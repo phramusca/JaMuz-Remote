@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private Button buttonRewind; //button_rewind
     private Button buttonPullup; //button_pullup
     private Button buttonForward; //button_forward
+    private Button buttonVolUp;
+    private Button buttonVolDown;
 
     private SeekBar seekBar;
     private Spinner spinner;
@@ -70,8 +72,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //TODO: Re-connect
+        getFromQRcode();
         buttonConnect.performClick();
+    }
+
+    private void getFromQRcode() {
+        String content = getIntent().getDataString();
+        if(content!=null) {
+            if(!content.equals("")) {
+                content=content.substring("JaMuzRemote://".length());
+
+                content=Encryption.decrypt(content, "NOTeBrrhzrtestSecretK");
+
+
+                editTextConnectInfo.setText(content);
+            }
+        }
     }
 
     @Override
@@ -124,6 +140,8 @@ public class MainActivity extends AppCompatActivity {
         buttonRewind = setButton(buttonRewind, R.id.button_rewind, "rewind");
         buttonPullup = setButton(buttonPullup, R.id.button_pullup, "pullup");
         buttonForward = setButton(buttonForward, R.id.button_forward, "forward");
+        buttonVolUp = setButton(buttonVolUp, R.id.button_volUp, "volUp");
+        buttonVolDown = setButton(buttonVolDown, R.id.button_volDown, "volDown");
 
         editTextConnectInfo = (EditText) findViewById(R.id.editText_info);
         buttonConnect = (Button) findViewById(R.id.button_connect);
@@ -172,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         enableGUI(false);
+        getFromQRcode();
         editTextConnectInfo.setEnabled(true);
         buttonConnect.setEnabled(true);
     }
@@ -202,6 +221,8 @@ public class MainActivity extends AppCompatActivity {
                 buttonRewind.setEnabled(enable);  //button_rewind
                 buttonPullup.setEnabled(enable);  //button_pullup
                 buttonForward.setEnabled(enable);  //button_forward
+                buttonVolUp.setEnabled(enable);
+                buttonVolDown.setEnabled(enable);
                 ratingBar.setEnabled(enable);
                 //seekBar.setEnabled(enable);
 

@@ -61,26 +61,31 @@ public class Reception  extends ProcessAbstract {
                     try {
                         //FIXME: works locally but not (well) over wifi:
                         // either gets stuck in decodeStream, either gets "SkImageDecoder::Factory returned null" and then data without catching
-						//Once an error occurred, have to close/connect to make it work again (if it does)
                         Bitmap bMap = BitmapFactory.decodeStream(inputStream);
                         System.out.println("receivedBitmap");
                         callback.receivedBitmap(bMap);
                     } catch (OutOfMemoryError ex) {
                         Logger.getLogger(Reception.class.getName()).log(Level.SEVERE, null, ex);
                         callback.received("MSG_ERROR_OUT_OF_MEMORY");
-                    }
+                    } catch (Exception ex) {
+						Logger.getLogger(Reception.class.getName()).log(Level.SEVERE, null, ex);
+						callback.received("MSG_ERROR_"+ex.toString());
+					}
                 }
 			}
 		} catch (InterruptedException ex) {
-//			Logger.getLogger(Reception.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (IOException ex) {
-//			Logger.getLogger(Reception.class.getName()).log(Level.SEVERE, null, ex);
+			callback.received("MSG_ERROR_IOException_"+ex.toString());
+			Logger.getLogger(Reception.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		catch (Exception ex) {
+			Logger.getLogger(Reception.class.getName()).log(Level.SEVERE, null, ex);
+			callback.received("MSG_ERROR_"+ex.toString());
 		}
 		finally {
 			try {
                 inputStream.close();
 			} catch (IOException e) {
-//				Logger.getLogger(Reception.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
 	}
