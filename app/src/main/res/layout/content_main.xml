@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:weightSum="1"
-    android:background="@android:color/darker_gray">
+    android:background="@android:color/darker_gray"
+    tools:showIn="@layout/activity_main">
 
     <GridLayout
         android:layout_width="match_parent"
@@ -174,7 +175,8 @@
             android:id="@+id/textView_conv"
             android:gravity="top|bottom|fill_vertical|center_horizontal"
             android:autoText="false"
-            android:text="23" />
+            android:text="23"
+            android:clickable="true" />
     </ScrollView>
 
 </LinearLayout>

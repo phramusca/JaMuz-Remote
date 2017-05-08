@@ -1,6 +1,8 @@
 package phramusca.com.jamuzremote;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -26,12 +28,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     private Client client;
+    private Track displayedTrack;
+    private Map coverMap = new HashMap();
+
     private TextView textViewReceived; //textView_conv
     private EditText editTextConnectInfo; //editText_info
     private Button buttonConnect; //button_connect
@@ -145,6 +152,16 @@ public class MainActivity extends AppCompatActivity {
 
         editTextConnectInfo = (EditText) findViewById(R.id.editText_info);
         buttonConnect = (Button) findViewById(R.id.button_connect);
+
+        textViewReceived.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        displayCover();
+
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -268,6 +285,44 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //Display cover from cache or ask for it
+    private void displayCover() {
+        if(displayedTrack!=null) {
+            Bitmap bitmap = null;
+            if (coverMap.containsKey(displayedTrack.getCoverHash())) {
+                bitmap = (Bitmap) coverMap.get(displayedTrack.getCoverHash());
+            } else { //Ask cover
+                client.send("sendCover");
+            }
+
+            final Bitmap finalBitmap = bitmap;
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    ImageView image = (ImageView) findViewById(R.id.imageView);
+                    image.setImageBitmap(finalBitmap);
+                }
+            });
+        }
+    }
+
+    public void Popup(final String title, final String msg) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                alertDialog.setTitle(title);
+                alertDialog.setMessage(msg);
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
+        });
+    }
+
     class CallBackReception implements ICallBackReception {
         @Override
         public void received(final String msg) {
@@ -306,20 +361,21 @@ public class MainActivity extends AppCompatActivity {
                             });
                             break;
                         case "fileInfoInt":
-                            final int rating = jObject.getInt("rating");
-                            String title = jObject.getString("title");
-                            String album = jObject.getString("album");
-                            String artist = jObject.getString("artist");
-                            final String msgHTML = "<b>" + title + "</b><BR/>" + //NOI18N
-                                    "<i>" + album + "</i><BR/>" + //NOI18N
-                                    "" + artist + ""; //NOI18N
+
+                            displayedTrack = new Track(jObject.getInt("rating"),
+                                    jObject.getString("title"),
+                                    jObject.getString("album"),
+                                    jObject.getString("artist"),
+                                    jObject.getString("coverHash"));
+
+                            displayCover();
 
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    textViewReceived.setText(Html.fromHtml("<html><h1>".concat(msgHTML).concat("</h1></html>")));
+                                    textViewReceived.setText(Html.fromHtml("<html><h1>".concat(displayedTrack.toString()).concat("</h1></html>")));
                                     ratingBar.setIndeterminate(false);
-                                    ratingBar.setRating(rating);
+                                    ratingBar.setRating(displayedTrack.getRating());
                                     ratingBar.setEnabled(true);
                                 }
                             });
@@ -333,14 +389,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void receivedBitmap(final Bitmap bitmap) {
+            System.out.println("receivedBitmap: callback");
+            System.out.println(bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight());
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ImageView image = (ImageView) findViewById(R.id.imageView);
-                    image.setImageBitmap(bitmap);
+            if (!coverMap.containsKey(displayedTrack.getCoverHash())) {
+                if (bitmap != null) { //Save to cache
+                    coverMap.put(displayedTrack.getCoverHash(), bitmap);
                 }
-            });
+            }
+            displayCover();
         }
 
         @Override
