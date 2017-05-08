@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
@@ -184,7 +185,8 @@ public class MainActivity extends AppCompatActivity {
                         port=2013;
                     }
 
-                    client = new Client(address, port, "tata", "tata", callBackReception);
+                    client = new Client(address, port, Settings.Secure.getString(MainActivity.this.getContentResolver(),
+                            Settings.Secure.ANDROID_ID), "tata", callBackReception);
 
                     //Must start networking in a thread or getting NetworkOnMainThreadException
                     new Thread() {
