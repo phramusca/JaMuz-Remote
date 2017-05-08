@@ -7,6 +7,8 @@ package phramusca.com.jamuzremote;
  */
 
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -28,6 +30,7 @@ public class Reception  extends ProcessAbstract {
 	private InputStream inputStream;
 	private final ICallBackReception callback;
 	private final String login;
+
 	
 	public Reception(InputStream inputStream, ICallBackReception callback, String login) {
 		super("Thread.Client.Reception");
@@ -42,12 +45,8 @@ public class Reception  extends ProcessAbstract {
 	public void run() {
 		try {
 			while(true) {
-                System.out.println("____________________________________________________");
 				checkAbort();
 				String msg = bufferedReader.readLine();
-                if(msg!=null) {
-                    System.out.println(msg);
-                }
                 if(msg==null) {
                     System.out.println("null");
                     callback.disconnected();
@@ -58,29 +57,21 @@ public class Reception  extends ProcessAbstract {
                 else if (msg.startsWith("JSON_")) {
                     callback.received(msg.substring(5));
                 } else if (msg.equals("SENDING_COVER")) {
+                    Bitmap bitmap=null;
                     try {
                         //FIXME: works locally but not (well) over wifi:
                         // either gets stuck in decodeStream, either gets "SkImageDecoder::Factory returned null" and then data without catching
-                        Bitmap bMap = BitmapFactory.decodeStream(inputStream);
+                        bitmap = BitmapFactory.decodeStream(inputStream);
                         System.out.println("receivedBitmap");
-                        callback.receivedBitmap(bMap);
                     } catch (OutOfMemoryError ex) {
-                        Logger.getLogger(Reception.class.getName()).log(Level.SEVERE, null, ex);
-                        callback.received("MSG_ERROR_OUT_OF_MEMORY");
-                    } catch (Exception ex) {
-						Logger.getLogger(Reception.class.getName()).log(Level.SEVERE, null, ex);
-						callback.received("MSG_ERROR_"+ex.toString());
-					}
+                    } finally {
+                        System.out.println("receivedBitmap: calling callback");
+                        callback.receivedBitmap(bitmap);
+                    }
                 }
 			}
 		} catch (InterruptedException ex) {
 		} catch (IOException ex) {
-			callback.received("MSG_ERROR_IOException_"+ex.toString());
-			Logger.getLogger(Reception.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		catch (Exception ex) {
-			Logger.getLogger(Reception.class.getName()).log(Level.SEVERE, null, ex);
-			callback.received("MSG_ERROR_"+ex.toString());
 		}
 		finally {
 			try {
@@ -89,4 +80,5 @@ public class Reception  extends ProcessAbstract {
 			}
 		}
 	}
+
 }
