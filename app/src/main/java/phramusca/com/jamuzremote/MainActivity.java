@@ -412,8 +412,6 @@ public class MainActivity extends AppCompatActivity {
     //- Close connection & dim after a delay (in settings)
     //- Eventually simulate position set (seekBar) and sync only every x (say 10) seconds.
 
-    //FIXME: Select source playlist (and refresh if not done by default) and add a "Clear queue" button (no, make it auto, better)
-
     //FIXME: Make a Settings activity
 
     private void close() {
