@@ -68,6 +68,7 @@ public class Client {
 					}
 				}
 			}
+			callback.received("MSG_ERROR_UNAUTHORIZED");
 			return false;
 			
 		} catch (IOException ex) {
@@ -83,8 +84,10 @@ public class Client {
 
 	public void close() {
 		try {
-            if(socket!=null) {
+            if(reception!=null) {
                 reception.abort();
+            }
+            if(socket!=null) {
                 socket.close();
             }
 		} catch (IOException ex) {
