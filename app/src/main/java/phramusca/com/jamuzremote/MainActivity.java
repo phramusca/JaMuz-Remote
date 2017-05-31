@@ -294,7 +294,11 @@ public class MainActivity extends AppCompatActivity {
             if (coverMap.containsKey(displayedTrack.getCoverHash())) {
                 bitmap = (Bitmap) coverMap.get(displayedTrack.getCoverHash());
             } else { //Ask cover
-                client.send("sendCover");
+                int maxWidth = this.getWindow().getDecorView().getWidth();
+                if(maxWidth<=0) {
+                    maxWidth=250;
+                }
+                client.send("sendCover"+maxWidth);
             }
 
             final Bitmap finalBitmap = bitmap;
