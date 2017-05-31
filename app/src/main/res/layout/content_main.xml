@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/editText_info"
             android:enabled="true"
-            android:text="192.168.0.16:2013"
+            android:text="192.168.0.15:2013"
             android:layout_gravity="left|right"
             android:gravity="fill_horizontal|left|right"
             android:inputType="text"
@@ -34,6 +34,7 @@
             android:layout_column="1" />
 
         <Button
+            android:background="@drawable/gradient_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Connect"
@@ -43,9 +44,22 @@
 
     </GridLayout>
 
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinner"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="10dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="20dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:popupBackground="#DFFFFFFF"
+        android:background="@drawable/gradient_spinner"/>
+
     <GridLayout
         android:layout_width="match_parent"
-        android:layout_height="104dp">
+        android:layout_height="wrap_content">
 
         <GridLayout
             android:layout_width="wrap_content"
@@ -58,6 +72,7 @@
             android:layout_column="0">
 
             <Button
+                android:background="@drawable/gradient_spinner"
                 android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:text="+"
@@ -67,6 +82,7 @@
                 android:layout_gravity="center"/>
 
             <Button
+                android:background="@drawable/gradient_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="&lt;="
@@ -76,6 +92,7 @@
                 android:layout_gravity="center" />
 
             <Button
+                android:background="@drawable/gradient_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="|| &gt;"
@@ -85,6 +102,7 @@
                 android:layout_gravity="center" />
 
             <Button
+                android:background="@drawable/gradient_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="=&gt;"
@@ -94,6 +112,7 @@
                 android:layout_gravity="center" />
 
             <Button
+                android:background="@drawable/gradient_spinner"
                 android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:text="-"
@@ -103,6 +122,7 @@
                 android:layout_gravity="center" />
 
             <Button
+                android:background="@drawable/gradient_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="&lt;&lt;"
@@ -112,6 +132,7 @@
                 android:layout_gravity="center" />
 
             <Button
+                android:background="@drawable/gradient_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="poulpe"
@@ -121,6 +142,7 @@
                 android:layout_gravity="center" />
 
             <Button
+                android:background="@drawable/gradient_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="&gt;&gt;"
@@ -149,34 +171,23 @@
         android:layout_gravity="center_horizontal"
         android:indeterminate="false" />
 
-    <Spinner
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/spinner"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/textView_conv"
+        android:gravity="top|bottom|fill_vertical|center_horizontal"
+        android:text="23"
+        android:clickable="true" />
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/imageView"
         android:layout_gravity="center_horizontal"
-        android:contentDescription="Cover" />
+        android:contentDescription="Cover"
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/scrollView"
-        android:fillViewport="true"
-        android:layout_gravity="center_horizontal">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/textView_conv"
-            android:gravity="top|bottom|fill_vertical|center_horizontal"
-            android:autoText="false"
-            android:text="23"
-            android:clickable="true" />
-    </ScrollView>
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"/>
 
 </LinearLayout>
