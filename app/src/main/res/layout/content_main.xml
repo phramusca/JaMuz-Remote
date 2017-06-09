@@ -34,7 +34,7 @@
             android:layout_column="1" />
 
         <Button
-            android:background="@drawable/gradient_spinner"
+            android:background="@drawable/button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Connect"
@@ -72,7 +72,7 @@
             android:layout_column="0">
 
             <Button
-                android:background="@drawable/gradient_spinner"
+                android:background="@drawable/button"
                 android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:text="+"
@@ -82,7 +82,7 @@
                 android:layout_gravity="center"/>
 
             <Button
-                android:background="@drawable/gradient_spinner"
+                android:background="@drawable/button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="&lt;="
@@ -92,7 +92,7 @@
                 android:layout_gravity="center" />
 
             <Button
-                android:background="@drawable/gradient_spinner"
+                android:background="@drawable/button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="|| &gt;"
@@ -102,7 +102,7 @@
                 android:layout_gravity="center" />
 
             <Button
-                android:background="@drawable/gradient_spinner"
+                android:background="@drawable/button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="=&gt;"
@@ -112,7 +112,7 @@
                 android:layout_gravity="center" />
 
             <Button
-                android:background="@drawable/gradient_spinner"
+                android:background="@drawable/button"
                 android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:text="-"
@@ -122,7 +122,7 @@
                 android:layout_gravity="center" />
 
             <Button
-                android:background="@drawable/gradient_spinner"
+                android:background="@drawable/button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="&lt;&lt;"
@@ -132,7 +132,7 @@
                 android:layout_gravity="center" />
 
             <Button
-                android:background="@drawable/gradient_spinner"
+                android:background="@drawable/button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="poulpe"
@@ -142,7 +142,7 @@
                 android:layout_gravity="center" />
 
             <Button
-                android:background="@drawable/gradient_spinner"
+                android:background="@drawable/button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="&gt;&gt;"
@@ -162,7 +162,8 @@
         android:numStars="5"
         android:stepSize="1"
         android:rating="0"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:theme="@style/RatingBar"/>
 
     <SeekBar
         android:layout_width="match_parent"
