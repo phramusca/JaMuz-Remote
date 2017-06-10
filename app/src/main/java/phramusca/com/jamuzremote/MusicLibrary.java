@@ -45,15 +45,24 @@ public class MusicLibrary {
         return id;
     }
 
-    public ArrayList<Track> getTracks() {
+    public ArrayList<Track> getTracks(String playlist) {
+
+        String query = null;
+
+        if(playlist.startsWith("Rated")) {
+            playlist = playlist.substring("Rated ".length());
+            int rating = Integer.parseInt(playlist);
+            query=musicLibraryDb.COL_RATING + "=" + rating;
+        } else if(playlist.startsWith("Genre ")) {
+            playlist = playlist.substring("Genre ".length());
+            query=musicLibraryDb.COL_GENRE + "=\"" + playlist+"\"";
+        }
 
         ArrayList<Track> tracks = new ArrayList<>();
-
         Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
                 null,
-                null,
+                query,
                 null, null, null, null);
-
         if(cursor != null && cursor.moveToFirst())
         {
             do {
@@ -69,7 +78,7 @@ public class MusicLibrary {
     }
 
     public int updateTrack(int id, Track track, boolean setRating){
-        return db.update(musicLibraryDb.TABLE_TRACKS, TrackToValues(track, false), musicLibraryDb.COL_ID + " = " +id, null);
+        return db.update(musicLibraryDb.TABLE_TRACKS, TrackToValues(track, setRating), musicLibraryDb.COL_ID + " = " +id, null);
     }
 
     public int deleteTrack(int id){
