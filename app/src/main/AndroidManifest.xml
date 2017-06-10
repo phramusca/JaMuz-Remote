@@ -3,6 +3,8 @@
     package="phramusca.com.jamuzremote">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -26,6 +28,9 @@
                 <data android:scheme="JaMuzRemote"/>
             </intent-filter>
         </activity>
+
+        <!--Service declared in manifest -->
+        <service android:name=".MyService" android:exported="false"/>
     </application>
 
 </manifest>
