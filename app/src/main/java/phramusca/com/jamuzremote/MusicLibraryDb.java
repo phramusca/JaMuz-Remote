@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 public class MusicLibraryDb extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "JaMuzRemote.db";
-    private static final int DB_VERSION = 5;
+    private static final int DB_VERSION = 6;
 
     public static final String TABLE_TRACKS = "tracks";
     public static final String COL_ID = "ID";

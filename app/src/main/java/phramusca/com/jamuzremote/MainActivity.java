@@ -88,33 +88,33 @@ public class MainActivity extends AppCompatActivity {
                             playRandom();
                             break;
                         case "playTrack":
-                            if(mp==null) {
+                            if(mediaPlayer ==null) {
                                 playRandom();
                             }
-                            else if(mp.isPlaying()) {
-                                mp.pause();
+                            else if(mediaPlayer.isPlaying()) {
+                                mediaPlayer.pause();
                                 stopTimer();
                             } else {
-                                mp.start();
+                                mediaPlayer.start();
                                 startTimer();
                             }
                             break;
                         case "pullup":
-                            mp.seekTo(0);
+                            mediaPlayer.seekTo(0);
                             break;
                         case "rewind":
-                            mp.seekTo(mp.getCurrentPosition()-mp.getDuration()/10);
+                            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()- mediaPlayer.getDuration()/10);
                             break;
                         case "forward":
-                            mp.seekTo(mp.getCurrentPosition()+mp.getDuration()/10);
+                            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()+ mediaPlayer.getDuration()/10);
                             break;
                         case "volUp":
-                            //mp.setVolume(20, 20);
+                            //mediaPlayer.setVolume(20, 20);
                             audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
                                     AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
                             break;
                         case "volDown":
-                            //mp.setVolume(1, 1);
+                            //mediaPlayer.setVolume(1, 1);
                             audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
                                     AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
                             break;
@@ -183,8 +183,13 @@ public class MainActivity extends AppCompatActivity {
                                        int pos, long id) {
                 // An item was selected. You can retrieve the selected item using
                 // parent.getItemAtPosition(pos)
+                String item = (String) parent.getItemAtPosition(pos);
                 if(spinnerSend) {
-                    client.send("setPlaylist".concat((String) parent.getItemAtPosition(pos)));
+                    if(local) {
+                        queue = musicLibrary.getTracks(item);
+                    } else {
+                        client.send("setPlaylist".concat(item));
+                    }
                 }
             }
 
@@ -318,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.i(TAG, "MainActivity onResume");
         getFromQRcode();
-        if(mp==null || !mp.isPlaying()) {
+        if(mediaPlayer ==null || !mediaPlayer.isPlaying()) {
             buttonConnect.performClick();
         }
     }
@@ -392,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
                             String genre =
                                     mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
 
-                            int rating = -1;
+                            int rating = 0;
                             String coverHash="";
 
                             Track track = new Track(-1, rating, title, album, artist, coverHash, absolutePath, genre);
@@ -441,30 +446,41 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private List<Track> queue = new ArrayList<>();
+
     private void playRandom() {
         stopMediaPlayer(false);
-        Random generator = new Random();
 
-        List<Track> songs = musicLibrary.getTracks();
+        if(queue.size()<5) {
+            //queue = musicLibrary.getTracks();
+            List<Track> addToQueue =musicLibrary.getTracks((String) spinner.getSelectedItem());
+            queue.addAll(addToQueue);
+        }
 
-        int index = generator.nextInt(songs.size());
-        displayedTrack = songs.get(index);
-        playAudio(displayedTrack.getPath());
-        displayTrack();
+        if(queue.size()>0) {
+            Random generator = new Random();
+            int index = generator.nextInt(queue.size());
+            displayedTrack = queue.get(index);
+            playAudio(displayedTrack.getPath());
+            displayTrack();
+        } else {
+            toast("Empty selection.");
+        }
+
     }
 
-    MediaPlayer mp;
+    MediaPlayer mediaPlayer;
     CountDownTimer timer;
 
     public void playAudio(String path){
         try {
-            mp = new MediaPlayer();
-            mp.setDataSource(path);
-            mp.prepare();
-            mp.start();
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(path);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
             startTimer();
 
-            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     if(local) {
@@ -473,7 +489,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+            mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
                 @Override
                 public void onSeekComplete(MediaPlayer mediaPlayer) {
                     startTimer();
@@ -481,7 +497,7 @@ public class MainActivity extends AppCompatActivity {
             });
 
             //FIXME: MAke this an option
-            //mp.setScreenOnWhilePlaying(true);
+            //mediaPlayer.setScreenOnWhilePlaying(true);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -490,14 +506,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void startTimer() {
         Log.d(TAG, "CountDownTimer startTimer");
-        timer = new CountDownTimer(mp.getDuration()-mp.getCurrentPosition()-1,500) {
+        timer = new CountDownTimer(mediaPlayer.getDuration()- mediaPlayer.getCurrentPosition()-1,500) {
             @Override
             public void onTick(long millisUntilFinished_) {
-                if(mp!=null) {
-                    Log.d(TAG, "CountDownTimer onTick "+mp.getCurrentPosition()/100+"/"+mp.getDuration()/1000);
-                    setSeekBar(mp.getCurrentPosition(), mp.getDuration());
+                if(mediaPlayer !=null) {
+                    Log.d(TAG, "CountDownTimer onTick "+ mediaPlayer.getCurrentPosition()/100+"/"+ mediaPlayer.getDuration()/1000);
+                    setSeekBar(mediaPlayer.getCurrentPosition(), mediaPlayer.getDuration());
                 }
-                if(mp==null || !mp.isPlaying()) {
+                if(mediaPlayer ==null || !mediaPlayer.isPlaying()) {
                     Log.d(TAG, "CountDownTimer onTick NOT isPlaying => cancel");
                     this.cancel();
                 }
@@ -528,6 +544,16 @@ public class MainActivity extends AppCompatActivity {
                 if(!enable) {
                     buttonConnect.setText("Close");
                     stopMediaPlayer(false);
+                } else {
+                    final List<String> playlists = new ArrayList<String>();
+                    playlists.add("All");
+                    for(int i=0; i < 6; i++) {
+                        String playlist = "Rated "+i;
+                        playlists.add(playlist);
+                    }
+                    playlists.add("Genre Reggae");
+                    playlists.add("Genre Rock");
+                    setupSpinner(playlists, "All");
                 }
                 editTextConnectInfo.setEnabled(enable);
                 buttonConnect.setEnabled(true);
@@ -536,10 +562,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stopMediaPlayer(boolean release) {
-        if (mp!=null && mp.isPlaying()) {
-            mp.stop();
+        if (mediaPlayer !=null && mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
             if(release) {
-                mp.release();
+                mediaPlayer.release();
             }
             setSeekBar(0, 1);
         }
@@ -564,7 +590,7 @@ public class MainActivity extends AppCompatActivity {
                 ratingBar.setEnabled(true);
 
                 //seekBar.setEnabled(enable);
-                spinner.setEnabled(enable);
+                spinner.setEnabled(true);
                 //if(!enable) {
                 //    spinner.setAdapter(null);
                  //   ImageView image = (ImageView) findViewById(R.id.imageView);
