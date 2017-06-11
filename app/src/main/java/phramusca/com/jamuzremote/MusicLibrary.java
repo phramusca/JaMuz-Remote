@@ -16,7 +16,7 @@ public class MusicLibrary {
     private MusicLibraryDb musicLibraryDb;
 
     public MusicLibrary(Context context){
-        musicLibraryDb = new MusicLibraryDb(context, null);
+        musicLibraryDb = new MusicLibraryDb(context);
     }
 
     public void open(){
@@ -43,6 +43,10 @@ public class MusicLibrary {
         int id = cursor.getInt(cursor.getColumnIndex(musicLibraryDb.COL_ID));
         cursor.close();
         return id;
+    }
+
+    public ArrayList<Track> getTracks() {
+        return getTracks("All");
     }
 
     public ArrayList<Track> getTracks(String playlist) {
@@ -81,8 +85,8 @@ public class MusicLibrary {
         return db.update(musicLibraryDb.TABLE_TRACKS, TrackToValues(track, setRating), musicLibraryDb.COL_ID + " = " +id, null);
     }
 
-    public int deleteTrack(int id){
-        return db.delete(musicLibraryDb.TABLE_TRACKS, musicLibraryDb.COL_ID + " = " +id, null);
+    public int deleteTrack(String path){
+        return db.delete(musicLibraryDb.TABLE_TRACKS, musicLibraryDb.COL_PATH + " = \"" +path+"\"", null);
     }
 
     private ContentValues TrackToValues(Track track, boolean setRating) {

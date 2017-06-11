@@ -1,17 +1,29 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.os.Environment;
+
+import java.io.File;
 
 /**
  * Created by raph on 10/06/17.
  */
 public class MusicLibraryDb extends SQLiteOpenHelper {
 
+
+    //In internal SD emulated storage:
+    private static final String DB_PATH = Environment.getExternalStorageDirectory()+"/JaMuz";
+
+    //In external SD. Does not seem to work !
+    //TODO: How to get "3515-1C15" value ?
+    //private static final String DB_PATH = "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;
+
     private static final String DB_NAME = "JaMuzRemote.db";
-    private static final int DB_VERSION = 6;
+    private static final int DB_VERSION = 1;
 
     public static final String TABLE_TRACKS = "tracks";
     public static final String COL_ID = "ID";
@@ -33,8 +45,13 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
             + COL_GENRE + " TEXT, "
             + COL_ALBUM + " TEXT NOT NULL);";
 
-    public MusicLibraryDb(Context context, CursorFactory factory) {
-        super(context, DB_NAME, factory, DB_VERSION);
+    //By default store in user internal folder
+    //public MusicLibraryDb(Context context) {
+    //    super(context, DB_NAME, null, DB_VERSION);
+    //}
+
+    public MusicLibraryDb(final Context context) {
+        super(context, DB_PATH+"/"+DB_NAME, null, DB_VERSION);
     }
 
     @Override

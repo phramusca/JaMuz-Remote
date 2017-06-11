@@ -79,61 +79,70 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(local) {
-                    switch (msg) {
-                        case "previousTrack":
-                            playRandom();
-                            break;
-                        case "nextTrack":
-                            playRandom();
-                            break;
-                        case "playTrack":
-                            if(mediaPlayer ==null) {
-                                playRandom();
-                            }
-                            else if(mediaPlayer.isPlaying()) {
-                                mediaPlayer.pause();
-                                stopTimer();
-                            } else {
-                                mediaPlayer.start();
-                                startTimer();
-                            }
-                            break;
-                        case "pullup":
-                            mediaPlayer.seekTo(0);
-                            break;
-                        case "rewind":
-                            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()- mediaPlayer.getDuration()/10);
-                            break;
-                        case "forward":
-                            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()+ mediaPlayer.getDuration()/10);
-                            break;
-                        case "volUp":
-                            //mediaPlayer.setVolume(20, 20);
-                            audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
-                                    AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
-                            break;
-                        case "volDown":
-                            //mediaPlayer.setVolume(1, 1);
-                            audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
-                                    AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
-                            break;
-                        default:
-                            //Popup("Error", "Not implemented");
-                            toast("Not implemented");
-                            break;
-                    }
-
-                } else {
-                    client.send(msg);
-                }
+                doAction(msg);
             }
         });
         return button;
     }
 
+    private void doAction(String msg) {
+        if(local) {
+            switch (msg) {
+                case "previousTrack":
+                    playRandom();
+                    break;
+                case "nextTrack":
+                    playRandom();
+                    break;
+                case "playTrack":
+                    if(mediaPlayer ==null) {
+                        playRandom();
+                    }
+                    else if(mediaPlayer.isPlaying()) {
+                        mediaPlayer.pause();
+                        stopTimer();
+                    } else {
+                        mediaPlayer.start();
+                        startTimer();
+                    }
+                    break;
+                case "pullup":
+                    mediaPlayer.seekTo(0);
+                    break;
+                case "rewind":
+                    mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()- mediaPlayer.getDuration()/10);
+                    break;
+                case "forward":
+                    mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()+ mediaPlayer.getDuration()/10);
+                    break;
+                case "volUp":
+                    //mediaPlayer.setVolume(20, 20);
+                    audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                            AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
+                    break;
+                case "volDown":
+                    //mediaPlayer.setVolume(1, 1);
+                    audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                            AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
+                    break;
+                default:
+                    //Popup("Error", "Not implemented");
+                    toast("Not implemented");
+                    break;
+            }
+
+        } else {
+            client.send(msg);
+        }
+    }
+
     private void toast(final String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        toast(msg, Toast.LENGTH_LONG);
+    }
+
+    private void toast(final String msg, int duration) {
+        Log.i(TAG, "Toast makeText "+msg);
+        Toast.makeText(this, msg, duration).show();
     }
 
     @Override
@@ -276,8 +285,51 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
 
                 connectDatabase();
-                browseFS(new File("/storage/3515-1C15/Android/data/com.theolivetree.sshserver/files/"));
+                nbFiles=0;
+                nbFilesTotal=0;
+                final String path = "/storage/3515-1C15/Android/data/com.theolivetree.sshserver/files/";
 
+                //Scan android filesystem for files
+                Thread bfs = new Thread() {
+                    public void run() {
+                        browseFS(new File(path));
+                    }
+                };
+                bfs.start();
+                //Get total number of files
+                Thread count = new Thread() {
+                    public void run() {
+                        browseFScount(new File(path));
+                    }
+                };
+                count.start();
+
+                try {
+                    bfs.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    count.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                //Scan deleted files
+                //FIXME: No need to check what scanned previously ...
+                List<Track> tracks = musicLibrary.getTracks();
+                nbFiles=0;
+                for(Track track : tracks) {
+                    File file = new File(track.getPath());
+                    final String action;
+                    if(!file.exists()) {
+                        musicLibrary.deleteTrack(track.getPath());
+                        action="removed";
+                    } else {
+                        action="present";
+                    }
+                    toastNbFile(action, 500);
+                }
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -302,6 +354,18 @@ public class MainActivity extends AppCompatActivity {
         //    }
         //}
 
+    }
+
+    private void toastNbFile(final String action, final int every) {
+        nbFiles++;
+        if(((nbFiles-1) % every) == 0){
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    toast("#"+(nbFiles)+"/"+nbFilesTotal+" "+action, Toast.LENGTH_SHORT);
+                }
+            });
+        }
     }
 
     private MusicLibrary musicLibrary;
@@ -373,6 +437,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private int nbFiles=0;
+
     private void browseFS(File path) {
         if (path.isDirectory()) {
             File[] files = path.listFiles();
@@ -385,33 +451,61 @@ public class MainActivity extends AppCompatActivity {
                         else {
                             String absolutePath=file.getAbsolutePath();
 
-                            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-                            mmr.setDataSource(absolutePath);
-
-                            String album =
-                                    mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-                            String artist =
-                                    mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-                            String title =
-                                    mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-                            String genre =
-                                    mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
-
-                            int rating = 0;
-                            String coverHash="";
-
-                            Track track = new Track(-1, rating, title, album, artist, coverHash, absolutePath, genre);
-
                             int id = musicLibrary.getTrack(absolutePath);
+                            final String action;
                             if(id>=0) {
                                 Log.d(TAG, "browseFS updateTrack " + absolutePath);
-                                musicLibrary.updateTrack(id, track, false);
+                                //FIXME: Update if file is modified only:
+                                //based on lastModificationDate and/or size (not on content as longer than updateTrack)
+                                //musicLibrary.updateTrack(id, track, false);
+                                action="updated";
                             } else {
                                 Log.d(TAG, "browseFS insertTrack " + absolutePath);
-                                musicLibrary.insertTrack(track);
+                                musicLibrary.insertTrack(getTrack(file));
+                                action="inserted";
                             }
+                            toastNbFile(action, 100);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
+    private Track getTrack(File file) {
+        String absolutePath=file.getAbsolutePath();
 
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(absolutePath);
+
+        String album =
+                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+        String artist =
+                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+        String title =
+                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+        String genre =
+                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
+
+        int rating = 0;
+        String coverHash="";
+
+        return new Track(-1, rating, title, album, artist, coverHash, absolutePath, genre);
+    }
+
+    private int nbFilesTotal = 0;
+
+    private void browseFScount(File path) {
+        if (path.isDirectory()) {
+            File[] files = path.listFiles();
+            if (files != null) {
+                if(files.length>0) {
+                    for (File file : files) {
+                        if (file.isDirectory()) {
+                            browseFScount(file);
+                        }
+                        else {
+                            nbFilesTotal++;
                         }
                     }
                 }
