@@ -46,26 +46,15 @@ public class MusicLibrary {
     }
 
     public ArrayList<Track> getTracks() {
-        return getTracks("All");
+        return getTracks(new PlayList("All", null));
     }
 
-    public ArrayList<Track> getTracks(String playlist) {
-
-        String query = null;
-
-        if(playlist.startsWith("Rated")) {
-            playlist = playlist.substring("Rated ".length());
-            int rating = Integer.parseInt(playlist);
-            query=musicLibraryDb.COL_RATING + "=" + rating;
-        } else if(playlist.startsWith("Genre ")) {
-            playlist = playlist.substring("Genre ".length());
-            query=musicLibraryDb.COL_GENRE + "=\"" + playlist+"\"";
-        }
+    public ArrayList<Track> getTracks(PlayList playlist) {
 
         ArrayList<Track> tracks = new ArrayList<>();
         Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
                 null,
-                query,
+                playlist.getQuery(),
                 null, null, null, null);
         if(cursor != null && cursor.moveToFirst())
         {
