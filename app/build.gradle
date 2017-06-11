@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        applicationId "phramusca.com.jamuz"
+        applicationId "org.phramusca.jamuz"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
