@@ -3,10 +3,16 @@ package phramusca.com.jamuzremote;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -14,7 +20,10 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.provider.MediaStore;
@@ -51,13 +60,29 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "=====> JaMuz";
     private Client client;
     private Track displayedTrack;
     private Map coverMap = new HashMap();
-    private static final String TAG = "=====> JaMuz";
     private Intent service; //Not yet used
     private AudioManager audioManager; //Used to set volume
+    private MusicLibrary musicLibrary;
 
+    private int nbFiles=0;
+    private int nbFilesTotal = 0;
+    private List<Track> queue = new ArrayList<>();
+    MediaPlayer mediaPlayer;
+    CountDownTimer timer;
+    private boolean local = true;
+
+    // Storage Permissions
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
+    // GUI elements
     private TextView textViewReceived; //textView_conv
     private EditText editTextConnectInfo; //editText_info
     private Button buttonConnect; //button_connect
@@ -74,7 +99,463 @@ public class MainActivity extends AppCompatActivity {
     private boolean spinnerSend=true;
     private RatingBar ratingBar;
 
-    private Button setButton(Button button, final int buttonName, final String msg) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.i(TAG, "MainActivity onCreate");
+        setContentView(R.layout.activity_main);
+
+        //TODO: Make this an option AND alow a timeout
+        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        textViewReceived = (TextView) findViewById(R.id.textView_conv);
+
+        ratingBar = (RatingBar) findViewById(R.id.ratingBar);
+        ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            public void onRatingChanged(RatingBar ratingBar, float rating,
+                                        boolean fromUser) {
+                if(fromUser) { //as it is also set when server sends file info (and it can be 0)
+                    ratingBar.setEnabled(false);
+                    displayedTrack.setRating(Math.round(rating));
+                    if(local) {
+                        musicLibrary.updateTrack(displayedTrack.getId(), displayedTrack, true);
+                    } else {
+                        client.send("setRating".concat(String.valueOf(Math.round(rating))));
+                    }
+                    ratingBar.setEnabled(true);
+                }
+            }
+        });
+
+        seekBar = (SeekBar) findViewById(R.id.seekBar);
+        seekBar.setEnabled(false);
+
+        spinner = (Spinner) findViewById(R.id.spinner);
+        spinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int pos, long id) {
+                // An item was selected. You can retrieve the selected item using
+                // parent.getItemAtPosition(pos)
+                PlayList item = (PlayList) parent.getItemAtPosition(pos);
+                if(spinnerSend) {
+                    if(local) {
+                        queue = musicLibrary.getTracks(item);
+                    } else {
+                        client.send("setPlaylist".concat(item.toString()));
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                // Another interface callback
+
+            }
+        });
+
+        buttonPrevious = setupButton(buttonPrevious, R.id.button_previous, "previousTrack");
+        buttonPlay = setupButton(buttonPlay, R.id.button_play, "playTrack");
+        buttonNext = setupButton(buttonNext, R.id.button_next, "nextTrack");
+        buttonRewind = setupButton(buttonRewind, R.id.button_rewind, "rewind");
+        buttonPullup = setupButton(buttonPullup, R.id.button_pullup, "pullup");
+        buttonForward = setupButton(buttonForward, R.id.button_forward, "forward");
+        buttonVolUp = setupButton(buttonVolUp, R.id.button_volUp, "volUp");
+        buttonVolDown = setupButton(buttonVolDown, R.id.button_volDown, "volDown");
+
+        editTextConnectInfo = (EditText) findViewById(R.id.editText_info);
+        buttonConnect = (Button) findViewById(R.id.button_connect);
+
+        textViewReceived.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        buttonConnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                enableGUI(false);
+                if(buttonConnect.getText().equals("Connect")) {
+                    CallBackReception callBackReception = new CallBackReception();
+
+                    String infoConnect = editTextConnectInfo.getText().toString();
+                    String[] split = infoConnect.split(":");  //NOI18N
+                    if(split.length<2) {
+                        enableConnect(true);
+                        return;
+                    }
+                    String address = split[0];
+                    int port;
+                    try {
+                        port = Integer.parseInt(split[1]);
+                    } catch(NumberFormatException ex) {
+                        port=2013;
+                    }
+
+                    client = new Client(address, port, Settings.Secure.getString(MainActivity.this.getContentResolver(),
+                            Settings.Secure.ANDROID_ID), "tata", callBackReception);
+
+                    //Must start networking in a thread or getting NetworkOnMainThreadException
+                    new Thread() {
+                        public void run() {
+                            if(client.connect()) {
+                                enableGUI(true);
+                                enableConnect(false);
+                            }
+                            else {
+                                enableConnect(true);
+                            }
+                        }
+                    }.start();
+
+                }
+                else {
+                    enableConnect(true);
+                    stopRemote();
+                }
+            }
+        });
+
+        setupLocalPlaylists();
+
+        enableGUI(false);
+        getFromQRcode();
+        editTextConnectInfo.setEnabled(true);
+        buttonConnect.setEnabled(true);
+
+        checkStoragePermissions(this);
+
+        scanLibrayInThread();
+
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
+        //Start background service
+        //Not yet used but can be used to scan library
+        //What is the benefit ??
+        service = new Intent(this, MyService.class);
+        startService(service);
+
+        //Start BT HeadSet connexion detection
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter != null)
+        {
+           if (audioManager.isBluetoothScoAvailableOffCall())
+            {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+                {
+                    mBluetoothAdapter.getProfileProxy(this, mHeadsetProfileListener, BluetoothProfile.HEADSET);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(TAG, "MainActivity onPause");
+        stopRemote();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i(TAG, "MainActivity onResume");
+        getFromQRcode();
+        if(mediaPlayer ==null || !mediaPlayer.isPlaying()) {
+            buttonConnect.performClick();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "MainActivity onDestroy");
+        stopMediaPlayer(true);
+        stopService(service);
+        musicLibrary.close();
+    }
+
+    private void scanLibrayInThread() {
+        new Thread() {
+            public void run() {
+
+                connectDatabase();
+                nbFiles=0;
+                nbFilesTotal=0;
+                final String path = "/storage/3515-1C15/Android/data/com.theolivetree.sshserver/files/";
+
+                //Scan android filesystem for files
+                Thread bfs = new Thread() {
+                    public void run() {
+                        browseFS(new File(path));
+                    }
+                };
+                bfs.start();
+                //Get total number of files
+                Thread count = new Thread() {
+                    public void run() {
+                        browseFScount(new File(path));
+                    }
+                };
+                count.start();
+
+                try {
+                    bfs.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    count.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                //Scan deleted files
+                //FIXME: No need to check what scanned previously ...
+                List<Track> tracks = musicLibrary.getTracks();
+                nbFiles=0;
+                for(Track track : tracks) {
+                    File file = new File(track.getPath());
+                    if(!file.exists()) {
+                        musicLibrary.deleteTrack(track.getPath());
+                    }
+                    toastNbFile("JaMuz scan deleted ", 1000);
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        toast("Database updated.");
+                    }
+                });
+
+            }
+        }.start();
+    }
+
+    private void connectDatabase() {
+        musicLibrary = new MusicLibrary(this);
+        musicLibrary.open();
+    }
+
+    private void browseFS(File path) {
+        if (path.isDirectory()) {
+            File[] files = path.listFiles();
+            if (files != null) {
+                if(files.length>0) {
+                    for (File file : files) {
+                        if (file.isDirectory()) {
+                            browseFS(file);
+                        }
+                        else {
+                            String absolutePath=file.getAbsolutePath();
+
+                            int id = musicLibrary.getTrack(absolutePath);
+                            if(id>=0) {
+                                Log.v(TAG, "browseFS updateTrack " + absolutePath);
+                                //FIXME: Update if file is modified only:
+                                //based on lastModificationDate and/or size (not on content as longer than updateTrack)
+                                //musicLibrary.updateTrack(id, track, false);
+                            } else {
+                                Log.v(TAG, "browseFS insertTrack " + absolutePath);
+                                musicLibrary.insertTrack(getTrack(file));
+                            }
+                            toastNbFile("JaMuz scan ", 200);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void browseFScount(File path) {
+        if (path.isDirectory()) {
+            File[] files = path.listFiles();
+            if (files != null) {
+                if(files.length>0) {
+                    for (File file : files) {
+                        if (file.isDirectory()) {
+                            browseFScount(file);
+                        }
+                        else {
+                            nbFilesTotal++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private Track getTrack(File file) {
+        String absolutePath=file.getAbsolutePath();
+
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(absolutePath);
+
+        String album =
+                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+        String artist =
+                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+        String title =
+                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+        String genre =
+                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
+
+        int rating = 0;
+        String coverHash="";
+
+        return new Track(-1, rating, title, album, artist, coverHash, absolutePath, genre);
+    }
+
+    private void playRandom() {
+        stopMediaPlayer(false);
+
+        if(queue.size()<5) {
+            List<Track> addToQueue =musicLibrary.getTracks((PlayList) spinner.getSelectedItem());
+            queue.addAll(addToQueue);
+        }
+
+        if(queue.size()>0) {
+            Random generator = new Random();
+            int index = generator.nextInt(queue.size());
+            displayedTrack = queue.get(index);
+            queue.remove(displayedTrack);
+            File file = new File(displayedTrack.getPath());
+            if(file.exists()) {
+                playAudio(displayedTrack.getPath());
+                displayTrack();
+            } else {
+                musicLibrary.deleteTrack(displayedTrack.getPath());
+                playRandom();
+            }
+
+        } else {
+            toast("Empty selection.");
+        }
+    }
+
+    public void playAudio(String path){
+        try {
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(path);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+            startTimer();
+
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    if(local) {
+                        buttonNext.performClick();
+                    }
+                }
+            });
+
+            mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+                @Override
+                public void onSeekComplete(MediaPlayer mediaPlayer) {
+                    startTimer();
+                }
+            });
+
+            //FIXME: MAke this an option
+            //mediaPlayer.setScreenOnWhilePlaying(true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void startTimer() {
+        timer = new CountDownTimer(mediaPlayer.getDuration()- mediaPlayer.getCurrentPosition()-1,500) {
+            @Override
+            public void onTick(long millisUntilFinished_) {
+                if(mediaPlayer !=null) {
+                    setSeekBar(mediaPlayer.getCurrentPosition(), mediaPlayer.getDuration());
+                }
+                if(mediaPlayer ==null || !mediaPlayer.isPlaying()) {
+                    this.cancel();
+                }
+            }
+
+            @Override
+            public void onFinish() {
+            }
+        }.start();
+    }
+
+    private void stopTimer() {
+        if(timer!=null) {
+            timer.cancel();
+            timer=null;
+        }
+    }
+
+    private void stopMediaPlayer(boolean release) {
+        if (mediaPlayer !=null && mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+            if(release) {
+                mediaPlayer.release();
+            }
+            setSeekBar(0, 1);
+        }
+        stopTimer();
+    }
+
+    private void enableConnect(final boolean enable) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                local=enable;
+                if(!enable) {
+                    buttonConnect.setText("Close");
+                    stopMediaPlayer(false);
+                } else {
+                    //FIXME: Should not recreate playlists if were already good
+                    //should replace only if we were connected but disconnected
+                    setupLocalPlaylists();
+                }
+                editTextConnectInfo.setEnabled(enable);
+                buttonConnect.setEnabled(true);
+            }
+        });
+    }
+
+    private void enableGUI(final boolean enable) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                editTextConnectInfo.setEnabled(enable);
+                buttonConnect.setEnabled(enable);
+                buttonPrevious.setEnabled(enable);
+            }
+        });
+    }
+
+    private void getFromQRcode() {
+        String content = getIntent().getDataString();
+        if(content!=null) {
+            if(!content.equals("")) {
+                content=content.substring("JaMuzRemote://".length());
+                content=Encryption.decrypt(content, "NOTeBrrhzrtestSecretK");
+                editTextConnectInfo.setText(content);
+            }
+        }
+    }
+
+    public static void checkStoragePermissions(Activity activity) {
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
+
+    private Button setupButton(Button button, final int buttonName, final String msg) {
         button = (Button) findViewById(buttonName);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,568 +617,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void toast(final String msg) {
-        toast(msg, Toast.LENGTH_LONG);
+    private void setupLocalPlaylists() {
+        final List<PlayList> playlists = new ArrayList<PlayList>();
+
+        String genreCol = "genre"; // TODO: Use musicLibraryDb.COL_GENRE
+        String ratingCol = "rating"; // TODO: Use musicLibraryDb.COL_RATING
+
+        PlayList all = new PlayList("All", null);
+
+        playlists.add(all);
+        playlists.add(new PlayList("Discover", ratingCol + "=0"));
+        playlists.add(new PlayList("Top", ratingCol + "=5"));
+        playlists.add(new PlayList("Top Reggae", genreCol + "=\"Reggae\" AND " + ratingCol + "=5"));
+        playlists.add(new PlayList("Top Rock", genreCol + "=\"Rock\" AND " + ratingCol + "=5"));
+
+        setupSpinner(playlists, all);
     }
 
-    private void toast(final String msg, int duration) {
-        Log.i(TAG, "Toast makeText "+msg);
-        Toast.makeText(this, msg, duration).show();
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.i(TAG, "MainActivity onCreate");
-        setContentView(R.layout.activity_main);
-
-        //TODO: Make this an option AND alow a timeout
-        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        textViewReceived = (TextView) findViewById(R.id.textView_conv);
-
-        ratingBar = (RatingBar) findViewById(R.id.ratingBar);
-        ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-            public void onRatingChanged(RatingBar ratingBar, float rating,
-                                        boolean fromUser) {
-                if(fromUser) { //as it is also set when server sends file info (and it can be 0)
-                    Log.i(TAG, "ratingBar Disabled");
-                    ratingBar.setEnabled(false);
-                    Log.i(TAG, "ratingBar setIndeterminate");
-                    ratingBar.setIndeterminate(true);
-                    Log.i(TAG, "displayedTrack setRating "+Math.round(rating));
-                    displayedTrack.setRating(Math.round(rating));
-                    if(local) {
-                        Log.i(TAG, "musicLibrary updateTrack "+displayedTrack.getRating());
-                        musicLibrary.updateTrack(displayedTrack.getId(), displayedTrack, true);
-                        Log.i(TAG, "ratingBar setEnabled");
-                        ratingBar.setEnabled(true);
-                        Log.i(TAG, "ratingBar UNset Indeterminate");
-                        ratingBar.setIndeterminate(false);
-                    } else {
-                        Log.i(TAG, "client send setRating"+displayedTrack.getRating());
-                        client.send("setRating".concat(String.valueOf(Math.round(rating))));
-                    }
-                }
-            }
-        });
-
-        seekBar = (SeekBar) findViewById(R.id.seekBar);
-        seekBar.setEnabled(false);
-
-        spinner = (Spinner) findViewById(R.id.spinner);
-        spinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int pos, long id) {
-                // An item was selected. You can retrieve the selected item using
-                // parent.getItemAtPosition(pos)
-                PlayList item = (PlayList) parent.getItemAtPosition(pos);
-                if(spinnerSend) {
-                    if(local) {
-                        queue = musicLibrary.getTracks(item);
-                    } else {
-                        client.send("setPlaylist".concat(item.toString()));
-                    }
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                // Another interface callback
-
-            }
-        });
-
-        buttonPrevious = setButton(buttonPrevious, R.id.button_previous, "previousTrack");
-        buttonPlay = setButton(buttonPlay, R.id.button_play, "playTrack");
-        buttonNext = setButton(buttonNext, R.id.button_next, "nextTrack");
-        buttonRewind = setButton(buttonRewind, R.id.button_rewind, "rewind");
-        buttonPullup = setButton(buttonPullup, R.id.button_pullup, "pullup");
-        buttonForward = setButton(buttonForward, R.id.button_forward, "forward");
-        buttonVolUp = setButton(buttonVolUp, R.id.button_volUp, "volUp");
-        buttonVolDown = setButton(buttonVolDown, R.id.button_volDown, "volDown");
-
-        editTextConnectInfo = (EditText) findViewById(R.id.editText_info);
-        buttonConnect = (Button) findViewById(R.id.button_connect);
-
-        textViewReceived.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
-        buttonConnect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                enableGUI(false);
-                //textViewReceived.setText("");
-                if(buttonConnect.getText().equals("Connect")) {
-                    CallBackReception callBackReception = new CallBackReception();
-
-                    String infoConnect = editTextConnectInfo.getText().toString();
-                    String[] split = infoConnect.split(":");  //NOI18N
-                    if(split.length<2) {
-                        enableConnect(true);
-                        return;
-                    }
-                    String address = split[0];
-                    int port;
-                    try {
-                        port = Integer.parseInt(split[1]);
-                    } catch(NumberFormatException ex) {
-                        port=2013;
-                    }
-
-                    client = new Client(address, port, Settings.Secure.getString(MainActivity.this.getContentResolver(),
-                            Settings.Secure.ANDROID_ID), "tata", callBackReception);
-
-                    //Must start networking in a thread or getting NetworkOnMainThreadException
-                    new Thread() {
-                        public void run() {
-                            if(client.connect()) {
-                                enableGUI(true);
-                                enableConnect(false);
-                            }
-                            else {
-                                enableConnect(true);
-                            }
-                        }
-                    }.start();
-
-                }
-                else {
-                    enableConnect(true);
-                    closeRemote();
-                }
-            }
-        });
-
-        enableGUI(false);
-        getFromQRcode();
-        editTextConnectInfo.setEnabled(true);
-        buttonConnect.setEnabled(true);
-
-        verifyStoragePermissions(this);
-
-        new Thread() {
-            public void run() {
-
-                connectDatabase();
-                nbFiles=0;
-                nbFilesTotal=0;
-                final String path = "/storage/3515-1C15/Android/data/com.theolivetree.sshserver/files/";
-
-                //Scan android filesystem for files
-                Thread bfs = new Thread() {
-                    public void run() {
-                        browseFS(new File(path));
-                    }
-                };
-                bfs.start();
-                //Get total number of files
-                Thread count = new Thread() {
-                    public void run() {
-                        browseFScount(new File(path));
-                    }
-                };
-                count.start();
-
-                try {
-                    bfs.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    count.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                //Scan deleted files
-                //FIXME: No need to check what scanned previously ...
-                List<Track> tracks = musicLibrary.getTracks();
-                nbFiles=0;
-                for(Track track : tracks) {
-                    File file = new File(track.getPath());
-                    final String action;
-                    if(!file.exists()) {
-                        musicLibrary.deleteTrack(track.getPath());
-                        action="removed";
-                    } else {
-                        action="present";
-                    }
-                    toastNbFile(action, 500);
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        toast("Database updated.");
-                    }
-                });
-
-            }
-        }.start();
-
-        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-
-        service = new Intent(this, MyService.class);
-        startService(service);
-
-        //browseLibrary(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-        //browseLibrary(MediaStore.Audio.Media.INTERNAL_CONTENT_URI);
-
-        //if(songs.size()>0) {
-        //    for(Song song : songs) {
-//
-        //    }
-        //}
-
-    }
-
-    private void toastNbFile(final String action, final int every) {
-        nbFiles++;
-        if(((nbFiles-1) % every) == 0){
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    toast("#"+(nbFiles)+"/"+nbFilesTotal+" "+action, Toast.LENGTH_SHORT);
-                }
-            });
-        }
-    }
-
-    private MusicLibrary musicLibrary;
-
-    private void connectDatabase() {
-        musicLibrary = new MusicLibrary(this);
-        musicLibrary.open();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.i(TAG, "MainActivity onPause");
-        closeRemote();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.i(TAG, "MainActivity onResume");
-        getFromQRcode();
-        if(mediaPlayer ==null || !mediaPlayer.isPlaying()) {
-            buttonConnect.performClick();
-        }
-    }
-
-    private void getFromQRcode() {
-        String content = getIntent().getDataString();
-        if(content!=null) {
-            if(!content.equals("")) {
-                content=content.substring("JaMuzRemote://".length());
-                content=Encryption.decrypt(content, "NOTeBrrhzrtestSecretK");
-                editTextConnectInfo.setText(content);
-            }
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.i(TAG, "MainActivity onDestroy");
-        stopMediaPlayer(true);
-        stopService(service);
-        musicLibrary.close();
-    }
-
-    private void browseLibrary(Uri songUri){
-        ContentResolver contentResolver = getContentResolver();
-        Cursor songCursor = contentResolver.query(songUri, null, null, null, null);
-
-        if(songCursor != null && songCursor.moveToFirst())
-        {
-            int songId = songCursor.getColumnIndex(MediaStore.Audio.Media._ID);
-            int songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
-            int songAlbum = songCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
-            int songArtist = songCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
-
-            int songData = songCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
-
-            do {
-                long currentId = songCursor.getLong(songId);
-                String currentTitle = songCursor.getString(songTitle);
-                String currentAlbum = songCursor.getString(songAlbum);
-                String currentArtist = songCursor.getString(songArtist);
-                String currentData = songCursor.getString(songData);
-
-                //songs.add(new Song(currentId, currentData, currentTitle, currentAlbum, currentArtist));
-            } while(songCursor.moveToNext());
-        }
-    }
-
-    private int nbFiles=0;
-
-    private void browseFS(File path) {
-        if (path.isDirectory()) {
-            File[] files = path.listFiles();
-            if (files != null) {
-                if(files.length>0) {
-                    for (File file : files) {
-                        if (file.isDirectory()) {
-                            browseFS(file);
-                        }
-                        else {
-                            String absolutePath=file.getAbsolutePath();
-
-                            int id = musicLibrary.getTrack(absolutePath);
-                            final String action;
-                            if(id>=0) {
-                                Log.d(TAG, "browseFS updateTrack " + absolutePath);
-                                //FIXME: Update if file is modified only:
-                                //based on lastModificationDate and/or size (not on content as longer than updateTrack)
-                                //musicLibrary.updateTrack(id, track, false);
-                                action="updated";
-                            } else {
-                                Log.d(TAG, "browseFS insertTrack " + absolutePath);
-                                musicLibrary.insertTrack(getTrack(file));
-                                action="inserted";
-                            }
-                            toastNbFile(action, 100);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private Track getTrack(File file) {
-        String absolutePath=file.getAbsolutePath();
-
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(absolutePath);
-
-        String album =
-                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-        String artist =
-                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-        String title =
-                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-        String genre =
-                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
-
-        int rating = 0;
-        String coverHash="";
-
-        return new Track(-1, rating, title, album, artist, coverHash, absolutePath, genre);
-    }
-
-    private int nbFilesTotal = 0;
-
-    private void browseFScount(File path) {
-        if (path.isDirectory()) {
-            File[] files = path.listFiles();
-            if (files != null) {
-                if(files.length>0) {
-                    for (File file : files) {
-                        if (file.isDirectory()) {
-                            browseFScount(file);
-                        }
-                        else {
-                            nbFilesTotal++;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Storage Permissions
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
-
-    /**
-     * Checks if the app has permission to write to device storage
-     * If the app does not has permission then the user will be prompted to grant permissions
-     *
-     * @param activity
-     */
-    public static void verifyStoragePermissions(Activity activity) {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
-        }
-    }
-
-    private List<Track> queue = new ArrayList<>();
-
-    private void playRandom() {
-        stopMediaPlayer(false);
-
-        if(queue.size()<5) {
-            //queue = musicLibrary.getTracks();
-            List<Track> addToQueue =musicLibrary.getTracks((PlayList) spinner.getSelectedItem());
-            queue.addAll(addToQueue);
-        }
-
-        if(queue.size()>0) {
-            Random generator = new Random();
-            int index = generator.nextInt(queue.size());
-            displayedTrack = queue.get(index);
-            queue.remove(displayedTrack);
-            playAudio(displayedTrack.getPath());
-            displayTrack();
-        } else {
-            toast("Empty selection.");
-        }
-
-    }
-
-    MediaPlayer mediaPlayer;
-    CountDownTimer timer;
-
-    public void playAudio(String path){
-        try {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(path);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-            startTimer();
-
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mediaPlayer) {
-                    if(local) {
-                        buttonNext.performClick();
-                    }
-                }
-            });
-
-            mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
-                @Override
-                public void onSeekComplete(MediaPlayer mediaPlayer) {
-                    startTimer();
-                }
-            });
-
-            //FIXME: MAke this an option
-            //mediaPlayer.setScreenOnWhilePlaying(true);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void startTimer() {
-        Log.d(TAG, "CountDownTimer startTimer");
-        timer = new CountDownTimer(mediaPlayer.getDuration()- mediaPlayer.getCurrentPosition()-1,500) {
-            @Override
-            public void onTick(long millisUntilFinished_) {
-                if(mediaPlayer !=null) {
-                    Log.d(TAG, "CountDownTimer onTick "+ mediaPlayer.getCurrentPosition()/100+"/"+ mediaPlayer.getDuration()/1000);
-                    setSeekBar(mediaPlayer.getCurrentPosition(), mediaPlayer.getDuration());
-                }
-                if(mediaPlayer ==null || !mediaPlayer.isPlaying()) {
-                    Log.d(TAG, "CountDownTimer onTick NOT isPlaying => cancel");
-                    this.cancel();
-                }
-            }
-
-            @Override
-            public void onFinish() {
-                Log.d(TAG, "CountDownTimer onFinish");
-            }
-        }.start();
-    }
-
-    private void stopTimer() {
-        if(timer!=null) {
-            Log.d(TAG, "CountDownTimer cancel");
-            timer.cancel();
-            timer=null;
-        }
-    }
-
-    private boolean local = true;
-
-    private void enableConnect(final boolean enable) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                local=enable;
-                if(!enable) {
-                    buttonConnect.setText("Close");
-                    stopMediaPlayer(false);
-                } else {
-                    final List<PlayList> playlists = new ArrayList<PlayList>();
-
-                    String genreCol = "genre"; // TODO: Use musicLibraryDb.COL_GENRE
-                    String ratingCol = "rating"; // TODO: Use musicLibraryDb.COL_RATING
-
-                    PlayList all = new PlayList("All", null);
-
-                    playlists.add(all);
-                    playlists.add(new PlayList("Discover", ratingCol + "=0"));
-                    playlists.add(new PlayList("Top", ratingCol + "=5"));
-                    playlists.add(new PlayList("Top Reggae", genreCol + "=\"Reggae\" AND " + ratingCol + "=5"));
-                    playlists.add(new PlayList("Top Rock", genreCol + "=\"Rock\" AND " + ratingCol + "=5"));
-
-                    setupSpinner(playlists, all);
-                }
-                editTextConnectInfo.setEnabled(enable);
-                buttonConnect.setEnabled(true);
-            }
-        });
-    }
-
-    private void stopMediaPlayer(boolean release) {
-        if (mediaPlayer !=null && mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-            if(release) {
-                mediaPlayer.release();
-            }
-            setSeekBar(0, 1);
-        }
-        stopTimer();
-    }
-
-    private void enableGUI(final boolean enable) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                editTextConnectInfo.setEnabled(enable);
-                buttonConnect.setEnabled(enable);
-                buttonPrevious.setEnabled(enable);
-                buttonPlay.setEnabled(true);
-                buttonNext.setEnabled(true);
-                buttonRewind.setEnabled(true);
-                buttonPullup.setEnabled(true);
-                buttonForward.setEnabled(true);
-                buttonVolUp.setEnabled(true);
-                buttonVolDown.setEnabled(true);
-                Log.d(TAG, "ratingBar setEnabled");
-                ratingBar.setEnabled(true);
-
-                //seekBar.setEnabled(enable);
-                spinner.setEnabled(true);
-                //if(!enable) {
-                //    spinner.setAdapter(null);
-                 //   ImageView image = (ImageView) findViewById(R.id.imageView);
-                 //   image.setImageResource(0);
-                //}
-            }
-        });
+    ///FIXME: Detect WIFI connection to allow/disallow "Connect" button
+    //https://stackoverflow.com/questions/5888502/how-to-detect-when-wifi-connection-has-been-established-in-android
+
+    private boolean checkConnectedViaWifi() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mWifi = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        return mWifi.isConnected();
     }
 
     private void setupSpinner(final List<PlayList> playlists, final PlayList selectedPlaylist) {
@@ -732,6 +675,55 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void toast(final String msg) {
+        toast(msg, Toast.LENGTH_LONG);
+    }
+
+    private void toast(final String msg, int duration) {
+        Log.i(TAG, "Toast makeText "+msg);
+        Toast.makeText(this, msg, duration).show();
+    }
+
+    private void toastNbFile(final String action, final int every) {
+        nbFiles++;
+        if(((nbFiles-1) % every) == 0){
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    toast("#"+(nbFiles)+"/"+nbFilesTotal+" "+action, Toast.LENGTH_SHORT);
+                }
+            });
+        }
+    }
+
+    private void setSeekBar(final int currentPosition, final int total) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                seekBar.setMax(total);
+                seekBar.setProgress(currentPosition);
+            }
+        });
+    }
+
+    public void popup(final String title, final String msg) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                alertDialog.setTitle(title);
+                alertDialog.setMessage(msg);
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
+        });
+    }
+
     private void displayTrack() {
         if(displayedTrack!=null) {
 
@@ -739,11 +731,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     setTextView(textViewReceived, Html.fromHtml("<html><h1>".concat(displayedTrack.toString()).concat("<BR/></h1></html>")), false);
-                    Log.i(TAG, "ratingBar UNset Indeterminate");
-                    ratingBar.setIndeterminate(false);
-                    Log.i(TAG, "ratingBar setRating "+displayedTrack.getRating());
+                    ratingBar.setEnabled(false);
                     ratingBar.setRating(displayedTrack.getRating());
-                    Log.i(TAG, "ratingBar setEnabled");
                     ratingBar.setEnabled(true);
                 }
             });
@@ -787,26 +776,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void Popup(final String title, final String msg) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-                alertDialog.setTitle(title);
-                alertDialog.setMessage(msg);
-                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                alertDialog.show();
-            }
-        });
-    }
-
-
-
     class CallBackReception implements ICallBackReception {
         @Override
         public void received(final String msg) {
@@ -814,8 +783,6 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            //textViewReceived.setText(msg);
-                            //Popup("Error", msg);
                             toast(msg);
                         }
                     });
@@ -877,18 +844,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void disconnected() {
-            closeRemote();
+            stopRemote();
         }
-    }
-
-    private void setSeekBar(final int currentPosition, final int total) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                seekBar.setMax(total);
-                seekBar.setProgress(currentPosition);
-            }
-        });
     }
 
     //FIXME: Battery consumption
@@ -897,7 +854,7 @@ public class MainActivity extends AppCompatActivity {
 
     //FIXME: Make a Settings activity
 
-    private void closeRemote() {
+    private void stopRemote() {
         if(client!=null) {
             client.close();
         }
@@ -955,4 +912,75 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton("No", null)
                 .show();
     }
+
+    protected BluetoothAdapter mBluetoothAdapter;
+    protected BluetoothHeadset mBluetoothHeadset;
+    //protected BluetoothDevice mConnectedHeadset;
+
+    protected BluetoothProfile.ServiceListener mHeadsetProfileListener = new BluetoothProfile.ServiceListener()
+    {
+
+        @Override
+        public void onServiceDisconnected(int profile)
+        {
+            unregisterReceiver(mHeadsetBroadcastReceiver);
+            mBluetoothHeadset = null;
+        }
+
+        @Override
+        public void onServiceConnected(int profile, BluetoothProfile proxy)
+        {
+            mBluetoothHeadset = (BluetoothHeadset) proxy;
+
+            registerReceiver(mHeadsetBroadcastReceiver,
+                    new IntentFilter(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED));
+
+            registerReceiver(mHeadsetBroadcastReceiver,
+                    new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED));
+        }
+    };
+
+    protected BroadcastReceiver mHeadsetBroadcastReceiver = new BroadcastReceiver()
+    {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            if (intent.getAction().equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED))
+            {
+                int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED);
+                if (state == BluetoothHeadset.STATE_CONNECTED)
+                {
+                    Log.i(TAG, "BT connected");
+                    if(!mediaPlayer.isPlaying()) {
+                        buttonPlay.performClick();
+                    }
+                }
+                else if (state == BluetoothHeadset.STATE_DISCONNECTED)
+                {
+                    Log.i(TAG, "BT DISconnected");
+                    if(mediaPlayer.isPlaying()) {
+                        mediaPlayer.pause();
+                        stopTimer();
+                    }
+                }
+            }
+            else // BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED
+            {
+                //FIXME: Never reached. Something wrong
+                //Check again with https://stackoverflow.com/questions/20398581/handle-bluetooth-headset-clicks-action-voice-command-and-action-web-search-on
+
+                int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_AUDIO_DISCONNECTED);
+                if (state == BluetoothHeadset.STATE_AUDIO_CONNECTED)
+                {
+                    Log.i(TAG, "BT AUDIO connected");
+
+                }
+                else if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED)
+                {
+                    Log.i(TAG, "BT AUDIO DISconnected");
+
+                }
+            }
+        }
+    };
 }
