@@ -192,12 +192,12 @@ public class MainActivity extends AppCompatActivity {
                                        int pos, long id) {
                 // An item was selected. You can retrieve the selected item using
                 // parent.getItemAtPosition(pos)
-                String item = (String) parent.getItemAtPosition(pos);
+                PlayList item = (PlayList) parent.getItemAtPosition(pos);
                 if(spinnerSend) {
                     if(local) {
                         queue = musicLibrary.getTracks(item);
                     } else {
-                        client.send("setPlaylist".concat(item));
+                        client.send("setPlaylist".concat(item.toString()));
                     }
                 }
             }
@@ -547,7 +547,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(queue.size()<5) {
             //queue = musicLibrary.getTracks();
-            List<Track> addToQueue =musicLibrary.getTracks((String) spinner.getSelectedItem());
+            List<Track> addToQueue =musicLibrary.getTracks((PlayList) spinner.getSelectedItem());
             queue.addAll(addToQueue);
         }
 
@@ -555,6 +555,7 @@ public class MainActivity extends AppCompatActivity {
             Random generator = new Random();
             int index = generator.nextInt(queue.size());
             displayedTrack = queue.get(index);
+            queue.remove(displayedTrack);
             playAudio(displayedTrack.getPath());
             displayTrack();
         } else {
@@ -639,15 +640,20 @@ public class MainActivity extends AppCompatActivity {
                     buttonConnect.setText("Close");
                     stopMediaPlayer(false);
                 } else {
-                    final List<String> playlists = new ArrayList<String>();
-                    playlists.add("All");
-                    for(int i=0; i < 6; i++) {
-                        String playlist = "Rated "+i;
-                        playlists.add(playlist);
-                    }
-                    playlists.add("Genre Reggae");
-                    playlists.add("Genre Rock");
-                    setupSpinner(playlists, "All");
+                    final List<PlayList> playlists = new ArrayList<PlayList>();
+
+                    String genreCol = "genre"; // TODO: Use musicLibraryDb.COL_GENRE
+                    String ratingCol = "rating"; // TODO: Use musicLibraryDb.COL_RATING
+
+                    PlayList all = new PlayList("All", null);
+
+                    playlists.add(all);
+                    playlists.add(new PlayList("Discover", ratingCol + "=0"));
+                    playlists.add(new PlayList("Top", ratingCol + "=5"));
+                    playlists.add(new PlayList("Top Reggae", genreCol + "=\"Reggae\" AND " + ratingCol + "=5"));
+                    playlists.add(new PlayList("Top Rock", genreCol + "=\"Rock\" AND " + ratingCol + "=5"));
+
+                    setupSpinner(playlists, all);
                 }
                 editTextConnectInfo.setEnabled(enable);
                 buttonConnect.setEnabled(true);
@@ -694,9 +700,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setupSpinner(final List<String> playlists, final String selectedPlaylist) {
-        final ArrayAdapter<String> arrayAdapter =
-                new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, playlists);
+    private void setupSpinner(final List<PlayList> playlists, final PlayList selectedPlaylist) {
+        final ArrayAdapter<PlayList> arrayAdapter =
+                new ArrayAdapter<PlayList>(this, android.R.layout.simple_spinner_item, playlists);
         // Drop down layout style - list view with radio button
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
@@ -821,13 +827,18 @@ public class MainActivity extends AppCompatActivity {
                     switch(type) {
                         case "playlists":
                             String selectedPlaylist = jObject.getString("selectedPlaylist");
+                            PlayList temp = new PlayList(selectedPlaylist, "");
                             final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists");
-                            final List<String> playlists = new ArrayList<String>();
+                            final List<PlayList> playlists = new ArrayList<PlayList>();
                             for(int i=0; i<jsonPlaylists.length(); i++) {
                                 String playlist = (String) jsonPlaylists.get(i);
-                                playlists.add(playlist);
+                                PlayList playList = new PlayList(playlist, "");
+                                if(playlist.equals(selectedPlaylist)) {
+                                    playList=temp;
+                                }
+                                playlists.add(playList);
                             }
-                            setupSpinner(playlists, selectedPlaylist);
+                            setupSpinner(playlists, temp);
                             break;
                         case "currentPosition":
                             final int currentPosition = jObject.getInt("currentPosition");
