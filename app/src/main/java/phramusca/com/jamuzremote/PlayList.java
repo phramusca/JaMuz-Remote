@@ -13,10 +13,6 @@ public class PlayList {
         this.query = query;
     }
 
-    //public String getName() {
-    //    return name;
-    //}
-
     public String getQuery() {
         return query;
     }
