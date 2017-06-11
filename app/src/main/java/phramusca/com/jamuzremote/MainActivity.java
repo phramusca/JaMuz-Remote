@@ -919,7 +919,6 @@ public class MainActivity extends AppCompatActivity {
 
     protected BluetoothProfile.ServiceListener mHeadsetProfileListener = new BluetoothProfile.ServiceListener()
     {
-
         @Override
         public void onServiceDisconnected(int profile)
         {
@@ -950,15 +949,29 @@ public class MainActivity extends AppCompatActivity {
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED);
                 if (state == BluetoothHeadset.STATE_CONNECTED)
                 {
-                    Log.i(TAG, "BT connected");
-                    if(!mediaPlayer.isPlaying()) {
-                        buttonPlay.performClick();
+                    Log.d(TAG, "BT connected. Waiting 4s");
+                    try {
+                        Thread.sleep(4000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if(mediaPlayer ==null) {
+                        Log.d(TAG, "BT: playRandom()");
+                        playRandom();
+                    }
+                    else if(!mediaPlayer.isPlaying()) {
+                        Log.d(TAG, "BT: mediaPlayer.start()");
+                        mediaPlayer.start();
+                        startTimer();
+                    }
+                    else  {
+                        Log.d(TAG, "BT: Already playing");
                     }
                 }
                 else if (state == BluetoothHeadset.STATE_DISCONNECTED)
                 {
-                    Log.i(TAG, "BT DISconnected");
-                    if(mediaPlayer.isPlaying()) {
+                    Log.d(TAG, "BT DISconnected");
+                    if(mediaPlayer!=null && mediaPlayer.isPlaying()) {
                         mediaPlayer.pause();
                         stopTimer();
                     }
@@ -972,12 +985,12 @@ public class MainActivity extends AppCompatActivity {
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_AUDIO_DISCONNECTED);
                 if (state == BluetoothHeadset.STATE_AUDIO_CONNECTED)
                 {
-                    Log.i(TAG, "BT AUDIO connected");
+                    Log.d(TAG, "BT AUDIO connected");
 
                 }
                 else if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED)
                 {
-                    Log.i(TAG, "BT AUDIO DISconnected");
+                    Log.d(TAG, "BT AUDIO DISconnected");
 
                 }
             }
