@@ -32,6 +32,7 @@ import android.os.CountDownTimer;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.Spanned;
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     private int nbFiles=0;
     private int nbFilesTotal = 0;
     private List<Track> queue = new ArrayList<>();
-    MediaPlayer mediaPlayer;
+    public static MediaPlayer mediaPlayer;
     CountDownTimer timer;
     private boolean local = true;
 
@@ -257,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
         mediaHandler.postDelayed(this, 1000L);
         */
 
-        ComponentName rec = new ComponentName(getPackageName(), MediaButtonIntentReceiver.class.getName());
+        ComponentName rec = new ComponentName(getPackageName(), MediaButtonIntentReceiverOld.class.getName());
         audioManager.registerMediaButtonEventReceiver(rec);
 
         //registerReceiver(mMediaButtonReceiver,
@@ -279,8 +280,7 @@ public class MainActivity extends AppCompatActivity {
         startService(service);
     }
 
-    //FIXME: How to use this below instead of MediaButtonIntentReceiver
-    protected BroadcastReceiver mMediaButtonReceiver = new BroadcastReceiver()
+    public class MediaButtonIntentReceiver extends MediaButtonReceiver
     {
         private static final String TAG = "JaMuz ButtonReceiver";
 
@@ -293,12 +293,11 @@ public class MainActivity extends AppCompatActivity {
             int action = keyEvent.getAction();
             if (action == KeyEvent.ACTION_UP) {
                 Log.i(TAG, intent.getAction()+" : "+keyExtraEvent);
-                //doAction("playTrack");
                 onKeyUp(keyEvent.getKeyCode(), keyEvent);
             }
 
         }
-    };
+    }
 
 
     @Override
