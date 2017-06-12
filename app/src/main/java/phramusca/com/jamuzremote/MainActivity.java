@@ -3,11 +3,13 @@ package phramusca.com.jamuzremote;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,6 +22,7 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.media.session.MediaSession;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -33,9 +36,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -104,9 +109,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "MainActivity onCreate");
         setContentView(R.layout.activity_main);
-
-        //TODO: Make this an option AND alow a timeout
-        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         textViewReceived = (TextView) findViewById(R.id.textView_conv);
 
@@ -231,12 +233,6 @@ public class MainActivity extends AppCompatActivity {
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
-        //Start background service
-        //Not yet used but can be used to scan library
-        //What is the benefit ??
-        service = new Intent(this, MyService.class);
-        startService(service);
-
         //Start BT HeadSet connexion detection
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter != null)
@@ -249,7 +245,61 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
+        //https://stackoverflow.com/questions/32220498/registermediabuttoneventreceiver-alternative-setmediabuttonreceiver-pendinginte
+
+        /*
+        MediaSession mSession =  new MediaSession(this, getPackageName());
+        Intent intent = new Intent(this, HeadsetReceiver.class);
+        PendingIntent pintent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        mSession.setMediaButtonReceiver(pintent);
+        mSession.setActive(true);
+        mediaHandler.postDelayed(this, 1000L);
+        */
+
+        ComponentName rec = new ComponentName(getPackageName(), MediaButtonIntentReceiver.class.getName());
+        audioManager.registerMediaButtonEventReceiver(rec);
+
+        //registerReceiver(mMediaButtonReceiver,
+        //       new IntentFilter(Intent.ACTION_MEDIA_BUTTON));
+
+
+        //TODO: No more needed if above work
+        //as it does work only if application is active
+        takeKeyEvents(true);
+
+        //TODO: Make this an option AND alow a timeout
+        //Used until MediaButtonReceiver is finally implemented
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        //Start background service
+        //Not yet used but can be used to scan library
+        //What is the benefit ??
+        service = new Intent(this, MyService.class);
+        startService(service);
     }
+
+    //FIXME: How to use this below instead of MediaButtonIntentReceiver
+    protected BroadcastReceiver mMediaButtonReceiver = new BroadcastReceiver()
+    {
+        private static final String TAG = "JaMuz ButtonReceiver";
+
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            KeyEvent keyEvent = (KeyEvent)intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+            String keyExtraEvent = KeyEvent.keyCodeToString(keyEvent.getKeyCode());
+
+            int action = keyEvent.getAction();
+            if (action == KeyEvent.ACTION_UP) {
+                Log.i(TAG, intent.getAction()+" : "+keyExtraEvent);
+                //doAction("playTrack");
+                onKeyUp(keyEvent.getKeyCode(), keyEvent);
+            }
+
+        }
+    };
+
 
     @Override
     protected void onPause() {
@@ -326,7 +376,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        toast("Database updated.");
+                        toastLong("Database updated.");
                     }
                 });
 
@@ -431,7 +481,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
         } else {
-            toast("Empty selection.");
+            toastLong("Empty Playlist.");
         }
     }
 
@@ -566,7 +616,7 @@ public class MainActivity extends AppCompatActivity {
         return button;
     }
 
-    private void doAction(String msg) {
+    protected void doAction(String msg) {
         if(local) {
             switch (msg) {
                 case "previousTrack":
@@ -608,7 +658,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 default:
                     //Popup("Error", "Not implemented");
-                    toast("Not implemented");
+                    toastLong("Not implemented");
                     break;
             }
 
@@ -675,8 +725,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void toast(final String msg) {
+    private void toastLong(final String msg) {
         toast(msg, Toast.LENGTH_LONG);
+    }
+
+    private void toastShort(final String msg) {
+        toast(msg, Toast.LENGTH_SHORT);
     }
 
     private void toast(final String msg, int duration) {
@@ -690,7 +744,7 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    toast("#"+(nbFiles)+"/"+nbFilesTotal+" "+action, Toast.LENGTH_SHORT);
+                    toastShort("#"+(nbFiles)+"/"+nbFilesTotal+" "+action);
                 }
             });
         }
@@ -783,7 +837,7 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            toast(msg);
+                            toastShort(msg);
                         }
                     });
             }
@@ -892,6 +946,57 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                Log.d(TAG, "KEYCODE_MEDIA_PREVIOUS");
+                toastShort("MEDIA_PREVIOUS : Play/Pause");
+                //doAction("previousTrack");
+                doAction("playTrack");
+
+                return true;
+            case KeyEvent.KEYCODE_MEDIA_NEXT:
+                Log.d(TAG, "KEYCODE_MEDIA_NEXT");
+                toastShort("MEDIA_NEXT : Next Track");
+                doAction("nextTrack");
+
+                return true;
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                Log.d(TAG, "KEYCODE_MEDIA_PLAY_PAUSE");
+                toastShort("PLAY_PAUSE : Play/Pause");
+                doAction("playTrack");
+                //TODO: Not triggered or not available on my nissan
+                return true;
+
+            case KeyEvent.KEYCODE_HEADSETHOOK:
+                //Play/Pause on Wired HeadSet
+                Log.d(TAG, "KEYCODE_HEADSETHOOK");
+                toastShort("HEADSETHOOK : Play/Pause");
+                doAction("playTrack");
+                return true;
+
+            case KeyEvent.KEYCODE_MEDIA_PLAY:
+                Log.d(TAG, "KEYCODE_MEDIA_PLAY");
+                toastShort("MEDIA_PLAY : Play/Pause");
+                doAction("playTrack");
+                return true;
+
+            case KeyEvent.KEYCODE_MEDIA_STOP:
+                Log.d(TAG, "KEYCODE_MEDIA_STOP");
+                toastShort("MEDIA_STOP : Play/Pause");
+                doAction("playTrack");
+                return true;
+
+            default:
+                String msg = keyCode+": "+String.valueOf(event.getKeyCode());
+                Log.d(TAG, msg);
+                toastShort(msg);
+                return super.onKeyUp(keyCode, event);
+        }
     }
 
     @Override

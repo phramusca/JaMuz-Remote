@@ -19,7 +19,6 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
@@ -28,10 +27,18 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="JaMuzRemote"/>
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+            </intent-filter>
         </activity>
 
-        <!--Service declared in manifest -->
+        <receiver android:name=".MediaButtonIntentReceiver">
+
+        </receiver>
+
         <service android:name=".MyService" android:exported="false"/>
+
     </application>
 
 </manifest>
