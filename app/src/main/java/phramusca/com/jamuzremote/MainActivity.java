@@ -3,33 +3,26 @@ package phramusca.com.jamuzremote;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
-import android.media.session.MediaSession;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.media.session.MediaButtonReceiver;
@@ -41,7 +34,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -69,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "=====> JaMuz";
     private Client client;
     private Track displayedTrack;
+    private Track localTrack;
     private Map coverMap = new HashMap();
     private Intent service; //Not yet used
     private AudioManager audioManager; //Used to set volume
@@ -144,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
                 if(spinnerSend) {
                     if(local) {
                         queue = musicLibrary.getTracks(item);
+                        localSelectedPlaylist = item;
                     } else {
                         client.send("setPlaylist".concat(item.toString()));
                     }
@@ -168,13 +162,6 @@ public class MainActivity extends AppCompatActivity {
 
         editTextConnectInfo = (EditText) findViewById(R.id.editText_info);
         buttonConnect = (Button) findViewById(R.id.button_connect);
-
-        textViewReceived.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
 
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -217,11 +204,18 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     enableConnect(true);
                     stopRemote();
+
+                    displayedTrack = localTrack;
+                    displayTrack();
                 }
             }
         });
 
         setupLocalPlaylists();
+
+        localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz Remote", "coverHash", "path", "---");
+        displayedTrack = localTrack;
+        setTextView(textViewReceived, Html.fromHtml("<html><h1>".concat(displayedTrack.toString()).concat("<BR/></h1></html>")), false);
 
         enableGUI(false);
         getFromQRcode();
@@ -269,9 +263,9 @@ public class MainActivity extends AppCompatActivity {
         //as it does work only if application is active
         takeKeyEvents(true);
 
-        //TODO: Make this an option AND alow a timeout
+        //TODO: Make this an option AND allow a timeout
         //Used until MediaButtonReceiver is finally implemented
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         //Start background service
         //Not yet used but can be used to scan library
@@ -311,8 +305,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.i(TAG, "MainActivity onResume");
-        getFromQRcode();
-        if(mediaPlayer ==null || !mediaPlayer.isPlaying()) {
+
+        if(mediaPlayer == null || !mediaPlayer.isPlaying()) {
+            enableGUI(false);
+            getFromQRcode();
             buttonConnect.performClick();
         }
     }
@@ -469,6 +465,7 @@ public class MainActivity extends AppCompatActivity {
             Random generator = new Random();
             int index = generator.nextInt(queue.size());
             displayedTrack = queue.get(index);
+            localTrack = displayedTrack;
             queue.remove(displayedTrack);
             File file = new File(displayedTrack.getPath());
             if(file.exists()) {
@@ -559,11 +556,8 @@ public class MainActivity extends AppCompatActivity {
                 local=enable;
                 if(!enable) {
                     buttonConnect.setText("Close");
-                    stopMediaPlayer(false);
                 } else {
-                    //FIXME: Should not recreate playlists if were already good
-                    //should replace only if we were connected but disconnected
-                    setupLocalPlaylists();
+                    setupSpinner(localPlaylists, localSelectedPlaylist);
                 }
                 editTextConnectInfo.setEnabled(enable);
                 buttonConnect.setEnabled(true);
@@ -632,6 +626,9 @@ public class MainActivity extends AppCompatActivity {
                         mediaPlayer.pause();
                         stopTimer();
                     } else {
+                        //displayedTrack = localTrack;
+                        //displayTrack();
+
                         mediaPlayer.start();
                         startTimer();
                     }
@@ -666,21 +663,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    final List<PlayList> localPlaylists = new ArrayList<PlayList>();
+    private PlayList localSelectedPlaylist = new PlayList("All", null);
+
     private void setupLocalPlaylists() {
-        final List<PlayList> playlists = new ArrayList<PlayList>();
 
         String genreCol = "genre"; // TODO: Use musicLibraryDb.COL_GENRE
         String ratingCol = "rating"; // TODO: Use musicLibraryDb.COL_RATING
 
-        PlayList all = new PlayList("All", null);
+        localPlaylists.add(localSelectedPlaylist);
+        localPlaylists.add(new PlayList("Discover", ratingCol + "=0"));
+        localPlaylists.add(new PlayList("Top", ratingCol + "=5"));
+        localPlaylists.add(new PlayList("Top Reggae", genreCol + "=\"Reggae\" AND " + ratingCol + "=5"));
+        localPlaylists.add(new PlayList("Top Rock", genreCol + "=\"Rock\" AND " + ratingCol + "=5"));
 
-        playlists.add(all);
-        playlists.add(new PlayList("Discover", ratingCol + "=0"));
-        playlists.add(new PlayList("Top", ratingCol + "=5"));
-        playlists.add(new PlayList("Top Reggae", genreCol + "=\"Reggae\" AND " + ratingCol + "=5"));
-        playlists.add(new PlayList("Top Rock", genreCol + "=\"Rock\" AND " + ratingCol + "=5"));
-
-        setupSpinner(playlists, all);
+        setupSpinner(localPlaylists, localSelectedPlaylist);
     }
 
     ///FIXME: Detect WIFI connection to allow/disallow "Connect" button
