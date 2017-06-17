@@ -10,15 +10,18 @@ import android.util.Log;
  */
 public class HeadSetPluggedReceiver extends BroadcastReceiver {
 
+    private static final String TAG = CallReceiver.class.getName();
     private boolean headsetConnected = false;
 
     public void onReceive(Context context, Intent intent) {
         if (intent.hasExtra("state")){
             if (headsetConnected && intent.getIntExtra("state", 0) == 0){
                 headsetConnected = false;
+                Log.i(TAG, "headset NOT Connected => pause");
                 pause();
             } else if (!headsetConnected && intent.getIntExtra("state", 0) == 1){
                 headsetConnected = true;
+                Log.i(TAG, "headset IS Connected => resume");
                 resume();
             }
         }

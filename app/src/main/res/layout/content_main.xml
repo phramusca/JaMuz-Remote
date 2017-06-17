@@ -179,7 +179,7 @@
         android:layout_gravity="center_horizontal"
         android:id="@+id/textView_conv"
         android:gravity="top|bottom|fill_vertical|center_horizontal"
-        android:text="23"
+        android:text=""
         android:clickable="true" />
 
     <ImageView
