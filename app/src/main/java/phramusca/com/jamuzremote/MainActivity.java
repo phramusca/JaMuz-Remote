@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
     private int nbFilesTotal = 0;
     private List<Track> queue = new ArrayList<>();
     public static MediaPlayer mediaPlayer;
+    public static AudioPlayer audioPlayer;
     CountDownTimer timer;
     private boolean local = true;
 
@@ -252,11 +253,8 @@ public class MainActivity extends AppCompatActivity {
         mediaHandler.postDelayed(this, 1000L);
         */
 
-        ComponentName rec = new ComponentName(getPackageName(), phramusca.com.jamuzremote.MediaButtonIntentReceiver.class.getName());
+        ComponentName rec = new ComponentName(getPackageName(), MediaButtonIntentReceiver.class.getName());
         audioManager.registerMediaButtonEventReceiver(rec);
-
-        //registerReceiver(mMediaButtonReceiver,
-        //       new IntentFilter(Intent.ACTION_MEDIA_BUTTON));
 
         registerReceiver(new HeadSetPluggedReceiver(),
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG));
@@ -282,26 +280,6 @@ public class MainActivity extends AppCompatActivity {
         service = new Intent(this, MyService.class);
         startService(service);
     }
-
-    public class MediaButtonIntentReceiver extends MediaButtonReceiver
-    {
-        private static final String TAG = "JaMuz ButtonReceiver";
-
-        @Override
-        public void onReceive(Context context, Intent intent)
-        {
-            KeyEvent keyEvent = (KeyEvent)intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-            String keyExtraEvent = KeyEvent.keyCodeToString(keyEvent.getKeyCode());
-
-            int action = keyEvent.getAction();
-            if (action == KeyEvent.ACTION_UP) {
-                Log.i(TAG, intent.getAction()+" : "+keyExtraEvent);
-                onKeyUp(keyEvent.getKeyCode(), keyEvent);
-            }
-
-        }
-    }
-
 
     @Override
     protected void onPause() {
