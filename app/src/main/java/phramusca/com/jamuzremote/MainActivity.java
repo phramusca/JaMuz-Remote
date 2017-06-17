@@ -252,12 +252,21 @@ public class MainActivity extends AppCompatActivity {
         mediaHandler.postDelayed(this, 1000L);
         */
 
-        ComponentName rec = new ComponentName(getPackageName(), MediaButtonIntentReceiverOld.class.getName());
+        ComponentName rec = new ComponentName(getPackageName(), phramusca.com.jamuzremote.MediaButtonIntentReceiver.class.getName());
         audioManager.registerMediaButtonEventReceiver(rec);
 
         //registerReceiver(mMediaButtonReceiver,
         //       new IntentFilter(Intent.ACTION_MEDIA_BUTTON));
 
+        registerReceiver(new HeadSetPluggedReceiver(),
+                new IntentFilter(Intent.ACTION_HEADSET_PLUG));
+
+        registerReceiver(new CallReceiver(),
+                new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL));
+
+        IntentFilter RecFilter = new IntentFilter();
+        RecFilter.addAction("android.intent.action.PHONE_STATE");
+        registerReceiver(new CallReceiver(), RecFilter);
 
         //TODO: No more needed if above work
         //as it does work only if application is active
