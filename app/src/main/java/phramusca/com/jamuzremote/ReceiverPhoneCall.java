@@ -8,42 +8,42 @@ import java.util.Date;
 /**
  * Created by raph on 17/06/17.
  */
-public class CallReceiver extends PhonecallReceiver {
+public class ReceiverPhoneCall extends PhonecallReceiver {
 
-    private static final String TAG = CallReceiver.class.getName();
+    private static final String TAG = ReceiverPhoneCall.class.getName();
 
     @Override
     protected void onIncomingCallReceived(Context ctx, String number, Date start) {
         Log.i(TAG, "onIncomingCallReceived => pause");
-        pause();
+        MainActivity.audioPlayer.pause();
     }
 
     @Override
     protected void onIncomingCallAnswered(Context ctx, String number, Date start)
     {
         Log.i(TAG, "onIncomingCallAnswered => pause");
-        pause();
+        MainActivity.audioPlayer.pause();
     }
 
     @Override
     protected void onIncomingCallEnded(Context ctx, String number, Date start, Date end)
     {
         Log.i(TAG, "onIncomingCallEnded => resume");
-        resume();
+        MainActivity.audioPlayer.resume();
     }
 
     @Override
     protected void onOutgoingCallStarted(Context ctx, String number, Date start)
     {
         Log.i(TAG, "onOutgoingCallStarted => pause");
-        pause();
+        MainActivity.audioPlayer.pause();
     }
 
     @Override
     protected void onOutgoingCallEnded(Context ctx, String number, Date start, Date end)
     {
         Log.i(TAG, "onOutgoingCallEnded => resume");
-        resume();
+        MainActivity.audioPlayer.resume();
     }
 
     @Override
@@ -52,30 +52,4 @@ public class CallReceiver extends PhonecallReceiver {
         Log.i(TAG, "onMissedCall => nothing");
     }
 
-    private void playPause() {
-        if(MainActivity.mediaPlayer ==null) {
-            return;
-        }
-        else if(MainActivity.mediaPlayer.isPlaying()) {
-            MainActivity.mediaPlayer.pause();
-            //FIXME: Stop timer
-        } else {
-            MainActivity.mediaPlayer.start();
-            //FIXME: Start timer
-        }
-    }
-
-    private void resume() {
-        if(MainActivity.mediaPlayer!=null && !MainActivity.mediaPlayer.isPlaying()) {
-            MainActivity.mediaPlayer.start();
-            //FIXME: Start timer
-        }
-    }
-
-    private void pause() {
-        if(MainActivity.mediaPlayer!=null && MainActivity.mediaPlayer.isPlaying()) {
-            MainActivity.mediaPlayer.pause();
-            //FIXME: Stop timer
-        }
-    }
 }

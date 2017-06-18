@@ -95,7 +95,7 @@ public class Client {
 		}
 	}
 
-	//FIXME: Add a timeout (and for all other while infinite loops as well)
+	//TODO: Add a timeout (and for all other while infinite loops as well)
 	private boolean waitPrompt(String prompt) {
 		try {
 			while(true){

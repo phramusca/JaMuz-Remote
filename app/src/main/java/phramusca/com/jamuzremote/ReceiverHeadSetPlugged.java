@@ -8,9 +8,9 @@ import android.util.Log;
 /**
  * Created by raph on 17/06/17.
  */
-public class HeadSetPluggedReceiver extends BroadcastReceiver {
+public class ReceiverHeadSetPlugged extends BroadcastReceiver {
 
-    private static final String TAG = CallReceiver.class.getName();
+    private static final String TAG = ReceiverHeadSetPlugged.class.getName();
     private boolean headsetConnected = false;
 
     public void onReceive(Context context, Intent intent) {
@@ -18,26 +18,12 @@ public class HeadSetPluggedReceiver extends BroadcastReceiver {
             if (headsetConnected && intent.getIntExtra("state", 0) == 0){
                 headsetConnected = false;
                 Log.i(TAG, "headset NOT Connected => pause");
-                pause();
+                MainActivity.audioPlayer.pause();
             } else if (!headsetConnected && intent.getIntExtra("state", 0) == 1){
                 headsetConnected = true;
                 Log.i(TAG, "headset IS Connected => resume");
-                resume();
+                MainActivity.audioPlayer.resume();
             }
-        }
-    }
-
-    private void resume() {
-        if(MainActivity.mediaPlayer!=null && !MainActivity.mediaPlayer.isPlaying()) {
-            MainActivity.mediaPlayer.start();
-            //FIXME: Start timer
-        }
-    }
-
-    private void pause() {
-        if(MainActivity.mediaPlayer!=null && MainActivity.mediaPlayer.isPlaying()) {
-            MainActivity.mediaPlayer.pause();
-            //FIXME: Stop timer
         }
     }
 }
