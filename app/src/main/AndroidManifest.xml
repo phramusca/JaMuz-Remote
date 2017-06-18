@@ -32,24 +32,21 @@
 
         </activity>
 
-        <receiver android:name=".MediaButtonIntentReceiver">
+        <receiver android:name=".ReceiverMediaButton">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".HeadSetPluggedReceiver">
+        <receiver android:name=".ReceiverHeadSetPlugged">
             <intent-filter>
                 <action android:name="android.intent.action.HEADSET_PLUG" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".CallReceiver" >
+        <receiver android:name=".PhoneStatReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
         </receiver>
 

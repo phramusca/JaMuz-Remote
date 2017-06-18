@@ -17,15 +17,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.Spanned;
@@ -58,7 +55,7 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "=====> JaMuz";
+    private static final String TAG = MainActivity.class.getName();
     private Client client;
     private Track displayedTrack;
     private Track localTrack;
@@ -70,9 +67,9 @@ public class MainActivity extends AppCompatActivity {
     private int nbFiles=0;
     private int nbFilesTotal = 0;
     private List<Track> queue = new ArrayList<>();
-    public static MediaPlayer mediaPlayer;
-    //public static AudioPlayer audioPlayer;
-    CountDownTimer timer;
+    //public static MediaPlayer mediaPlayer;
+    public static AudioPlayer audioPlayer;
+    //CountDownTimer timer;
     private boolean local = true;
 
     // Storage Permissions
@@ -137,7 +134,9 @@ public class MainActivity extends AppCompatActivity {
                 PlayList item = (PlayList) parent.getItemAtPosition(pos);
                 if(spinnerSend) {
                     if(local) {
-                        queue = musicLibrary.getTracks(item);
+                        if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                            queue = musicLibrary.getTracks(item);
+                        }
                         localSelectedPlaylist = item;
                     } else {
                         client.send("setPlaylist".concat(item.toString()));
@@ -225,7 +224,8 @@ public class MainActivity extends AppCompatActivity {
 
         checkStoragePermissions(this);
 
-        scanLibrayInThread();
+        CallBackPlayer callBackPlayer = new CallBackPlayer();
+        audioPlayer = new AudioPlayer(callBackPlayer);
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
@@ -253,25 +253,31 @@ public class MainActivity extends AppCompatActivity {
         mediaHandler.postDelayed(this, 1000L);
         */
 
-        ComponentName rec = new ComponentName(getPackageName(), MediaButtonIntentReceiver.class.getName());
+        ComponentName rec = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
         audioManager.registerMediaButtonEventReceiver(rec);
 
-        registerReceiver(new HeadSetPluggedReceiver(),
+        registerReceiver(new ReceiverHeadSetPlugged(),
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG));
 
-        registerReceiver(new CallReceiver(),
-                new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL));
+        //FIXME: PhoneCall Receiver does not work. Why is that ??
 
-        IntentFilter RecFilter = new IntentFilter();
-        RecFilter.addAction("android.intent.action.PHONE_STATE");
-        registerReceiver(new CallReceiver(), RecFilter);
+        //registerReceiver(new ReceiverPhoneCall(),
+        //        new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL));
 
-        //TODO: No more needed if above work
-        //as it does work only if application is active
+        //IntentFilter RecFilter = new IntentFilter();
+        //RecFilter.addAction("android.intent.action.PHONE_STATE");
+        //registerReceiver(new ReceiverPhoneCall(), RecFilter);
+
+
+        //IntentFilter RecFilter = new IntentFilter();
+        //RecFilter.addAction(Intent.ACTION_NEW_OUTGOING_CALL);
+        //RecFilter.addAction("android.intent.action.PHONE_STATE");
+        //registerReceiver(new PhoneStatReceiver(), RecFilter);
+
+        //TODO: Why the ReceiverMediaButton would not work when application is active ? Give it a try
         takeKeyEvents(true);
 
         //TODO: Make this an option AND allow a timeout
-        //Used until MediaButtonReceiver is finally implemented
         //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         //Start background service
@@ -280,6 +286,8 @@ public class MainActivity extends AppCompatActivity {
         service = new Intent(this, MyService.class);
         startService(service);
     }
+
+
 
     @Override
     protected void onPause() {
@@ -293,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.i(TAG, "MainActivity onResume");
 
-        if(mediaPlayer == null || !mediaPlayer.isPlaying()) {
+        if(!audioPlayer.isPlaying()) {
             enableGUI(false);
             getFromQRcode();
             buttonConnect.performClick();
@@ -304,9 +312,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "MainActivity onDestroy");
-        stopMediaPlayer(true);
+        audioPlayer.stop(true);
         stopService(service);
-        musicLibrary.close();
+
+        //FIXME: Abort and wait scanLibrayInThread is aborted
+        //So it does not crash on closure if scanLib not completed
+
+        if(musicLibrary!=null) {
+            musicLibrary.close();
+        }
     }
 
     private void scanLibrayInThread() {
@@ -345,7 +359,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 //Scan deleted files
-                //FIXME: No need to check what scanned previously ...
+                //TODO: No need to check what scanned previously ...
                 List<Track> tracks = musicLibrary.getTracks();
                 nbFiles=0;
                 for(Track track : tracks) {
@@ -441,11 +455,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void playRandom() {
-        stopMediaPlayer(false);
+        audioPlayer.stop(false);
 
         if(queue.size()<5) {
-            List<Track> addToQueue =musicLibrary.getTracks((PlayList) spinner.getSelectedItem());
-            queue.addAll(addToQueue);
+            if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                List<Track> addToQueue = musicLibrary.getTracks((PlayList) spinner.getSelectedItem());
+                queue.addAll(addToQueue);
+            }
         }
 
         if(queue.size()>0) {
@@ -468,72 +484,29 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    class CallBackPlayer implements ICallBackPlayer {
+
+        @Override
+        public void onPlayBackEnd() {
+            if(local) {
+                playRandom();
+            }
+        }
+
+        @Override
+        public void onPositionChanged(int position, int duration) {
+            setSeekBar(position, duration);
+        }
+
+        @Override
+        public void onPlayRandom() {
+            playRandom();
+        }
+
+    }
+
     public void playAudio(String path){
-        try {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(path);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-            startTimer();
-
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mediaPlayer) {
-                    if(local) {
-                        buttonNext.performClick();
-                    }
-                }
-            });
-
-            mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
-                @Override
-                public void onSeekComplete(MediaPlayer mediaPlayer) {
-                    startTimer();
-                }
-            });
-
-            //FIXME: MAke this an option
-            //mediaPlayer.setScreenOnWhilePlaying(true);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void startTimer() {
-        timer = new CountDownTimer(mediaPlayer.getDuration()- mediaPlayer.getCurrentPosition()-1,500) {
-            @Override
-            public void onTick(long millisUntilFinished_) {
-                if(mediaPlayer !=null) {
-                    setSeekBar(mediaPlayer.getCurrentPosition(), mediaPlayer.getDuration());
-                }
-                if(mediaPlayer ==null || !mediaPlayer.isPlaying()) {
-                    this.cancel();
-                }
-            }
-
-            @Override
-            public void onFinish() {
-            }
-        }.start();
-    }
-
-    private void stopTimer() {
-        if(timer!=null) {
-            timer.cancel();
-            timer=null;
-        }
-    }
-
-    private void stopMediaPlayer(boolean release) {
-        if (mediaPlayer !=null && mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-            if(release) {
-                mediaPlayer.release();
-            }
-            setSeekBar(0, 1);
-        }
-        stopTimer();
+        audioPlayer.play(path);
     }
 
     private void enableConnect(final boolean enable) {
@@ -574,7 +547,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static void checkStoragePermissions(Activity activity) {
+    public void checkStoragePermissions(Activity activity) {
         int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (permission != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
@@ -582,6 +555,16 @@ public class MainActivity extends AppCompatActivity {
                     PERMISSIONS_STORAGE,
                     REQUEST_EXTERNAL_STORAGE
             );
+        } else {
+            scanLibrayInThread();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permission == PackageManager.PERMISSION_GRANTED) {
+            scanLibrayInThread();
         }
     }
 
@@ -606,28 +589,16 @@ public class MainActivity extends AppCompatActivity {
                     playRandom();
                     break;
                 case "playTrack":
-                    if(mediaPlayer ==null) {
-                        playRandom();
-                    }
-                    else if(mediaPlayer.isPlaying()) {
-                        mediaPlayer.pause();
-                        stopTimer();
-                    } else {
-                        //displayedTrack = localTrack;
-                        //displayTrack();
-
-                        mediaPlayer.start();
-                        startTimer();
-                    }
+                    audioPlayer.togglePlay();
                     break;
                 case "pullup":
-                    mediaPlayer.seekTo(0);
+                    audioPlayer.pullUp();
                     break;
                 case "rewind":
-                    mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()- mediaPlayer.getDuration()/10);
+                    audioPlayer.rewind();
                     break;
                 case "forward":
-                    mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()+ mediaPlayer.getDuration()/10);
+                    audioPlayer.forward();
                     break;
                 case "volUp":
                     //mediaPlayer.setVolume(20, 20);
@@ -885,12 +856,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //FIXME: Battery consumption
-    //- Close connection & dim after a delay (in settings)
-    //- Eventually simulate position set (seekBar) and sync only every x (say 10) seconds.
-
-    //FIXME: Make a Settings activity
-
     private void stopRemote() {
         if(client!=null) {
             client.close();
@@ -934,50 +899,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
 
+        String msg = keyCode+": "+String.valueOf(event.getKeyCode());
+        Log.d(TAG, msg);
+
         switch (keyCode) {
-            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                Log.d(TAG, "KEYCODE_MEDIA_PREVIOUS");
-                toastShort("MEDIA_PREVIOUS : Play/Pause");
-                //doAction("previousTrack");
-                doAction("playTrack");
-
-                return true;
             case KeyEvent.KEYCODE_MEDIA_NEXT:
-                Log.d(TAG, "KEYCODE_MEDIA_NEXT");
-                toastShort("MEDIA_NEXT : Next Track");
                 doAction("nextTrack");
-
                 return true;
-            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                Log.d(TAG, "KEYCODE_MEDIA_PLAY_PAUSE");
-                toastShort("PLAY_PAUSE : Play/Pause");
-                doAction("playTrack");
-                //TODO: Not triggered or not available on my nissan
-                return true;
-
-            case KeyEvent.KEYCODE_HEADSETHOOK:
-                //Play/Pause on Wired HeadSet
-                Log.d(TAG, "KEYCODE_HEADSETHOOK");
-                toastShort("HEADSETHOOK : Play/Pause");
-                doAction("playTrack");
-                return true;
-
             case KeyEvent.KEYCODE_MEDIA_PLAY:
-                Log.d(TAG, "KEYCODE_MEDIA_PLAY");
-                toastShort("MEDIA_PLAY : Play/Pause");
-                doAction("playTrack");
-                return true;
-
             case KeyEvent.KEYCODE_MEDIA_STOP:
-                Log.d(TAG, "KEYCODE_MEDIA_STOP");
-                toastShort("MEDIA_STOP : Play/Pause");
+            case KeyEvent.KEYCODE_HEADSETHOOK:  //Play/Pause on Wired HeadSet
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+            case KeyEvent.KEYCODE_MEDIA_PREVIOUS: //Yes, also with Previous as: 1) N/A 2) handy in car
                 doAction("playTrack");
                 return true;
-
             default:
-                String msg = keyCode+": "+String.valueOf(event.getKeyCode());
-                Log.d(TAG, msg);
-                toastShort(msg);
                 return super.onKeyUp(keyCode, event);
         }
     }
@@ -1003,7 +939,6 @@ public class MainActivity extends AppCompatActivity {
 
     protected BluetoothAdapter mBluetoothAdapter;
     protected BluetoothHeadset mBluetoothHeadset;
-    //protected BluetoothDevice mConnectedHeadset;
 
     protected BluetoothProfile.ServiceListener mHeadsetProfileListener = new BluetoothProfile.ServiceListener()
     {
@@ -1043,32 +978,17 @@ public class MainActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if(mediaPlayer ==null) {
-                        Log.d(TAG, "BT: playRandom()");
-                        playRandom();
-                    }
-                    else if(!mediaPlayer.isPlaying()) {
-                        Log.d(TAG, "BT: mediaPlayer.start()");
-                        mediaPlayer.start();
-                        startTimer();
-                    }
-                    else  {
-                        Log.d(TAG, "BT: Already playing");
-                    }
+                    audioPlayer.play();
                 }
                 else if (state == BluetoothHeadset.STATE_DISCONNECTED)
                 {
                     Log.d(TAG, "BT DISconnected");
-                    if(mediaPlayer!=null && mediaPlayer.isPlaying()) {
-                        mediaPlayer.pause();
-                        stopTimer();
-                    }
+                    audioPlayer.pause();
                 }
             }
             else // BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED
             {
-                //FIXME: Never reached. Something wrong
-                //Check again with https://stackoverflow.com/questions/20398581/handle-bluetooth-headset-clicks-action-voice-command-and-action-web-search-on
+                //This is triggered on phone calls
 
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_AUDIO_DISCONNECTED);
                 if (state == BluetoothHeadset.STATE_AUDIO_CONNECTED)

@@ -9,9 +9,9 @@ import android.view.KeyEvent;
 /**
  * Created by raph on 12/06/17.
  */
-public class MediaButtonIntentReceiver extends MediaButtonReceiver
+public class ReceiverMediaButton extends MediaButtonReceiver
 {
-    private static final String TAG = "JaMuz ButtonReceiver";
+    private static final String TAG = ReceiverMediaButton.class.getName();
 
     @Override
     public void onReceive(Context context, Intent intent)
@@ -21,32 +21,19 @@ public class MediaButtonIntentReceiver extends MediaButtonReceiver
 
         int action = keyEvent.getAction();
         if (action == KeyEvent.ACTION_UP) {
-            Log.i(TAG, intent.getAction()+" : "+keyExtraEvent);
+            Log.i(TAG, "onReceive "+intent.getAction()+" : "+keyExtraEvent);
 
             switch (keyEvent.getKeyCode()) {
                 case KeyEvent.KEYCODE_MEDIA_NEXT:
-                    //FIXME: H2 do this ??
-                    //doAction("nextTrack");
+                    MainActivity.audioPlayer.playRandom();
+                    break;
                 case KeyEvent.KEYCODE_MEDIA_PLAY:
                 case KeyEvent.KEYCODE_MEDIA_STOP:
                 case KeyEvent.KEYCODE_HEADSETHOOK:  //Play/Pause on Wired HeadSet
                 case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                case KeyEvent.KEYCODE_MEDIA_PREVIOUS: //Yes, also with Previous as 1. N/A 2. handy in car
-                    playPause(); break;
+                case KeyEvent.KEYCODE_MEDIA_PREVIOUS: //Yes, also with Previous as: 1) N/A 2) handy in car
+                    MainActivity.audioPlayer.togglePlay(); break;
             }
-        }
-    }
-
-    private void playPause() {
-        if(MainActivity.mediaPlayer ==null) {
-            return;
-        }
-        else if(MainActivity.mediaPlayer.isPlaying()) {
-            MainActivity.mediaPlayer.pause();
-            //FIXME: Stop timer
-        } else {
-            MainActivity.mediaPlayer.start();
-            //FIXME: Start timer
         }
     }
 }

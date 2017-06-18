@@ -59,8 +59,6 @@ public class Reception  extends ProcessAbstract {
                 } else if (msg.equals("SENDING_COVER")) {
                     Bitmap bitmap=null;
                     try {
-                        //FIXME: works locally but not (well) over wifi:
-                        // either gets stuck in decodeStream, either gets "SkImageDecoder::Factory returned null" and then data without catching
                         bitmap = BitmapFactory.decodeStream(inputStream);
                         System.out.println("receivedBitmap");
                     } catch (OutOfMemoryError ex) {
