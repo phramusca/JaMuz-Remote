@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
     private int nbFilesTotal = 0;
     private List<Track> queue = new ArrayList<>();
     public static MediaPlayer mediaPlayer;
-    public static AudioPlayer audioPlayer;
+    //public static AudioPlayer audioPlayer;
     CountDownTimer timer;
     private boolean local = true;
 
