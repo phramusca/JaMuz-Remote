@@ -93,6 +93,7 @@ public class AudioPlayer {
             mediaPlayer.stop();
             if(release) {
                 mediaPlayer.release();
+                mediaPlayer=null;
             }
             callback.onPositionChanged(0, 1);
         }
@@ -125,6 +126,8 @@ public class AudioPlayer {
     }
 
     private void startTimer() {
+        callback.onPlayBackStart();
+
         timer = new CountDownTimer(mediaPlayer.getDuration()- mediaPlayer.getCurrentPosition()-1,500) {
             @Override
             public void onTick(long millisUntilFinished_) {

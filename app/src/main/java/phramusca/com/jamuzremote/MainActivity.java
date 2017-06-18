@@ -253,10 +253,10 @@ public class MainActivity extends AppCompatActivity {
         mediaHandler.postDelayed(this, 1000L);
         */
 
-        ComponentName rec = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
-        audioManager.registerMediaButtonEventReceiver(rec);
+        receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
+        audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
 
-        registerReceiver(new ReceiverHeadSetPlugged(),
+        registerReceiver(receiverHeadSetPlugged,
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG));
 
         //FIXME: PhoneCall Receiver does not work. Why is that ??
@@ -287,7 +287,8 @@ public class MainActivity extends AppCompatActivity {
         startService(service);
     }
 
-
+    ReceiverHeadSetPlugged receiverHeadSetPlugged = new ReceiverHeadSetPlugged();
+    ComponentName receiverMediaButtonName;// = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
 
     @Override
     protected void onPause() {
@@ -312,125 +313,180 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "MainActivity onDestroy");
+        //Better unregister as it does not trigger anyway + raises exceptions if not
+        unregisterReceiver(receiverHeadSetPlugged);
+        unregisterReceiver(mHeadsetBroadcastReceiver);
+        //TODO: Why receiverMediaButtonName still active after app destroyed
+        // , if not unregistered ?
+        audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
+
         audioPlayer.stop(true);
         stopService(service);
 
-        //FIXME: Abort and wait scanLibrayInThread is aborted
-        //So it does not crash on closure if scanLib not completed
+        //Abort and wait scanLibrayInThread is aborted
+        //So it does not crash if scanLib not completed
+        if(processBrowseFS!=null) {
+            processBrowseFS.abort();
+        }
+        if(processBrowseFScount!=null) {
+            processBrowseFScount.abort();
+        }
+        if(scanLibray!=null) {
+            scanLibray.abort();
+        }
+        try {
+            if(processBrowseFS!=null) {
+                processBrowseFS.join();
+            }
+            if(processBrowseFScount!=null) {
+                processBrowseFScount.join();
+            }
+            if(scanLibray!=null) {
+                scanLibray.join();
+            }
+        } catch (InterruptedException e) {
+            Log.i(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException");
+        }
+
+
 
         if(musicLibrary!=null) {
             musicLibrary.close();
         }
     }
 
+    ProcessAbstract scanLibray;
+    ProcessAbstract processBrowseFS;
+    ProcessAbstract processBrowseFScount;
+
     private void scanLibrayInThread() {
-        new Thread() {
+        scanLibray = new ProcessAbstract("Thread.MainActivity.scanLibrayInThread") {
             public void run() {
-
-                connectDatabase();
-                nbFiles=0;
-                nbFilesTotal=0;
-                final String path = "/storage/3515-1C15/Android/data/com.theolivetree.sshserver/files/";
-
-                //Scan android filesystem for files
-                Thread bfs = new Thread() {
-                    public void run() {
-                        browseFS(new File(path));
-                    }
-                };
-                bfs.start();
-                //Get total number of files
-                Thread count = new Thread() {
-                    public void run() {
-                        browseFScount(new File(path));
-                    }
-                };
-                count.start();
-
                 try {
-                    bfs.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    count.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                    checkAbort();
 
-                //Scan deleted files
-                //TODO: No need to check what scanned previously ...
-                List<Track> tracks = musicLibrary.getTracks();
-                nbFiles=0;
-                for(Track track : tracks) {
-                    File file = new File(track.getPath());
-                    if(!file.exists()) {
-                        musicLibrary.deleteTrack(track.getPath());
-                    }
-                    toastNbFile("JaMuz scan deleted ", 1000);
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        toastLong("Database updated.");
-                    }
-                });
+                    connectDatabase();
+                    nbFiles=0;
+                    nbFilesTotal=0;
+                    final String path = "/storage/3515-1C15/Android/data/com.theolivetree.sshserver/files/";
+                    checkAbort();
+                    //Scan android filesystem for files
+                    processBrowseFS = new ProcessAbstract("Thread.MainActivity.browseFS") {
+                        public void run() {
+                            try {
+                                browseFS(new File(path));
+                            } catch (InterruptedException e) {
+                                Log.i(TAG, "Thread.MainActivity.browseFS InterruptedException");
+                                scanLibray.abort();
+                            }
+                        }
+                    };
+                    processBrowseFS.start();
+                    //Get total number of files
+                    processBrowseFScount = new ProcessAbstract("Thread.MainActivity.browseFScount") {
+                        public void run() {
+                            try {
+                                browseFScount(new File(path));
+                            } catch (InterruptedException e) {
+                                Log.i(TAG, "Thread.MainActivity.browseFScount InterruptedException");
+                                scanLibray.abort();
+                            }
+                        }
+                    };
+                    processBrowseFScount.start();
 
+                    try {
+                        processBrowseFS.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        processBrowseFScount.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    checkAbort();
+                    //Scan deleted files
+                    //TODO: No need to check what scanned previously ...
+                    List<Track> tracks = musicLibrary.getTracks();
+                    nbFiles=0;
+                    for(Track track : tracks) {
+                        checkAbort();
+                        File file = new File(track.getPath());
+                        if(!file.exists()) {
+                            musicLibrary.deleteTrack(track.getPath());
+                        }
+                        toastNbFile("JaMuz scan deleted ", 1000);
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            toastLong("Database updated.");
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    Log.i(TAG, "Thread.MainActivity.scanLibrayInThread InterruptedException");
+                }
             }
-        }.start();
+
+            private void browseFS(File path) throws InterruptedException {
+                checkAbort();
+                if (path.isDirectory()) {
+                    File[] files = path.listFiles();
+                    if (files != null) {
+                        if(files.length>0) {
+                            for (File file : files) {
+                                checkAbort();
+                                if (file.isDirectory()) {
+                                    browseFS(file);
+                                }
+                                else {
+                                    String absolutePath=file.getAbsolutePath();
+
+                                    int id = musicLibrary.getTrack(absolutePath);
+                                    if(id>=0) {
+                                        Log.v(TAG, "browseFS updateTrack " + absolutePath);
+                                        //FIXME: Update if file is modified only:
+                                        //based on lastModificationDate and/or size (not on content as longer than updateTrack)
+                                        //musicLibrary.updateTrack(id, track, false);
+                                    } else {
+                                        Log.v(TAG, "browseFS insertTrack " + absolutePath);
+                                        musicLibrary.insertTrack(getTrack(file));
+                                    }
+                                    toastNbFile("JaMuz scan ", 200);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            private void browseFScount(File path) throws InterruptedException {
+                checkAbort();
+                if (path.isDirectory()) {
+                    File[] files = path.listFiles();
+                    if (files != null) {
+                        if(files.length>0) {
+                            for (File file : files) {
+                                checkAbort();
+                                if (file.isDirectory()) {
+                                    browseFScount(file);
+                                }
+                                else {
+                                    nbFilesTotal++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        scanLibray.start();
     }
 
     private void connectDatabase() {
         musicLibrary = new MusicLibrary(this);
         musicLibrary.open();
-    }
-
-    private void browseFS(File path) {
-        if (path.isDirectory()) {
-            File[] files = path.listFiles();
-            if (files != null) {
-                if(files.length>0) {
-                    for (File file : files) {
-                        if (file.isDirectory()) {
-                            browseFS(file);
-                        }
-                        else {
-                            String absolutePath=file.getAbsolutePath();
-
-                            int id = musicLibrary.getTrack(absolutePath);
-                            if(id>=0) {
-                                Log.v(TAG, "browseFS updateTrack " + absolutePath);
-                                //FIXME: Update if file is modified only:
-                                //based on lastModificationDate and/or size (not on content as longer than updateTrack)
-                                //musicLibrary.updateTrack(id, track, false);
-                            } else {
-                                Log.v(TAG, "browseFS insertTrack " + absolutePath);
-                                musicLibrary.insertTrack(getTrack(file));
-                            }
-                            toastNbFile("JaMuz scan ", 200);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void browseFScount(File path) {
-        if (path.isDirectory()) {
-            File[] files = path.listFiles();
-            if (files != null) {
-                if(files.length>0) {
-                    for (File file : files) {
-                        if (file.isDirectory()) {
-                            browseFScount(file);
-                        }
-                        else {
-                            nbFilesTotal++;
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private Track getTrack(File file) {
@@ -473,7 +529,7 @@ public class MainActivity extends AppCompatActivity {
             File file = new File(displayedTrack.getPath());
             if(file.exists()) {
                 playAudio(displayedTrack.getPath());
-                displayTrack();
+                //displayTrack();
             } else {
                 musicLibrary.deleteTrack(displayedTrack.getPath());
                 playRandom();
@@ -501,6 +557,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onPlayRandom() {
             playRandom();
+        }
+
+        @Override
+        public void onPlayBackStart() {
+            displayTrack();
         }
 
     }
