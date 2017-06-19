@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
 
+//https://stackoverflow.com/questions/15563921/how-to-detect-incoming-calls-in-an-android-device
+//https://gist.github.com/ftvs/e61ccb039f511eb288ee
 public abstract class PhonecallReceiver extends BroadcastReceiver {
 
     //The receiver will be recreated whenever android feels like it.  We need a static variable to remember data between instantiations
@@ -40,8 +42,6 @@ public abstract class PhonecallReceiver extends BroadcastReceiver {
             else if(stateStr.equals(TelephonyManager.EXTRA_STATE_RINGING)){
                 state = TelephonyManager.CALL_STATE_RINGING;
             }
-
-
             onCallStateChanged(context, state, number);
         }
     }

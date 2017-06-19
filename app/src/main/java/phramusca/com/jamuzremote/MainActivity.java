@@ -22,8 +22,10 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
@@ -62,22 +64,12 @@ public class MainActivity extends AppCompatActivity {
     private Map coverMap = new HashMap();
     private Intent service; //Not yet used
     private AudioManager audioManager; //Used to set volume
+    public static AudioPlayer audioPlayer;
     private MusicLibrary musicLibrary;
-
     private int nbFiles=0;
     private int nbFilesTotal = 0;
     private List<Track> queue = new ArrayList<>();
-    //public static MediaPlayer mediaPlayer;
-    public static AudioPlayer audioPlayer;
-    //CountDownTimer timer;
     private boolean local = true;
-
-    // Storage Permissions
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
 
     // GUI elements
     private TextView textViewReceived; //textView_conv
@@ -222,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
         editTextConnectInfo.setEnabled(true);
         buttonConnect.setEnabled(true);
 
-        checkStoragePermissions(this);
+        checkPermissions();
 
         CallBackPlayer callBackPlayer = new CallBackPlayer();
         audioPlayer = new AudioPlayer(callBackPlayer);
@@ -242,40 +234,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        //https://stackoverflow.com/questions/32220498/registermediabuttoneventreceiver-alternative-setmediabuttonreceiver-pendinginte
-
-        /*
-        MediaSession mSession =  new MediaSession(this, getPackageName());
-        Intent intent = new Intent(this, HeadsetReceiver.class);
-        PendingIntent pintent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        mSession.setMediaButtonReceiver(pintent);
-        mSession.setActive(true);
-        mediaHandler.postDelayed(this, 1000L);
-        */
-
         receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
         audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
 
-        registerReceiver(receiverHeadSetPlugged,
-                new IntentFilter(Intent.ACTION_HEADSET_PLUG));
-
-        //FIXME: PhoneCall Receiver does not work. Why is that ??
-
-        //registerReceiver(new ReceiverPhoneCall(),
-        //        new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL));
-
-        //IntentFilter RecFilter = new IntentFilter();
-        //RecFilter.addAction("android.intent.action.PHONE_STATE");
-        //registerReceiver(new ReceiverPhoneCall(), RecFilter);
-
-
-        //IntentFilter RecFilter = new IntentFilter();
-        //RecFilter.addAction(Intent.ACTION_NEW_OUTGOING_CALL);
-        //RecFilter.addAction("android.intent.action.PHONE_STATE");
-        //registerReceiver(new PhoneStatReceiver(), RecFilter);
-
         //TODO: Why the ReceiverMediaButton would not work when application is active ? Give it a try
-        takeKeyEvents(true);
+        //takeKeyEvents(true);
 
         //TODO: Make this an option AND allow a timeout
         //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -283,12 +246,11 @@ public class MainActivity extends AppCompatActivity {
         //Start background service
         //Not yet used but can be used to scan library
         //What is the benefit ??
-        service = new Intent(this, MyService.class);
-        startService(service);
+        //service = new Intent(this, MyService.class);
+        //startService(service);
     }
 
-    ReceiverHeadSetPlugged receiverHeadSetPlugged = new ReceiverHeadSetPlugged();
-    ComponentName receiverMediaButtonName;// = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
+    ComponentName receiverMediaButtonName;
 
     @Override
     protected void onPause() {
@@ -313,15 +275,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "MainActivity onDestroy");
-        //Better unregister as it does not trigger anyway + raises exceptions if not
-        unregisterReceiver(receiverHeadSetPlugged);
         unregisterReceiver(mHeadsetBroadcastReceiver);
         //TODO: Why receiverMediaButtonName still active after app destroyed
         // , if not unregistered ?
         audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
 
         audioPlayer.stop(true);
-        stopService(service);
+        if(service!=null) {
+            stopService(service);
+        }
 
         //Abort and wait scanLibrayInThread is aborted
         //So it does not crash if scanLib not completed
@@ -608,24 +570,43 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void checkStoragePermissions(Activity activity) {
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
+    private static final int REQUEST= 112;
+
+    public void checkPermissions() {
+        String[] PERMISSIONS = {
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.PROCESS_OUTGOING_CALLS
+        };
+
+        if (!hasPermissions(this, PERMISSIONS)) {
+            ActivityCompat.requestPermissions((Activity) this, PERMISSIONS, REQUEST );
         } else {
             scanLibrayInThread();
         }
     }
 
+    private static boolean hasPermissions(Context context, String... permissions) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (permission == PackageManager.PERMISSION_GRANTED) {
-            scanLibrayInThread();
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case REQUEST: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    scanLibrayInThread();
+                }
+            }
         }
     }
 
@@ -957,7 +938,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
+    /*@Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
 
         String msg = keyCode+": "+String.valueOf(event.getKeyCode());
@@ -977,7 +958,7 @@ public class MainActivity extends AppCompatActivity {
             default:
                 return super.onKeyUp(keyCode, event);
         }
-    }
+    }*/
 
     @Override
     public void onBackPressed() {
@@ -1018,8 +999,9 @@ public class MainActivity extends AppCompatActivity {
             registerReceiver(mHeadsetBroadcastReceiver,
                     new IntentFilter(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED));
 
-            registerReceiver(mHeadsetBroadcastReceiver,
-                    new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED));
+            //This is triggered on phone calls, already received in ReceiverPhoneCall
+            /*registerReceiver(mHeadsetBroadcastReceiver,
+                    new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED));*/
         }
     };
 
@@ -1043,13 +1025,16 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if (state == BluetoothHeadset.STATE_DISCONNECTED)
                 {
+                    //FIXME: This situation (at least) can endup with other receivers (headsethook at least)
+                    //not to trigger anymore => Why ?
+
                     Log.d(TAG, "BT DISconnected");
                     audioPlayer.pause();
                 }
-            }
+            }/*
             else // BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED
             {
-                //This is triggered on phone calls
+                //This is triggered on phone calls, already received in ReceiverPhoneCall
 
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_AUDIO_DISCONNECTED);
                 if (state == BluetoothHeadset.STATE_AUDIO_CONNECTED)
@@ -1062,7 +1047,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "BT AUDIO DISconnected");
 
                 }
-            }
+            }*/
         }
     };
 }
