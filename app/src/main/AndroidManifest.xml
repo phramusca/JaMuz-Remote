@@ -44,9 +44,10 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".PhoneStatReceiver" >
+        <receiver android:name=".ReceiverPhoneCall" >
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
+                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
         </receiver>
 

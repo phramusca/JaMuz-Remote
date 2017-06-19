@@ -7,6 +7,7 @@ import java.util.Date;
 
 /**
  * Created by raph on 17/06/17.
+ * https://stackoverflow.com/questions/15563921/how-to-detect-incoming-calls-in-an-android-device
  */
 public class ReceiverPhoneCall extends PhonecallReceiver {
 
@@ -49,7 +50,8 @@ public class ReceiverPhoneCall extends PhonecallReceiver {
     @Override
     protected void onMissedCall(Context ctx, String number, Date start)
     {
-        Log.i(TAG, "onMissedCall => nothing");
+        Log.i(TAG, "onMissedCall => resume");
+        MainActivity.audioPlayer.resume();
     }
 
 }
