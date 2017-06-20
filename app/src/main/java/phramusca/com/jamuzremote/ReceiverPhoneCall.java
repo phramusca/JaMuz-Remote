@@ -12,46 +12,64 @@ import java.util.Date;
 public class ReceiverPhoneCall extends PhonecallReceiver {
 
     private static final String TAG = ReceiverPhoneCall.class.getName();
+    private static boolean wasPlaying = false;
+
+    private void pause() {
+        wasPlaying = MainActivity.audioPlayer.isPlaying();
+        Log.i(TAG, "wasPlaying="+wasPlaying+"");
+        MainActivity.audioPlayer.pause();
+    }
+
+    private void resume() {
+        if(wasPlaying) {
+            Log.i(TAG, "wasPlaying => audioPlayer.resume");
+            MainActivity.audioPlayer.resume();
+            wasPlaying = false;
+        } else {
+            Log.i(TAG, "was NOT Playing => nothing");
+        }
+    }
 
     @Override
     protected void onIncomingCallReceived(Context ctx, String number, Date start) {
         Log.i(TAG, "onIncomingCallReceived => pause");
-        MainActivity.audioPlayer.pause();
+        pause();
     }
 
     @Override
     protected void onIncomingCallAnswered(Context ctx, String number, Date start)
     {
-        Log.i(TAG, "onIncomingCallAnswered => pause");
-        MainActivity.audioPlayer.pause();
+        //TODO: Pause in this case but only set volume low in onIncomingCallReceived
+        Log.i(TAG, "onIncomingCallAnswered => nothing");
+        //pause();
     }
 
     @Override
     protected void onIncomingCallEnded(Context ctx, String number, Date start, Date end)
     {
         Log.i(TAG, "onIncomingCallEnded => resume");
-        MainActivity.audioPlayer.resume();
+        resume();
     }
 
     @Override
     protected void onOutgoingCallStarted(Context ctx, String number, Date start)
     {
         Log.i(TAG, "onOutgoingCallStarted => pause");
-        MainActivity.audioPlayer.pause();
+        pause();
     }
 
     @Override
     protected void onOutgoingCallEnded(Context ctx, String number, Date start, Date end)
     {
         Log.i(TAG, "onOutgoingCallEnded => resume");
-        MainActivity.audioPlayer.resume();
+        resume();
     }
 
     @Override
     protected void onMissedCall(Context ctx, String number, Date start)
     {
         Log.i(TAG, "onMissedCall => resume");
-        MainActivity.audioPlayer.resume();
+        resume();
     }
 
 }
