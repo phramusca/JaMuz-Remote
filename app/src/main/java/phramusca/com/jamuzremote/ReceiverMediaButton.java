@@ -18,13 +18,11 @@ public class ReceiverMediaButton extends MediaButtonReceiver
     {
         KeyEvent keyEvent = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
         String keyExtraEvent = KeyEvent.keyCodeToString(keyEvent.getKeyCode());
-
         int action = keyEvent.getAction();
         if (action == KeyEvent.ACTION_UP) {
-            Log.i(TAG, "onReceive "+intent.getAction()+" : "+keyExtraEvent);
-
             switch (keyEvent.getKeyCode()) {
                 case KeyEvent.KEYCODE_MEDIA_NEXT:
+                    Log.i(TAG, keyExtraEvent+" => playRandom");
                     MainActivity.audioPlayer.playRandom();
                     break;
                 case KeyEvent.KEYCODE_MEDIA_PLAY:
@@ -32,6 +30,7 @@ public class ReceiverMediaButton extends MediaButtonReceiver
                 case KeyEvent.KEYCODE_HEADSETHOOK:  //Play/Pause on Wired HeadSet
                 case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
                 case KeyEvent.KEYCODE_MEDIA_PREVIOUS: //Yes, also with Previous as: 1) N/A 2) handy in car
+                    Log.i(TAG, keyExtraEvent+" => togglePlay");
                     MainActivity.audioPlayer.togglePlay(); break;
             }
         }

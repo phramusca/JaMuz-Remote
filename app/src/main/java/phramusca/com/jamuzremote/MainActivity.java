@@ -237,6 +237,10 @@ public class MainActivity extends AppCompatActivity {
         receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
         audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
 
+        //TODO: Why this one needs registerReceiver whereas ReceiverPhoneCall does not
+        registerReceiver(receiverHeadSetPlugged,
+                new IntentFilter(Intent.ACTION_HEADSET_PLUG));
+
         //TODO: Why the ReceiverMediaButton would not work when application is active ? Give it a try
         //takeKeyEvents(true);
 
@@ -251,6 +255,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     ComponentName receiverMediaButtonName;
+    ReceiverHeadSetPlugged receiverHeadSetPlugged = new ReceiverHeadSetPlugged();
 
     @Override
     protected void onPause() {
@@ -275,6 +280,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "MainActivity onDestroy");
+        //Better unregister as it does not trigger anyway + raises exceptions if not
+        unregisterReceiver(receiverHeadSetPlugged);
         unregisterReceiver(mHeadsetBroadcastReceiver);
         //TODO: Why receiverMediaButtonName still active after app destroyed
         // , if not unregistered ?
@@ -1015,7 +1022,7 @@ public class MainActivity extends AppCompatActivity {
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED);
                 if (state == BluetoothHeadset.STATE_CONNECTED)
                 {
-                    Log.d(TAG, "BT connected. Waiting 4s");
+                    Log.i(TAG, "BT connected. Waiting 4s");
                     try {
                         Thread.sleep(4000);
                     } catch (InterruptedException e) {
@@ -1028,7 +1035,7 @@ public class MainActivity extends AppCompatActivity {
                     //FIXME: This situation (at least) can endup with other receivers (headsethook at least)
                     //not to trigger anymore => Why ?
 
-                    Log.d(TAG, "BT DISconnected");
+                    Log.i(TAG, "BT DISconnected");
                     audioPlayer.pause();
                 }
             }/*

@@ -43,7 +43,7 @@ public class AudioPlayer {
             });
 
         } catch (IOException e) {
-            Log.i(TAG, e.toString());
+            Log.e(TAG, "Error play(\""+path+"\")", e);
         }
     }
 
