@@ -25,11 +25,9 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -242,7 +240,6 @@ public class MainActivity extends AppCompatActivity {
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG));
 
         //TODO: Why the ReceiverMediaButton would not work when application is active ? Give it a try
-        //takeKeyEvents(true);
 
         //TODO: Make this an option AND allow a timeout
         //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -328,6 +325,10 @@ public class MainActivity extends AppCompatActivity {
     ProcessAbstract processBrowseFS;
     ProcessAbstract processBrowseFScount;
 
+    //TODO: MAke this an option somehow
+    //FIXME: How to get "3515-1C15" value ?
+    public static final String pathToFiles = "/storage/3515-1C15/Android/data/com.theolivetree.sshserver/files/";
+
     private void scanLibrayInThread() {
         scanLibray = new ProcessAbstract("Thread.MainActivity.scanLibrayInThread") {
             public void run() {
@@ -337,13 +338,12 @@ public class MainActivity extends AppCompatActivity {
                     connectDatabase();
                     nbFiles=0;
                     nbFilesTotal=0;
-                    final String path = "/storage/3515-1C15/Android/data/com.theolivetree.sshserver/files/";
                     checkAbort();
                     //Scan android filesystem for files
                     processBrowseFS = new ProcessAbstract("Thread.MainActivity.browseFS") {
                         public void run() {
                             try {
-                                browseFS(new File(path));
+                                browseFS(new File(pathToFiles));
                             } catch (InterruptedException e) {
                                 Log.i(TAG, "Thread.MainActivity.browseFS InterruptedException");
                                 scanLibray.abort();
@@ -355,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
                     processBrowseFScount = new ProcessAbstract("Thread.MainActivity.browseFScount") {
                         public void run() {
                             try {
-                                browseFScount(new File(path));
+                                browseFScount(new File(pathToFiles));
                             } catch (InterruptedException e) {
                                 Log.i(TAG, "Thread.MainActivity.browseFScount InterruptedException");
                                 scanLibray.abort();
@@ -579,19 +579,43 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST= 112;
 
-    public void checkPermissions() {
-        String[] PERMISSIONS = {
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.PROCESS_OUTGOING_CALLS
-        };
+    private final String[] PERMISSIONS = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.PROCESS_OUTGOING_CALLS
+    };
 
+    public void checkPermissions() {
         if (!hasPermissions(this, PERMISSIONS)) {
-            ActivityCompat.requestPermissions((Activity) this, PERMISSIONS, REQUEST );
+
+            //TODO: Translate
+            String msgStr = "<html><b>For a full JaMuz experience</b>, please consider " +
+                    "allowing permissions that you will be asked for: <BR/><BR/>" +
+                    "<i>- <u>Mutimedia files</u></i> : Needed to be able to read files in \"" +
+                    pathToFiles +
+                    "\" which is the root of \"SSH Server\" from \"The Olive Tree\" where music files are expected to be.<BR/>" +
+                    "It is also needed to store database in JaMuz folder on internal SD card.<BR/><BR/>" +
+                    "<i>- <u>Phone calls</u></i> : Simply to be able to pause and resume audio on phone calls.";
+
+            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+            alertDialog.setTitle("Warning !");
+            alertDialog.setMessage(Html.fromHtml(msgStr));
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            askPermissions();
+                        }
+                    });
+            alertDialog.show();
         } else {
             scanLibrayInThread();
         }
+    }
+
+    private void askPermissions() {
+        ActivityCompat.requestPermissions((Activity) this, PERMISSIONS, REQUEST );
     }
 
     private static boolean hasPermissions(Context context, String... permissions) {
@@ -763,7 +787,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void popup(final String title, final String msg) {
+    public void popup(final String title, final CharSequence msg) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -944,28 +968,6 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-    /*@Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-
-        String msg = keyCode+": "+String.valueOf(event.getKeyCode());
-        Log.d(TAG, msg);
-
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_MEDIA_NEXT:
-                doAction("nextTrack");
-                return true;
-            case KeyEvent.KEYCODE_MEDIA_PLAY:
-            case KeyEvent.KEYCODE_MEDIA_STOP:
-            case KeyEvent.KEYCODE_HEADSETHOOK:  //Play/Pause on Wired HeadSet
-            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-            case KeyEvent.KEYCODE_MEDIA_PREVIOUS: //Yes, also with Previous as: 1) N/A 2) handy in car
-                doAction("playTrack");
-                return true;
-            default:
-                return super.onKeyUp(keyCode, event);
-        }
-    }*/
 
     @Override
     public void onBackPressed() {

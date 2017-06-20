@@ -19,7 +19,6 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     private static final String DB_PATH = Environment.getExternalStorageDirectory()+"/JaMuz";
 
     //In external SD. Does not seem to work !
-    //FIXME: How to get "3515-1C15" value ?
     //private static final String DB_PATH = "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;
 
     private static final String DB_NAME = "JaMuzRemote.db";
