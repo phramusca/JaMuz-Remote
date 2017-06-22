@@ -25,7 +25,6 @@ public class MusicLibrary {
 
     public void close(){
         db.close();
-        //FIXME: Queries on db fails on app exit if scanLib not ended
     }
 
     public SQLiteDatabase getBDD(){

@@ -21,6 +21,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -212,6 +213,10 @@ public class MainActivity extends AppCompatActivity {
         editTextConnectInfo.setEnabled(true);
         buttonConnect.setEnabled(true);
 
+        //TODO: MAke this an option somehow
+        pathToFiles = getExtSDcard("/storage/", "Android/data/com.theolivetree.sshserver/files/");
+        //  /storage/3515-1C15/Android/data/com.theolivetree.sshserver/files/";
+
         checkPermissions();
 
         CallBackPlayer callBackPlayer = new CallBackPlayer();
@@ -232,14 +237,12 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
+        //receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
         audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
 
         //TODO: Why this one needs registerReceiver whereas ReceiverPhoneCall does not
         registerReceiver(receiverHeadSetPlugged,
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG));
-
-        //TODO: Why the ReceiverMediaButton would not work when application is active ? Give it a try
 
         //TODO: Make this an option AND allow a timeout
         //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -271,6 +274,10 @@ public class MainActivity extends AppCompatActivity {
             getFromQRcode();
             buttonConnect.performClick();
         }
+
+        //TODO: Check if this solves the issue with buttons
+        receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
+        audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
     }
 
     @Override
@@ -280,8 +287,8 @@ public class MainActivity extends AppCompatActivity {
         //Better unregister as it does not trigger anyway + raises exceptions if not
         unregisterReceiver(receiverHeadSetPlugged);
         unregisterReceiver(mHeadsetBroadcastReceiver);
-        //TODO: Why receiverMediaButtonName still active after app destroyed
-        // , if not unregistered ?
+        //Note: receiverMediaButtonName remains active if not unregistered
+        //but causes issues
         audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
 
         audioPlayer.stop(true);
@@ -325,9 +332,30 @@ public class MainActivity extends AppCompatActivity {
     ProcessAbstract processBrowseFS;
     ProcessAbstract processBrowseFScount;
 
-    //TODO: MAke this an option somehow
-    //FIXME: How to get "3515-1C15" value ?
-    public static final String pathToFiles = "/storage/3515-1C15/Android/data/com.theolivetree.sshserver/files/";
+    public static File pathToFiles;
+
+    private File getExtSDcard(String path, String search) {
+        File f = new File(path);
+        File[] files = f.listFiles();
+
+        if (files != null) {
+            if(files.length>0) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        File checkFolder = new File(file.getAbsolutePath()+File.separator+search);
+                        if(checkFolder.exists()) {
+                            return checkFolder;
+                        }
+                    }
+                }
+            }
+        }
+        //If not found, use external storage which turns out to be ... internal SD card + internal phone memory
+        //filtered and emulated
+        // and not the actual external SD card as any could expect
+        return new File(Environment.getExternalStorageDirectory()+"/JaMuz");
+                //+File.separator+"Android/data/"+BuildConfig.APPLICATION_ID);
+    }
 
     private void scanLibrayInThread() {
         scanLibray = new ProcessAbstract("Thread.MainActivity.scanLibrayInThread") {
@@ -343,7 +371,7 @@ public class MainActivity extends AppCompatActivity {
                     processBrowseFS = new ProcessAbstract("Thread.MainActivity.browseFS") {
                         public void run() {
                             try {
-                                browseFS(new File(pathToFiles));
+                                browseFS(pathToFiles);
                             } catch (InterruptedException e) {
                                 Log.i(TAG, "Thread.MainActivity.browseFS InterruptedException");
                                 scanLibray.abort();
@@ -355,7 +383,7 @@ public class MainActivity extends AppCompatActivity {
                     processBrowseFScount = new ProcessAbstract("Thread.MainActivity.browseFScount") {
                         public void run() {
                             try {
-                                browseFScount(new File(pathToFiles));
+                                browseFScount(pathToFiles);
                             } catch (InterruptedException e) {
                                 Log.i(TAG, "Thread.MainActivity.browseFScount InterruptedException");
                                 scanLibray.abort();
@@ -480,7 +508,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void playRandom() {
-        audioPlayer.stop(false);
 
         if(queue.size()<5) {
             if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
@@ -497,6 +524,7 @@ public class MainActivity extends AppCompatActivity {
             queue.remove(displayedTrack);
             File file = new File(displayedTrack.getPath());
             if(file.exists()) {
+                audioPlayer.stop(false);
                 playAudio(displayedTrack.getPath());
                 //displayTrack();
             } else {
@@ -702,16 +730,23 @@ public class MainActivity extends AppCompatActivity {
         String genreCol = "genre"; // TODO: Use musicLibraryDb.COL_GENRE
         String ratingCol = "rating"; // TODO: Use musicLibraryDb.COL_RATING
 
+        //FIXME: Generate the playlists
+        //and/or sync with JaMuz
         localPlaylists.add(localSelectedPlaylist);
-        localPlaylists.add(new PlayList("Discover", ratingCol + "=0"));
+        localPlaylists.add(new PlayList("Discover", genreCol + "!=\"Enfantin\" AND " + ratingCol + "=0"));
         localPlaylists.add(new PlayList("Top", ratingCol + "=5"));
         localPlaylists.add(new PlayList("Top Reggae", genreCol + "=\"Reggae\" AND " + ratingCol + "=5"));
         localPlaylists.add(new PlayList("Top Rock", genreCol + "=\"Rock\" AND " + ratingCol + "=5"));
+        localPlaylists.add(new PlayList("Top Autre", genreCol + " NOT IN (\"Rock\", \"Reggae\") AND " + ratingCol + "=5"));
+        localPlaylists.add(new PlayList("Top Enfantin", genreCol + "=\"Enfantin\" AND " + ratingCol + ">2"));
+        localPlaylists.add(new PlayList("Discover Enfantin", genreCol + "=\"Enfantin\" AND " + ratingCol + "=0"));
+        //localPlaylists.add(new PlayList("Empty playlist (test)", genreCol + "=\"TUcroisVRaimentQUEceGENRE" +
+         //       "PEUXexister????\" AND " + ratingCol + ">10000000"));
 
         setupSpinner(localPlaylists, localSelectedPlaylist);
     }
 
-    ///FIXME: Detect WIFI connection to allow/disallow "Connect" button
+    ///TODO: Detect WIFI connection to allow/disallow "Connect" button
     //https://stackoverflow.com/questions/5888502/how-to-detect-when-wifi-connection-has-been-established-in-android
 
     private boolean checkConnectedViaWifi() {
