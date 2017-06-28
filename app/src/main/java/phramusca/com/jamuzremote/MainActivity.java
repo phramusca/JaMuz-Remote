@@ -26,6 +26,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
@@ -39,6 +40,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -91,6 +93,8 @@ public class MainActivity extends AppCompatActivity {
     private Spinner spinner;
     private boolean spinnerSend=true;
     private RatingBar ratingBar;
+    private ImageView image;
+    private LinearLayout trackInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
                 // Another interface callback
-
             }
         });
 
@@ -205,6 +208,28 @@ public class MainActivity extends AppCompatActivity {
                     displayTrack();
                 }
             }
+        });
+
+        image = (ImageView) findViewById(R.id.imageView);
+
+        trackInfo = (LinearLayout) findViewById(R.id.trackInfo);
+
+        trackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
+            public void onSwipeTop() {
+                Log.i(TAG, "onSwipeTop");
+            }
+            public void onSwipeRight() {
+                Log.i(TAG, "onSwipeRight");
+                playPrevious();
+            }
+            public void onSwipeLeft() {
+                Log.i(TAG, "onSwipeLeft");
+                playNext();
+            }
+            public void onSwipeBottom() {
+                Log.i(TAG, "onSwipeBottom");
+            }
+
         });
 
         setupLocalPlaylists();
@@ -921,7 +946,6 @@ public class MainActivity extends AppCompatActivity {
         //final Bitmap finalBitmap = bitmap;
         runOnUiThread(new Runnable() {
             public void run() {
-                ImageView image = (ImageView) findViewById(R.id.imageView);
                 image.setImageBitmap(finalBitmap);
             }
         });

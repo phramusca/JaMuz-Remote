@@ -173,23 +173,29 @@
         android:layout_gravity="center_horizontal"
         android:indeterminate="false" />
 
-    <TextView
+    <LinearLayout
+        android:id="@+id/trackInfo"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:id="@+id/textView_conv"
-        android:gravity="top|bottom|fill_vertical|center_horizontal"
-        android:text=""
-        android:clickable="true" />
+        android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_gravity="center_horizontal"
-        android:contentDescription="Cover"
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/textView_conv"
+            android:gravity="top|bottom|fill_vertical|center_horizontal"
+            android:text=""
+            android:clickable="false" />
 
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter"/>
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_gravity="center_horizontal"
+            android:contentDescription="Cover"
 
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"/>
+    </LinearLayout>
 </LinearLayout>
