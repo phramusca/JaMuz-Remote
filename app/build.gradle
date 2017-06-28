@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "org.phramusca.jamuz"
-        minSdkVersion 14 //for GridLayout
+        minSdkVersion 15 //Targets > 97% devices
         targetSdkVersion 23
         versionCode 2
         versionName "0.1.1-dev"
