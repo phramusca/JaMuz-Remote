@@ -22,14 +22,24 @@ public class ReceiverMediaButton extends MediaButtonReceiver
         if (action == KeyEvent.ACTION_UP) {
             switch (keyEvent.getKeyCode()) {
                 case KeyEvent.KEYCODE_MEDIA_NEXT:
-                    Log.i(TAG, keyExtraEvent+" => playRandom");
-                    MainActivity.audioPlayer.playRandom();
+                    Log.i(TAG, keyExtraEvent+" => playNext");
+                    MainActivity.audioPlayer.playNext();
+                    break;
+                case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                    //TODO: Alow this as an option as handy in car
+                    boolean usePreviousButtonAsPauseButton=false;
+                    if(usePreviousButtonAsPauseButton) {
+                        Log.i(TAG, keyExtraEvent+" => togglePlay");
+                        MainActivity.audioPlayer.togglePlay();
+                    } else {
+                        Log.i(TAG, keyExtraEvent+" => playPrevious");
+                        MainActivity.audioPlayer.playPrevious();
+                    }
                     break;
                 case KeyEvent.KEYCODE_MEDIA_PLAY:
                 case KeyEvent.KEYCODE_MEDIA_STOP:
                 case KeyEvent.KEYCODE_HEADSETHOOK:  //Play/Pause on Wired HeadSet
                 case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                case KeyEvent.KEYCODE_MEDIA_PREVIOUS: //Yes, also with Previous as: 1) N/A 2) handy in car
                     Log.i(TAG, keyExtraEvent+" => togglePlay");
                     MainActivity.audioPlayer.togglePlay(); break;
             }
