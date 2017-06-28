@@ -798,33 +798,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupSpinner(final List<PlayList> playlists, final PlayList selectedPlaylist) {
 
-        final ArrayAdapter<PlayList> arrayAdapter = new ArrayAdapter<PlayList>(this, android.R.layout.simple_spinner_item, playlists)
-        {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent)
-            {
-                return setCentered(super.getView(position, convertView, parent));
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent)
-            {
-                return setCentered(super.getDropDownView(position, convertView, parent));
-            }
-
-            private View setCentered(View view)
-            {
-                TextView textView = (TextView)view.findViewById(android.R.id.text1);
-                textView.setGravity(Gravity.CENTER);
-                return view;
-            }
-        };
+        final ArrayAdapter<PlayList> arrayAdapter =
+                new ArrayAdapter<PlayList>(this, android.R.layout.simple_spinner_item, playlists);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        //final ArrayAdapter<PlayList> arrayAdapter =
-         //       new ArrayAdapter<PlayList>(this, android.R.layout.simple_spinner_item, playlists);
-        // Drop down layout style - list view with radio button
-        //arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         runOnUiThread(new Runnable() {
             @Override
