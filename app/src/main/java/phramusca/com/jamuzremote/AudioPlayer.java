@@ -58,7 +58,15 @@ public class AudioPlayer {
     }
 
     public void playRandom() {
-        callback.onPlayRandom();
+        callback.doPlayRandom();
+    }
+
+    public void playNext() {
+        callback.doPlayNext();
+    }
+
+    public void playPrevious() {
+        callback.doPlayPrevious();
     }
 
     public void togglePlay() {

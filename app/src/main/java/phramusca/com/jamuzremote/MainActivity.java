@@ -29,9 +29,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -62,13 +64,16 @@ public class MainActivity extends AppCompatActivity {
     private Track localTrack;
     private Map coverMap = new HashMap();
     private Intent service; //Not yet used
-    private AudioManager audioManager; //Used to set volume
+    private AudioManager audioManager;
     public static AudioPlayer audioPlayer;
     private MusicLibrary musicLibrary;
     private int nbFiles=0;
     private int nbFilesTotal = 0;
     private List<Track> queue = new ArrayList<>();
+    private List<Track> queueHistory = new ArrayList<>();
     private boolean local = true;
+    final List<PlayList> localPlaylists = new ArrayList<PlayList>();
+    private PlayList localSelectedPlaylist = new PlayList("All", null);
 
     // GUI elements
     private TextView textViewReceived; //textView_conv
@@ -237,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        //receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
+        receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
         audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
 
         //TODO: Why this one needs registerReceiver whereas ReceiverPhoneCall does not
@@ -253,9 +258,6 @@ public class MainActivity extends AppCompatActivity {
         //service = new Intent(this, MyService.class);
         //startService(service);
     }
-
-    ComponentName receiverMediaButtonName;
-    ReceiverHeadSetPlugged receiverHeadSetPlugged = new ReceiverHeadSetPlugged();
 
     @Override
     protected void onPause() {
@@ -276,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //TODO: Check if this solves the issue with buttons
-        receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
+        ///receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
         audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
     }
 
@@ -507,33 +509,64 @@ public class MainActivity extends AppCompatActivity {
         return new Track(-1, rating, title, album, artist, coverHash, absolutePath, genre);
     }
 
-    private void playRandom() {
 
+    private void playRandom() {
+        //Fill the queue
         if(queue.size()<5) {
             if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
                 List<Track> addToQueue = musicLibrary.getTracks((PlayList) spinner.getSelectedItem());
                 queue.addAll(addToQueue);
             }
         }
-
+        //Play a random track
         if(queue.size()>0) {
-            Random generator = new Random();
-            int index = generator.nextInt(queue.size());
+            int index=new Random().nextInt(queue.size());
             displayedTrack = queue.get(index);
-            localTrack = displayedTrack;
             queue.remove(displayedTrack);
-            File file = new File(displayedTrack.getPath());
-            if(file.exists()) {
-                audioPlayer.stop(false);
-                playAudio(displayedTrack.getPath());
-                //displayTrack();
-            } else {
-                musicLibrary.deleteTrack(displayedTrack.getPath());
-                playRandom();
-            }
+            Log.i(TAG, "playQueue("+(index+1)+"/"+queue.size()+")");
+            play();
 
         } else {
             toastLong("Empty Playlist.");
+        }
+    }
+
+    private void playHistory() {
+        displayedTrack = queueHistory.get(queueHistoryIndex);
+        Log.i(TAG, "playHistory("+(queueHistoryIndex+1)+"/"+queueHistory.size()+")");
+        playAudio(displayedTrack.getPath());
+    }
+
+    private void play() {
+        File file = new File(displayedTrack.getPath());
+        if(file.exists()) {
+            queueHistory.add(displayedTrack);
+            queueHistoryIndex = queueHistory.size()-1;
+            playAudio(displayedTrack.getPath());
+        } else {
+            musicLibrary.deleteTrack(displayedTrack.getPath());
+            playRandom();
+        }
+    }
+
+    private int queueHistoryIndex =-1;
+
+    private void playPrevious() {
+        if(queueHistory.size()>0 && queueHistoryIndex>0 && queueHistoryIndex<queueHistory.size()) {
+            queueHistoryIndex--;
+            playHistory();
+        } else {
+            toastLong("No tracks beyond.");
+        }
+    }
+
+    private void playNext() {
+        if(queueHistoryIndex>=0 && (queueHistoryIndex+1)<queueHistory.size()) {
+            queueHistoryIndex++;
+            playHistory();
+        }
+        else {
+            playRandom();
         }
     }
 
@@ -542,7 +575,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onPlayBackEnd() {
             if(local) {
-                playRandom();
+                playNext();
             }
         }
 
@@ -552,8 +585,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onPlayRandom() {
+        public void doPlayRandom() {
             playRandom();
+        }
+
+        @Override
+        public void doPlayPrevious() {
+            playPrevious();
+        }
+
+        @Override
+        public void doPlayNext() {
+            playNext();
         }
 
         @Override
@@ -564,6 +607,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void playAudio(String path){
+        localTrack = displayedTrack;
+        audioPlayer.stop(false);
         audioPlayer.play(path);
     }
 
@@ -589,7 +634,6 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 editTextConnectInfo.setEnabled(enable);
                 buttonConnect.setEnabled(enable);
-                buttonPrevious.setEnabled(enable);
             }
         });
     }
@@ -684,10 +728,10 @@ public class MainActivity extends AppCompatActivity {
         if(local) {
             switch (msg) {
                 case "previousTrack":
-                    playRandom();
+                    playPrevious();
                     break;
                 case "nextTrack":
-                    playRandom();
+                    playNext();
                     break;
                 case "playTrack":
                     audioPlayer.togglePlay();
@@ -722,9 +766,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    final List<PlayList> localPlaylists = new ArrayList<PlayList>();
-    private PlayList localSelectedPlaylist = new PlayList("All", null);
-
     private void setupLocalPlaylists() {
 
         String genreCol = "genre"; // TODO: Use musicLibraryDb.COL_GENRE
@@ -756,10 +797,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupSpinner(final List<PlayList> playlists, final PlayList selectedPlaylist) {
-        final ArrayAdapter<PlayList> arrayAdapter =
-                new ArrayAdapter<PlayList>(this, android.R.layout.simple_spinner_item, playlists);
-        // Drop down layout style - list view with radio button
+
+        final ArrayAdapter<PlayList> arrayAdapter = new ArrayAdapter<PlayList>(this, android.R.layout.simple_spinner_item, playlists)
+        {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent)
+            {
+                return setCentered(super.getView(position, convertView, parent));
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent)
+            {
+                return setCentered(super.getDropDownView(position, convertView, parent));
+            }
+
+            private View setCentered(View view)
+            {
+                TextView textView = (TextView)view.findViewById(android.R.id.text1);
+                textView.setGravity(Gravity.CENTER);
+                return view;
+            }
+        };
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        //final ArrayAdapter<PlayList> arrayAdapter =
+         //       new ArrayAdapter<PlayList>(this, android.R.layout.simple_spinner_item, playlists);
+        // Drop down layout style - list view with radio button
+        //arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         runOnUiThread(new Runnable() {
             @Override
@@ -1022,6 +1087,10 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton("No", null)
                 .show();
     }
+
+    //Receivers
+    ComponentName receiverMediaButtonName;
+    ReceiverHeadSetPlugged receiverHeadSetPlugged = new ReceiverHeadSetPlugged();
 
     protected BluetoothAdapter mBluetoothAdapter;
     protected BluetoothHeadset mBluetoothHeadset;
