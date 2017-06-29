@@ -21,20 +21,19 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -57,6 +56,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -217,6 +218,8 @@ public class MainActivity extends AppCompatActivity {
         trackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
             public void onSwipeTop() {
                 Log.i(TAG, "onSwipeTop");
+                audioPlayer.forward();
+                dimOff();
             }
             public void onSwipeRight() {
                 Log.i(TAG, "onSwipeRight");
@@ -228,6 +231,8 @@ public class MainActivity extends AppCompatActivity {
             }
             public void onSwipeBottom() {
                 Log.i(TAG, "onSwipeBottom");
+                audioPlayer.rewind();
+                dimOff();
             }
 
         });
@@ -275,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG));
 
         //TODO: Make this an option AND allow a timeout
-        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         //Start background service
         //Not yet used but can be used to scan library
@@ -283,6 +288,8 @@ public class MainActivity extends AppCompatActivity {
         //service = new Intent(this, MyService.class);
         //startService(service);
     }
+
+
 
     @Override
     protected void onPause() {
@@ -607,6 +614,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onPositionChanged(int position, int duration) {
             setSeekBar(position, duration);
+            if((duration-position)<5001 && (duration-position)>4501) {
+                setBrightness(1);
+            }
         }
 
         @Override
@@ -635,6 +645,50 @@ public class MainActivity extends AppCompatActivity {
         localTrack = displayedTrack;
         audioPlayer.stop(false);
         audioPlayer.play(path);
+        dimOff();
+    }
+
+    //FIXME: Try http://android.okhelp.cz/turn-screen-on-off-android-sample-code/
+
+    private void dim(final boolean on) {
+        new CountDownTimer(1000,100) {
+            private float brightness=on?0:1;
+            @Override
+            public void onTick(long millisUntilFinished_) {
+                if(on) {
+                    setBrightness(brightness+=0.1);
+                } else {
+                    setBrightness(brightness-=0.1);
+                }
+            }
+            @Override
+            public void onFinish() {
+            }
+        }.start();
+    }
+
+    private void dimOff() {
+        setBrightness(1);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                setBrightness(0);
+                //dim(false);
+            }
+        }, 5*1000);
+    }
+
+    private void setBrightness(final float brightness) {
+        Log.i(TAG, "setBrightness("+brightness+");");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                WindowManager.LayoutParams params = getWindow().getAttributes();
+                params.screenBrightness = brightness;
+                getWindow().setAttributes(params);
+            }
+        });
     }
 
     private void enableConnect(final boolean enable) {
@@ -760,25 +814,31 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case "playTrack":
                     audioPlayer.togglePlay();
+                    dimOff();
                     break;
                 case "pullup":
                     audioPlayer.pullUp();
+                    dimOff();
                     break;
                 case "rewind":
                     audioPlayer.rewind();
+                    dimOff();
                     break;
                 case "forward":
                     audioPlayer.forward();
+                    dimOff();
                     break;
                 case "volUp":
                     //mediaPlayer.setVolume(20, 20);
                     audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
                             AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
+                    dimOff();
                     break;
                 case "volDown":
                     //mediaPlayer.setVolume(1, 1);
                     audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
                             AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
+                    dimOff();
                     break;
                 default:
                     //Popup("Error", "Not implemented");
