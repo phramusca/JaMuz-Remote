@@ -192,10 +192,10 @@
             android:id="@+id/imageView"
             android:layout_gravity="center_horizontal"
             android:contentDescription="Cover"
-
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"/>
     </LinearLayout>
+
 </LinearLayout>
