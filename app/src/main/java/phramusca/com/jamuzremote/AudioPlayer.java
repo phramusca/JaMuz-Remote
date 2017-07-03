@@ -133,10 +133,6 @@ public class AudioPlayer {
         return true;
     }
 
-    public int getDuration() {
-        return mediaPlayer.getDuration();
-    }
-
     private void startTimer() {
         callback.onPlayBackStart();
 
