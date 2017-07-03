@@ -216,23 +216,31 @@ public class MainActivity extends AppCompatActivity {
         trackInfo = (LinearLayout) findViewById(R.id.trackInfo);
 
         trackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
+            @Override
             public void onSwipeTop() {
                 Log.i(TAG, "onSwipeTop");
                 audioPlayer.forward();
-                dimOff();
+                dimOn();
             }
+            @Override
             public void onSwipeRight() {
                 Log.i(TAG, "onSwipeRight");
                 playPrevious();
             }
+            @Override
             public void onSwipeLeft() {
                 Log.i(TAG, "onSwipeLeft");
                 playNext();
             }
+            @Override
             public void onSwipeBottom() {
                 Log.i(TAG, "onSwipeBottom");
                 audioPlayer.rewind();
-                dimOff();
+                dimOn();
+            }
+            @Override
+            public void onTouch() {
+                dimOn();
             }
 
         });
@@ -303,6 +311,8 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.i(TAG, "MainActivity onResume");
 
+        dim(true);
+
         if(!audioPlayer.isPlaying()) {
             enableGUI(false);
             getFromQRcode();
@@ -310,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //TODO: Check if this solves the issue with buttons
-        ///receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
+        receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
         audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
     }
 
@@ -615,7 +625,8 @@ public class MainActivity extends AppCompatActivity {
         public void onPositionChanged(int position, int duration) {
             setSeekBar(position, duration);
             if((duration-position)<5001 && (duration-position)>4501) {
-                setBrightness(1);
+                //setBrightness(1);
+                dimOn();
             }
         }
 
@@ -645,13 +656,13 @@ public class MainActivity extends AppCompatActivity {
         localTrack = displayedTrack;
         audioPlayer.stop(false);
         audioPlayer.play(path);
-        dimOff();
+        dimOn();
     }
 
     //FIXME: Try http://android.okhelp.cz/turn-screen-on-off-android-sample-code/
 
     private void dim(final boolean on) {
-        new CountDownTimer(1000,100) {
+        CountDownTimer countDownTimer = new CountDownTimer(500,50) {
             private float brightness=on?0:1;
             @Override
             public void onTick(long millisUntilFinished_) {
@@ -663,20 +674,33 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onFinish() {
+                setBrightness(on?1:0);
             }
         }.start();
     }
 
-    private void dimOff() {
-        setBrightness(1);
-        Timer timer = new Timer();
+    private Timer timer = new Timer();
+    private boolean isDimOn = false;
+    private void dimOn() {
+        if(!isDimOn) {
+            //setBrightness(1);
+            dim(true);
+            isDimOn=true;
+        }
+        timer.cancel();
+        timer.purge();
+        Log.i(TAG, "timerTask cancelled");
+        timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                setBrightness(0);
-                //dim(false);
+                Log.i(TAG, "timerTask performed");
+                //setBrightness(0);
+                dim(false);
+                isDimOn=false;
             }
-        }, 5*1000);
+        }, 5 *1000);
+        Log.i(TAG, "timerTask scheduled");
     }
 
     private void setBrightness(final float brightness) {
@@ -814,31 +838,31 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case "playTrack":
                     audioPlayer.togglePlay();
-                    dimOff();
+                    dimOn();
                     break;
                 case "pullup":
                     audioPlayer.pullUp();
-                    dimOff();
+                    dimOn();
                     break;
                 case "rewind":
                     audioPlayer.rewind();
-                    dimOff();
+                    dimOn();
                     break;
                 case "forward":
                     audioPlayer.forward();
-                    dimOff();
+                    dimOn();
                     break;
                 case "volUp":
                     //mediaPlayer.setVolume(20, 20);
                     audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
                             AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
-                    dimOff();
+                    dimOn();
                     break;
                 case "volDown":
                     //mediaPlayer.setVolume(1, 1);
                     audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
                             AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
-                    dimOff();
+                    dimOn();
                     break;
                 default:
                     //Popup("Error", "Not implemented");

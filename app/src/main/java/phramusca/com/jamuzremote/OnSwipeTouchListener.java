@@ -18,6 +18,7 @@ public class OnSwipeTouchListener implements OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        onTouch();
         return gestureDetector.onTouchEvent(event);
     }
 
@@ -60,6 +61,9 @@ public class OnSwipeTouchListener implements OnTouchListener {
             }
             return result;
         }
+    }
+
+    public void onTouch() {
     }
 
     public void onSwipeRight() {
