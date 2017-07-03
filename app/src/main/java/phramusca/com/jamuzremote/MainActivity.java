@@ -32,6 +32,7 @@ import android.text.Spanned;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -110,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
             public void onRatingChanged(RatingBar ratingBar, float rating,
                                         boolean fromUser) {
                 if(fromUser) { //as it is also set when server sends file info (and it can be 0)
+                    dimOn();
                     ratingBar.setEnabled(false);
                     displayedTrack.setRating(Math.round(rating));
                     if(local) {
@@ -133,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
                 // An item was selected. You can retrieve the selected item using
                 // parent.getItemAtPosition(pos)
                 PlayList item = (PlayList) parent.getItemAtPosition(pos);
+                dimOn();
                 if(spinnerSend) {
                     if(local) {
                         if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
@@ -150,6 +153,13 @@ public class MainActivity extends AppCompatActivity {
                 // Another interface callback
             }
         });
+        spinner.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                dimOn();
+                return false;
+            }
+        });
 
         buttonPrevious = setupButton(buttonPrevious, R.id.button_previous, "previousTrack");
         buttonPlay = setupButton(buttonPlay, R.id.button_play, "playTrack");
@@ -161,11 +171,20 @@ public class MainActivity extends AppCompatActivity {
         buttonVolDown = setupButton(buttonVolDown, R.id.button_volDown, "volDown");
 
         editTextConnectInfo = (EditText) findViewById(R.id.editText_info);
+        editTextConnectInfo.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                dimOn();
+                return false;
+            }
+        });
+
         buttonConnect = (Button) findViewById(R.id.button_connect);
 
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                dimOn();
                 enableGUI(false);
                 if(buttonConnect.getText().equals("Connect")) {
                     CallBackReception callBackReception = new CallBackReception();
@@ -695,8 +714,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 Log.i(TAG, "timerTask performed");
-                //setBrightness(0);
-                dim(false);
+                setBrightness(0);
+                //dim(false);
                 isDimOn=false;
             }
         }, 5 *1000);
