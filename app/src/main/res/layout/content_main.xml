@@ -12,14 +12,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <ToggleButton
+            android:background="@drawable/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textOn="Exit Car Mode"
+            android:textOff="Enter Car Mode"
+            android:id="@+id/button_car"
+            android:layout_row="0"
+            android:layout_column="0"
+            android:textSize="10sp"
+            android:textAllCaps="false" />
+
         <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
         <LinearLayout
+            android:id="@+id/dummy"
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:layout_width="0px"
             android:layout_height="0px"
             android:layout_row="0"
-            android:layout_column="0" />
+            android:layout_column="1"
+            android:orientation="horizontal" />
 
         <EditText
             android:layout_width="175dp"
@@ -28,10 +42,10 @@
             android:enabled="true"
             android:text="192.168.0.15:2013"
             android:layout_gravity="left|right"
-            android:gravity="fill_horizontal|left|right"
+            android:gravity="center_horizontal"
             android:inputType="text"
             android:layout_row="0"
-            android:layout_column="1"
+            android:layout_column="2"
             android:theme="@style/EditText" />
 
         <Button
@@ -41,7 +55,9 @@
             android:text="Connect"
             android:id="@+id/button_connect"
             android:layout_row="0"
-            android:layout_column="2" />
+            android:layout_column="3"
+            android:textSize="10sp"
+            android:textAllCaps="false" />
 
     </GridLayout>
 
@@ -56,7 +72,7 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
         android:popupBackground="#DFFFFFFF"
-        android:background="@drawable/gradient_spinner"/>
+        android:background="@drawable/gradient_spinner" />
 
     <GridLayout
         android:layout_width="match_parent"
@@ -80,7 +96,8 @@
                 android:id="@+id/button_volUp"
                 android:layout_row="0"
                 android:layout_column="0"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center"
+                android:textSize="20sp" />
 
             <Button
                 android:background="@drawable/button"
@@ -90,7 +107,8 @@
                 android:id="@+id/button_previous"
                 android:layout_row="0"
                 android:layout_column="1"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:textSize="20sp" />
 
             <Button
                 android:background="@drawable/button"
@@ -100,7 +118,8 @@
                 android:id="@+id/button_play"
                 android:layout_row="0"
                 android:layout_column="2"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:textSize="20sp" />
 
             <Button
                 android:background="@drawable/button"
@@ -110,7 +129,8 @@
                 android:id="@+id/button_next"
                 android:layout_row="0"
                 android:layout_column="3"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:textSize="20sp" />
 
             <Button
                 android:background="@drawable/button"
@@ -120,7 +140,8 @@
                 android:id="@+id/button_volDown"
                 android:layout_row="1"
                 android:layout_column="0"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:textSize="20sp" />
 
             <Button
                 android:background="@drawable/button"
@@ -130,17 +151,20 @@
                 android:id="@+id/button_rewind"
                 android:layout_row="1"
                 android:layout_column="1"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:textSize="20sp" />
 
             <Button
                 android:background="@drawable/button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="poulpe"
+                android:text="Poulp"
                 android:id="@+id/button_pullup"
                 android:layout_row="1"
                 android:layout_column="2"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:textSize="20sp"
+                android:textAllCaps="false" />
 
             <Button
                 android:background="@drawable/button"
@@ -150,7 +174,8 @@
                 android:id="@+id/button_forward"
                 android:layout_row="1"
                 android:layout_column="3"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:textSize="20sp" />
 
         </GridLayout>
 

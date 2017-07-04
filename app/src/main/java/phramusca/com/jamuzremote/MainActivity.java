@@ -46,6 +46,7 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewReceived; //textView_conv
     private EditText editTextConnectInfo; //editText_info
     private Button buttonConnect; //button_connect
+    private ToggleButton buttonSetCarMode; //button_car
     private Button buttonPrevious; //button_previous
     private Button buttonPlay; //button_play
     private Button buttonNext; //button_next
@@ -135,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
                 // An item was selected. You can retrieve the selected item using
                 // parent.getItemAtPosition(pos)
                 PlayList item = (PlayList) parent.getItemAtPosition(pos);
-                dimOn();
                 if(spinnerSend) {
                     if(local) {
                         if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
@@ -176,6 +177,22 @@ public class MainActivity extends AppCompatActivity {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 dimOn();
                 return false;
+            }
+        });
+
+        buttonSetCarMode = (ToggleButton) findViewById(R.id.button_car);
+        buttonSetCarMode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                /*if(buttonSetCarMode.isChecked()) {
+                    //FIXME: Enter Car Mode
+                    toastLong("Enter Car Mode");
+                    setCarMode(true);
+                } else {
+                    //FIXME: Exit Car Mode
+                    toastLong("Exit Car Mode");
+                }*/
+                setCarMode(buttonSetCarMode.isChecked());
             }
         });
 
@@ -238,24 +255,39 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSwipeTop() {
                 Log.i(TAG, "onSwipeTop");
-                audioPlayer.forward();
-                dimOn();
+                if(local) {
+                    audioPlayer.forward();
+                } else {
+                    client.send("forward");
+                }
+
             }
             @Override
             public void onSwipeRight() {
                 Log.i(TAG, "onSwipeRight");
-                playPrevious();
+                if(local) {
+                    playPrevious();
+                } else {
+                    client.send("previousTrack");
+                }
             }
             @Override
             public void onSwipeLeft() {
                 Log.i(TAG, "onSwipeLeft");
-                playNext();
+                if(local) {
+                    playNext();
+                } else {
+                    client.send("nextTrack");
+                }
             }
             @Override
             public void onSwipeBottom() {
                 Log.i(TAG, "onSwipeBottom");
-                audioPlayer.rewind();
-                dimOn();
+                if(local) {
+                    audioPlayer.rewind();
+                } else {
+                    client.send("rewind");
+                }
             }
             @Override
             public void onTouch() {
@@ -306,9 +338,6 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(receiverHeadSetPlugged,
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG));
 
-        //TODO: Make this an option AND allow a timeout
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         //Start background service
         //Not yet used but can be used to scan library
         //What is the benefit ??
@@ -316,7 +345,22 @@ public class MainActivity extends AppCompatActivity {
         //startService(service);
     }
 
+    private void setCarMode(boolean enable) {
+        if(!buttonConnect.getText().equals("Close")) {
+            buttonConnect.setEnabled(!enable);
+            editTextConnectInfo.setEnabled(!enable);
+        }
 
+        if(enable) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            dimOn();
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            timer.cancel();
+            timer.purge();
+            setBrightness(-1);
+        }
+    }
 
     @Override
     protected void onPause() {
@@ -330,9 +374,10 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.i(TAG, "MainActivity onResume");
 
-        dim(true);
-
-        if(!audioPlayer.isPlaying()) {
+        if(buttonSetCarMode.isChecked()) {
+            dimOn();
+        }
+        else if(!audioPlayer.isPlaying()) {
             enableGUI(false);
             getFromQRcode();
             buttonConnect.performClick();
@@ -642,10 +687,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onPositionChanged(int position, int duration) {
-            setSeekBar(position, duration);
-            if((duration-position)<5001 && (duration-position)>4501) {
-                //setBrightness(1);
-                dimOn();
+            if(local) {
+                setSeekBar(position, duration);
+                if ((duration - position) < 5001 && (duration - position) > 4501) {
+                    //setBrightness(1);
+                    dimOn();
+                }
             }
         }
 
@@ -701,25 +748,29 @@ public class MainActivity extends AppCompatActivity {
     private Timer timer = new Timer();
     private boolean isDimOn = false;
     private void dimOn() {
-        if(!isDimOn) {
-            //setBrightness(1);
-            dim(true);
-            isDimOn=true;
-        }
-        timer.cancel();
-        timer.purge();
-        Log.i(TAG, "timerTask cancelled");
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Log.i(TAG, "timerTask performed");
-                setBrightness(0);
-                //dim(false);
-                isDimOn=false;
+        editTextConnectInfo.clearFocus();
+
+        if(buttonSetCarMode.isChecked()) {
+            if (!isDimOn) {
+                //setBrightness(1);
+                dim(true);
+                isDimOn = true;
             }
-        }, 5 *1000);
-        Log.i(TAG, "timerTask scheduled");
+            timer.cancel();
+            timer.purge();
+            Log.i(TAG, "timerTask cancelled");
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    Log.i(TAG, "timerTask performed");
+                    setBrightness(0);
+                    //dim(false);
+                    isDimOn = false;
+                }
+            }, 5 * 1000);
+            Log.i(TAG, "timerTask scheduled");
+        }
     }
 
     private void setBrightness(final float brightness) {
@@ -890,7 +941,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
         } else {
+            dimOn();
             client.send(msg);
+
         }
     }
 
@@ -1094,7 +1147,9 @@ public class MainActivity extends AppCompatActivity {
                         case "currentPosition":
                             final int currentPosition = jObject.getInt("currentPosition");
                             final int total = jObject.getInt("total");
-                            setSeekBar(currentPosition, total);
+                            if(!local) {
+                                setSeekBar(currentPosition, total);
+                            }
                             break;
                         case "fileInfoInt":
                             displayedTrack = new Track(-1,
