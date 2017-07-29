@@ -6,7 +6,9 @@ package phramusca.com.jamuzremote;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,7 +51,7 @@ public class MusicLibrary {
     }
 
     public ArrayList<Track> getTracks() {
-        return getTracks(new PlayList("All", null));
+        return getTracks(new PlayList("All", null, 0));
     }
 
     public ArrayList<Track> getTracks(PlayList playlist) {
@@ -58,7 +60,7 @@ public class MusicLibrary {
         Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
                 null,
                 playlist.getQuery(),
-                null, null, null, null, "0, 5");
+                null, null, null, null, null);
         if(cursor != null && cursor.moveToFirst())
         {
             do {
@@ -70,7 +72,11 @@ public class MusicLibrary {
     }
 
     public long insertTrack(Track track){
-        return db.insert(musicLibraryDb.TABLE_TRACKS, null, TrackToValues(track, true));
+        try {
+            return db.insert(musicLibraryDb.TABLE_TRACKS, null, TrackToValues(track, true));
+        } catch (SQLiteException ex) {
+        }
+        return -1;
     }
 
     public int updateTrack(int id, Track track, boolean setRating){
@@ -79,28 +85,6 @@ public class MusicLibrary {
 
     public int deleteTrack(String path){
         return db.delete(musicLibraryDb.TABLE_TRACKS, musicLibraryDb.COL_PATH + " = \"" +path+"\"", null);
-    }
-
-    public LinkedHashMap<String, String> getGenres(String where) {
-        LinkedHashMap<String, String> genres = new LinkedHashMap<>();
-        Cursor cursor = db.rawQuery("SELECT " + musicLibraryDb.COL_GENRE+", count(*) FROM "+musicLibraryDb.TABLE_TRACKS +
-                " WHERE " + where +
-                " GROUP BY "+musicLibraryDb.COL_GENRE+" ORDER BY count(*) desc,"+musicLibraryDb.COL_GENRE, new String [] {});
-
-        if(cursor != null && cursor.moveToFirst())
-        {
-            do {
-                Integer nb = cursor.getInt(1);
-                if(nb>30) {
-                    genres.put(cursor.getString(0), cursor.getString(0)+" ("+nb+")");
-                } else {
-                    cursor.close();
-                    return genres;
-                }
-            } while(cursor.moveToNext());
-        }
-        cursor.close();
-        return genres;
     }
 
     private ContentValues TrackToValues(Track track, boolean setRating) {
@@ -129,5 +113,39 @@ public class MusicLibrary {
         String genre=c.getString(c.getColumnIndex(musicLibraryDb.COL_GENRE));
         Track track = new Track(id, rating, title, album,artist, coverHash, path, genre);
         return track;
+    }
+
+    public LinkedHashMap<String, Integer> getGenres(String where) {
+        LinkedHashMap<String, Integer> genres = new LinkedHashMap<>();
+        Cursor cursor = db.rawQuery("SELECT " + musicLibraryDb.COL_GENRE+", count(*) FROM "+musicLibraryDb.TABLE_TRACKS +
+                " WHERE " + where +
+                " GROUP BY "+musicLibraryDb.COL_GENRE+" ORDER BY count(*) desc,"+musicLibraryDb.COL_GENRE, new String [] {});
+
+        if(cursor != null && cursor.moveToFirst())
+        {
+            do {
+                Integer nb = cursor.getInt(1);
+                if(nb>30) {
+                    genres.put(cursor.getString(0), nb);
+                } else {
+                    cursor.close();
+                    return genres;
+                }
+            } while(cursor.moveToNext());
+        }
+        cursor.close();
+        return genres;
+    }
+
+    public int getNb(String where){
+        Cursor cursor = db.rawQuery("SELECT count(*) FROM "+musicLibraryDb.TABLE_TRACKS +
+                " WHERE " + where, new String [] {});
+        if (cursor.getCount() == 0)
+            return 0;
+
+        cursor.moveToFirst();
+        Integer nb = cursor.getInt(0);
+        cursor.close();
+        return nb;
     }
 }

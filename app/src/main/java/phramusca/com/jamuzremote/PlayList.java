@@ -7,10 +7,12 @@ public class PlayList {
 
     private String name;
     private String query;
+    private int value;
 
-    public PlayList(String name, String query) {
+    public PlayList(String name, String query, int value) {
         this.name = name;
         this.query = query;
+        this.value = value;
     }
 
     public String getQuery() {
@@ -19,6 +21,10 @@ public class PlayList {
 
     @Override
     public String toString() {
+        return name+" ("+value+")";
+    }
+
+    public String getValue() {
         return name;
     }
 }
