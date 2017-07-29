@@ -328,6 +328,7 @@ public class MainActivity extends AppCompatActivity {
         getFromQRcode();
         editTextConnectInfo.setEnabled(true);
         buttonConnect.setEnabled(true);
+        buttonConnectToggle.setEnabled(true);
 
         //TODO: MAke this an option somehow
         pathToFiles = getExtSDcard("/storage/", "Android/data/com.theolivetree.sshserver/files/");
@@ -368,6 +369,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setCarMode(boolean enable) {
+        buttonConnectToggle.setEnabled(!enable);
+
+        if(enable) {
+            if(!buttonConnectToggle.isChecked()) {
+                toggleConnect(true);
+                buttonConnectToggle.setChecked(true);
+            }
+        }
+
         if(!buttonConnect.getText().equals("Close")) {
             buttonConnect.setEnabled(!enable);
             editTextConnectInfo.setEnabled(!enable);
@@ -384,17 +394,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void toggleConnect(boolean enable) {
-        if(enable) {
+    private void toggleConnect(boolean collapse) {
+        if(collapse) {
             collapse(connect);
         } else {
             expand(connect);
         }
     }
 
-    private void toggleControls(boolean enable) {
+    private void toggleControls(boolean collapse) {
         //https://stackoverflow.com/questions/4946295/android-expand-collapse-animation
-        if(enable) {
+        if(collapse) {
             collapse(controls);
         } else {
             expand(controls);
@@ -892,6 +902,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 editTextConnectInfo.setEnabled(enable);
                 buttonConnect.setEnabled(true);
+                buttonConnectToggle.setEnabled(true);
             }
         });
     }
@@ -902,6 +913,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 editTextConnectInfo.setEnabled(enable);
                 buttonConnect.setEnabled(enable);
+                buttonConnectToggle.setEnabled(enable);
             }
         });
     }
@@ -1293,6 +1305,7 @@ public class MainActivity extends AppCompatActivity {
                 enableGUI(false);
                 buttonConnect.setText("Connect");
                 buttonConnect.setEnabled(true);
+                buttonConnectToggle.setEnabled(true);
                 editTextConnectInfo.setEnabled(true);
             }
         });
