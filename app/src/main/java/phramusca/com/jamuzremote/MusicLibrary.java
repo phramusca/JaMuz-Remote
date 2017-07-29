@@ -78,6 +78,28 @@ public class MusicLibrary {
         return db.delete(musicLibraryDb.TABLE_TRACKS, musicLibraryDb.COL_PATH + " = \"" +path+"\"", null);
     }
 
+    public ArrayList<String> getGenres() {
+
+        ArrayList<String> genres = new ArrayList<>();
+        Cursor cursor = db.rawQuery("SELECT " + musicLibraryDb.COL_GENRE+", count(*) FROM "+musicLibraryDb.TABLE_TRACKS+
+                " GROUP BY "+musicLibraryDb.COL_GENRE+" ORDER BY count(*) desc,"+musicLibraryDb.COL_GENRE, new String [] {});
+
+        if(cursor != null && cursor.moveToFirst())
+        {
+            do {
+                Integer nb = cursor.getInt(1);
+                if(nb>30) {
+                    genres.add(cursor.getString(0));
+                } else {
+                    cursor.close();
+                    return genres;
+                }
+            } while(cursor.moveToNext());
+        }
+        cursor.close();
+        return genres;
+    }
+
     private ContentValues TrackToValues(Track track, boolean setRating) {
         ContentValues values = new ContentValues();
         values.put(musicLibraryDb.COL_TITLE, track.getTitle());
