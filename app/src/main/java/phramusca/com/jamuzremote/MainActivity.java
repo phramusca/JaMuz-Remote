@@ -36,11 +36,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.view.animation.GridLayoutAnimationController;
 import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
@@ -103,6 +105,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageView image;
     private LinearLayout trackInfo;
     private LinearLayout controls;
+    private GridLayout connect;
+    private ToggleButton buttonConnectToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,12 +196,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        buttonCollapse = (ToggleButton) findViewById(R.id.button_collapse);
+        buttonCollapse = (ToggleButton) findViewById(R.id.button_controls_toggle);
         buttonCollapse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dimOn();
-                collapse(buttonCollapse.isChecked());
+                toggleControls(buttonCollapse.isChecked());
+            }
+        });
+
+
+        buttonConnectToggle = (ToggleButton) findViewById(R.id.button_connect_toggle);
+        buttonConnectToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dimOn();
+                toggleConnect(buttonConnectToggle.isChecked());
             }
         });
 
@@ -257,6 +271,7 @@ public class MainActivity extends AppCompatActivity {
         trackInfo = (LinearLayout) findViewById(R.id.trackInfo);
 
         controls = (LinearLayout) findViewById(R.id.controls);
+        connect = (GridLayout) findViewById(R.id.connect);
 
         trackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
             @Override
@@ -369,7 +384,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void collapse(boolean enable) {
+    private void toggleConnect(boolean enable) {
+        if(enable) {
+            collapse(connect);
+        } else {
+            expand(connect);
+        }
+    }
+
+    private void toggleControls(boolean enable) {
         //https://stackoverflow.com/questions/4946295/android-expand-collapse-animation
         if(enable) {
             collapse(controls);
@@ -378,6 +401,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //https://stackoverflow.com/questions/4946295/android-expand-collapse-animation
     public static void expand(final View v) {
         v.measure(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
         final int targetHeight = v.getMeasuredHeight();
@@ -406,6 +430,7 @@ public class MainActivity extends AppCompatActivity {
         v.startAnimation(a);
     }
 
+    //https://stackoverflow.com/questions/4946295/android-expand-collapse-animation
     public static void collapse(final View v) {
         final int initialHeight = v.getMeasuredHeight();
 
