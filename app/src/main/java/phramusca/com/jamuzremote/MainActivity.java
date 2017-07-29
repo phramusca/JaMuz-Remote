@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
         buttonSetCarMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setCarMode(buttonSetCarMode.isChecked());
+                setCarMode(!buttonSetCarMode.isChecked());
             }
         });
 
@@ -201,17 +201,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dimOn();
-                toggleControls(buttonCollapse.isChecked());
+                toggleControls(!buttonCollapse.isChecked());
             }
         });
-
 
         buttonConnectToggle = (ToggleButton) findViewById(R.id.button_connect_toggle);
         buttonConnectToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dimOn();
-                toggleConnect(buttonConnectToggle.isChecked());
+                toggleConnect(!buttonConnectToggle.isChecked());
             }
         });
 
@@ -328,7 +327,6 @@ public class MainActivity extends AppCompatActivity {
         getFromQRcode();
         editTextConnectInfo.setEnabled(true);
         buttonConnect.setEnabled(true);
-        buttonConnectToggle.setEnabled(true);
 
         //TODO: MAke this an option somehow
         pathToFiles = getExtSDcard("/storage/", "Android/data/com.theolivetree.sshserver/files/");
@@ -366,23 +364,12 @@ public class MainActivity extends AppCompatActivity {
         //What is the benefit ??
         //service = new Intent(this, MyService.class);
         //startService(service);
+
+        toggleControls(true);
+        toggleConnect(true);
     }
 
     private void setCarMode(boolean enable) {
-        buttonConnectToggle.setEnabled(!enable);
-
-        if(enable) {
-            if(!buttonConnectToggle.isChecked()) {
-                toggleConnect(true);
-                buttonConnectToggle.setChecked(true);
-            }
-        }
-
-        if(!buttonConnect.getText().equals("Close")) {
-            buttonConnect.setEnabled(!enable);
-            editTextConnectInfo.setEnabled(!enable);
-        }
-
         if(enable) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             dimOn();
@@ -479,7 +466,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.i(TAG, "MainActivity onResume");
 
-        if(buttonSetCarMode.isChecked()) {
+        if(!buttonSetCarMode.isChecked()) {
             dimOn();
         }
         else if(!audioPlayer.isPlaying()) {
@@ -855,7 +842,7 @@ public class MainActivity extends AppCompatActivity {
     private void dimOn() {
         editTextConnectInfo.clearFocus();
 
-        if(buttonSetCarMode.isChecked()) {
+        if(!buttonSetCarMode.isChecked()) {
             if (!isDimOn) {
                 //setBrightness(1);
                 dim(true);
@@ -902,7 +889,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 editTextConnectInfo.setEnabled(enable);
                 buttonConnect.setEnabled(true);
-                buttonConnectToggle.setEnabled(true);
             }
         });
     }
@@ -913,7 +899,6 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 editTextConnectInfo.setEnabled(enable);
                 buttonConnect.setEnabled(enable);
-                buttonConnectToggle.setEnabled(enable);
             }
         });
     }
@@ -1305,7 +1290,6 @@ public class MainActivity extends AppCompatActivity {
                 enableGUI(false);
                 buttonConnect.setText("Connect");
                 buttonConnect.setEnabled(true);
-                buttonConnectToggle.setEnabled(true);
                 editTextConnectInfo.setEnabled(true);
             }
         });

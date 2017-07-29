@@ -16,8 +16,8 @@
             android:background="@drawable/button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOn="Show Controls"
-            android:textOff="Hide Controls"
+            android:textOn="Hide Controls"
+            android:textOff="Show Controls"
             android:id="@+id/button_controls_toggle"
             android:layout_row="0"
             android:layout_column="0"
@@ -28,8 +28,8 @@
             android:background="@drawable/button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOn="Exit Car Mode"
-            android:textOff="Enter Car Mode"
+            android:textOn="Enter Dim Mode"
+            android:textOff="Exit Dim Mode"
             android:id="@+id/button_car"
             android:layout_row="0"
             android:layout_column="1"
@@ -37,15 +37,26 @@
             android:textAllCaps="false"
             android:layout_gravity="center"/>
 
+        <Button
+            android:background="@drawable/button"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="Connect"
+            android:id="@+id/button_connect"
+            android:layout_row="0"
+            android:layout_column="2"
+            android:textSize="10sp"
+            android:textAllCaps="false" />
+
         <ToggleButton
             android:background="@drawable/button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOn="Show Connect"
-            android:textOff="Hide Connect"
+            android:textOn="Hide Config"
+            android:textOff="Show Config"
             android:id="@+id/button_connect_toggle"
             android:layout_row="0"
-            android:layout_column="2"
+            android:layout_column="3"
             android:textSize="10sp"
             android:textAllCaps="false" />
 
@@ -64,8 +75,13 @@
             android:layout_width="0px"
             android:layout_height="0px"
             android:layout_row="0"
-            android:layout_column="2"
+            android:layout_column="0"
             android:orientation="horizontal" />
+
+        <TextView
+            android:text="&lt;IP&gt;:&lt;Port&gt; : "
+            android:layout_row="0"
+            android:layout_column="1"/>
 
         <EditText
             android:layout_width="175dp"
@@ -77,19 +93,10 @@
             android:gravity="center_horizontal"
             android:inputType="text"
             android:layout_row="0"
-            android:layout_column="0"
+            android:layout_column="2"
             android:theme="@style/EditText" />
 
-        <Button
-            android:background="@drawable/button"
-            android:layout_width="60dp"
-            android:layout_height="wrap_content"
-            android:text="Connect"
-            android:id="@+id/button_connect"
-            android:layout_row="0"
-            android:layout_column="1"
-            android:textSize="10sp"
-            android:textAllCaps="false" />
+
     </GridLayout>
 
     <LinearLayout
