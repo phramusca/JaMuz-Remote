@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Track> queueHistory = new ArrayList<>();
     private boolean local = true;
     final List<PlayList> localPlaylists = new ArrayList<PlayList>();
-    private PlayList localSelectedPlaylist = new PlayList("All", null);
+    private PlayList localSelectedPlaylist;
 
     // GUI elements
     private TextView textViewReceived;
@@ -144,15 +144,15 @@ public class MainActivity extends AppCompatActivity {
                                        int pos, long id) {
                 // An item was selected. You can retrieve the selected item using
                 // parent.getItemAtPosition(pos)
-                PlayList item = (PlayList) parent.getItemAtPosition(pos);
+                PlayList playList = (PlayList) parent.getItemAtPosition(pos);
                 if(spinnerSend) {
                     if(local) {
                         if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                            queue = musicLibrary.getTracks(item);
+                            queue = musicLibrary.getTracks(playList);
                         }
-                        localSelectedPlaylist = item;
+                        localSelectedPlaylist = playList;
                     } else {
-                        client.send("setPlaylist".concat(item.toString()));
+                        client.send("setPlaylist".concat(playList.getValue()));
                     }
                 }
             }
@@ -1042,51 +1042,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupLocalPlaylists() {
-
-        String genreCol = "genre"; // TODO: Use musicLibraryDb.COL_GENRE
-        String ratingCol = "rating"; // TODO: Use musicLibraryDb.COL_RATING
-
         //TODO: sync playlists with JaMuz
 
+        int nb = musicLibrary.getNb("1");
+        localSelectedPlaylist = new PlayList("All", null, nb);
         localPlaylists.add(localSelectedPlaylist);
-        localPlaylists.add(new PlayList("Top", ratingCol + "=5"));
-        LinkedHashMap<String, String> genres = new LinkedHashMap();
-        if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-            genres = musicLibrary.getGenres(ratingCol + "=5");
-        }
 
-        for(Map.Entry<String, String> entry : genres.entrySet()) {
-            localPlaylists.add(new PlayList("Top " + entry.getValue(), genreCol + "=\"" + entry.getKey() + "\" AND " + ratingCol + "=5"));
-        }
-        String in = getInSqlList(genres);
-        if(!in.equals("")) {
-            localPlaylists.add(new PlayList("Top Autre", genreCol + " NOT IN ("+in+") AND " + ratingCol + "=5"));
-        }
-        localPlaylists.add(new PlayList("Discover", genreCol + "!=\"Enfantin\" AND " + ratingCol + "=0"));
-        if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-            genres = musicLibrary.getGenres(ratingCol + "=0");
-            in = getInSqlList(genres);
-        }
-        for(Map.Entry<String, String> entry : genres.entrySet()) {
-            localPlaylists.add(new PlayList("Discover "+entry.getValue(), genreCol + "=\""+entry.getKey()+"\" AND " + ratingCol + "=0"));
-        }
-        if(!genres.containsKey("Enfantin")) {
-            localPlaylists.add(new PlayList("Discover Enfantin", genreCol + "=\"Enfantin\" AND " + ratingCol + "=0"));
-        }
-        if(!in.equals("")) {
-            in+=",\"Enfantin\"";
-            localPlaylists.add(new PlayList("Discover Autre", genreCol + " NOT IN ("+in+") AND " + ratingCol + "=0"));
-        }
+        addPlaylists("Top","rating=5");
+        addPlaylists("More","rating>0 AND rating<5");
+        addPlaylists("Discover","rating=0");
+
         //localPlaylists.add(new PlayList("Empty playlist (test)", genreCol + "=\"TUcroisVRaimentQUEceGENRE" +
          //       "PEUXexister????\" AND " + ratingCol + ">10000000"));
 
         setupSpinner(localPlaylists, localSelectedPlaylist);
     }
 
-    private String getInSqlList(Map<String, String> list) {
+    private void addPlaylists(String name, String where) {
+        String enfantin = "Enfantin";
+
+        addToPlaylists(name, "genre!=\""+enfantin+"\" AND " + where);
+        LinkedHashMap<String, Integer> genres = new LinkedHashMap();
+        genres = musicLibrary.getGenres(where);
+        for(Map.Entry<String, Integer> entry : genres.entrySet()) {
+            localPlaylists.add(new PlayList(name + " " + entry.getKey(), "genre=\"" + entry.getKey() + "\" AND " + where, entry.getValue()));
+        }
+        String in = getInSqlList(genres);
+        if(!genres.containsKey(enfantin)) {
+            addToPlaylists(name+" "+enfantin, "genre=\""+enfantin+"\" AND " + where);
+        }
+        if(!in.equals("")) {
+            in+=",\""+enfantin+"\"";
+            addToPlaylists(name+" Autre", "genre NOT IN ("+in+") AND " + where);
+        }
+    }
+
+    private void addToPlaylists(String name, String where) {
+        int nb = musicLibrary.getNb(where);
+        localPlaylists.add(new PlayList(name, where, nb));
+    }
+
+    private String getInSqlList(Map<String, Integer> list) {
         String in = "";
         if(list.size()>0) {
-            for(String entry : list.values()) {
+            for(String entry : list.keySet()) {
                 in+="\""+entry+"\",";
             }
             in = in.substring(0, in.length()-1);
@@ -1257,12 +1256,12 @@ public class MainActivity extends AppCompatActivity {
                     switch(type) {
                         case "playlists":
                             String selectedPlaylist = jObject.getString("selectedPlaylist");
-                            PlayList temp = new PlayList(selectedPlaylist, "");
+                            PlayList temp = new PlayList(selectedPlaylist, "", -1);
                             final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists");
                             final List<PlayList> playlists = new ArrayList<PlayList>();
                             for(int i=0; i<jsonPlaylists.length(); i++) {
                                 String playlist = (String) jsonPlaylists.get(i);
-                                PlayList playList = new PlayList(playlist, "");
+                                PlayList playList = new PlayList(playlist, "", -1);
                                 if(playlist.equals(selectedPlaylist)) {
                                     playList=temp;
                                 }
