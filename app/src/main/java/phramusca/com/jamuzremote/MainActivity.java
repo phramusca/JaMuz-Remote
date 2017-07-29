@@ -1051,7 +1051,7 @@ public class MainActivity extends AppCompatActivity {
         localPlaylists.add(new PlayList("Top", ratingCol + "=5"));
         ArrayList<String> genres = new ArrayList<>();
         if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-            genres = musicLibrary.getGenres();
+            genres = musicLibrary.getGenres(ratingCol + "=5");
         }
         for(String genre : genres) {
             localPlaylists.add(new PlayList("Top " + genre, genreCol + "=\"" + genre + "\" AND " + ratingCol + "=5"));
@@ -1061,6 +1061,10 @@ public class MainActivity extends AppCompatActivity {
             localPlaylists.add(new PlayList("Top Autre", genreCol + " NOT IN ("+in+") AND " + ratingCol + "=5"));
         }
         localPlaylists.add(new PlayList("Discover", genreCol + "!=\"Enfantin\" AND " + ratingCol + "=0"));
+        if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+            genres = musicLibrary.getGenres(ratingCol + "=0");
+            in = getInSqlList(genres);
+        }
         for(String genre : genres) {
             localPlaylists.add(new PlayList("Discover "+genre, genreCol + "=\""+genre+"\" AND " + ratingCol + "=0"));
         }

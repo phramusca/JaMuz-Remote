@@ -78,10 +78,11 @@ public class MusicLibrary {
         return db.delete(musicLibraryDb.TABLE_TRACKS, musicLibraryDb.COL_PATH + " = \"" +path+"\"", null);
     }
 
-    public ArrayList<String> getGenres() {
+    public ArrayList<String> getGenres(String where) {
 
         ArrayList<String> genres = new ArrayList<>();
-        Cursor cursor = db.rawQuery("SELECT " + musicLibraryDb.COL_GENRE+", count(*) FROM "+musicLibraryDb.TABLE_TRACKS+
+        Cursor cursor = db.rawQuery("SELECT " + musicLibraryDb.COL_GENRE+", count(*) FROM "+musicLibraryDb.TABLE_TRACKS +
+                " WHERE " + where +
                 " GROUP BY "+musicLibraryDb.COL_GENRE+" ORDER BY count(*) desc,"+musicLibraryDb.COL_GENRE, new String [] {});
 
         if(cursor != null && cursor.moveToFirst())
