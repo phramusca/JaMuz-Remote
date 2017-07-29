@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -1049,12 +1050,13 @@ public class MainActivity extends AppCompatActivity {
 
         localPlaylists.add(localSelectedPlaylist);
         localPlaylists.add(new PlayList("Top", ratingCol + "=5"));
-        ArrayList<String> genres = new ArrayList<>();
+        LinkedHashMap<String, String> genres = new LinkedHashMap();
         if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
             genres = musicLibrary.getGenres(ratingCol + "=5");
         }
-        for(String genre : genres) {
-            localPlaylists.add(new PlayList("Top " + genre, genreCol + "=\"" + genre + "\" AND " + ratingCol + "=5"));
+
+        for(Map.Entry<String, String> entry : genres.entrySet()) {
+            localPlaylists.add(new PlayList("Top " + entry.getValue(), genreCol + "=\"" + entry.getKey() + "\" AND " + ratingCol + "=5"));
         }
         String in = getInSqlList(genres);
         if(!in.equals("")) {
@@ -1065,10 +1067,10 @@ public class MainActivity extends AppCompatActivity {
             genres = musicLibrary.getGenres(ratingCol + "=0");
             in = getInSqlList(genres);
         }
-        for(String genre : genres) {
-            localPlaylists.add(new PlayList("Discover "+genre, genreCol + "=\""+genre+"\" AND " + ratingCol + "=0"));
+        for(Map.Entry<String, String> entry : genres.entrySet()) {
+            localPlaylists.add(new PlayList("Discover "+entry.getValue(), genreCol + "=\""+entry.getKey()+"\" AND " + ratingCol + "=0"));
         }
-        if(!genres.contains("Enfantin")) {
+        if(!genres.containsKey("Enfantin")) {
             localPlaylists.add(new PlayList("Discover Enfantin", genreCol + "=\"Enfantin\" AND " + ratingCol + "=0"));
         }
         if(!in.equals("")) {
@@ -1081,11 +1083,11 @@ public class MainActivity extends AppCompatActivity {
         setupSpinner(localPlaylists, localSelectedPlaylist);
     }
 
-    private String getInSqlList(ArrayList<String> list) {
+    private String getInSqlList(Map<String, String> list) {
         String in = "";
         if(list.size()>0) {
-            for(String item : list) {
-                in+="\""+item+"\",";
+            for(String entry : list.values()) {
+                in+="\""+entry+"\",";
             }
             in = in.substring(0, in.length()-1);
         }

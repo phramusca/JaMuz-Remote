@@ -9,6 +9,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class MusicLibrary {
 
@@ -55,7 +58,7 @@ public class MusicLibrary {
         Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
                 null,
                 playlist.getQuery(),
-                null, null, null, null);
+                null, null, null, null, "0, 5");
         if(cursor != null && cursor.moveToFirst())
         {
             do {
@@ -78,9 +81,8 @@ public class MusicLibrary {
         return db.delete(musicLibraryDb.TABLE_TRACKS, musicLibraryDb.COL_PATH + " = \"" +path+"\"", null);
     }
 
-    public ArrayList<String> getGenres(String where) {
-
-        ArrayList<String> genres = new ArrayList<>();
+    public LinkedHashMap<String, String> getGenres(String where) {
+        LinkedHashMap<String, String> genres = new LinkedHashMap<>();
         Cursor cursor = db.rawQuery("SELECT " + musicLibraryDb.COL_GENRE+", count(*) FROM "+musicLibraryDb.TABLE_TRACKS +
                 " WHERE " + where +
                 " GROUP BY "+musicLibraryDb.COL_GENRE+" ORDER BY count(*) desc,"+musicLibraryDb.COL_GENRE, new String [] {});
@@ -90,7 +92,7 @@ public class MusicLibrary {
             do {
                 Integer nb = cursor.getInt(1);
                 if(nb>30) {
-                    genres.add(cursor.getString(0));
+                    genres.put(cursor.getString(0), cursor.getString(0)+" ("+nb+")");
                 } else {
                     cursor.close();
                     return genres;
