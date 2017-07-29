@@ -36,7 +36,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
-import android.view.animation.GridLayoutAnimationController;
 import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -85,17 +84,18 @@ public class MainActivity extends AppCompatActivity {
     private PlayList localSelectedPlaylist = new PlayList("All", null);
 
     // GUI elements
-    private TextView textViewReceived; //textView_conv
-    private EditText editTextConnectInfo; //editText_info
-    private Button buttonConnect; //button_connect
-    private ToggleButton buttonSetCarMode; //button_car
-    private ToggleButton buttonCollapse; //button_collapse
-    private Button buttonPrevious; //button_previous
-    private Button buttonPlay; //button_play
-    private Button buttonNext; //button_next
-    private Button buttonRewind; //button_rewind
-    private Button buttonPullup; //button_pullup
-    private Button buttonForward; //button_forward
+    private TextView textViewReceived;
+    private EditText editTextConnectInfo;
+    private Button buttonConnect;
+    private ToggleButton buttonSetDimMode;
+    private ToggleButton buttonControlsToggle;
+    private ToggleButton buttonConnectToggle;
+    private Button buttonPrevious;
+    private Button buttonPlay;
+    private Button buttonNext;
+    private Button buttonRewind;
+    private Button buttonPullup;
+    private Button buttonForward;
     private Button buttonVolUp;
     private Button buttonVolDown;
     private SeekBar seekBar;
@@ -106,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout trackInfo;
     private LinearLayout controls;
     private GridLayout connect;
-    private ToggleButton buttonConnectToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,20 +187,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        buttonSetCarMode = (ToggleButton) findViewById(R.id.button_car);
-        buttonSetCarMode.setOnClickListener(new View.OnClickListener() {
+        buttonSetDimMode = (ToggleButton) findViewById(R.id.button_dim_mode);
+        buttonSetDimMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setCarMode(!buttonSetCarMode.isChecked());
+                setDimMode(!buttonSetDimMode.isChecked());
             }
         });
 
-        buttonCollapse = (ToggleButton) findViewById(R.id.button_controls_toggle);
-        buttonCollapse.setOnClickListener(new View.OnClickListener() {
+        buttonControlsToggle = (ToggleButton) findViewById(R.id.button_controls_toggle);
+        buttonControlsToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dimOn();
-                toggleControls(!buttonCollapse.isChecked());
+                toggleControls(!buttonControlsToggle.isChecked());
             }
         });
 
@@ -317,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        setupLocalPlaylists();
+
 
         localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz Remote", "coverHash", "path", "---");
         displayedTrack = localTrack;
@@ -369,7 +368,7 @@ public class MainActivity extends AppCompatActivity {
         toggleConnect(true);
     }
 
-    private void setCarMode(boolean enable) {
+    private void setDimMode(boolean enable) {
         if(enable) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             dimOn();
@@ -466,7 +465,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.i(TAG, "MainActivity onResume");
 
-        if(!buttonSetCarMode.isChecked()) {
+        if(!buttonSetDimMode.isChecked()) {
             dimOn();
         }
         else if(!audioPlayer.isPlaying()) {
@@ -562,8 +561,6 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 try {
                     checkAbort();
-
-                    connectDatabase();
                     nbFiles=0;
                     nbFilesTotal=0;
                     checkAbort();
@@ -842,7 +839,7 @@ public class MainActivity extends AppCompatActivity {
     private void dimOn() {
         editTextConnectInfo.clearFocus();
 
-        if(!buttonSetCarMode.isChecked()) {
+        if(!buttonSetDimMode.isChecked()) {
             if (!isDimOn) {
                 //setBrightness(1);
                 dim(true);
@@ -947,7 +944,13 @@ public class MainActivity extends AppCompatActivity {
                     });
             alertDialog.show();
         } else {
+            connectDatabase();
             scanLibrayInThread();
+            ArrayList<String> genres = new ArrayList<>();
+            if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                genres = musicLibrary.getGenres();
+            }
+            setupLocalPlaylists(genres);
         }
     }
 
@@ -972,7 +975,15 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    connectDatabase();
                     scanLibrayInThread();
+                    ArrayList<String> genres = new ArrayList<>();
+                    if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                        genres = musicLibrary.getGenres();
+                    }
+                    setupLocalPlaylists(genres);
+                } else {
+                    setupLocalPlaylists(new ArrayList<String>());
                 }
             }
         }
@@ -1039,25 +1050,48 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setupLocalPlaylists() {
+    private void setupLocalPlaylists(ArrayList<String> genres) {
 
         String genreCol = "genre"; // TODO: Use musicLibraryDb.COL_GENRE
         String ratingCol = "rating"; // TODO: Use musicLibraryDb.COL_RATING
 
-        //FIXME: Generate the playlists
-        //and/or sync with JaMuz
+        //TODO: sync playlists with JaMuz
+
         localPlaylists.add(localSelectedPlaylist);
-        localPlaylists.add(new PlayList("Discover", genreCol + "!=\"Enfantin\" AND " + ratingCol + "=0"));
         localPlaylists.add(new PlayList("Top", ratingCol + "=5"));
-        localPlaylists.add(new PlayList("Top Reggae", genreCol + "=\"Reggae\" AND " + ratingCol + "=5"));
-        localPlaylists.add(new PlayList("Top Rock", genreCol + "=\"Rock\" AND " + ratingCol + "=5"));
-        localPlaylists.add(new PlayList("Top Autre", genreCol + " NOT IN (\"Rock\", \"Reggae\") AND " + ratingCol + "=5"));
-        localPlaylists.add(new PlayList("Top Enfantin", genreCol + "=\"Enfantin\" AND " + ratingCol + ">2"));
-        localPlaylists.add(new PlayList("Discover Enfantin", genreCol + "=\"Enfantin\" AND " + ratingCol + "=0"));
+        for(String genre : genres) {
+            localPlaylists.add(new PlayList("Top " + genre, genreCol + "=\"" + genre + "\" AND " + ratingCol + "=5"));
+        }
+        String in = getInSqlList(genres);
+        if(!in.equals("")) {
+            localPlaylists.add(new PlayList("Top Autre", genreCol + " NOT IN ("+in+") AND " + ratingCol + "=5"));
+        }
+        localPlaylists.add(new PlayList("Discover", genreCol + "!=\"Enfantin\" AND " + ratingCol + "=0"));
+        for(String genre : genres) {
+            localPlaylists.add(new PlayList("Discover "+genre, genreCol + "=\""+genre+"\" AND " + ratingCol + "=0"));
+        }
+        if(!genres.contains("Enfantin")) {
+            localPlaylists.add(new PlayList("Discover Enfantin", genreCol + "=\"Enfantin\" AND " + ratingCol + "=0"));
+        }
+        if(!in.equals("")) {
+            in+=",\"Enfantin\"";
+            localPlaylists.add(new PlayList("Discover Autre", genreCol + " NOT IN ("+in+") AND " + ratingCol + "=0"));
+        }
         //localPlaylists.add(new PlayList("Empty playlist (test)", genreCol + "=\"TUcroisVRaimentQUEceGENRE" +
          //       "PEUXexister????\" AND " + ratingCol + ">10000000"));
 
         setupSpinner(localPlaylists, localSelectedPlaylist);
+    }
+
+    private String getInSqlList(ArrayList<String> list) {
+        String in = "";
+        if(list.size()>0) {
+            for(String item : list) {
+                in+="\""+item+"\",";
+            }
+            in = in.substring(0, in.length()-1);
+        }
+        return in;
     }
 
     ///TODO: Detect WIFI connection to allow/disallow "Connect" button
