@@ -946,11 +946,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             connectDatabase();
             scanLibrayInThread();
-            ArrayList<String> genres = new ArrayList<>();
-            if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                genres = musicLibrary.getGenres();
-            }
-            setupLocalPlaylists(genres);
+            setupLocalPlaylists();
         }
     }
 
@@ -977,13 +973,7 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     connectDatabase();
                     scanLibrayInThread();
-                    ArrayList<String> genres = new ArrayList<>();
-                    if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                        genres = musicLibrary.getGenres();
-                    }
-                    setupLocalPlaylists(genres);
-                } else {
-                    setupLocalPlaylists(new ArrayList<String>());
+                    setupLocalPlaylists();
                 }
             }
         }
@@ -1050,7 +1040,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setupLocalPlaylists(ArrayList<String> genres) {
+    private void setupLocalPlaylists() {
 
         String genreCol = "genre"; // TODO: Use musicLibraryDb.COL_GENRE
         String ratingCol = "rating"; // TODO: Use musicLibraryDb.COL_RATING
@@ -1059,6 +1049,10 @@ public class MainActivity extends AppCompatActivity {
 
         localPlaylists.add(localSelectedPlaylist);
         localPlaylists.add(new PlayList("Top", ratingCol + "=5"));
+        ArrayList<String> genres = new ArrayList<>();
+        if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+            genres = musicLibrary.getGenres();
+        }
         for(String genre : genres) {
             localPlaylists.add(new PlayList("Top " + genre, genreCol + "=\"" + genre + "\" AND " + ratingCol + "=5"));
         }
