@@ -35,6 +35,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -85,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText editTextConnectInfo; //editText_info
     private Button buttonConnect; //button_connect
     private ToggleButton buttonSetCarMode; //button_car
+    private ToggleButton buttonCollapse; //button_collapse
     private Button buttonPrevious; //button_previous
     private Button buttonPlay; //button_play
     private Button buttonNext; //button_next
@@ -99,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
     private RatingBar ratingBar;
     private ImageView image;
     private LinearLayout trackInfo;
+    private LinearLayout controls;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -184,15 +188,16 @@ public class MainActivity extends AppCompatActivity {
         buttonSetCarMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*if(buttonSetCarMode.isChecked()) {
-                    //FIXME: Enter Car Mode
-                    toastLong("Enter Car Mode");
-                    setCarMode(true);
-                } else {
-                    //FIXME: Exit Car Mode
-                    toastLong("Exit Car Mode");
-                }*/
                 setCarMode(buttonSetCarMode.isChecked());
+            }
+        });
+
+        buttonCollapse = (ToggleButton) findViewById(R.id.button_collapse);
+        buttonCollapse.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dimOn();
+                collapse(buttonCollapse.isChecked());
             }
         });
 
@@ -250,6 +255,8 @@ public class MainActivity extends AppCompatActivity {
         image = (ImageView) findViewById(R.id.imageView);
 
         trackInfo = (LinearLayout) findViewById(R.id.trackInfo);
+
+        controls = (LinearLayout) findViewById(R.id.controls);
 
         trackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
             @Override
@@ -360,6 +367,69 @@ public class MainActivity extends AppCompatActivity {
             timer.purge();
             setBrightness(-1);
         }
+    }
+
+    private void collapse(boolean enable) {
+        //https://stackoverflow.com/questions/4946295/android-expand-collapse-animation
+        if(enable) {
+            collapse(controls);
+        } else {
+            expand(controls);
+        }
+    }
+
+    public static void expand(final View v) {
+        v.measure(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = v.getMeasuredHeight();
+
+        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
+        v.getLayoutParams().height = 1;
+        v.setVisibility(View.VISIBLE);
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                v.getLayoutParams().height = interpolatedTime == 1
+                        ? WindowManager.LayoutParams.WRAP_CONTENT
+                        : (int)(targetHeight * interpolatedTime);
+                v.requestLayout();
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(targetHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
+    }
+
+    public static void collapse(final View v) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if(interpolatedTime == 1){
+                    v.setVisibility(View.GONE);
+                }else{
+                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
     }
 
     @Override
