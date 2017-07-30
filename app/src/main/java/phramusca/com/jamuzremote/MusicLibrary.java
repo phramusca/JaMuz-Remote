@@ -50,11 +50,7 @@ public class MusicLibrary {
         return id;
     }
 
-    public ArrayList<Track> getTracks() {
-        return getTracks(new PlayList("All", "1"));
-    }
-
-    public ArrayList<Track> getTracks(PlayList playlist) {
+    public ArrayList<Track> getTracks(PlayList playlist, Track currentTrack) {
 
         ArrayList<Track> tracks = new ArrayList<>();
         Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
@@ -64,7 +60,10 @@ public class MusicLibrary {
         if(cursor != null && cursor.moveToFirst())
         {
             do {
-                tracks.add(cursorToTrack(cursor));
+                Track track = cursorToTrack(cursor);
+                if(currentTrack==null || !currentTrack.equals(track)) {
+                    tracks.add(track);
+                }
             } while(cursor.moveToNext());
         }
         cursor.close();
@@ -117,20 +116,17 @@ public class MusicLibrary {
 
     public LinkedHashMap<String, Integer> getGenres(String where) {
         LinkedHashMap<String, Integer> genres = new LinkedHashMap<>();
-        Cursor cursor = db.rawQuery("SELECT " + musicLibraryDb.COL_GENRE+", count(*) FROM "+musicLibraryDb.TABLE_TRACKS +
+        Cursor cursor = db.rawQuery("SELECT " + musicLibraryDb.COL_GENRE + ", count(*) FROM " + musicLibraryDb.TABLE_TRACKS +
                 " WHERE " + where +
-                " GROUP BY "+musicLibraryDb.COL_GENRE+" ORDER BY count(*) desc,"+musicLibraryDb.COL_GENRE, new String [] {});
+                " GROUP BY " + musicLibraryDb.COL_GENRE +
+                " HAVING count(*)>10" +
+                " ORDER BY count(*) desc," + musicLibraryDb.COL_GENRE, new String [] {});
 
         if(cursor != null && cursor.moveToFirst())
         {
             do {
                 Integer nb = cursor.getInt(1);
-                if(nb>10) {
-                    genres.put(cursor.getString(0), nb);
-                } else {
-                    cursor.close();
-                    return genres;
-                }
+                genres.put(cursor.getString(0), nb);
             } while(cursor.moveToNext());
         }
         cursor.close();

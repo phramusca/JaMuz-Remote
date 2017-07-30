@@ -28,6 +28,18 @@ public class OnSwipeTouchListener implements OnTouchListener {
         private static final int SWIPE_VELOCITY_THRESHOLD = 100;
 
         @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            onTap();
+            return super.onSingleTapUp(e);
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            onDoubleTapUp();
+            return super.onDoubleTap(e);
+        }
+
+        @Override
         public boolean onDown(MotionEvent e) {
             return true;
         }
@@ -63,18 +75,11 @@ public class OnSwipeTouchListener implements OnTouchListener {
         }
     }
 
-    public void onTouch() {
-    }
-
-    public void onSwipeRight() {
-    }
-
-    public void onSwipeLeft() {
-    }
-
-    public void onSwipeTop() {
-    }
-
-    public void onSwipeBottom() {
-    }
+    public void onTouch() {}
+    public void onTap() {}
+    public void onDoubleTapUp() {}
+    public void onSwipeRight() {}
+    public void onSwipeLeft() {}
+    public void onSwipeTop() {}
+    public void onSwipeBottom() {}
 }

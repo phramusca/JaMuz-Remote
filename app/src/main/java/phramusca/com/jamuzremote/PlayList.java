@@ -9,13 +9,13 @@ public class PlayList {
     private String query;
     MusicLibrary musicLibrary=null;
 
-    public PlayList(String name, String query) {
+    public PlayList(String name) {
         this.name = name;
-        this.query = query;
     }
 
     public PlayList(String name, String query, MusicLibrary musicLibrary) {
-        this(name, query);
+        this(name);
+        this.query = query;
         this.musicLibrary = musicLibrary;
     }
 
