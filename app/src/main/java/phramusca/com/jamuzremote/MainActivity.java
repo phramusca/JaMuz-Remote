@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                 if(spinnerSend) {
                     if(local) {
                         if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                            queue = musicLibrary.getTracks(playList, displayedTrack);
+                            queue = musicLibrary.getTracks(playList);
                         }
                         localSelectedPlaylist = playList;
                     } else {
@@ -621,7 +621,7 @@ public class MainActivity extends AppCompatActivity {
                     checkAbort();
                     //Scan deleted files
                     //TODO: No need to check what scanned previously ...
-                    List<Track> tracks = musicLibrary.getTracks(new PlayList("All"), null);
+                    List<Track> tracks = musicLibrary.getTracks(new PlayList("All"));
                     nbFiles=0;
                     for(Track track : tracks) {
                         checkAbort();
@@ -728,7 +728,7 @@ public class MainActivity extends AppCompatActivity {
         //Fill the queue
         if(queue.size()<5) {
             if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                List<Track> addToQueue = musicLibrary.getTracks((PlayList) spinner.getSelectedItem(), displayedTrack);
+                List<Track> addToQueue = musicLibrary.getTracks((PlayList) spinner.getSelectedItem());
                 queue.addAll(addToQueue);
             }
         }

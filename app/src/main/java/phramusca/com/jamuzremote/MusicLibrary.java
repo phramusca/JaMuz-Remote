@@ -50,7 +50,7 @@ public class MusicLibrary {
         return id;
     }
 
-    public ArrayList<Track> getTracks(PlayList playlist, Track currentTrack) {
+    public ArrayList<Track> getTracks(PlayList playlist) {
 
         ArrayList<Track> tracks = new ArrayList<>();
         Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
@@ -61,9 +61,7 @@ public class MusicLibrary {
         {
             do {
                 Track track = cursorToTrack(cursor);
-                if(currentTrack==null || !currentTrack.equals(track)) {
-                    tracks.add(track);
-                }
+                tracks.add(track);
             } while(cursor.moveToNext());
         }
         cursor.close();
