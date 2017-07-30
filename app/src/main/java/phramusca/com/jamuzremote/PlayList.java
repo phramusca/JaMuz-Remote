@@ -7,12 +7,16 @@ public class PlayList {
 
     private String name;
     private String query;
-    private int value;
+    MusicLibrary musicLibrary=null;
 
-    public PlayList(String name, String query, int value) {
+    public PlayList(String name, String query) {
         this.name = name;
         this.query = query;
-        this.value = value;
+    }
+
+    public PlayList(String name, String query, MusicLibrary musicLibrary) {
+        this(name, query);
+        this.musicLibrary = musicLibrary;
     }
 
     public String getQuery() {
@@ -21,10 +25,6 @@ public class PlayList {
 
     @Override
     public String toString() {
-        return name+" ("+value+")";
-    }
-
-    public String getValue() {
-        return name;
+        return musicLibrary==null?name:name+" ("+ musicLibrary.getNb(query) +")";
     }
 }

@@ -51,7 +51,7 @@ public class MusicLibrary {
     }
 
     public ArrayList<Track> getTracks() {
-        return getTracks(new PlayList("All", null, 0));
+        return getTracks(new PlayList("All", "1"));
     }
 
     public ArrayList<Track> getTracks(PlayList playlist) {
