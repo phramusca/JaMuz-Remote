@@ -99,18 +99,12 @@
         android:paddingTop="10dp" >
 
         <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <GridLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:columnCount="4"
                 android:rowCount="2"
-                android:id="@+id/gridLayout2"
-                android:layout_gravity="center_horizontal"
-                android:layout_row="1"
-                android:layout_column="0" >
+                android:id="@+id/gridLayout"
+                android:layout_gravity="center">
 
                 <Button
                     android:background="@drawable/button"
@@ -120,8 +114,8 @@
                     android:id="@+id/button_volUp"
                     android:layout_row="0"
                     android:layout_column="0"
-                    android:layout_gravity="center"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:layout_margin="1dp"/>
 
                 <Button
                     android:background="@drawable/button"
@@ -131,8 +125,8 @@
                     android:id="@+id/button_previous"
                     android:layout_row="0"
                     android:layout_column="1"
-                    android:layout_gravity="center"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:layout_margin="1dp"/>
 
                 <Button
                     android:background="@drawable/button"
@@ -142,8 +136,8 @@
                     android:id="@+id/button_play"
                     android:layout_row="0"
                     android:layout_column="2"
-                    android:layout_gravity="center"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:layout_margin="1dp"/>
 
                 <Button
                     android:background="@drawable/button"
@@ -153,8 +147,8 @@
                     android:id="@+id/button_next"
                     android:layout_row="0"
                     android:layout_column="3"
-                    android:layout_gravity="center"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:layout_margin="1dp"/>
 
                 <Button
                     android:background="@drawable/button"
@@ -164,8 +158,8 @@
                     android:id="@+id/button_volDown"
                     android:layout_row="1"
                     android:layout_column="0"
-                    android:layout_gravity="center"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:layout_margin="1dp"/>
 
                 <Button
                     android:background="@drawable/button"
@@ -175,8 +169,8 @@
                     android:id="@+id/button_rewind"
                     android:layout_row="1"
                     android:layout_column="1"
-                    android:layout_gravity="center"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:layout_margin="1dp"/>
 
                 <Button
                     android:background="@drawable/button"
@@ -186,9 +180,9 @@
                     android:id="@+id/button_pullup"
                     android:layout_row="1"
                     android:layout_column="2"
-                    android:layout_gravity="center"
                     android:textSize="20sp"
-                    android:textAllCaps="false" />
+                    android:textAllCaps="false"
+                    android:layout_margin="1dp"/>
 
                 <Button
                     android:background="@drawable/button"
@@ -198,12 +192,11 @@
                     android:id="@+id/button_forward"
                     android:layout_row="1"
                     android:layout_column="3"
-                    android:layout_gravity="center"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:layout_margin="1dp"/>
 
             </GridLayout>
 
-        </GridLayout>
     </LinearLayout>
 
     <Spinner
