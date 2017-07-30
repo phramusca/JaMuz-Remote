@@ -317,12 +317,16 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onTap() {
-                audioPlayer.togglePlay();
+                if(isDimOn) {
+                    audioPlayer.togglePlay();
+                }
             }
             @Override
             public void onDoubleTapUp() {
-                audioPlayer.pullUp();
-                audioPlayer.resume(); //As toggled by simple Tap
+                if(isDimOn) {
+                    audioPlayer.pullUp();
+                    audioPlayer.resume(); //As toggled by simple Tap
+                }
             }
         });
 
@@ -839,6 +843,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 setBrightness(on?1:0);
+                isDimOn = true;
             }
         }.start();
     }
@@ -850,9 +855,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(!buttonSetDimMode.isChecked()) {
             if (!isDimOn) {
-                //setBrightness(1);
                 dim(true);
-                isDimOn = true;
             }
             timer.cancel();
             timer.purge();
