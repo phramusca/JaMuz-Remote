@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         localSelectedPlaylist = playList;
                     } else {
-                        client.send("setPlaylist".concat(playList.getValue()));
+                        client.send("setPlaylist".concat(playList.toString()));
                     }
                 }
             }
@@ -1044,8 +1044,7 @@ public class MainActivity extends AppCompatActivity {
     private void setupLocalPlaylists() {
         //TODO: sync playlists with JaMuz
 
-        int nb = musicLibrary.getNb("1");
-        localSelectedPlaylist = new PlayList("All", null, nb);
+        localSelectedPlaylist = new PlayList("All", "1", musicLibrary);
         localPlaylists.add(localSelectedPlaylist);
 
         addToPlaylists("Top",5);
@@ -1065,7 +1064,7 @@ public class MainActivity extends AppCompatActivity {
         LinkedHashMap<String, Integer> genres = new LinkedHashMap();
         genres = musicLibrary.getGenres(where);
         for(Map.Entry<String, Integer> entry : genres.entrySet()) {
-            localPlaylists.add(new PlayList(name + " " + entry.getKey(), "genre=\"" + entry.getKey() + "\" AND " + where, entry.getValue()));
+            localPlaylists.add(new PlayList(name + " " + entry.getKey(), "genre=\"" + entry.getKey() + "\" AND " + where, musicLibrary));
         }
         if(!genres.containsKey(enfantin)) {
             addToPlaylists(name+" "+enfantin, "genre=\""+enfantin+"\" AND " + (rating>2?"rating>2":where));
@@ -1078,8 +1077,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addToPlaylists(String name, String where) {
-        int nb = musicLibrary.getNb(where);
-        localPlaylists.add(new PlayList(name, where, nb));
+        localPlaylists.add(new PlayList(name, where, musicLibrary));
     }
 
     private String getInSqlList(Map<String, Integer> list) {
@@ -1256,12 +1254,12 @@ public class MainActivity extends AppCompatActivity {
                     switch(type) {
                         case "playlists":
                             String selectedPlaylist = jObject.getString("selectedPlaylist");
-                            PlayList temp = new PlayList(selectedPlaylist, "", -1);
+                            PlayList temp = new PlayList(selectedPlaylist, "");
                             final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists");
                             final List<PlayList> playlists = new ArrayList<PlayList>();
                             for(int i=0; i<jsonPlaylists.length(); i++) {
                                 String playlist = (String) jsonPlaylists.get(i);
-                                PlayList playList = new PlayList(playlist, "", -1);
+                                PlayList playList = new PlayList(playlist, "");
                                 if(playlist.equals(selectedPlaylist)) {
                                     playList=temp;
                                 }
