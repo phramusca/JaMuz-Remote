@@ -30,6 +30,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
                 if(spinnerSend) {
                     if(local) {
                         if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                            queue = musicLibrary.getTracks(playList);
+                            queue = musicLibrary.getTracks(playList, displayedTrack);
                         }
                         localSelectedPlaylist = playList;
                     } else {
@@ -314,10 +315,16 @@ public class MainActivity extends AppCompatActivity {
             public void onTouch() {
                 dimOn();
             }
-
+            @Override
+            public void onTap() {
+                audioPlayer.togglePlay();
+            }
+            @Override
+            public void onDoubleTapUp() {
+                audioPlayer.pullUp();
+                audioPlayer.resume(); //As toggled by simple Tap
+            }
         });
-
-
 
         localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz Remote", "coverHash", "path", "---");
         displayedTrack = localTrack;
@@ -603,7 +610,7 @@ public class MainActivity extends AppCompatActivity {
                     checkAbort();
                     //Scan deleted files
                     //TODO: No need to check what scanned previously ...
-                    List<Track> tracks = musicLibrary.getTracks();
+                    List<Track> tracks = musicLibrary.getTracks(new PlayList("All"), null);
                     nbFiles=0;
                     for(Track track : tracks) {
                         checkAbort();
@@ -710,7 +717,7 @@ public class MainActivity extends AppCompatActivity {
         //Fill the queue
         if(queue.size()<5) {
             if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                List<Track> addToQueue = musicLibrary.getTracks((PlayList) spinner.getSelectedItem());
+                List<Track> addToQueue = musicLibrary.getTracks((PlayList) spinner.getSelectedItem(), displayedTrack);
                 queue.addAll(addToQueue);
             }
         }
@@ -810,6 +817,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void playAudio(String path){
         localTrack = displayedTrack;
+        setupSpinner(localPlaylists, localSelectedPlaylist);
         audioPlayer.stop(false);
         audioPlayer.play(path);
         dimOn();
@@ -1254,12 +1262,12 @@ public class MainActivity extends AppCompatActivity {
                     switch(type) {
                         case "playlists":
                             String selectedPlaylist = jObject.getString("selectedPlaylist");
-                            PlayList temp = new PlayList(selectedPlaylist, "");
+                            PlayList temp = new PlayList(selectedPlaylist);
                             final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists");
                             final List<PlayList> playlists = new ArrayList<PlayList>();
                             for(int i=0; i<jsonPlaylists.length(); i++) {
                                 String playlist = (String) jsonPlaylists.get(i);
-                                PlayList playList = new PlayList(playlist, "");
+                                PlayList playList = new PlayList(playlist);
                                 if(playlist.equals(selectedPlaylist)) {
                                     playList=temp;
                                 }
