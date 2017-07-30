@@ -1048,9 +1048,8 @@ public class MainActivity extends AppCompatActivity {
         localSelectedPlaylist = new PlayList("All", null, nb);
         localPlaylists.add(localSelectedPlaylist);
 
-        addPlaylists("Top","rating=5");
-        addPlaylists("More","rating>0 AND rating<5");
-        addPlaylists("Discover","rating=0");
+        addToPlaylists("Top",5);
+        addToPlaylists("Discover",0);
 
         //localPlaylists.add(new PlayList("Empty playlist (test)", genreCol + "=\"TUcroisVRaimentQUEceGENRE" +
          //       "PEUXexister????\" AND " + ratingCol + ">10000000"));
@@ -1058,8 +1057,9 @@ public class MainActivity extends AppCompatActivity {
         setupSpinner(localPlaylists, localSelectedPlaylist);
     }
 
-    private void addPlaylists(String name, String where) {
+    private void addToPlaylists(String name, int rating) {
         String enfantin = "Enfantin";
+        String where = "rating="+rating;
 
         addToPlaylists(name, "genre!=\""+enfantin+"\" AND " + where);
         LinkedHashMap<String, Integer> genres = new LinkedHashMap();
@@ -1067,10 +1067,10 @@ public class MainActivity extends AppCompatActivity {
         for(Map.Entry<String, Integer> entry : genres.entrySet()) {
             localPlaylists.add(new PlayList(name + " " + entry.getKey(), "genre=\"" + entry.getKey() + "\" AND " + where, entry.getValue()));
         }
-        String in = getInSqlList(genres);
         if(!genres.containsKey(enfantin)) {
-            addToPlaylists(name+" "+enfantin, "genre=\""+enfantin+"\" AND " + where);
+            addToPlaylists(name+" "+enfantin, "genre=\""+enfantin+"\" AND " + (rating>2?"rating>2":where));
         }
+        String in = getInSqlList(genres);
         if(!in.equals("")) {
             in+=",\""+enfantin+"\"";
             addToPlaylists(name+" Autre", "genre NOT IN ("+in+") AND " + where);

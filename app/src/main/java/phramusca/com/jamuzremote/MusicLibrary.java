@@ -125,7 +125,7 @@ public class MusicLibrary {
         {
             do {
                 Integer nb = cursor.getInt(1);
-                if(nb>30) {
+                if(nb>10) {
                     genres.put(cursor.getString(0), nb);
                 } else {
                     cursor.close();
