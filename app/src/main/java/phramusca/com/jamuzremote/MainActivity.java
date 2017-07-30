@@ -217,7 +217,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         buttonConnect = (Button) findViewById(R.id.button_connect);
-
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -384,12 +383,14 @@ public class MainActivity extends AppCompatActivity {
     private void setDimMode(boolean enable) {
         if(enable) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            isDimOn = false;
             dimOn();
         } else {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             timer.cancel();
             timer.purge();
             setBrightness(-1);
+            isDimOn = true;
         }
     }
 
