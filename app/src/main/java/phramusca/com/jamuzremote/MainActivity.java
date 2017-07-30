@@ -901,6 +901,7 @@ public class MainActivity extends AppCompatActivity {
                 local=enable;
                 if(!enable) {
                     buttonConnect.setText("Close");
+                    buttonConnect.setBackgroundResource(R.mipmap.connect);
                 } else {
                     setupSpinner(localPlaylists, localSelectedPlaylist);
                 }
@@ -1338,6 +1339,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 enableGUI(false);
                 buttonConnect.setText("Connect");
+                buttonConnect.setBackgroundResource(R.mipmap.disconnect);
                 buttonConnect.setEnabled(true);
                 editTextConnectInfo.setEnabled(true);
             }

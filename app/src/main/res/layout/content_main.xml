@@ -33,7 +33,7 @@
             android:layout_gravity="center"/>
 
         <Button
-            android:background="@drawable/ic_toggle_connect"
+            android:background="@mipmap/disconnect"
             android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:text="Connect"
