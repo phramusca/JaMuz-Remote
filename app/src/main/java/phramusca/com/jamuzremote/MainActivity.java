@@ -741,6 +741,7 @@ public class MainActivity extends AppCompatActivity {
             play();
 
         } else {
+            setupSpinner(localPlaylists, localSelectedPlaylist);
             toastLong("Empty Playlist.");
         }
     }
