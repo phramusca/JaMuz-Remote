@@ -127,6 +127,8 @@ public class MainActivity extends AppCompatActivity {
                     displayedTrack.setRating(Math.round(rating));
                     if(local) {
                         musicLibrary.updateTrack(displayedTrack.getId(), displayedTrack, true);
+                        //Queue may not be valid as value changed
+                        queue.clear();
                     } else {
                         client.send("setRating".concat(String.valueOf(Math.round(rating))));
                     }
