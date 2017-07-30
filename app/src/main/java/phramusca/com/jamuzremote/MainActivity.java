@@ -155,12 +155,13 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         client.send("setPlaylist".concat(playList.toString()));
                     }
+                    dimOn();
                 }
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-                // Another interface callback
+                dimOn();
             }
         });
         spinner.setOnTouchListener(new View.OnTouchListener() {
