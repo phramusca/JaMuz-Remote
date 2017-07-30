@@ -319,13 +319,16 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onTap() {
-                if(isDimOn) {
+                if(!local) {
+                    client.send("playTrack");
+                }
+                else if(local && isDimOn) {
                     audioPlayer.togglePlay();
                 }
             }
             @Override
             public void onDoubleTapUp() {
-                if(isDimOn) {
+                if(local && isDimOn) {
                     audioPlayer.pullUp();
                     audioPlayer.resume(); //As toggled by simple Tap
                 }
