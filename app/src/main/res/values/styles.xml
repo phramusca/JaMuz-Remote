@@ -1,5 +1,16 @@
 <resources>
 
+    <!-- Application theme. -->
+    <!-- FIXME: Make some themes  -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <!-- Controls styles. -->
+    <!-- FIXME: Why seen as themes ? Alternative ?  -->
     <style name="RatingBar" parent="Theme.AppCompat">
         <item name="colorControlNormal">@color/duskYellow</item>
         <item name="colorControlActivated">@color/lightYellow</item>
@@ -9,35 +20,11 @@
         <item name="colorControlActivated">#6d6f7c</item>
         <item name="colorControlNormal">#6d6f7c</item>
         <item name="android:textColor">#6d6f7c</item>
-
     </style>
 
-    <style name="Widget.Button.Toggle" parent="android:Widget">
-        <item name="android:background">@drawable/ic_toggle_bg_controls</item>
-        <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
-    </style>
-
-    <style name="toggleButton"  parent="Theme.AppCompat">
-        <item name="android:buttonStyleToggle">@style/Widget.Button.Toggle</item>
+    <style name="ToggleButton" parent="Theme.AppCompat">
         <item name="android:textOn"></item>
         <item name="android:textOff"></item>
     </style>
-
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-    </style>
-
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>

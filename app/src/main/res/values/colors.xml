@@ -8,4 +8,6 @@
     <!--Rating bar-->
     <color name="duskYellow">#a69d62</color>
     <color name="lightYellow">#d1bc6e</color>
+
+    <color name="background_color">#606060</color>
 </resources>
