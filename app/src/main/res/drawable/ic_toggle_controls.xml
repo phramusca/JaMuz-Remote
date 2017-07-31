@@ -2,9 +2,9 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:state_checked="false"
-        android:drawable="@mipmap/plus_button" />
+        android:drawable="@drawable/buttons_normal" />
 
     <item android:state_checked="true"
-        android:drawable="@mipmap/prohibition_button" />
+        android:drawable="@drawable/buttons_red" />
 
 </selector>

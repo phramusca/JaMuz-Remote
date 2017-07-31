@@ -2,9 +2,9 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:state_checked="false"
-        android:drawable="@mipmap/lightbulb_off" />
+        android:drawable="@drawable/screen_on" />
 
     <item android:state_checked="true"
-        android:drawable="@mipmap/lightbulb" />
+        android:drawable="@drawable/screen_off" />
 
 </selector>

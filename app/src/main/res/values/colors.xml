@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--Default application -->
     <color name="colorPrimary">#626D6E</color>
     <color name="colorPrimaryDark">#434C4D</color>
     <color name="colorAccent">#D34B24</color>
+
+    <!--Rating bar-->
+    <color name="duskYellow">#a69d62</color>
+    <color name="lightYellow">#d1bc6e</color>
 </resources>

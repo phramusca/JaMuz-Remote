@@ -30,7 +30,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -65,6 +64,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+
+//FIXME: Support Themes
+//http://www.hidroh.com/2015/02/25/support-multiple-themes-android-app-part-2/
 
 public class MainActivity extends AppCompatActivity {
 
@@ -214,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dimOn();
-                toggleConnect(!buttonConnectToggle.isChecked());
+                toggleConfig(!buttonConnectToggle.isChecked());
             }
         });
 
@@ -224,6 +226,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dimOn();
                 enableGUI(false);
+                buttonConnect.setBackgroundResource(R.drawable.connect_ongoing);
                 if(buttonConnect.getText().equals("Connect")) {
                     CallBackReception callBackReception = new CallBackReception();
 
@@ -382,7 +385,7 @@ public class MainActivity extends AppCompatActivity {
         //startService(service);
 
         toggleControls(true);
-        toggleConnect(true);
+        toggleConfig(true);
     }
 
     private void setDimMode(boolean enable) {
@@ -399,7 +402,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void toggleConnect(boolean collapse) {
+    private void toggleConfig(boolean collapse) {
         if(collapse) {
             collapse(connect);
         } else {
@@ -835,8 +838,6 @@ public class MainActivity extends AppCompatActivity {
         dimOn();
     }
 
-    //FIXME: Try http://android.okhelp.cz/turn-screen-on-off-android-sample-code/
-
     private void dim(final boolean on) {
         CountDownTimer countDownTimer = new CountDownTimer(500,50) {
             private float brightness=on?0:1;
@@ -901,8 +902,9 @@ public class MainActivity extends AppCompatActivity {
                 local=enable;
                 if(!enable) {
                     buttonConnect.setText("Close");
-                    buttonConnect.setBackgroundResource(R.mipmap.connect);
+                    buttonConnect.setBackgroundResource(R.drawable.connect_on);
                 } else {
+                    buttonConnect.setBackgroundResource(R.drawable.connect_off);
                     setupSpinner(localPlaylists, localSelectedPlaylist);
                 }
                 editTextConnectInfo.setEnabled(enable);
@@ -1339,7 +1341,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 enableGUI(false);
                 buttonConnect.setText("Connect");
-                buttonConnect.setBackgroundResource(R.mipmap.disconnect);
+                buttonConnect.setBackgroundResource(R.drawable.connect_off);
                 buttonConnect.setEnabled(true);
                 editTextConnectInfo.setEnabled(true);
             }
