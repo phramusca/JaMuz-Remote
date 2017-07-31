@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:weightSum="1"
-    android:background="#606060"
+    android:background="@color/background_color"
     tools:showIn="@layout/activity_main">
 
     <GridLayout
@@ -19,8 +19,8 @@
             android:layout_column="0"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
-            style="@style/toggleButton"
-            android:background="@drawable/ic_toggle_bg_controls" />
+            style="@style/ToggleButton"
+            android:background="@drawable/ic_toggle_controls" />
 
         <ToggleButton
             android:id="@+id/button_dim_mode"
@@ -28,8 +28,8 @@
             android:layout_column="1"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
-            style="@style/toggleButton"
-            android:background="@drawable/ic_toggle_bg_lightbulb"
+            style="@style/ToggleButton"
+            android:background="@drawable/ic_toggle_lightbulb"
             android:layout_gravity="center"/>
 
         <Button
@@ -50,8 +50,8 @@
             android:layout_column="3"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
-            style="@style/toggleButton"
-            android:background="@drawable/ic_toggle_bg_config" />
+            style="@style/ToggleButton"
+            android:background="@drawable/ic_toggle_config" />
 
     </GridLayout>
 
@@ -189,7 +189,7 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
         android:popupBackground="#DDFFFFFF"
-        android:background="@drawable/gradient_spinner" />
+        android:background="@drawable/ic_gradient_spinner" />
 
     <RatingBar
         android:layout_width="wrap_content"
