@@ -33,8 +33,8 @@
             android:layout_gravity="center"/>
 
         <Button
-            android:background="@mipmap/disconnect"
-            android:layout_width="60dp"
+            android:background="@drawable/connect_off"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:text="Connect"
             android:id="@+id/button_connect"
@@ -88,8 +88,6 @@
             android:layout_row="0"
             android:layout_column="2"
             android:theme="@style/EditText" />
-
-
     </GridLayout>
 
     <LinearLayout
@@ -108,92 +106,72 @@
                 android:layout_gravity="center">
 
                 <Button
-                    android:background="@drawable/button"
-                    android:layout_width="40dp"
+                    android:background="@drawable/ic_button_up"
+                    android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="+"
                     android:id="@+id/button_volUp"
                     android:layout_row="0"
                     android:layout_column="0"
-                    android:textSize="20sp"
-                    android:layout_margin="1dp"/>
+                    android:layout_marginRight="20dp"
+                    android:layout_marginBottom="5dp"/>
 
                 <Button
-                    android:background="@drawable/button"
-                    android:layout_width="wrap_content"
+                    android:background="@drawable/ic_button_previous"
+                    android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="&lt;="
                     android:id="@+id/button_previous"
                     android:layout_row="0"
                     android:layout_column="1"
-                    android:textSize="20sp"
-                    android:layout_margin="1dp"/>
+                    android:layout_marginRight="5dp"/>
 
                 <Button
-                    android:background="@drawable/button"
-                    android:layout_width="wrap_content"
+                    android:background="@drawable/ic_button_play"
+                    android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="|| &gt;"
                     android:id="@+id/button_play"
                     android:layout_row="0"
                     android:layout_column="2"
-                    android:textSize="20sp"
-                    android:layout_margin="1dp"/>
+                    android:layout_marginRight="5dp"/>
 
                 <Button
-                    android:background="@drawable/button"
-                    android:layout_width="wrap_content"
+                    android:background="@drawable/ic_button_next"
+                    android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="=&gt;"
                     android:id="@+id/button_next"
                     android:layout_row="0"
-                    android:layout_column="3"
-                    android:textSize="20sp"
-                    android:layout_margin="1dp"/>
+                    android:layout_column="3"/>
 
                 <Button
-                    android:background="@drawable/button"
-                    android:layout_width="40dp"
+                    android:background="@drawable/ic_button_down"
+                    android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="-"
                     android:id="@+id/button_volDown"
                     android:layout_row="1"
-                    android:layout_column="0"
-                    android:textSize="20sp"
-                    android:layout_margin="1dp"/>
+                    android:layout_column="0"/>
 
                 <Button
-                    android:background="@drawable/button"
-                    android:layout_width="wrap_content"
+                    android:background="@drawable/ic_button_rewind"
+                    android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="&lt;&lt;"
                     android:id="@+id/button_rewind"
                     android:layout_row="1"
-                    android:layout_column="1"
-                    android:textSize="20sp"
-                    android:layout_margin="1dp"/>
+                    android:layout_column="1"/>
 
                 <Button
-                    android:background="@drawable/button"
-                    android:layout_width="wrap_content"
+                    android:background="@drawable/ic_button_pullup"
+                    android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="Poulp"
                     android:id="@+id/button_pullup"
                     android:layout_row="1"
-                    android:layout_column="2"
-                    android:textSize="20sp"
-                    android:textAllCaps="false"
-                    android:layout_margin="1dp"/>
+                    android:layout_column="2"/>
 
                 <Button
-                    android:background="@drawable/button"
-                    android:layout_width="wrap_content"
+                    android:background="@drawable/ic_button_forward"
+                    android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="&gt;&gt;"
                     android:id="@+id/button_forward"
                     android:layout_row="1"
                     android:layout_column="3"
-                    android:textSize="20sp"
                     android:layout_margin="1dp"/>
 
             </GridLayout>
@@ -210,7 +188,7 @@
         android:paddingRight="20dp"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
-        android:popupBackground="#DFFFFFFF"
+        android:popupBackground="#DDFFFFFF"
         android:background="@drawable/gradient_spinner" />
 
     <RatingBar

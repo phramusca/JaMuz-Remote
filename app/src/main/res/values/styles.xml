@@ -1,5 +1,28 @@
 <resources>
 
+    <style name="RatingBar" parent="Theme.AppCompat">
+        <item name="colorControlNormal">@color/duskYellow</item>
+        <item name="colorControlActivated">@color/lightYellow</item>
+    </style>
+
+    <style name="EditText" parent="Theme.AppCompat">
+        <item name="colorControlActivated">#6d6f7c</item>
+        <item name="colorControlNormal">#6d6f7c</item>
+        <item name="android:textColor">#6d6f7c</item>
+
+    </style>
+
+    <style name="Widget.Button.Toggle" parent="android:Widget">
+        <item name="android:background">@drawable/ic_toggle_bg_controls</item>
+        <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
+    </style>
+
+    <style name="toggleButton"  parent="Theme.AppCompat">
+        <item name="android:buttonStyleToggle">@style/Widget.Button.Toggle</item>
+        <item name="android:textOn"></item>
+        <item name="android:textOff"></item>
+    </style>
+
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
@@ -16,28 +39,5 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <style name="RatingBar" parent="Theme.AppCompat">
-        <item name="colorControlNormal">@color/duskYellow</item>
-        <item name="colorControlActivated">@color/lightYellow</item>
-    </style>
-
-    <style name="EditText" parent="Theme.AppCompat">
-        <item name="colorControlActivated">#6d6f7c</item>
-    </style>
-
-    <color name="duskYellow">#a69d62</color>
-    <color name="lightYellow">#d1bc6e</color>
-
-    <style name="Widget.Button.Toggle" parent="android:Widget">
-        <item name="android:background">@drawable/ic_toggle_bg_controls</item>
-        <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
-    </style>
-
-    <style name="toggleButton"  parent="Theme.AppCompat">
-        <item name="android:buttonStyleToggle">@style/Widget.Button.Toggle</item>
-        <item name="android:textOn"></item>
-        <item name="android:textOff"></item>
-    </style>
 
 </resources>

@@ -11,7 +11,7 @@ import android.util.Log;
 public class ReceiverHeadSetPlugged extends BroadcastReceiver {
 
     private static final String TAG = ReceiverHeadSetPlugged.class.getName();
-    private boolean headsetConnected = false; //TODO: not static, how can this be usefull ?
+    private boolean headsetConnected = false;
 
     public void onReceive(Context context, Intent intent) {
         if (intent.hasExtra("state")){
