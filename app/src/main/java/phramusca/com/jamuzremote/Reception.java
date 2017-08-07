@@ -7,25 +7,25 @@ package phramusca.com.jamuzremote;
  */
 
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import static phramusca.com.jamuzremote.MainActivity.getExtSDcard;
 
 public class Reception  extends ProcessAbstract {
 
+    private static final String TAG = ProcessAbstract.class.getName();
 	private final BufferedReader bufferedReader;
 	private InputStream inputStream;
 	private final ICallBackReception callback;
@@ -48,7 +48,7 @@ public class Reception  extends ProcessAbstract {
 				checkAbort();
 				String msg = bufferedReader.readLine();
                 if(msg==null) {
-                    System.out.println("null");
+                    Log.i(TAG, "RECEIVED null");
                     callback.disconnected();
                 }
                 else if (msg.startsWith("MSG_")) {
@@ -56,17 +56,51 @@ public class Reception  extends ProcessAbstract {
                 }
                 else if (msg.startsWith("JSON_")) {
                     callback.received(msg.substring(5));
-                } else if (msg.equals("SENDING_COVER")) {
+                }
+				else if (msg.equals("SENDING_COVER")) {
                     Bitmap bitmap=null;
                     try {
                         bitmap = BitmapFactory.decodeStream(inputStream);
-                        System.out.println("receivedBitmap");
+                        Log.i(TAG, "receivedBitmap");
                     } catch (OutOfMemoryError ex) {
                     } finally {
-                        System.out.println("receivedBitmap: calling callback");
+                        Log.i(TAG, "receivedBitmap: calling callback");
                         callback.receivedBitmap(bitmap);
                     }
                 }
+				else if (msg.startsWith("SENDING_FILE")) {
+                    int idFile = -1;
+                    try {
+
+                        idFile = Integer.valueOf(msg.substring("SENDING_FILE".length()));
+                        Log.i(TAG, "receivedFile "+idFile);
+                        File path =  getExtSDcard("/storage/", "JaMuz");
+                        //FIXME: Write to SD card !!
+                        /*File path = new File("/storage/3515-1C15/Android/data/jamuzremote.com.phramusca");
+                        if(!path.exists()) {
+                            path.mkdirs();
+                        }*/
+
+
+                        DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
+                        long fileSize = dis.readLong();
+                        FileOutputStream fos =  new FileOutputStream(path.getAbsolutePath()+File.separator+idFile);
+                        byte[] buf = new byte[1024]; // Adjust if you want
+                        int bytesRead;
+                        while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int)Math.min(buf.length, fileSize))) != -1)
+                        {
+                            fos.write(buf,0,bytesRead);
+                            fileSize -= bytesRead;
+                        }
+                        fos.close();
+					}
+                    catch (IOException | OutOfMemoryError /* | JSONException*/ ex) {
+                        Log.e(TAG, "receivedFile", ex);
+                    } finally {
+                        Log.i(TAG, "receivedFile: calling callback");
+						callback.receivedFile(idFile);
+					}
+				}
 			}
 		} catch (InterruptedException ex) {
 		} catch (IOException ex) {
@@ -78,5 +112,21 @@ public class Reception  extends ProcessAbstract {
 			}
 		}
 	}
+
+    /**
+     *
+     * @param input
+     * @param output
+     * @throws IOException
+     */
+    public static void copyStream(InputStream input, OutputStream output) throws IOException {
+        byte[] buffer = new byte[1024]; // Adjust if you want
+        int bytesRead;
+        while ((bytesRead = input.read(buffer)) != -1)
+        {
+            output.write(buffer, 0, bytesRead);
+            Log.i(TAG, String.valueOf(bytesRead));
+        }
+    }
 
 }

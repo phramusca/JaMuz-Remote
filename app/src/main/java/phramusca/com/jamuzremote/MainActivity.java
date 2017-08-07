@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -338,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz Remote", "coverHash", "path", "---");
+        localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz Remote", "coverHash", "relativeFullPath", "---");
         displayedTrack = localTrack;
         setTextView(textViewReceived, Html.fromHtml("<html><h1>".concat(displayedTrack.toString()).concat("<BR/></h1></html>")), false);
 
@@ -386,6 +387,8 @@ public class MainActivity extends AppCompatActivity {
 
         toggleControls(true);
         toggleConfig(true);
+
+        setDimMode(!buttonSetDimMode.isChecked());
     }
 
     private void setDimMode(boolean enable) {
@@ -555,7 +558,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static File pathToFiles;
 
-    private File getExtSDcard(String path, String search) {
+    public static File getExtSDcard(String path, String search) {
         File f = new File(path);
         File[] files = f.listFiles();
 
@@ -868,23 +871,23 @@ public class MainActivity extends AppCompatActivity {
             }
             timer.cancel();
             timer.purge();
-            Log.i(TAG, "timerTask cancelled");
+            Log.d(TAG, "timerTask cancelled");
             timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    Log.i(TAG, "timerTask performed");
+                    Log.d(TAG, "timerTask performed");
                     setBrightness(0);
                     //dim(false);
                     isDimOn = false;
                 }
             }, 5 * 1000);
-            Log.i(TAG, "timerTask scheduled");
+            Log.d(TAG, "timerTask scheduled");
         }
     }
 
     private void setBrightness(final float brightness) {
-        Log.i(TAG, "setBrightness("+brightness+");");
+        Log.d(TAG, "setBrightness("+brightness+");");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -1305,6 +1308,19 @@ public class MainActivity extends AppCompatActivity {
                                     jObject.getString("genre"));
                             displayTrack();
                             break;
+                        case "FilesToGet":
+                            filesToGet = new HashMap<>();
+                            JSONArray files = (JSONArray) jObject.get("files");
+                            for(int i=0; i<files.length(); i++) {
+                                JSONObject file = (JSONObject) files.get(i);
+                                String relativeFullPath = file.getString("path");
+                                double size = file.getDouble("size");
+                                int id = file.getInt("idFile");
+                                //FIXME: Do not add if file already exists with proper size
+                                filesToGet.put(id, new FileInfoReception(relativeFullPath, size, id));
+                            }
+                            requestNextFile();
+                            break;
                     }
                 } catch (JSONException e) {
                     setTextView(textViewReceived, Html.fromHtml(e.toString()), false);
@@ -1312,10 +1328,54 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        private void requestNextFile() {
+            if(filesToGet.size()>0) {
+                client.send("sendFile"+filesToGet.entrySet().iterator().next().getKey());
+            }
+        }
+
+        private Map<Integer, FileInfoReception> filesToGet = new HashMap<>();
+
+        @Override
+        public void receivedFile(final int idFile) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    toastLong("Received file "+idFile);
+                }
+            });
+
+            if(filesToGet.containsKey(idFile)) {
+                FileInfoReception fileInfoReception = filesToGet.get(idFile);
+                //FIXME: Find the sd card id
+                File dir = getFilesDir();
+                /*File path = new File("/storage/3515-1C15/Android/data/jamuzremote.com.phramusca");
+                if(!path.exists()) {
+                    path.mkdirs();
+                }
+                //*/File path =  getExtSDcard("/storage/", "JaMuz");
+                File sourceFile = new File(path.getAbsolutePath()+File.separator+idFile);
+                File destinationFile = new File(path.getAbsolutePath()+File.separator+fileInfoReception.relativeFullPath);
+                if(sourceFile.exists()) {
+                    if(!destinationFile.exists()) {
+                        File destinationPath = new File(path.getAbsolutePath()+File.separator+new File(fileInfoReception.relativeFullPath).getParent());
+                        destinationPath.mkdirs();
+                        sourceFile.renameTo(destinationFile);
+                    }
+                }
+                filesToGet.remove(idFile);
+            }
+            //FIXME: Check file size and remove from list if received
+            //or from disk if size is incorrect
+            //FIXME: Scan library again when list is empty
+            //FIXME: limit number of retries
+            requestNextFile();
+        }
+
         @Override
         public void receivedBitmap(final Bitmap bitmap) {
-            System.out.println("receivedBitmap: callback");
-            System.out.println(bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight());
+            Log.i(TAG, "receivedBitmap: callback");
+            Log.i(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight());
 
             if (!coverMap.containsKey(displayedTrack.getCoverHash())) {
                 if (bitmap != null) { //Save to cache
@@ -1328,6 +1388,18 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void disconnected() {
             stopRemote();
+        }
+    }
+
+    class FileInfoReception {
+        public String relativeFullPath;
+        public double size;
+        public int idFile;
+
+        public FileInfoReception(String relativeFullPath, double size, int idFile) {
+            this.relativeFullPath = relativeFullPath;
+            this.size = size;
+            this.idFile = idFile;
         }
     }
 
