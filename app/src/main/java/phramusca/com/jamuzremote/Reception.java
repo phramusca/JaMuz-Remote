@@ -79,7 +79,7 @@ public class Reception  extends ProcessAbstract {
                         Log.i(TAG, "receivedFile: "+fileSize);
                         //FIXME: fileSize can be (very) wrong for some reasons
                         //=> Send info in json so that we are sure of the information
-                        long fileMax=20000000; // > 20MB is big enough. Not sure it would work
+                        long fileMax=20000000; // > 20MB is big enough. Not sure it would even work
                         if(fileSize<fileMax && fileSize>0) {
                             FileOutputStream fos = new FileOutputStream(path.getAbsolutePath() + File.separator + idFile);
                             byte[] buf = new byte[1024]; // Adjust if you want
@@ -92,6 +92,8 @@ public class Reception  extends ProcessAbstract {
                             fos.close();
                         } else {
                             Log.e(TAG, "Size over limits !!!");
+                            //FIXME: Even if aborting the buffer is corrupted !!
+                            //Needs to close and reopen connection
                         }
 					}
                     catch (IOException | OutOfMemoryError ex) {
@@ -100,7 +102,9 @@ public class Reception  extends ProcessAbstract {
                         Log.i(TAG, "receivedFile: calling callback");
 						callback.receivedFile(idFile);
 					}
-				}
+				} else {
+                    Log.v(TAG, msg);
+                }
 			}
 		} catch (InterruptedException ex) {
 		} catch (IOException ex) {
