@@ -76,17 +76,25 @@ public class Reception  extends ProcessAbstract {
                         File path = getAppDataPath();
                         DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
                         long fileSize = dis.readLong();
-                        FileOutputStream fos =  new FileOutputStream(path.getAbsolutePath()+File.separator+idFile);
-                        byte[] buf = new byte[1024]; // Adjust if you want
-                        int bytesRead;
-                        while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int)Math.min(buf.length, fileSize))) != -1)
-                        {
-                            fos.write(buf,0,bytesRead);
-                            fileSize -= bytesRead;
+                        Log.i(TAG, "receivedFile: "+fileSize);
+                        //FIXME: fileSize can be (very) wrong for some reasons
+                        //=> Send info in json so that we are sure of the information
+                        long fileMax=20000000; // > 20MB is big enough. Not sure it would work
+                        if(fileSize<fileMax && fileSize>0) {
+                            FileOutputStream fos = new FileOutputStream(path.getAbsolutePath() + File.separator + idFile);
+                            byte[] buf = new byte[1024]; // Adjust if you want
+                            int bytesRead;
+                            while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
+                                fos.write(buf, 0, bytesRead);
+                                fileSize -= bytesRead;
+                                Log.d(TAG, "receivedFile: " + fileSize);
+                            }
+                            fos.close();
+                        } else {
+                            Log.e(TAG, "Size over limits !!!");
                         }
-                        fos.close();
 					}
-                    catch (IOException | OutOfMemoryError /* | JSONException*/ ex) {
+                    catch (IOException | OutOfMemoryError ex) {
                         Log.e(TAG, "receivedFile", ex);
                     } finally {
                         Log.i(TAG, "receivedFile: calling callback");
