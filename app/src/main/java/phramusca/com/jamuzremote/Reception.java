@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-import static phramusca.com.jamuzremote.MainActivity.getExtSDcard;
+import static phramusca.com.jamuzremote.MainActivity.getAppDataPath;
 
 public class Reception  extends ProcessAbstract {
 
@@ -71,17 +71,9 @@ public class Reception  extends ProcessAbstract {
 				else if (msg.startsWith("SENDING_FILE")) {
                     int idFile = -1;
                     try {
-
                         idFile = Integer.valueOf(msg.substring("SENDING_FILE".length()));
                         Log.i(TAG, "receivedFile "+idFile);
-                        File path =  getExtSDcard("/storage/", "JaMuz");
-                        //FIXME: Write to SD card !!
-                        /*File path = new File("/storage/3515-1C15/Android/data/jamuzremote.com.phramusca");
-                        if(!path.exists()) {
-                            path.mkdirs();
-                        }*/
-
-
+                        File path = getAppDataPath();
                         DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
                         long fileSize = dis.readLong();
                         FileOutputStream fos =  new FileOutputStream(path.getAbsolutePath()+File.separator+idFile);
