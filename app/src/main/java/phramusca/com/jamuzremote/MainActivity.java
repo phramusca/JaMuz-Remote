@@ -349,9 +349,13 @@ public class MainActivity extends AppCompatActivity {
         buttonConnect.setEnabled(true);
 
         //TODO: MAke this an option somehow
-        pathToFiles = getExtSDcard("/storage/", "Android/data/com.theolivetree.sshserver/files/");
-        //  /storage/3515-1C15/Android/data/com.theolivetree.sshserver/files/";
 
+        //The following call creates default application folder
+        // - in "external" card, the emulated one : /storage/emulated/0/Android//com.phramusca.jamuz/files
+        // - and in real removable sd card : /storage/xxxx-xxxx/Android/com.phramusca.jamuz/files
+        externalFilesDir = getExternalFilesDirs(null);
+        //Then request for permissions.
+        // When allowed, starts database update.
         checkPermissions();
 
         CallBackPlayer callBackPlayer = new CallBackPlayer();
@@ -389,6 +393,8 @@ public class MainActivity extends AppCompatActivity {
         toggleConfig(true);
 
         setDimMode(!buttonSetDimMode.isChecked());
+
+
     }
 
     private void setDimMode(boolean enable) {
@@ -558,8 +564,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static File pathToFiles;
 
-    public static File getExtSDcard(String path, String search) {
-        File f = new File(path);
+    public static File getExtSDcard(String path) {
+        /*File f = new File(path);
         File[] files = f.listFiles();
 
         if (files != null) {
@@ -573,15 +579,42 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
+        }*/
+        String removableStoragePath;
+        File fileList[] = new File("/storage/").listFiles();
+        for (File file : fileList)
+        {
+            if(!file.getAbsolutePath().equalsIgnoreCase(Environment.getExternalStorageDirectory().getAbsolutePath()) && file.isDirectory() && file.canRead())
+                return new File(file.getAbsolutePath()+File.separator+path);
         }
         //If not found, use external storage which turns out to be ... internal SD card + internal phone memory
         //filtered and emulated
         // and not the actual external SD card as any could expect
-        return new File(Environment.getExternalStorageDirectory()+"/JaMuz");
+        return new File(Environment.getExternalStorageDirectory()+File.separator+"JaMuz");
                 //+File.separator+"Android/data/"+BuildConfig.APPLICATION_ID);
     }
 
+    private static File[] externalFilesDir;
+
+    public static File getAppDataPath() {
+
+        File path =  externalFilesDir[1];
+        /*
+        File path = getExtSDcard("Android/data/org.phramusca.jamuz/");
+        //File path = new File("/storage/3515-1C15/Android/data/org.phramusca.jamuz/files/");
+        if(!path.exists()) {
+            path.mkdir();
+        }
+        path = getExtSDcard("Android/data/org.phramusca.jamuz/files/");*/
+        if(!path.exists()) {
+            path.mkdirs();
+        }
+        return path;
+        //FIXME: Write to SD card !!
+    }
+
     private void scanLibrayInThread() {
+        pathToFiles = getAppDataPath();
         scanLibray = new ProcessAbstract("Thread.MainActivity.scanLibrayInThread") {
             public void run() {
                 try {
@@ -661,17 +694,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 else {
                                     String absolutePath=file.getAbsolutePath();
-
-                                    int id = musicLibrary.getTrack(absolutePath);
-                                    if(id>=0) {
-                                        Log.v(TAG, "browseFS updateTrack " + absolutePath);
-                                        //FIXME: Update if file is modified only:
-                                        //based on lastModificationDate and/or size (not on content as longer than updateTrack)
-                                        //musicLibrary.updateTrack(id, track, false);
-                                    } else {
-                                        Log.v(TAG, "browseFS insertTrack " + absolutePath);
-                                        musicLibrary.insertTrack(getTrack(file));
-                                    }
+                                    insertOrUpdateTrackInDatabase(absolutePath);
                                     toastNbFile("JaMuz scan ", 200);
                                 }
                             }
@@ -703,13 +726,25 @@ public class MainActivity extends AppCompatActivity {
         scanLibray.start();
     }
 
+    private void insertOrUpdateTrackInDatabase(String absolutePath) {
+        int id = musicLibrary.getTrack(absolutePath);
+        if(id>=0) {
+            Log.v(TAG, "browseFS updateTrack " + absolutePath);
+            //FIXME: Update if file is modified only:
+            //based on lastModificationDate and/or size (not on content as longer than updateTrack)
+            //musicLibrary.updateTrack(id, track, false);
+        } else {
+            Log.v(TAG, "browseFS insertTrack " + absolutePath);
+            musicLibrary.insertTrack(getTrack(absolutePath));
+        }
+    }
+
     private void connectDatabase() {
         musicLibrary = new MusicLibrary(this);
         musicLibrary.open();
     }
 
-    private Track getTrack(File file) {
-        String absolutePath=file.getAbsolutePath();
+    private Track getTrack(String absolutePath) {
 
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         mmr.setDataSource(absolutePath);
@@ -937,7 +972,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static final int REQUEST= 112;
+    private static final int REQUEST = 112;
 
     private final String[] PERMISSIONS = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -1310,15 +1345,24 @@ public class MainActivity extends AppCompatActivity {
                             break;
                         case "FilesToGet":
                             filesToGet = new HashMap<>();
+                            filesToKeep = new HashMap<>();
                             JSONArray files = (JSONArray) jObject.get("files");
                             for(int i=0; i<files.length(); i++) {
                                 JSONObject file = (JSONObject) files.get(i);
                                 String relativeFullPath = file.getString("path");
                                 double size = file.getDouble("size");
                                 int id = file.getInt("idFile");
-                                //FIXME: Do not add if file already exists with proper size
-                                filesToGet.put(id, new FileInfoReception(relativeFullPath, size, id));
+                                File localFile = new File(getAppDataPath(), relativeFullPath);
+                                FileInfoReception fileReceived = new FileInfoReception(relativeFullPath, size, id);
+                                filesToKeep.put(id, fileReceived);
+                                if(!localFile.exists()) {
+                                    filesToGet.put(id, fileReceived);
+                                } else {
+                                    client.send("insertDeviceFile"+id);
+                                }
                             }
+                            //FIXME: Remove other files and request server back to remove from deviceFile table
+                            //Use filesToKeep for that purpose
                             requestNextFile();
                             break;
                     }
@@ -1335,6 +1379,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private Map<Integer, FileInfoReception> filesToGet = new HashMap<>();
+        private Map<Integer, FileInfoReception> filesToKeep = new HashMap<>();
 
         @Override
         public void receivedFile(final int idFile) {
@@ -1347,13 +1392,7 @@ public class MainActivity extends AppCompatActivity {
 
             if(filesToGet.containsKey(idFile)) {
                 FileInfoReception fileInfoReception = filesToGet.get(idFile);
-                //FIXME: Find the sd card id
-                File dir = getFilesDir();
-                /*File path = new File("/storage/3515-1C15/Android/data/jamuzremote.com.phramusca");
-                if(!path.exists()) {
-                    path.mkdirs();
-                }
-                //*/File path =  getExtSDcard("/storage/", "JaMuz");
+                File path = getAppDataPath();
                 File sourceFile = new File(path.getAbsolutePath()+File.separator+idFile);
                 File destinationFile = new File(path.getAbsolutePath()+File.separator+fileInfoReception.relativeFullPath);
                 if(sourceFile.exists()) {
@@ -1363,10 +1402,12 @@ public class MainActivity extends AppCompatActivity {
                         sourceFile.renameTo(destinationFile);
                     }
                 }
-                filesToGet.remove(idFile);
+                if(destinationFile.exists() && destinationFile.length()==fileInfoReception.size) {
+                    filesToGet.remove(idFile);
+                    client.send("insertDeviceFile"+idFile);
+                    insertOrUpdateTrackInDatabase(destinationFile.getAbsolutePath());
+                }
             }
-            //FIXME: Check file size and remove from list if received
-            //or from disk if size is incorrect
             //FIXME: Scan library again when list is empty
             //FIXME: limit number of retries
             requestNextFile();
