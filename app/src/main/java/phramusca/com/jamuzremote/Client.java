@@ -47,6 +47,7 @@ public class Client {
 			socket = new Socket(address, port);
             if(!socket.isConnected()) {
                 socket.connect(new InetSocketAddress(address, port));
+				socket.setSoTimeout(10000);
             }
 
             inputStream = socket.getInputStream();

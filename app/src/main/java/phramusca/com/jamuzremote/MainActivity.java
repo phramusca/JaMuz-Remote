@@ -958,6 +958,7 @@ public class MainActivity extends AppCompatActivity {
                 if(!enable) {
                     buttonConnect.setText("Close");
                     buttonConnect.setBackgroundResource(R.drawable.connect_on);
+                    requestNextFile();
                 } else {
                     buttonConnect.setBackgroundResource(R.drawable.connect_off);
                     setupSpinner(localPlaylists, localSelectedPlaylist);
@@ -1389,33 +1390,15 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        private void requestNextFile() {
-            if(filesToGet.size()>0) {
-                client.send("sendFile"+filesToGet.entrySet().iterator().next().getKey());
-            } else {
-                //FIXME: Scan library again when list is empty
-                scanLibrayInThread();
-                //checkPermissions();
-            }
-        }
-
-        private Map<Integer, FileInfoReception> filesToGet = new HashMap<>();
-        private Map<Integer, FileInfoReception> filesToKeep = new HashMap<>();
-
         @Override
         public void receivedFile(final int idFile) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    toastLong("Received file "+idFile);
-                }
-            });
+            Log.i(TAG, "Received file "+filesToGet.size()+" bytes. idFile="+idFile);
 
             if(filesToGet.containsKey(idFile)) {
                 FileInfoReception fileInfoReception = filesToGet.get(idFile);
                 File path = getAppDataPath();
                 File sourceFile = new File(path.getAbsolutePath()+File.separator+idFile);
-                File destinationFile = new File(path.getAbsolutePath()+File.separator+fileInfoReception.relativeFullPath);
+                final File destinationFile = new File(path.getAbsolutePath()+File.separator+fileInfoReception.relativeFullPath);
                 if(sourceFile.exists()) {
                     if(!destinationFile.exists()) {
                         File destinationPath = new File(path.getAbsolutePath()+File.separator+new File(fileInfoReception.relativeFullPath).getParent());
@@ -1424,12 +1407,18 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 if(destinationFile.exists() && destinationFile.length()==fileInfoReception.size) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            toastLong("Received file "+destinationFile.getAbsolutePath());
+                        }
+                    });
                     filesToGet.remove(idFile);
                     client.send("insertDeviceFile"+idFile);
                     insertOrUpdateTrackInDatabase(destinationFile.getAbsolutePath());
                 }
             }
-            //FIXME: limit number of retries
+            //FIXME: limit number of retries, do not remove here
             filesToGet.remove(idFile);
             requestNextFile();
         }
@@ -1462,6 +1451,19 @@ public class MainActivity extends AppCompatActivity {
             this.relativeFullPath = relativeFullPath;
             this.size = size;
             this.idFile = idFile;
+        }
+    }
+
+    private Map<Integer, FileInfoReception> filesToGet = new HashMap<>();
+    private Map<Integer, FileInfoReception> filesToKeep = new HashMap<>();
+
+    private void requestNextFile() {
+        if(filesToGet.size()>0) {
+            client.send("sendFile"+filesToGet.entrySet().iterator().next().getKey());
+        } else {
+            //FIXME: Scan library again when list is empty
+            scanLibrayInThread();
+            //checkPermissions();
         }
     }
 
