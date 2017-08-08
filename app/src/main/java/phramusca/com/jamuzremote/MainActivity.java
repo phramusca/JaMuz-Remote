@@ -735,7 +735,13 @@ public class MainActivity extends AppCompatActivity {
             //musicLibrary.updateTrack(id, track, false);
         } else {
             Log.v(TAG, "browseFS insertTrack " + absolutePath);
-            musicLibrary.insertTrack(getTrack(absolutePath));
+            Track track = getTrack(absolutePath);
+            if(track!=null) {
+                musicLibrary.insertTrack(track);
+            } else {
+                //FIXME: Delete track if it is a song track
+                //that appears to be corrupted
+            }
         }
     }
 
@@ -744,24 +750,35 @@ public class MainActivity extends AppCompatActivity {
         musicLibrary.open();
     }
 
-    private Track getTrack(String absolutePath) {
+    private Track getTrack(final String absolutePath) {
+        Track track=null;
+        try {
+            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(absolutePath);
 
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(absolutePath);
+            String album =
+                    mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+            String artist =
+                    mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+            String title =
+                    mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+            String genre =
+                    mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
 
-        String album =
-                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-        String artist =
-                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-        String title =
-                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-        String genre =
-                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
+            int rating = 0;
+            String coverHash="";
+            track = new Track(-1, rating, title, album, artist, coverHash, absolutePath, genre);
+        } catch (final RuntimeException ex) {
+            //FIXME: Why do these occurs (even if not song files) ?
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    toastLong("getTrack"+" :  "+ex.getMessage()+" --  "+absolutePath);
+                }
+            });
 
-        int rating = 0;
-        String coverHash="";
-
-        return new Track(-1, rating, title, album, artist, coverHash, absolutePath, genre);
+        }
+        return track;
     }
 
 
@@ -1375,6 +1392,10 @@ public class MainActivity extends AppCompatActivity {
         private void requestNextFile() {
             if(filesToGet.size()>0) {
                 client.send("sendFile"+filesToGet.entrySet().iterator().next().getKey());
+            } else {
+                //FIXME: Scan library again when list is empty
+                scanLibrayInThread();
+                //checkPermissions();
             }
         }
 
@@ -1408,8 +1429,8 @@ public class MainActivity extends AppCompatActivity {
                     insertOrUpdateTrackInDatabase(destinationFile.getAbsolutePath());
                 }
             }
-            //FIXME: Scan library again when list is empty
             //FIXME: limit number of retries
+            filesToGet.remove(idFile);
             requestNextFile();
         }
 
