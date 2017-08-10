@@ -5,6 +5,8 @@
  */
 package phramusca.com.jamuzremote;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +22,8 @@ import java.util.logging.Logger;
  * @author phramusca
  */
 public class Client {
+	private static final String TAG = Client.class.getSimpleName();
+
 	private final int port;
 	private final String login;
 	private final String password;
@@ -80,7 +84,7 @@ public class Client {
 
 	private void sendException(Exception ex) {
 		callback.received("MSG_ERROR: ".concat(ex.toString()));
-		Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        Log.e(TAG, "", ex);
 	}
 
 	public void close() {
@@ -92,7 +96,7 @@ public class Client {
                 socket.close();
             }
 		} catch (IOException ex) {
-			Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+			Log.e(TAG, "", ex);
 		}
 	}
 
@@ -115,6 +119,7 @@ public class Client {
 	}
 
 	public void send(String msg) {
+		Log.i(TAG, "SENDING "+msg);
 		emission.send(msg);
 	}
 }
