@@ -48,7 +48,7 @@ public class Reception  extends ProcessAbstract {
 				checkAbort();
 				String msg = bufferedReader.readLine();
                 if(msg==null) {
-                    Log.i(TAG, "RECEIVED null");
+                    Log.d(TAG, "RECEIVED null");
                     callback.disconnected();
                 }
                 else if (msg.startsWith("MSG_")) {
@@ -61,22 +61,23 @@ public class Reception  extends ProcessAbstract {
                     Bitmap bitmap=null;
                     try {
                         bitmap = BitmapFactory.decodeStream(inputStream);
-                        Log.i(TAG, "receivedBitmap");
+                        Log.d(TAG, "receivedBitmap");
                     } catch (OutOfMemoryError ex) {
                     } finally {
-                        Log.i(TAG, "receivedBitmap: calling callback");
+                        Log.d(TAG, "receivedBitmap: calling callback");
                         callback.receivedBitmap(bitmap);
                     }
                 }
 				else if (msg.startsWith("SENDING_FILE")) {
                     int idFile = -1;
+                    boolean isValid=true;
                     try {
                         idFile = Integer.valueOf(msg.substring("SENDING_FILE".length()));
-                        Log.i(TAG, "receivedFile "+idFile);
+                        Log.i(TAG, "receivedFile id:"+idFile);
                         File path = getAppDataPath();
                         DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
                         long fileSize = dis.readLong();
-                        Log.i(TAG, "receivedFile: "+fileSize);
+                        Log.i(TAG, "receivedFile size: "+fileSize);
                         //FIXME: fileSize can be (very) wrong for some reasons
                         //=> Send info in json so that we are sure of the information
                         long fileMax=20000000; // > 20MB is big enough. Not sure it would even work
@@ -87,11 +88,12 @@ public class Reception  extends ProcessAbstract {
                             while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
                                 fos.write(buf, 0, bytesRead);
                                 fileSize -= bytesRead;
-                                Log.d(TAG, "receivedFile: " + fileSize);
+                                //Log.v(TAG, "receivedFile chunk. Size is now: " + fileSize);
                             }
                             fos.close();
                         } else {
                             Log.e(TAG, "Size over limits !!!");
+                            isValid=false;
                             //FIXME: Even if aborting the buffer is corrupted !!
                             //Needs to close and reopen connection
                         }
@@ -100,11 +102,9 @@ public class Reception  extends ProcessAbstract {
                         Log.e(TAG, "receivedFile", ex);
                     } finally {
                         Log.i(TAG, "receivedFile: calling callback");
-						callback.receivedFile(idFile);
+						callback.receivedFile(idFile, isValid);
 					}
-				} else {
-                    Log.v(TAG, msg);
-                }
+				}
 			}
 		} catch (InterruptedException ex) {
 		} catch (IOException ex) {

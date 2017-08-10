@@ -1,6 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import android.media.MediaMetadataRetriever;
+import android.util.Log;
 
 import java.io.File;
 
@@ -75,9 +76,14 @@ public class Track {
 
     //TODO: Use the same cache system as for remote
     public byte[] getArt() {
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(path);
-        byte[] art = mmr.getEmbeddedPicture();
+        byte[]art=null;
+        try {
+            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(path);
+            art = mmr.getEmbeddedPicture();
+        } catch (final RuntimeException ex) {
+            Log.e("Track", "Error reading art of "+toString());
+        }
         return art;
     }
 }

@@ -18,6 +18,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     //In internal SD emulated storage:
     private static final String DB_PATH = Environment.getExternalStorageDirectory()+"/JaMuz";
 
+    //FIXME: Change folder as we now have rights
     //In external SD. Does not seem to work !
     //private static final String DB_PATH = "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;
 
