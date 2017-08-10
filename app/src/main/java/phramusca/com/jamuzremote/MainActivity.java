@@ -74,7 +74,7 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getName();
+    private static final String TAG = MainActivity.class.getSimpleName();
     private Client client;
     private Track displayedTrack;
     private Track localTrack;
@@ -864,6 +864,8 @@ public class MainActivity extends AppCompatActivity {
 
     class CallBackPlayer implements ICallBackPlayer {
 
+        private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackPlayer.class.getSimpleName();
+
         @Override
         public void onPlayBackEnd() {
             if(local) {
@@ -977,6 +979,13 @@ public class MainActivity extends AppCompatActivity {
                 if(!enable) {
                     buttonConnect.setText("Close");
                     buttonConnect.setBackgroundResource(R.drawable.connect_on);
+                    try {
+                        //FIXME: Does this help ?
+                        //Why ? It should not since it is a new connection !
+                        Thread.sleep(10000);
+                    } catch (InterruptedException e) {
+
+                    }
                     requestNextFile(false);
                 } else {
                     buttonConnect.setBackgroundResource(R.drawable.connect_off);
@@ -1334,6 +1343,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class CallBackReception implements ICallBackReception {
+
+        private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackReception.class.getSimpleName();
+
         @Override
         public void received(final String msg) {
             if(msg.startsWith("MSG_")) {
@@ -1424,17 +1436,16 @@ public class MainActivity extends AppCompatActivity {
                         destinationPath.mkdirs();
                         Log.i(TAG, "Renaming file to "+destinationFile.getAbsolutePath());
                         sourceFile.renameTo(destinationFile);
-                    } else {
-                        Log.w(TAG, "File already available. Deleting source "+sourceFile.getAbsolutePath());
-                        sourceFile.delete();
                     }
                 } else {
-                    Log.w(TAG, "File has wrong size. Deleting source "+sourceFile.getAbsolutePath());
+                    Log.w(TAG, "File has wrong size ("+sourceFile.length()+" instead of "+fileInfoReception.size+"). \nDeleting source "+sourceFile.getAbsolutePath());
                     sourceFile.delete();
                 }
                 //Final check
                 if(destinationFile.exists() && destinationFile.length()==fileInfoReception.size) {
                     Log.i(TAG, "Saved file size: "+destinationFile.length());
+                    Log.w(TAG, "Deleting source "+sourceFile.getAbsolutePath());
+                    sourceFile.delete();
                     filesToGet.remove(idFile);
                     client.send("insertDeviceFile"+idFile);
                     insertOrUpdateTrackInDatabase(destinationFile.getAbsolutePath());
@@ -1495,7 +1506,6 @@ public class MainActivity extends AppCompatActivity {
         if(filesToKeep!=null) {
             if(filesToGet.size()>0) {
                 int id = filesToGet.entrySet().iterator().next().getKey();
-                Log.i(TAG, "Requesting sendFile"+id);
                 client.send("sendFile"+id);
             } else if(scanLibrary) {
                 Log.i(TAG, "No more files to retrieve. Update library");

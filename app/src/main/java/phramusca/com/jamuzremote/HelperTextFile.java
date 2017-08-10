@@ -24,7 +24,7 @@ import java.util.Properties;
 
 public class HelperTextFile {
 
-    private static final String TAG = HelperTextFile.class.getName();
+    private static final String TAG = HelperTextFile.class.getSimpleName();
 
     public static void write(Context context, String filename, String json) {
         try {

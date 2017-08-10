@@ -10,7 +10,7 @@ import android.util.Log;
  */
 public class ReceiverHeadSetPlugged extends BroadcastReceiver {
 
-    private static final String TAG = ReceiverHeadSetPlugged.class.getName();
+    private static final String TAG = ReceiverHeadSetPlugged.class.getSimpleName();
     private boolean headsetConnected = false;
 
     public void onReceive(Context context, Intent intent) {

@@ -11,7 +11,7 @@ import android.view.KeyEvent;
  */
 public class ReceiverMediaButton extends MediaButtonReceiver
 {
-    private static final String TAG = ReceiverMediaButton.class.getName();
+    private static final String TAG = ReceiverMediaButton.class.getSimpleName();
 
     @Override
     public void onReceive(Context context, Intent intent)

@@ -11,7 +11,7 @@ import android.util.Log;
 
 public class MyService extends Service {
 
-    private static final String TAG = MyService.class.getName();
+    private static final String TAG = MyService.class.getSimpleName();
     private boolean isRunning  = false;
 
     @Override
