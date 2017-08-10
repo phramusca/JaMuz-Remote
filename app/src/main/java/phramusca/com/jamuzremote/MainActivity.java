@@ -9,7 +9,6 @@ import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -57,6 +56,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OptionalDataException;
+import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -66,7 +73,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-//FIXME: Support Themes
+//TODO: Support Themes
 //http://www.hidroh.com/2015/02/25/support-multiple-themes-android-app-part-2/
 
 public class MainActivity extends AppCompatActivity {
@@ -85,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Track> queue = new ArrayList<>();
     private List<Track> queueHistory = new ArrayList<>();
     private boolean local = true;
-    final List<PlayList> localPlaylists = new ArrayList<PlayList>();
+    private List<PlayList> localPlaylists = new ArrayList<PlayList>();
     private PlayList localSelectedPlaylist;
 
     // GUI elements
@@ -117,6 +124,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "MainActivity onCreate");
         setContentView(R.layout.activity_main);
+
+        if(filesToKeep!=null) {
+            filesToKeep = HelperSerialize.getFromFile(this, "FilesToKeep.txt", filesToKeep.getClass());
+            filesToGet = HelperSerialize.getFromFile(this, "FilesToKeep.txt", filesToGet.getClass());
+        }
 
         textViewReceived = (TextView) findViewById(R.id.textView_conv);
 
@@ -282,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
         trackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
             @Override
             public void onSwipeTop() {
-                Log.i(TAG, "onSwipeTop");
+                Log.v(TAG, "onSwipeTop");
                 if(local) {
                     audioPlayer.forward();
                 } else {
@@ -292,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onSwipeRight() {
-                Log.i(TAG, "onSwipeRight");
+                Log.v(TAG, "onSwipeRight");
                 if(local) {
                     playPrevious();
                 } else {
@@ -301,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onSwipeLeft() {
-                Log.i(TAG, "onSwipeLeft");
+                Log.v(TAG, "onSwipeLeft");
                 if(local) {
                     playNext();
                 } else {
@@ -310,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onSwipeBottom() {
-                Log.i(TAG, "onSwipeBottom");
+                Log.v(TAG, "onSwipeBottom");
                 if(local) {
                     audioPlayer.rewind();
                 } else {
@@ -323,11 +335,13 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onTap() {
-                if(!local) {
-                    client.send("playTrack");
-                }
-                else if(local && isDimOn) {
-                    audioPlayer.togglePlay();
+                if(isDimOn) {
+                    if(!local) {
+                        client.send("playTrack");
+                    }
+                    else if(local) {
+                        audioPlayer.togglePlay();
+                    }
                 }
             }
             @Override
@@ -336,6 +350,7 @@ public class MainActivity extends AppCompatActivity {
                     audioPlayer.pullUp();
                     audioPlayer.resume(); //As toggled by simple Tap
                 }
+                //TODO: Do the same for remote when fixed on JaMuz
             }
         });
 
@@ -354,9 +369,7 @@ public class MainActivity extends AppCompatActivity {
         // - in "external" card, the emulated one : /storage/emulated/0/Android//com.phramusca.jamuz/files
         // - and in real removable sd card : /storage/xxxx-xxxx/Android/com.phramusca.jamuz/files
         externalFilesDir = getExternalFilesDirs(null);
-        //Then request for permissions.
-        // When allowed, starts database update.
-        checkPermissions();
+        checkPermissionsThenScanLibrary();
 
         CallBackPlayer callBackPlayer = new CallBackPlayer();
         audioPlayer = new AudioPlayer(callBackPlayer);
@@ -393,8 +406,6 @@ public class MainActivity extends AppCompatActivity {
         toggleConfig(true);
 
         setDimMode(!buttonSetDimMode.isChecked());
-
-
     }
 
     private void setDimMode(boolean enable) {
@@ -488,7 +499,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.i(TAG, "MainActivity onPause");
-        stopRemote();
+        //stopRemote();
     }
 
     @Override
@@ -502,7 +513,7 @@ public class MainActivity extends AppCompatActivity {
         else if(!audioPlayer.isPlaying()) {
             enableGUI(false);
             getFromQRcode();
-            buttonConnect.performClick();
+            //buttonConnect.performClick();
         }
 
         //TODO: Check if this solves the issue with buttons
@@ -514,6 +525,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "MainActivity onDestroy");
+
+        //FIXME: write to file
+        //HelperSerialize.writeToFile(this, filesToKeep, "FileToKeep.txt", filesToKeep.getClass());
+        //HelperSerialize.writeToFile(this, filesToGet, "FileToKeep.txt", filesToGet.getClass());
+
+
         //Better unregister as it does not trigger anyway + raises exceptions if not
         unregisterReceiver(receiverHeadSetPlugged);
         unregisterReceiver(mHeadsetBroadcastReceiver);
@@ -548,7 +565,7 @@ public class MainActivity extends AppCompatActivity {
                 scanLibray.join();
             }
         } catch (InterruptedException e) {
-            Log.i(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException");
+            Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
         }
 
 
@@ -610,7 +627,6 @@ public class MainActivity extends AppCompatActivity {
             path.mkdirs();
         }
         return path;
-        //FIXME: Write to SD card !!
     }
 
     private void scanLibrayInThread() {
@@ -626,9 +642,9 @@ public class MainActivity extends AppCompatActivity {
                     processBrowseFS = new ProcessAbstract("Thread.MainActivity.browseFS") {
                         public void run() {
                             try {
-                                browseFS(pathToFiles);
+                                browseFS(pathToFiles, filesToKeep!=null);
                             } catch (InterruptedException e) {
-                                Log.i(TAG, "Thread.MainActivity.browseFS InterruptedException");
+                                Log.w(TAG, "Thread.MainActivity.browseFS InterruptedException");
                                 scanLibray.abort();
                             }
                         }
@@ -640,7 +656,7 @@ public class MainActivity extends AppCompatActivity {
                             try {
                                 browseFScount(pathToFiles);
                             } catch (InterruptedException e) {
-                                Log.i(TAG, "Thread.MainActivity.browseFScount InterruptedException");
+                                Log.w(TAG, "Thread.MainActivity.browseFScount InterruptedException");
                                 scanLibray.abort();
                             }
                         }
@@ -666,6 +682,7 @@ public class MainActivity extends AppCompatActivity {
                         checkAbort();
                         File file = new File(track.getPath());
                         if(!file.exists()) {
+                            Log.d(TAG, "Remove track from db: "+track);
                             musicLibrary.deleteTrack(track.getPath());
                         }
                         toastNbFile("JaMuz scan deleted ", 1000);
@@ -677,11 +694,11 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 } catch (InterruptedException e) {
-                    Log.i(TAG, "Thread.MainActivity.scanLibrayInThread InterruptedException");
+                    Log.w(TAG, "Thread.MainActivity.scanLibrayInThread InterruptedException");
                 }
             }
 
-            private void browseFS(File path) throws InterruptedException {
+            private void browseFS(File path, boolean delete) throws InterruptedException {
                 checkAbort();
                 if (path.isDirectory()) {
                     File[] files = path.listFiles();
@@ -690,14 +707,24 @@ public class MainActivity extends AppCompatActivity {
                             for (File file : files) {
                                 checkAbort();
                                 if (file.isDirectory()) {
-                                    browseFS(file);
+                                    browseFS(file, delete);
                                 }
                                 else {
                                     String absolutePath=file.getAbsolutePath();
-                                    insertOrUpdateTrackInDatabase(absolutePath);
-                                    toastNbFile("JaMuz scan ", 200);
+                                    if(delete && !filesToKeep.containsKey(absolutePath.substring(getAppDataPath().getAbsolutePath().length()+1))) {
+                                        Log.i(TAG, "Deleting file "+absolutePath);
+                                        //FIXME: Uncomment when transfer is better
+                                        //FIXME: MEANTIME fix the result on stats merge
+                                        //file.delete();
+                                    } else {
+                                        insertOrUpdateTrackInDatabase(absolutePath);
+                                        toastNbFile("JaMuz scan ", 200);
+                                    }
                                 }
                             }
+                        } else {
+                            Log.i(TAG, "Deleting empty folder "+path.getAbsolutePath());
+                            path.delete();
                         }
                     }
                 }
@@ -729,18 +756,20 @@ public class MainActivity extends AppCompatActivity {
     private void insertOrUpdateTrackInDatabase(String absolutePath) {
         int id = musicLibrary.getTrack(absolutePath);
         if(id>=0) {
-            Log.v(TAG, "browseFS updateTrack " + absolutePath);
+            Log.d(TAG, "browseFS updateTrack " + absolutePath);
             //FIXME: Update if file is modified only:
             //based on lastModificationDate and/or size (not on content as longer than updateTrack)
             //musicLibrary.updateTrack(id, track, false);
         } else {
-            Log.v(TAG, "browseFS insertTrack " + absolutePath);
             Track track = getTrack(absolutePath);
             if(track!=null) {
+                Log.d(TAG, "browseFS insertTrack " + absolutePath);
                 musicLibrary.insertTrack(track);
             } else {
-                //FIXME: Delete track if it is a song track
+                //FIXME: Delete track ONLY if it is a song track
                 //that appears to be corrupted
+                Log.i(TAG, "browseFS delete file " + absolutePath);
+                new File(absolutePath).delete();
             }
         }
     }
@@ -769,14 +798,7 @@ public class MainActivity extends AppCompatActivity {
             String coverHash="";
             track = new Track(-1, rating, title, album, artist, coverHash, absolutePath, genre);
         } catch (final RuntimeException ex) {
-            //FIXME: Why do these occurs (even if not song files) ?
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    toastLong("getTrack"+" :  "+ex.getMessage()+" --  "+absolutePath);
-                }
-            });
-
+            Log.e(TAG, "Error reading file tags "+absolutePath, ex);
         }
         return track;
     }
@@ -817,6 +839,7 @@ public class MainActivity extends AppCompatActivity {
             queueHistoryIndex = queueHistory.size()-1;
             playAudio(displayedTrack.getPath());
         } else {
+            Log.d(TAG, "play(): Remove track from db:"+displayedTrack);
             musicLibrary.deleteTrack(displayedTrack.getPath());
             playRandom();
         }
@@ -923,23 +946,23 @@ public class MainActivity extends AppCompatActivity {
             }
             timer.cancel();
             timer.purge();
-            Log.d(TAG, "timerTask cancelled");
+            Log.v(TAG, "timerTask cancelled");
             timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    Log.d(TAG, "timerTask performed");
+                    Log.v(TAG, "timerTask performed");
                     setBrightness(0);
                     //dim(false);
                     isDimOn = false;
                 }
             }, 5 * 1000);
-            Log.d(TAG, "timerTask scheduled");
+            Log.v(TAG, "timerTask scheduled");
         }
     }
 
     private void setBrightness(final float brightness) {
-        Log.d(TAG, "setBrightness("+brightness+");");
+        Log.v(TAG, "setBrightness("+brightness+");");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -958,7 +981,7 @@ public class MainActivity extends AppCompatActivity {
                 if(!enable) {
                     buttonConnect.setText("Close");
                     buttonConnect.setBackgroundResource(R.drawable.connect_on);
-                    requestNextFile();
+                    requestNextFile(false);
                 } else {
                     buttonConnect.setBackgroundResource(R.drawable.connect_off);
                     setupSpinner(localPlaylists, localSelectedPlaylist);
@@ -999,7 +1022,7 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.PROCESS_OUTGOING_CALLS
     };
 
-    public void checkPermissions() {
+    public void checkPermissionsThenScanLibrary() {
         if (!hasPermissions(this, PERMISSIONS)) {
 
             //TODO: Translate
@@ -1123,6 +1146,7 @@ public class MainActivity extends AppCompatActivity {
         //TODO: sync playlists with JaMuz
 
         localSelectedPlaylist = new PlayList("All", "1", musicLibrary);
+        localPlaylists = new ArrayList<PlayList>();
         localPlaylists.add(localSelectedPlaylist);
 
         addToPlaylists("Top", "rating=5", "rating>2");
@@ -1372,16 +1396,14 @@ public class MainActivity extends AppCompatActivity {
                                 int id = file.getInt("idFile");
                                 File localFile = new File(getAppDataPath(), relativeFullPath);
                                 FileInfoReception fileReceived = new FileInfoReception(relativeFullPath, size, id);
-                                filesToKeep.put(id, fileReceived);
+                                filesToKeep.put(fileReceived.relativeFullPath, fileReceived);
                                 if(!localFile.exists()) {
                                     filesToGet.put(id, fileReceived);
                                 } else {
                                     client.send("insertDeviceFile"+id);
                                 }
                             }
-                            //FIXME: Remove other files and request server back to remove from deviceFile table
-                            //Use filesToKeep for that purpose
-                            requestNextFile();
+                            requestNextFile(true);
                             break;
                     }
                 } catch (JSONException e) {
@@ -1391,11 +1413,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void receivedFile(final int idFile) {
-            Log.i(TAG, "Received file "+filesToGet.size()+" bytes. idFile="+idFile);
+        public void receivedFile(final int idFile, boolean isValid) {
+            Log.i(TAG, "Received file "+filesToGet.size()+". idFile="+idFile);
 
             if(filesToGet.containsKey(idFile)) {
-                FileInfoReception fileInfoReception = filesToGet.get(idFile);
+                final FileInfoReception fileInfoReception = filesToGet.get(idFile);
                 File path = getAppDataPath();
                 File sourceFile = new File(path.getAbsolutePath()+File.separator+idFile);
                 final File destinationFile = new File(path.getAbsolutePath()+File.separator+fileInfoReception.relativeFullPath);
@@ -1410,23 +1432,34 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            toastLong("Received file "+destinationFile.getAbsolutePath());
+                            toastLong("JaMuz received file "+fileInfoReception.relativeFullPath);
+                            Log.i(TAG, "Saved file size: "+destinationFile.length());
                         }
                     });
                     filesToGet.remove(idFile);
                     client.send("insertDeviceFile"+idFile);
                     insertOrUpdateTrackInDatabase(destinationFile.getAbsolutePath());
                 }
+            } else {
+                //FIXME: This is not requested: delete it !
             }
             //FIXME: limit number of retries, do not remove here
             filesToGet.remove(idFile);
-            requestNextFile();
+            if(!isValid) {
+                //FIXME: Manage better
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    Log.w(TAG, "InterruptedException waiting before requesting next file", e);
+                }
+            }
+            requestNextFile(true);
         }
 
         @Override
         public void receivedBitmap(final Bitmap bitmap) {
-            Log.i(TAG, "receivedBitmap: callback");
-            Log.i(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight());
+            Log.d(TAG, "receivedBitmap: callback");
+            Log.d(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight());
 
             if (!coverMap.containsKey(displayedTrack.getCoverHash())) {
                 if (bitmap != null) { //Save to cache
@@ -1442,7 +1475,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    class FileInfoReception {
+    public class FileInfoReception {
         public String relativeFullPath;
         public double size;
         public int idFile;
@@ -1454,16 +1487,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private Map<Integer, FileInfoReception> filesToGet = new HashMap<>();
-    private Map<Integer, FileInfoReception> filesToKeep = new HashMap<>();
+    private Map<Integer, FileInfoReception> filesToGet = null;
+    private Map<String, FileInfoReception> filesToKeep = null;
 
-    private void requestNextFile() {
-        if(filesToGet.size()>0) {
-            client.send("sendFile"+filesToGet.entrySet().iterator().next().getKey());
-        } else {
-            //FIXME: Scan library again when list is empty
-            scanLibrayInThread();
-            //checkPermissions();
+    private void requestNextFile(boolean scanLibrary) {
+        if(filesToKeep!=null) {
+            if(filesToGet.size()>0) {
+                client.send("sendFile"+filesToGet.entrySet().iterator().next().getKey());
+            } else if(scanLibrary) {
+                checkPermissionsThenScanLibrary();
+            }
         }
     }
 
