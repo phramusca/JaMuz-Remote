@@ -51,19 +51,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
-import java.io.StreamCorruptedException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -125,9 +121,20 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "MainActivity onCreate");
         setContentView(R.layout.activity_main);
 
-        if(filesToKeep!=null) {
-            filesToKeep = HelperSerialize.getFromFile(this, "FilesToKeep.txt", filesToKeep.getClass());
-            filesToGet = HelperSerialize.getFromFile(this, "FilesToKeep.txt", filesToGet.getClass());
+        //Read FilesToKeep file to get list of files to maintain in db
+        String readJson = HelperTextFile.read(this, "FilesToKeep.txt");
+        if(!readJson.equals("")) {
+            filesToKeep = new HashMap<>();
+            Gson gson = new Gson();
+            filesToKeep = gson.fromJson(readJson, filesToKeep.getClass());
+        }
+        //Read filesToGet file to get list of files to retrieve
+        readJson = HelperTextFile.read(this, "filesToGet.txt");
+        if(!readJson.equals("")) {
+            Gson gson = new Gson();
+            Type collectionType = new TypeToken<HashMap<Integer, FileInfoReception>>(){}.getType();
+            filesToGet = gson.fromJson(readJson, collectionType);
+            System.out.println(filesToGet);
         }
 
         textViewReceived = (TextView) findViewById(R.id.textView_conv);
@@ -526,10 +533,16 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         Log.i(TAG, "MainActivity onDestroy");
 
-        //FIXME: write to file
-        //HelperSerialize.writeToFile(this, filesToKeep, "FileToKeep.txt", filesToKeep.getClass());
-        //HelperSerialize.writeToFile(this, filesToGet, "FileToKeep.txt", filesToGet.getClass());
-
+        //Write list of files to maintain in db
+        if(filesToKeep!=null) {
+            Gson gson = new Gson();
+            HelperTextFile.write(this, "FilesToKeep.txt", gson.toJson(filesToKeep));
+        }
+        //Write list of files to retrieve
+        if(filesToGet!=null) {
+            Gson gson = new Gson();
+            HelperTextFile.write(this, "filesToGet.txt", gson.toJson(filesToGet));
+        }
 
         //Better unregister as it does not trigger anyway + raises exceptions if not
         unregisterReceiver(receiverHeadSetPlugged);
@@ -568,8 +581,6 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
         }
 
-
-
         if(musicLibrary!=null) {
             musicLibrary.close();
         }
@@ -582,21 +593,6 @@ public class MainActivity extends AppCompatActivity {
     public static File pathToFiles;
 
     public static File getExtSDcard(String path) {
-        /*File f = new File(path);
-        File[] files = f.listFiles();
-
-        if (files != null) {
-            if(files.length>0) {
-                for (File file : files) {
-                    if (file.isDirectory()) {
-                        File checkFolder = new File(file.getAbsolutePath()+File.separator+search);
-                        if(checkFolder.exists()) {
-                            return checkFolder;
-                        }
-                    }
-                }
-            }
-        }*/
         String removableStoragePath;
         File fileList[] = new File("/storage/").listFiles();
         for (File file : fileList)
@@ -1386,7 +1382,7 @@ public class MainActivity extends AppCompatActivity {
                             displayTrack();
                             break;
                         case "FilesToGet":
-                            filesToGet = new HashMap<>();
+                            filesToGet = new HashMap<Integer, FileInfoReception>();
                             filesToKeep = new HashMap<>();
                             JSONArray files = (JSONArray) jObject.get("files");
                             for(int i=0; i<files.length(); i++) {
@@ -1413,45 +1409,50 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void receivedFile(final int idFile, boolean isValid) {
-            Log.i(TAG, "Received file "+filesToGet.size()+". idFile="+idFile);
+        public void receivedFile(final int idFile) {
 
+            File path = getAppDataPath();
+            File sourceFile = new File(path.getAbsolutePath()+File.separator+idFile);
+            Log.i(TAG, "Received file (remaining "+filesToGet.size()+"/"+filesToKeep.size()+"). "+sourceFile.getAbsolutePath());
             if(filesToGet.containsKey(idFile)) {
+                //Moving
                 final FileInfoReception fileInfoReception = filesToGet.get(idFile);
-                File path = getAppDataPath();
-                File sourceFile = new File(path.getAbsolutePath()+File.separator+idFile);
                 final File destinationFile = new File(path.getAbsolutePath()+File.separator+fileInfoReception.relativeFullPath);
-                if(sourceFile.exists()) {
-                    if(!destinationFile.exists()) {
+                if(sourceFile.exists() && sourceFile.length()==fileInfoReception.size) {
+                    if(!(destinationFile.exists() && destinationFile.length()==fileInfoReception.size)) {
                         File destinationPath = new File(path.getAbsolutePath()+File.separator+new File(fileInfoReception.relativeFullPath).getParent());
                         destinationPath.mkdirs();
+                        Log.i(TAG, "Renaming file to "+destinationFile.getAbsolutePath());
                         sourceFile.renameTo(destinationFile);
+                    } else {
+                        Log.w(TAG, "File already available. Deleting source "+sourceFile.getAbsolutePath());
+                        sourceFile.delete();
                     }
+                } else {
+                    Log.w(TAG, "File has wrong size. Deleting source "+sourceFile.getAbsolutePath());
+                    sourceFile.delete();
                 }
+                //Final check
                 if(destinationFile.exists() && destinationFile.length()==fileInfoReception.size) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            toastLong("JaMuz received file "+fileInfoReception.relativeFullPath);
-                            Log.i(TAG, "Saved file size: "+destinationFile.length());
-                        }
-                    });
+                    Log.i(TAG, "Saved file size: "+destinationFile.length());
                     filesToGet.remove(idFile);
                     client.send("insertDeviceFile"+idFile);
                     insertOrUpdateTrackInDatabase(destinationFile.getAbsolutePath());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            toastLong("JaMuz received file (remaining "+filesToGet.size()+"/"+filesToKeep.size()+") \n"
+                                    +fileInfoReception.relativeFullPath);
+                        }
+                    });
+                } else {
+                    Log.w(TAG, "File move failed or wrong size, delete both source and destination.");
+                    sourceFile.delete();
+                    destinationFile.delete();
                 }
             } else {
-                //FIXME: This is not requested: delete it !
-            }
-            //FIXME: limit number of retries, do not remove here
-            filesToGet.remove(idFile);
-            if(!isValid) {
-                //FIXME: Manage better
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    Log.w(TAG, "InterruptedException waiting before requesting next file", e);
-                }
+                Log.w(TAG, "File not requested. Deleting "+sourceFile.getAbsolutePath());
+                sourceFile.delete();
             }
             requestNextFile(true);
         }
@@ -1493,8 +1494,11 @@ public class MainActivity extends AppCompatActivity {
     private void requestNextFile(boolean scanLibrary) {
         if(filesToKeep!=null) {
             if(filesToGet.size()>0) {
-                client.send("sendFile"+filesToGet.entrySet().iterator().next().getKey());
+                int id = filesToGet.entrySet().iterator().next().getKey();
+                Log.i(TAG, "Requesting sendFile"+id);
+                client.send("sendFile"+id);
             } else if(scanLibrary) {
+                Log.i(TAG, "No more files to retrieve. Update library");
                 checkPermissionsThenScanLibrary();
             }
         }

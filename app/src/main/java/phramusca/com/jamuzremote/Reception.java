@@ -70,14 +70,12 @@ public class Reception  extends ProcessAbstract {
                 }
 				else if (msg.startsWith("SENDING_FILE")) {
                     int idFile = -1;
-                    boolean isValid=true;
                     try {
                         idFile = Integer.valueOf(msg.substring("SENDING_FILE".length()));
-                        Log.i(TAG, "receivedFile id:"+idFile);
                         File path = getAppDataPath();
                         DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
                         long fileSize = dis.readLong();
-                        Log.i(TAG, "receivedFile size: "+fileSize);
+                        Log.i(TAG, "Start file reception: { idFile:"+idFile+" fileSize: "+fileSize+" }");
                         //FIXME: fileSize can be (very) wrong for some reasons
                         //=> Send info in json so that we are sure of the information
                         long fileMax=20000000; // > 20MB is big enough. Not sure it would even work
@@ -92,8 +90,8 @@ public class Reception  extends ProcessAbstract {
                             }
                             fos.close();
                         } else {
-                            Log.e(TAG, "Size over limits !!!");
-                            isValid=false;
+                            Log.e(TAG, "Size over limits !!! Aborting. Waiting 5s (does this helps ???)");
+                            Thread.sleep(5000);
                             //FIXME: Even if aborting the buffer is corrupted !!
                             //Needs to close and reopen connection
                         }
@@ -102,7 +100,7 @@ public class Reception  extends ProcessAbstract {
                         Log.e(TAG, "receivedFile", ex);
                     } finally {
                         Log.i(TAG, "receivedFile: calling callback");
-						callback.receivedFile(idFile, isValid);
+						callback.receivedFile(idFile);
 					}
 				}
 			}
