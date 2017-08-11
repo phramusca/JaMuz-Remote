@@ -83,7 +83,7 @@ public class Reception  extends ProcessAbstract {
                         Log.i(TAG, "Start file reception: \n"+fileInfoReception);
                         DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
                         double fileSize = fileInfoReception.size;
-                        long fileMax=20000000; // > 20MB is big enough. Not sure it would even work
+                        long fileMax=200000000L; // > 200MB is big enough. Not sure it would even work
                         if(fileSize<fileMax && fileSize>0) {
                             FileOutputStream fos = new FileOutputStream(path.getAbsolutePath() + File.separator +
                                     fileInfoReception.relativeFullPath);
@@ -96,7 +96,7 @@ public class Reception  extends ProcessAbstract {
                             }
                             fos.close();
                         } else {
-                            Log.e(TAG, "Size over limits !!! Aborting. Waiting 5s (does this helps ???)");
+                            Log.e(TAG, "Size over limits (0 - "+fileMax+") !!! Aborting. Waiting 5s (does this helps ???)");
                             Thread.sleep(5000);
                             //FIXME: Even if aborting the buffer is corrupted !!
                             //Needs to close and reopen connection
