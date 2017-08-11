@@ -121,6 +121,9 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "MainActivity onCreate");
         setContentView(R.layout.activity_main);
 
+
+
+
         //Read FilesToKeep file to get list of files to maintain in db
         String readJson = HelperTextFile.read(this, "FilesToKeep.txt");
         if(!readJson.equals("")) {
@@ -131,10 +134,10 @@ public class MainActivity extends AppCompatActivity {
         //Read filesToGet file to get list of files to retrieve
         readJson = HelperTextFile.read(this, "filesToGet.txt");
         if(!readJson.equals("")) {
+            filesToGet = new HashMap<>();
             Gson gson = new Gson();
             Type collectionType = new TypeToken<HashMap<Integer, FileInfoReception>>(){}.getType();
             filesToGet = gson.fromJson(readJson, collectionType);
-            System.out.println(filesToGet);
         }
 
         textViewReceived = (TextView) findViewById(R.id.textView_conv);
@@ -248,8 +251,6 @@ public class MainActivity extends AppCompatActivity {
                 enableGUI(false);
                 buttonConnect.setBackgroundResource(R.drawable.connect_ongoing);
                 if(buttonConnect.getText().equals("Connect")) {
-                    CallBackReception callBackReception = new CallBackReception();
-
                     String infoConnect = editTextConnectInfo.getText().toString();
                     String[] split = infoConnect.split(":");  //NOI18N
                     if(split.length<2) {
@@ -263,12 +264,10 @@ public class MainActivity extends AppCompatActivity {
                     } catch(NumberFormatException ex) {
                         port=2013;
                     }
-
+                    CallBackReception callBackReception = new CallBackReception();
                     client = new Client(address, port, Settings.Secure.getString(MainActivity.this.getContentResolver(),
                             Settings.Secure.ANDROID_ID), "tata", callBackReception);
-
-                    //Must start networking in a thread or getting NetworkOnMainThreadException
-                    new Thread() {
+                   new Thread() {
                         public void run() {
                             if(client.connect()) {
                                 enableGUI(true);
@@ -279,7 +278,6 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                     }.start();
-
                 }
                 else {
                     enableConnect(true);
@@ -710,7 +708,6 @@ public class MainActivity extends AppCompatActivity {
                                     if(delete && !filesToKeep.containsKey(absolutePath.substring(getAppDataPath().getAbsolutePath().length()+1))) {
                                         Log.i(TAG, "Deleting file "+absolutePath);
                                         //FIXME: Uncomment when transfer is better
-                                        //FIXME: MEANTIME fix the result on stats merge
                                         //file.delete();
                                     } else {
                                         insertOrUpdateTrackInDatabase(absolutePath);
@@ -749,7 +746,8 @@ public class MainActivity extends AppCompatActivity {
         scanLibray.start();
     }
 
-    private void insertOrUpdateTrackInDatabase(String absolutePath) {
+    private boolean insertOrUpdateTrackInDatabase(String absolutePath) {
+        boolean result=true;
         int id = musicLibrary.getTrack(absolutePath);
         if(id>=0) {
             Log.d(TAG, "browseFS updateTrack " + absolutePath);
@@ -766,8 +764,10 @@ public class MainActivity extends AppCompatActivity {
                 //that appears to be corrupted
                 Log.i(TAG, "browseFS delete file " + absolutePath);
                 new File(absolutePath).delete();
+                result=false;
             }
         }
+        return result;
     }
 
     private void connectDatabase() {
@@ -798,7 +798,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return track;
     }
-
 
     private void playRandom() {
         //Fill the queue
@@ -935,6 +934,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Timer timer = new Timer();
     private boolean isDimOn = false;
+
     private void dimOn() {
         editTextConnectInfo.clearFocus();
 
@@ -979,13 +979,6 @@ public class MainActivity extends AppCompatActivity {
                 if(!enable) {
                     buttonConnect.setText("Close");
                     buttonConnect.setBackgroundResource(R.drawable.connect_on);
-                    try {
-                        //FIXME: Does this help ?
-                        //Why ? It should not since it is a new connection !
-                        Thread.sleep(10000);
-                    } catch (InterruptedException e) {
-
-                    }
                     requestNextFile(false);
                 } else {
                     buttonConnect.setBackgroundResource(R.drawable.connect_off);
@@ -1148,7 +1141,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupLocalPlaylists() {
-        //TODO: sync playlists with JaMuz
 
         localSelectedPlaylist = new PlayList("All", "1", musicLibrary);
         localPlaylists = new ArrayList<PlayList>();
@@ -1157,10 +1149,6 @@ public class MainActivity extends AppCompatActivity {
         addToPlaylists("Top", "rating=5", "rating>2");
         addToPlaylists("Discover","rating=0", "rating=0");
         addToPlaylists("More","rating>2 AND rating<5", "rating>0 AND rating<3");
-
-
-        //localPlaylists.add(new PlayList("Empty playlist (test)", genreCol + "=\"TUcroisVRaimentQUEceGENRE" +
-         //       "PEUXexister????\" AND " + ratingCol + ">10000000"));
 
         setupSpinner(localPlaylists, localSelectedPlaylist);
     }
@@ -1306,10 +1294,28 @@ public class MainActivity extends AppCompatActivity {
 
             if(displayedTrack.getId()>=0) {
                 displayImage(displayedTrack.getArt());
+                bluetoothNotifyChange(AVRCP_META_CHANGED);
+
             } else {
                 displayCover();
             }
         }
+    }
+
+    private static final String AVRCP_PLAYSTATE_CHANGED = "com.android.music.playstatechanged";
+    private static final String AVRCP_META_CHANGED = "com.android.music.metachanged";
+
+    private void bluetoothNotifyChange(String what) {
+        Intent i = new Intent(what);
+        i.putExtra("id", Long.valueOf(displayedTrack.getId()));
+        i.putExtra("artist", displayedTrack.getArtist());
+        i.putExtra("album",displayedTrack.getAlbum());
+        i.putExtra("track", displayedTrack.getTitle());
+        i.putExtra("playing", "true");
+        i.putExtra("ListSize", "99");
+        i.putExtra("duration", "20");
+        i.putExtra("position", "0");
+        sendBroadcast(i);
     }
 
     //Display cover from cache or ask for it
@@ -1398,17 +1404,13 @@ public class MainActivity extends AppCompatActivity {
                             filesToKeep = new HashMap<>();
                             JSONArray files = (JSONArray) jObject.get("files");
                             for(int i=0; i<files.length(); i++) {
-                                JSONObject file = (JSONObject) files.get(i);
-                                String relativeFullPath = file.getString("path");
-                                double size = file.getDouble("size");
-                                int id = file.getInt("idFile");
-                                File localFile = new File(getAppDataPath(), relativeFullPath);
-                                FileInfoReception fileReceived = new FileInfoReception(relativeFullPath, size, id);
+                                FileInfoReception fileReceived = new FileInfoReception((JSONObject) files.get(i));
                                 filesToKeep.put(fileReceived.relativeFullPath, fileReceived);
+                                File localFile = new File(getAppDataPath(), fileReceived.relativeFullPath);
                                 if(!localFile.exists()) {
-                                    filesToGet.put(id, fileReceived);
+                                    filesToGet.put(fileReceived.idFile, fileReceived);
                                 } else {
-                                    client.send("insertDeviceFile"+id);
+                                    client.send("insertDeviceFile"+fileReceived.idFile);
                                 }
                             }
                             requestNextFile(true);
@@ -1420,50 +1422,45 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        @Override
-        public void receivedFile(final int idFile) {
+        //FIXME: fileInfoReception.size can be wrong
+        //(maybe path too)
+        //So => Get FileInfoReception from receivedFile callback to have fresh file info
+        // Keep FileInfoReception in FilesToGet to be able to compare (now done + can be useful)
 
+        @Override
+        public void receivedFile(final FileInfoReception fileInfoReception) {
+            Log.i(TAG, "Received file\n"+fileInfoReception+"\nRemaining : "+filesToGet.size()+"/"+filesToKeep.size());
             File path = getAppDataPath();
-            File sourceFile = new File(path.getAbsolutePath()+File.separator+idFile);
-            Log.i(TAG, "Received file (remaining "+filesToGet.size()+"/"+filesToKeep.size()+"). "+sourceFile.getAbsolutePath());
-            if(filesToGet.containsKey(idFile)) {
-                //Moving
-                final FileInfoReception fileInfoReception = filesToGet.get(idFile);
-                final File destinationFile = new File(path.getAbsolutePath()+File.separator+fileInfoReception.relativeFullPath);
-                if(sourceFile.exists() && sourceFile.length()==fileInfoReception.size) {
-                    if(!(destinationFile.exists() && destinationFile.length()==fileInfoReception.size)) {
-                        File destinationPath = new File(path.getAbsolutePath()+File.separator+new File(fileInfoReception.relativeFullPath).getParent());
-                        destinationPath.mkdirs();
-                        Log.i(TAG, "Renaming file to "+destinationFile.getAbsolutePath());
-                        sourceFile.renameTo(destinationFile);
+            File receivedFile = new File(path.getAbsolutePath()+File.separator
+                    +fileInfoReception.relativeFullPath);
+            if(filesToGet.containsKey(fileInfoReception.idFile)) {
+                if(receivedFile.exists()) {
+                    if (receivedFile.length() == fileInfoReception.size) {
+                        Log.i(TAG, "Saved file size: " + receivedFile.length());
+                        if(insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath())) {
+                            filesToGet.remove(fileInfoReception.idFile);
+                            client.send("insertDeviceFile" + fileInfoReception.idFile);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    toastShort("JaMuz received file (remaining " + filesToGet.size() + "/" + filesToKeep.size() + ") \n"
+                                            + fileInfoReception.relativeFullPath);
+                                }
+                            });
+                        } else {
+                            Log.w(TAG, "File tags could not be read. Deleted " + receivedFile.getAbsolutePath());
+                            receivedFile.delete();
+                        }
+                    } else {
+                        Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
+                        receivedFile.delete();
                     }
                 } else {
-                    Log.w(TAG, "File has wrong size ("+sourceFile.length()+" instead of "+fileInfoReception.size+"). \nDeleting source "+sourceFile.getAbsolutePath());
-                    sourceFile.delete();
-                }
-                //Final check
-                if(destinationFile.exists() && destinationFile.length()==fileInfoReception.size) {
-                    Log.i(TAG, "Saved file size: "+destinationFile.length());
-                    Log.w(TAG, "Deleting source "+sourceFile.getAbsolutePath());
-                    sourceFile.delete();
-                    filesToGet.remove(idFile);
-                    client.send("insertDeviceFile"+idFile);
-                    insertOrUpdateTrackInDatabase(destinationFile.getAbsolutePath());
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            toastLong("JaMuz received file (remaining "+filesToGet.size()+"/"+filesToKeep.size()+") \n"
-                                    +fileInfoReception.relativeFullPath);
-                        }
-                    });
-                } else {
-                    Log.w(TAG, "File move failed or wrong size, delete both source and destination.");
-                    sourceFile.delete();
-                    destinationFile.delete();
+                    Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
                 }
             } else {
-                Log.w(TAG, "File not requested. Deleting "+sourceFile.getAbsolutePath());
-                sourceFile.delete();
+                Log.w(TAG, "File not requested. Deleting "+receivedFile.getAbsolutePath());
+                receivedFile.delete();
             }
             requestNextFile(true);
         }
@@ -1487,26 +1484,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public class FileInfoReception {
-        public String relativeFullPath;
-        public double size;
-        public int idFile;
-
-        public FileInfoReception(String relativeFullPath, double size, int idFile) {
-            this.relativeFullPath = relativeFullPath;
-            this.size = size;
-            this.idFile = idFile;
-        }
-    }
-
     private Map<Integer, FileInfoReception> filesToGet = null;
     private Map<String, FileInfoReception> filesToKeep = null;
 
-    private void requestNextFile(boolean scanLibrary) {
+    private void requestNextFile(final boolean scanLibrary) {
         if(filesToKeep!=null) {
             if(filesToGet.size()>0) {
-                int id = filesToGet.entrySet().iterator().next().getKey();
-                client.send("sendFile"+id);
+                FileInfoReception fileInfoReception = filesToGet.entrySet().iterator().next().getValue();
+                File receivedFile = new File(getAppDataPath(), fileInfoReception.relativeFullPath);
+                if(receivedFile.exists() && receivedFile.length() == fileInfoReception.size) {
+                    //No need to request this one, it already exists (how can this be ?)
+                    filesToGet.remove(fileInfoReception.idFile);
+                    //Request next one then
+                    requestNextFile(scanLibrary);
+                } else {
+                    //Wait (after connection) and send request
+                    final int id = filesToGet.entrySet().iterator().next().getKey();
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            if(!scanLibrary) {
+                                try {
+                                    //FIXME: This can help to let the other info (remote track) to pass
+                                    //=> Use a second socket for the file transfer
+                                    //along with a new toggle button
+                                    //So we can play and transfer
+                                    //and also control the connection when transfer fails or timeouts
+                                    // (timeout to be detected somehow)
+                                    Log.i(TAG, "Waiting 10s");
+                                    Thread.sleep(10000);
+                                } catch (InterruptedException e) {
+                                }
+                            }
+                            client.send("sendFile"+id);
+                        }
+                    }.start();
+                }
             } else if(scanLibrary) {
                 Log.i(TAG, "No more files to retrieve. Update library");
                 checkPermissionsThenScanLibrary();

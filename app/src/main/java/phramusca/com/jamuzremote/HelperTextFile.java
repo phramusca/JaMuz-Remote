@@ -57,7 +57,7 @@ public class HelperTextFile {
                 }
                 inputStream.close();
                 ret = stringBuilder.toString();
-                Log.i(TAG, "Read \n"+ret+"\n");
+                Log.d(TAG, "Read \n"+ret+"\n");
             }
         }
         catch (FileNotFoundException e) {

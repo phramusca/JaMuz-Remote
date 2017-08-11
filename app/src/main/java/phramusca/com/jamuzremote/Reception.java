@@ -11,6 +11,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -69,18 +72,21 @@ public class Reception  extends ProcessAbstract {
                     }
                 }
 				else if (msg.startsWith("SENDING_FILE")) {
-                    int idFile = -1;
+                    FileInfoReception fileInfoReception = null;
                     try {
-                        idFile = Integer.valueOf(msg.substring("SENDING_FILE".length()));
+                        String json = msg.substring("SENDING_FILE".length());
+                        fileInfoReception = new FileInfoReception(json);
                         File path = getAppDataPath();
+                        File destinationPath = new File(path.getAbsolutePath()+File.separator
+                                +new File(fileInfoReception.relativeFullPath).getParent());
+                        destinationPath.mkdirs();
+                        Log.i(TAG, "Start file reception: \n"+fileInfoReception);
                         DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
-                        long fileSize = dis.readLong();
-                        Log.i(TAG, "Start file reception: { idFile:"+idFile+" fileSize: "+fileSize+" }");
-                        //FIXME: fileSize can be (very) wrong for some reasons
-                        //=> Send info in json so that we are sure of the information
+                        double fileSize = fileInfoReception.size;
                         long fileMax=20000000; // > 20MB is big enough. Not sure it would even work
                         if(fileSize<fileMax && fileSize>0) {
-                            FileOutputStream fos = new FileOutputStream(path.getAbsolutePath() + File.separator + idFile);
+                            FileOutputStream fos = new FileOutputStream(path.getAbsolutePath() + File.separator +
+                                    fileInfoReception.relativeFullPath);
                             byte[] buf = new byte[1024]; // Adjust if you want
                             int bytesRead;
                             while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
@@ -96,11 +102,11 @@ public class Reception  extends ProcessAbstract {
                             //Needs to close and reopen connection
                         }
 					}
-                    catch (IOException | OutOfMemoryError ex) {
-                        Log.e(TAG, "receivedFile", ex);
+                    catch (IOException | OutOfMemoryError | JSONException e) {
+                        Log.e(TAG, "receivedFile", e);
                     } finally {
                         Log.i(TAG, "receivedFile: calling callback");
-						callback.receivedFile(idFile);
+						callback.receivedFile(fileInfoReception);
 					}
 				}
 			}
