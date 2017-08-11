@@ -8,15 +8,17 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+
 /**
  * Created by raph on 01/05/17.
  */
 public class FileInfoReception {
     public String relativeFullPath;
-    public double size;
+    public long size;
     public int idFile;
 
-    public FileInfoReception(String relativeFullPath, double size, int idFile) {
+    public FileInfoReception(String relativeFullPath, long size, int idFile) {
         this.relativeFullPath = relativeFullPath;
         this.size = size;
         this.idFile = idFile;
@@ -29,7 +31,7 @@ public class FileInfoReception {
     public FileInfoReception(JSONObject file) {
         try {
             relativeFullPath = file.getString("path");
-            size = file.getDouble("size");
+            size = file.getLong("size");
             idFile = file.getInt("idFile");
         } catch (JSONException e) {
         }
