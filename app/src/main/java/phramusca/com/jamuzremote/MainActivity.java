@@ -3,6 +3,7 @@ package phramusca.com.jamuzremote;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
@@ -26,6 +27,7 @@ import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.Spanned;
@@ -114,15 +116,17 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout trackInfo;
     private LinearLayout controls;
     private GridLayout connect;
+    private NotificationManager mNotifyManager;
+    private NotificationCompat.Builder mBuilderSync;
+    private NotificationCompat.Builder mBuilderScan;
+    private static final int ID_NOTIFIER_SYNC = 1;
+    private static final int ID_NOTIFIER_SCAN = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "MainActivity onCreate");
         setContentView(R.layout.activity_main);
-
-
-
 
         //Read FilesToKeep file to get list of files to maintain in db
         String readJson = HelperTextFile.read(this, "FilesToKeep.txt");
@@ -139,6 +143,20 @@ public class MainActivity extends AppCompatActivity {
             Type collectionType = new TypeToken<HashMap<Integer, FileInfoReception>>(){}.getType();
             filesToGet = gson.fromJson(readJson, collectionType);
         }
+
+        mNotifyManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mBuilderSync = new NotificationCompat.Builder(this);
+        mBuilderSync.setContentTitle("JaMuz sync")
+                .setContentText("Download in progress")
+                .setUsesChronometer(true)
+                .setSmallIcon(R.drawable.gears_normal);
+
+        mBuilderScan = new NotificationCompat.Builder(this);
+        mBuilderScan.setContentTitle("JaMuz scan")
+                .setContentText("Scan in progress")
+                .setUsesChronometer(true)
+                .setSmallIcon(R.drawable.gears_normal);
 
         textViewReceived = (TextView) findViewById(R.id.textView_conv);
 
@@ -281,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     enableConnect(true);
-                    stopRemote();
+                    stopRemote(true);
 
                     displayedTrack = localTrack;
                     displayTrack();
@@ -531,6 +549,8 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         Log.i(TAG, "MainActivity onDestroy");
 
+        mNotifyManager.cancelAll();
+
         //Write list of files to maintain in db
         if(filesToKeep!=null) {
             Gson gson = new Gson();
@@ -671,6 +691,7 @@ public class MainActivity extends AppCompatActivity {
                     //Scan deleted files
                     //TODO: No need to check what scanned previously ...
                     List<Track> tracks = musicLibrary.getTracks(new PlayList("All"));
+                    nbFilesTotal = tracks.size();
                     nbFiles=0;
                     for(Track track : tracks) {
                         checkAbort();
@@ -679,12 +700,17 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "Remove track from db: "+track);
                             musicLibrary.deleteTrack(track.getPath());
                         }
-                        toastNbFile("JaMuz scan deleted ", 1000);
+                        notifyScan("JaMuz is scanning deleted files ... ");
                     }
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             toastLong("Database updated.");
+                            mBuilderScan.setContentText("Database updated.");
+                            mBuilderScan.setUsesChronometer(false);
+                            mBuilderSync.setWhen(System.currentTimeMillis());
+                            mBuilderScan.setProgress(0, 0, false);
+                            mNotifyManager.notify(ID_NOTIFIER_SCAN, mBuilderScan.build());
                         }
                     });
                 } catch (InterruptedException e) {
@@ -711,7 +737,7 @@ public class MainActivity extends AppCompatActivity {
                                         //file.delete();
                                     } else {
                                         insertOrUpdateTrackInDatabase(absolutePath);
-                                        toastNbFile("JaMuz scan ", 200);
+                                        notifyScan("JaMuz is scanning files ... ");
                                     }
                                 }
                             }
@@ -762,7 +788,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 //FIXME: Delete track ONLY if it is a song track
                 //that appears to be corrupted
-                Log.i(TAG, "browseFS delete file " + absolutePath);
+                Log.w(TAG, "browseFS delete file because cannot read tags of " + absolutePath);
                 new File(absolutePath).delete();
                 result=false;
             }
@@ -1239,16 +1265,16 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, msg, duration).show();
     }
 
-    private void toastNbFile(final String action, final int every) {
+    private void notifyScan(final String action) {
         nbFiles++;
-        if(((nbFiles-1) % every) == 0){
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    toastShort("#"+(nbFiles)+"/"+nbFilesTotal+" "+action);
+                    mBuilderScan.setProgress(nbFilesTotal, nbFiles, false);
+                    mBuilderScan.setContentText(nbFiles+"/"+nbFilesTotal+" "+action);
+                    mNotifyManager.notify(ID_NOTIFIER_SCAN, mBuilderScan.build());
                 }
             });
-        }
     }
 
     private void setSeekBar(final int currentPosition, final int total) {
@@ -1429,6 +1455,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void receivedFile(final FileInfoReception fileInfoReception) {
+            cancelWatchTimeOut();
             Log.i(TAG, "Received file\n"+fileInfoReception+"\nRemaining : "+filesToGet.size()+"/"+filesToKeep.size());
             File path = getAppDataPath();
             File receivedFile = new File(path.getAbsolutePath()+File.separator
@@ -1443,8 +1470,13 @@ public class MainActivity extends AppCompatActivity {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    toastShort("JaMuz received file (remaining " + filesToGet.size() + "/" + filesToKeep.size() + ") \n"
-                                            + fileInfoReception.relativeFullPath);
+                                    mBuilderSync.setProgress(filesToKeep.size(), filesToKeep.size()-filesToGet.size(), false);
+                                    mBuilderSync.setContentText((filesToKeep.size()-filesToGet.size())
+                                            +"/"+filesToKeep.size()
+                                            +" "+fileInfoReception.relativeFullPath);
+                                    mBuilderSync.setUsesChronometer(true);
+                                    mBuilderSync.setWhen(System.currentTimeMillis());
+                                    mNotifyManager.notify(ID_NOTIFIER_SYNC, mBuilderSync.build());
                                 }
                             });
                         } else {
@@ -1480,8 +1512,58 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void disconnected() {
-            stopRemote();
+            stopRemote(true);
+            cancelWatchTimeOut();
         }
+
+        @Override
+        public void timeout() {
+            //FIXME: RuntimeException: Can't create handler inside thread that has not called Looper.prepare()
+            watchTimeOut();
+        }
+    }
+
+    private CountDownTimer timerWatchTimeout=null;
+
+    private void cancelWatchTimeOut() {
+        Log.i(TAG, "timerWatchTimeout.cancel()");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized(timerWatchTimeout) {
+                    if(timerWatchTimeout!=null) {
+                        timerWatchTimeout.cancel(); //Cancel previous if any
+                    }
+                }
+            }
+        });
+    }
+
+    private void watchTimeOut() {
+        cancelWatchTimeOut();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized(timerWatchTimeout) {
+                    timerWatchTimeout = new CountDownTimer(30000, 3000) {
+                        @Override
+                        public void onTick(long millisUntilFinished) {
+                            Log.i(TAG, "Seconds Remaining: "+ (millisUntilFinished/1000));
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            Log.w(TAG, "Timeout. Dis-connecting");
+                            stopRemote(false);
+                            Log.i(TAG, "Re-connecting");
+                            buttonConnect.performClick();
+                        }
+                    };
+                    Log.i(TAG, "timerWatchTimeout.start()");
+                    timerWatchTimeout.start();
+                }
+            }
+        });
     }
 
     private Map<Integer, FileInfoReception> filesToGet = null;
@@ -1493,6 +1575,7 @@ public class MainActivity extends AppCompatActivity {
                 FileInfoReception fileInfoReception = filesToGet.entrySet().iterator().next().getValue();
                 File receivedFile = new File(getAppDataPath(), fileInfoReception.relativeFullPath);
                 if(receivedFile.exists() && receivedFile.length() == fileInfoReception.size) {
+                    Log.i(TAG, "File already exists. Remove from filesToGet list: "+fileInfoReception);
                     //No need to request this one, it already exists (how can this be ?)
                     filesToGet.remove(fileInfoReception.idFile);
                     //Request next one then
@@ -1511,8 +1594,8 @@ public class MainActivity extends AppCompatActivity {
                                     //So we can play and transfer
                                     //and also control the connection when transfer fails or timeouts
                                     // (timeout to be detected somehow)
-                                    Log.i(TAG, "Waiting 10s");
-                                    Thread.sleep(10000);
+                                    Log.i(TAG, "Waiting 2s");
+                                    Thread.sleep(2000);
                                 } catch (InterruptedException e) {
                                 }
                             }
@@ -1520,14 +1603,23 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }.start();
                 }
-            } else if(scanLibrary) {
+            } else {
                 Log.i(TAG, "No more files to retrieve. Update library");
-                checkPermissionsThenScanLibrary();
+                mBuilderSync.setContentText("No more files to download.");
+                mBuilderSync.setUsesChronometer(false);
+                mBuilderSync.setWhen(System.currentTimeMillis());
+                mBuilderSync.setProgress(0, 0, false);
+                mNotifyManager.notify(ID_NOTIFIER_SYNC, mBuilderSync.build());
+                if(scanLibrary) {
+                    checkPermissionsThenScanLibrary();
+                }
             }
+        } else {
+            Log.i(TAG, "filesToKeep is null");
         }
     }
 
-    private void stopRemote() {
+    private void stopRemote(final boolean enable) {
         if(client!=null) {
             client.close();
         }
@@ -1538,8 +1630,8 @@ public class MainActivity extends AppCompatActivity {
                 enableGUI(false);
                 buttonConnect.setText("Connect");
                 buttonConnect.setBackgroundResource(R.drawable.connect_off);
-                buttonConnect.setEnabled(true);
-                editTextConnectInfo.setEnabled(true);
+                buttonConnect.setEnabled(enable);
+                editTextConnectInfo.setEnabled(enable);
             }
         });
     }

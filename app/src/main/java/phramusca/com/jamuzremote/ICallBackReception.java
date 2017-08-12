@@ -16,4 +16,5 @@ public interface ICallBackReception {
 	public void receivedBitmap(Bitmap bitmap);
 	public void receivedFile(FileInfoReception fileInfoReception);
 	public void disconnected();
+    public void timeout();
 }

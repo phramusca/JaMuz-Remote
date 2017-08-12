@@ -119,7 +119,9 @@ public class Client {
 	}
 
 	public void send(String msg) {
-		Log.i(TAG, "SENDING "+msg);
-		emission.send(msg);
+		if(emission!=null) {
+			Log.i(TAG, "SENDING "+msg);
+			emission.send(msg);
+		}
 	}
 }
