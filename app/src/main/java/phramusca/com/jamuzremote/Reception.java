@@ -9,10 +9,11 @@ package phramusca.com.jamuzremote;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.CountDownTimer;
+import android.os.Looper;
 import android.util.Log;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -89,6 +90,7 @@ public class Reception  extends ProcessAbstract {
                                     fileInfoReception.relativeFullPath);
                             byte[] buf = new byte[1024]; // Adjust if you want
                             int bytesRead;
+                            callback.timeout();
                             while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
                                 fos.write(buf, 0, bytesRead);
                                 fileSize -= bytesRead;
