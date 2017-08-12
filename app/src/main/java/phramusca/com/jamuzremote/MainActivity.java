@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         mNotifyManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mBuilderSync = new NotificationCompat.Builder(this);
-        mBuilderSync.setContentTitle("JaMuz sync")
+        mBuilderSync.setContentTitle("JaMuz Sync")
                 .setContentText("Download in progress")
                 .setUsesChronometer(true)
                 .setSmallIcon(R.drawable.gears_normal);
@@ -1523,7 +1523,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private CountDownTimer timerWatchTimeout=null;
+    private CountDownTimer timerWatchTimeout= new CountDownTimer(0, 0) {
+        @Override
+        public void onTick(long l) {
+
+        }
+
+        @Override
+        public void onFinish() {
+
+        }
+    };
 
     private void cancelWatchTimeOut() {
         Log.i(TAG, "timerWatchTimeout.cancel()");

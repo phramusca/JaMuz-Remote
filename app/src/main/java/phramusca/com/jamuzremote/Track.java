@@ -10,13 +10,13 @@ import java.io.File;
  */
 public class Track {
     private int id;
-    private int rating;
-    private String title;
-    private String album;
-    private String artist;
-    private String coverHash;
+    private int rating=0;
+    private String title="";
+    private String album="";
+    private String artist="";
+    private String coverHash="";
     private String path;
-    private String genre;
+    private String genre="";
 
     public Track(int id, int rating, String title, String album,
                  String artist, String coverHash, String path, String genre) {
@@ -55,19 +55,19 @@ public class Track {
     }
 
     public String getTitle() {
-        return title;
+        return title==null?"":title;
     }
 
     public String getAlbum() {
-        return album;
+        return album==null?"":album;
     }
 
     public String getArtist() {
-        return artist;
+        return artist==null?"":artist;
     }
 
     public String getGenre() {
-        return genre;
+        return genre==null?"":genre;
     }
 
     public String getPath() {
