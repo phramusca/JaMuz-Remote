@@ -711,6 +711,7 @@ public class MainActivity extends AppCompatActivity {
                             mBuilderSync.setWhen(System.currentTimeMillis());
                             mBuilderScan.setProgress(0, 0, false);
                             mNotifyManager.notify(ID_NOTIFIER_SCAN, mBuilderScan.build());
+                            disableNotificationIn(5000, ID_NOTIFIER_SCAN);
                         }
                     });
                 } catch (InterruptedException e) {
@@ -1576,6 +1577,27 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void disableNotificationIn(final long millisInFuture, final int id) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                CountDownTimer timer = new CountDownTimer(millisInFuture, millisInFuture/10) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        Log.i(TAG, (millisUntilFinished/1000)+"s remaining before " +
+                                "disabling notification");
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        mNotifyManager.cancel(id);
+                    }
+                };
+                timer.start();
+            }
+        });
+    }
+
     private Map<Integer, FileInfoReception> filesToGet = null;
     private Map<String, FileInfoReception> filesToKeep = null;
 
@@ -1614,12 +1636,13 @@ public class MainActivity extends AppCompatActivity {
                     }.start();
                 }
             } else {
-                Log.i(TAG, "No more files to retrieve. Update library");
+                Log.i(TAG, "No more files to retrieve. Updating library:"+scanLibrary);
                 mBuilderSync.setContentText("No more files to download.");
                 mBuilderSync.setUsesChronometer(false);
                 mBuilderSync.setWhen(System.currentTimeMillis());
                 mBuilderSync.setProgress(0, 0, false);
                 mNotifyManager.notify(ID_NOTIFIER_SYNC, mBuilderSync.build());
+                disableNotificationIn(30000, ID_NOTIFIER_SYNC);
                 if(scanLibrary) {
                     checkPermissionsThenScanLibrary();
                 }
