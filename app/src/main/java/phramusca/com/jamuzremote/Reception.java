@@ -84,25 +84,17 @@ public class Reception  extends ProcessAbstract {
                         Log.i(TAG, "Start file reception: \n"+fileInfoReception);
                         DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
                         double fileSize = fileInfoReception.size;
-                        long fileMax=200000000L; // > 200MB is big enough. Not sure it would even work
-                        if(fileSize<fileMax && fileSize>0) {
-                            FileOutputStream fos = new FileOutputStream(path.getAbsolutePath() + File.separator +
-                                    fileInfoReception.relativeFullPath);
-                            byte[] buf = new byte[1024]; // Adjust if you want
-                            int bytesRead;
-                            callback.timeout();
-                            while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
-                                fos.write(buf, 0, bytesRead);
-                                fileSize -= bytesRead;
-                                //Log.v(TAG, "receivedFile chunk. Size is now: " + fileSize);
-                            }
-                            fos.close();
-                        } else {
-                            Log.e(TAG, "Size over limits (0 - "+fileMax+") !!! Aborting. Waiting 5s (does this helps ???)");
-                            Thread.sleep(5000);
-                            //FIXME: Even if aborting the buffer is corrupted !!
-                            //Needs to close and reopen connection
+                        FileOutputStream fos = new FileOutputStream(path.getAbsolutePath() + File.separator +
+                                fileInfoReception.relativeFullPath);
+                        byte[] buf = new byte[1024]; // Adjust if you want
+                        int bytesRead;
+                        callback.timeout();
+                        while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
+                            fos.write(buf, 0, bytesRead);
+                            fileSize -= bytesRead;
+                            //Log.v(TAG, "receivedFile chunk. Size is now: " + fileSize);
                         }
+                        fos.close();
 					}
                     catch (IOException | OutOfMemoryError | JSONException e) {
                         Log.e(TAG, "receivedFile", e);

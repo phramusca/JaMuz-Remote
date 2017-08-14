@@ -1520,7 +1520,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void timeout() {
             //FIXME: RuntimeException: Can't create handler inside thread that has not called Looper.prepare()
-            watchTimeOut();
+
         }
     }
 
@@ -1631,6 +1631,7 @@ public class MainActivity extends AppCompatActivity {
                                 } catch (InterruptedException e) {
                                 }
                             }
+                            watchTimeOut();
                             client.send("sendFile"+id);
                         }
                     }.start();
