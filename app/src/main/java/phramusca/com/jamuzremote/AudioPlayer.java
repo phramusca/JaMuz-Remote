@@ -4,6 +4,7 @@ import android.media.MediaPlayer;
 import android.os.CountDownTimer;
 import android.util.Log;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -43,7 +44,13 @@ public class AudioPlayer {
             });
 
         } catch (IOException e) {
-            Log.e(TAG, "Error play(\""+path+"\")", e);
+            Log.e(TAG, "Error playing (\""+path+"\") => DELETING IT !!!!!!", e);
+            //FIXME: Put back in FilesToGet if in FilesToKeep (take info from there)
+            //FIXME:
+            stop(false);
+            File file = new File(path);
+            file.delete();
+            callback.onPlayBackEnd();
         }
     }
 
