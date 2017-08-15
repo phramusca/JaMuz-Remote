@@ -33,13 +33,25 @@
             android:layout_gravity="center"/>
 
         <Button
+            android:id="@+id/button_sync"
             android:background="@drawable/connect_off"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:text="Connect"
-            android:id="@+id/button_connect"
             android:layout_row="0"
             android:layout_column="2"
+            android:textColor="@android:color/transparent"
+            android:textSize="10sp"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button_connect"
+            android:background="@drawable/remote_off"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="Connect"
+            android:layout_row="0"
+            android:layout_column="3"
             android:textColor="@android:color/transparent"
             android:textSize="10sp"
             android:textAllCaps="false" />
@@ -47,7 +59,7 @@
         <ToggleButton
             android:id="@+id/button_connect_toggle"
             android:layout_row="0"
-            android:layout_column="3"
+            android:layout_column="4"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
             style="@style/ToggleButton"
