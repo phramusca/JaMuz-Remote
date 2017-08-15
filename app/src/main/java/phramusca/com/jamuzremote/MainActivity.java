@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
                     ratingBar.setEnabled(false);
                     displayedTrack.setRating(Math.round(rating));
                     if(local) {
-                        musicLibrary.updateTrack(displayedTrack.getId(), displayedTrack, true);
+                        musicLibrary.updateTrack(displayedTrack.getId(), displayedTrack);
                         //Queue may not be valid as value changed
                         queue.clear();
                     } else {
@@ -806,7 +806,7 @@ public class MainActivity extends AppCompatActivity {
                                         Log.i(TAG, "Deleting file "+absolutePath);
                                         file.delete();
                                     } else {
-                                        insertOrUpdateTrackInDatabase(absolutePath, -1);
+                                        insertOrUpdateTrackInDatabase(absolutePath, null);
                                         notifyScan("JaMuz is scanning files ... ");
                                     }
                                 }
@@ -842,7 +842,7 @@ public class MainActivity extends AppCompatActivity {
         scanLibray.start();
     }
 
-    private boolean insertOrUpdateTrackInDatabase(String absolutePath, int rating) {
+    private boolean insertOrUpdateTrackInDatabase(String absolutePath, FileInfoReception fileInfoReception) {
         boolean result=true;
         int id = musicLibrary.getTrack(absolutePath);
         if(id>=0) {
@@ -854,8 +854,12 @@ public class MainActivity extends AppCompatActivity {
             Track track = getTrack(absolutePath);
             if(track!=null) {
                 Log.d(TAG, "browseFS insertTrack " + absolutePath);
-                if(rating>0) {
-                    track.setRating(rating);
+                if(fileInfoReception!=null) {
+                    //TODO: Remove FileInfoReception. Use Track instead
+                    track.setRating(fileInfoReception.rating);
+                    track.setAddedDate(fileInfoReception.addedDate);
+                    track.setLastPlayed(fileInfoReception.lastPlayed);
+                    track.setPlayCounter(fileInfoReception.playCounter);
                 }
                 musicLibrary.insertTrack(track);
             } else {
@@ -1594,7 +1598,7 @@ public class MainActivity extends AppCompatActivity {
                 if(receivedFile.exists()) {
                     if (receivedFile.length() == fileInfoReception.size) {
                         Log.i(TAG, "Saved file size: " + receivedFile.length());
-                        if(insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception.rating)) {
+                        if(insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception)) {
                             filesToGet.remove(fileInfoReception.idFile);
                             clientSync.send("insertDeviceFile" + fileInfoReception.idFile);
                             runOnUiThread(new Runnable() {
