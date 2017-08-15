@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private Client client;
+    private Client clientSync;
     private Track displayedTrack;
     private Track localTrack;
     private Map coverMap = new HashMap();
@@ -97,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewReceived;
     private EditText editTextConnectInfo;
     private Button buttonConnect;
+    private Button buttonSync;
     private ToggleButton buttonSetDimMode;
     private ToggleButton buttonControlsToggle;
     private ToggleButton buttonConnectToggle;
@@ -266,8 +268,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dimOn();
-                enableGUI(false);
-                buttonConnect.setBackgroundResource(R.drawable.connect_ongoing);
+                enableGUI(buttonConnect, false);
+                buttonConnect.setBackgroundResource(R.drawable.remote_ongoing);
                 if(buttonConnect.getText().equals("Connect")) {
                     String infoConnect = editTextConnectInfo.getText().toString();
                     String[] split = infoConnect.split(":");  //NOI18N
@@ -288,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
                    new Thread() {
                         public void run() {
                             if(client.connect()) {
-                                enableGUI(true);
+                                enableGUI(buttonConnect, true);
                                 enableConnect(false);
                             }
                             else {
@@ -299,10 +301,55 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     enableConnect(true);
-                    stopRemote(true);
+                    stopRemote(client, buttonConnect, R.drawable.remote_off, true);
 
                     displayedTrack = localTrack;
                     displayTrack();
+                }
+            }
+        });
+
+        buttonSync = (Button) findViewById(R.id.button_sync);
+        buttonSync.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //dimOn();
+                enableGUI(buttonSync, false);
+                buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
+                if(buttonSync.getText().equals("Connect")) {
+                    String infoConnect = editTextConnectInfo.getText().toString();
+                    String[] split = infoConnect.split(":");  //NOI18N
+                    if(split.length<2) {
+                        enableSync(true);
+                        return;
+                    }
+                    String address = split[0];
+                    int port;
+                    try {
+                        port = Integer.parseInt(split[1]);
+                    } catch(NumberFormatException ex) {
+                        port=2013;
+                    }
+                    CallBackSync callBackReception = new CallBackSync();
+                    clientSync = new Client(address, port,
+                            Settings.Secure.getString(MainActivity.this.getContentResolver(),
+                            Settings.Secure.ANDROID_ID)+"-data", "tata", callBackReception);
+                    new Thread() {
+                        public void run() {
+                            if(clientSync.connect()) {
+                                enableGUI(buttonSync, true);
+                                enableSync(false);
+                                requestNextFile(false);
+                            }
+                            else {
+                                enableSync(true);
+                            }
+                        }
+                    }.start();
+                }
+                else {
+                    enableSync(true);
+                    stopRemote(clientSync,buttonSync, R.drawable.connect_off, true);
                 }
             }
         });
@@ -381,10 +428,12 @@ public class MainActivity extends AppCompatActivity {
         displayedTrack = localTrack;
         setTextView(textViewReceived, Html.fromHtml("<html><h1>".concat(displayedTrack.toString()).concat("<BR/></h1></html>")), false);
 
-        enableGUI(false);
+        enableGUI(buttonSync, false);
+        enableGUI(buttonConnect, false);
         getFromQRcode();
         editTextConnectInfo.setEnabled(true);
         buttonConnect.setEnabled(true);
+        buttonSync.setEnabled(true);
 
         //TODO: MAke this an option somehow
 
@@ -534,8 +583,8 @@ public class MainActivity extends AppCompatActivity {
             dimOn();
         }
         else if(!audioPlayer.isPlaying()) {
-            enableGUI(false);
-            getFromQRcode();
+            //enableGUI(false);
+            //getFromQRcode();
             //buttonConnect.performClick();
         }
 
@@ -705,8 +754,9 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            toastLong("Database updated.");
-                            mBuilderScan.setContentText("Database updated.");
+                            String msg = "Database updated.";
+                            toastLong(msg);
+                            mBuilderScan.setContentText(msg);
                             mBuilderScan.setUsesChronometer(false);
                             mBuilderSync.setWhen(System.currentTimeMillis());
                             mBuilderScan.setProgress(0, 0, false);
@@ -734,8 +784,7 @@ public class MainActivity extends AppCompatActivity {
                                     String absolutePath=file.getAbsolutePath();
                                     if(delete && !filesToKeep.containsKey(absolutePath.substring(getAppDataPath().getAbsolutePath().length()+1))) {
                                         Log.i(TAG, "Deleting file "+absolutePath);
-                                        //FIXME: Uncomment when transfer is better
-                                        //file.delete();
+                                        file.delete();
                                     } else {
                                         insertOrUpdateTrackInDatabase(absolutePath);
                                         notifyScan("JaMuz is scanning files ... ");
@@ -1005,10 +1054,9 @@ public class MainActivity extends AppCompatActivity {
                 local=enable;
                 if(!enable) {
                     buttonConnect.setText("Close");
-                    buttonConnect.setBackgroundResource(R.drawable.connect_on);
-                    requestNextFile(false);
+                    buttonConnect.setBackgroundResource(R.drawable.remote_on);
                 } else {
-                    buttonConnect.setBackgroundResource(R.drawable.connect_off);
+                    buttonConnect.setBackgroundResource(R.drawable.remote_off);
                     setupSpinner(localPlaylists, localSelectedPlaylist);
                 }
                 editTextConnectInfo.setEnabled(enable);
@@ -1017,12 +1065,28 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void enableGUI(final boolean enable) {
+    private void enableSync(final boolean enable) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(!enable) {
+                    buttonSync.setText("Close");
+                    buttonSync.setBackgroundResource(R.drawable.connect_on);
+                } else {
+                    buttonSync.setBackgroundResource(R.drawable.connect_off);
+                }
+                editTextConnectInfo.setEnabled(enable);
+                buttonSync.setEnabled(true);
+            }
+        });
+    }
+
+    private void enableGUI(final Button button, final boolean enable) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 editTextConnectInfo.setEnabled(enable);
-                buttonConnect.setEnabled(enable);
+                button.setEnabled(enable);
             }
         });
     }
@@ -1159,11 +1223,9 @@ public class MainActivity extends AppCompatActivity {
                     toastLong("Not implemented");
                     break;
             }
-
         } else {
             dimOn();
             client.send(msg);
-
         }
     }
 
@@ -1212,7 +1274,7 @@ public class MainActivity extends AppCompatActivity {
         return in;
     }
 
-    ///TODO: Detect WIFI connection to allow/disallow "Connect" button
+    ///TODO: Detect WIFI connection to allow/disallow "Connect" buttons
     //https://stackoverflow.com/questions/5888502/how-to-detect-when-wifi-connection-has-been-established-in-android
 
     private boolean checkConnectedViaWifi() {
@@ -1426,6 +1488,55 @@ public class MainActivity extends AppCompatActivity {
                                     jObject.getString("genre"));
                             displayTrack();
                             break;
+                    }
+                } catch (JSONException e) {
+                    setTextView(textViewReceived, Html.fromHtml(e.toString()), false);
+                }
+            }
+        }
+
+        @Override
+        public void receivedFile(final FileInfoReception fileInfoReception) {
+        }
+
+        @Override
+        public void receivedBitmap(final Bitmap bitmap) {
+            Log.d(TAG, "receivedBitmap: callback");
+            Log.d(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight());
+
+            if (!coverMap.containsKey(displayedTrack.getCoverHash())) {
+                if (bitmap != null) { //Save to cache
+                    coverMap.put(displayedTrack.getCoverHash(), bitmap);
+                }
+            }
+            displayCover();
+        }
+
+        @Override
+        public void disconnected() {
+            stopRemote(client, buttonConnect, R.drawable.remote_off, true);
+        }
+    }
+
+    class CallBackSync implements ICallBackReception {
+
+        private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackSync.class.getSimpleName();
+
+        @Override
+        public void received(final String msg) {
+            if(msg.startsWith("MSG_")) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        toastShort(msg);
+                    }
+                });
+            }
+            else {
+                try {
+                    JSONObject jObject = new JSONObject(msg);
+                    String type = jObject.getString("type");
+                    switch(type) {
                         case "FilesToGet":
                             filesToGet = new HashMap<Integer, FileInfoReception>();
                             filesToKeep = new HashMap<>();
@@ -1437,7 +1548,7 @@ public class MainActivity extends AppCompatActivity {
                                 if(!localFile.exists()) {
                                     filesToGet.put(fileReceived.idFile, fileReceived);
                                 } else {
-                                    client.send("insertDeviceFile"+fileReceived.idFile);
+                                    clientSync.send("insertDeviceFile"+fileReceived.idFile);
                                 }
                             }
                             requestNextFile(true);
@@ -1448,11 +1559,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-
-        //FIXME: fileInfoReception.size can be wrong
-        //(maybe path too)
-        //So => Get FileInfoReception from receivedFile callback to have fresh file info
-        // Keep FileInfoReception in FilesToGet to be able to compare (now done + can be useful)
 
         @Override
         public void receivedFile(final FileInfoReception fileInfoReception) {
@@ -1467,7 +1573,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.i(TAG, "Saved file size: " + receivedFile.length());
                         if(insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath())) {
                             filesToGet.remove(fileInfoReception.idFile);
-                            client.send("insertDeviceFile" + fileInfoReception.idFile);
+                            clientSync.send("insertDeviceFile" + fileInfoReception.idFile);
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -1500,29 +1606,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void receivedBitmap(final Bitmap bitmap) {
-            Log.d(TAG, "receivedBitmap: callback");
-            Log.d(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight());
-
-            if (!coverMap.containsKey(displayedTrack.getCoverHash())) {
-                if (bitmap != null) { //Save to cache
-                    coverMap.put(displayedTrack.getCoverHash(), bitmap);
-                }
-            }
-            displayCover();
         }
 
         @Override
         public void disconnected() {
-            stopRemote(true);
+            stopRemote(clientSync, buttonSync, R.drawable.connect_off, true);
             cancelWatchTimeOut();
         }
-
-        @Override
-        public void timeout() {
-            //FIXME: RuntimeException: Can't create handler inside thread that has not called Looper.prepare()
-
-        }
     }
+
 
     private CountDownTimer timerWatchTimeout= new CountDownTimer(0, 0) {
         @Override
@@ -1565,9 +1657,9 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onFinish() {
                             Log.w(TAG, "Timeout. Dis-connecting");
-                            stopRemote(false);
+                            stopRemote(clientSync, buttonSync, R.drawable.connect_off, false);
                             Log.i(TAG, "Re-connecting");
-                            buttonConnect.performClick();
+                            buttonSync.performClick();
                         }
                     };
                     Log.i(TAG, "timerWatchTimeout.start()");
@@ -1618,7 +1710,7 @@ public class MainActivity extends AppCompatActivity {
                     new Thread() {
                         @Override
                         public void run() {
-                            if(!scanLibrary) {
+                            /*if(!scanLibrary) {
                                 try {
                                     //FIXME: This can help to let the other info (remote track) to pass
                                     //=> Use a second socket for the file transfer
@@ -1630,20 +1722,33 @@ public class MainActivity extends AppCompatActivity {
                                     Thread.sleep(2000);
                                 } catch (InterruptedException e) {
                                 }
-                            }
+                            }*/
                             watchTimeOut();
-                            client.send("sendFile"+id);
+                            clientSync.send("sendFile"+id);
                         }
                     }.start();
                 }
             } else {
-                Log.i(TAG, "No more files to retrieve. Updating library:"+scanLibrary);
-                mBuilderSync.setContentText("No more files to download.");
+                //FIXME: Ask user if he wants to get a new list
+                //=> Need to manage stats sync over socket first !!
+
+
+                final String msg = "No more files to download.";
+                Log.i(TAG, msg+" Updating library:"+scanLibrary);
+                mBuilderSync.setContentText(msg);
                 mBuilderSync.setUsesChronometer(false);
                 mBuilderSync.setWhen(System.currentTimeMillis());
                 mBuilderSync.setProgress(0, 0, false);
                 mNotifyManager.notify(ID_NOTIFIER_SYNC, mBuilderSync.build());
-                disableNotificationIn(30000, ID_NOTIFIER_SYNC);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        toastLong(msg);
+                    }
+                });
+                enableSync(true);
+                stopRemote(clientSync,buttonSync, R.drawable.connect_off, true);
+                disableNotificationIn(5000, ID_NOTIFIER_SYNC);
                 if(scanLibrary) {
                     checkPermissionsThenScanLibrary();
                 }
@@ -1653,7 +1758,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void stopRemote(final boolean enable) {
+    private void stopRemote(Client client, final Button button, final int resId, final boolean enable) {
         if(client!=null) {
             client.close();
         }
@@ -1661,10 +1766,10 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                enableGUI(false);
-                buttonConnect.setText("Connect");
-                buttonConnect.setBackgroundResource(R.drawable.connect_off);
-                buttonConnect.setEnabled(enable);
+                enableGUI(button, false);
+                button.setText("Connect");
+                button.setBackgroundResource(resId);
+                button.setEnabled(enable);
                 editTextConnectInfo.setEnabled(enable);
             }
         });

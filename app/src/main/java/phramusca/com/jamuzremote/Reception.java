@@ -88,7 +88,6 @@ public class Reception  extends ProcessAbstract {
                                 fileInfoReception.relativeFullPath);
                         byte[] buf = new byte[1024]; // Adjust if you want
                         int bytesRead;
-                        callback.timeout();
                         while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
                             fos.write(buf, 0, bytesRead);
                             fileSize -= bytesRead;
@@ -114,21 +113,4 @@ public class Reception  extends ProcessAbstract {
 			}
 		}
 	}
-
-    /**
-     *
-     * @param input
-     * @param output
-     * @throws IOException
-     */
-    public static void copyStream(InputStream input, OutputStream output) throws IOException {
-        byte[] buffer = new byte[1024]; // Adjust if you want
-        int bytesRead;
-        while ((bytesRead = input.read(buffer)) != -1)
-        {
-            output.write(buffer, 0, bytesRead);
-            Log.i(TAG, String.valueOf(bytesRead));
-        }
-    }
-
 }

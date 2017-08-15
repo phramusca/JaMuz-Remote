@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Application theme. -->
-    <!-- FIXME: Make some themes  -->
+    <!-- TODO: Make some themes  -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -10,7 +10,7 @@
     </style>
 
     <!-- Controls styles. -->
-    <!-- FIXME: Why seen as themes ? Alternative ?  -->
+    <!-- TODO: Why seen as themes ? Alternative ?  -->
     <style name="RatingBar" parent="Theme.AppCompat">
         <item name="colorControlNormal">@color/duskYellow</item>
         <item name="colorControlActivated">@color/lightYellow</item>

@@ -45,8 +45,7 @@ public class AudioPlayer {
 
         } catch (IOException e) {
             Log.e(TAG, "Error playing (\""+path+"\") => DELETING IT !!!!!!", e);
-            //FIXME: Put back in FilesToGet if in FilesToKeep (take info from there)
-            //FIXME:
+            //TODO: Put back in FilesToGet if in FilesToKeep (take info from there)
             stop(false);
             File file = new File(path);
             file.delete();
