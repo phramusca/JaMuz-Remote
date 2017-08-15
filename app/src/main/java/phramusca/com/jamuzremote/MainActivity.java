@@ -1753,10 +1753,6 @@ public class MainActivity extends AppCompatActivity {
                     }.start();
                 }
             } else {
-                //FIXME: Ask user if he wants to get a new list
-                //=> Need to manage stats sync over socket first !!
-
-
                 final String msg = "No more files to download.";
                 Log.i(TAG, msg+" Updating library:"+scanLibrary);
                 mBuilderSync.setContentText(msg);
@@ -1770,6 +1766,8 @@ public class MainActivity extends AppCompatActivity {
                         toastLong(msg);
                     }
                 });
+                //Not disconnecting to be able to receive a new list
+                //sent by the server. User can still close
                 //enableSync(true);
                 //stopRemote(clientSync,buttonSync, R.drawable.connect_off, true);
                 disableNotificationIn(5000, ID_NOTIFIER_SYNC);
