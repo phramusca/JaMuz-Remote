@@ -35,6 +35,10 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     public static final String COL_PATH = "path";
     public static final String COL_GENRE = "genre";
 
+    public static final String COL_ADDED_DATE = "addedDate";
+    public static final String COL_LAST_PLAYED = "lastPlayed";
+    public static final String COL_PLAY_COUNTER = "playCounter";
+
     private static final String CREATE_BDD = "CREATE TABLE " + TABLE_TRACKS + " ("
             + COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COL_TITLE + " TEXT NOT NULL, "
@@ -43,6 +47,9 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
             + COL_COVER_HASH + " TEXT NOT NULL, "
             + COL_PATH + " TEXT NOT NULL, "
             + COL_GENRE + " TEXT, "
+            + COL_ADDED_DATE + " TEXT NOT NULL, "
+            + COL_PLAY_COUNTER + " INTEGER NOT NULL, "
+            + COL_LAST_PLAYED + " TEXT NOT NULL, "
             + COL_ALBUM + " TEXT NOT NULL);";
 
     //By default store in user internal folder

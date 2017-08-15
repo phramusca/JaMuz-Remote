@@ -80,18 +80,18 @@ public class MusicLibrary {
 
     public long insertTrack(Track track){
         try {
-            return db.insert(musicLibraryDb.TABLE_TRACKS, null, TrackToValues(track, true));
+            return db.insert(musicLibraryDb.TABLE_TRACKS, null, TrackToValues(track));
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "insertTrack("+track+")", ex);
         }
         return -1;
     }
 
-    public int updateTrack(int id, Track track, boolean setRating){
+    public int updateTrack(int id, Track track){
         try {
-            return db.update(musicLibraryDb.TABLE_TRACKS, TrackToValues(track, setRating), musicLibraryDb.COL_ID + " = " +id, null);
+            return db.update(musicLibraryDb.TABLE_TRACKS, TrackToValues(track), musicLibraryDb.COL_ID + " = " +id, null);
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "updateTrack("+id+","+track+","+setRating+")", ex);
+            Log.e(TAG, "updateTrack("+id+","+track+")", ex);
         }
         return -1;
     }
@@ -105,7 +105,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    private ContentValues TrackToValues(Track track, boolean setRating) {
+    private ContentValues TrackToValues(Track track) {
         ContentValues values = new ContentValues();
         values.put(musicLibraryDb.COL_TITLE, track.getTitle());
         values.put(musicLibraryDb.COL_ALBUM, track.getAlbum());
@@ -113,9 +113,10 @@ public class MusicLibrary {
         values.put(musicLibraryDb.COL_COVER_HASH, track.getCoverHash());
         values.put(musicLibraryDb.COL_GENRE, track.getGenre());
         values.put(musicLibraryDb.COL_PATH, track.getPath());
-        if(setRating) {
-            values.put(musicLibraryDb.COL_RATING, track.getRating());
-        }
+        values.put(musicLibraryDb.COL_RATING, track.getRating());
+        values.put(musicLibraryDb.COL_ADDED_DATE, track.getAddedDate());
+        values.put(musicLibraryDb.COL_LAST_PLAYED, track.getLastPlayed());
+        values.put(musicLibraryDb.COL_PLAY_COUNTER, track.getPlayCounter());
         return values;
     }
 
