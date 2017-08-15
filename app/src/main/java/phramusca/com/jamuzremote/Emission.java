@@ -26,6 +26,7 @@ public class Emission extends ProcessAbstract {
 
 	public boolean send(String msg) {
 		try {
+			checkAbort();
 			outQueue.put(msg);
 			return true;
 		} catch (InterruptedException ex) {

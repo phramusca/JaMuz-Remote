@@ -89,6 +89,9 @@ public class Client {
 
 	public void close() {
 		try {
+			if(emission!=null) {
+				emission.abort();
+			}
             if(reception!=null) {
                 reception.abort();
             }

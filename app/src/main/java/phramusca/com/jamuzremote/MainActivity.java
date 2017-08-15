@@ -350,6 +350,7 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     enableSync(true);
                     stopRemote(clientSync,buttonSync, R.drawable.connect_off, true);
+                    cancelWatchTimeOut();
                 }
             }
         });
@@ -1676,7 +1677,7 @@ public class MainActivity extends AppCompatActivity {
                 synchronized(timerWatchTimeout) {
 
                     long minTimeout =  3 * 1000;  //Min timeout 3s (+ 3s by Mo)
-                    long maxTimeout =  60 * 1000; //Max timeout 60s
+                    long maxTimeout =  120 * 1000; //Max timeout 2 min
 
                     long timeout = size<1000000?minTimeout:((size / 1000000) * minTimeout);
                     timeout = timeout>maxTimeout?maxTimeout:timeout;
@@ -1690,6 +1691,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onFinish() {
                             Log.w(TAG, "Timeout. Dis-connecting");
                             stopRemote(clientSync, buttonSync, R.drawable.connect_off, false);
+                            cancelWatchTimeOut();
                             Log.i(TAG, "Re-connecting");
                             buttonSync.performClick();
                         }
@@ -1752,7 +1754,9 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                             watchTimeOut(fileInfoReception.size);
-                            clientSync.send("sendFile"+fileInfoReception.idFile);
+                            synchronized(timerWatchTimeout) {
+                                clientSync.send("sendFile"+fileInfoReception.idFile);
+                            }
                         }
                     }.start();
                 }
