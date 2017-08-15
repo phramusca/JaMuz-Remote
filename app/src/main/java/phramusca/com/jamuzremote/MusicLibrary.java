@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ public class MusicLibrary {
 
     private SQLiteDatabase db;
     private MusicLibraryDb musicLibraryDb;
+    private static final String TAG = MusicLibrary.class.getSimpleName();
 
     public MusicLibrary(Context context){
         musicLibraryDb = new MusicLibraryDb(context);
@@ -37,51 +39,70 @@ public class MusicLibrary {
     }
 
     public int getTrack(String path){
-        Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
-                new String[] {musicLibraryDb.COL_ID},
-                musicLibraryDb.COL_PATH + " LIKE \"" + path +"\"",
-                null, null, null, null);
-        if (cursor.getCount() == 0)
-            return -1;
+        try {
+            Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
+                    new String[] {musicLibraryDb.COL_ID},
+                    musicLibraryDb.COL_PATH + " LIKE \"" + path +"\"",
+                    null, null, null, null);
+            if (cursor.getCount() == 0)
+                return -1;
 
-        cursor.moveToFirst();
-        int id = cursor.getInt(cursor.getColumnIndex(musicLibraryDb.COL_ID));
-        cursor.close();
-        return id;
+            cursor.moveToFirst();
+            int id = cursor.getInt(cursor.getColumnIndex(musicLibraryDb.COL_ID));
+            cursor.close();
+            return id;
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "getTrack("+path+")", ex);
+        }
+        return -1;
     }
 
     public ArrayList<Track> getTracks(PlayList playlist) {
-
         ArrayList<Track> tracks = new ArrayList<>();
-        Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
-                null,
-                playlist.getQuery(),
-                null, null, null, null, null);
-        if(cursor != null && cursor.moveToFirst())
-        {
-            do {
-                Track track = cursorToTrack(cursor);
-                tracks.add(track);
-            } while(cursor.moveToNext());
+        try {
+            Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
+                    null,
+                    playlist.getQuery(),
+                    null, null, null, null, null);
+            if(cursor != null && cursor.moveToFirst())
+            {
+                do {
+                    Track track = cursorToTrack(cursor);
+                    tracks.add(track);
+                } while(cursor.moveToNext());
+            }
+            cursor.close();
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "getTracks("+playlist+")", ex);
         }
-        cursor.close();
         return tracks;
     }
 
     public long insertTrack(Track track){
         try {
             return db.insert(musicLibraryDb.TABLE_TRACKS, null, TrackToValues(track, true));
-        } catch (SQLiteException ex) {
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "insertTrack("+track+")", ex);
         }
         return -1;
     }
 
     public int updateTrack(int id, Track track, boolean setRating){
-        return db.update(musicLibraryDb.TABLE_TRACKS, TrackToValues(track, setRating), musicLibraryDb.COL_ID + " = " +id, null);
+        try {
+            return db.update(musicLibraryDb.TABLE_TRACKS, TrackToValues(track, setRating), musicLibraryDb.COL_ID + " = " +id, null);
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "updateTrack("+id+","+track+","+setRating+")", ex);
+        }
+        return -1;
     }
 
     public int deleteTrack(String path){
-        return db.delete(musicLibraryDb.TABLE_TRACKS, musicLibraryDb.COL_PATH + " = \"" +path+"\"", null);
+        try {
+            return db.delete(musicLibraryDb.TABLE_TRACKS, musicLibraryDb.COL_PATH + " = \"" +path+"\"", null);
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "deleteTrack("+path+")", ex);
+        }
+        return -1;
     }
 
     private ContentValues TrackToValues(Track track, boolean setRating) {
@@ -132,14 +153,19 @@ public class MusicLibrary {
     }
 
     public int getNb(String where){
-        Cursor cursor = db.rawQuery("SELECT count(*) FROM "+musicLibraryDb.TABLE_TRACKS +
-                " WHERE " + where, new String [] {});
-        if (cursor.getCount() == 0)
-            return 0;
+        try {
+            Cursor cursor = db.rawQuery("SELECT count(*) FROM "+musicLibraryDb.TABLE_TRACKS +
+                    " WHERE " + where, new String [] {});
+            if (cursor.getCount() == 0)
+                return 0;
 
-        cursor.moveToFirst();
-        Integer nb = cursor.getInt(0);
-        cursor.close();
-        return nb;
+            cursor.moveToFirst();
+            Integer nb = cursor.getInt(0);
+            cursor.close();
+            return nb;
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "getNb("+where+")", ex);
+        }
+        return -1;
     }
 }

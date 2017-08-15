@@ -17,12 +17,7 @@ public class FileInfoReception {
     public String relativeFullPath;
     public long size;
     public int idFile;
-
-    public FileInfoReception(String relativeFullPath, long size, int idFile) {
-        this.relativeFullPath = relativeFullPath;
-        this.size = size;
-        this.idFile = idFile;
-    }
+    public int rating;
 
     public FileInfoReception(String json) throws JSONException {
         this(new JSONObject(json));
@@ -33,6 +28,7 @@ public class FileInfoReception {
             relativeFullPath = file.getString("path");
             size = file.getLong("size");
             idFile = file.getInt("idFile");
+            rating = file.getInt("rating");
         } catch (JSONException e) {
         }
     }

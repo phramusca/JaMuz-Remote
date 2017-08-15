@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
     // GUI elements
     private TextView textViewReceived;
     private EditText editTextConnectInfo;
-    private Button buttonConnect;
+    private Button buttonRemote;
     private Button buttonSync;
     private ToggleButton buttonSetDimMode;
     private ToggleButton buttonControlsToggle;
@@ -263,14 +263,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        buttonConnect = (Button) findViewById(R.id.button_connect);
-        buttonConnect.setOnClickListener(new View.OnClickListener() {
+        buttonRemote = (Button) findViewById(R.id.button_connect);
+        buttonRemote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dimOn();
-                enableGUI(buttonConnect, false);
-                buttonConnect.setBackgroundResource(R.drawable.remote_ongoing);
-                if(buttonConnect.getText().equals("Connect")) {
+                enableGUI(buttonRemote, false);
+                buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
+                if(buttonRemote.getText().equals("Connect")) {
                     String infoConnect = editTextConnectInfo.getText().toString();
                     String[] split = infoConnect.split(":");  //NOI18N
                     if(split.length<2) {
@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
                    new Thread() {
                         public void run() {
                             if(client.connect()) {
-                                enableGUI(buttonConnect, true);
+                                enableGUI(buttonRemote, true);
                                 enableConnect(false);
                             }
                             else {
@@ -301,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     enableConnect(true);
-                    stopRemote(client, buttonConnect, R.drawable.remote_off, true);
+                    stopRemote(client, buttonRemote, R.drawable.remote_off, true);
 
                     displayedTrack = localTrack;
                     displayTrack();
@@ -313,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
         buttonSync.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //dimOn();
+                dimOn();
                 enableGUI(buttonSync, false);
                 buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
                 if(buttonSync.getText().equals("Connect")) {
@@ -429,10 +429,10 @@ public class MainActivity extends AppCompatActivity {
         setTextView(textViewReceived, Html.fromHtml("<html><h1>".concat(displayedTrack.toString()).concat("<BR/></h1></html>")), false);
 
         enableGUI(buttonSync, false);
-        enableGUI(buttonConnect, false);
+        enableGUI(buttonRemote, false);
         getFromQRcode();
         editTextConnectInfo.setEnabled(true);
-        buttonConnect.setEnabled(true);
+        buttonRemote.setEnabled(true);
         buttonSync.setEnabled(true);
 
         //TODO: MAke this an option somehow
@@ -571,7 +571,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.i(TAG, "MainActivity onPause");
-        //stopRemote();
+        stopRemote(client, buttonRemote, R.drawable.remote_off, true);
+        //setDimMode(false);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus)
+    {
+        try
+        {
+            if(hasFocus) {
+                setDimMode(!buttonSetDimMode.isChecked());
+            }
+            else {
+                setDimMode(false);
+            }
+        }
+        catch(Exception ex)
+        {
+            Log.e(TAG, "onWindowFocusChanged", ex);
+        }
     }
 
     @Override
@@ -580,12 +599,13 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "MainActivity onResume");
 
         if(!buttonSetDimMode.isChecked()) {
+            //setDimMode(true);
             dimOn();
         }
         else if(!audioPlayer.isPlaying()) {
-            //enableGUI(false);
-            //getFromQRcode();
-            //buttonConnect.performClick();
+            enableGUI(buttonRemote, false);
+            getFromQRcode();
+            buttonRemote.performClick();
         }
 
         //TODO: Check if this solves the issue with buttons
@@ -786,7 +806,7 @@ public class MainActivity extends AppCompatActivity {
                                         Log.i(TAG, "Deleting file "+absolutePath);
                                         file.delete();
                                     } else {
-                                        insertOrUpdateTrackInDatabase(absolutePath);
+                                        insertOrUpdateTrackInDatabase(absolutePath, -1);
                                         notifyScan("JaMuz is scanning files ... ");
                                     }
                                 }
@@ -822,7 +842,7 @@ public class MainActivity extends AppCompatActivity {
         scanLibray.start();
     }
 
-    private boolean insertOrUpdateTrackInDatabase(String absolutePath) {
+    private boolean insertOrUpdateTrackInDatabase(String absolutePath, int rating) {
         boolean result=true;
         int id = musicLibrary.getTrack(absolutePath);
         if(id>=0) {
@@ -834,6 +854,9 @@ public class MainActivity extends AppCompatActivity {
             Track track = getTrack(absolutePath);
             if(track!=null) {
                 Log.d(TAG, "browseFS insertTrack " + absolutePath);
+                if(rating>0) {
+                    track.setRating(rating);
+                }
                 musicLibrary.insertTrack(track);
             } else {
                 //FIXME: Delete track ONLY if it is a song track
@@ -1053,14 +1076,14 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 local=enable;
                 if(!enable) {
-                    buttonConnect.setText("Close");
-                    buttonConnect.setBackgroundResource(R.drawable.remote_on);
+                    buttonRemote.setText("Close");
+                    buttonRemote.setBackgroundResource(R.drawable.remote_on);
                 } else {
-                    buttonConnect.setBackgroundResource(R.drawable.remote_off);
+                    buttonRemote.setBackgroundResource(R.drawable.remote_off);
                     setupSpinner(localPlaylists, localSelectedPlaylist);
                 }
                 editTextConnectInfo.setEnabled(enable);
-                buttonConnect.setEnabled(true);
+                buttonRemote.setEnabled(true);
             }
         });
     }
@@ -1514,7 +1537,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void disconnected() {
-            stopRemote(client, buttonConnect, R.drawable.remote_off, true);
+            stopRemote(client, buttonRemote, R.drawable.remote_off, true);
         }
     }
 
@@ -1571,7 +1594,7 @@ public class MainActivity extends AppCompatActivity {
                 if(receivedFile.exists()) {
                     if (receivedFile.length() == fileInfoReception.size) {
                         Log.i(TAG, "Saved file size: " + receivedFile.length());
-                        if(insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath())) {
+                        if(insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception.rating)) {
                             filesToGet.remove(fileInfoReception.idFile);
                             clientSync.send("insertDeviceFile" + fileInfoReception.idFile);
                             runOnUiThread(new Runnable() {
@@ -1615,7 +1638,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     private CountDownTimer timerWatchTimeout= new CountDownTimer(0, 0) {
         @Override
         public void onTick(long l) {
@@ -1642,13 +1664,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void watchTimeOut() {
+    private void watchTimeOut(final long size) {
         cancelWatchTimeOut();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 synchronized(timerWatchTimeout) {
-                    timerWatchTimeout = new CountDownTimer(30000, 3000) {
+
+                    long minTimeout =  3 * 1000;  //Min timeout 3s (+ 3s by Mo)
+                    long maxTimeout =  60 * 1000; //Max timeout 60s
+
+                    long timeout = size<1000000?minTimeout:((size / 1000000) * minTimeout);
+                    timeout = timeout>maxTimeout?maxTimeout:timeout;
+                    timerWatchTimeout = new CountDownTimer(timeout, timeout/10) {
                         @Override
                         public void onTick(long millisUntilFinished) {
                             Log.i(TAG, "Seconds Remaining: "+ (millisUntilFinished/1000));
@@ -1696,7 +1724,7 @@ public class MainActivity extends AppCompatActivity {
     private void requestNextFile(final boolean scanLibrary) {
         if(filesToKeep!=null) {
             if(filesToGet.size()>0) {
-                FileInfoReception fileInfoReception = filesToGet.entrySet().iterator().next().getValue();
+                final FileInfoReception fileInfoReception = filesToGet.entrySet().iterator().next().getValue();
                 File receivedFile = new File(getAppDataPath(), fileInfoReception.relativeFullPath);
                 if(receivedFile.exists() && receivedFile.length() == fileInfoReception.size) {
                     Log.i(TAG, "File already exists. Remove from filesToGet list: "+fileInfoReception);
@@ -1706,25 +1734,21 @@ public class MainActivity extends AppCompatActivity {
                     requestNextFile(scanLibrary);
                 } else {
                     //Wait (after connection) and send request
-                    final int id = filesToGet.entrySet().iterator().next().getKey();
+                    //final int id = filesToGet.entrySet().iterator().next().getKey();
+                    //final FileInfoReception id = filesToGet.entrySet().iterator().next().getValue();
                     new Thread() {
                         @Override
                         public void run() {
-                            /*if(!scanLibrary) {
+                            if(!scanLibrary) {
                                 try {
-                                    //FIXME: This can help to let the other info (remote track) to pass
-                                    //=> Use a second socket for the file transfer
-                                    //along with a new toggle button
-                                    //So we can play and transfer
-                                    //and also control the connection when transfer fails or timeouts
-                                    // (timeout to be detected somehow)
+                                    //Waits a little after connection
                                     Log.i(TAG, "Waiting 2s");
                                     Thread.sleep(2000);
                                 } catch (InterruptedException e) {
                                 }
-                            }*/
-                            watchTimeOut();
-                            clientSync.send("sendFile"+id);
+                            }
+                            watchTimeOut(fileInfoReception.size);
+                            clientSync.send("sendFile"+fileInfoReception.idFile);
                         }
                     }.start();
                 }
@@ -1746,8 +1770,8 @@ public class MainActivity extends AppCompatActivity {
                         toastLong(msg);
                     }
                 });
-                enableSync(true);
-                stopRemote(clientSync,buttonSync, R.drawable.connect_off, true);
+                //enableSync(true);
+                //stopRemote(clientSync,buttonSync, R.drawable.connect_off, true);
                 disableNotificationIn(5000, ID_NOTIFIER_SYNC);
                 if(scanLibrary) {
                     checkPermissionsThenScanLibrary();
