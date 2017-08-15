@@ -1676,7 +1676,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 synchronized(timerWatchTimeout) {
 
-                    long minTimeout =  3 * 1000;  //Min timeout 3s (+ 3s by Mo)
+                    long minTimeout =  10 * 1000;  //Min timeout 10s (+ 10s by Mo)
                     long maxTimeout =  120 * 1000; //Max timeout 2 min
 
                     long timeout = size<1000000?minTimeout:((size / 1000000) * minTimeout);

@@ -89,16 +89,19 @@ public class Reception  extends ProcessAbstract {
                         byte[] buf = new byte[1024]; // Adjust if you want
                         int bytesRead;
                         while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
+                            checkAbort();
                             fos.write(buf, 0, bytesRead);
                             fileSize -= bytesRead;
                             //Log.v(TAG, "receivedFile chunk. Size is now: " + fileSize);
                         }
                         fos.close();
+                        checkAbort();
 					}
                     catch (IOException | OutOfMemoryError | JSONException e) {
                         Log.e(TAG, "receivedFile", e);
                     } finally {
                         Log.i(TAG, "receivedFile: calling callback");
+                        checkAbort();
 						callback.receivedFile(fileInfoReception);
 					}
 				}
