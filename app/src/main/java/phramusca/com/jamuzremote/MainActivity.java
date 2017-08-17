@@ -116,8 +116,8 @@ public class MainActivity extends AppCompatActivity {
     private RatingBar ratingBar;
     private ImageView image;
     private LinearLayout trackInfo;
-    private LinearLayout controls;
-    private GridLayout connect;
+    private LinearLayout panelControls;
+    private GridLayout panelOptions;
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilderSync;
     private NotificationCompat.Builder mBuilderScan;
@@ -359,8 +359,8 @@ public class MainActivity extends AppCompatActivity {
 
         trackInfo = (LinearLayout) findViewById(R.id.trackInfo);
 
-        controls = (LinearLayout) findViewById(R.id.controls);
-        connect = (GridLayout) findViewById(R.id.connect);
+        panelControls = (LinearLayout) findViewById(R.id.panel_controls);
+        panelOptions = (GridLayout) findViewById(R.id.panel_options);
 
         trackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
             @Override
@@ -497,18 +497,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void toggleConfig(boolean collapse) {
         if(collapse) {
-            collapse(connect);
+            collapse(panelOptions);
         } else {
-            expand(connect);
+            expand(panelOptions);
         }
     }
 
     private void toggleControls(boolean collapse) {
         //https://stackoverflow.com/questions/4946295/android-expand-collapse-animation
         if(collapse) {
-            collapse(controls);
+            collapse(panelControls);
         } else {
-            expand(controls);
+            expand(panelControls);
         }
     }
 
@@ -1571,7 +1571,7 @@ public class MainActivity extends AppCompatActivity {
                     String type = jObject.getString("type");
                     switch(type) {
                         case "FilesToGet":
-                            filesToGet = new HashMap<Integer, FileInfoReception>();
+                            filesToGet = new HashMap<>();
                             filesToKeep = new HashMap<>();
                             JSONArray files = (JSONArray) jObject.get("files");
                             for(int i=0; i<files.length(); i++) {
