@@ -86,7 +86,10 @@ public class Reception  extends ProcessAbstract {
                         double fileSize = fileInfoReception.size;
                         FileOutputStream fos = new FileOutputStream(path.getAbsolutePath() + File.separator +
                                 fileInfoReception.relativeFullPath);
-                        byte[] buf = new byte[1024]; // Adjust if you want
+
+                        // FIXME: Find best. Make a benchmark
+                        //https://stackoverflow.com/questions/8748960/how-do-you-decide-what-byte-size-to-use-for-inputstream-read
+                        byte[] buf = new byte[8192];
                         int bytesRead;
                         while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
                             checkAbort();
@@ -96,14 +99,11 @@ public class Reception  extends ProcessAbstract {
                         }
                         fos.close();
                         checkAbort();
+                        callback.receivedFile(fileInfoReception);
 					}
                     catch (IOException | OutOfMemoryError | JSONException e) {
                         Log.e(TAG, "receivedFile", e);
-                    } finally {
-                        Log.i(TAG, "receivedFile: calling callback");
-                        checkAbort();
-						callback.receivedFile(fileInfoReception);
-					}
+                    }
 				}
 			}
 		} catch (InterruptedException ex) {

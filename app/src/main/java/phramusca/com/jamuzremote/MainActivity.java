@@ -573,7 +573,6 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         Log.i(TAG, "MainActivity onPause");
         stopRemote(client, buttonRemote, R.drawable.remote_off, true);
-        //setDimMode(false);
     }
 
     @Override
@@ -600,7 +599,6 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "MainActivity onResume");
 
         if(!buttonSetDimMode.isChecked()) {
-            //setDimMode(true);
             dimOn();
         }
         else if(!audioPlayer.isPlaying()) {
@@ -619,19 +617,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         Log.i(TAG, "MainActivity onDestroy");
 
-        mNotifyManager.cancelAll();
-
-        //Write list of files to maintain in db
-        if(filesToKeep!=null) {
-            Gson gson = new Gson();
-            HelperTextFile.write(this, "FilesToKeep.txt", gson.toJson(filesToKeep));
-        }
-        //Write list of files to retrieve
-        if(filesToGet!=null) {
-            Gson gson = new Gson();
-            HelperTextFile.write(this, "filesToGet.txt", gson.toJson(filesToGet));
-        }
-
         //Better unregister as it does not trigger anyway + raises exceptions if not
         unregisterReceiver(receiverHeadSetPlugged);
         unregisterReceiver(mHeadsetBroadcastReceiver);
@@ -643,6 +628,12 @@ public class MainActivity extends AppCompatActivity {
         if(service!=null) {
             stopService(service);
         }
+
+        //Stop connections to JaMuz "server"
+        stopRemote(client, buttonRemote, R.drawable.remote_off, true);
+        stopRemote(clientSync,buttonSync, R.drawable.connect_off, true);
+        //FIXME: Can continue even after application is close ! Why ?
+        cancelWatchTimeOut();
 
         //Abort and wait scanLibrayInThread is aborted
         //So it does not crash if scanLib not completed
@@ -672,6 +663,20 @@ public class MainActivity extends AppCompatActivity {
         if(musicLibrary!=null) {
             musicLibrary.close();
         }
+
+        //Write list of files to maintain in db
+        if(filesToKeep!=null) {
+            Gson gson = new Gson();
+            HelperTextFile.write(this, "FilesToKeep.txt", gson.toJson(filesToKeep));
+        }
+        //Write list of files to retrieve
+        if(filesToGet!=null) {
+            Gson gson = new Gson();
+            HelperTextFile.write(this, "filesToGet.txt", gson.toJson(filesToGet));
+        }
+
+        //Close all notifications
+        mNotifyManager.cancelAll();
     }
 
     ProcessAbstract scanLibray;
