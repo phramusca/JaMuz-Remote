@@ -135,15 +135,16 @@ public class MainActivity extends AppCompatActivity {
         if(!readJson.equals("")) {
             filesToKeep = new HashMap<>();
             Gson gson = new Gson();
-            filesToKeep = gson.fromJson(readJson, filesToKeep.getClass());
+            Type mapType = new TypeToken<HashMap<String, FileInfoReception>>(){}.getType();
+            filesToKeep = gson.fromJson(readJson,mapType);
         }
         //Read filesToGet file to get list of files to retrieve
         readJson = HelperTextFile.read(this, "filesToGet.txt");
         if(!readJson.equals("")) {
             filesToGet = new HashMap<>();
             Gson gson = new Gson();
-            Type collectionType = new TypeToken<HashMap<Integer, FileInfoReception>>(){}.getType();
-            filesToGet = gson.fromJson(readJson, collectionType);
+            Type mapType = new TypeToken<HashMap<Integer, FileInfoReception>>(){}.getType();
+            filesToGet = gson.fromJson(readJson, mapType);
         }
 
         mNotifyManager =
@@ -808,7 +809,8 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 else {
                                     String absolutePath=file.getAbsolutePath();
-                                    if(delete && !filesToKeep.containsKey(absolutePath.substring(getAppDataPath().getAbsolutePath().length()+1))) {
+                                    String fileKey = absolutePath.substring(getAppDataPath().getAbsolutePath().length()+1);
+                                    if(delete && !filesToKeep.containsKey(fileKey)) {
                                         Log.i(TAG, "Deleting file "+absolutePath);
                                         file.delete();
                                     } else {
@@ -1739,6 +1741,7 @@ public class MainActivity extends AppCompatActivity {
                 File receivedFile = new File(getAppDataPath(), fileInfoReception.relativeFullPath);
                 if(receivedFile.exists() && receivedFile.length() == fileInfoReception.size) {
                     Log.i(TAG, "File already exists. Remove from filesToGet list: "+fileInfoReception);
+                    clientSync.send("insertDeviceFile"+fileInfoReception.idFile);
                     //No need to request this one, it already exists (how can this be ?)
                     filesToGet.remove(fileInfoReception.idFile);
                     //Request next one then
@@ -1773,6 +1776,7 @@ public class MainActivity extends AppCompatActivity {
                 mBuilderSync.setWhen(System.currentTimeMillis());
                 mBuilderSync.setProgress(0, 0, false);
                 mNotifyManager.notify(ID_NOTIFIER_SYNC, mBuilderSync.build());
+                disableNotificationIn(5000, ID_NOTIFIER_SYNC);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -1783,7 +1787,15 @@ public class MainActivity extends AppCompatActivity {
                 //sent by the server. User can still close
                 //enableSync(true);
                 //stopRemote(clientSync,buttonSync, R.drawable.connect_off, true);
-                disableNotificationIn(5000, ID_NOTIFIER_SYNC);
+
+                //Resend add request in case missed for some reason
+                if(filesToKeep!=null) {
+                    for(FileInfoReception file : filesToKeep.values()) {
+                        if(!filesToGet.containsKey(file.idFile)) {
+                            clientSync.send("insertDeviceFile"+file.idFile);
+                        }
+                    }
+                }
                 if(scanLibrary) {
                     checkPermissionsThenScanLibrary();
                 }
