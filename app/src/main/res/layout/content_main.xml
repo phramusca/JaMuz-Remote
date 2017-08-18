@@ -75,7 +75,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_row="0"
-            android:layout_column="0">
+            android:layout_column="0"
+            android:paddingTop="10dp">
 
             <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
             <LinearLayout android:id="@+id/dummy"
@@ -194,18 +195,32 @@
 
     </LinearLayout>
 
-    <Spinner
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/spinner"
-        android:layout_gravity="center_horizontal"
-        android:layout_margin="10dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="20dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:popupBackground="#DDFFFFFF"
-        android:background="@drawable/ic_gradient_spinner" />
+        android:paddingTop="10dp">
+
+        <ToggleButton
+            android:id="@+id/button_random_toggle"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            style="@style/ToggleButton"
+            android:background="@drawable/ic_toggle_random"
+            android:layout_gravity="center_vertical"/>
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner"
+            android:popupBackground="#DDFFFFFF"
+            android:background="@drawable/ic_gradient_spinner"
+            android:paddingStart="8dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="10dp"/>
+    </LinearLayout>
 
     <RatingBar
         android:layout_width="wrap_content"

@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean local = true;
     private List<PlayList> localPlaylists = new ArrayList<PlayList>();
     private PlayList localSelectedPlaylist;
+    private boolean playRandom=false;
 
     // GUI elements
     private TextView textViewReceived;
@@ -103,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton buttonSetDimMode;
     private ToggleButton buttonControlsToggle;
     private ToggleButton buttonConnectToggle;
+    private ToggleButton buttonRandomToggle;
     private Button buttonPrevious;
     private Button buttonPlay;
     private Button buttonNext;
@@ -113,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
     private Button buttonVolDown;
     private SeekBar seekBar;
     private Spinner spinner;
-    private boolean spinnerSend=true;
+    private static boolean spinnerSend=true;
     private RatingBar ratingBar;
     private ImageView image;
     private LinearLayout trackInfo;
@@ -188,31 +190,7 @@ public class MainActivity extends AppCompatActivity {
         seekBar.setEnabled(false);
 
         spinner = (Spinner) findViewById(R.id.spinner);
-        spinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int pos, long id) {
-                // An item was selected. You can retrieve the selected item using
-                // parent.getItemAtPosition(pos)
-                PlayList playList = (PlayList) parent.getItemAtPosition(pos);
-                if(spinnerSend) {
-                    if(local) {
-                        if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                            queue = musicLibrary.getTracks(playList);
-                        }
-                        localSelectedPlaylist = playList;
-                    } else {
-                        client.send("setPlaylist".concat(playList.toString()));
-                    }
-                    dimOn();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                dimOn();
-            }
-        });
+        spinner.setOnItemSelectedListener(spinnerListener);
         spinner.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -262,6 +240,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dimOn();
                 toggleConfig(!buttonConnectToggle.isChecked());
+            }
+        });
+
+        buttonRandomToggle = (ToggleButton) findViewById(R.id.button_random_toggle);
+        buttonRandomToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dimOn();
             }
         });
 
@@ -482,6 +468,31 @@ public class MainActivity extends AppCompatActivity {
 
         setDimMode(!buttonSetDimMode.isChecked());
     }
+
+    Spinner.OnItemSelectedListener spinnerListener = new Spinner.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view,
+        int pos, long id) {
+            if(spinnerSend) {
+                PlayList playList = (PlayList) parent.getItemAtPosition(pos);
+                if(local) {
+                    if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                        queue = musicLibrary.getTracks(playList);
+                    }
+                    localSelectedPlaylist = playList;
+                } else {
+                    client.send("setPlaylist".concat(playList.toString()));
+                }
+                dimOn();
+            }
+            spinnerSend=true;
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> adapterView) {
+            dimOn();
+        }
+    };
 
     private void setDimMode(boolean enable) {
         if(enable) {
@@ -922,12 +933,11 @@ public class MainActivity extends AppCompatActivity {
         }
         //Play a random track
         if(queue.size()>0) {
-            int index=new Random().nextInt(queue.size());
+            int index=buttonRandomToggle.isChecked()?new Random().nextInt(queue.size()):0;
             displayedTrack = queue.get(index);
-            queue.remove(displayedTrack);
+            queue.remove(index);
             Log.i(TAG, "playQueue("+(index+1)+"/"+queue.size()+")");
             play();
-
         } else {
             setupSpinner(localPlaylists, localSelectedPlaylist);
             toastLong("Empty Playlist.");
@@ -1335,11 +1345,9 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                // attaching data adapter to spinner
                 spinnerSend=false;
                 spinner.setAdapter(arrayAdapter);
                 spinner.setSelection(arrayAdapter.getPosition(selectedPlaylist));
-                spinnerSend=true;
             }
         });
     }

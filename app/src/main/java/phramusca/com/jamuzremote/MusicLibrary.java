@@ -60,7 +60,7 @@ public class MusicLibrary {
             Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
                     null,
                     playlist.getQuery(),
-                    null, null, null, null, null);
+                    null, null, null, "playCounter, lastPlayed", null);
             if(cursor != null && cursor.moveToFirst())
             {
                 do {
