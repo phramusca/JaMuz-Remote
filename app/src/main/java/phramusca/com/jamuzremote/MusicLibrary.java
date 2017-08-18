@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,10 +33,6 @@ public class MusicLibrary {
 
     public void close(){
         db.close();
-    }
-
-    public SQLiteDatabase getBDD(){
-        return db;
     }
 
     public int getTrack(String path){
@@ -87,11 +84,11 @@ public class MusicLibrary {
         return -1;
     }
 
-    public int updateTrack(int id, Track track){
+    public int updateTrack(Track track){
         try {
-            return db.update(musicLibraryDb.TABLE_TRACKS, TrackToValues(track), musicLibraryDb.COL_ID + " = " +id, null);
+            return db.update(musicLibraryDb.TABLE_TRACKS, TrackToValues(track), musicLibraryDb.COL_ID + " = " +track.getId(), null);
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "updateTrack("+id+","+track+")", ex);
+            Log.e(TAG, "updateTrack("+track.getId()+","+track+")", ex);
         }
         return -1;
     }
@@ -114,8 +111,8 @@ public class MusicLibrary {
         values.put(musicLibraryDb.COL_GENRE, track.getGenre());
         values.put(musicLibraryDb.COL_PATH, track.getPath());
         values.put(musicLibraryDb.COL_RATING, track.getRating());
-        values.put(musicLibraryDb.COL_ADDED_DATE, track.getAddedDate());
-        values.put(musicLibraryDb.COL_LAST_PLAYED, track.getLastPlayed());
+        values.put(musicLibraryDb.COL_ADDED_DATE, track.getFormattedAddedDate());
+        values.put(musicLibraryDb.COL_LAST_PLAYED, track.getFormattedLastPlayed());
         values.put(musicLibraryDb.COL_PLAY_COUNTER, track.getPlayCounter());
         return values;
     }
@@ -130,13 +127,21 @@ public class MusicLibrary {
         String coverHash=c.getString(c.getColumnIndex(musicLibraryDb.COL_COVER_HASH));
         String path=c.getString(c.getColumnIndex(musicLibraryDb.COL_PATH));
         String genre=c.getString(c.getColumnIndex(musicLibraryDb.COL_GENRE));
-        Track track = new Track(id, rating, title, album,artist, coverHash, path, genre);
+
+        Date addedDate=HelperDateTime.parseSqlUtc(
+                c.getString(c.getColumnIndex(musicLibraryDb.COL_ADDED_DATE)));
+        Date lastPlayed=HelperDateTime.parseSqlUtc(
+                c.getString(c.getColumnIndex(musicLibraryDb.COL_LAST_PLAYED)));
+        int playCounter=c.getInt(c.getColumnIndex(musicLibraryDb.COL_PLAY_COUNTER));
+        Track track = new Track(id, rating, title, album, artist, coverHash, path, genre,
+                addedDate, lastPlayed, playCounter);
         return track;
     }
 
     public LinkedHashMap<String, Integer> getGenres(String where) {
         LinkedHashMap<String, Integer> genres = new LinkedHashMap<>();
-        Cursor cursor = db.rawQuery("SELECT " + musicLibraryDb.COL_GENRE + ", count(*) FROM " + musicLibraryDb.TABLE_TRACKS +
+        Cursor cursor = db.rawQuery("SELECT " + musicLibraryDb.COL_GENRE + ", count(*) " +
+                " FROM " + musicLibraryDb.TABLE_TRACKS +
                 " WHERE " + where +
                 " GROUP BY " + musicLibraryDb.COL_GENRE +
                 " HAVING count(*)>10" +

@@ -43,17 +43,12 @@ public class FileInfoReception {
     }
 
     private Date getDate(JSONObject file, String id) {
-        Date date = new Date(); //FIXME: watchout default
+        String dateStr = "";
         try {
-            String dateStr = file.getString(id);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            date = sdf.parse(dateStr);
-        } catch (ParseException e) {
-
+            dateStr = file.getString(id);
         } catch (JSONException e) {
-
         }
-        return date;
+        return HelperDateTime.parseSqlUtc(dateStr);
     }
 
     @Override
