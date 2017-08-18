@@ -20,12 +20,13 @@ public class Track {
     private String coverHash="";
     private String path;
     private String genre="";
-    public Date addedDate = new Date(0); //FIXME: watchout defaults
-    public Date lastPlayed = new Date(0); //FIXME: watchout defaults
-    public int playCounter=0; //FIXME: watchout defaults
+    public Date addedDate = new Date(0);
+    public Date lastPlayed = new Date(0);
+    public int playCounter=0;
 
     public Track(int id, int rating, String title, String album,
-                 String artist, String coverHash, String path, String genre) {
+                 String artist, String coverHash, String path, String genre,
+                 Date addedDate, Date lastPlayed, int playCounter) {
         this.id = id;
         this.rating = rating;
         this.title = title;
@@ -34,6 +35,9 @@ public class Track {
         this.coverHash = coverHash;
         this.genre=genre;
         this.path = path;
+        this.addedDate = addedDate;
+        this.lastPlayed = lastPlayed;
+        this.playCounter = playCounter;
     }
 
     @Override
@@ -72,18 +76,38 @@ public class Track {
         this.playCounter = playCounter;
     }
 
-    private String getFormattedDate(Date date) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return simpleDateFormat.format(date);
+    /**
+     * Returns last played date in "yyyy-MM-dd HH:mm:ss" format
+     * @return
+     */
+    public String getFormattedLastPlayed() {
+        return HelperDateTime.formatUTCtoSqlUTC(this.lastPlayed);
     }
 
-    public String getAddedDate() {
-        return getFormattedDate(addedDate);
+    /**
+     * Returns last played date in "yyyy-MM-dd HH:mm:ss" format,
+     * translated to local time.
+     * @return
+     */
+    public String getLastPlayedLocalTime() {
+        return HelperDateTime.formatUTCtoSqlLocal(this.lastPlayed);
     }
 
-    public String getLastPlayed() {
-        return getFormattedDate(lastPlayed);
+    /**
+     * Returns added date in "yyyy-MM-dd HH:mm:ss" format
+     * @return
+     */
+    public String getFormattedAddedDate() {
+        return HelperDateTime.formatUTCtoSqlUTC(this.addedDate);
+    }
+
+    /**
+     * Returns added date date in "yyyy-MM-dd HH:mm:ss" format,
+     * translated to local time.
+     * @return
+     */
+    public String getAddedDateLocalTime() {
+        return HelperDateTime.formatUTCtoSqlLocal(this.addedDate);
     }
 
     public int getPlayCounter() {

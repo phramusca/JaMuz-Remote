@@ -63,6 +63,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -172,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
                     ratingBar.setEnabled(false);
                     displayedTrack.setRating(Math.round(rating));
                     if(local) {
-                        musicLibrary.updateTrack(displayedTrack.getId(), displayedTrack);
+                        musicLibrary.updateTrack(displayedTrack);
                         //Queue may not be valid as value changed
                         queue.clear();
                     } else {
@@ -426,7 +427,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz Remote", "coverHash", "relativeFullPath", "---");
+        localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz Remote", "coverHash", "relativeFullPath", "---", new Date(0), new Date(0), 0);
         displayedTrack = localTrack;
         setTextView(textViewReceived, Html.fromHtml("<html><h1>".concat(displayedTrack.toString()).concat("<BR/></h1></html>")), false);
 
@@ -903,7 +904,8 @@ public class MainActivity extends AppCompatActivity {
 
             int rating = 0;
             String coverHash="";
-            track = new Track(-1, rating, title, album, artist, coverHash, absolutePath, genre);
+            track = new Track(-1, rating, title, album, artist, coverHash, absolutePath, genre ,
+                    new Date(), new Date(0), 0);
         } catch (final RuntimeException ex) {
             Log.e(TAG, "Error reading file tags "+absolutePath, ex);
         }
@@ -968,6 +970,12 @@ public class MainActivity extends AppCompatActivity {
             playHistory();
         }
         else {
+            //Update lastPlayed and playCounter
+            displayedTrack.setPlayCounter(displayedTrack.getPlayCounter()+1);
+            displayedTrack.setLastPlayed(new Date());
+            musicLibrary.updateTrack(displayedTrack);
+            //FIXME: Do not play random, but make it a option
+            //=> ORDER BY playCounter (ASC), lastPlayed (ASC)
             playRandom();
         }
     }
@@ -1520,7 +1528,9 @@ public class MainActivity extends AppCompatActivity {
                                     jObject.getString("album"),
                                     jObject.getString("artist"),
                                     jObject.getString("coverHash"), "",
-                                    jObject.getString("genre"));
+                                    jObject.getString("genre"),
+                                    new Date(),
+                                    new Date(0),0);
                             displayTrack();
                             break;
                     }
