@@ -21,8 +21,8 @@ public class FileInfoReception {
     public long size;
     public int idFile;
     public int rating;
-    public Date addedDate = new Date(0); //FIXME: watchout defaults
-    public Date lastPlayed = new Date(0); //FIXME: watchout defaults
+    public Date addedDate = new Date(0);
+    public Date lastPlayed = new Date(0);
     public int playCounter;
 
     public FileInfoReception(String json) throws JSONException {
