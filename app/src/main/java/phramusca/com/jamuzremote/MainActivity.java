@@ -796,6 +796,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         notifyScan("JaMuz is scanning deleted files ... ");
                     }
+                    //FIXME: UI freezes at this point (based on notifications. To debug). Why ?
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
