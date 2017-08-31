@@ -14,15 +14,6 @@ import java.io.File;
  */
 public class MusicLibraryDb extends SQLiteOpenHelper {
 
-
-    //In internal SD emulated storage:
-    private static final String DB_PATH = Environment.getExternalStorageDirectory()+"/JaMuz";
-
-    //TODO: Change folder as we now have rights
-    //In external SD. Does not seem to work !
-    //private static final String DB_PATH = "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;
-
-    private static final String DB_NAME = "JaMuzRemote.db";
     private static final int DB_VERSION = 1;
 
     public static final String TABLE_TRACKS = "tracks";
@@ -58,7 +49,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     //}
 
     public MusicLibraryDb(final Context context) {
-        super(context, DB_PATH+"/"+DB_NAME, null, DB_VERSION);
+        super(context, MainActivity.musicLibraryDbFile.getAbsolutePath(), null, DB_VERSION);
     }
 
     @Override

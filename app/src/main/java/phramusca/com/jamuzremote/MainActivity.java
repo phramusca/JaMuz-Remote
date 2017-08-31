@@ -87,6 +87,13 @@ public class MainActivity extends AppCompatActivity {
     private AudioManager audioManager;
     public static AudioPlayer audioPlayer;
     private MusicLibrary musicLibrary;
+
+    //In internal SD emulated storage:
+    //TODO: Change folder as we now have rights
+    //In external SD. Does not seem to work !
+    //private static final String DB_PATH = "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;
+    public static File musicLibraryDbFile = new File(Environment.getExternalStorageDirectory()+"/JaMuz/JaMuzRemote.db");
+
     private int nbFiles=0;
     private int nbFilesTotal = 0;
     private List<Track> queue = new ArrayList<>();
@@ -94,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean local = true;
     private List<PlayList> localPlaylists = new ArrayList<PlayList>();
     private PlayList localSelectedPlaylist;
-    private boolean playRandom=false;
 
     // GUI elements
     private TextView textViewReceived;
@@ -1494,7 +1500,10 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void received(final String msg) {
-            if(msg.startsWith("MSG_")) {
+            if(msg.equals("MSG_SEND_DB")) {
+                client.sendDatabase();
+            }
+            else if(msg.startsWith("MSG_")) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
