@@ -120,6 +120,7 @@ public class Reception  extends ProcessAbstract {
                         }
                         fos.close();
                         Log.i(TAG, "database received");
+                        callback.receivedDatabase();
                         checkAbort();
                     }
                     catch (IOException | OutOfMemoryError e) {
