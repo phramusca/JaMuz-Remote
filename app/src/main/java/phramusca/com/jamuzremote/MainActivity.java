@@ -1501,10 +1501,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void received(final String msg) {
-            if(msg.equals("MSG_SEND_DB")) {
-                client.sendDatabase();
-            }
-            else if(msg.startsWith("MSG_")) {
+            if(msg.startsWith("MSG_")) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -1563,6 +1560,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
+        public void receivedDatabase() {
+        }
+
+        @Override
         public void receivedBitmap(final Bitmap bitmap) {
             Log.d(TAG, "receivedBitmap: callback");
             Log.d(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight());
@@ -1587,7 +1588,10 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void received(final String msg) {
-            if(msg.startsWith("MSG_")) {
+            if(msg.equals("MSG_SEND_DB")) {
+                clientSync.sendDatabase();
+            }
+            else if(msg.startsWith("MSG_")) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -1665,6 +1669,23 @@ public class MainActivity extends AppCompatActivity {
                 receivedFile.delete();
             }
             requestNextFile(true);
+        }
+
+        @Override
+        public void receivedDatabase() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String msg = "Statistics merged.";
+                    toastLong(msg);
+                    mBuilderSync.setContentText(msg);
+                    mBuilderSync.setUsesChronometer(false);
+                    mBuilderSync.setWhen(System.currentTimeMillis());
+                    mBuilderSync.setProgress(0, 0, false);
+                    mNotifyManager.notify(ID_NOTIFIER_SYNC, mBuilderSync.build());
+                    disableNotificationIn(5000, ID_NOTIFIER_SYNC);
+                }
+            });
         }
 
         @Override
