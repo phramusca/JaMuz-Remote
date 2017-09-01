@@ -71,6 +71,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.ConsoleHandler;
 
 //TODO: Support Themes
 //http://www.hidroh.com/2015/02/25/support-multiple-themes-android-app-part-2/
@@ -165,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
                 .setSmallIcon(R.drawable.gears_normal);
 
         mBuilderScan = new NotificationCompat.Builder(this);
-        mBuilderScan.setContentTitle("JaMuz scan")
+        mBuilderScan.setContentTitle("JaMuz Scan")
                 .setContentText("Scan in progress")
                 .setUsesChronometer(true)
                 .setSmallIcon(R.drawable.gears_normal);
@@ -788,15 +789,15 @@ public class MainActivity extends AppCompatActivity {
                     nbFilesTotal = tracks.size();
                     nbFiles=0;
                     for(Track track : tracks) {
+                        Log.i(TAG, nbFiles+"/"+nbFilesTotal);
                         checkAbort();
                         File file = new File(track.getPath());
                         if(!file.exists()) {
                             Log.d(TAG, "Remove track from db: "+track);
                             musicLibrary.deleteTrack(track.getPath());
                         }
-                        notifyScan("JaMuz is scanning deleted files ... ");
+                        notifyScan("JaMuz is scanning deleted files ... ", 200);
                     }
-                    //FIXME: UI freezes at this point (based on notifications. To debug). Why ?
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -834,7 +835,7 @@ public class MainActivity extends AppCompatActivity {
                                         file.delete();
                                     } else {
                                         insertOrUpdateTrackInDatabase(absolutePath, null);
-                                        notifyScan("JaMuz is scanning files ... ");
+                                        notifyScan("JaMuz is scanning files ... ", 10);
                                     }
                                 }
                             }
@@ -1385,17 +1386,19 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "Toast makeText "+msg);
         Toast.makeText(this, msg, duration).show();
     }
-
-    private void notifyScan(final String action) {
+    
+    private void notifyScan(final String action, int every) {
         nbFiles++;
+        if(((nbFiles-1) % every) == 0) { //To prevent UI from freezing
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mBuilderScan.setProgress(nbFilesTotal, nbFiles, false);
-                    mBuilderScan.setContentText(nbFiles+"/"+nbFilesTotal+" "+action);
+                    mBuilderScan.setContentText(nbFiles + "/" + nbFilesTotal + " " + action);
                     mNotifyManager.notify(ID_NOTIFIER_SCAN, mBuilderScan.build());
                 }
             });
+        }
     }
 
     private void setSeekBar(final int currentPosition, final int total) {
@@ -1664,8 +1667,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     mBuilderSync.setProgress(filesToKeep.size(), filesToKeep.size()-filesToGet.size(), false);
-                    mBuilderSync.setContentText(filesToGet.size() + " remaining. "
-                            +"Receiving "+fileInfoReception.relativeFullPath);
+                    mBuilderSync.setContentText(filesToGet.size() + "/" + filesToKeep.size()
+                            + " remaining. Receiving: "+fileInfoReception.relativeFullPath);
                     mBuilderSync.setUsesChronometer(true);
                     mBuilderSync.setWhen(System.currentTimeMillis());
                     mNotifyManager.notify(ID_NOTIFIER_SYNC, mBuilderSync.build());
