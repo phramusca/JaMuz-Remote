@@ -835,7 +835,7 @@ public class MainActivity extends AppCompatActivity {
                                         file.delete();
                                     } else {
                                         insertOrUpdateTrackInDatabase(absolutePath, null);
-                                        notifyScan("JaMuz is scanning files ... ", 10);
+                                        notifyScan("JaMuz is scanning files ... ", 13);
                                     }
                                 }
                             }
@@ -1386,7 +1386,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "Toast makeText "+msg);
         Toast.makeText(this, msg, duration).show();
     }
-    
+
     private void notifyScan(final String action, int every) {
         nbFiles++;
         if(((nbFiles-1) % every) == 0) { //To prevent UI from freezing
