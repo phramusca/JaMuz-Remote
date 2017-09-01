@@ -12,9 +12,10 @@ import android.graphics.Bitmap;
  * @author phramusca
  */
 public interface ICallBackReception {
-	public void received(String msg);
-	public void receivedBitmap(Bitmap bitmap);
-	public void receivedFile(FileInfoReception fileInfoReception);
-	public void receivedDatabase();
-	public void disconnected();
+	void received(String msg);
+	void receivedBitmap(Bitmap bitmap);
+	void receivedFile(FileInfoReception fileInfoReception);
+	void receivingFile(FileInfoReception fileInfoReception);
+	void receivedDatabase();
+	void disconnected();
 }

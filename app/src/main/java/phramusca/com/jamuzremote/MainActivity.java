@@ -1556,12 +1556,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void receivedFile(final FileInfoReception fileInfoReception) {
-        }
-
+        public void receivedFile(final FileInfoReception fileInfoReception) { }
         @Override
-        public void receivedDatabase() {
-        }
+        public void receivingFile(FileInfoReception fileInfoReception) { }
+        @Override
+        public void receivedDatabase() { }
 
         @Override
         public void receivedBitmap(final Bitmap bitmap) {
@@ -1641,18 +1640,6 @@ public class MainActivity extends AppCompatActivity {
                         if(insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception)) {
                             filesToGet.remove(fileInfoReception.idFile);
                             clientSync.send("insertDeviceFile" + fileInfoReception.idFile);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mBuilderSync.setProgress(filesToKeep.size(), filesToKeep.size()-filesToGet.size(), false);
-                                    mBuilderSync.setContentText((filesToKeep.size()-filesToGet.size())
-                                            +"/"+filesToKeep.size()
-                                            +" "+fileInfoReception.relativeFullPath);
-                                    mBuilderSync.setUsesChronometer(true);
-                                    mBuilderSync.setWhen(System.currentTimeMillis());
-                                    mNotifyManager.notify(ID_NOTIFIER_SYNC, mBuilderSync.build());
-                                }
-                            });
                         } else {
                             Log.w(TAG, "File tags could not be read. Deleted " + receivedFile.getAbsolutePath());
                             receivedFile.delete();
@@ -1669,6 +1656,21 @@ public class MainActivity extends AppCompatActivity {
                 receivedFile.delete();
             }
             requestNextFile(true);
+        }
+
+        @Override
+        public void receivingFile(final FileInfoReception fileInfoReception) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mBuilderSync.setProgress(filesToKeep.size(), filesToKeep.size()-filesToGet.size(), false);
+                    mBuilderSync.setContentText(filesToGet.size() + " remaining. "
+                            +"Receiving "+fileInfoReception.relativeFullPath);
+                    mBuilderSync.setUsesChronometer(true);
+                    mBuilderSync.setWhen(System.currentTimeMillis());
+                    mNotifyManager.notify(ID_NOTIFIER_SYNC, mBuilderSync.build());
+                }
+            });
         }
 
         @Override

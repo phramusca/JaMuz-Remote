@@ -83,8 +83,8 @@ public class Reception  extends ProcessAbstract {
                         double fileSize = fileInfoReception.size;
                         FileOutputStream fos = new FileOutputStream(path.getAbsolutePath() + File.separator +
                                 fileInfoReception.relativeFullPath);
-
-                        // FIXME: Find best. Make a benchmark
+                        callback.receivingFile(fileInfoReception);
+                        // FIXME: Find best. Make a benchmark (and use it in notification progres bar)
                         //https://stackoverflow.com/questions/8748960/how-do-you-decide-what-byte-size-to-use-for-inputstream-read
                         byte[] buf = new byte[8192];
                         int bytesRead;
@@ -92,7 +92,6 @@ public class Reception  extends ProcessAbstract {
                             checkAbort();
                             fos.write(buf, 0, bytesRead);
                             fileSize -= bytesRead;
-                            //Log.v(TAG, "receivedFile chunk. Size is now: " + fileSize);
                         }
                         fos.close();
                         checkAbort();
