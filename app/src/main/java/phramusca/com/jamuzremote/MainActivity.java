@@ -1133,6 +1133,8 @@ public class MainActivity extends AppCompatActivity {
                     setupSpinner(localPlaylists, localSelectedPlaylist);
                 }
                 editTextConnectInfo.setEnabled(enable);
+                buttonRandomToggle.setEnabled(enable);
+                buttonRandomToggle.setVisibility(enable?View.VISIBLE:View.GONE);
                 buttonRemote.setEnabled(true);
             }
         });
