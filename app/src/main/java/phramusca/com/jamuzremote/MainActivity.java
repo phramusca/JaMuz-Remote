@@ -92,8 +92,10 @@ public class MainActivity extends AppCompatActivity {
     //In internal SD emulated storage:
     //TODO: Change folder as we now have rights
     //In external SD. Does not seem to work !
-    //private static final String DB_PATH = "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;
-    public static File musicLibraryDbFile = new File(Environment.getExternalStorageDirectory()+"/JaMuz/JaMuzRemote.db");
+    //private static final String DB_PATH =
+    //      "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;
+    public static File musicLibraryDbFile = new File(
+            Environment.getExternalStorageDirectory()+"/JaMuz/JaMuzRemote.db");
 
     private int nbFiles=0;
     private int nbFilesTotal = 0;
@@ -280,7 +282,8 @@ public class MainActivity extends AppCompatActivity {
                         port=2013;
                     }
                     CallBackReception callBackReception = new CallBackReception();
-                    client = new Client(address, port, Settings.Secure.getString(MainActivity.this.getContentResolver(),
+                    client = new Client(address, port,
+                            Settings.Secure.getString(MainActivity.this.getContentResolver(),
                             Settings.Secure.ANDROID_ID), "tata", callBackReception);
                    new Thread() {
                         public void run() {
@@ -420,9 +423,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz Remote", "coverHash", "relativeFullPath", "---", new Date(0), new Date(0), 0);
+        localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz Remote", "coverHash",
+                "relativeFullPath", "---", new Date(0), new Date(0), 0);
         displayedTrack = localTrack;
-        setTextView(textViewReceived, Html.fromHtml("<html><h1>".concat(displayedTrack.toString()).concat("<BR/></h1></html>")), false);
+        setTextView(textViewReceived, Html.fromHtml("<html><h1>"
+                .concat(displayedTrack.toString())
+                .concat("<BR/></h1></html>")), false);
 
         enableGUI(buttonSync, false);
         enableGUI(buttonRemote, false);
@@ -452,12 +458,14 @@ public class MainActivity extends AppCompatActivity {
             {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
                 {
-                    mBluetoothAdapter.getProfileProxy(this, mHeadsetProfileListener, BluetoothProfile.HEADSET);
+                    mBluetoothAdapter.getProfileProxy(this, mHeadsetProfileListener,
+                            BluetoothProfile.HEADSET);
                 }
             }
         }
 
-        receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
+        receiverMediaButtonName = new ComponentName(getPackageName(),
+                ReceiverMediaButton.class.getName());
         audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
 
         //TODO: Why this one needs registerReceiver whereas ReceiverPhoneCall does not
@@ -710,7 +718,9 @@ public class MainActivity extends AppCompatActivity {
         File fileList[] = new File("/storage/").listFiles();
         for (File file : fileList)
         {
-            if(!file.getAbsolutePath().equalsIgnoreCase(Environment.getExternalStorageDirectory().getAbsolutePath()) && file.isDirectory() && file.canRead())
+            if(!file.getAbsolutePath().equalsIgnoreCase(
+                    Environment.getExternalStorageDirectory().getAbsolutePath())
+                    && file.isDirectory() && file.canRead())
                 return new File(file.getAbsolutePath()+File.separator+path);
         }
         //If not found, use external storage which turns out to be ... internal SD card + internal phone memory
@@ -829,7 +839,8 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 else {
                                     String absolutePath=file.getAbsolutePath();
-                                    String fileKey = absolutePath.substring(getAppDataPath().getAbsolutePath().length()+1);
+                                    String fileKey = absolutePath.substring(
+                                            getAppDataPath().getAbsolutePath().length()+1);
                                     if(delete && !filesToKeep.containsKey(fileKey)) {
                                         Log.i(TAG, "Deleting file "+absolutePath);
                                         file.delete();
@@ -870,7 +881,8 @@ public class MainActivity extends AppCompatActivity {
         scanLibray.start();
     }
 
-    private boolean insertOrUpdateTrackInDatabase(String absolutePath, FileInfoReception fileInfoReception) {
+    private boolean insertOrUpdateTrackInDatabase(String absolutePath,
+                                                  FileInfoReception fileInfoReception) {
         boolean result=true;
         int id = musicLibrary.getTrack(absolutePath);
         if(id>=0) {
