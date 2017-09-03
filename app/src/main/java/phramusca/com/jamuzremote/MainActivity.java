@@ -38,6 +38,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -115,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
     private Button buttonSync;
     private ToggleButton buttonSetDimMode;
     private ToggleButton buttonControlsToggle;
+    private ToggleButton buttonTagsToggle;
     private ToggleButton buttonConnectToggle;
     private ToggleButton buttonRandomToggle;
     private Button buttonPrevious;
@@ -243,16 +245,28 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dimOn();
-                toggleControls(!buttonControlsToggle.isChecked());
+                toggle(panelControls, !buttonControlsToggle.isChecked());
             }
         });
+
+        buttonTagsToggle = (ToggleButton) findViewById(R.id.button_tags_toggle);
+        buttonTagsToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dimOn();
+                panelTags.setVisibility(buttonTagsToggle.isChecked()?View.VISIBLE:View.GONE);
+                //toggle(panelTags, !buttonTagsToggle.isChecked());
+            }
+        });
+
+
 
         buttonConnectToggle = (ToggleButton) findViewById(R.id.button_connect_toggle);
         buttonConnectToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dimOn();
-                toggleConfig(!buttonConnectToggle.isChecked());
+                toggle(panelOptions, !buttonConnectToggle.isChecked());
             }
         });
 
@@ -360,10 +374,6 @@ public class MainActivity extends AppCompatActivity {
         image = (ImageView) findViewById(R.id.imageView);
 
         trackInfo = (LinearLayout) findViewById(R.id.trackInfo);
-
-        panelControls = (LinearLayout) findViewById(R.id.panel_controls);
-        panelOptions = (GridLayout) findViewById(R.id.panel_options);
-
         trackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
             @Override
             public void onSwipeTop() {
@@ -482,21 +492,29 @@ public class MainActivity extends AppCompatActivity {
         //service = new Intent(this, MyService.class);
         //startService(service);
 
-        toggleControls(true);
-        toggleConfig(true);
+        panelTags = (FlexboxLayout) findViewById(R.id.panel_tags);
+        panelControls = (LinearLayout) findViewById(R.id.panel_controls);
+        panelOptions = (GridLayout) findViewById(R.id.panel_options);
+
+        toggle(panelOptions, true);
+        toggle(panelControls, true);
+        //toggle(panelTags, true);
+        panelTags.setVisibility(View.GONE);
 
         setDimMode(!buttonSetDimMode.isChecked());
 
 
 
-        panelTags = (FlexboxLayout) findViewById(R.id.panel_tags);
+
         for(int i=0; i<10; i++) {
             makeButton(panelTags, "Tag "+i);
         }
         makeButton(panelTags, "Problème");
         makeButton(panelTags, "Live");
+        makeButton(panelTags, "Un très grand tag");
         makeButton(panelTags, "Groove");
         makeButton(panelTags, "Love");
+        makeButton(panelTags, "Un grand tag");
     }
 
     private void makeButton(FlexboxLayout layout, String text) {
@@ -505,7 +523,7 @@ public class MainActivity extends AppCompatActivity {
         button.setTextOff(text);
         button.setTextOn(text);
         button.setAllCaps(false);
-        button.setBackgroundResource(R.drawable.ic_toggle_config);
+        button.setBackgroundResource(R.drawable.ic_tags);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -561,20 +579,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void toggleConfig(boolean collapse) {
-        if(collapse) {
-            collapse(panelOptions);
-        } else {
-            expand(panelOptions);
-        }
-    }
-
-    private void toggleControls(boolean collapse) {
+    private void toggle(View view, boolean collapse) {
         //https://stackoverflow.com/questions/4946295/android-expand-collapse-animation
         if(collapse) {
-            collapse(panelControls);
+            collapse(view);
         } else {
-            expand(panelControls);
+            expand(view);
         }
     }
 

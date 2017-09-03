@@ -22,6 +22,15 @@
             style="@style/ToggleButton"
             android:background="@drawable/ic_toggle_controls" />
 
+        <ToggleButton
+            android:id="@+id/button_tags_toggle"
+            android:layout_row="0"
+            android:layout_column="1"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            style="@style/ToggleButton"
+            android:background="@drawable/ic_toggle_tags" />
+
         <Button
             android:id="@+id/button_connect"
             android:background="@drawable/remote_off"
@@ -29,7 +38,7 @@
             android:layout_height="wrap_content"
             android:text="Connect"
             android:layout_row="0"
-            android:layout_column="1"
+            android:layout_column="2"
             android:textColor="@android:color/transparent"
             android:textSize="10sp"
             android:textAllCaps="false"
@@ -42,7 +51,7 @@
             android:layout_height="wrap_content"
             android:text="Connect"
             android:layout_row="0"
-            android:layout_column="2"
+            android:layout_column="3"
             android:textColor="@android:color/transparent"
             android:textSize="10sp"
             android:textAllCaps="false"/>
@@ -50,7 +59,7 @@
         <ToggleButton
             android:id="@+id/button_dim_mode"
             android:layout_row="0"
-            android:layout_column="3"
+            android:layout_column="4"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
             style="@style/ToggleButton"
@@ -59,7 +68,7 @@
         <ToggleButton
             android:id="@+id/button_connect_toggle"
             android:layout_row="0"
-            android:layout_column="4"
+            android:layout_column="5"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
             style="@style/ToggleButton"
