@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
@@ -28,6 +29,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.Spanned;
@@ -47,12 +49,14 @@ import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -71,7 +75,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.ConsoleHandler;
 
 //TODO: Support Themes
 //http://www.hidroh.com/2015/02/25/support-multiple-themes-android-app-part-2/
@@ -129,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView image;
     private LinearLayout trackInfo;
     private LinearLayout panelControls;
+    private FlexboxLayout panelTags;
     private GridLayout panelOptions;
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilderSync;
@@ -482,6 +486,40 @@ public class MainActivity extends AppCompatActivity {
         toggleConfig(true);
 
         setDimMode(!buttonSetDimMode.isChecked());
+
+
+
+        panelTags = (FlexboxLayout) findViewById(R.id.panel_tags);
+        for(int i=0; i<10; i++) {
+            makeButton(panelTags, "Tag "+i);
+        }
+        makeButton(panelTags, "Problème");
+        makeButton(panelTags, "Live");
+        makeButton(panelTags, "Groove");
+        makeButton(panelTags, "Love");
+    }
+
+    private void makeButton(FlexboxLayout layout, String text) {
+        ToggleButton button = new ToggleButton(this);
+        button.setText(text);
+        button.setTextOff(text);
+        button.setTextOn(text);
+        button.setAllCaps(false);
+        button.setBackgroundResource(R.drawable.ic_toggle_config);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dimOn();
+                ToggleButton b = (ToggleButton)view;
+                String buttonText = b.getText().toString();
+                boolean checked = b.isChecked();
+                toastLong(buttonText+" : "+checked);
+            }
+        });
+
+        ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
+                ActionBar.LayoutParams.WRAP_CONTENT);
+        layout.addView(button, lp);
     }
 
     Spinner.OnItemSelectedListener spinnerListener = new Spinner.OnItemSelectedListener() {
@@ -799,7 +837,6 @@ public class MainActivity extends AppCompatActivity {
                     nbFilesTotal = tracks.size();
                     nbFiles=0;
                     for(Track track : tracks) {
-                        Log.i(TAG, nbFiles+"/"+nbFilesTotal);
                         checkAbort();
                         File file = new File(track.getPath());
                         if(!file.exists()) {
@@ -813,12 +850,8 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             String msg = "Database updated.";
                             toastLong(msg);
-                            mBuilderScan.setContentText(msg);
-                            mBuilderScan.setUsesChronometer(false);
-                            mBuilderSync.setWhen(System.currentTimeMillis());
-                            mBuilderScan.setProgress(0, 0, false);
-                            mNotifyManager.notify(ID_NOTIFIER_SCAN, mBuilderScan.build());
-                            disableNotificationIn(5000, ID_NOTIFIER_SCAN);
+                            notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, 5000);
+
                         }
                     });
                 } catch (InterruptedException e) {
@@ -879,6 +912,36 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         scanLibray.start();
+    }
+
+    //Ends a notification
+    private void notifyBar(NotificationCompat.Builder builder, int id, String msg, long millisInFuture) {
+        notifyBar(builder, id, msg, 0, 0, false, true, false);
+        disableNotificationIn(millisInFuture, id);
+    }
+
+    private void notifyBar(NotificationCompat.Builder builder, int id, String msg,
+                           int max, int progress, boolean indeterminate,boolean setWhen,
+                           boolean usesChronometer) {
+        builder.setContentText(msg);
+        if(setWhen) {
+            builder.setWhen(System.currentTimeMillis());
+        }
+        builder.setUsesChronometer(usesChronometer);
+        builder.setProgress(max, progress, indeterminate);
+        builder.setContentIntent(getApplicationIntent());
+        mNotifyManager.notify(id, builder.build());
+    }
+
+    //This is to have application opened when clicking on notification
+    private PendingIntent getApplicationIntent() {
+        Intent notificationIntent = new Intent(getApplicationContext(),
+                MainActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent intent = PendingIntent.getActivity(getApplicationContext(), 0,
+                notificationIntent, 0);
+        return intent;
     }
 
     private boolean insertOrUpdateTrackInDatabase(String absolutePath,
@@ -1407,9 +1470,8 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mBuilderScan.setProgress(nbFilesTotal, nbFiles, false);
-                    mBuilderScan.setContentText(nbFiles + "/" + nbFilesTotal + " " + action);
-                    mNotifyManager.notify(ID_NOTIFIER_SCAN, mBuilderScan.build());
+                    String msg = nbFiles + "/" + nbFilesTotal + " " + action;
+                    notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, nbFilesTotal, nbFiles, false, false, false);
                 }
             });
         }
@@ -1680,12 +1742,11 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mBuilderSync.setProgress(filesToKeep.size(), filesToKeep.size()-filesToGet.size(), false);
-                    mBuilderSync.setContentText(filesToGet.size() + "/" + filesToKeep.size()
-                            + " remaining. Receiving: "+fileInfoReception.relativeFullPath);
-                    mBuilderSync.setUsesChronometer(true);
-                    mBuilderSync.setWhen(System.currentTimeMillis());
-                    mNotifyManager.notify(ID_NOTIFIER_SYNC, mBuilderSync.build());
+                    String msg = filesToGet.size() + "/" + filesToKeep.size()
+                            + " remaining. Receiving: "+fileInfoReception.relativeFullPath;
+                    int max=filesToKeep.size();
+                    int progress=filesToKeep.size()-filesToGet.size();
+                    notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, max, progress, false, true, true);
                 }
             });
         }
@@ -1697,12 +1758,7 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     String msg = "Statistics merged.";
                     toastLong(msg);
-                    mBuilderSync.setContentText(msg);
-                    mBuilderSync.setUsesChronometer(false);
-                    mBuilderSync.setWhen(System.currentTimeMillis());
-                    mBuilderSync.setProgress(0, 0, false);
-                    mNotifyManager.notify(ID_NOTIFIER_SYNC, mBuilderSync.build());
-                    disableNotificationIn(5000, ID_NOTIFIER_SYNC);
+                    notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, 5000);
                 }
             });
         }
@@ -1839,12 +1895,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 final String msg = "No more files to download.";
                 Log.i(TAG, msg+" Updating library:"+scanLibrary);
-                mBuilderSync.setContentText(msg);
-                mBuilderSync.setUsesChronometer(false);
-                mBuilderSync.setWhen(System.currentTimeMillis());
-                mBuilderSync.setProgress(0, 0, false);
-                mNotifyManager.notify(ID_NOTIFIER_SYNC, mBuilderSync.build());
-                disableNotificationIn(5000, ID_NOTIFIER_SYNC);
+                notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, 5000);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
