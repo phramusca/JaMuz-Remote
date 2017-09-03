@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -23,6 +24,7 @@ public class Track {
     public Date addedDate = new Date(0);
     public Date lastPlayed = new Date(0);
     public int playCounter=0;
+    private ArrayList<String> tags = null;
 
     public Track(int id, int rating, String title, String album,
                  String artist, String coverHash, String path, String genre,
@@ -145,5 +147,41 @@ public class Track {
             Log.e("Track", "Error reading art of "+toString());
         }
         return art;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public ArrayList<String> getTags() {
+        if(tags==null) {
+            readTags();
+        }
+        return tags;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public ArrayList<String> readTags() {
+        tags = new ArrayList<>();
+        MainActivity.musicLibrary.getTags(id);
+        return tags;
+    }
+
+    /**
+     *
+     * @param value
+     */
+    public void toggleTag(String value) {
+        if(tags.contains(value)) {
+            tags.remove(value);
+            MainActivity.musicLibrary.removeTag(id, value);
+        }
+        else {
+            tags.add(value);
+            MainActivity.musicLibrary.addTag(id, value);
+        }
     }
 }

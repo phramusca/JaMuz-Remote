@@ -14,7 +14,7 @@ import java.io.File;
  */
 public class MusicLibraryDb extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
 
     public static final String TABLE_TRACKS = "tracks";
     public static final String COL_ID = "ID";
@@ -55,11 +55,25 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_BDD);
+        db.execSQL("CREATE TABLE 'tag' (\n" +
+                "'id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\n" +
+                "'value' TEXT NOT NULL,\n" +
+                "CONSTRAINT name_unique UNIQUE ('value')\n" +
+                ")");
+        db.execSQL("CREATE TABLE 'tagfile' (\n" +
+                "    'idFile' INTEGER NOT NULL,\n" +
+                "    'idTag' INTEGER NOT NULL,\n" +
+                "\tPRIMARY KEY ('idFile', 'idTag'),\n" +
+                "\tFOREIGN KEY(idFile) REFERENCES "+TABLE_TRACKS+"("+COL_ID+"),\n" +
+                "\tFOREIGN KEY(idTag) REFERENCES tag(id) ON DELETE CASCADE\n" +
+                ");");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE " + TABLE_TRACKS + ";");
+        db.execSQL("DROP TABLE tags");
+        db.execSQL("DROP TABLE tagfile");
         onCreate(db);
     }
 }
