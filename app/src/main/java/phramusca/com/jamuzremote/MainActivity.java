@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     private Intent service; //Not yet used
     private AudioManager audioManager;
     public static AudioPlayer audioPlayer;
-    private MusicLibrary musicLibrary;
+    public static MusicLibrary musicLibrary;
 
     //In internal SD emulated storage:
     //TODO: Change folder as we now have rights
@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean local = true;
     private List<PlayList> localPlaylists = new ArrayList<PlayList>();
     private PlayList localSelectedPlaylist;
+    private ArrayList<String> tags = new ArrayList<>();
 
     // GUI elements
     private TextView textViewReceived;
@@ -502,23 +503,11 @@ public class MainActivity extends AppCompatActivity {
         panelTags.setVisibility(View.GONE);
 
         setDimMode(!buttonSetDimMode.isChecked());
-
-
-
-
-        for(int i=0; i<10; i++) {
-            makeButton(panelTags, "Tag "+i);
-        }
-        makeButton(panelTags, "Problème");
-        makeButton(panelTags, "Live");
-        makeButton(panelTags, "Un très grand tag");
-        makeButton(panelTags, "Groove");
-        makeButton(panelTags, "Love");
-        makeButton(panelTags, "Un grand tag");
     }
 
-    private void makeButton(FlexboxLayout layout, String text) {
+    private void makeButton(FlexboxLayout layout, String text, int id) {
         ToggleButton button = new ToggleButton(this);
+        button.setId(id);
         button.setText(text);
         button.setTextOff(text);
         button.setTextOn(text);
@@ -530,8 +519,8 @@ public class MainActivity extends AppCompatActivity {
                 dimOn();
                 ToggleButton b = (ToggleButton)view;
                 String buttonText = b.getText().toString();
-                boolean checked = b.isChecked();
-                toastLong(buttonText+" : "+checked);
+                displayedTrack.toggleTag(buttonText);
+                //boolean checked = b.isChecked();
             }
         });
 
@@ -1525,6 +1514,15 @@ public class MainActivity extends AppCompatActivity {
                     ratingBar.setEnabled(false);
                     ratingBar.setRating(displayedTrack.getRating());
                     ratingBar.setEnabled(true);
+
+                    //Display file tags
+                    ArrayList<String> fileTags = displayedTrack.getTags();
+                    for(String tag : tags) {
+                        ToggleButton button = (ToggleButton) panelTags.findViewById(tags.indexOf(tag));
+                        if(button.isChecked()!=fileTags.contains(tag)) {
+                            button.setChecked(fileTags.contains(tag));
+                        }
+                    }
                 }
             });
 
@@ -1617,6 +1615,30 @@ public class MainActivity extends AppCompatActivity {
                                 playlists.add(playList);
                             }
                             setupSpinner(playlists, temp);
+                            break;
+                        case "tags":
+                            final JSONArray jsonTags = (JSONArray) jObject.get("tags");
+                            //FIXME: Store tags locally and only refresh if list
+                            //is different + display current song tags
+                            tags = new ArrayList<>();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    panelTags.removeAllViews();
+                                }
+                            });
+                            for(int i=0; i<jsonTags.length(); i++) {
+                                final String tag = (String) jsonTags.get(i);
+                                final int finalI = i;
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        makeButton(panelTags, tag, finalI);
+                                        tags.add(tag);
+                                    }
+                                });
+
+                            }
                             break;
                         case "currentPosition":
                             final int currentPosition = jObject.getInt("currentPosition");

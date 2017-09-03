@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.provider.BaseColumns;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -173,5 +174,61 @@ public class MusicLibrary {
             Log.e(TAG, "getNb("+where+")", ex);
         }
         return -1;
+    }
+
+    public ArrayList<String> getTags(int idFile) {
+        ArrayList<String> genres = new ArrayList<>();
+        Cursor cursor = db.rawQuery("SELECT value FROM tag T " +
+                "JOIN tagFile F ON T.id=F.idTag " +
+                "WHERE F.idFile=?", new String [] {});
+
+        if(cursor != null && cursor.moveToFirst())
+        {
+            do {
+                genres.add(cursor.getString(0));
+            } while(cursor.moveToNext());
+        }
+        cursor.close();
+        return genres;
+    }
+
+    public boolean addTag(int idFile, String tag){
+        try {
+            //Add the tag in db if it does not exist
+            ContentValues values = new ContentValues();
+            values.put("value", tag);
+            int idTag = (int) db.insertWithOnConflict("tag", BaseColumns._ID, values,
+                    SQLiteDatabase.CONFLICT_REPLACE);
+
+            //Add the tag in tagfile
+            values = new ContentValues();
+            values.put("idFile", idFile);
+            values.put("idTag", idTag);
+            db.insertWithOnConflict("tagfile", BaseColumns._ID, values,
+                    SQLiteDatabase.CONFLICT_REPLACE);
+
+            return true;
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "addTag("+idFile+","+tag+")", ex);
+        }
+        return false;
+    }
+
+    public boolean removeTag(int idFile, String tag){
+        try {
+            Cursor cursor = db.query("tag", null, "value=?",
+                    new String[] { tag }, "", "", "");
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                Integer idTag = cursor.getInt(0);
+                cursor.close();
+                db.delete("tagfile", "idFile=? AND idTag=?",
+                        new String[] { String.valueOf(idFile), String.valueOf(idTag) });
+            }
+            return true;
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "removeTag("+idFile+","+tag+")", ex);
+        }
+        return false;
     }
 }
