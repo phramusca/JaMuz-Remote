@@ -155,18 +155,8 @@ public class Track {
      */
     public ArrayList<String> getTags() {
         if(tags==null) {
-            readTags();
+            tags = MainActivity.musicLibrary.getTags(id);
         }
-        return tags;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public ArrayList<String> readTags() {
-        tags = new ArrayList<>();
-        MainActivity.musicLibrary.getTags(id);
         return tags;
     }
 

@@ -177,13 +177,13 @@ public class MusicLibrary {
         return -1;
     }
 
-    public ArrayList<AbstractMap.SimpleEntry<Integer, String>> getTags() {
-        ArrayList<AbstractMap.SimpleEntry<Integer, String>> tags = new ArrayList<>();
+    public Map<Integer, String> getTags() {
+        Map<Integer, String> tags = new HashMap<>();
         Cursor cursor = db.rawQuery("SELECT id, value FROM tag", new String [] {});
         if(cursor != null && cursor.moveToFirst())
         {
             do {
-                tags.add(new AbstractMap.SimpleEntry<>(cursor.getInt(0), cursor.getString(1)));
+                tags.put(cursor.getInt(0), cursor.getString(1));
             } while(cursor.moveToNext());
         }
         cursor.close();
@@ -208,14 +208,14 @@ public class MusicLibrary {
 
     public boolean addTag(int idFile, String tag){
         try {
-            int idTag=addTag(tag);
+            int idTag=getIdTag(tag);
             if(idTag>0) {
                 //Add the tag in tagfile
                 ContentValues values = new ContentValues();
                 values.put("idFile", idFile);
                 values.put("idTag", idTag);
                 db.insertWithOnConflict("tagfile", BaseColumns._ID, values,
-                        SQLiteDatabase.CONFLICT_REPLACE);
+                        SQLiteDatabase.CONFLICT_IGNORE);
                 return true;
             }
         } catch (SQLiteException | IllegalStateException ex) {
@@ -231,7 +231,7 @@ public class MusicLibrary {
             ContentValues values = new ContentValues();
             values.put("value", tag);
             idTag = (int) db.insertWithOnConflict("tag", BaseColumns._ID, values,
-                    SQLiteDatabase.CONFLICT_REPLACE);
+                    SQLiteDatabase.CONFLICT_IGNORE);
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "addTag("+tag+")", ex);
         }
@@ -240,12 +240,8 @@ public class MusicLibrary {
 
     public boolean removeTag(int idFile, String tag){
         try {
-            Cursor cursor = db.query("tag", null, "value=?",
-                    new String[] { tag }, "", "", "");
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                Integer idTag = cursor.getInt(0);
-                cursor.close();
+            int idTag=getIdTag(tag);
+            if (idTag > 0) {
                 db.delete("tagfile", "idFile=? AND idTag=?",
                         new String[] { String.valueOf(idFile), String.valueOf(idTag) });
             }
@@ -254,5 +250,21 @@ public class MusicLibrary {
             Log.e(TAG, "removeTag("+idFile+","+tag+")", ex);
         }
         return false;
+    }
+
+    private int getIdTag(String tag){
+        int idTag=-1;
+        try {
+            Cursor cursor = db.query("tag", null, "value=?",
+                    new String[] { tag }, "", "", "");
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                idTag = cursor.getInt(0);
+                cursor.close();
+            }
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "getIdTag("+tag+")", ex);
+        }
+        return idTag;
     }
 }
