@@ -68,6 +68,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.lang.reflect.Type;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -500,8 +501,22 @@ public class MainActivity extends AppCompatActivity {
 
         toggle(panelOptions, true);
         toggle(panelControls, true);
+
+
+        //Tags Panel
         //toggle(panelTags, true);
         panelTags.setVisibility(View.GONE);
+        final ArrayList<AbstractMap.SimpleEntry<Integer, String>> newTags = musicLibrary.getTags();
+        tags = new ArrayList<>();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                for(AbstractMap.SimpleEntry<Integer, String> tag : newTags) {
+                    tags.add(tag.getValue());
+                    makeButton(panelTags, tag.getValue(), tag.getKey());
+                }
+            }
+        });
 
         setDimMode(!buttonSetDimMode.isChecked());
     }
@@ -1636,30 +1651,6 @@ public class MainActivity extends AppCompatActivity {
                             }
                             setupSpinner(playlists, temp);
                             break;
-                        case "tags":
-                            final JSONArray jsonTags = (JSONArray) jObject.get("tags");
-                            //FIXME: Store tags locally and only refresh if list
-                            //is different + display current song tags
-                            tags = new ArrayList<>();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    panelTags.removeAllViews();
-                                }
-                            });
-                            for(int i=0; i<jsonTags.length(); i++) {
-                                final String tag = (String) jsonTags.get(i);
-                                final int finalI = i;
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        makeButton(panelTags, tag, finalI);
-                                        tags.add(tag);
-                                    }
-                                });
-
-                            }
-                            break;
                         case "currentPosition":
                             final int currentPosition = jObject.getInt("currentPosition");
                             final int total = jObject.getInt("total");
@@ -1750,7 +1741,26 @@ public class MainActivity extends AppCompatActivity {
                             }
                             requestNextFile(true);
                             break;
-                    }
+                        case "tags":
+                            final JSONArray jsonTags = (JSONArray) jObject.get("tags");
+                            for(int i=0; i<jsonTags.length(); i++) {
+                                final String tag = (String) jsonTags.get(i);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if(!tags.contains(tag)) {
+                                            int idTag = MainActivity.musicLibrary.addTag(tag);
+                                            if(idTag>0) {
+                                                tags.add(tag);
+                                                makeButton(panelTags, tag, idTag);
+                                            }
+                                        }
+                                    }
+                                });
+
+                            }
+                            break;
+                    }tags = new ArrayList<>();
                 } catch (JSONException e) {
                     setTextView(textViewReceived, Html.fromHtml(e.toString()), false);
                 }
