@@ -5,12 +5,14 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -24,6 +26,7 @@ public class FileInfoReception {
     public Date addedDate = new Date(0);
     public Date lastPlayed = new Date(0);
     public int playCounter;
+    private ArrayList<String> tags = null;
 
     public FileInfoReception(String json) throws JSONException {
         this(new JSONObject(json));
@@ -38,6 +41,13 @@ public class FileInfoReception {
             addedDate = getDate(file, "addedDate");
             lastPlayed = getDate(file, "lastPlayed");
             playCounter = file.getInt("playCounter");
+
+            JSONArray jsonTags = (JSONArray) file.get("tags");
+            tags = new ArrayList<>();
+            for(int i=0; i<jsonTags.length(); i++) {
+                String tag = (String) jsonTags.get(i);
+                tags.add(tag);
+            }
         } catch (JSONException e) {
         }
     }
