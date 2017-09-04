@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean local = true;
     private List<PlayList> localPlaylists = new ArrayList<PlayList>();
     private PlayList localSelectedPlaylist;
-    private ArrayList<String> tags = new ArrayList<>();
+    private Map<Integer, String> tags = new HashMap<>();
 
     // GUI elements
     private TextView textViewReceived;
@@ -506,14 +506,12 @@ public class MainActivity extends AppCompatActivity {
         //Tags Panel
         //toggle(panelTags, true);
         panelTags.setVisibility(View.GONE);
-        final ArrayList<AbstractMap.SimpleEntry<Integer, String>> newTags = musicLibrary.getTags();
-        tags = new ArrayList<>();
+        tags = musicLibrary.getTags();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                for(AbstractMap.SimpleEntry<Integer, String> tag : newTags) {
-                    tags.add(tag.getValue());
-                    makeButton(panelTags, tag.getValue(), tag.getKey());
+                for(Map.Entry<Integer, String> tag : tags.entrySet()) {
+                    makeButton(panelTags, tag.getKey(), tag.getValue());
                 }
             }
         });
@@ -521,12 +519,12 @@ public class MainActivity extends AppCompatActivity {
         setDimMode(!buttonSetDimMode.isChecked());
     }
 
-    private void makeButton(FlexboxLayout layout, String text, int id) {
+    private void makeButton(FlexboxLayout layout, int key, String value) {
         ToggleButton button = new ToggleButton(this);
-        button.setId(id);
-        button.setText(text);
-        button.setTextOff(text);
-        button.setTextOn(text);
+        button.setId(key);
+        button.setText(value);
+        button.setTextOff(value);
+        button.setTextOn(value);
         button.setAllCaps(false);
         button.setBackgroundResource(R.drawable.ic_tags);
         button.setOnClickListener(new View.OnClickListener() {
@@ -1533,10 +1531,10 @@ public class MainActivity extends AppCompatActivity {
 
                     //Display file tags
                     ArrayList<String> fileTags = displayedTrack.getTags();
-                    for(String tag : tags) {
-                        ToggleButton button = (ToggleButton) panelTags.findViewById(tags.indexOf(tag));
-                        if(button.isChecked()!=fileTags.contains(tag)) {
-                            button.setChecked(fileTags.contains(tag));
+                    for(Map.Entry<Integer, String> tag : tags.entrySet()) {
+                        ToggleButton button = (ToggleButton) panelTags.findViewById(tag.getKey());
+                        if(button.isChecked()!=fileTags.contains(tag.getValue())) {
+                            button.setChecked(fileTags.contains(tag.getValue()));
                         }
                     }
                 }
@@ -1748,11 +1746,11 @@ public class MainActivity extends AppCompatActivity {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        if(!tags.contains(tag)) {
+                                        if(!tags.values().contains(tag)) {
                                             int idTag = MainActivity.musicLibrary.addTag(tag);
                                             if(idTag>0) {
-                                                tags.add(tag);
-                                                makeButton(panelTags, tag, idTag);
+                                                tags.put(idTag, tag);
+                                                makeButton(panelTags, idTag, tag);
                                             }
                                         }
                                     }
@@ -1760,7 +1758,7 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                             break;
-                    }tags = new ArrayList<>();
+                    }
                 } catch (JSONException e) {
                     setTextView(textViewReceived, Html.fromHtml(e.toString()), false);
                 }
