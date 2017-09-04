@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteException;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -176,42 +177,65 @@ public class MusicLibrary {
         return -1;
     }
 
+    public ArrayList<AbstractMap.SimpleEntry<Integer, String>> getTags() {
+        ArrayList<AbstractMap.SimpleEntry<Integer, String>> tags = new ArrayList<>();
+        Cursor cursor = db.rawQuery("SELECT id, value FROM tag", new String [] {});
+        if(cursor != null && cursor.moveToFirst())
+        {
+            do {
+                tags.add(new AbstractMap.SimpleEntry<>(cursor.getInt(0), cursor.getString(1)));
+            } while(cursor.moveToNext());
+        }
+        cursor.close();
+        return tags;
+    }
+
     public ArrayList<String> getTags(int idFile) {
-        ArrayList<String> genres = new ArrayList<>();
+        ArrayList<String> tags = new ArrayList<>();
         Cursor cursor = db.rawQuery("SELECT value FROM tag T " +
                 "JOIN tagFile F ON T.id=F.idTag " +
-                "WHERE F.idFile=?", new String [] {});
+                "WHERE F.idFile=?", new String[] { String.valueOf(idFile)});
 
         if(cursor != null && cursor.moveToFirst())
         {
             do {
-                genres.add(cursor.getString(0));
+                tags.add(cursor.getString(0));
             } while(cursor.moveToNext());
         }
         cursor.close();
-        return genres;
+        return tags;
     }
 
     public boolean addTag(int idFile, String tag){
         try {
-            //Add the tag in db if it does not exist
-            ContentValues values = new ContentValues();
-            values.put("value", tag);
-            int idTag = (int) db.insertWithOnConflict("tag", BaseColumns._ID, values,
-                    SQLiteDatabase.CONFLICT_REPLACE);
-
-            //Add the tag in tagfile
-            values = new ContentValues();
-            values.put("idFile", idFile);
-            values.put("idTag", idTag);
-            db.insertWithOnConflict("tagfile", BaseColumns._ID, values,
-                    SQLiteDatabase.CONFLICT_REPLACE);
-
-            return true;
+            int idTag=addTag(tag);
+            if(idTag>0) {
+                //Add the tag in tagfile
+                ContentValues values = new ContentValues();
+                values.put("idFile", idFile);
+                values.put("idTag", idTag);
+                db.insertWithOnConflict("tagfile", BaseColumns._ID, values,
+                        SQLiteDatabase.CONFLICT_REPLACE);
+                return true;
+            }
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "addTag("+idFile+","+tag+")", ex);
         }
         return false;
+    }
+
+    public int addTag(String tag) {
+        int idTag=-1;
+        try {
+            //Add the tag in db if it does not exist
+            ContentValues values = new ContentValues();
+            values.put("value", tag);
+            idTag = (int) db.insertWithOnConflict("tag", BaseColumns._ID, values,
+                    SQLiteDatabase.CONFLICT_REPLACE);
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "addTag("+tag+")", ex);
+        }
+        return idTag;
     }
 
     public boolean removeTag(int idFile, String tag){
