@@ -129,6 +129,7 @@ public class Reception  extends ProcessAbstract {
 			}
 		} catch (InterruptedException ex) {
 		} catch (IOException ex) {
+            callback.disconnected();
 		}
 		finally {
 			try {
