@@ -17,6 +17,9 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.net.ConnectivityManager;
@@ -38,7 +41,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -50,7 +52,6 @@ import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -1579,7 +1580,26 @@ public class MainActivity extends AppCompatActivity {
     private void displayImage(byte[] art) {
         if( art != null ){
             displayImage( BitmapFactory.decodeByteArray(art, 0, art.length));
+        } else {
+            displayImage(getEmptyCover());
         }
+    }
+
+    private Bitmap getEmptyCover() {
+        return textAsBitmap("No cover");
+    }
+
+    public Bitmap textAsBitmap(String text) {
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTextSize(35);
+        paint.setColor(Color.rgb(192, 192, 192));
+        int size = 500;
+        Bitmap image = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(image);
+        canvas.drawColor(Color.rgb(64, 64, 64));
+        canvas.drawText(text, (size/2)-(text.length()*12),
+                (size/2)+20, paint);
+        return image;
     }
 
     class CallBackReception implements ICallBackReception {
