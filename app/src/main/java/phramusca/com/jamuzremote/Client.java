@@ -92,7 +92,7 @@ public class Client {
 
 	private void sendException(Exception ex) {
 		callback.received("MSG_ERROR: ".concat(ex.toString()));
-        Log.e(TAG, "", ex);
+        Log.w(TAG, "", ex);
 	}
 
 	public void close() {

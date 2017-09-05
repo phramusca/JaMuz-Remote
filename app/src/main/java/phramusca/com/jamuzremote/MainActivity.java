@@ -182,6 +182,10 @@ public class MainActivity extends AppCompatActivity {
                 .setUsesChronometer(true)
                 .setSmallIcon(R.drawable.gears_normal);
 
+        panelTags = (FlexboxLayout) findViewById(R.id.panel_tags);
+        panelControls = (LinearLayout) findViewById(R.id.panel_controls);
+        panelOptions = (GridLayout) findViewById(R.id.panel_options);
+
         textViewReceived = (TextView) findViewById(R.id.textView_conv);
 
         ratingBar = (RatingBar) findViewById(R.id.ratingBar);
@@ -495,10 +499,6 @@ public class MainActivity extends AppCompatActivity {
         //service = new Intent(this, MyService.class);
         //startService(service);
 
-        panelTags = (FlexboxLayout) findViewById(R.id.panel_tags);
-        panelControls = (LinearLayout) findViewById(R.id.panel_controls);
-        panelOptions = (GridLayout) findViewById(R.id.panel_options);
-
         toggle(panelOptions, true);
         toggle(panelControls, true);
 
@@ -506,15 +506,6 @@ public class MainActivity extends AppCompatActivity {
         //Tags Panel
         //toggle(panelTags, true);
         panelTags.setVisibility(View.GONE);
-        tags = musicLibrary.getTags();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                for(Map.Entry<Integer, String> tag : tags.entrySet()) {
-                    makeButton(panelTags, tag.getKey(), tag.getValue());
-                }
-            }
-        });
 
         setDimMode(!buttonSetDimMode.isChecked());
     }
@@ -1287,9 +1278,23 @@ public class MainActivity extends AppCompatActivity {
             alertDialog.show();
         } else {
             connectDatabase();
+            setupTags();
             scanLibrayInThread();
             setupLocalPlaylists();
         }
+    }
+
+    private void setupTags() {
+        tags = new HashMap<>();
+        tags = musicLibrary.getTags();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                for(Map.Entry<Integer, String> tag : tags.entrySet()) {
+                    makeButton(panelTags, tag.getKey(), tag.getValue());
+                }
+            }
+        });
     }
 
     private void askPermissions() {
@@ -1314,6 +1319,7 @@ public class MainActivity extends AppCompatActivity {
             case REQUEST: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     connectDatabase();
+                    setupTags();
                     scanLibrayInThread();
                     setupLocalPlaylists();
                 }
