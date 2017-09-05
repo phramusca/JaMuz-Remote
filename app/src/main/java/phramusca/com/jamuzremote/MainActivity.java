@@ -262,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dimOn();
                 panelTags.setVisibility(buttonTagsToggle.isChecked()?View.VISIBLE:View.GONE);
+                //Can't use toggle as height is dynamic
                 //toggle(panelTags, !buttonTagsToggle.isChecked());
             }
         });
@@ -501,9 +502,7 @@ public class MainActivity extends AppCompatActivity {
 
         toggle(panelOptions, true);
         toggle(panelControls, true);
-
-
-        //Tags Panel
+        //Can't use toggle as height is dynamic
         //toggle(panelTags, true);
         panelTags.setVisibility(View.GONE);
 
