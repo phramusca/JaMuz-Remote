@@ -35,6 +35,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.text.SpannableString;
 import android.text.Spanned;
 import android.util.Log;
 import android.view.Menu;
@@ -118,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
     ProcessAbstract processBrowseFScount;
 
     // GUI elements
-    private TextView textView;
+    private TextView textViewFileInfo;
     private EditText editTextConnectInfo;
     private Button buttonRemote;
     private Button buttonSync;
@@ -193,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
         layoutControls = (LinearLayout) findViewById(R.id.panel_controls);
         layoutOptions = (GridLayout) findViewById(R.id.panel_options);
 
-        textView = (TextView) findViewById(R.id.textFileInfo);
+        textViewFileInfo = (TextView) findViewById(R.id.textFileInfo);
 
         ratingBar = (RatingBar) findViewById(R.id.ratingBar);
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
@@ -455,7 +456,7 @@ public class MainActivity extends AppCompatActivity {
         localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz Remote", "coverHash",
                 "relativeFullPath", "---", new Date(0), new Date(0), 0);
         displayedTrack = localTrack;
-        setTextView(textView, Html.fromHtml("<html><h1>"
+        setTextView(textViewFileInfo, Html.fromHtml("<html><h1>"
                 .concat(displayedTrack.toString())
                 .concat("<BR/></h1></html>")), false);
 
@@ -1527,7 +1528,9 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    setTextView(textView, Html.fromHtml("<html><h1>".concat(displayedTrack.toString()).concat("<BR/></h1></html>")), false);
+                    setTextView(textViewFileInfo, trimTrailingWhitespace(Html.fromHtml("<html><h1>"
+                            .concat(displayedTrack.toString())
+                            .concat("</h1></html>"))), false);
                     ratingBar.setEnabled(false);
                     ratingBar.setRating(displayedTrack.getRating());
                     ratingBar.setEnabled(true);
@@ -1551,6 +1554,34 @@ public class MainActivity extends AppCompatActivity {
                 displayCover();
             }
         }
+    }
+
+    /**
+     * Trims trailing whitespace. Removes any of these characters:
+     * https://stackoverflow.com/questions/9589381/remove-extra-line-breaks-after-html-fromhtml
+     * 0009, HORIZONTAL TABULATION
+     * 000A, LINE FEED
+     * 000B, VERTICAL TABULATION
+     * 000C, FORM FEED
+     * 000D, CARRIAGE RETURN
+     * 001C, FILE SEPARATOR
+     * 001D, GROUP SEPARATOR
+     * 001E, RECORD SEPARATOR
+     * 001F, UNIT SEPARATOR
+     * @return "" if source is null, otherwise string with all trailing whitespace removed
+     */
+    public static Spanned trimTrailingWhitespace(Spanned source) {
+
+        if(source == null)
+            return new SpannableString("");
+
+        int i = source.length();
+
+        // loop back to the first non-whitespace character
+        while(--i >= 0 && Character.isWhitespace(source.charAt(i))) {
+        }
+
+        return new SpannableString(source.subSequence(0, i+1));
     }
 
     private static final String AVRCP_PLAYSTATE_CHANGED = "com.android.music.playstatechanged";
@@ -1673,7 +1704,7 @@ public class MainActivity extends AppCompatActivity {
                             break;
                     }
                 } catch (JSONException e) {
-                    setTextView(textView, Html.fromHtml(e.toString()), false);
+                    setTextView(textViewFileInfo, Html.fromHtml(e.toString()), false);
                 }
             }
         }
@@ -1763,7 +1794,7 @@ public class MainActivity extends AppCompatActivity {
                             break;
                     }
                 } catch (JSONException e) {
-                    setTextView(textView, Html.fromHtml(e.toString()), false);
+                    setTextView(textViewFileInfo, Html.fromHtml(e.toString()), false);
                 }
             }
         }
