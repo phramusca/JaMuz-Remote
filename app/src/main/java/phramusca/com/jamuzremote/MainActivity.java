@@ -68,7 +68,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.lang.reflect.Type;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -85,7 +84,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private Client client;
+    private Client clientRemote;
     private Client clientSync;
     private Track displayedTrack;
     private Track localTrack;
@@ -94,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
     private AudioManager audioManager;
     public static AudioPlayer audioPlayer;
     public static MusicLibrary musicLibrary;
+    public static File pathToFiles;
 
     //In internal SD emulated storage:
     //TODO: Change folder as we now have rights
@@ -108,20 +108,25 @@ public class MainActivity extends AppCompatActivity {
     private List<Track> queue = new ArrayList<>();
     private List<Track> queueHistory = new ArrayList<>();
     private boolean local = true;
+
     private List<PlayList> localPlaylists = new ArrayList<PlayList>();
     private PlayList localSelectedPlaylist;
     private Map<Integer, String> tags = new HashMap<>();
 
+    ProcessAbstract scanLibray;
+    ProcessAbstract processBrowseFS;
+    ProcessAbstract processBrowseFScount;
+
     // GUI elements
-    private TextView textViewReceived;
+    private TextView textView;
     private EditText editTextConnectInfo;
     private Button buttonRemote;
     private Button buttonSync;
-    private ToggleButton buttonSetDimMode;
-    private ToggleButton buttonControlsToggle;
-    private ToggleButton buttonTagsToggle;
-    private ToggleButton buttonConnectToggle;
-    private ToggleButton buttonRandomToggle;
+    private ToggleButton toggleButtonDimMode;
+    private ToggleButton toggleButtonControls;
+    private ToggleButton toggleButtonTags;
+    private ToggleButton toggleButtonOptions;
+    private ToggleButton toggleButtonRandom;
     private Button buttonPrevious;
     private Button buttonPlay;
     private Button buttonNext;
@@ -130,15 +135,17 @@ public class MainActivity extends AppCompatActivity {
     private Button buttonForward;
     private Button buttonVolUp;
     private Button buttonVolDown;
-    private SeekBar seekBar;
-    private Spinner spinner;
+    private SeekBar seekBarPosition;
+    private Spinner spinnerPlaylist;
     private static boolean spinnerSend=true;
     private RatingBar ratingBar;
-    private ImageView image;
-    private LinearLayout trackInfo;
-    private LinearLayout panelControls;
-    private FlexboxLayout panelTags;
-    private GridLayout panelOptions;
+    private ImageView imageViewCover;
+    private LinearLayout layoutTrackInfo;
+    private LinearLayout layoutControls;
+    private FlexboxLayout layoutTags;
+    private GridLayout layoutOptions;
+
+    //Notifications
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilderSync;
     private NotificationCompat.Builder mBuilderScan;
@@ -182,11 +189,11 @@ public class MainActivity extends AppCompatActivity {
                 .setUsesChronometer(true)
                 .setSmallIcon(R.drawable.gears_normal);
 
-        panelTags = (FlexboxLayout) findViewById(R.id.panel_tags);
-        panelControls = (LinearLayout) findViewById(R.id.panel_controls);
-        panelOptions = (GridLayout) findViewById(R.id.panel_options);
+        layoutTags = (FlexboxLayout) findViewById(R.id.panel_tags);
+        layoutControls = (LinearLayout) findViewById(R.id.panel_controls);
+        layoutOptions = (GridLayout) findViewById(R.id.panel_options);
 
-        textViewReceived = (TextView) findViewById(R.id.textView_conv);
+        textView = (TextView) findViewById(R.id.textFileInfo);
 
         ratingBar = (RatingBar) findViewById(R.id.ratingBar);
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
@@ -201,19 +208,19 @@ public class MainActivity extends AppCompatActivity {
                         //Queue may not be valid as value changed
                         queue.clear();
                     } else {
-                        client.send("setRating".concat(String.valueOf(Math.round(rating))));
+                        clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
                     }
                     ratingBar.setEnabled(true);
                 }
             }
         });
 
-        seekBar = (SeekBar) findViewById(R.id.seekBar);
-        seekBar.setEnabled(false);
+        seekBarPosition = (SeekBar) findViewById(R.id.seekBar);
+        seekBarPosition.setEnabled(false);
 
-        spinner = (Spinner) findViewById(R.id.spinner);
-        spinner.setOnItemSelectedListener(spinnerListener);
-        spinner.setOnTouchListener(new View.OnTouchListener() {
+        spinnerPlaylist = (Spinner) findViewById(R.id.spinner);
+        spinnerPlaylist.setOnItemSelectedListener(spinnerListener);
+        spinnerPlaylist.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 dimOn();
@@ -239,47 +246,47 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        buttonSetDimMode = (ToggleButton) findViewById(R.id.button_dim_mode);
-        buttonSetDimMode.setOnClickListener(new View.OnClickListener() {
+        toggleButtonDimMode = (ToggleButton) findViewById(R.id.button_dim_mode);
+        toggleButtonDimMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setDimMode(!buttonSetDimMode.isChecked());
+                setDimMode(!toggleButtonDimMode.isChecked());
             }
         });
 
-        buttonControlsToggle = (ToggleButton) findViewById(R.id.button_controls_toggle);
-        buttonControlsToggle.setOnClickListener(new View.OnClickListener() {
+        toggleButtonControls = (ToggleButton) findViewById(R.id.button_controls_toggle);
+        toggleButtonControls.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dimOn();
-                toggle(panelControls, !buttonControlsToggle.isChecked());
+                toggle(layoutControls, !toggleButtonControls.isChecked());
             }
         });
 
-        buttonTagsToggle = (ToggleButton) findViewById(R.id.button_tags_toggle);
-        buttonTagsToggle.setOnClickListener(new View.OnClickListener() {
+        toggleButtonTags = (ToggleButton) findViewById(R.id.button_tags_toggle);
+        toggleButtonTags.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dimOn();
-                panelTags.setVisibility(buttonTagsToggle.isChecked()?View.VISIBLE:View.GONE);
+                layoutTags.setVisibility(toggleButtonTags.isChecked()?View.VISIBLE:View.GONE);
                 //Can't use toggle as height is dynamic
-                //toggle(panelTags, !buttonTagsToggle.isChecked());
+                //toggle(layoutTags, !toggleButtonTags.isChecked());
             }
         });
 
 
 
-        buttonConnectToggle = (ToggleButton) findViewById(R.id.button_connect_toggle);
-        buttonConnectToggle.setOnClickListener(new View.OnClickListener() {
+        toggleButtonOptions = (ToggleButton) findViewById(R.id.button_connect_toggle);
+        toggleButtonOptions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dimOn();
-                toggle(panelOptions, !buttonConnectToggle.isChecked());
+                toggle(layoutOptions, !toggleButtonOptions.isChecked());
             }
         });
 
-        buttonRandomToggle = (ToggleButton) findViewById(R.id.button_random_toggle);
-        buttonRandomToggle.setOnClickListener(new View.OnClickListener() {
+        toggleButtonRandom = (ToggleButton) findViewById(R.id.button_random_toggle);
+        toggleButtonRandom.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dimOn();
@@ -308,12 +315,12 @@ public class MainActivity extends AppCompatActivity {
                         port=2013;
                     }
                     CallBackReception callBackReception = new CallBackReception();
-                    client = new Client(address, port,
+                    clientRemote = new Client(address, port,
                             Settings.Secure.getString(MainActivity.this.getContentResolver(),
                             Settings.Secure.ANDROID_ID), "tata", callBackReception);
                    new Thread() {
                         public void run() {
-                            if(client.connect()) {
+                            if(clientRemote.connect()) {
                                 enableGUI(buttonRemote, true);
                                 enableConnect(false);
                             }
@@ -325,7 +332,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     enableConnect(true);
-                    stopRemote(client, buttonRemote, R.drawable.remote_off, true);
+                    stopRemote(clientRemote, buttonRemote, R.drawable.remote_off, true);
 
                     displayedTrack = localTrack;
                     displayTrack();
@@ -379,17 +386,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        image = (ImageView) findViewById(R.id.imageView);
+        imageViewCover = (ImageView) findViewById(R.id.imageView);
 
-        trackInfo = (LinearLayout) findViewById(R.id.trackInfo);
-        trackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
+        layoutTrackInfo = (LinearLayout) findViewById(R.id.trackInfo);
+        layoutTrackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
             @Override
             public void onSwipeTop() {
                 Log.v(TAG, "onSwipeTop");
                 if(local) {
                     audioPlayer.forward();
                 } else {
-                    client.send("forward");
+                    clientRemote.send("forward");
                 }
 
             }
@@ -399,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
                 if(local) {
                     playPrevious();
                 } else {
-                    client.send("previousTrack");
+                    clientRemote.send("previousTrack");
                 }
             }
             @Override
@@ -408,7 +415,7 @@ public class MainActivity extends AppCompatActivity {
                 if(local) {
                     playNext();
                 } else {
-                    client.send("nextTrack");
+                    clientRemote.send("nextTrack");
                 }
             }
             @Override
@@ -417,7 +424,7 @@ public class MainActivity extends AppCompatActivity {
                 if(local) {
                     audioPlayer.rewind();
                 } else {
-                    client.send("rewind");
+                    clientRemote.send("rewind");
                 }
             }
             @Override
@@ -428,7 +435,7 @@ public class MainActivity extends AppCompatActivity {
             public void onTap() {
                 if(isDimOn) {
                     if(!local) {
-                        client.send("playTrack");
+                        clientRemote.send("playTrack");
                     }
                     else if(local) {
                         audioPlayer.togglePlay();
@@ -448,7 +455,7 @@ public class MainActivity extends AppCompatActivity {
         localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz Remote", "coverHash",
                 "relativeFullPath", "---", new Date(0), new Date(0), 0);
         displayedTrack = localTrack;
-        setTextView(textViewReceived, Html.fromHtml("<html><h1>"
+        setTextView(textView, Html.fromHtml("<html><h1>"
                 .concat(displayedTrack.toString())
                 .concat("<BR/></h1></html>")), false);
 
@@ -500,16 +507,15 @@ public class MainActivity extends AppCompatActivity {
         //service = new Intent(this, MyService.class);
         //startService(service);
 
-        toggle(panelOptions, true);
-        toggle(panelControls, true);
+        toggle(layoutOptions, true);
+        toggle(layoutControls, true);
         //Can't use toggle as height is dynamic
-        //toggle(panelTags, true);
-        panelTags.setVisibility(View.GONE);
-
-        setDimMode(!buttonSetDimMode.isChecked());
+        //toggle(layoutTags, true);
+        layoutTags.setVisibility(View.GONE);
+        setDimMode(!toggleButtonDimMode.isChecked());
     }
 
-    private void makeButton(FlexboxLayout layout, int key, String value) {
+    private void makeButtonTag(FlexboxLayout layout, int key, String value) {
         ToggleButton button = new ToggleButton(this);
         button.setId(key);
         button.setText(value);
@@ -545,7 +551,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     localSelectedPlaylist = playList;
                 } else {
-                    client.send("setPlaylist".concat(playList.toString()));
+                    clientRemote.send("setPlaylist".concat(playList.toString()));
                 }
                 dimOn();
             }
@@ -641,7 +647,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.i(TAG, "MainActivity onPause");
-        stopRemote(client, buttonRemote, R.drawable.remote_off, true);
+        stopRemote(clientRemote, buttonRemote, R.drawable.remote_off, true);
     }
 
     @Override
@@ -650,7 +656,7 @@ public class MainActivity extends AppCompatActivity {
         try
         {
             if(hasFocus) {
-                setDimMode(!buttonSetDimMode.isChecked());
+                setDimMode(!toggleButtonDimMode.isChecked());
             }
             else {
                 setDimMode(false);
@@ -667,7 +673,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.i(TAG, "MainActivity onResume");
 
-        if(!buttonSetDimMode.isChecked()) {
+        if(!toggleButtonDimMode.isChecked()) {
             dimOn();
         }
         else if(!audioPlayer.isPlaying()) {
@@ -698,10 +704,8 @@ public class MainActivity extends AppCompatActivity {
             stopService(service);
         }
 
-        //Stop connections to JaMuz "server"
-        stopRemote(client, buttonRemote, R.drawable.remote_off, true);
+        stopRemote(clientRemote, buttonRemote, R.drawable.remote_off, true);
         stopRemote(clientSync,buttonSync, R.drawable.connect_off, true);
-        //FIXME: Can continue even after application is close ! Why ?
         cancelWatchTimeOut();
 
         //Abort and wait scanLibrayInThread is aborted
@@ -747,12 +751,6 @@ public class MainActivity extends AppCompatActivity {
         //Close all notifications
         mNotifyManager.cancelAll();
     }
-
-    ProcessAbstract scanLibray;
-    ProcessAbstract processBrowseFS;
-    ProcessAbstract processBrowseFScount;
-
-    public static File pathToFiles;
 
     public static File getExtSDcard(String path) {
         String removableStoragePath;
@@ -1013,13 +1011,13 @@ public class MainActivity extends AppCompatActivity {
         //Fill the queue
         if(queue.size()<5) {
             if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                List<Track> addToQueue = musicLibrary.getTracks((PlayList) spinner.getSelectedItem());
+                List<Track> addToQueue = musicLibrary.getTracks((PlayList) spinnerPlaylist.getSelectedItem());
                 queue.addAll(addToQueue);
             }
         }
         //Play a random track
         if(queue.size()>0) {
-            int index=buttonRandomToggle.isChecked()?new Random().nextInt(queue.size()):0;
+            int index= toggleButtonRandom.isChecked()?new Random().nextInt(queue.size()):0;
             displayedTrack = queue.get(index);
             queue.remove(index);
             Log.i(TAG, "playQueue("+(index+1)+"/"+queue.size()+")");
@@ -1153,7 +1151,7 @@ public class MainActivity extends AppCompatActivity {
     private void dimOn() {
         editTextConnectInfo.clearFocus();
 
-        if(!buttonSetDimMode.isChecked()) {
+        if(!toggleButtonDimMode.isChecked()) {
             if (!isDimOn) {
                 dim(true);
             }
@@ -1199,8 +1197,8 @@ public class MainActivity extends AppCompatActivity {
                     setupSpinner(localPlaylists, localSelectedPlaylist);
                 }
                 editTextConnectInfo.setEnabled(enable);
-                buttonRandomToggle.setEnabled(enable);
-                buttonRandomToggle.setVisibility(enable?View.VISIBLE:View.GONE);
+                toggleButtonRandom.setEnabled(enable);
+                toggleButtonRandom.setVisibility(enable?View.VISIBLE:View.GONE);
                 buttonRemote.setEnabled(true);
             }
         });
@@ -1290,7 +1288,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 for(Map.Entry<Integer, String> tag : tags.entrySet()) {
-                    makeButton(panelTags, tag.getKey(), tag.getValue());
+                    makeButtonTag(layoutTags, tag.getKey(), tag.getValue());
                 }
             }
         });
@@ -1381,7 +1379,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             dimOn();
-            client.send(msg);
+            clientRemote.send(msg);
         }
     }
 
@@ -1449,8 +1447,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 spinnerSend=false;
-                spinner.setAdapter(arrayAdapter);
-                spinner.setSelection(arrayAdapter.getPosition(selectedPlaylist));
+                spinnerPlaylist.setAdapter(arrayAdapter);
+                spinnerPlaylist.setSelection(arrayAdapter.getPosition(selectedPlaylist));
             }
         });
     }
@@ -1499,8 +1497,8 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                seekBar.setMax(total);
-                seekBar.setProgress(currentPosition);
+                seekBarPosition.setMax(total);
+                seekBarPosition.setProgress(currentPosition);
             }
         });
     }
@@ -1529,7 +1527,7 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    setTextView(textViewReceived, Html.fromHtml("<html><h1>".concat(displayedTrack.toString()).concat("<BR/></h1></html>")), false);
+                    setTextView(textView, Html.fromHtml("<html><h1>".concat(displayedTrack.toString()).concat("<BR/></h1></html>")), false);
                     ratingBar.setEnabled(false);
                     ratingBar.setRating(displayedTrack.getRating());
                     ratingBar.setEnabled(true);
@@ -1537,7 +1535,7 @@ public class MainActivity extends AppCompatActivity {
                     //Display file tags
                     ArrayList<String> fileTags = displayedTrack.getTags();
                     for(Map.Entry<Integer, String> tag : tags.entrySet()) {
-                        ToggleButton button = (ToggleButton) panelTags.findViewById(tag.getKey());
+                        ToggleButton button = (ToggleButton) layoutTags.findViewById(tag.getKey());
                         if(button.isChecked()!=fileTags.contains(tag.getValue())) {
                             button.setChecked(fileTags.contains(tag.getValue()));
                         }
@@ -1581,7 +1579,7 @@ public class MainActivity extends AppCompatActivity {
             if(maxWidth<=0) {
                 maxWidth=250;
             }
-            client.send("sendCover"+maxWidth);
+            clientRemote.send("sendCover"+maxWidth);
         }
         displayImage(bitmap);
     }
@@ -1590,7 +1588,7 @@ public class MainActivity extends AppCompatActivity {
         //final Bitmap finalBitmap = bitmap;
         runOnUiThread(new Runnable() {
             public void run() {
-                image.setImageBitmap(finalBitmap);
+                imageViewCover.setImageBitmap(finalBitmap);
             }
         });
     }
@@ -1675,7 +1673,7 @@ public class MainActivity extends AppCompatActivity {
                             break;
                     }
                 } catch (JSONException e) {
-                    setTextView(textViewReceived, Html.fromHtml(e.toString()), false);
+                    setTextView(textView, Html.fromHtml(e.toString()), false);
                 }
             }
         }
@@ -1702,7 +1700,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void disconnected() {
-            stopRemote(client, buttonRemote, R.drawable.remote_off, true);
+            stopRemote(clientRemote, buttonRemote, R.drawable.remote_off, true);
         }
     }
 
@@ -1755,7 +1753,7 @@ public class MainActivity extends AppCompatActivity {
                                             int idTag = MainActivity.musicLibrary.addTag(tag);
                                             if(idTag>0) {
                                                 tags.put(idTag, tag);
-                                                makeButton(panelTags, idTag, tag);
+                                                makeButtonTag(layoutTags, idTag, tag);
                                             }
                                         }
                                     }
@@ -1765,7 +1763,7 @@ public class MainActivity extends AppCompatActivity {
                             break;
                     }
                 } catch (JSONException e) {
-                    setTextView(textViewReceived, Html.fromHtml(e.toString()), false);
+                    setTextView(textView, Html.fromHtml(e.toString()), false);
                 }
             }
         }
