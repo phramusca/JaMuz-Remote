@@ -117,6 +117,34 @@
     </GridLayout>
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingStart="10dp">
+
+        <ToggleButton
+            android:id="@+id/button_random_toggle"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            style="@style/ToggleButton"
+            android:background="@drawable/ic_toggle_random"
+            android:layout_gravity="center_vertical"/>
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner"
+            android:popupBackground="#DDFFFFFF"
+            android:background="@drawable/ic_gradient_spinner"
+            android:paddingStart="10dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="10dp"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -214,35 +242,18 @@
         app:alignItems="stretch"
         app:alignContent="stretch"
         android:layout_gravity="center">
+
+        <!-- Dummy item to see FlexBox in Preview and padTop -->
+        <LinearLayout android:id="@+id/dummy2"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_width="0px"
+            android:layout_height="10px"
+            android:layout_row="0"
+            android:layout_column="0"
+            android:orientation="horizontal" />
+
     </com.google.android.flexbox.FlexboxLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="10dp"
-        android:paddingStart="10dp">
-
-        <ToggleButton
-            android:id="@+id/button_random_toggle"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            style="@style/ToggleButton"
-            android:background="@drawable/ic_toggle_random"
-            android:layout_gravity="center_vertical"/>
-
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/spinner"
-            android:popupBackground="#DDFFFFFF"
-            android:background="@drawable/ic_gradient_spinner"
-            android:paddingStart="10dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="10dp"/>
-    </LinearLayout>
 
     <RatingBar
         android:layout_width="wrap_content"
