@@ -695,7 +695,13 @@ public class MainActivity extends AppCompatActivity {
 
         //Better unregister as it does not trigger anyway + raises exceptions if not
         unregisterReceiver(receiverHeadSetPlugged);
-        unregisterReceiver(mHeadsetBroadcastReceiver);
+        try {
+            unregisterReceiver(mHeadsetBroadcastReceiver);
+        } catch(IllegalArgumentException ex) {
+            //TODO: Why does this occurs in Galaxy tablet
+            //FIXME: Test mHeadsetBroadcastReceiver in Galaxy tablet
+        }
+
         //Note: receiverMediaButtonName remains active if not unregistered
         //but causes issues
         audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
@@ -801,7 +807,7 @@ public class MainActivity extends AppCompatActivity {
                     processBrowseFS = new ProcessAbstract("Thread.MainActivity.browseFS") {
                         public void run() {
                             try {
-                                browseFS(pathToFiles, filesToKeep!=null);
+                                browseFS(pathToFiles);
                             } catch (InterruptedException e) {
                                 Log.w(TAG, "Thread.MainActivity.browseFS InterruptedException");
                                 scanLibray.abort();
@@ -861,7 +867,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            private void browseFS(File path, boolean delete) throws InterruptedException {
+            private void browseFS(File path) throws InterruptedException {
                 checkAbort();
                 if (path.isDirectory()) {
                     File[] files = path.listFiles();
@@ -870,19 +876,22 @@ public class MainActivity extends AppCompatActivity {
                             for (File file : files) {
                                 checkAbort();
                                 if (file.isDirectory()) {
-                                    browseFS(file, delete);
+                                    browseFS(file);
                                 }
                                 else {
                                     String absolutePath=file.getAbsolutePath();
                                     String fileKey = absolutePath.substring(
                                             getAppDataPath().getAbsolutePath().length()+1);
-                                    if(delete && !filesToKeep.containsKey(fileKey)) {
+                                    if(filesToKeep!=null && !filesToKeep.containsKey(fileKey)) {
                                         Log.i(TAG, "Deleting file "+absolutePath);
                                         file.delete();
+                                    } else if(filesToKeep!=null && filesToKeep.containsKey(fileKey)) {
+                                        FileInfoReception fileInfoReception=filesToKeep.get(fileKey);
+                                        insertOrUpdateTrackInDatabase(absolutePath, fileInfoReception);
                                     } else {
                                         insertOrUpdateTrackInDatabase(absolutePath, null);
-                                        notifyScan("JaMuz is scanning files ... ", 13);
                                     }
+                                    notifyScan("JaMuz is scanning files ... ", 13);
                                 }
                             }
                         } else {
@@ -1477,8 +1486,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void toast(final String msg, int duration) {
-        Log.i(TAG, "Toast makeText "+msg);
-        Toast.makeText(this, msg, duration).show();
+        if(!msg.equals("")) {
+            Log.i(TAG, "Toast makeText "+msg);
+            Toast.makeText(this, msg, duration).show();
+        }
     }
 
     private void notifyScan(final String action, int every) {
@@ -1730,7 +1741,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void disconnected() {
+        public void disconnected(final String msg) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    toastShort(msg);
+                }
+            });
             stopRemote(clientRemote, buttonRemote, R.drawable.remote_off, true);
         }
     }
@@ -1862,7 +1879,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void disconnected() {
+        public void disconnected(final String msg) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    toastShort(msg);
+                }
+            });
             stopRemote(clientSync, buttonSync, R.drawable.connect_off, true);
             cancelWatchTimeOut();
         }
@@ -1987,7 +2010,8 @@ public class MainActivity extends AppCompatActivity {
                     }.start();
                 }
             } else {
-                final String msg = "No more files to download.";
+                final String msg = "No more files to download.\n\nAll "+filesToKeep.size()+" files" +
+                        " have been retrieved successfully.";
                 Log.i(TAG, msg+" Updating library:"+scanLibrary);
                 notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, 5000);
                 runOnUiThread(new Runnable() {
@@ -2015,6 +2039,13 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             Log.i(TAG, "filesToKeep is null");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
+                            "export a list of files to retrieve, based on playlists.");
+                }
+            });
         }
     }
 
