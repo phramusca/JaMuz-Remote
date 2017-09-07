@@ -5,7 +5,6 @@
  */
 package phramusca.com.jamuzremote;
 
-import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedOutputStream;
@@ -21,8 +20,6 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -85,12 +82,12 @@ public class Client {
 			return false;
 			
 		} catch (IOException ex) {
-			sendException(ex);
+			callbackWithException(ex);
 			return false;
 		}
 	}
 
-	private void sendException(Exception ex) {
+	private void callbackWithException(Exception ex) {
 		callback.received("MSG_ERROR: ".concat(ex.toString()));
         Log.w(TAG, "", ex);
 	}
@@ -123,7 +120,7 @@ public class Client {
 				}
 			}
 		} catch (IOException ex) {
-			sendException(ex);
+			callbackWithException(ex);
 			return false;
 		}
 	}
@@ -162,7 +159,7 @@ public class Client {
 			} catch (SocketException ex) {
                 Log.e(TAG, "", ex);
 				close();
-				callback.disconnected();
+				callback.disconnected("");
 			} catch (IOException ex) {
                 Log.e(TAG, "", ex);
 			}
