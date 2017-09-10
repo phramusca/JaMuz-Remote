@@ -69,7 +69,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
@@ -123,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
     // GUI elements
     private TextView textViewFileInfo;
     private EditText editTextConnectInfo;
+    private TextView textViewPath;
     private Button buttonConfigConnection;
     private Button buttonRemote;
     private Button buttonSync;
@@ -214,6 +214,8 @@ public class MainActivity extends AppCompatActivity {
         preferences = getPreferences(MODE_PRIVATE);
         editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.10:2013"));
 
+        textViewPath = (TextView) findViewById(R.id.textViewPath);
+
         buttonConfigConnection = (Button) findViewById(R.id.button_config_connection);
         buttonConfigConnection.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -239,9 +241,9 @@ public class MainActivity extends AppCompatActivity {
                                     public void onChosenDir(String chosenDir)
                                     {
                                         m_chosenDir = chosenDir;
-                                        Toast.makeText(
-                                                MainActivity.this, "Chosen directory: " +
-                                                        m_chosenDir, Toast.LENGTH_LONG).show();
+                                        textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
+                                                .concat(chosenDir)
+                                                .concat("</html>"))));
                                     }
                                 });
                 directoryChooserDialog.setNewFolderEnabled(m_newFolderEnabled);

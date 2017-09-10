@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -117,10 +118,11 @@
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ok"
+                android:text="Save"
                 android:id="@+id/button_config_connection"
                 android:layout_row="0"
-                android:layout_column="3" />
+                android:layout_column="3"
+                android:textAllCaps="false"/>
         </GridLayout>
 
         <GridLayout
@@ -144,20 +146,22 @@
             <TextView
                 android:text="Path : "
                 android:layout_row="0"
-                android:layout_column="1"/>
+                android:layout_column="1"
+                android:paddingEnd="5dp"/>
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/editText_path"
+                android:id="@+id/textViewPath"
                 android:text="Soon (or later)"
                 android:enabled="false"
-                android:layout_gravity="left|right"
-                android:gravity="center_horizontal"
-                android:inputType="text"
+                android:layout_gravity="left|right|center_vertical"
                 android:layout_row="0"
                 android:layout_column="2"
-                android:theme="@style/EditText"/>
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLength="2000"
+                android:maxLines="4"/>
 
             <Button
                 style="?android:attr/buttonStyleSmall"
@@ -166,17 +170,9 @@
                 android:text="Browse"
                 android:id="@+id/button_browse"
                 android:layout_row="0"
-                android:layout_column="3" />
+                android:layout_column="3"
+                android:textAllCaps="false"/>
 
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ok"
-                android:id="@+id/button_search"
-                android:layout_row="0"
-                android:layout_column="4"
-                android:enabled="false"/>
         </GridLayout>
     </GridLayout>
 
