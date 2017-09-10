@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -153,11 +154,16 @@ public class MainActivity extends AppCompatActivity {
     private static final int ID_NOTIFIER_SYNC = 1;
     private static final int ID_NOTIFIER_SCAN = 2;
 
+    private SharedPreferences preferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "MainActivity onCreate");
         setContentView(R.layout.activity_main);
+
+        preferences = getPreferences(MODE_PRIVATE);
+        int storedPreference = preferences.getInt("storedInt", 0);
 
         //Read FilesToKeep file to get list of files to maintain in db
         String readJson = HelperTextFile.read(this, "FilesToKeep.txt");
