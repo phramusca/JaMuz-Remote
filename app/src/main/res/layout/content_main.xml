@@ -102,7 +102,7 @@
                 android:layout_column="1"/>
 
             <EditText android:id="@+id/editText_info"
-                android:text="192.168.0.11:2013"
+                android:text="192.168.0.0:2013"
                 android:layout_width="175dp"
                 android:layout_height="wrap_content"
                 android:enabled="true"
@@ -112,6 +112,61 @@
                 android:layout_row="0"
                 android:layout_column="2"
                 android:theme="@style/EditText" />
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ok"
+                android:id="@+id/button_config_connection"
+                android:layout_row="0"
+                android:layout_column="3" />
+        </GridLayout>
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/repo"
+            android:layout_row="1"
+            android:layout_column="0">
+
+            <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+            <LinearLayout
+                android:id="@+id/llrepo"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:layout_width="0px"
+                android:layout_height="0px"
+                android:layout_row="0"
+                android:layout_column="0"
+                android:orientation="horizontal" />
+
+            <TextView
+                android:text="Path : "
+                android:layout_row="0"
+                android:layout_column="1"/>
+
+            <EditText
+                android:layout_width="175dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/editText_path"
+                android:text="Soon (or later)"
+                android:enabled="false"
+                android:layout_gravity="left|right"
+                android:gravity="center_horizontal"
+                android:inputType="text"
+                android:layout_row="0"
+                android:layout_column="2"
+                android:theme="@style/EditText"/>
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ok"
+                android:id="@+id/button_search"
+                android:layout_row="0"
+                android:layout_column="3" android:enabled="false"/>
         </GridLayout>
     </GridLayout>
 

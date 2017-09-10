@@ -122,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
     // GUI elements
     private TextView textViewFileInfo;
     private EditText editTextConnectInfo;
+    private Button buttonConfigConnection;
     private Button buttonRemote;
     private Button buttonSync;
     private ToggleButton toggleButtonDimMode;
@@ -156,14 +157,12 @@ public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences preferences;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "MainActivity onCreate");
         setContentView(R.layout.activity_main);
-
-        preferences = getPreferences(MODE_PRIVATE);
-        int storedPreference = preferences.getInt("storedInt", 0);
 
         //Read FilesToKeep file to get list of files to maintain in db
         String readJson = HelperTextFile.read(this, "FilesToKeep.txt");
@@ -201,6 +200,26 @@ public class MainActivity extends AppCompatActivity {
         layoutOptions = (GridLayout) findViewById(R.id.panel_options);
 
         textViewFileInfo = (TextView) findViewById(R.id.textFileInfo);
+
+        editTextConnectInfo = (EditText) findViewById(R.id.editText_info);
+        editTextConnectInfo.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                dimOn();
+                return false;
+            }
+        });
+
+        preferences = getPreferences(MODE_PRIVATE);
+        editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.10:2013"));
+
+        buttonConfigConnection = (Button) findViewById(R.id.button_config_connection);
+        buttonConfigConnection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setConfig("connectionString", editTextConnectInfo.getText().toString());
+            }
+        });
 
         ratingBar = (RatingBar) findViewById(R.id.ratingBar);
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
@@ -243,15 +262,6 @@ public class MainActivity extends AppCompatActivity {
         buttonForward = setupButton(buttonForward, R.id.button_forward, "forward");
         buttonVolUp = setupButton(buttonVolUp, R.id.button_volUp, "volUp");
         buttonVolDown = setupButton(buttonVolDown, R.id.button_volDown, "volDown");
-
-        editTextConnectInfo = (EditText) findViewById(R.id.editText_info);
-        editTextConnectInfo.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                dimOn();
-                return false;
-            }
-        });
 
         toggleButtonDimMode = (ToggleButton) findViewById(R.id.button_dim_mode);
         toggleButtonDimMode.setOnClickListener(new View.OnClickListener() {
@@ -328,6 +338,7 @@ public class MainActivity extends AppCompatActivity {
                    new Thread() {
                         public void run() {
                             if(clientRemote.connect()) {
+                                setConfig("connectionString", editTextConnectInfo.getText().toString());
                                 enableGUI(buttonRemote, true);
                                 enableConnect(false);
                             }
@@ -375,6 +386,7 @@ public class MainActivity extends AppCompatActivity {
                     new Thread() {
                         public void run() {
                             if(clientSync.connect()) {
+                                setConfig("connectionString", editTextConnectInfo.getText().toString());
                                 enableGUI(buttonSync, true);
                                 enableSync(false);
                                 requestNextFile(false);
@@ -520,6 +532,12 @@ public class MainActivity extends AppCompatActivity {
         //toggle(layoutTags, true);
         layoutTags.setVisibility(View.GONE);
         setDimMode(!toggleButtonDimMode.isChecked());
+    }
+
+    private void setConfig(String id, String value) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(id, value);
+        editor.commit();
     }
 
     private void makeButtonTag(FlexboxLayout layout, int key, String value) {
