@@ -231,7 +231,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                // Create DirectoryChooserDialog and register a callback
                 DirectoryChooserDialog directoryChooserDialog =
                         new DirectoryChooserDialog(MainActivity.this,
                                 new DirectoryChooserDialog.ChosenDirectoryListener()
@@ -242,15 +241,11 @@ public class MainActivity extends AppCompatActivity {
                                         m_chosenDir = chosenDir;
                                         Toast.makeText(
                                                 MainActivity.this, "Chosen directory: " +
-                                                        chosenDir, Toast.LENGTH_LONG).show();
+                                                        m_chosenDir, Toast.LENGTH_LONG).show();
                                     }
                                 });
-                // Toggle new folder button enabling
                 directoryChooserDialog.setNewFolderEnabled(m_newFolderEnabled);
-                // Load directory chooser dialog for initial 'm_chosenDir' directory.
-                // The registered callback will be called upon final directory selection.
                 directoryChooserDialog.chooseDirectory(m_chosenDir);
-                m_newFolderEnabled = ! m_newFolderEnabled;
             }
         });
 
