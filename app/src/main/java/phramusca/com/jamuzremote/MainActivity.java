@@ -69,6 +69,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
@@ -218,6 +219,38 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 setConfig("connectionString", editTextConnectInfo.getText().toString());
+            }
+        });
+
+        Button dirChooserButton = (Button) findViewById(R.id.button_browse);
+        dirChooserButton.setOnClickListener(new View.OnClickListener()
+        {
+            private String m_chosenDir = "/";
+            private boolean m_newFolderEnabled = false;
+
+            @Override
+            public void onClick(View v)
+            {
+                // Create DirectoryChooserDialog and register a callback
+                DirectoryChooserDialog directoryChooserDialog =
+                        new DirectoryChooserDialog(MainActivity.this,
+                                new DirectoryChooserDialog.ChosenDirectoryListener()
+                                {
+                                    @Override
+                                    public void onChosenDir(String chosenDir)
+                                    {
+                                        m_chosenDir = chosenDir;
+                                        Toast.makeText(
+                                                MainActivity.this, "Chosen directory: " +
+                                                        chosenDir, Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                // Toggle new folder button enabling
+                directoryChooserDialog.setNewFolderEnabled(m_newFolderEnabled);
+                // Load directory chooser dialog for initial 'm_chosenDir' directory.
+                // The registered callback will be called upon final directory selection.
+                directoryChooserDialog.chooseDirectory(m_chosenDir);
+                m_newFolderEnabled = ! m_newFolderEnabled;
             }
         });
 
