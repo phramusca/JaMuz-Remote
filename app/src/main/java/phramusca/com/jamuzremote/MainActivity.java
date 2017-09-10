@@ -808,7 +808,7 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             try {
                                 browseFS(pathToFiles);
-                            } catch (InterruptedException e) {
+                            } catch (IllegalStateException | InterruptedException e) {
                                 Log.w(TAG, "Thread.MainActivity.browseFS InterruptedException");
                                 scanLibray.abort();
                             }
@@ -1017,7 +1017,7 @@ public class MainActivity extends AppCompatActivity {
         return track;
     }
 
-    private void playRandom() {
+    private void playNextOrRandom() {
         //Fill the queue
         if(queue.size()<5) {
             if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
@@ -1025,7 +1025,7 @@ public class MainActivity extends AppCompatActivity {
                 queue.addAll(addToQueue);
             }
         }
-        //Play a random track
+        //Play first track in queue (or random if toggleButtonRandom.isChecked)
         if(queue.size()>0) {
             int index= toggleButtonRandom.isChecked()?new Random().nextInt(queue.size()):0;
             displayedTrack = queue.get(index);
@@ -1053,7 +1053,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "play(): Remove track from db:"+displayedTrack);
             musicLibrary.deleteTrack(displayedTrack.getPath());
-            playRandom();
+            playNext();
         }
     }
 
@@ -1078,9 +1078,7 @@ public class MainActivity extends AppCompatActivity {
             displayedTrack.setPlayCounter(displayedTrack.getPlayCounter()+1);
             displayedTrack.setLastPlayed(new Date());
             musicLibrary.updateTrack(displayedTrack);
-            //FIXME: Do not play random, but make it a option
-            //=> ORDER BY playCounter (ASC), lastPlayed (ASC)
-            playRandom();
+            playNextOrRandom();
         }
     }
 
@@ -1104,11 +1102,6 @@ public class MainActivity extends AppCompatActivity {
                     dimOn();
                 }
             }
-        }
-
-        @Override
-        public void doPlayRandom() {
-            playRandom();
         }
 
         @Override

@@ -55,16 +55,12 @@ public class AudioPlayer {
 
     public void play() {
         if(mediaPlayer==null) {
-            playRandom();
+            playNext();
         }
         else if(!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
             startTimer();
         }
-    }
-
-    public void playRandom() {
-        callback.doPlayRandom();
     }
 
     public void playNext() {
@@ -77,7 +73,7 @@ public class AudioPlayer {
 
     public void togglePlay() {
         if(mediaPlayer ==null) {
-            playRandom();
+            playNext();
         }
         else if(mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
