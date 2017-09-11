@@ -1023,11 +1023,11 @@ public class MainActivity extends AppCompatActivity {
             if(track!=null) {
                 Log.d(TAG, "browseFS insertTrack " + absolutePath);
                 if(fileInfoReception!=null) {
-                    //TODO: Remove FileInfoReception. Use Track instead
                     track.setRating(fileInfoReception.rating);
                     track.setAddedDate(fileInfoReception.addedDate);
                     track.setLastPlayed(fileInfoReception.lastPlayed);
                     track.setPlayCounter(fileInfoReception.playCounter);
+                    track.setTags(fileInfoReception.tags);
                 }
                 musicLibrary.insertTrack(track);
             } else {
@@ -1594,6 +1594,7 @@ public class MainActivity extends AppCompatActivity {
                     ratingBar.setEnabled(true);
 
                     //Display file tags
+                    MainActivity.musicLibrary.getTags(displayedTrack.getId()); //To refresh after merge
                     ArrayList<String> fileTags = displayedTrack.getTags();
                     for(Map.Entry<Integer, String> tag : tags.entrySet()) {
                         ToggleButton button = (ToggleButton) layoutTags.findViewById(tag.getKey());
@@ -1668,7 +1669,9 @@ public class MainActivity extends AppCompatActivity {
             if(maxWidth<=0) {
                 maxWidth=250;
             }
-            clientRemote.send("sendCover"+maxWidth);
+            if(clientRemote!=null) {
+                clientRemote.send("sendCover"+maxWidth);
+            }
         }
         displayImage(bitmap);
     }

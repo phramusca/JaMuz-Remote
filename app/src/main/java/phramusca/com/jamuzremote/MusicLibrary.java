@@ -79,7 +79,13 @@ public class MusicLibrary {
 
     public long insertTrack(Track track){
         try {
-            return db.insert(musicLibraryDb.TABLE_TRACKS, null, TrackToValues(track));
+            if(db.insert(musicLibraryDb.TABLE_TRACKS, null, TrackToValues(track))<0) {
+                return -1;
+            }
+            for(String tag : track.getTags()) {
+                addTag(track.getId(), tag);
+            }
+
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "insertTrack("+track+")", ex);
         }

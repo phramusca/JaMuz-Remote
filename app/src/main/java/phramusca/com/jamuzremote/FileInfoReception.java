@@ -26,7 +26,7 @@ public class FileInfoReception {
     public Date addedDate = new Date(0);
     public Date lastPlayed = new Date(0);
     public int playCounter;
-    private ArrayList<String> tags = null;
+    public ArrayList<String> tags = null;
 
     public FileInfoReception(String json) throws JSONException {
         this(new JSONObject(json));

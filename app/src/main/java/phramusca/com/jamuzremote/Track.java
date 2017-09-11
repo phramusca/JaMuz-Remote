@@ -160,6 +160,10 @@ public class Track {
         return tags;
     }
 
+    public void setTags(ArrayList<String> tags) {
+        this.tags = tags;
+    }
+
     /**
      *
      * @param value
