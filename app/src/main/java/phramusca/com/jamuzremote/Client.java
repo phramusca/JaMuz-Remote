@@ -87,6 +87,10 @@ public class Client {
 		}
 	}
 
+	public boolean isConnected() {
+		return socket!=null && socket.isConnected();
+	}
+
 	private void callbackWithException(Exception ex) {
 		callback.received("MSG_ERROR: ".concat(ex.toString()));
         Log.w(TAG, "", ex);
