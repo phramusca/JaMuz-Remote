@@ -76,7 +76,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -109,15 +108,13 @@ public class MainActivity extends AppCompatActivity {
     private int nbFilesTotal = 0;
     private List<Track> queue = new ArrayList<>();
     private List<Track> queueHistory = new ArrayList<>();
-    private boolean local = true;
-
     private List<PlayList> localPlaylists = new ArrayList<PlayList>();
     private PlayList localSelectedPlaylist;
     private Map<Integer, String> tags = new HashMap<>();
 
-    ProcessAbstract scanLibray;
-    ProcessAbstract processBrowseFS;
-    ProcessAbstract processBrowseFScount;
+    private ProcessAbstract scanLibray;
+    private ProcessAbstract processBrowseFS;
+    private ProcessAbstract processBrowseFScount;
 
     // GUI elements
     private TextView textViewFileInfo;
@@ -130,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton toggleButtonControls;
     private ToggleButton toggleButtonTags;
     private ToggleButton toggleButtonOptions;
-    private ToggleButton toggleButtonRandom;
     private Button buttonPrevious;
     private Button buttonPlay;
     private Button buttonNext;
@@ -259,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
                     dimOn();
                     ratingBar.setEnabled(false);
                     displayedTrack.setRating(Math.round(rating));
-                    if(local) {
+                    if(!clientRemote.isConnected()) {
                         musicLibrary.updateTrack(displayedTrack);
                         //Queue may not be valid as value changed
                         queue.clear();
@@ -332,14 +328,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        toggleButtonRandom = (ToggleButton) findViewById(R.id.button_random_toggle);
-        toggleButtonRandom.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dimOn();
-            }
-        });
-
         buttonRemote = (Button) findViewById(R.id.button_connect);
         buttonRemote.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -361,10 +349,10 @@ public class MainActivity extends AppCompatActivity {
                     } catch(NumberFormatException ex) {
                         port=2013;
                     }
-                    CallBackReception callBackReception = new CallBackReception();
+                    CallBackRemote callBackRemote = new CallBackRemote();
                     clientRemote = new Client(address, port,
                             Settings.Secure.getString(MainActivity.this.getContentResolver(),
-                            Settings.Secure.ANDROID_ID), "tata", callBackReception);
+                            Settings.Secure.ANDROID_ID), "tata", callBackRemote);
                    new Thread() {
                         public void run() {
                             if(clientRemote.connect()) {
@@ -406,10 +394,10 @@ public class MainActivity extends AppCompatActivity {
                     } catch(NumberFormatException ex) {
                         port=2013;
                     }
-                    CallBackSync callBackReception = new CallBackSync();
+                    CallBackSync callBackSync = new CallBackSync();
                     clientSync = new Client(address, port,
                             Settings.Secure.getString(MainActivity.this.getContentResolver(),
-                            Settings.Secure.ANDROID_ID)+"-data", "tata", callBackReception);
+                            Settings.Secure.ANDROID_ID)+"-data", "tata", callBackSync);
                     new Thread() {
                         public void run() {
                             if(clientSync.connect()) {
@@ -438,7 +426,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSwipeTop() {
                 Log.v(TAG, "onSwipeTop");
-                if(local) {
+                if(!clientRemote.isConnected()) {
                     audioPlayer.forward();
                 } else {
                     clientRemote.send("forward");
@@ -448,7 +436,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSwipeRight() {
                 Log.v(TAG, "onSwipeRight");
-                if(local) {
+                if(!clientRemote.isConnected()) {
                     playPrevious();
                 } else {
                     clientRemote.send("previousTrack");
@@ -457,7 +445,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSwipeLeft() {
                 Log.v(TAG, "onSwipeLeft");
-                if(local) {
+                if(!clientRemote.isConnected()) {
                     playNext();
                 } else {
                     clientRemote.send("nextTrack");
@@ -466,7 +454,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSwipeBottom() {
                 Log.v(TAG, "onSwipeBottom");
-                if(local) {
+                if(!clientRemote.isConnected()) {
                     audioPlayer.rewind();
                 } else {
                     clientRemote.send("rewind");
@@ -479,17 +467,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTap() {
                 if(isDimOn) {
-                    if(!local) {
+                    if(clientRemote.isConnected()) {
                         clientRemote.send("playTrack");
                     }
-                    else if(local) {
+                    else if(!clientRemote.isConnected()) {
                         audioPlayer.togglePlay();
                     }
                 }
             }
             @Override
             public void onDoubleTapUp() {
-                if(local && isDimOn) {
+                if(!clientRemote.isConnected() && isDimOn) {
                     audioPlayer.pullUp();
                     audioPlayer.resume(); //As toggled by simple Tap
                 }
@@ -596,7 +584,7 @@ public class MainActivity extends AppCompatActivity {
         int pos, long id) {
             if(spinnerSend) {
                 PlayList playList = (PlayList) parent.getItemAtPosition(pos);
-                if(local) {
+                if(!clientRemote.isConnected()) {
                     if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
                         queue = musicLibrary.getTracks(playList);
                     }
@@ -1073,27 +1061,6 @@ public class MainActivity extends AppCompatActivity {
         return track;
     }
 
-    private void playNextOrRandom() {
-        //Fill the queue
-        if(queue.size()<5) {
-            if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                List<Track> addToQueue = musicLibrary.getTracks((PlayList) spinnerPlaylist.getSelectedItem());
-                queue.addAll(addToQueue);
-            }
-        }
-        //Play first track in queue (or random if toggleButtonRandom.isChecked)
-        if(queue.size()>0) {
-            int index= toggleButtonRandom.isChecked()?new Random().nextInt(queue.size()):0;
-            displayedTrack = queue.get(index);
-            queue.remove(index);
-            Log.i(TAG, "playQueue("+(index+1)+"/"+queue.size()+")");
-            play();
-        } else {
-            setupSpinner(localPlaylists, localSelectedPlaylist);
-            toastLong("Empty Playlist.");
-        }
-    }
-
     private void playHistory() {
         displayedTrack = queueHistory.get(queueHistoryIndex);
         Log.i(TAG, "playHistory("+(queueHistoryIndex+1)+"/"+queueHistory.size()+")");
@@ -1134,7 +1101,23 @@ public class MainActivity extends AppCompatActivity {
             displayedTrack.setPlayCounter(displayedTrack.getPlayCounter()+1);
             displayedTrack.setLastPlayed(new Date());
             musicLibrary.updateTrack(displayedTrack);
-            playNextOrRandom();
+            //Fill the queue
+            if(queue.size()<5) {
+                if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                    List<Track> addToQueue = musicLibrary.getTracks((PlayList) spinnerPlaylist.getSelectedItem());
+                    queue.addAll(addToQueue);
+                }
+            }
+            //Play first track in queue
+            if(queue.size()>0) {
+                displayedTrack = queue.get(0);
+                queue.remove(0);
+                Log.i(TAG, "playQueue(1/"+queue.size()+")");
+                play();
+            } else {
+                setupSpinner(localPlaylists, localSelectedPlaylist);
+                toastLong("Empty Playlist.");
+            }
         }
     }
 
@@ -1144,14 +1127,14 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onPlayBackEnd() {
-            if(local) {
+            if(!clientRemote.isConnected()) {
                 playNext();
             }
         }
 
         @Override
         public void onPositionChanged(int position, int duration) {
-            if(local) {
+            if(!clientRemote.isConnected()) {
                 setSeekBar(position, duration);
                 if ((duration - position) < 5001 && (duration - position) > 4501) {
                     //setBrightness(1);
@@ -1247,7 +1230,6 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                local=enable;
                 if(!enable) {
                     buttonRemote.setText("Close");
                     buttonRemote.setBackgroundResource(R.drawable.remote_on);
@@ -1256,8 +1238,6 @@ public class MainActivity extends AppCompatActivity {
                     setupSpinner(localPlaylists, localSelectedPlaylist);
                 }
                 editTextConnectInfo.setEnabled(enable);
-                toggleButtonRandom.setEnabled(enable);
-                toggleButtonRandom.setVisibility(enable?View.VISIBLE:View.GONE);
                 buttonRemote.setEnabled(true);
             }
         });
@@ -1395,7 +1375,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void doAction(String msg) {
-        if(local) {
+        if(!clientRemote.isConnected()) {
             switch (msg) {
                 case "previousTrack":
                     playPrevious();
@@ -1443,37 +1423,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupLocalPlaylists() {
-
-        localSelectedPlaylist = new PlayList("All", "1", musicLibrary);
         localPlaylists = new ArrayList<PlayList>();
-        localPlaylists.add(localSelectedPlaylist);
-
-        addToPlaylists("Top", "rating=5", "rating>2");
-        addToPlaylists("Discover","rating=0", "rating=0");
-        addToPlaylists("More","rating>2 AND rating<5", "rating>0 AND rating<3");
-
+        addToPlaylists("Top", "rating=5", "rating>2", "playCounter, lastPlayed");
+        addToPlaylists("Discover","rating=0", "rating=0", "RANDOM()");
+        addToPlaylists("More","rating>2 AND rating<5", "rating>0 AND rating<3", "playCounter, lastPlayed");
+        localPlaylists.add(new PlayList("All", "1", "", musicLibrary));
+        localSelectedPlaylist = localPlaylists.get(0);
         setupSpinner(localPlaylists, localSelectedPlaylist);
     }
 
-    private void addToPlaylists(String name, String where, String whereEnfantin) {
+    private void addToPlaylists(String name, String where, String whereEnfantin, String order) {
         String enfantin = "Enfantin";
 
-        addToPlaylists(name, "genre!=\""+enfantin+"\" AND " + where);
-        addToPlaylists(name+" "+enfantin, "genre=\""+enfantin+"\" AND " + whereEnfantin);
+        addToPlaylists(name, "genre!=\""+enfantin+"\" AND " + where, order);
+        addToPlaylists(name+" "+enfantin, "genre=\""+enfantin+"\" AND " + whereEnfantin, order);
         LinkedHashMap<String, Integer> genres = new LinkedHashMap();
         genres = musicLibrary.getGenres("genre!=\""+enfantin+"\" AND " + where);
         for(Map.Entry<String, Integer> entry : genres.entrySet()) {
-            localPlaylists.add(new PlayList(name + " " + entry.getKey(), "genre=\"" + entry.getKey() + "\" AND " + where, musicLibrary));
+            localPlaylists.add(new PlayList(name + " " + entry.getKey(),
+                    "genre=\"" + entry.getKey() + "\" AND " + where,
+                    order,
+                    musicLibrary));
         }
         String in = getInSqlList(genres);
         if(!in.equals("")) {
             in+=",\""+enfantin+"\"";
-            addToPlaylists(name+" Autre", "genre NOT IN ("+in+") AND " + where);
+            addToPlaylists(name+" Autre", "genre NOT IN ("+in+") AND " + where, order);
         }
     }
 
-    private void addToPlaylists(String name, String where) {
-        localPlaylists.add(new PlayList(name, where, musicLibrary));
+    private void addToPlaylists(String name, String where, String order) {
+        localPlaylists.add(new PlayList(name, where, order, musicLibrary));
     }
 
     private String getInSqlList(Map<String, Integer> list) {
@@ -1712,9 +1692,9 @@ public class MainActivity extends AppCompatActivity {
         return image;
     }
 
-    class CallBackReception implements ICallBackReception {
+    class CallBackRemote implements ICallBackReception {
 
-        private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackReception.class.getSimpleName();
+        private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackRemote.class.getSimpleName();
 
         @Override
         public void received(final String msg) {
@@ -1749,7 +1729,7 @@ public class MainActivity extends AppCompatActivity {
                         case "currentPosition":
                             final int currentPosition = jObject.getInt("currentPosition");
                             final int total = jObject.getInt("total");
-                            if(!local) {
+                            if(clientRemote.isConnected()) {
                                 setSeekBar(currentPosition, total);
                             }
                             break;
