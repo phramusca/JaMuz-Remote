@@ -169,7 +169,7 @@ public class Track {
      * @param value
      */
     public void toggleTag(String value) {
-        if(tags.contains(value)) {
+        if(getTags().contains(value)) {
             tags.remove(value);
             MainActivity.musicLibrary.removeTag(id, value);
         }
