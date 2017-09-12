@@ -85,7 +85,7 @@ public class Reception  extends ProcessAbstract {
                         FileOutputStream fos = new FileOutputStream(path.getAbsolutePath() + File.separator +
                                 fileInfoReception.relativeFullPath);
                         callback.receivingFile(fileInfoReception);
-                        // FIXME: Find best. Make a benchmark (and use it in notification progres bar)
+                        // TODO: Find best. Make a benchmark (and use it in notification progres bar)
                         //https://stackoverflow.com/questions/8748960/how-do-you-decide-what-byte-size-to-use-for-inputstream-read
                         byte[] buf = new byte[8192];
                         int bytesRead;
@@ -107,7 +107,7 @@ public class Reception  extends ProcessAbstract {
                         DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
                         double fileSize = dis.readLong();
                         FileOutputStream fos = new FileOutputStream(MainActivity.musicLibraryDbFile);
-                        // FIXME: Find best. Make a benchmark
+                        // TODO: Find best. Make a benchmark
                         //https://stackoverflow.com/questions/8748960/how-do-you-decide-what-byte-size-to-use-for-inputstream-read
                         byte[] buf = new byte[8192];
                         int bytesRead;

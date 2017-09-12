@@ -743,7 +743,7 @@ public class MainActivity extends AppCompatActivity {
             unregisterReceiver(mHeadsetBroadcastReceiver);
         } catch(IllegalArgumentException ex) {
             //TODO: Why does this occurs in Galaxy tablet
-            //FIXME: Test mHeadsetBroadcastReceiver in Galaxy tablet
+            //TODO: Test mHeadsetBroadcastReceiver in Galaxy tablet
         }
 
         //Note: receiverMediaButtonName remains active if not unregistered
@@ -793,7 +793,7 @@ public class MainActivity extends AppCompatActivity {
         mNotifyManager.cancelAll();
     }
 
-    //FIXME: Do not saveFilesLists ALL everytime !! (not in receivedFile at least)
+    //TODO: Do not saveFilesLists ALL everytime !! (not in receivedFile at least)
     private void saveFilesLists() {
         //Write list of files to maintain in db
         if(filesToKeep!=null) {
@@ -1009,9 +1009,10 @@ public class MainActivity extends AppCompatActivity {
         int id = musicLibrary.getTrack(absolutePath);
         if(id>=0) {
             Log.d(TAG, "browseFS updateTrack " + absolutePath);
-            //FIXME: Update if file is modified only:
+            //TODDO: Update if file is modified only:
             //based on lastModificationDate and/or size (not on content as longer than updateTrack)
             //musicLibrary.updateTrack(id, track, false);
+            //Warning with genre now that it is part of merge
         } else {
             Track track = getTrack(absolutePath);
             if(track!=null) {
@@ -2209,9 +2210,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if (state == BluetoothHeadset.STATE_DISCONNECTED)
                 {
-                    //FIXME: This situation (at least) can endup with other receivers (headsethook at least)
+                    //TODO: This situation (at least) can endup with other receivers (headsethook at least)
                     //not to trigger anymore => Why ?
-
                     Log.i(TAG, "BT DISconnected");
                     audioPlayer.pause();
                 }
