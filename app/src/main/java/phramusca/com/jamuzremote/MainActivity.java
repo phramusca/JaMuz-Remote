@@ -255,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
                     dimOn();
                     ratingBar.setEnabled(false);
                     displayedTrack.setRating(Math.round(rating));
-                    if(!clientRemote.isConnected()) {
+                    if(!isRemoteConnected()) {
                         musicLibrary.updateTrack(displayedTrack);
                         //Queue may not be valid as value changed
                         queue.clear();
@@ -426,7 +426,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSwipeTop() {
                 Log.v(TAG, "onSwipeTop");
-                if(!clientRemote.isConnected()) {
+                if(!isRemoteConnected()) {
                     audioPlayer.forward();
                 } else {
                     clientRemote.send("forward");
@@ -436,7 +436,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSwipeRight() {
                 Log.v(TAG, "onSwipeRight");
-                if(!clientRemote.isConnected()) {
+                if(!isRemoteConnected()) {
                     playPrevious();
                 } else {
                     clientRemote.send("previousTrack");
@@ -445,7 +445,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSwipeLeft() {
                 Log.v(TAG, "onSwipeLeft");
-                if(!clientRemote.isConnected()) {
+                if(!isRemoteConnected()) {
                     playNext();
                 } else {
                     clientRemote.send("nextTrack");
@@ -454,7 +454,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSwipeBottom() {
                 Log.v(TAG, "onSwipeBottom");
-                if(!clientRemote.isConnected()) {
+                if(!isRemoteConnected()) {
                     audioPlayer.rewind();
                 } else {
                     clientRemote.send("rewind");
@@ -467,17 +467,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTap() {
                 if(isDimOn) {
-                    if(clientRemote.isConnected()) {
+                    if(isRemoteConnected()) {
                         clientRemote.send("playTrack");
                     }
-                    else if(!clientRemote.isConnected()) {
+                    else {
                         audioPlayer.togglePlay();
                     }
                 }
             }
             @Override
             public void onDoubleTapUp() {
-                if(!clientRemote.isConnected() && isDimOn) {
+                if(!isRemoteConnected() && isDimOn) {
                     audioPlayer.pullUp();
                     audioPlayer.resume(); //As toggled by simple Tap
                 }
@@ -584,7 +584,7 @@ public class MainActivity extends AppCompatActivity {
         int pos, long id) {
             if(spinnerSend) {
                 PlayList playList = (PlayList) parent.getItemAtPosition(pos);
-                if(!clientRemote.isConnected()) {
+                if(!isRemoteConnected()) {
                     if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
                         queue = musicLibrary.getTracks(playList);
                     }
@@ -602,6 +602,10 @@ public class MainActivity extends AppCompatActivity {
             dimOn();
         }
     };
+
+    private boolean isRemoteConnected() {
+        return (clientRemote!=null && clientRemote.isConnected());
+    }
 
     private void setDimMode(boolean enable) {
         if(enable) {
@@ -686,7 +690,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.i(TAG, "MainActivity onPause");
-        wasRemoteConnected=(clientRemote!=null && clientRemote.isConnected());
+        wasRemoteConnected=isRemoteConnected();
         stopRemote();
     }
 
@@ -1127,14 +1131,14 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onPlayBackEnd() {
-            if(!clientRemote.isConnected()) {
+            if(!isRemoteConnected()) {
                 playNext();
             }
         }
 
         @Override
         public void onPositionChanged(int position, int duration) {
-            if(!clientRemote.isConnected()) {
+            if(!isRemoteConnected()) {
                 setSeekBar(position, duration);
                 if ((duration - position) < 5001 && (duration - position) > 4501) {
                     //setBrightness(1);
@@ -1375,7 +1379,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void doAction(String msg) {
-        if(!clientRemote.isConnected()) {
+        if(!isRemoteConnected()) {
             switch (msg) {
                 case "previousTrack":
                     playPrevious();
@@ -1729,7 +1733,7 @@ public class MainActivity extends AppCompatActivity {
                         case "currentPosition":
                             final int currentPosition = jObject.getInt("currentPosition");
                             final int total = jObject.getInt("total");
-                            if(clientRemote.isConnected()) {
+                            if(isRemoteConnected()) {
                                 setSeekBar(currentPosition, total);
                             }
                             break;
