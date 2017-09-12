@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
         toggleButtonDimMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setDimMode(!toggleButtonDimMode.isChecked());
+                setDimMode(toggleButtonDimMode.isChecked());
             }
         });
 
@@ -380,10 +380,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     enableConnect(true);
-                    stopRemote(clientRemote, buttonRemote, R.drawable.remote_off, true);
-
-                    displayedTrack = localTrack;
-                    displayTrack();
+                    stopRemote();
                 }
             }
         });
@@ -429,8 +426,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     enableSync(true);
-                    stopRemote(clientSync,buttonSync, R.drawable.connect_off, true);
-                    cancelWatchTimeOut();
+                    stopSync();
                 }
             }
         });
@@ -561,7 +557,7 @@ public class MainActivity extends AppCompatActivity {
         //Can't use toggle as height is dynamic
         //toggle(layoutTags, true);
         layoutTags.setVisibility(View.GONE);
-        setDimMode(!toggleButtonDimMode.isChecked());
+        setDimMode(toggleButtonDimMode.isChecked());
     }
 
     private void setConfig(String id, String value) {
@@ -702,7 +698,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.i(TAG, "MainActivity onPause");
-        stopRemote(clientRemote, buttonRemote, R.drawable.remote_off, true);
+        wasRemoteConnected=(clientRemote!=null && clientRemote.isConnected());
+        stopRemote();
     }
 
     @Override
@@ -711,10 +708,10 @@ public class MainActivity extends AppCompatActivity {
         try
         {
             if(hasFocus) {
-                setDimMode(!toggleButtonDimMode.isChecked());
+                setDimMode(toggleButtonDimMode.isChecked());
             }
             else {
-                setDimMode(false);
+                setDimMode(true);
             }
         }
         catch(Exception ex)
@@ -723,21 +720,22 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private boolean wasRemoteConnected=false;
+
     @Override
     protected void onResume() {
         super.onResume();
         Log.i(TAG, "MainActivity onResume");
 
-        if(!toggleButtonDimMode.isChecked()) {
+        if(toggleButtonDimMode.isChecked()) {
             dimOn();
         }
-        else if(!audioPlayer.isPlaying()) {
+        else if(wasRemoteConnected && !audioPlayer.isPlaying()) {
             enableGUI(buttonRemote, false);
             getFromQRcode();
             buttonRemote.performClick();
         }
 
-        //TODO: Check if this solves the issue with buttons
         receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
         audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
     }
@@ -765,9 +763,8 @@ public class MainActivity extends AppCompatActivity {
             stopService(service);
         }
 
-        stopRemote(clientRemote, buttonRemote, R.drawable.remote_off, true);
-        stopRemote(clientSync,buttonSync, R.drawable.connect_off, true);
-        cancelWatchTimeOut();
+        stopRemote();
+        stopSync();
 
         //Abort and wait scanLibrayInThread is aborted
         //So it does not crash if scanLib not completed
@@ -798,6 +795,14 @@ public class MainActivity extends AppCompatActivity {
             musicLibrary.close();
         }
 
+        saveFilesLists();
+
+        //Close all notifications
+        mNotifyManager.cancelAll();
+    }
+
+    //FIXME: Do not saveFilesLists ALL everytime !! (not in receivedFile at least)
+    private void saveFilesLists() {
         //Write list of files to maintain in db
         if(filesToKeep!=null) {
             Gson gson = new Gson();
@@ -808,9 +813,6 @@ public class MainActivity extends AppCompatActivity {
             Gson gson = new Gson();
             HelperTextFile.write(this, "filesToGet.txt", gson.toJson(filesToGet));
         }
-
-        //Close all notifications
-        mNotifyManager.cancelAll();
     }
 
     public static File getExtSDcard(String path) {
@@ -1203,12 +1205,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Timer timer = new Timer();
-    private boolean isDimOn = false;
+    private boolean isDimOn = true;
 
     private void dimOn() {
         editTextConnectInfo.clearFocus();
 
-        if(!toggleButtonDimMode.isChecked()) {
+        if(toggleButtonDimMode.isChecked()) {
             if (!isDimOn) {
                 dim(true);
             }
@@ -1798,7 +1800,10 @@ public class MainActivity extends AppCompatActivity {
                     toastShort(msg);
                 }
             });
-            stopRemote(clientRemote, buttonRemote, R.drawable.remote_off, true);
+            stopRemote();
+            setupSpinner(localPlaylists, localSelectedPlaylist);
+            displayedTrack = localTrack;
+            displayTrack();
         }
     }
 
@@ -1936,8 +1941,7 @@ public class MainActivity extends AppCompatActivity {
                     toastShort(msg);
                 }
             });
-            stopRemote(clientSync, buttonSync, R.drawable.connect_off, true);
-            cancelWatchTimeOut();
+            stopSync();
         }
     }
 
@@ -1988,8 +1992,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onFinish() {
                             Log.w(TAG, "Timeout. Dis-connecting");
-                            stopRemote(clientSync, buttonSync, R.drawable.connect_off, false);
-                            cancelWatchTimeOut();
+                            stopSync();
                             Log.i(TAG, "Re-connecting");
                             buttonSync.performClick();
                         }
@@ -2027,6 +2030,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void requestNextFile(final boolean scanLibrary) {
         if(filesToKeep!=null) {
+            saveFilesLists();
             if(filesToGet.size()>0) {
                 final FileInfoReception fileInfoReception = filesToGet.entrySet().iterator().next().getValue();
                 File receivedFile = new File(getAppDataPath(), fileInfoReception.relativeFullPath);
@@ -2073,7 +2077,7 @@ public class MainActivity extends AppCompatActivity {
                 //Not disconnecting to be able to receive a new list
                 //sent by the server. User can still close
                 //enableSync(true);
-                //stopRemote(clientSync,buttonSync, R.drawable.connect_off, true);
+                //stopClient(clientSync,buttonSync, R.drawable.connect_off, true);
 
                 //Resend add request in case missed for some reason
                 if(filesToKeep!=null) {
@@ -2099,7 +2103,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void stopRemote(Client client, final Button button, final int resId, final boolean enable) {
+    private void stopRemote() {
+        stopClient(clientRemote, buttonRemote, R.drawable.remote_off, true);
+        setupSpinner(localPlaylists, localSelectedPlaylist);
+        displayedTrack = localTrack;
+        displayTrack();
+    }
+
+    private void stopSync() {
+        stopClient(clientSync,buttonSync, R.drawable.connect_off, true);
+        cancelWatchTimeOut();
+    }
+
+    private void stopClient(Client client, final Button button, final int resId, final boolean enable) {
         if(client!=null) {
             client.close();
         }

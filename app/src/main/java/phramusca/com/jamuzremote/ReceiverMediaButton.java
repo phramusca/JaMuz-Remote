@@ -26,7 +26,7 @@ public class ReceiverMediaButton extends MediaButtonReceiver
                     MainActivity.audioPlayer.playNext();
                     break;
                 case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                    //TODO: Alow this as an option as handy in car
+                    //TODO: Allow this as an option as handy in car
                     boolean usePreviousButtonAsPauseButton=false;
                     if(usePreviousButtonAsPauseButton) {
                         Log.i(TAG, keyExtraEvent+" => togglePlay");

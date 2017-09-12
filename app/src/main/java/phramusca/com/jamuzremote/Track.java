@@ -136,7 +136,7 @@ public class Track {
         return path;
     }
 
-    //TODO: Use the same cache system as for remote
+    //TODO: Use the same cache system as for remote (that is not used by the way !!)
     public byte[] getArt() {
         byte[]art=null;
         try {
