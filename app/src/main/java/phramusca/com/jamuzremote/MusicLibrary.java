@@ -12,12 +12,18 @@ import android.database.sqlite.SQLiteException;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class MusicLibrary {
 
@@ -29,15 +35,33 @@ public class MusicLibrary {
         musicLibraryDb = new MusicLibraryDb(context);
     }
 
-    public void open(){
+    public synchronized void open(){
         db = musicLibraryDb.getWritableDatabase();
     }
 
-    public void close(){
+    public synchronized void close(){
         db.close();
     }
 
-    public int getTrack(String path){
+    public synchronized void receive(InputStream inputStream) throws IOException {
+        DataInputStream dis = new DataInputStream(
+                new BufferedInputStream(inputStream));
+        double fileSize = dis.readLong();
+        FileOutputStream fos = new FileOutputStream(
+                MainActivity.musicLibraryDbFile);
+        // TODO: Find best. Make a benchmark
+        //https://stackoverflow.com/questions/8748960/how-do-you-decide-what-byte-size-to-use-for-inputstream-read
+        byte[] buf = new byte[8192];
+        int bytesRead;
+        //FIXME !!!!!!! LOCK database !!!!!
+        while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
+            fos.write(buf, 0, bytesRead);
+            fileSize -= bytesRead;
+        }
+        fos.close();
+    }
+
+    public synchronized int getTrack(String path){
         try {
             Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
                     new String[] {musicLibraryDb.COL_ID},
@@ -56,7 +80,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    public ArrayList<Track> getTracks(PlayList playlist) {
+    public synchronized ArrayList<Track> getTracks(PlayList playlist) {
         ArrayList<Track> tracks = new ArrayList<>();
         try {
             Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
@@ -78,7 +102,7 @@ public class MusicLibrary {
         return tracks;
     }
 
-    public long insertTrack(Track track){
+    public synchronized long insertTrack(Track track){
         try {
             if(db.insert(musicLibraryDb.TABLE_TRACKS, null, TrackToValues(track))<0) {
                 return -1;
@@ -93,7 +117,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    public int updateTrack(Track track){
+    public synchronized int updateTrack(Track track){
         try {
             return db.update(musicLibraryDb.TABLE_TRACKS, TrackToValues(track), musicLibraryDb.COL_ID + " = " +track.getId(), null);
         } catch (SQLiteException | IllegalStateException ex) {
@@ -102,7 +126,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    public int deleteTrack(String path){
+    public synchronized int deleteTrack(String path){
         try {
             return db.delete(musicLibraryDb.TABLE_TRACKS, musicLibraryDb.COL_PATH + " = \"" +path+"\"", null);
         } catch (SQLiteException | IllegalStateException ex) {
@@ -147,7 +171,7 @@ public class MusicLibrary {
         return track;
     }
 
-    public LinkedHashMap<String, Integer> getGenres(String where) {
+    public synchronized LinkedHashMap<String, Integer> getGenres(String where) {
         LinkedHashMap<String, Integer> genres = new LinkedHashMap<>();
         Cursor cursor = db.rawQuery("SELECT " + musicLibraryDb.COL_GENRE + ", count(*) " +
                 " FROM " + musicLibraryDb.TABLE_TRACKS +
@@ -167,7 +191,7 @@ public class MusicLibrary {
         return genres;
     }
 
-    public int getNb(String where){
+    public synchronized int getNb(String where){
         try {
             Cursor cursor = db.rawQuery("SELECT count(*) FROM "+musicLibraryDb.TABLE_TRACKS +
                     " WHERE " + where, new String [] {});
@@ -184,7 +208,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    public Map<Integer, String> getTags() {
+    public synchronized Map<Integer, String> getTags() {
         Map<Integer, String> tags = new HashMap<>();
         Cursor cursor = db.rawQuery("SELECT id, value FROM tag", new String [] {});
         if(cursor != null && cursor.moveToFirst())
@@ -197,7 +221,7 @@ public class MusicLibrary {
         return tags;
     }
 
-    public ArrayList<String> getTags(int idFile) {
+    public synchronized ArrayList<String> getTags(int idFile) {
         ArrayList<String> tags = new ArrayList<>();
         Cursor cursor = db.rawQuery("SELECT value FROM tag T " +
                 "JOIN tagFile F ON T.id=F.idTag " +
@@ -213,7 +237,7 @@ public class MusicLibrary {
         return tags;
     }
 
-    public boolean addTag(int idFile, String tag){
+    public synchronized boolean addTag(int idFile, String tag){
         try {
             int idTag=getIdTag(tag);
             if(idTag>0) {
@@ -231,7 +255,7 @@ public class MusicLibrary {
         return false;
     }
 
-    public int addTag(String tag) {
+    public synchronized int addTag(String tag) {
         int idTag=-1;
         try {
             //Add the tag in db if it does not exist
@@ -245,7 +269,7 @@ public class MusicLibrary {
         return idTag;
     }
 
-    public boolean removeTag(int idFile, String tag){
+    public synchronized boolean removeTag(int idFile, String tag){
         try {
             int idTag=getIdTag(tag);
             if (idTag > 0) {
@@ -259,7 +283,7 @@ public class MusicLibrary {
         return false;
     }
 
-    private int getIdTag(String tag){
+    private synchronized int getIdTag(String tag){
         int idTag=-1;
         try {
             Cursor cursor = db.query("tag", null, "value=?",

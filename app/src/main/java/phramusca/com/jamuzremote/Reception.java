@@ -104,21 +104,7 @@ public class Reception  extends ProcessAbstract {
 				} else if (msg.startsWith("SENDING_DB")) {
                     try {
                         Log.i(TAG, "Start database reception");
-                        DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
-                        double fileSize = dis.readLong();
-                        FileOutputStream fos = new FileOutputStream(MainActivity.musicLibraryDbFile);
-                        // TODO: Find best. Make a benchmark
-                        //https://stackoverflow.com/questions/8748960/how-do-you-decide-what-byte-size-to-use-for-inputstream-read
-                        byte[] buf = new byte[8192];
-                        int bytesRead;
-                        //FIXME: Need to lock database writing
-                        // as writing (scan) fails while receiving
-                        while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
-                            checkAbort();
-                            fos.write(buf, 0, bytesRead);
-                            fileSize -= bytesRead;
-                        }
-                        fos.close();
+                        MainActivity.musicLibrary.receive(inputStream); //To lock db while receiving
                         Log.i(TAG, "database received");
                         callback.receivedDatabase();
                         checkAbort();
