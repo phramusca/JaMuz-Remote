@@ -178,4 +178,8 @@ public class Track {
             MainActivity.musicLibrary.addTag(id, value);
         }
     }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
 }

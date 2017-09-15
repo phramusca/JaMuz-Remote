@@ -1022,7 +1022,10 @@ public class MainActivity extends AppCompatActivity {
                     track.setAddedDate(fileInfoReception.addedDate);
                     track.setLastPlayed(fileInfoReception.lastPlayed);
                     track.setPlayCounter(fileInfoReception.playCounter);
+
+                    //FIXME TAGS & GENRE : test insertion from FileInfoReception
                     track.setTags(fileInfoReception.tags);
+                    track.setGenre(fileInfoReception.genre); //TODO Do not if genre read from file is better
                 }
                 musicLibrary.insertTrack(track);
             } else {
@@ -1871,7 +1874,7 @@ public class MainActivity extends AppCompatActivity {
                             filesToGet.remove(fileInfoReception.idFile);
                             clientSync.send("insertDeviceFile" + fileInfoReception.idFile);
                         } else {
-                            Log.w(TAG, "File tags could not be read. Deleted " + receivedFile.getAbsolutePath());
+                            Log.w(TAG, "File tags could not be read. Deleting " + receivedFile.getAbsolutePath());
                             receivedFile.delete();
                         }
                     } else {
@@ -1912,6 +1915,12 @@ public class MainActivity extends AppCompatActivity {
                     notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, 5000);
                 }
             });
+
+            // TODO MERGE: Update FilesToKeep and FilesToGet
+            // as received merged db is the new reference
+            // (not urgent since values should only be
+            // used again if file has been removed from db
+            // somehow, as if db crashes and remade)
         }
 
         @Override
