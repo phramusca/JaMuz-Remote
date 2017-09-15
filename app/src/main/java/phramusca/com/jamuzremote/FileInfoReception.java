@@ -27,6 +27,7 @@ public class FileInfoReception {
     public Date lastPlayed = new Date(0);
     public int playCounter;
     public ArrayList<String> tags = null;
+    public String genre;
 
     public FileInfoReception(String json) throws JSONException {
         this(new JSONObject(json));
@@ -41,6 +42,7 @@ public class FileInfoReception {
             addedDate = getDate(file, "addedDate");
             lastPlayed = getDate(file, "lastPlayed");
             playCounter = file.getInt("playCounter");
+            genre = file.getString("genre");
 
             JSONArray jsonTags = (JSONArray) file.get("tags");
             tags = new ArrayList<>();
