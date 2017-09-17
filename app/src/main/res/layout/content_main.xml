@@ -7,7 +7,8 @@
     android:layout_height="match_parent"
     android:weightSum="1"
     android:background="@color/background_color"
-    tools:showIn="@layout/activity_main">
+    tools:showIn="@layout/activity_main"
+    android:id="@+id/panel_main">
 
     <GridLayout
         android:layout_width="match_parent"
@@ -189,7 +190,7 @@
         <Spinner
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/spinner"
+            android:id="@+id/spinner_playlist"
             android:popupBackground="#DDFFFFFF"
             android:background="@drawable/ic_gradient_spinner"
             android:layout_gravity="center_vertical"
@@ -285,36 +286,53 @@
 
     </LinearLayout>
 
-    <com.google.android.flexbox.FlexboxLayout
-        android:id="@+id/panel_tags"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <LinearLayout
+        android:id="@+id/panel_attributes"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:flexWrap="wrap"
-        app:alignItems="stretch"
-        app:alignContent="stretch"
-        android:layout_gravity="center"
-        android:paddingTop="5dp">
-    </com.google.android.flexbox.FlexboxLayout>
+        android:layout_height="wrap_content">
 
-    <RatingBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ratingBar"
-        android:numStars="5"
-        android:stepSize="1"
-        android:rating="0"
-        android:layout_gravity="center_horizontal"
-        android:theme="@style/RatingBar"
-        android:paddingTop="5dp"/>
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/panel_tags"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexWrap="wrap"
+            app:alignItems="stretch"
+            app:alignContent="stretch"
+            android:layout_gravity="center"
+            android:paddingTop="5dp">
+        </com.google.android.flexbox.FlexboxLayout>
 
-    <SeekBar
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/seekBar"
-        android:layout_gravity="center_horizontal"
-        android:indeterminate="false" />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RatingBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ratingBar"
+                android:numStars="5"
+                android:stepSize="1"
+                android:rating="0"
+                android:layout_gravity="left"
+                android:theme="@style/RatingBar"
+                android:paddingTop="5dp"/>
+
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/spinner_genre"
+                android:popupBackground="#DDFFFFFF"
+                android:background="@drawable/ic_gradient_spinner"
+                android:layout_gravity="center"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp" />
+        </LinearLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/trackInfo"
@@ -329,6 +347,13 @@
             android:gravity="center_horizontal"
             android:text="test\nof\ngravity"
             android:clickable="false" />
+
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/seekBar"
+            android:layout_gravity="center_horizontal"
+            android:indeterminate="false" />
 
         <ImageView
             android:id="@+id/imageView"

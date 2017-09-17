@@ -21,6 +21,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.net.ConnectivityManager;
@@ -111,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
     private List<PlayList> localPlaylists = new ArrayList<PlayList>();
     private PlayList localSelectedPlaylist;
     private Map<Integer, String> tags = new HashMap<>();
+    private List<String> genres = new ArrayList<>();
 
     private ProcessAbstract scanLibray;
     private ProcessAbstract processBrowseFS;
@@ -137,12 +139,15 @@ public class MainActivity extends AppCompatActivity {
     private Button buttonVolDown;
     private SeekBar seekBarPosition;
     private Spinner spinnerPlaylist;
-    private static boolean spinnerSend=true;
+    private Spinner spinnerGenre;
+    private static boolean spinnerPlaylistSend =true;
     private RatingBar ratingBar;
     private ImageView imageViewCover;
     private LinearLayout layoutTrackInfo;
+    private LinearLayout layoutMain;
     private LinearLayout layoutControls;
     private FlexboxLayout layoutTags;
+    private LinearLayout layoutAttributes;
     private GridLayout layoutOptions;
 
     //Notifications
@@ -153,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int ID_NOTIFIER_SCAN = 2;
 
     private SharedPreferences preferences;
+
 
 
     @Override
@@ -193,6 +199,8 @@ public class MainActivity extends AppCompatActivity {
                 .setSmallIcon(R.drawable.gears_normal);
 
         layoutTags = (FlexboxLayout) findViewById(R.id.panel_tags);
+        layoutAttributes = (LinearLayout) findViewById(R.id.panel_attributes);
+
         layoutControls = (LinearLayout) findViewById(R.id.panel_controls);
         layoutOptions = (GridLayout) findViewById(R.id.panel_options);
 
@@ -270,9 +278,19 @@ public class MainActivity extends AppCompatActivity {
         seekBarPosition = (SeekBar) findViewById(R.id.seekBar);
         seekBarPosition.setEnabled(false);
 
-        spinnerPlaylist = (Spinner) findViewById(R.id.spinner);
+        spinnerPlaylist = (Spinner) findViewById(R.id.spinner_playlist);
         spinnerPlaylist.setOnItemSelectedListener(spinnerListener);
         spinnerPlaylist.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                dimOn();
+                return false;
+            }
+        });
+
+        spinnerGenre = (Spinner) findViewById(R.id.spinner_genre);
+        spinnerGenre.setOnItemSelectedListener(spinnerGenreListener);
+        spinnerGenre.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 dimOn();
@@ -311,9 +329,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dimOn();
-                layoutTags.setVisibility(toggleButtonTags.isChecked()?View.VISIBLE:View.GONE);
+                //layoutTags.setVisibility(toggleButtonTags.isChecked()?View.VISIBLE:View.GONE);
                 //Can't use toggle as height is dynamic
-                //toggle(layoutTags, !toggleButtonTags.isChecked());
+                toggle(layoutAttributes, !toggleButtonTags.isChecked());
             }
         });
 
@@ -420,6 +438,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         imageViewCover = (ImageView) findViewById(R.id.imageView);
+        layoutMain = (LinearLayout) findViewById(R.id.panel_main);
 
         layoutTrackInfo = (LinearLayout) findViewById(R.id.trackInfo);
         layoutTrackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
@@ -543,8 +562,8 @@ public class MainActivity extends AppCompatActivity {
         toggle(layoutOptions, true);
         toggle(layoutControls, true);
         //Can't use toggle as height is dynamic
-        //toggle(layoutTags, true);
-        layoutTags.setVisibility(View.GONE);
+        toggle(layoutAttributes, true);
+        //layoutTags.setVisibility(View.GONE);
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
@@ -582,7 +601,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view,
         int pos, long id) {
-            if(spinnerSend) {
+            if(spinnerPlaylistSend) {
                 PlayList playList = (PlayList) parent.getItemAtPosition(pos);
                 if(!isRemoteConnected()) {
                     if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
@@ -594,7 +613,32 @@ public class MainActivity extends AppCompatActivity {
                 }
                 dimOn();
             }
-            spinnerSend=true;
+            spinnerPlaylistSend =true;
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> adapterView) {
+            dimOn();
+        }
+    };
+
+    Spinner.OnItemSelectedListener spinnerGenreListener = new Spinner.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view,
+                                   int pos, long id) {
+            /*if(spinnerSend) {
+                PlayList playList = (PlayList) parent.getItemAtPosition(pos);
+                if(!isRemoteConnected()) {
+                    if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                        queue = musicLibrary.getTracks(playList);
+                    }
+                    localSelectedPlaylist = playList;
+                } else {
+                    clientRemote.send("setPlaylist".concat(playList.toString()));
+                }
+                dimOn();
+            }
+            spinnerSend=true;*/
         }
 
         @Override
@@ -1493,9 +1537,27 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                spinnerSend=false;
+                spinnerPlaylistSend =false;
                 spinnerPlaylist.setAdapter(arrayAdapter);
                 spinnerPlaylist.setSelection(arrayAdapter.getPosition(selectedPlaylist));
+            }
+        });
+    }
+
+    private void setupSpinnerGenre(final List<String> genres, final String genre) {
+
+        final ArrayAdapter<String> arrayAdapter =
+                new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, genres);
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                /*spinnerSend=false;*/
+                spinnerGenre.setAdapter(arrayAdapter);
+                if(!genre.equals("")) {
+                    spinnerGenre.setSelection(arrayAdapter.getPosition(genre));
+                }
             }
         });
     }
@@ -1582,14 +1644,17 @@ public class MainActivity extends AppCompatActivity {
                     ratingBar.setEnabled(false);
                     ratingBar.setRating(displayedTrack.getRating());
                     ratingBar.setEnabled(true);
+                    setupSpinnerGenre(genres, displayedTrack.getGenre());
 
                     //Display file tags
-                    MainActivity.musicLibrary.getTags(displayedTrack.getId()); //To refresh after merge
-                    ArrayList<String> fileTags = displayedTrack.getTags();
-                    for(Map.Entry<Integer, String> tag : tags.entrySet()) {
-                        ToggleButton button = (ToggleButton) layoutTags.findViewById(tag.getKey());
-                        if(button.isChecked()!=fileTags.contains(tag.getValue())) {
-                            button.setChecked(fileTags.contains(tag.getValue()));
+                    if(musicLibrary!=null) {
+                        musicLibrary.getTags(displayedTrack.getId()); //To refresh after merge
+                        ArrayList<String> fileTags = displayedTrack.getTags();
+                        for(Map.Entry<Integer, String> tag : tags.entrySet()) {
+                            ToggleButton button = (ToggleButton) layoutTags.findViewById(tag.getKey());
+                            if(button.isChecked()!=fileTags.contains(tag.getValue())) {
+                                button.setChecked(fileTags.contains(tag.getValue()));
+                            }
                         }
                     }
                 }
@@ -1671,6 +1736,9 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             public void run() {
                 imageViewCover.setImageBitmap(finalBitmap);
+                BitmapDrawable bitmapDrawable = new BitmapDrawable(finalBitmap);
+                bitmapDrawable.setAlpha(50);
+                layoutMain.setBackground(bitmapDrawable);
             }
         });
     }
@@ -1846,6 +1914,22 @@ public class MainActivity extends AppCompatActivity {
                                                 tags.put(idTag, tag);
                                                 makeButtonTag(layoutTags, idTag, tag);
                                             }
+                                        }
+                                    }
+                                });
+
+                            }
+                            break;
+                        case "genres":
+                            final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
+                            for(int i=0; i<jsonGenres.length(); i++) {
+                                final String genre = (String) jsonGenres.get(i);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if(!genres.contains(genre)) {
+                                            genres.add(genre);
+                                            setupSpinnerGenre(genres, "");
                                         }
                                     }
                                 });

@@ -46,8 +46,7 @@ public class Track {
     public String toString() {
         return   title + "<BR/>" +
                 artist + "<BR/>"+
-                album + "<BR/>"+
-                genre + "<BR/>";
+                album + "<BR/>";
     }
 
     public int getId() {
