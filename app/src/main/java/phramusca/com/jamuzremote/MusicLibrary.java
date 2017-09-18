@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -191,6 +192,20 @@ public class MusicLibrary {
         return genres;
     }
 
+    public synchronized List<String> getGenres() {
+        List<String> genres = new ArrayList<>();
+        Cursor cursor = db.rawQuery("SELECT id, value FROM genre", new String [] {});
+        if(cursor != null && cursor.moveToFirst())
+        {
+            do {
+                //int id = cursor.getInt(0);
+                genres.add(cursor.getString(1));
+            } while(cursor.moveToNext());
+        }
+        cursor.close();
+        return genres;
+    }
+
     public synchronized int getNb(String where){
         try {
             Cursor cursor = db.rawQuery("SELECT count(*) FROM "+musicLibraryDb.TABLE_TRACKS +
@@ -297,5 +312,33 @@ public class MusicLibrary {
             Log.e(TAG, "getIdTag("+tag+")", ex);
         }
         return idTag;
+    }
+
+    public synchronized int updateGenre(Track track){
+        try {
+            ContentValues values = new ContentValues();
+            values.put(musicLibraryDb.COL_GENRE, track.getGenre());
+
+            return db.update(musicLibraryDb.TABLE_TRACKS,
+                    values,
+                    musicLibraryDb.COL_ID + " = " +track.getId(), null);
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "updateGenre("+track.getId()+","+track+")", ex);
+        }
+        return -1;
+    }
+
+    public synchronized boolean addGenre(String genre) {
+        try {
+            //Add the genre in db if it does not exist
+            ContentValues values = new ContentValues();
+            values.put("value", genre);
+            db.insertWithOnConflict("genre", BaseColumns._ID, values,
+                    SQLiteDatabase.CONFLICT_IGNORE);
+            return true;
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "addGenre("+genre+")", ex);
+            return false;
+        }
     }
 }

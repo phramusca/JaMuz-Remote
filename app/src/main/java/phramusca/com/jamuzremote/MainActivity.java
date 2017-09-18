@@ -140,7 +140,8 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBarPosition;
     private Spinner spinnerPlaylist;
     private Spinner spinnerGenre;
-    private static boolean spinnerPlaylistSend =true;
+    private static boolean spinnerPlaylistSend=true;
+    private static boolean spinnerGenreSend=true;
     private RatingBar ratingBar;
     private ImageView imageViewCover;
     private LinearLayout layoutTrackInfo;
@@ -626,19 +627,19 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view,
                                    int pos, long id) {
-            /*if(spinnerSend) {
-                PlayList playList = (PlayList) parent.getItemAtPosition(pos);
+            if(spinnerGenreSend) {
+                String genre = (String) parent.getItemAtPosition(pos);
                 if(!isRemoteConnected()) {
                     if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                        queue = musicLibrary.getTracks(playList);
+                        displayedTrack.setGenre(genre);
+                        musicLibrary.updateGenre(displayedTrack);
                     }
-                    localSelectedPlaylist = playList;
                 } else {
-                    clientRemote.send("setPlaylist".concat(playList.toString()));
+                    //clientRemote.send("setGenre", displayedTrack);
                 }
                 dimOn();
             }
-            spinnerSend=true;*/
+            spinnerGenreSend=true;
         }
 
         @Override
@@ -1367,6 +1368,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             connectDatabase();
             setupTags();
+            setupGenres();
             scanLibrayInThread();
             setupLocalPlaylists();
         }
@@ -1383,6 +1385,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void setupGenres() {
+        genres = new ArrayList<>();
+        genres = musicLibrary.getGenres();
+        setupSpinnerGenre(genres, displayedTrack.getGenre());
     }
 
     private void askPermissions() {
@@ -1408,6 +1416,7 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     connectDatabase();
                     setupTags();
+                    setupGenres();
                     scanLibrayInThread();
                     setupLocalPlaylists();
                 }
@@ -1553,7 +1562,7 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                /*spinnerSend=false;*/
+                spinnerGenreSend=false;
                 spinnerGenre.setAdapter(arrayAdapter);
                 if(!genre.equals("")) {
                     spinnerGenre.setSelection(arrayAdapter.getPosition(genre));
@@ -1928,13 +1937,15 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         if(!genres.contains(genre)) {
-                                            genres.add(genre);
-                                            setupSpinnerGenre(genres, "");
+                                            if(MainActivity.musicLibrary.addGenre(genre)) {
+                                                genres.add(genre);
+                                            }
                                         }
                                     }
                                 });
 
                             }
+                            setupSpinnerGenre(genres, displayedTrack.getGenre());
                             break;
                     }
                 } catch (JSONException e) {
