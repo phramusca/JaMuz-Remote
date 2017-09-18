@@ -562,9 +562,7 @@ public class MainActivity extends AppCompatActivity {
 
         toggle(layoutOptions, true);
         toggle(layoutControls, true);
-        //Can't use toggle as height is dynamic
         toggle(layoutAttributes, true);
-        //layoutTags.setVisibility(View.GONE);
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
@@ -634,8 +632,6 @@ public class MainActivity extends AppCompatActivity {
                         displayedTrack.setGenre(genre);
                         musicLibrary.updateGenre(displayedTrack);
                     }
-                } else {
-                    //clientRemote.send("setGenre", displayedTrack);
                 }
                 dimOn();
             }

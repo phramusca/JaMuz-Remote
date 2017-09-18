@@ -54,7 +54,6 @@ public class MusicLibrary {
         //https://stackoverflow.com/questions/8748960/how-do-you-decide-what-byte-size-to-use-for-inputstream-read
         byte[] buf = new byte[8192];
         int bytesRead;
-        //FIXME !!!!!!! LOCK database !!!!!
         while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
             fos.write(buf, 0, bytesRead);
             fileSize -= bytesRead;
