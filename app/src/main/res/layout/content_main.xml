@@ -86,8 +86,7 @@
             android:layout_height="wrap_content"
             android:layout_row="0"
             android:layout_column="0"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp">
+            android:paddingTop="5dp">
 
             <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
             <LinearLayout android:id="@+id/dummy"
@@ -134,7 +133,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/repo"
             android:layout_row="1"
-            android:layout_column="0">
+            android:layout_column="0"
+            android:paddingTop="5dp">
 
             <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
             <LinearLayout
@@ -185,6 +185,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="5dp"
         android:paddingEnd="20dp"
         android:paddingStart="20dp">
         <Spinner
@@ -338,7 +339,8 @@
         android:id="@+id/trackInfo"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:paddingTop="10dp">
 
         <TextView
             android:layout_width="match_parent"
