@@ -26,7 +26,7 @@ public class ReceiverMediaButton extends MediaButtonReceiver
                     MainActivity.audioPlayer.playNext();
                     break;
                 case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                    //TODO: Allow this as an option as handy in car
+                    //TODO: Allow this as an option as handy in car with no pause/play button
                     boolean usePreviousButtonAsPauseButton=false;
                     if(usePreviousButtonAsPauseButton) {
                         Log.i(TAG, keyExtraEvent+" => togglePlay");
@@ -37,11 +37,22 @@ public class ReceiverMediaButton extends MediaButtonReceiver
                     }
                     break;
                 case KeyEvent.KEYCODE_MEDIA_PLAY:
+                    Log.i(TAG, keyExtraEvent+" => play");
+                    MainActivity.audioPlayer.play();
+                    break;
+                case KeyEvent.KEYCODE_MEDIA_PAUSE:
                 case KeyEvent.KEYCODE_MEDIA_STOP:
-                case KeyEvent.KEYCODE_HEADSETHOOK:  //Play/Pause on Wired HeadSet
+                    Log.i(TAG, keyExtraEvent+" => pause");
+                    MainActivity.audioPlayer.pause();
+                    break;
                 case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                case KeyEvent.KEYCODE_HEADSETHOOK:
                     Log.i(TAG, keyExtraEvent+" => togglePlay");
-                    MainActivity.audioPlayer.togglePlay(); break;
+                    MainActivity.audioPlayer.togglePlay();
+                    break;
+                default:
+                    Log.i(TAG, keyExtraEvent+" => NOTHING :(");
+                    break;
             }
         }
     }
