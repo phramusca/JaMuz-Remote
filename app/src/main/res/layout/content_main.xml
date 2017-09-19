@@ -6,13 +6,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:weightSum="1"
-    android:background="@color/background_color"
+    android:background="@color/colorPrimary"
     tools:showIn="@layout/activity_main"
     android:id="@+id/panel_main">
 
     <GridLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@android:color/background_light"
+        android:alpha="0.5">
 
         <ToggleButton
             android:id="@+id/button_controls_toggle"
@@ -340,22 +342,31 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="10dp">
+        android:paddingTop="10dp"
+        android:gravity="center_vertical">
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/textFileInfo"
             android:gravity="center_horizontal"
+            android:layout_gravity="center_horizontal"
             android:text="test\nof\ngravity"
-            android:clickable="false" />
+            android:clickable="false"
+            android:background="@drawable/rounded_corner"
+            android:alpha="0.5"
+            android:textColor="@android:color/background_light"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            />
 
         <SeekBar
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/seekBar"
             android:layout_gravity="center_horizontal"
-            android:indeterminate="false" />
+            android:indeterminate="false"
+            android:paddingTop="5dp"/>
 
         <ImageView
             android:id="@+id/imageView"
