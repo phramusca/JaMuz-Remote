@@ -10,4 +10,5 @@
     <color name="lightYellow">#d1bc6e</color>
 
     <color name="background_color">#606060</color>
+    <color name="textColor">#FFFFFF</color>
 </resources>

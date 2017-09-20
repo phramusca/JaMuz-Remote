@@ -34,6 +34,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
@@ -575,11 +576,15 @@ public class MainActivity extends AppCompatActivity {
     private void makeButtonTag(FlexboxLayout layout, int key, String value) {
         ToggleButton button = new ToggleButton(this);
         button.setId(key);
+        //FIXME toggle_text does not work when set programatically
+        button.setTextColor(ContextCompat.getColor(this, R.color.toggle_text));
+        //button.setTextColor(getResources().getColor(R.color.toggle_text));
+        button.setBackgroundResource(R.drawable.ic_tags);
+        button.setAlpha(0.7F);
+        button.setAllCaps(false);
         button.setText(value);
         button.setTextOff(value);
         button.setTextOn(value);
-        button.setAllCaps(false);
-        button.setBackgroundResource(R.drawable.ic_tags);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
