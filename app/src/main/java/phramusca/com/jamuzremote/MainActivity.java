@@ -360,6 +360,9 @@ public class MainActivity extends AppCompatActivity {
                     String[] split = infoConnect.split(":");  //NOI18N
                     if(split.length<2) {
                         enableConnect(true);
+                        toastLong("Bad format:\t"+infoConnect+"" +
+                                "\nExpected:\t\t<IP>:<Port>" +
+                                "\nEx:\t\t\t\t\t\t\t192.168.0.12:2013");
                         return;
                     }
                     String address = split[0];
@@ -576,9 +579,7 @@ public class MainActivity extends AppCompatActivity {
     private void makeButtonTag(FlexboxLayout layout, int key, String value) {
         ToggleButton button = new ToggleButton(this);
         button.setId(key);
-        //FIXME toggle_text does not work when set programatically
-        button.setTextColor(ContextCompat.getColor(this, R.color.toggle_text));
-        //button.setTextColor(getResources().getColor(R.color.toggle_text));
+        button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
         button.setBackgroundResource(R.drawable.ic_tags);
         button.setAlpha(0.7F);
         button.setAllCaps(false);
@@ -592,7 +593,11 @@ public class MainActivity extends AppCompatActivity {
                 ToggleButton b = (ToggleButton)view;
                 String buttonText = b.getText().toString();
                 displayedTrack.toggleTag(buttonText);
-                //boolean checked = b.isChecked();
+
+                //This is a trick since the following (not in listner) is not working:
+                //button.setTextColor(ContextCompat.getColor(this, R.color.toggle_text));
+                boolean checked = b.isChecked();
+                b.setTextColor(ContextCompat.getColor(view.getContext(), checked?R.color.textColor:R.color.colorPrimaryDark));
             }
         });
 

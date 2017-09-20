@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:weightSum="1"
-    android:background="@color/colorPrimary"
+    android:background="@color/textColor"
     tools:showIn="@layout/activity_main"
     android:id="@+id/panel_main">
 
@@ -82,7 +82,8 @@
     <GridLayout android:id="@+id/panel_options"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary">
+        android:background="@color/colorPrimary"
+        android:paddingBottom="5dp" >
 
         <GridLayout android:id="@+id/panel_options_network"
 
@@ -125,7 +126,7 @@
             <Button
                 style="?android:attr/buttonStyleSmall"
                 android:padding="5dp"
-                android:background="@color/colorPrimaryDark"
+                android:background="@drawable/ic_button"
                 android:textColor="@color/textColor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -181,7 +182,7 @@
             <Button
                 style="?android:attr/buttonStyleSmall"
                 android:padding="5dp"
-                android:background="@color/colorPrimaryDark"
+                android:background="@drawable/ic_button"
                 android:textColor="@color/textColor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -318,17 +319,6 @@
             app:flexWrap="wrap"
             app:alignItems="flex_start"
             app:alignContent="flex_end" >
-
-            <ToggleButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ic_tags"
-                android:alpha="0.7"
-                android:textAllCaps="false"
-                android:textColor="@color/toggle_text"
-                android:text="Test"
-                android:textOff="Test"
-                android:textOn="Test" />
         </com.google.android.flexbox.FlexboxLayout>
 
         <LinearLayout
