@@ -17,9 +17,8 @@
     </style>
 
     <style name="EditText" parent="Theme.AppCompat">
-        <item name="colorControlActivated">#6d6f7c</item>
-        <item name="colorControlNormal">#6d6f7c</item>
-        <item name="android:textColor">#6d6f7c</item>
+        <item name="colorControlActivated">@color/background_color</item>
+        <item name="colorControlNormal">@color/background_color</item>
     </style>
 
     <style name="ToggleButton" parent="Theme.AppCompat">
