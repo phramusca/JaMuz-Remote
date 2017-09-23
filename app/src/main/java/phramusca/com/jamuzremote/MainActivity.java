@@ -590,20 +590,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 dimOn();
-                ToggleButton b = (ToggleButton)view;
-                String buttonText = b.getText().toString();
+                ToggleButton button = (ToggleButton)view;
+                String buttonText = button.getText().toString();
                 displayedTrack.toggleTag(buttonText);
-
-                //This is a trick since the following (not in listner) is not working:
-                //button.setTextColor(ContextCompat.getColor(this, R.color.toggle_text));
-                boolean checked = b.isChecked();
-                b.setTextColor(ContextCompat.getColor(view.getContext(), checked?R.color.textColor:R.color.colorPrimaryDark));
+                setTagButtonTextColor(button);
             }
         });
 
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
                 ActionBar.LayoutParams.WRAP_CONTENT);
         layout.addView(button, lp);
+    }
+
+    //This is a trick since the following (not in listner) is not working:
+    //button.setTextColor(ContextCompat.getColor(this, R.color.toggle_text));
+    private void setTagButtonTextColor(ToggleButton b) {
+        boolean checked = b.isChecked();
+        b.setTextColor(ContextCompat.getColor(this, checked?R.color.textColor:R.color.colorPrimaryDark));
     }
 
     Spinner.OnItemSelectedListener spinnerListener = new Spinner.OnItemSelectedListener() {
@@ -1123,7 +1126,7 @@ public class MainActivity extends AppCompatActivity {
     private void playHistory() {
         displayedTrack = queueHistory.get(queueHistoryIndex);
         Log.i(TAG, "playHistory("+(queueHistoryIndex+1)+"/"+queueHistory.size()+")");
-        playAudio(displayedTrack.getPath());
+        playAudio();
     }
 
     private void play() {
@@ -1131,7 +1134,7 @@ public class MainActivity extends AppCompatActivity {
         if(file.exists()) {
             queueHistory.add(displayedTrack);
             queueHistoryIndex = queueHistory.size()-1;
-            playAudio(displayedTrack.getPath());
+            playAudio();
         } else {
             Log.d(TAG, "play(): Remove track from db:"+displayedTrack);
             musicLibrary.deleteTrack(displayedTrack.getPath());
@@ -1219,11 +1222,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void playAudio(String path){
+    public void playAudio(){
         localTrack = displayedTrack;
         setupSpinner(localPlaylists, localSelectedPlaylist);
         audioPlayer.stop(false);
-        audioPlayer.play(path);
+        audioPlayer.play(displayedTrack);
         dimOn();
     }
 
@@ -1467,6 +1470,7 @@ public class MainActivity extends AppCompatActivity {
                     dimOn();
                     break;
                 case "volUp":
+                    //FIXME: Here to setVolume with replayGain if needed
                     //mediaPlayer.setVolume(20, 20);
                     audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
                             AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
@@ -1670,6 +1674,7 @@ public class MainActivity extends AppCompatActivity {
                             if(button.isChecked()!=fileTags.contains(tag.getValue())) {
                                 button.setChecked(fileTags.contains(tag.getValue()));
                             }
+                            setTagButtonTextColor(button);
                         }
                     }
                 }
