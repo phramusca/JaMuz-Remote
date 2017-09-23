@@ -518,7 +518,7 @@ public class MainActivity extends AppCompatActivity {
 
         enableGUI(buttonSync, false);
         enableGUI(buttonRemote, false);
-        getFromQRcode();
+        getFromQRcode(getIntent().getDataString());
         editTextConnectInfo.setEnabled(true);
         buttonRemote.setEnabled(true);
         buttonSync.setEnabled(true);
@@ -778,7 +778,7 @@ public class MainActivity extends AppCompatActivity {
         }
         else if(wasRemoteConnected && !audioPlayer.isPlaying()) {
             enableGUI(buttonRemote, false);
-            getFromQRcode();
+            getFromQRcode(getIntent().getDataString());
             buttonRemote.performClick();
         }
 
@@ -1331,8 +1331,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void getFromQRcode() {
-        String content = getIntent().getDataString();
+    private void getFromQRcode(String content) {
         if(content!=null) {
             if(!content.equals("")) {
                 content=content.substring("JaMuzRemote://".length());
@@ -2273,6 +2272,13 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("No", null)
                 .show();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if(intent.getAction().equals("android.intent.action.VIEW")) {
+            getFromQRcode(intent.getDataString());
+        }
     }
 
     //Receivers
