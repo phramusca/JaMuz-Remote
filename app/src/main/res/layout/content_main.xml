@@ -165,7 +165,6 @@
 
             <TextView
                 android:id="@+id/textViewPath"
-                android:text="Soon (or later)"
                 android:textColor="@color/textColor"
                 android:enabled="false"
                 android:layout_gravity="left|right|center_vertical"
