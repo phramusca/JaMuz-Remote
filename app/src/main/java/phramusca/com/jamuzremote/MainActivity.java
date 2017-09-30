@@ -1226,7 +1226,10 @@ public class MainActivity extends AppCompatActivity {
         localTrack = displayedTrack;
         setupSpinner(localPlaylists, localSelectedPlaylist);
         audioPlayer.stop(false);
-        audioPlayer.play(displayedTrack);
+        String popupMsg = audioPlayer.play(displayedTrack);
+        if(!popupMsg.equals("")) {
+            popup("ReplayGain", popupMsg);
+        }
         dimOn();
     }
 
@@ -1470,15 +1473,21 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case "volUp":
                     //FIXME: Here to setVolume with replayGain if needed
-                    //mediaPlayer.setVolume(20, 20);
-                    audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
-                            AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
+                    String popupMsg = audioPlayer.setVolumeUp(displayedTrack);
+                    if(!popupMsg.equals("")) {
+                        popup("ReplayGain", popupMsg);
+                    }
+                    /*audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                            AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);*/
                     dimOn();
                     break;
                 case "volDown":
-                    //mediaPlayer.setVolume(1, 1);
-                    audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
-                            AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
+                    String popupMsg2 = audioPlayer.setVolumeDown(displayedTrack);
+                    if(!popupMsg2.equals("")) {
+                        popup("ReplayGain", popupMsg2);
+                    }
+                    /*audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                            AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);*/
                     dimOn();
                     break;
                 default:
@@ -2293,7 +2302,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceDisconnected(int profile)
         {
-            unregisterReceiver(mHeadsetBroadcastReceiver);
+            try {
+                unregisterReceiver(mHeadsetBroadcastReceiver);
+            } catch(IllegalArgumentException ex) {
+                //java.lang.IllegalArgumentException: Receiver not registered
+                //TODO: We don't care but why does this happen ?
+            }
             mBluetoothHeadset = null;
         }
 

@@ -26,6 +26,8 @@ public class Track {
     public int playCounter=0;
     private ArrayList<String> tags = null;
 
+    //FIXME: Store replaygain, no to read too often
+
     public Track(int id, int rating, String title, String album,
                  String artist, String coverHash, String path, String genre,
                  Date addedDate, Date lastPlayed, int playCounter) {

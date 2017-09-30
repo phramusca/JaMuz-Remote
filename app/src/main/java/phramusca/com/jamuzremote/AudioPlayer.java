@@ -1,14 +1,15 @@
 package phramusca.com.jamuzremote;
 
-import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.CountDownTimer;
 import android.util.Log;
 
+import com.beaglebuddy.ape.APEItem;
+import com.beaglebuddy.ape.APETag;
+import com.beaglebuddy.mp3.MP3;
+
 import java.io.File;
 import java.io.IOException;
-
-import phramusca.com.jamuzremote.tags.BastpUtil;
 
 /**
  * Created by raph on 17/06/17.
@@ -24,7 +25,8 @@ public class AudioPlayer {
         this.callback = callback;
     }
 
-    public void play(Track track) {
+    public String play(Track track) {
+        String msg ="";
         try {
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(track.getPath());
@@ -32,7 +34,7 @@ public class AudioPlayer {
             mediaPlayer.start();
             startTimer();
 
-            applyReplayGain(mediaPlayer, track);
+            msg = applyReplayGain(mediaPlayer, track);
 
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
@@ -56,82 +58,170 @@ public class AudioPlayer {
             file.delete();
             callback.onPlayBackEnd();
         }
+        return msg;
     }
 
-    //TODO: Make this an option.
-    private static final boolean PREFERENCES_KEY_REPLAY_GAIN = true;
+    public static final boolean ENABLE_TRACK_REPLAYGAIN = true;
+    public static final boolean ENABLE_ALBUM_REPLAYGAIN = false;
+    public static final int     REPLAYGAIN_BUMP = 75; // seek bar is 150 -> 75 == middle == 0
+    public static final int     REPLAYGAIN_UNTAGGED_DEBUMP = 150; // seek bar is 150 -> == 0
 
-    //FIXME: These were default values. Try adjusting (find limits)
-    private static final int PREFERENCES_KEY_REPLAY_GAIN_BUMP = 150; //Default: 150
-    private static final int PREFERENCES_KEY_REPLAY_GAIN_UNTAGGED = 50; //Default: 0
+    //FIXME: Make Replaygain options.
+    /**
+     * Enables or disables Replay Gain
+     */
+    private boolean mReplayGainTrackEnabled=ENABLE_TRACK_REPLAYGAIN;
+    private boolean mReplayGainAlbumEnabled=ENABLE_ALBUM_REPLAYGAIN;
+    private int mReplayGainBump=REPLAYGAIN_BUMP;
+    private int mReplayGainUntaggedDeBump=REPLAYGAIN_UNTAGGED_DEBUMP;
 
     //https://www.programcreek.com/java-api-examples/index.php?class=android.media.MediaPlayer&method=setVolume
     //https://www.programcreek.com/java-api-examples/index.php?source_dir=Subsonic-master/app/src/main/java/github/daneren2005/dsub/service/DownloadService.java
-    private void applyReplayGain(MediaPlayer mediaPlayer, Track track) {
-        float[] rg = BastpUtil.getReplayGainValues(track.getPath()); /* track, album */
+    private String applyReplayGain(MediaPlayer mediaPlayer, Track track) {
+        /*float[] rg = BastpUtil.getReplayGainValues(track.getPath());  //track, album*/
 
-        Log.i(TAG, "rg[0] (track gain)="+rg[0]);
-        Log.i(TAG, "rg[1] (album gain)="+rg[1]);
+        GainValues rg = readReplayGainFromAPE(track);
+        Log.i(TAG, rg.toString());
+
         float adjust = 0f;
-        if (PREFERENCES_KEY_REPLAY_GAIN) {
-            boolean singleAlbum = false;
-
-/*              String replayGainType = prefs.getString(PREFERENCES_KEY_REPLAY_GAIN_TYPE, "1");
-            // 1 => Smart replay gain
-            // => Not useful here, not kept
-
-            // 2 => Use album tags
-            else if("2".equals(replayGainType)) {
-                singleAlbum = true;
-            }
-            // 3 => Use track tags
-            // Already false, no need to do anything here
-
-*/
-            // If playing a single album or no track gain, use album gain
-            if((singleAlbum || rg[0] == 0) && rg[1] != 0) {
-                adjust = rg[1];
-            } else {
-                // Otherwise, give priority to track gain
-                adjust = rg[0];
-            }
-            Log.i(TAG, "adjust="+adjust);
-            if (adjust == 0) {
-            /* No RG value found: decrease volume for untagged song if requested by user */
-                adjust = (PREFERENCES_KEY_REPLAY_GAIN_UNTAGGED - 150) / 10f;
-            } else {
-                adjust += (PREFERENCES_KEY_REPLAY_GAIN_BUMP - 150) / 10f;
-            }
-            Log.i(TAG, "adjust="+adjust);
+        if(mReplayGainAlbumEnabled) {
+            adjust = (rg.trackGain != 0 ? rg.trackGain : adjust); /* do we have track adjustment ? */
+            adjust = (rg.albumGain != 0 ? rg.albumGain : adjust); /* ..or, even better, album adj? */
         }
-        Log.i(TAG, "volume="+volume);
-        float rg_result = ((float) Math.pow(10, (adjust / 20))) * volume;
+
+        if(mReplayGainTrackEnabled || (mReplayGainAlbumEnabled && adjust == 0)) {
+            adjust = (rg.albumGain != 0 ? rg.albumGain : adjust); /* do we have album adjustment ? */
+            adjust = (rg.trackGain != 0 ? rg.trackGain : adjust); /* ..or, even better, track adj? */
+        }
+
+        if(adjust == 0) {
+			/* No RG value found: decrease volume for untagged song if requested by user */
+            adjust = (mReplayGainUntaggedDeBump-150)/10f;
+        } else {
+			/* This song has some replay gain info, we are now going to apply the 'bump' value
+			** The preferences stores the raw value of the seekbar, that's 0-150
+			** But we want -15 <-> +15, so 75 shall be zero */
+            adjust += 2*(mReplayGainBump-75)/10f; /* 2* -> we want +-15, not +-7.5 */
+        }
+
+        if(mReplayGainAlbumEnabled == false && mReplayGainTrackEnabled == false) {
+			/* Feature is disabled: Make sure that we are going to 100% volume */
+            adjust = 0f;
+        }
+
+        String msg="";
+        Log.i(TAG, "baseVolume="+ baseVolume);
+        float rg_result = ((float) Math.pow(10, (adjust / 20))) * baseVolume;
         Log.i(TAG, "rg_result="+rg_result);
         if (rg_result > 1.0f) {
-            rg_result = 1.0f; /* android would IGNORE the change if this is > 1 and we would end up with the wrong volume */
+            msg =   "Base volume too high. " +
+                    "\nConsider lower it for replayGain to work properly !" +
+                    "\n---------------"+
+                    "\n "+rg.toString()+
+                    "\n baseVolume="+ baseVolume +
+                    "\n adjust="+adjust+
+                    "\n setVolume="+rg_result+" => 1.0";
+            rg_result = 1.0f; /* android would IGNORE the change if this is > 1
+                                    and we would end up with the wrong volume */
         } else if (rg_result < 0.0f) {
             rg_result = 0.0f;
         }
         Log.i(TAG, "mediaPlayer.setVolume("+rg_result+", "+rg_result+")");
         mediaPlayer.setVolume(rg_result, rg_result);
+
+        return msg;
     }
 
-    private float volume = 1.0f;
+    public class GainValues {
+        public float albumGain;
+        public float trackGain;
+        public float trackPeak;
+        public float albumPeak;
+
+        @Override
+        public String toString() {
+            return "albumGain="+ albumGain +
+                    "\n trackGain="+trackGain;
+        }
+    }
+
+    public GainValues readReplayGainFromAPE(Track track) {
+        GainValues gv = new GainValues();
+        try {
+            MP3 mp3 = new MP3(track.getPath());
+            if (mp3.hasAPETag()) {
+//				mp3 contains an APEv2 tag
+//				MP3GAIN_MINMAX : 052,209
+//				MP3GAIN_ALBUM_MINMAX : 052,209
+//				MP3GAIN_UNDO : +001,+001,N
+//				REPLAYGAIN_TRACK_GAIN : +0.920000 dB
+//				REPLAYGAIN_TRACK_PEAK : 0.860053
+//				REPLAYGAIN_ALBUM_GAIN : +0.400000 dB
+//				REPLAYGAIN_ALBUM_PEAK : 0.899413
+                APETag apeTag = mp3.getAPETag();
+//				System.out.println("mp3 contains an " + apeTag.getVersionString() + " tag");
+//				System.out.println(apeTag);
+                for(APEItem item : apeTag.getItems()) {
+                    if(item.isValueText()) {
+                        if(item.getKey().toUpperCase().equals("REPLAYGAIN_TRACK_GAIN")) {
+                            gv.trackGain = getFloatFromString(item.getTextValue());
+                        }
+                        else if(item.getKey().toUpperCase().equals("REPLAYGAIN_ALBUM_GAIN")) {
+                            gv.albumGain = getFloatFromString(item.getTextValue());
+                        }
+                        else if(item.getKey().toUpperCase().equals("REPLAYGAIN_ALBUM_PEAK")) {
+                            gv.albumPeak = getFloatFromString(item.getTextValue());
+                        }
+                        else if(item.getKey().toUpperCase().equals("REPLAYGAIN_TRACK_PEAK")) {
+                            gv.trackPeak = getFloatFromString(item.getTextValue());
+                        }
+                    }
+                }
+//					else {
+//						System.out.println(item.getKey() + " (binary data): "
+//								+ item.getBinaryValue().length + " bytes.");
+//					}
+            }
+        }
+        catch (IOException ex) {
+            System.out.println("An error occurred while reading the mp3 file.");
+        }
+        return gv;
+    }
+
+    /**
+     * Parses common replayGain string values
+     */
+    private float getFloatFromString(String dbFloat) {
+        float rg_float = 0f;
+        try {
+            String nums = dbFloat.replaceAll("[^0-9.-]","");
+            rg_float = Float.parseFloat(nums);
+        } catch(Exception e) {}
+        return rg_float;
+    }
+
+    private float baseVolume = 0.70f;
+
+    public String setVolumeUp(Track track) {
+        return (baseVolume +0.1f>1.0f)?"Max":setVolume(baseVolume +0.1f, track);
+    }
+
+    public String setVolumeDown(Track track) {
+        return (baseVolume -0.1f<0f)?"Min":setVolume(baseVolume -0.1f, track);
+    }
 
     //FIXME: Shall I use this instead of system volume mixer ?
-    public void setVolume(float volume, Track track) {
+    public String setVolume(float volume, Track track) {
         if(mediaPlayer!=null && mediaPlayer.isPlaying()) { //mediaPlayer != null && (playerState == STARTED || playerState == PAUSED || playerState == STOPPED)) {
             try {
-                this.volume = volume;
-                reapplyVolume(track);
+                this.baseVolume = volume;
+                return applyReplayGain(mediaPlayer, track);
             } catch(Exception e) {
                 Log.w(TAG, "Failed to set volume");
             }
         }
-    }
-
-    public void reapplyVolume(Track track) {
-        applyReplayGain(mediaPlayer, track);
+        return "";
     }
 
     public void play() {
