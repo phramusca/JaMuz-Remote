@@ -96,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
     private AudioManager audioManager;
     public static AudioPlayer audioPlayer;
     public static MusicLibrary musicLibrary;
-    public static File pathToFiles;
 
     //In internal SD emulated storage:
     //TODO: Change folder as we now have rights
@@ -158,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
     private NotificationCompat.Builder mBuilderScan;
     private static final int ID_NOTIFIER_SYNC = 1;
     private static final int ID_NOTIFIER_SCAN = 2;
-
+    private String m_chosenDir = "/";
     private SharedPreferences preferences;
 
 
@@ -230,12 +229,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        m_chosenDir = preferences.getString("m_chosenDir", "/");
+        String display = m_chosenDir.equals("/")?
+                "Choose an additional local path for music. Note that it is recommended to use JaMuz though."
+                :m_chosenDir;
+        textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
+                .concat(display)
+                .concat("</html>"))));
         Button dirChooserButton = (Button) findViewById(R.id.button_browse);
         dirChooserButton.setOnClickListener(new View.OnClickListener()
         {
-            private String m_chosenDir = "/";
             private boolean m_newFolderEnabled = false;
-
             @Override
             public void onClick(View v)
             {
@@ -250,6 +254,9 @@ public class MainActivity extends AppCompatActivity {
                                         textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
                                                 .concat(chosenDir)
                                                 .concat("</html>"))));
+                                        setConfig("m_chosenDir", m_chosenDir);
+                                        checkPermissionsThenScanLibrary();
+
                                     }
                                 });
                 directoryChooserDialog.setNewFolderEnabled(m_newFolderEnabled);
@@ -897,7 +904,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void scanLibrayInThread() {
-        pathToFiles = getAppDataPath();
+        scanFolder(getAppDataPath());
+        new Thread() {
+            public void run() {
+                try {
+                    if(scanLibray!=null) {
+                        scanLibray.join();
+                    }
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
+                }
+                if(!m_chosenDir.equals("/")) {
+                    File folder = new File(m_chosenDir);
+                    scanFolder(folder);
+                }
+            }
+        }.start();
+    }
+
+    private void scanFolder(final File path) {
         scanLibray = new ProcessAbstract("Thread.MainActivity.scanLibrayInThread") {
             public void run() {
                 try {
@@ -909,7 +934,7 @@ public class MainActivity extends AppCompatActivity {
                     processBrowseFS = new ProcessAbstract("Thread.MainActivity.browseFS") {
                         public void run() {
                             try {
-                                browseFS(pathToFiles);
+                                browseFS(path);
                             } catch (IllegalStateException | InterruptedException e) {
                                 Log.w(TAG, "Thread.MainActivity.browseFS InterruptedException");
                                 scanLibray.abort();
@@ -921,7 +946,7 @@ public class MainActivity extends AppCompatActivity {
                     processBrowseFScount = new ProcessAbstract("Thread.MainActivity.browseFScount") {
                         public void run() {
                             try {
-                                browseFScount(pathToFiles);
+                                browseFScount(path);
                             } catch (InterruptedException e) {
                                 Log.w(TAG, "Thread.MainActivity.browseFScount InterruptedException");
                                 scanLibray.abort();
@@ -982,16 +1007,27 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 else {
                                     String absolutePath=file.getAbsolutePath();
-                                    String fileKey = absolutePath.substring(
-                                            getAppDataPath().getAbsolutePath().length()+1);
-                                    if(filesToKeep!=null && !filesToKeep.containsKey(fileKey)) {
-                                        Log.i(TAG, "Deleting file "+absolutePath);
-                                        file.delete();
-                                    } else if(filesToKeep!=null && filesToKeep.containsKey(fileKey)) {
-                                        FileInfoReception fileInfoReception=filesToKeep.get(fileKey);
-                                        insertOrUpdateTrackInDatabase(absolutePath, fileInfoReception);
-                                    } else {
-                                        insertOrUpdateTrackInDatabase(absolutePath, null);
+                                    if(absolutePath.startsWith(getAppDataPath().getAbsolutePath())) {
+                                        //Scanning private sd card path
+                                        //=> Files from JaMuz Sync
+                                        String fileKey = absolutePath.substring(
+                                                getAppDataPath().getAbsolutePath().length()+1);
+                                        if(filesToKeep!=null && !filesToKeep.containsKey(fileKey)) {
+                                            Log.i(TAG, "Deleting file "+absolutePath);
+                                            file.delete();
+                                        } else if(filesToKeep!=null && filesToKeep.containsKey(fileKey)) {
+                                            FileInfoReception fileInfoReception=filesToKeep.get(fileKey);
+                                            insertOrUpdateTrackInDatabase(absolutePath, fileInfoReception);
+                                        } else {
+                                            insertOrUpdateTrackInDatabase(absolutePath, null);
+                                        }
+                                    }
+                                    else {
+                                        //Scanning extra local folder
+                                        //FIXME: add extensions to allow. Only mp3 for now
+                                        if(absolutePath.endsWith(".mp3")) {
+                                            insertOrUpdateTrackInDatabase(absolutePath, null);
+                                        }
                                     }
                                     notifyScan("JaMuz is scanning files ... ", 13);
                                 }
@@ -1226,6 +1262,12 @@ public class MainActivity extends AppCompatActivity {
         localTrack = displayedTrack;
         setupSpinner(localPlaylists, localSelectedPlaylist);
         audioPlayer.stop(false);
+        boolean isLocal = !displayedTrack.getPath().startsWith(getAppDataPath().getAbsolutePath());
+        toggleButtonTags.setEnabled(!isLocal);
+        if(isLocal) {
+            toggleButtonTags.setChecked(false);
+            toggle(layoutAttributes, true);
+        }
         String popupMsg = audioPlayer.play(displayedTrack);
         if(!popupMsg.equals("")) {
             popup("ReplayGain", popupMsg);
@@ -1359,10 +1401,12 @@ public class MainActivity extends AppCompatActivity {
             //TODO: Translate
             String msgStr = "<html><b>For a full JaMuz experience</b>, please consider " +
                     "allowing permissions that you will be asked for: <BR/><BR/>" +
-                    "<i>- <u>Mutimedia files</u></i> : Needed to be able to read files in \"" +
-                    pathToFiles +
-                    "\" which is the root of \"SSH Server\" from \"The Olive Tree\" where music files are expected to be.<BR/>" +
-                    "It is also needed to store database in JaMuz folder on internal SD card.<BR/><BR/>" +
+                    "<i>- <u>Multimedia files</u></i> : Allows application to:<BR/> " +
+                    "- Write files received from JaMuz to application folder on external SD card " +
+                        "(\"" + getAppDataPath() +"\") <BR/> " +
+                    "- Read-only user selected folder on external SD card <BR/>" +
+                    "- Store database in JaMuz folder on internal SD card " +
+                        "(\""+musicLibraryDbFile.getAbsolutePath()+"\").<BR/><BR/>" +
                     "<i>- <u>Phone calls</u></i> : Simply to be able to pause and resume audio on phone calls.";
 
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
@@ -1386,16 +1430,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupTags() {
-        tags = new HashMap<>();
-        tags = musicLibrary.getTags();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                for(Map.Entry<Integer, String> tag : tags.entrySet()) {
-                    makeButtonTag(layoutTags, tag.getKey(), tag.getValue());
+        if(tags.size()<=0) {
+            tags = new HashMap<>();
+            tags = musicLibrary.getTags();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    for(Map.Entry<Integer, String> tag : tags.entrySet()) {
+                        makeButtonTag(layoutTags, tag.getKey(), tag.getValue());
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void setupGenres() {
@@ -1937,10 +1983,12 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         if(!tags.values().contains(tag)) {
-                                            int idTag = MainActivity.musicLibrary.addTag(tag);
-                                            if(idTag>0) {
-                                                tags.put(idTag, tag);
-                                                makeButtonTag(layoutTags, idTag, tag);
+                                            if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                                                int idTag = musicLibrary.addTag(tag);
+                                                if(idTag>0) {
+                                                    tags.put(idTag, tag);
+                                                    makeButtonTag(layoutTags, idTag, tag);
+                                                }
                                             }
                                         }
                                     }
@@ -1956,8 +2004,10 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         if(!genres.contains(genre)) {
-                                            if(MainActivity.musicLibrary.addGenre(genre)) {
-                                                genres.add(genre);
+                                            if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                                                if (musicLibrary.addGenre(genre)) {
+                                                    genres.add(genre);
+                                                }
                                             }
                                         }
                                     }
