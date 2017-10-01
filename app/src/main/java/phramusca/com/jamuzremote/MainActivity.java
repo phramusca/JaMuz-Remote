@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.Settings;
+import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
@@ -137,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
     private Button buttonForward;
     private Button buttonVolUp;
     private Button buttonVolDown;
+    private Button button_speech;
     private SeekBar seekBarPosition;
     private Spinner spinnerPlaylist;
     private Spinner spinnerGenre;
@@ -420,6 +422,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        button_speech = (Button) findViewById(R.id.button_speech);
+        button_speech.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displaySpeechRecognizer();
+            }
+        });
+
         buttonSync = (Button) findViewById(R.id.button_sync);
         buttonSync.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -633,21 +643,27 @@ public class MainActivity extends AppCompatActivity {
         b.setTextColor(ContextCompat.getColor(this, checked?R.color.textColor:R.color.colorPrimaryDark));
     }
 
+
+    private void applyPlaylist(PlayList playList) {
+        if(!isRemoteConnected()) {
+            if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                queue = musicLibrary.getTracks(playList);
+            }
+            localSelectedPlaylist = playList;
+        } else {
+            clientRemote.send("setPlaylist".concat(playList.toString()));
+        }
+        playNext();
+        dimOn();
+    }
+
     Spinner.OnItemSelectedListener spinnerListener = new Spinner.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view,
         int pos, long id) {
             if(spinnerPlaylistSend) {
                 PlayList playList = (PlayList) parent.getItemAtPosition(pos);
-                if(!isRemoteConnected()) {
-                    if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                        queue = musicLibrary.getTracks(playList);
-                    }
-                    localSelectedPlaylist = playList;
-                } else {
-                    clientRemote.send("setPlaylist".concat(playList.toString()));
-                }
-                dimOn();
+                applyPlaylist(playList);
             }
             spinnerPlaylistSend =true;
         }
@@ -809,6 +825,39 @@ public class MainActivity extends AppCompatActivity {
         receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
         audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
     }
+
+    private static final int SPEECH_REQUEST_CODE = 0;
+    private void displaySpeechRecognizer() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        startActivityForResult(intent, SPEECH_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode,
+                                    Intent data) {
+        if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
+            List<String> results = data.getStringArrayListExtra(
+                    RecognizerIntent.EXTRA_RESULTS);
+            String spokenText = results.get(0);
+            boolean foundPlaylist=false;
+            for(PlayList playList : localPlaylists) {
+                if(playList.getName().equalsIgnoreCase(spokenText)) {
+                    localSelectedPlaylist = playList;
+                    setupSpinner(localPlaylists, localSelectedPlaylist);
+                    applyPlaylist(localSelectedPlaylist);
+                    foundPlaylist=true;
+                    break;
+                }
+            }
+            if(!foundPlaylist) {
+                toastLong("Playlist not found:\n\""+spokenText+"\"");
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
 
     @Override
     protected void onDestroy() {
@@ -1041,8 +1090,12 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                     else {
                                         //Scanning extra local folder
-                                        //FIXME: add extensions to allow. Only mp3 for now
-                                        if(absolutePath.endsWith(".mp3")) {
+                                        List<String> audioExtenstions = new ArrayList<>();
+                                        audioExtenstions.add("mp3");
+                                        audioExtenstions.add("flac");
+                                        /*audioFiles.add("ogg");*/
+                                        String ext = absolutePath.substring(absolutePath.lastIndexOf(".")+1);
+                                        if(audioExtenstions.contains(ext)) {
                                             insertOrUpdateTrackInDatabase(absolutePath, null);
                                         }
                                     }
@@ -1280,7 +1333,7 @@ public class MainActivity extends AppCompatActivity {
         setupSpinner(localPlaylists, localSelectedPlaylist);
         audioPlayer.stop(false);
         boolean isLocal = !displayedTrack.getPath().startsWith(getAppDataPath().getAbsolutePath());
-        textViewFileInfo.setTextColor(isLocal?R.color.duskYellow:R.color.textColor);
+        //TODO: Display info somehow
         String msg = audioPlayer.play(displayedTrack);
         if(!msg.equals("")) {
             toastLong(msg);

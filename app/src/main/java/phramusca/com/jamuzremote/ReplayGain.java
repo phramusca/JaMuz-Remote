@@ -100,6 +100,8 @@ public class ReplayGain {
 	private static GainValues readReplayGainFromFlac(File path) {
 		GainValues gv = new GainValues();
 		try {
+            //FIXME: java.lang.NoSuchMethodError: No virtual method toPath()Ljava/nio/file/Path; in class Ljava/io/File; or its super classes (declaration of 'java.io.File' appears in /system/framework/core-libart.jar)
+            //https://bitbucket.org/ijabz/jaudiotagger/issues/149/some-nio-classes-are-unavailable-while
 			org.jaudiotagger.audio.AudioFile f = AudioFileIO.read(path);
 			FlacTag tag = (FlacTag) f.getTag();
 			VorbisCommentTag vcTag = tag.getVorbisCommentTag();
@@ -109,7 +111,7 @@ public class ReplayGain {
 			gv.albumGain = getFloatFromString(vcTag.getFirst("REPLAYGAIN_ALBUM_GAIN"));
 			gv.albumPeak = getFloatFromString(vcTag.getFirst("REPLAYGAIN_ALBUM_PEAK"));
 			gv.trackPeak = getFloatFromString(vcTag.getFirst("REPLAYGAIN_TRACK_PEAK"));
-		} catch (CannotReadException | IOException | TagException | 
+		} catch (NoSuchMethodError | CannotReadException | IOException | TagException |
 				ReadOnlyFileException | InvalidAudioFrameException ex) {
 			Logger.getLogger(ReplayGain.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -224,8 +226,10 @@ public class ReplayGain {
 					}
 				}
 			}
-		} catch (CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException ex) {
-			Logger.getLogger(ReplayGain.class.getName()).log(Level.SEVERE, null, ex);
+		} catch (NoSuchMethodError | CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException ex) {
+			//FIXME: Same NoSuchMethodError problem as with FLAC ?
+            //Not tested but catching NoSuchMethodError as it should be the same
+            Logger.getLogger(ReplayGain.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		return gv;
 	}
