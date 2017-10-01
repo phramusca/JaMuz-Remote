@@ -29,6 +29,10 @@ public class PlayList {
         return order;
     }
 
+    public String getName() {
+        return name;
+    }
+
     @Override
     public String toString() {
         return musicLibrary==null?name:name+" ("+ musicLibrary.getNb(query) +")";
