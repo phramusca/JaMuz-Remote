@@ -150,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
     private FlexboxLayout layoutTags;
     private LinearLayout layoutAttributes;
     private GridLayout layoutOptions;
+    private SeekBar seekBarReplayGain;
 
     //Notifications
     private NotificationManager mNotifyManager;
@@ -159,8 +160,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int ID_NOTIFIER_SCAN = 2;
     private String m_chosenDir = "/";
     private SharedPreferences preferences;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -287,6 +286,26 @@ public class MainActivity extends AppCompatActivity {
         seekBarPosition = (SeekBar) findViewById(R.id.seekBar);
         seekBarPosition.setEnabled(false);
 
+        seekBarReplayGain = (SeekBar) findViewById(R.id.seekBarReplayGain);
+        seekBarReplayGain.setProgress(70);
+        seekBarReplayGain.setMax(100); //default, but still
+        seekBarReplayGain.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float value = ((float)progress / 100.0f);
+                Log.i(TAG, "seekBarReplayGain: "+value);
+                String msg = audioPlayer.setVolume(value, displayedTrack);
+                if(!msg.equals("")) {
+                    toastLong(msg);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
         spinnerPlaylist = (Spinner) findViewById(R.id.spinner_playlist);
         spinnerPlaylist.setOnItemSelectedListener(spinnerListener);
         spinnerPlaylist.setOnTouchListener(new View.OnTouchListener() {
@@ -338,8 +357,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dimOn();
-                //layoutTags.setVisibility(toggleButtonTags.isChecked()?View.VISIBLE:View.GONE);
-                //Can't use toggle as height is dynamic
                 toggle(layoutAttributes, !toggleButtonTags.isChecked());
             }
         });
@@ -1263,20 +1280,16 @@ public class MainActivity extends AppCompatActivity {
         setupSpinner(localPlaylists, localSelectedPlaylist);
         audioPlayer.stop(false);
         boolean isLocal = !displayedTrack.getPath().startsWith(getAppDataPath().getAbsolutePath());
-        toggleButtonTags.setEnabled(!isLocal);
-        if(isLocal) {
-            toggleButtonTags.setChecked(false);
-            toggle(layoutAttributes, true);
-        }
-        String popupMsg = audioPlayer.play(displayedTrack);
-        if(!popupMsg.equals("")) {
-            popup("ReplayGain", popupMsg);
+        textViewFileInfo.setTextColor(isLocal?R.color.duskYellow:R.color.textColor);
+        String msg = audioPlayer.play(displayedTrack);
+        if(!msg.equals("")) {
+            toastLong(msg);
         }
         dimOn();
     }
 
     private void dim(final boolean on) {
-        CountDownTimer countDownTimer = new CountDownTimer(500,50) {
+        new CountDownTimer(500,50) {
             private float brightness=on?0:1;
             @Override
             public void onTick(long millisUntilFinished_) {
@@ -1518,22 +1531,13 @@ public class MainActivity extends AppCompatActivity {
                     dimOn();
                     break;
                 case "volUp":
-                    //FIXME: Here to setVolume with replayGain if needed
-                    String popupMsg = audioPlayer.setVolumeUp(displayedTrack);
-                    if(!popupMsg.equals("")) {
-                        popup("ReplayGain", popupMsg);
-                    }
-                    /*audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
-                            AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);*/
+                    audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                            AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
                     dimOn();
                     break;
                 case "volDown":
-                    String popupMsg2 = audioPlayer.setVolumeDown(displayedTrack);
-                    if(!popupMsg2.equals("")) {
-                        popup("ReplayGain", popupMsg2);
-                    }
-                    /*audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
-                            AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);*/
+                    audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                            AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
                     dimOn();
                     break;
                 default:

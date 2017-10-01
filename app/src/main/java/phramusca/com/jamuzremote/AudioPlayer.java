@@ -61,19 +61,15 @@ public class AudioPlayer {
         return msg;
     }
 
-    public static final boolean ENABLE_TRACK_REPLAYGAIN = true;
-    public static final boolean ENABLE_ALBUM_REPLAYGAIN = false;
-    /*public static final int     REPLAYGAIN_BUMP = 75; // seek bar is 150 -> 75 == middle == 0
-    public static final int     REPLAYGAIN_UNTAGGED_DEBUMP = 150; // seek bar is 150 -> == 0*/
-
     //FIXME: Make Replaygain options.
+    private boolean mReplayGainTrackEnabled=true;
+    private boolean mReplayGainAlbumEnabled=false;
+    private float baseVolume = 0.70f;
+
     /**
-     * Enables or disables Replay Gain
+     * Enables or disables Replay Gain.
+     * Taken partially from https://github.com/vanilla-music/vanilla
      */
-    private boolean mReplayGainTrackEnabled=ENABLE_TRACK_REPLAYGAIN;
-    private boolean mReplayGainAlbumEnabled=ENABLE_ALBUM_REPLAYGAIN;
-    /*private int mReplayGainBump=REPLAYGAIN_BUMP;
-    private int mReplayGainUntaggedDeBump=REPLAYGAIN_UNTAGGED_DEBUMP;*/
     private String applyReplayGain(MediaPlayer mediaPlayer, Track track) {
         ReplayGain.GainValues rg = track.getReplayGain(false);
         Log.i(TAG, rg.toString());
@@ -91,16 +87,6 @@ public class AudioPlayer {
             }
         }
 
-       /* if(adjust == 0) {
-			*//* No RG value found: decrease volume for untagged song if requested by user *//*
-            adjust = (mReplayGainUntaggedDeBump-150)/10f;
-        } else {
-			*//* This song has some replay gain info, we are now going to apply the 'bump' value
-			** The preferences stores the raw value of the seekbar, that's 0-150
-			** But we want -15 <-> +15, so 75 shall be zero *//*
-            adjust += 2*(mReplayGainBump-75)/10f; *//* 2* -> we want +-15, not +-7.5 *//*
-        }*/
-
         if(mReplayGainAlbumEnabled == false && mReplayGainTrackEnabled == false) {
 			/* Feature is disabled: Make sure that we are going to 100% volume */
             adjust = 0f;
@@ -113,35 +99,24 @@ public class AudioPlayer {
         if (rg_result > 1.0f) {
             msg =   "Base volume too high. " +
                     "\nConsider lower it for replayGain to work properly !";
+            msg +=  "\n---------------"+
+                    "\n "+rg.toString()+
+                    "\n baseVolume="+ baseVolume +
+                    "\n adjust="+adjust+
+                    "\n setVolume="+rg_result+" (limit 1.0)";
             rg_result = 1.0f; /* android would IGNORE the change if this is > 1
                                     and we would end up with the wrong volume */
         } else if (rg_result < 0.0f) {
             rg_result = 0.0f;
         }
-        msg +=  "\n---------------"+
-                "\n "+rg.toString()+
-                "\n baseVolume="+ baseVolume +
-                "\n adjust="+adjust+
-                "\n setVolume="+rg_result+" (limit 1.0)";
         Log.i(TAG, "mediaPlayer.setVolume("+rg_result+", "+rg_result+")");
         mediaPlayer.setVolume(rg_result, rg_result);
 
         return msg;
     }
 
-    private float baseVolume = 0.70f;
-
-    public String setVolumeUp(Track track) {
-        return (baseVolume +0.1f>1.0f)?"Max":setVolume(baseVolume +0.1f, track);
-    }
-
-    public String setVolumeDown(Track track) {
-        return (baseVolume -0.1f<0f)?"Min":setVolume(baseVolume -0.1f, track);
-    }
-
-    //FIXME: Shall I use this instead of system volume mixer ?
     public String setVolume(float volume, Track track) {
-        if(mediaPlayer!=null && mediaPlayer.isPlaying()) { //mediaPlayer != null && (playerState == STARTED || playerState == PAUSED || playerState == STOPPED)) {
+        if(mediaPlayer!=null && mediaPlayer.isPlaying()) {
             try {
                 this.baseVolume = volume;
                 return applyReplayGain(mediaPlayer, track);
