@@ -25,6 +25,7 @@ public class Track {
     public Date lastPlayed = new Date(0);
     public int playCounter=0;
     private ArrayList<String> tags = null;
+    private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
 
     //FIXME: Store replaygain, no to read too often
 
@@ -182,5 +183,12 @@ public class Track {
 
     public void setGenre(String genre) {
         this.genre = genre;
+    }
+
+    public ReplayGain.GainValues getReplayGain(boolean read) {
+        if(read || !replayGain.isValid()) {
+            replayGain = ReplayGain.read(new File(path), path.substring(path.lastIndexOf(".")+1));
+        }
+        return replayGain;
     }
 }
