@@ -30,6 +30,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
@@ -826,8 +829,9 @@ public class MainActivity extends AppCompatActivity {
         audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
     }
 
+    //https://developer.android.com/training/wearables/apps/voice.html
     private static final int SPEECH_REQUEST_CODE = 0;
-    private void displaySpeechRecognizer() {
+    public void displaySpeechRecognizer() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -1322,11 +1326,40 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
+        public void speech() {
+            displaySpeechRecognizer();
+        }
+
+        @Override
         public void onPlayBackStart() {
             displayTrack();
         }
 
     }
+
+    public static Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message message) {
+            String msg = (String) message.obj;
+            switch (msg) {
+                case "play":
+                    audioPlayer.play();
+                    break;
+                case "pause":
+                    audioPlayer.pause();
+                    break;
+                case "togglePlay":
+                    audioPlayer.togglePlay();
+                    break;
+                case "playNext":
+                    audioPlayer.playNext();
+                    break;
+                case "playPrevious":
+                    audioPlayer.playPrevious();
+                    break;
+            }
+        }
+    };
 
     public void playAudio(){
         localTrack = displayedTrack;
@@ -1360,7 +1393,7 @@ public class MainActivity extends AppCompatActivity {
         }.start();
     }
 
-    private Timer timer = new Timer();
+    private static Timer timer = new Timer();
     private boolean isDimOn = true;
 
     private void dimOn() {
@@ -1717,9 +1750,14 @@ public class MainActivity extends AppCompatActivity {
     private void toast(final String msg, int duration) {
         if(!msg.equals("")) {
             Log.i(TAG, "Toast makeText "+msg);
-            Toast.makeText(this, msg, duration).show();
+            Toast.makeText(MainActivity.this, msg, duration).show();
         }
     }
+
+    public static void showToast(Context context, String text) {
+        Toast.makeText(context, text, Toast.LENGTH_LONG).show();
+    }
+
 
     private void notifyScan(final String action, int every) {
         nbFiles++;
