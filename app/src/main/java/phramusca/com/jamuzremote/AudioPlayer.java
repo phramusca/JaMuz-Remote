@@ -4,10 +4,6 @@ import android.media.MediaPlayer;
 import android.os.CountDownTimer;
 import android.util.Log;
 
-import com.beaglebuddy.ape.APEItem;
-import com.beaglebuddy.ape.APETag;
-import com.beaglebuddy.mp3.MP3;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -19,7 +15,7 @@ public class AudioPlayer {
     private final ICallBackPlayer callback;
     private static final String TAG = AudioPlayer.class.getSimpleName();
     private static MediaPlayer mediaPlayer;
-    private CountDownTimer timer;
+    private static CountDownTimer timer;
 
     public AudioPlayer(final ICallBackPlayer callback) {
         this.callback = callback;
@@ -139,6 +135,10 @@ public class AudioPlayer {
 
     public void playNext() {
         callback.doPlayNext();
+    }
+
+    public void speech() {
+        callback.speech();
     }
 
     public void playPrevious() {
