@@ -35,6 +35,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
@@ -81,6 +82,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -171,6 +173,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "MainActivity onCreate");
         setContentView(R.layout.activity_main);
+
+        textToSpeech =new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status != TextToSpeech.ERROR) {
+                    textToSpeech.setLanguage(Locale.FRENCH);
+                }
+            }
+        });
 
         //Read FilesToKeep file to get list of files to maintain in db
         String readJson = HelperTextFile.read(this, "FilesToKeep.txt");
@@ -832,6 +843,7 @@ public class MainActivity extends AppCompatActivity {
     //https://developer.android.com/training/wearables/apps/voice.html
     private static final int SPEECH_REQUEST_CODE = 0;
     public void displaySpeechRecognizer() {
+        textToSpeech.speak("Je vous écoute.", TextToSpeech.QUEUE_FLUSH, null);
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -857,10 +869,13 @@ public class MainActivity extends AppCompatActivity {
             }
             if(!foundPlaylist) {
                 toastLong("Playlist not found:\n\""+spokenText+"\"");
+                textToSpeech.speak(spokenText, TextToSpeech.QUEUE_FLUSH, null);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+    TextToSpeech textToSpeech;
 
 
     @Override
@@ -886,6 +901,11 @@ public class MainActivity extends AppCompatActivity {
             stopService(service);
         }
 
+        if(textToSpeech !=null){
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+        
         stopRemote();
         stopSync();
 
