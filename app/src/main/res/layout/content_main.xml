@@ -20,7 +20,7 @@
             android:id="@+id/button_controls_toggle"
             android:layout_row="0"
             android:layout_column="0"
-            android:layout_width="50dp"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             style="@style/ToggleButton"
             android:background="@drawable/ic_toggle_controls" />
@@ -29,7 +29,16 @@
             android:id="@+id/button_tags_toggle"
             android:layout_row="0"
             android:layout_column="1"
-            android:layout_width="50dp"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            style="@style/ToggleButton"
+            android:background="@drawable/ic_toggle_tags" />
+
+        <ToggleButton
+            android:id="@+id/button_playlist_toggle"
+            android:layout_row="0"
+            android:layout_column="2"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             style="@style/ToggleButton"
             android:background="@drawable/ic_toggle_tags" />
@@ -37,36 +46,36 @@
         <Button
             android:id="@+id/button_connect"
             android:background="@drawable/remote_off"
-            android:layout_width="50dp"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:text="Connect"
-            android:layout_row="0"
-            android:layout_column="2"
-            android:textColor="@android:color/transparent"
-            android:textSize="10sp"
-            android:textAllCaps="false"
-            android:layout_gravity="center" />
-
-        <Button
-            android:id="@+id/button_speech"
-            android:background="@drawable/ic_action_speech"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:text="Speech"
             android:layout_row="0"
             android:layout_column="3"
             android:textColor="@android:color/transparent"
             android:textSize="10sp"
-            android:textAllCaps="false"/>
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button_speech"
+            android:background="@drawable/ic_action_speech"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:text="Speech"
+            android:layout_row="0"
+            android:layout_column="4"
+            android:textColor="@android:color/transparent"
+            android:textSize="10sp"
+            android:textAllCaps="false"
+            android:layout_gravity="center"/>
 
         <Button
             android:id="@+id/button_sync"
             android:background="@drawable/connect_off"
-            android:layout_width="50dp"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:text="Connect"
             android:layout_row="0"
-            android:layout_column="4"
+            android:layout_column="5"
             android:textColor="@android:color/transparent"
             android:textSize="10sp"
             android:textAllCaps="false"/>
@@ -74,8 +83,8 @@
         <ToggleButton
             android:id="@+id/button_dim_mode"
             android:layout_row="0"
-            android:layout_column="5"
-            android:layout_width="50dp"
+            android:layout_column="6"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             style="@style/ToggleButton"
             android:background="@drawable/ic_toggle_lightbulb"/>
@@ -83,8 +92,8 @@
         <ToggleButton
             android:id="@+id/button_connect_toggle"
             android:layout_row="0"
-            android:layout_column="6"
-            android:layout_width="50dp"
+            android:layout_column="7"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             style="@style/ToggleButton"
             android:background="@drawable/ic_toggle_config" />
@@ -392,6 +401,55 @@
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:alpha="0.7"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/panel_playlist"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/panel_tags_playlist"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingTop="5dp"
+            app:flexWrap="wrap"
+            app:alignItems="flex_start"
+            app:alignContent="flex_end" >
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+ <!--           <RatingBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ratingBar"
+                android:numStars="5"
+                android:stepSize="1"
+                android:rating="0"
+                android:layout_gravity="left"
+                android:theme="@style/RatingBar"
+                android:paddingTop="5dp"/>
+
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/spinner_genre"
+                android:popupBackground="#DDFFFFFF"
+                android:background="@drawable/ic_gradient_spinner"
+                android:layout_gravity="center"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:alpha="0.7"/>-->
         </LinearLayout>
     </LinearLayout>
 

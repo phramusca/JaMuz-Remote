@@ -134,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton toggleButtonDimMode;
     private ToggleButton toggleButtonControls;
     private ToggleButton toggleButtonTags;
+    private ToggleButton toggleButtonPlaylist;
     private ToggleButton toggleButtonOptions;
     private Button buttonPrevious;
     private Button buttonPlay;
@@ -147,15 +148,17 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBarPosition;
     private Spinner spinnerPlaylist;
     private Spinner spinnerGenre;
-    private static boolean spinnerPlaylistSend=true;
-    private static boolean spinnerGenreSend=true;
+    private static boolean spinnerPlaylistSend=false;
+    private static boolean spinnerGenreSend=false;
     private RatingBar ratingBar;
     private ImageView imageViewCover;
     private LinearLayout layoutTrackInfo;
     private LinearLayout layoutMain;
     private LinearLayout layoutControls;
     private FlexboxLayout layoutTags;
+    private FlexboxLayout layoutTagsPlaylist;
     private LinearLayout layoutAttributes;
+    private LinearLayout layoutPlaylist;
     private GridLayout layoutOptions;
     private SeekBar seekBarReplayGain;
 
@@ -215,8 +218,9 @@ public class MainActivity extends AppCompatActivity {
                 .setSmallIcon(R.drawable.gears_normal);
 
         layoutTags = (FlexboxLayout) findViewById(R.id.panel_tags);
+        layoutTagsPlaylist = (FlexboxLayout) findViewById(R.id.panel_tags_playlist);
         layoutAttributes = (LinearLayout) findViewById(R.id.panel_attributes);
-
+        layoutPlaylist = (LinearLayout) findViewById(R.id.panel_playlist);
         layoutControls = (LinearLayout) findViewById(R.id.panel_controls);
         layoutOptions = (GridLayout) findViewById(R.id.panel_options);
 
@@ -377,7 +381,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+        toggleButtonPlaylist = (ToggleButton) findViewById(R.id.button_playlist_toggle);
+        toggleButtonPlaylist.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dimOn();
+                toggle(layoutPlaylist, !toggleButtonPlaylist.isChecked());
+            }
+        });
 
         toggleButtonOptions = (ToggleButton) findViewById(R.id.button_connect_toggle);
         toggleButtonOptions.setOnClickListener(new View.OnClickListener() {
@@ -615,6 +626,7 @@ public class MainActivity extends AppCompatActivity {
         toggle(layoutOptions, true);
         toggle(layoutControls, true);
         toggle(layoutAttributes, true);
+        toggle(layoutPlaylist, true);
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
@@ -624,7 +636,7 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
-    private void makeButtonTag(FlexboxLayout layout, int key, String value) {
+    private ToggleButton getButtonTag(int key, String value) {
         ToggleButton button = new ToggleButton(this);
         button.setId(key);
         button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
@@ -634,6 +646,11 @@ public class MainActivity extends AppCompatActivity {
         button.setText(value);
         button.setTextOff(value);
         button.setTextOn(value);
+        return button;
+    }
+
+    private void makeButtonTag(int key, String value) {
+        ToggleButton button = getButtonTag(key, value);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -644,10 +661,27 @@ public class MainActivity extends AppCompatActivity {
                 setTagButtonTextColor(button);
             }
         });
-
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
                 ActionBar.LayoutParams.WRAP_CONTENT);
-        layout.addView(button, lp);
+        layoutTags.addView(button, lp);
+    }
+
+    private void makeButtonTagPlaylist(int key, String value) {
+        ToggleButton button = getButtonTag(key, value);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dimOn();
+                ToggleButton button = (ToggleButton)view;
+                String buttonText = button.getText().toString();
+                //FIXME: Do sthg with buttonText !!
+                /*displayedTrack.toggleTag(buttonText);*/
+                setTagButtonTextColor(button);
+            }
+        });
+        ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
+                ActionBar.LayoutParams.WRAP_CONTENT);
+        layoutTagsPlaylist.addView(button, lp);
     }
 
     //This is a trick since the following (not in listner) is not working:
@@ -664,10 +698,10 @@ public class MainActivity extends AppCompatActivity {
                 queue = musicLibrary.getTracks(playList);
             }
             localSelectedPlaylist = playList;
+            playNext();
         } else {
             clientRemote.send("setPlaylist".concat(playList.toString()));
         }
-        playNext();
         dimOn();
     }
 
@@ -675,11 +709,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view,
         int pos, long id) {
-            if(spinnerPlaylistSend) {
+            if (spinnerPlaylistSend) {
                 PlayList playList = (PlayList) parent.getItemAtPosition(pos);
                 applyPlaylist(playList);
             }
-            spinnerPlaylistSend =true;
+            spinnerPlaylistSend = true;
         }
 
         @Override
@@ -905,7 +939,7 @@ public class MainActivity extends AppCompatActivity {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
-        
+
         stopRemote();
         stopSync();
 
@@ -1307,7 +1341,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(TAG, "playQueue(1/"+queue.size()+")");
                 play();
             } else {
-                setupSpinner(localPlaylists, localSelectedPlaylist);
+                //setupSpinner(localPlaylists, localSelectedPlaylist);
                 toastLong("Empty Playlist.");
             }
         }
@@ -1383,10 +1417,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void playAudio(){
         localTrack = displayedTrack;
-        setupSpinner(localPlaylists, localSelectedPlaylist);
         audioPlayer.stop(false);
-        boolean isLocal = !displayedTrack.getPath().startsWith(getAppDataPath().getAbsolutePath());
-        //TODO: Display info somehow
         String msg = audioPlayer.play(displayedTrack);
         if(!msg.equals("")) {
             toastLong(msg);
@@ -1556,7 +1587,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     for(Map.Entry<Integer, String> tag : tags.entrySet()) {
-                        makeButtonTag(layoutTags, tag.getKey(), tag.getValue());
+                        makeButtonTag(tag.getKey(), tag.getValue());
+                        makeButtonTagPlaylist(tag.getKey(), tag.getValue());
                     }
                 }
             });
@@ -2102,7 +2134,8 @@ public class MainActivity extends AppCompatActivity {
                                                 int idTag = musicLibrary.addTag(tag);
                                                 if(idTag>0) {
                                                     tags.put(idTag, tag);
-                                                    makeButtonTag(layoutTags, idTag, tag);
+                                                    makeButtonTag(idTag, tag);
+                                                    makeButtonTagPlaylist(idTag, tag);
                                                 }
                                             }
                                         }
