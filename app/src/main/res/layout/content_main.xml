@@ -41,7 +41,7 @@
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             style="@style/ToggleButton"
-            android:background="@drawable/ic_toggle_tags" />
+            android:background="@drawable/ic_toggle_filter" />
 
         <Button
             android:id="@+id/button_connect"
