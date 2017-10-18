@@ -6,7 +6,6 @@ package phramusca.com.jamuzremote;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.provider.BaseColumns;
@@ -17,14 +16,12 @@ import java.io.DataInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class MusicLibrary {
 
@@ -80,25 +77,51 @@ public class MusicLibrary {
         return -1;
     }
 
-    public synchronized ArrayList<Track> getTracks(PlayList playlist) {
+    public synchronized ArrayList<Track> getTracks(String query, String order) {
         ArrayList<Track> tracks = new ArrayList<>();
         try {
             Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
                     null,
-                    playlist.getQuery(),
+                    query,
                     null, null, null,
-                    playlist.getOrder(), null);
-            if(cursor != null && cursor.moveToFirst())
-            {
-                do {
-                    Track track = cursorToTrack(cursor);
-                    tracks.add(track);
-                } while(cursor.moveToNext());
-            }
-            cursor.close();
+                    order, null);
+
+            tracks = getTracks(cursor);
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getTracks("+playlist+")", ex);
+            Log.e(TAG, "getTracks(\""+query+"\", \""+order+"\")", ex);
         }
+        return tracks;
+    }
+
+    public synchronized ArrayList<Track> getTracks(String where) {
+        ArrayList<Track> tracks = new ArrayList<>();
+        try {
+            //TODO: Use GROUP_CONCAT(tag.value)
+            Cursor cursor = db.rawQuery(
+                "SELECT GROUP_CONCAT(tag.value), tracks.* \n" +
+                " FROM tracks \n" +
+                " LEFT JOIN tagfile ON tracks.ID=tagfile.idFile \n" +
+                " LEFT JOIN tag ON tag.id=tagfile.idTag "+ where + "\n" +
+                " GROUP BY tracks.ID \n" +
+                " ORDER BY playCounter, lastPlayed",
+                new String[] { });
+            tracks = getTracks(cursor);
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "getTracks(\""+where+"\")", ex);
+        }
+        return tracks;
+    }
+
+    private ArrayList<Track> getTracks(Cursor cursor) {
+        ArrayList<Track> tracks = new ArrayList<>();
+        if(cursor != null && cursor.moveToFirst())
+        {
+            do {
+                Track track = cursorToTrack(cursor);
+                tracks.add(track);
+            } while(cursor.moveToNext());
+        }
+        cursor.close();
         return tracks;
     }
 

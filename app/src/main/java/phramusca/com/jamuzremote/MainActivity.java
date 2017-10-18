@@ -117,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Track> queueHistory = new ArrayList<>();
     private List<PlayList> localPlaylists = new ArrayList<PlayList>();
     private PlayList localSelectedPlaylist;
+    private PlayList localPlaylist;
     private Map<Integer, String> tags = new HashMap<>();
     private List<String> genres = new ArrayList<>();
 
@@ -656,9 +657,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 dimOn();
                 ToggleButton button = (ToggleButton)view;
+                setTagButtonTextColor(button);
                 String buttonText = button.getText().toString();
                 displayedTrack.toggleTag(buttonText);
-                setTagButtonTextColor(button);
             }
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
@@ -668,15 +669,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void makeButtonTagPlaylist(int key, String value) {
         ToggleButton button = getButtonTag(key, value);
+        button.setChecked(true);
+        setTagButtonTextColor(button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dimOn();
                 ToggleButton button = (ToggleButton)view;
-                String buttonText = button.getText().toString();
-                //FIXME: Do sthg with buttonText !!
-                /*displayedTrack.toggleTag(buttonText);*/
                 setTagButtonTextColor(button);
+                String buttonText = button.getText().toString();
+                localPlaylist.toggleTag(buttonText);
+                if(localSelectedPlaylist.equals(localPlaylist)) {
+                    //Queue may not be valid as value changed
+                    queue.clear();
+                }
             }
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
@@ -695,7 +701,7 @@ public class MainActivity extends AppCompatActivity {
     private void applyPlaylist(PlayList playList) {
         if(!isRemoteConnected()) {
             if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                queue = musicLibrary.getTracks(playList);
+                queue = playList.getTracks();
             }
             localSelectedPlaylist = playList;
             playNext();
@@ -1092,7 +1098,7 @@ public class MainActivity extends AppCompatActivity {
                     checkAbort();
                     //Scan deleted files
                     //TODO: No need to check what scanned previously ...
-                    List<Track> tracks = musicLibrary.getTracks(new PlayList("All"));
+                    List<Track> tracks = new PlayList("All", musicLibrary).getTracks();
                     nbFilesTotal = tracks.size();
                     nbFiles=0;
                     for(Track track : tracks) {
@@ -1330,7 +1336,7 @@ public class MainActivity extends AppCompatActivity {
             //Fill the queue
             if(queue.size()<5) {
                 if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                    List<Track> addToQueue = musicLibrary.getTracks((PlayList) spinnerPlaylist.getSelectedItem());
+                    List<Track> addToQueue = ((PlayList) spinnerPlaylist.getSelectedItem()).getTracks();
                     queue.addAll(addToQueue);
                 }
             }
@@ -1583,6 +1589,7 @@ public class MainActivity extends AppCompatActivity {
         if(tags.size()<=0) {
             tags = new HashMap<>();
             tags = musicLibrary.getTags();
+            makeButtonTagPlaylist(Integer.MAX_VALUE, "null");
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1691,6 +1698,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupLocalPlaylists() {
         localPlaylists = new ArrayList<PlayList>();
+        localPlaylist = new PlayList("Selection", musicLibrary, new ArrayList<String>(tags.values()));
+        localPlaylists.add(localPlaylist);
         addToPlaylists("Top", "rating=5", "rating>2", "playCounter, lastPlayed");
         addToPlaylists("Discover","rating=0", "rating=0", "RANDOM()");
         addToPlaylists("More","rating>2 AND rating<5", "rating>0 AND rating<3", "playCounter, lastPlayed");
@@ -2010,12 +2019,12 @@ public class MainActivity extends AppCompatActivity {
                     switch(type) {
                         case "playlists":
                             String selectedPlaylist = jObject.getString("selectedPlaylist");
-                            PlayList temp = new PlayList(selectedPlaylist);
+                            PlayList temp = new PlayList(selectedPlaylist, musicLibrary);
                             final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists");
                             final List<PlayList> playlists = new ArrayList<PlayList>();
                             for(int i=0; i<jsonPlaylists.length(); i++) {
                                 String playlist = (String) jsonPlaylists.get(i);
-                                PlayList playList = new PlayList(playlist);
+                                PlayList playList = new PlayList(playlist, musicLibrary);
                                 if(playlist.equals(selectedPlaylist)) {
                                     playList=temp;
                                 }
