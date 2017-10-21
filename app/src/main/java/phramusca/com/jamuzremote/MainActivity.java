@@ -1643,7 +1643,7 @@ public class MainActivity extends AppCompatActivity {
                     buttonSync.setText("Close");
                     buttonSync.setBackgroundResource(R.drawable.connect_on);
                 } else {
-                    buttonSync.setBackgroundResource(R.drawable.connect_off);
+                    buttonSync.setBackgroundResource(R.drawable.connect_off_new);
                 }
                 editTextConnectInfo.setEnabled(enable);
                 buttonSync.setEnabled(true);
@@ -2585,7 +2585,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stopSync() {
-        stopClient(clientSync,buttonSync, R.drawable.connect_off, true);
+        stopClient(clientSync,buttonSync, R.drawable.connect_off_new, true);
         cancelWatchTimeOut();
     }
 

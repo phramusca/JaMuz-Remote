@@ -70,7 +70,7 @@
 
         <Button
             android:id="@+id/button_sync"
-            android:background="@drawable/connect_off"
+            android:background="@drawable/connect_off_new"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:text="Connect"
@@ -344,7 +344,7 @@
         android:paddingEnd="20dp"
         android:paddingStart="20dp"
         android:paddingBottom="5dp">
-        
+
         <Spinner
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
