@@ -5,6 +5,6 @@
         android:drawable="@drawable/connect_on" />
 
     <item android:state_checked="true"
-        android:drawable="@drawable/connect_off" />
+        android:drawable="@drawable/connect_off_new" />
 
 </selector>
