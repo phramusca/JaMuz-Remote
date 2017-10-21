@@ -249,6 +249,118 @@
     </GridLayout>
 
     <LinearLayout
+        android:id="@+id/panel_playlist"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:paddingBottom="5dp"
+        android:layout_row="0"
+        android:layout_column="0">
+
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/panel_tags_playlist"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingTop="5dp"
+            app:flexWrap="wrap"
+            app:alignItems="flex_start"
+            app:alignContent="flex_end" >
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_rating"
+                android:text=">="
+                android:background="@drawable/ic_button"
+                android:layout_gravity="center_vertical"
+                android:alpha="0.7"/>
+
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_clear_rating"
+                android:background="@drawable/ic_button_clear_rating"
+                android:layout_gravity="center_vertical"
+                android:alpha="0.7"/>
+
+            <RatingBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ratingBarPlaylist"
+                android:numStars="5"
+                android:stepSize="1"
+                android:rating="0"
+                android:layout_gravity="left"
+                android:theme="@style/RatingBar"
+                android:paddingTop="5dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView android:text="Include : "
+
+                android:layout_row="0"
+                android:layout_column="1"
+                android:textColor="@color/textColor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"/>
+
+            <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinnerGenrePlaylist"
+            android:popupBackground="#DDFFFFFF"
+            android:background="@drawable/ic_gradient_spinner"
+            android:layout_gravity="center"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:alpha="0.7"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView android:text="Exclude : "
+
+                android:layout_row="0"
+                android:layout_column="1"
+                android:textColor="@color/textColor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"/>
+
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/spinnerGenreExcludePlaylist"
+                android:popupBackground="#DDFFFFFF"
+                android:background="@drawable/ic_gradient_spinner"
+                android:layout_gravity="center"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:alpha="0.7"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="5dp"
@@ -394,62 +506,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/spinner_genre"
-                android:popupBackground="#DDFFFFFF"
-                android:background="@drawable/ic_gradient_spinner"
-                android:layout_gravity="center"
-                android:paddingStart="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:alpha="0.7"/>
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/panel_playlist"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <com.google.android.flexbox.FlexboxLayout
-            android:id="@+id/panel_tags_playlist"
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:paddingTop="5dp"
-            app:flexWrap="wrap"
-            app:alignItems="flex_start"
-            app:alignContent="flex_end" >
-        </com.google.android.flexbox.FlexboxLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
-                android:id="@+id/button_clear_rating"
-                android:background="@drawable/ic_button_clear_rating"
-                android:layout_gravity="center_vertical" />
-
-            <RatingBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/ratingBarPlaylist"
-                android:numStars="5"
-                android:stepSize="1"
-                android:rating="0"
-                android:layout_gravity="left"
-                android:theme="@style/RatingBar"
-                android:paddingTop="5dp"/>
-
-            <Spinner
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/spinnerGenrePlaylist"
                 android:popupBackground="#DDFFFFFF"
                 android:background="@drawable/ic_gradient_spinner"
                 android:layout_gravity="center"
