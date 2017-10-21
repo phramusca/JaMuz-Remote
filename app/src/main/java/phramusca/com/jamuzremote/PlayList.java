@@ -13,6 +13,7 @@ public class PlayList {
     private MusicLibrary musicLibrary=null;
     private ArrayList<String> tags = new ArrayList<>();
     private boolean includeUnTagged = true;
+    private int rating=0;
 
     public PlayList(String name, MusicLibrary musicLibrary) {
         this.name = name;
@@ -55,11 +56,14 @@ public class PlayList {
         }
     }
 
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
     private String getWhere(ArrayList<String> tags) {
-        String in = "";
-        //FIXME: When no tags, what tracks are returned ?
+        String in = "WHERE rating>="+rating+" AND (";
         if(tags.size()>0) {
-            in += "WHERE tag.value IN (";
+            in += "tag.value IN (";
             for(String entry : tags) {
                 in+="\""+entry+"\",";
             }
@@ -69,8 +73,11 @@ public class PlayList {
                 in += " OR tag.value IS NULL";
             }
         } else if(!includeUnTagged) {
-            in += "WHERE tag.value NOT NULL";
+            in += "tag.value NOT NULL";
+        } else {
+            in += "1";
         }
+        in += ")";
         return in;
     }
 

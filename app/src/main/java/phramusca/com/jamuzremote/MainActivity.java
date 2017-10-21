@@ -138,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton toggleButtonTags;
     private ToggleButton toggleButtonPlaylist;
     private ToggleButton toggleButtonOptions;
+    private Button buttonClearRating;
     private Button buttonPrevious;
     private Button buttonPlay;
     private Button buttonNext;
@@ -153,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
     private static boolean spinnerPlaylistSend=false;
     private static boolean spinnerGenreSend=false;
     private RatingBar ratingBar;
+    private RatingBar ratingBarPlaylist;
     private ImageView imageViewCover;
     private LinearLayout layoutTrackInfo;
     private LinearLayout layoutMain;
@@ -301,6 +303,36 @@ public class MainActivity extends AppCompatActivity {
                         clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
                     }
                     ratingBar.setEnabled(true);
+                }
+            }
+        });
+
+        ratingBarPlaylist = (RatingBar) findViewById(R.id.ratingBarPlaylist);
+        ratingBarPlaylist.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            public void onRatingChanged(RatingBar ratingBar, float rating,
+                                        boolean fromUser) {
+                if(fromUser) {
+                    dimOn();
+                    ratingBarPlaylist.setEnabled(false);
+                    localPlaylist.setRating(Math.round(rating));
+                    if(localSelectedPlaylist.equals(localPlaylist)) {
+                        //Queue may not be valid as value changed
+                        queue.clear();
+                    }
+                    ratingBarPlaylist.setEnabled(true);
+                }
+            }
+        });
+
+        buttonClearRating = (Button) findViewById(R.id.button_clear_rating);
+        buttonClearRating.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ratingBarPlaylist.setRating(0F);
+                localPlaylist.setRating(0);
+                if(localSelectedPlaylist.equals(localPlaylist)) {
+                    //Queue may not be valid as value changed
+                    queue.clear();
                 }
             }
         });
