@@ -116,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Track> queue = new ArrayList<>();
     private List<Track> queueHistory = new ArrayList<>();
     private List<PlayList> localPlaylists = new ArrayList<PlayList>();
+    private ArrayAdapter<PlayList> arrayAdapter;
     private PlayList localSelectedPlaylist;
     private PlayList localPlaylist;
     private Map<Integer, String> tags = new HashMap<>();
@@ -900,9 +901,8 @@ public class MainActivity extends AppCompatActivity {
             boolean foundPlaylist=false;
             for(PlayList playList : localPlaylists) {
                 if(playList.getName().equalsIgnoreCase(spokenText)) {
-                    localSelectedPlaylist = playList;
-                    setupSpinner(localPlaylists, localSelectedPlaylist);
-                    applyPlaylist(localSelectedPlaylist);
+                    applyPlaylist(playList);
+                    setupSpinner(arrayAdapter, localPlaylists, playList);
                     foundPlaylist=true;
                     break;
                 }
@@ -1347,7 +1347,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(TAG, "playQueue(1/"+queue.size()+")");
                 play();
             } else {
-                //setupSpinner(localPlaylists, localSelectedPlaylist);
+                arrayAdapter.notifyDataSetChanged();
                 toastLong("Empty Playlist.");
             }
         }
@@ -1423,6 +1423,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void playAudio(){
         localTrack = displayedTrack;
+        arrayAdapter.notifyDataSetChanged();
         audioPlayer.stop(false);
         String msg = audioPlayer.play(displayedTrack);
         if(!msg.equals("")) {
@@ -1498,7 +1499,7 @@ public class MainActivity extends AppCompatActivity {
                     buttonRemote.setBackgroundResource(R.drawable.remote_on);
                 } else {
                     buttonRemote.setBackgroundResource(R.drawable.remote_off);
-                    setupSpinner(localPlaylists, localSelectedPlaylist);
+                    setupSpinner(arrayAdapter, localPlaylists, localSelectedPlaylist);
                 }
                 editTextConnectInfo.setEnabled(enable);
                 buttonRemote.setEnabled(true);
@@ -1705,7 +1706,12 @@ public class MainActivity extends AppCompatActivity {
         addToPlaylists("More","rating>2 AND rating<5", "rating>0 AND rating<3", "playCounter, lastPlayed");
         localPlaylists.add(new PlayList("All", "1", "", musicLibrary));
         localSelectedPlaylist = localPlaylists.get(0);
-        setupSpinner(localPlaylists, localSelectedPlaylist);
+
+        arrayAdapter =
+                new ArrayAdapter<PlayList>(this, android.R.layout.simple_spinner_item, localPlaylists);
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        setupSpinner(arrayAdapter, localPlaylists, localSelectedPlaylist);
     }
 
     private void addToPlaylists(String name, String where, String whereEnfantin, String order) {
@@ -1752,12 +1758,9 @@ public class MainActivity extends AppCompatActivity {
         return mWifi.isConnected();
     }
 
-    private void setupSpinner(final List<PlayList> playlists, final PlayList selectedPlaylist) {
-
-        final ArrayAdapter<PlayList> arrayAdapter =
-                new ArrayAdapter<PlayList>(this, android.R.layout.simple_spinner_item, playlists);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
+    private void setupSpinner(final ArrayAdapter<PlayList> arrayAdapter,
+                              final List<PlayList> playlists,
+                              final PlayList selectedPlaylist) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -2030,7 +2033,12 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 playlists.add(playList);
                             }
-                            setupSpinner(playlists, temp);
+                            ArrayAdapter<PlayList> arrayAdapter =
+                                    new ArrayAdapter<PlayList>(MainActivity.this,
+                                            android.R.layout.simple_spinner_item, localPlaylists);
+                            arrayAdapter.setDropDownViewResource(
+                                    android.R.layout.simple_spinner_dropdown_item);
+                            setupSpinner(arrayAdapter, playlists, temp);
                             break;
                         case "currentPosition":
                             final int currentPosition = jObject.getInt("currentPosition");
@@ -2087,7 +2095,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             stopRemote();
-            setupSpinner(localPlaylists, localSelectedPlaylist);
+            setupSpinner(arrayAdapter, localPlaylists, localSelectedPlaylist);
             displayedTrack = localTrack;
             displayTrack();
         }
@@ -2420,7 +2428,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void stopRemote() {
         stopClient(clientRemote, buttonRemote, R.drawable.remote_off, true);
-        setupSpinner(localPlaylists, localSelectedPlaylist);
+        setupSpinner(arrayAdapter, localPlaylists, localSelectedPlaylist);
         displayedTrack = localTrack;
         displayTrack();
     }
