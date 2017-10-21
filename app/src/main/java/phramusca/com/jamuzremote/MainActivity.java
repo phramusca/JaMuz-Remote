@@ -218,13 +218,13 @@ public class MainActivity extends AppCompatActivity {
         mBuilderSync.setContentTitle("JaMuz Sync")
                 .setContentText("Download in progress")
                 .setUsesChronometer(true)
-                .setSmallIcon(R.drawable.gears_normal);
+                .setSmallIcon(R.drawable.ic_process);
 
         mBuilderScan = new NotificationCompat.Builder(this);
         mBuilderScan.setContentTitle("JaMuz Scan")
                 .setContentText("Scan in progress")
                 .setUsesChronometer(true)
-                .setSmallIcon(R.drawable.gears_normal);
+                .setSmallIcon(R.drawable.ic_process);
 
         layoutTags = (FlexboxLayout) findViewById(R.id.panel_tags);
         layoutTagsPlaylist = (FlexboxLayout) findViewById(R.id.panel_tags_playlist);
@@ -451,6 +451,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dimOn();
                 toggle(layoutAttributes, !toggleButtonTags.isChecked());
+                if(toggleButtonTags.isChecked()) {
+                    toggleButtonPlaylist.setChecked(false);
+                    toggle(layoutPlaylist, true);
+                }
+
             }
         });
 
@@ -460,6 +465,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dimOn();
                 toggle(layoutPlaylist, !toggleButtonPlaylist.isChecked());
+                if(toggleButtonPlaylist.isChecked()) {
+                    toggleButtonTags.setChecked(false);
+                    toggle(layoutAttributes, true);
+                }
             }
         });
 

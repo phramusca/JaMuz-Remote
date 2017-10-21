@@ -249,6 +249,115 @@
     </GridLayout>
 
     <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/panel_controls"
+        android:paddingTop="5dp" >
+
+        <GridLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:columnCount="4"
+            android:rowCount="2"
+            android:id="@+id/gridLayout"
+            android:layout_gravity="center"
+            android:alpha="0.7">
+
+            <Button
+                android:background="@drawable/ic_button_up"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_volUp"
+                android:layout_row="0"
+                android:layout_column="0"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="5dp"/>
+
+            <Button
+                android:background="@drawable/ic_button_previous"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_previous"
+                android:layout_row="0"
+                android:layout_column="1"
+                android:layout_marginRight="5dp"/>
+
+            <Button
+                android:background="@drawable/ic_button_play"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_play"
+                android:layout_row="0"
+                android:layout_column="2"
+                android:layout_marginRight="5dp"/>
+
+            <Button
+                android:background="@drawable/ic_button_next"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_next"
+                android:layout_row="0"
+                android:layout_column="3"/>
+
+            <Button
+                android:background="@drawable/ic_button_down"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_volDown"
+                android:layout_row="1"
+                android:layout_column="0"/>
+
+            <Button
+                android:background="@drawable/ic_button_rewind"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_rewind"
+                android:layout_row="1"
+                android:layout_column="1"/>
+
+            <Button
+                android:background="@drawable/ic_button_pullup"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_pullup"
+                android:layout_row="1"
+                android:layout_column="2"/>
+
+            <Button
+                android:background="@drawable/ic_button_forward"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_forward"
+                android:layout_row="1"
+                android:layout_column="3"
+                android:layout_margin="1dp"/>
+
+        </GridLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:paddingEnd="20dp"
+        android:paddingStart="20dp"
+        android:paddingBottom="5dp">
+        
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner_playlist"
+            android:popupBackground="#DDFFFFFF"
+            android:background="@drawable/ic_gradient_spinner"
+            android:layout_gravity="center_vertical"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:alpha="0.7"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/panel_playlist"
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -358,113 +467,6 @@
                 android:paddingBottom="5dp"
                 android:alpha="0.7"/>
         </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="5dp"
-        android:paddingEnd="20dp"
-        android:paddingStart="20dp">
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/spinner_playlist"
-            android:popupBackground="#DDFFFFFF"
-            android:background="@drawable/ic_gradient_spinner"
-            android:layout_gravity="center_vertical"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:alpha="0.7"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/panel_controls"
-        android:paddingTop="5dp" >
-
-        <GridLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:columnCount="4"
-                android:rowCount="2"
-                android:id="@+id/gridLayout"
-                android:layout_gravity="center"
-                android:alpha="0.7">
-
-                <Button
-                    android:background="@drawable/ic_button_up"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/button_volUp"
-                    android:layout_row="0"
-                    android:layout_column="0"
-                    android:layout_marginRight="20dp"
-                    android:layout_marginBottom="5dp"/>
-
-                <Button
-                    android:background="@drawable/ic_button_previous"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/button_previous"
-                    android:layout_row="0"
-                    android:layout_column="1"
-                    android:layout_marginRight="5dp"/>
-
-                <Button
-                    android:background="@drawable/ic_button_play"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/button_play"
-                    android:layout_row="0"
-                    android:layout_column="2"
-                    android:layout_marginRight="5dp"/>
-
-                <Button
-                    android:background="@drawable/ic_button_next"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/button_next"
-                    android:layout_row="0"
-                    android:layout_column="3"/>
-
-                <Button
-                    android:background="@drawable/ic_button_down"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/button_volDown"
-                    android:layout_row="1"
-                    android:layout_column="0"/>
-
-                <Button
-                    android:background="@drawable/ic_button_rewind"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/button_rewind"
-                    android:layout_row="1"
-                    android:layout_column="1"/>
-
-                <Button
-                    android:background="@drawable/ic_button_pullup"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/button_pullup"
-                    android:layout_row="1"
-                    android:layout_column="2"/>
-
-                <Button
-                    android:background="@drawable/ic_button_forward"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/button_forward"
-                    android:layout_row="1"
-                    android:layout_column="3"
-                    android:layout_margin="1dp"/>
-
-            </GridLayout>
-
     </LinearLayout>
 
     <LinearLayout
