@@ -1,13 +1,8 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
-import android.os.Environment;
-
-import java.io.File;
 
 /**
  * Created by raph on 10/06/17.
@@ -67,6 +62,10 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
                 "\tFOREIGN KEY(idFile) REFERENCES "+TABLE_TRACKS+"("+COL_ID+"),\n" +
                 "\tFOREIGN KEY(idTag) REFERENCES tag(id) ON DELETE CASCADE\n" +
                 ");");
+        db.execSQL("CREATE TABLE \"genre\" (\n" +
+                "    \"id\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\n" +
+                "    \"value\" TEXT NOT NULL\n" +
+                ");");
     }
 
     @Override
@@ -74,6 +73,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE " + TABLE_TRACKS + ";");
         db.execSQL("DROP TABLE tags");
         db.execSQL("DROP TABLE tagfile");
+        db.execSQL("DROP TABLE genre");
         onCreate(db);
     }
 }

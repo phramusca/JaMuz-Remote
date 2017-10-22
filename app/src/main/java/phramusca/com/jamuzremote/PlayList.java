@@ -126,8 +126,8 @@ public class PlayList {
             if(includeUnTagged) {
                 in += " OR tag.value IS NULL ";
             }
-        } else if(!includeUnTagged) {
-            in += " tag.value NOT NULL ";
+        } else if(includeUnTagged) {
+            in += " tag.value IS NULL ";
         } else {
             in += " 1 ";
         }
