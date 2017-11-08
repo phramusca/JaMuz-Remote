@@ -11,8 +11,9 @@ public class PlayList {
     private String query;
     private String order;
     private MusicLibrary musicLibrary=null;
-    private ArrayList<String> tags = new ArrayList<>();
-    private boolean includeUnTagged = true;
+    private ArrayList<String> tagsToInclude = new ArrayList<>();
+    private ArrayList<String> tagsToExclude = new ArrayList<>();
+    private TriStateButton.STATE includeUnTagged = TriStateButton.STATE.ANY;
     private int rating=0;
     private Operator ratingOperator =PlayList.Operator.GREATERTHAN;
     private String genre="";
@@ -25,7 +26,7 @@ public class PlayList {
 
     public PlayList(String name, MusicLibrary musicLibrary, ArrayList<String> tags) {
         this(name, musicLibrary);
-        this.tags = tags;
+        //this.tagsToInclude = tags;
     }
 
     public PlayList(String name, String query, String order, MusicLibrary musicLibrary) {
@@ -36,7 +37,7 @@ public class PlayList {
 
     public ArrayList<Track> getTracks() {
         if(query==null) {
-            return musicLibrary.getTracks(getWhere(tags));
+            return musicLibrary.getTracks(getWhere(tagsToInclude, tagsToExclude));
         } else {
             return musicLibrary.getTracks(query, order);
         }
@@ -46,16 +47,30 @@ public class PlayList {
      *
      * @param value
      */
-    public void toggleTag(String value) {
+    public void toggleTag(String value, TriStateButton.STATE state) {
         if(value.equals("null")) {
-            includeUnTagged=!includeUnTagged;
+            includeUnTagged=state;
         } else {
-            if(tags.contains(value)) {
-                tags.remove(value);
+            switch (state) {
+                case TRUE:
+                    tagsToInclude.add(value);
+                    removeTag(tagsToExclude, value);
+                    break;
+                case FALSE:
+                    tagsToExclude.add(value);
+                    removeTag(tagsToInclude, value);
+                    break;
+                case ANY:
+                default:
+                    removeTag(tagsToInclude, value);
+                    removeTag(tagsToExclude, value);
             }
-            else {
-                tags.add(value);
-            }
+        }
+    }
+
+    private void removeTag(ArrayList<String> list, String value) {
+        if(list.contains(value)) {
+            list.remove(value);
         }
     }
 
@@ -89,7 +104,7 @@ public class PlayList {
         this.genreExclude = genreExclude;
     }
 
-    private String getWhere(ArrayList<String> tags) {
+    private String getWhere(ArrayList<String> tagsToInclude, ArrayList<String> tagsToExclude) {
 
         //FILTER by RATING
         String in = " WHERE rating ";
@@ -108,30 +123,55 @@ public class PlayList {
 
         //FILTER by GENRE
         if(!genre.equals("")) {
-            in += " AND genre=\""+genre+"\" ";
+            in += "\n AND genre=\""+genre+"\" ";
         }
         if(!genreExclude.equals("")) {
-            in += " AND genre!=\""+genreExclude+"\" ";
+            in += "\n AND genre!=\""+genreExclude+"\" ";
         }
 
         //FILTER by TAGS
-        in += " AND ( ";
-        if(tags.size()>0) {
-            in += " tag.value IN (";
-            for(String entry : tags) {
-                in+="\""+entry+"\",";
-            }
-            in = in.substring(0, in.length()-1);
-            in += " )";
-            if(includeUnTagged) {
-                in += " OR tag.value IS NULL ";
-            }
-        } else if(includeUnTagged) {
-            in += " tag.value IS NULL ";
+         if (includeUnTagged.equals(TriStateButton.STATE.TRUE)) {
+            in += "\n AND tag.value IS NULL ";
         } else {
-            in += " 1 ";
+            in += "\n AND (( ";
+
+            //Include tags
+            if(tagsToInclude.size()>0) {
+                in += " tag.value IN (";
+                for(String entry : tagsToInclude) {
+                    in+="\""+entry+"\",";
+                }
+                in = in.substring(0, in.length()-1);
+                in += " )";
+            }  else {
+                in += " 1 ";
+            }
+
+            //Exclude tags
+
+            if(tagsToExclude.size()>0) {
+                in += "\n OR ";
+                in += " tag.value NOT IN (";
+                for(String entry : tagsToExclude) {
+                    in+="\""+entry+"\",";
+                }
+                in = in.substring(0, in.length()-1);
+                in += " )";
+            } /*else {
+                in += " 1 ";
+            }*/
+            in += " ) ";
+
+            //Include or exclude untagged
+            if(includeUnTagged.equals(TriStateButton.STATE.ANY)) {
+                in += "\n OR tag.value IS NULL ";
+            } else if(includeUnTagged.equals(TriStateButton.STATE.FALSE)) {
+                in += "\n AND tag.value IS NOT NULL ";
+            }
+
+            in += " ) ";
         }
-        in += " ) ";
+
         return in;
     }
 

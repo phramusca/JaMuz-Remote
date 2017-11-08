@@ -212,6 +212,8 @@ public class MainActivity extends AppCompatActivity {
             filesToGet = gson.fromJson(readJson, mapType);
         }
 
+        //FIXME: Store and read local playlist ("Selection")
+
         mNotifyManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mBuilderSync = new NotificationCompat.Builder(this);
@@ -749,6 +751,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void makeButtonTagPlaylist(int key, String value) {
+        TriStateButton button = new TriStateButton(this);
+        button.setId(key);
+        button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        button.setBackgroundResource(R.drawable.ic_tags);
+        button.setAlpha(0.7F);
+        button.setAllCaps(false);
+        button.setText(value);
+        button.setState(TriStateButton.STATE.ANY);
+        setTagButtonTextColor(button, TriStateButton.STATE.ANY);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dimOn();
+                TriStateButton button = (TriStateButton)view;
+                TriStateButton.STATE state = button.getState();
+                setTagButtonTextColor(button, state);
+                String buttonText = button.getText().toString();
+                localPlaylist.toggleTag(buttonText, state);
+                if(localSelectedPlaylist.equals(localPlaylist)) {
+                    //Queue may not be valid as value changed
+                    queue.clear();
+                }
+            }
+        });
+        ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
+                ActionBar.LayoutParams.WRAP_CONTENT);
+        layoutTagsPlaylist.addView(button, lp);
+    }
+
+    /*private void makeButtonTagPlaylist(int key, String value) {
         ToggleButton button = getButtonTag(key, value);
         button.setChecked(true);
         setTagButtonTextColor(button);
@@ -769,7 +801,7 @@ public class MainActivity extends AppCompatActivity {
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
                 ActionBar.LayoutParams.WRAP_CONTENT);
         layoutTagsPlaylist.addView(button, lp);
-    }
+    }*/
 
     //This is a trick since the following (not in listner) is not working:
     //button.setTextColor(ContextCompat.getColor(this, R.color.toggle_text));
@@ -778,6 +810,21 @@ public class MainActivity extends AppCompatActivity {
         b.setTextColor(ContextCompat.getColor(this, checked?R.color.textColor:R.color.colorPrimaryDark));
     }
 
+    private void setTagButtonTextColor(TriStateButton b, TriStateButton.STATE state) {
+        switch (state) {
+            case ANY:
+                b.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+                break;
+            case TRUE:
+                b.setTextColor(ContextCompat.getColor(this, R.color.textColor));
+                break;
+            case FALSE:
+                b.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
+                break;
+            default:
+                break;
+        }
+    }
 
     private void applyPlaylist(PlayList playList) {
         if(!isRemoteConnected()) {

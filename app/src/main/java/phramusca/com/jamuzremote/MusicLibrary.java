@@ -101,7 +101,7 @@ public class MusicLibrary {
                 "SELECT GROUP_CONCAT(tag.value), tracks.* \n" +
                 " FROM tracks \n" +
                 " LEFT JOIN tagfile ON tracks.ID=tagfile.idFile \n" +
-                " LEFT JOIN tag ON tag.id=tagfile.idTag "+ where + "\n" +
+                " LEFT JOIN tag ON tag.id=tagfile.idTag \n"+ where + "\n" +
                 " GROUP BY tracks.ID \n" +
                 " ORDER BY playCounter, lastPlayed",
                 new String[] { });
