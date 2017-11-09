@@ -212,8 +212,6 @@ public class MainActivity extends AppCompatActivity {
             filesToGet = gson.fromJson(readJson, mapType);
         }
 
-        //FIXME: Store and read local playlist ("Selection")
-
         mNotifyManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mBuilderSync = new NotificationCompat.Builder(this);
@@ -753,6 +751,7 @@ public class MainActivity extends AppCompatActivity {
     private void makeButtonTagPlaylist(int key, String value) {
         TriStateButton button = new TriStateButton(this);
         button.setId(key);
+        button.setTag(value);
         button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
         button.setBackgroundResource(R.drawable.ic_tags);
         button.setAlpha(0.7F);
@@ -1158,6 +1157,12 @@ public class MainActivity extends AppCompatActivity {
 
         saveFilesLists();
 
+        //Write localPlaylist
+        if(localPlaylist!=null) {
+            Gson gson = new Gson();
+            HelperTextFile.write(this, "localPlaylist.txt", gson.toJson(localPlaylist));
+        }
+
         //Close all notifications
         mNotifyManager.cancelAll();
     }
@@ -1276,7 +1281,7 @@ public class MainActivity extends AppCompatActivity {
                     checkAbort();
                     //Scan deleted files
                     //TODO: No need to check what scanned previously ...
-                    List<Track> tracks = new PlayList("All", musicLibrary).getTracks();
+                    List<Track> tracks = new PlayList("All").getTracks();
                     nbFilesTotal = tracks.size();
                     nbFiles=0;
                     for(Track track : tracks) {
@@ -1431,8 +1436,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 musicLibrary.insertTrack(track);
             } else {
-                //FIXME: Delete track ONLY if it is a song track
-                //that appears to be corrupted
+                //FIXME: Delete track ONLY if it is a song track that appears to be corrupted
                 Log.w(TAG, "browseFS delete file because cannot read tags of " + absolutePath);
                 new File(absolutePath).delete();
                 result=false;
@@ -1785,7 +1789,7 @@ public class MainActivity extends AppCompatActivity {
         genres = new ArrayList<>();
         genres = musicLibrary.getGenres();
         setupSpinnerGenre(genres, displayedTrack.getGenre());
-        setupSpinnerGenrePlaylist(genres);
+        setupSpinnerGenrePlaylist(genres, genres.get(0), genres.get(0));
     }
 
     private void askPermissions() {
@@ -1878,7 +1882,26 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupLocalPlaylists() {
         localPlaylists = new ArrayList<PlayList>();
-        localPlaylist = new PlayList("Selection", musicLibrary);
+        //Read localPlaylist
+        localPlaylist = new PlayList("Selection");
+        String readJson = HelperTextFile.read(this, "localPlaylist.txt");
+        if(!readJson.equals("")) {
+            Gson gson = new Gson();
+            Type mapType = new TypeToken<PlayList>(){}.getType();
+            localPlaylist = gson.fromJson(readJson, mapType);
+            //Display retrieved playlist filter
+            TriStateButton nullButton = (TriStateButton) layoutTagsPlaylist.findViewWithTag("null");
+            nullButton.setState(localPlaylist.getUnTaggedState());
+            setTagButtonTextColor(nullButton, localPlaylist.getUnTaggedState());
+            for(Map.Entry<String, TriStateButton.STATE> entry : localPlaylist.getTags()) {
+                TriStateButton button = (TriStateButton) layoutTagsPlaylist.findViewWithTag(entry.getKey());
+                button.setState(entry.getValue());
+                setTagButtonTextColor(button, entry.getValue());
+            }
+            buttonRating.setText(localPlaylist.getRatingOperator());
+            ratingBarPlaylist.setRating(localPlaylist.getRating());
+            setupSpinnerGenrePlaylist(genres, localPlaylist.getGenre(), localPlaylist.getGenreExclude());
+        }
         localPlaylists.add(localPlaylist);
         addToPlaylists("Top", "rating=5", "rating>2", "playCounter, lastPlayed");
         addToPlaylists("Discover","rating=0", "rating=0", "RANDOM()");
@@ -1968,7 +1991,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setupSpinnerGenrePlaylist(final List<String> genres) {
+    private void setupSpinnerGenrePlaylist(final List<String> genres
+            , final String genreIncluded
+            , final String genreExcluded) {
 
         ArrayList<String> strings = new ArrayList<>();
         strings.add("");
@@ -1985,6 +2010,12 @@ public class MainActivity extends AppCompatActivity {
                 spinnerGenreExcludedPlaylistSend=false;
                 spinnerGenrePlaylist.setAdapter(arrayAdapter);
                 spinnerGenreExcludePlaylist.setAdapter(arrayAdapter);
+                if(!genreIncluded.equals("")) {
+                    spinnerGenrePlaylist.setSelection(arrayAdapter.getPosition(genreIncluded));
+                }
+                if(!genreExcluded.equals("")) {
+                    spinnerGenreExcludePlaylist.setSelection(arrayAdapter.getPosition(genreExcluded));
+                }
             }
         });
     }
@@ -2222,12 +2253,12 @@ public class MainActivity extends AppCompatActivity {
                     switch(type) {
                         case "playlists":
                             String selectedPlaylist = jObject.getString("selectedPlaylist");
-                            PlayList temp = new PlayList(selectedPlaylist, musicLibrary);
+                            PlayList temp = new PlayList(selectedPlaylist);
                             final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists");
                             final List<PlayList> playlists = new ArrayList<PlayList>();
                             for(int i=0; i<jsonPlaylists.length(); i++) {
                                 String playlist = (String) jsonPlaylists.get(i);
-                                PlayList playList = new PlayList(playlist, musicLibrary);
+                                PlayList playList = new PlayList(playlist);
                                 if(playlist.equals(selectedPlaylist)) {
                                     playList=temp;
                                 }
@@ -2380,7 +2411,7 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                             setupSpinnerGenre(genres, displayedTrack.getGenre());
-                            setupSpinnerGenrePlaylist(genres);
+                            setupSpinnerGenrePlaylist(genres, localPlaylist.getGenre(), localPlaylist.getGenreExclude());
                             break;
                     }
                 } catch (JSONException e) {
