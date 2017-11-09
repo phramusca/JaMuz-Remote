@@ -810,16 +810,19 @@ public class MainActivity extends AppCompatActivity {
         b.setTextColor(ContextCompat.getColor(this, checked?R.color.textColor:R.color.colorPrimaryDark));
     }
 
-    private void setTagButtonTextColor(TriStateButton b, TriStateButton.STATE state) {
+    private void setTagButtonTextColor(TriStateButton button, TriStateButton.STATE state) {
         switch (state) {
             case ANY:
-                b.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+                button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+                button.setBackgroundResource(R.drawable.ic_gradient_button);
                 break;
             case TRUE:
-                b.setTextColor(ContextCompat.getColor(this, R.color.textColor));
+                button.setTextColor(ContextCompat.getColor(this, R.color.textColor));
+                button.setBackgroundResource(R.drawable.ic_gradient_button_pressed);
                 break;
             case FALSE:
-                b.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
+                button.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
+                button.setBackgroundResource(R.drawable.ic_gradient_button_pressed);
                 break;
             default:
                 break;
