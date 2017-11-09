@@ -57,7 +57,7 @@ public class AudioPlayer {
         return msg;
     }
 
-    //FIXME: Make Replaygain options.
+    //TODO: Make Replaygain options.
     private boolean mReplayGainTrackEnabled=true;
     private boolean mReplayGainAlbumEnabled=false;
     private float baseVolume = 0.70f;

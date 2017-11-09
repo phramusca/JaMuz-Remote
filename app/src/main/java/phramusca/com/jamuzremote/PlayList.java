@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by raph on 11/06/17.
@@ -13,31 +14,53 @@ public class PlayList {
     private String name;
     private String query;
     private String order;
-    private MusicLibrary musicLibrary=null;
     private Map<String, TriStateButton.STATE> tags = new HashMap<>();
     private TriStateButton.STATE unTaggedState = TriStateButton.STATE.ANY;
     private int rating=0;
-    private Operator ratingOperator =PlayList.Operator.GREATERTHAN;
+    private Operator ratingOperator = PlayList.Operator.GREATERTHAN;
     private String genre="";
     private String genreExclude="";
 
-    public PlayList(String name, MusicLibrary musicLibrary) {
+    public PlayList(String name) {
         this.name = name;
-        this.musicLibrary = musicLibrary;
     }
 
     public PlayList(String name, String query, String order, MusicLibrary musicLibrary) {
-        this(name, musicLibrary);
+        this(name);
         this.query = query;
         this.order = order;
     }
 
     public ArrayList<Track> getTracks() {
         if(query==null) {
-            return musicLibrary.getTracks(getWhere(), getHaving(), "");
+            return MainActivity.musicLibrary.getTracks(getWhere(), getHaving(), "");
         } else {
-            return musicLibrary.getTracks(query, order);
+            return MainActivity.musicLibrary.getTracks(query, order);
         }
+    }
+
+    public Set<Map.Entry<String, TriStateButton.STATE>> getTags() {
+        return tags.entrySet();
+    }
+
+    public TriStateButton.STATE getUnTaggedState() {
+        return unTaggedState;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public String getGenreExclude() {
+        return genreExclude;
+    }
+
+    public String getRatingOperator() {
+        return ratingOperator.toString();
     }
 
     public void toggleTag(String value, TriStateButton.STATE state) {
@@ -149,7 +172,7 @@ public class PlayList {
     @Override
     public String toString() {
         //FIXME: getNb for "Selected" playlist
-        return query==null?name:name+" ("+ musicLibrary.getNb(query) +")";
+        return query==null?name:name+" ("+ MainActivity.musicLibrary.getNb(query) +")";
     }
 
     /**

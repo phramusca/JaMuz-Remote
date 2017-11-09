@@ -4,10 +4,8 @@ import android.media.MediaMetadataRetriever;
 import android.util.Log;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * Created by raph on 01/05/17.
@@ -27,7 +25,7 @@ public class Track {
     private ArrayList<String> tags = null;
     private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
 
-    //FIXME: Store replaygain, no to read too often
+    //TODO: Store replaygain, no to read too often
 
     public Track(int id, int rating, String title, String album,
                  String artist, String coverHash, String path, String genre,
