@@ -9,9 +9,13 @@ import android.widget.Button;
  */
 public class TriStateButton extends Button {
 
-    private final int MAX_STATES=3;
+    //private final int MAX_STATES=3;
     int state;
     Context context;
+
+    public enum STATE {
+        ANY, TRUE, FALSE
+    }
 
     public TriStateButton(Context context) {
         super(context);
@@ -35,13 +39,9 @@ public class TriStateButton extends Button {
     private void nextState() {
         state++;
 
-        if (state == MAX_STATES) {
+        if (state == STATE.values().length) {
             state = 0;
         }
-    }
-
-    public enum STATE {
-        ANY, TRUE, FALSE
     }
 
     public STATE getState() {
@@ -62,13 +62,13 @@ public class TriStateButton extends Button {
 
         switch (state) {
             case ANY:
-                this.state =0;
+                this.state = 0;
                 break;
             case TRUE:
-                this.state =1;
+                this.state = 1;
                 break;
             case FALSE:
-                this.state =2;
+                this.state = 2;
                 break;
             default:
                 break;

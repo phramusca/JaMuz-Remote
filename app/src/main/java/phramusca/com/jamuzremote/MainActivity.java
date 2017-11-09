@@ -1875,7 +1875,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupLocalPlaylists() {
         localPlaylists = new ArrayList<PlayList>();
-        localPlaylist = new PlayList("Selection", musicLibrary, new ArrayList<String>(tags.values()));
+        localPlaylist = new PlayList("Selection", musicLibrary);
         localPlaylists.add(localPlaylist);
         addToPlaylists("Top", "rating=5", "rating>2", "playCounter, lastPlayed");
         addToPlaylists("Discover","rating=0", "rating=0", "RANDOM()");

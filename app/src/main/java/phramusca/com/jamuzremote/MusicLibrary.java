@@ -93,18 +93,19 @@ public class MusicLibrary {
         return tracks;
     }
 
-    public synchronized ArrayList<Track> getTracks(String where) {
+    public synchronized ArrayList<Track> getTracks(String where, String having, String order) {
         ArrayList<Track> tracks = new ArrayList<>();
         try {
-            //TODO: Use GROUP_CONCAT(tag.value)
-            Cursor cursor = db.rawQuery(
-                "SELECT GROUP_CONCAT(tag.value), tracks.* \n" +
-                " FROM tracks \n" +
-                " LEFT JOIN tagfile ON tracks.ID=tagfile.idFile \n" +
-                " LEFT JOIN tag ON tag.id=tagfile.idTag \n"+ where + "\n" +
-                " GROUP BY tracks.ID \n" +
-                " ORDER BY playCounter, lastPlayed",
-                new String[] { });
+            String query = "SELECT GROUP_CONCAT(tag.value) AS tags, tracks.* \n" +
+                    " FROM tracks \n" +
+                    " LEFT JOIN tagfile ON tracks.ID=tagfile.idFile \n" +
+                    " LEFT JOIN tag ON tag.id=tagfile.idTag \n"+
+                    " " + where + " \n" +
+                    " GROUP BY tracks.ID \n" +
+                    " " + having + " \n" +
+                    " ORDER BY playCounter, lastPlayed";
+            Log.i(TAG, query);
+            Cursor cursor = db.rawQuery(query, new String[] { });
             tracks = getTracks(cursor);
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "getTracks(\""+where+"\")", ex);
