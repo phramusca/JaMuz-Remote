@@ -1,6 +1,9 @@
 package phramusca.com.jamuzremote;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created by raph on 11/06/17.
@@ -11,9 +14,8 @@ public class PlayList {
     private String query;
     private String order;
     private MusicLibrary musicLibrary=null;
-    private ArrayList<String> tagsToInclude = new ArrayList<>();
-    private ArrayList<String> tagsToExclude = new ArrayList<>();
-    private TriStateButton.STATE includeUnTagged = TriStateButton.STATE.ANY;
+    private Map<String, TriStateButton.STATE> tags = new HashMap<>();
+    private TriStateButton.STATE unTaggedState = TriStateButton.STATE.ANY;
     private int rating=0;
     private Operator ratingOperator =PlayList.Operator.GREATERTHAN;
     private String genre="";
@@ -24,11 +26,6 @@ public class PlayList {
         this.musicLibrary = musicLibrary;
     }
 
-    public PlayList(String name, MusicLibrary musicLibrary, ArrayList<String> tags) {
-        this(name, musicLibrary);
-        //this.tagsToInclude = tags;
-    }
-
     public PlayList(String name, String query, String order, MusicLibrary musicLibrary) {
         this(name, musicLibrary);
         this.query = query;
@@ -37,46 +34,20 @@ public class PlayList {
 
     public ArrayList<Track> getTracks() {
         if(query==null) {
-            return musicLibrary.getTracks(getWhere(tagsToInclude, tagsToExclude));
+            return musicLibrary.getTracks(getWhere(), getHaving(), "");
         } else {
             return musicLibrary.getTracks(query, order);
         }
     }
 
-    /**
-     *
-     * @param value
-     */
     public void toggleTag(String value, TriStateButton.STATE state) {
         if(value.equals("null")) {
-            includeUnTagged=state;
+            unTaggedState = state;
         } else {
-            switch (state) {
-                case TRUE:
-                    tagsToInclude.add(value);
-                    removeTag(tagsToExclude, value);
-                    break;
-                case FALSE:
-                    tagsToExclude.add(value);
-                    removeTag(tagsToInclude, value);
-                    break;
-                case ANY:
-                default:
-                    removeTag(tagsToInclude, value);
-                    removeTag(tagsToExclude, value);
-            }
+            tags.put(value, state);
         }
     }
 
-    private void removeTag(ArrayList<String> list, String value) {
-        if(list.contains(value)) {
-            list.remove(value);
-        }
-    }
-
-    /**
-     *Set rating operator
-     */
     public String setRatingOperator() {
         switch (ratingOperator) {
             case GREATERTHAN:
@@ -104,7 +75,7 @@ public class PlayList {
         this.genreExclude = genreExclude;
     }
 
-    private String getWhere(ArrayList<String> tagsToInclude, ArrayList<String> tagsToExclude) {
+    private String getWhere() {
 
         //FILTER by RATING
         String in = " WHERE rating ";
@@ -129,49 +100,45 @@ public class PlayList {
             in += "\n AND genre!=\""+genreExclude+"\" ";
         }
 
+        return in;
+    }
+
+    private String getTagClause(Map.Entry<String, TriStateButton.STATE> tag) {
+        String name = tag.getKey();
+        TriStateButton.STATE state = tag.getValue();
+        return state.equals(TriStateButton.STATE.ANY)?" 1 ":
+                " tags "+(state.equals(TriStateButton.STATE.FALSE)?"NOT":"")+" LIKE "+"\"%"+name+"%\" ";
+    }
+
+    private String getHaving() {
         //FILTER by TAGS
-         if (includeUnTagged.equals(TriStateButton.STATE.TRUE)) {
-            in += "\n AND tag.value IS NULL ";
+        String in;
+        if (unTaggedState.equals(TriStateButton.STATE.TRUE)) {
+            in = " HAVING tag.value IS NULL ";
         } else {
-            in += "\n AND (( ";
-
-            //Include tags
-            if(tagsToInclude.size()>0) {
-                in += " tag.value IN (";
-                for(String entry : tagsToInclude) {
-                    in+="\""+entry+"\",";
+            //Include or exclude tags according to states
+            in = " HAVING ( ";
+            if(tags.size()>0) {
+                Iterator<Map.Entry<String, TriStateButton.STATE>> iterator = tags.entrySet().iterator();
+                if (iterator.hasNext()) {
+                    Map.Entry<String, TriStateButton.STATE> tag = iterator.next();
+                    in+=" "+getTagClause(tag);
                 }
-                in = in.substring(0, in.length()-1);
-                in += " )";
-            }  else {
-                in += " 1 ";
+                while (iterator.hasNext()) {
+                    Map.Entry<String, TriStateButton.STATE> tag = iterator.next();
+                    in+="\n AND "+getTagClause(tag);
+                }
+            } else {
+                in+=" 1 ";
             }
-
-            //Exclude tags
-
-            if(tagsToExclude.size()>0) {
-                in += "\n OR ";
-                in += " tag.value NOT IN (";
-                for(String entry : tagsToExclude) {
-                    in+="\""+entry+"\",";
-                }
-                in = in.substring(0, in.length()-1);
-                in += " )";
-            } /*else {
-                in += " 1 ";
-            }*/
             in += " ) ";
-
             //Include or exclude untagged
-            if(includeUnTagged.equals(TriStateButton.STATE.ANY)) {
-                in += "\n OR tag.value IS NULL ";
-            } else if(includeUnTagged.equals(TriStateButton.STATE.FALSE)) {
-                in += "\n AND tag.value IS NOT NULL ";
+            if(unTaggedState.equals(TriStateButton.STATE.ANY)) {
+                in += "\n OR tags IS NULL ";
+            } else if(unTaggedState.equals(TriStateButton.STATE.FALSE)) {
+                in += "\n AND tags IS NOT NULL ";
             }
-
-            in += " ) ";
         }
-
         return in;
     }
 
