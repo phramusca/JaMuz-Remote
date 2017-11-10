@@ -103,14 +103,32 @@ public class MusicLibrary {
                     " " + where + " \n" +
                     " GROUP BY tracks.ID \n" +
                     " " + having + " \n" +
-                    " ORDER BY playCounter, lastPlayed";
+                    " " + order;
             Log.i(TAG, query);
             Cursor cursor = db.rawQuery(query, new String[] { });
             tracks = getTracks(cursor);
+            Log.i(TAG, "getTracks: "+tracks.size()+"//"+cursor.getCount());
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getTracks(\""+where+"\")", ex);
+            Log.e(TAG, "getTracks("+where+","+having+","+order+")", ex);
         }
         return tracks;
+    }
+
+    public synchronized int getNb(String where, String having){
+        try {
+            String query = "SELECT * \n" +
+                    " FROM tracks \n" +
+                    " LEFT JOIN tagfile ON tracks.ID=tagfile.idFile \n" +
+                    " LEFT JOIN tag ON tag.id=tagfile.idTag \n"+
+                    " " + where + " \n" +
+                    " GROUP BY tracks.ID \n" +
+                    " " + having;
+            Cursor cursor = db.rawQuery(query, new String [] {});
+            return cursor.getCount();
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "getNb("+where+","+having+")", ex);
+        }
+        return -1;
     }
 
     private ArrayList<Track> getTracks(Cursor cursor) {
