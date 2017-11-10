@@ -323,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
                     if(localSelectedPlaylist.equals(localPlaylist)) {
                         //Queue may not be valid as value changed
                         queue.clear();
-                        setupSpinner(localPlaylist);
+                        setupSpinner(arrayAdapter, localPlaylist);
                     }
                     ratingBarPlaylist.setEnabled(true);
                 }
@@ -339,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
                 if(localSelectedPlaylist.equals(localPlaylist)) {
                     //Queue may not be valid as value changed
                     queue.clear();
-                    setupSpinner(localPlaylist);
+                    setupSpinner(arrayAdapter, localPlaylist);
                 }
             }
         });
@@ -352,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
                 if(localSelectedPlaylist.equals(localPlaylist)) {
                     //Queue may not be valid as value changed
                     queue.clear();
-                    setupSpinner(localPlaylist);
+                    setupSpinner(arrayAdapter, localPlaylist);
                 }
             }
         });
@@ -774,7 +774,7 @@ public class MainActivity extends AppCompatActivity {
                 if(localSelectedPlaylist.equals(localPlaylist)) {
                     //Queue may not be valid as value changed
                     queue.clear();
-                    setupSpinner(localPlaylist);
+                    setupSpinner(arrayAdapter, localPlaylist);
                 }
             }
         });
@@ -782,29 +782,6 @@ public class MainActivity extends AppCompatActivity {
                 ActionBar.LayoutParams.WRAP_CONTENT);
         layoutTagsPlaylist.addView(button, lp);
     }
-
-    /*private void makeButtonTagPlaylist(int key, String value) {
-        ToggleButton button = getButtonTag(key, value);
-        button.setChecked(true);
-        setTagButtonTextColor(button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dimOn();
-                ToggleButton button = (ToggleButton)view;
-                setTagButtonTextColor(button);
-                String buttonText = button.getText().toString();
-                localPlaylist.toggleTag(buttonText);
-                if(localSelectedPlaylist.equals(localPlaylist)) {
-                    //Queue may not be valid as value changed
-                    queue.clear();
-                }
-            }
-        });
-        ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
-                ActionBar.LayoutParams.WRAP_CONTENT);
-        layoutTagsPlaylist.addView(button, lp);
-    }*/
 
     //This is a trick since the following (not in listner) is not working:
     //button.setTextColor(ContextCompat.getColor(this, R.color.toggle_text));
@@ -873,7 +850,7 @@ public class MainActivity extends AppCompatActivity {
                     if(localSelectedPlaylist.equals(localPlaylist)) {
                         //Queue may not be valid as value changed
                         queue.clear();
-                        setupSpinner(localPlaylist);
+                        setupSpinner(arrayAdapter, localPlaylist);
                     }
                 }
                 dimOn();
@@ -898,7 +875,7 @@ public class MainActivity extends AppCompatActivity {
                     if(localSelectedPlaylist.equals(localPlaylist)) {
                         //Queue may not be valid as value changed
                         queue.clear();
-                        setupSpinner(localPlaylist);
+                        setupSpinner(arrayAdapter, localPlaylist);
                     }
                 }
                 dimOn();
@@ -1085,7 +1062,7 @@ public class MainActivity extends AppCompatActivity {
             for(PlayList playList : localPlaylists) {
                 if(playList.getName().equalsIgnoreCase(spokenText)) {
                     applyPlaylist(playList);
-                    setupSpinner(playList);
+                    setupSpinner(arrayAdapter, playList);
                     foundPlaylist=true;
                     break;
                 }
@@ -1687,7 +1664,7 @@ public class MainActivity extends AppCompatActivity {
                     buttonRemote.setBackgroundResource(R.drawable.remote_on);
                 } else {
                     buttonRemote.setBackgroundResource(R.drawable.remote_off);
-                    setupSpinner(localSelectedPlaylist);
+                    setupSpinner(arrayAdapter, localSelectedPlaylist);
                 }
                 editTextConnectInfo.setEnabled(enable);
                 buttonRemote.setEnabled(true);
@@ -1912,14 +1889,14 @@ public class MainActivity extends AppCompatActivity {
         addToPlaylists("Top", "rating=5", "rating>2", "playCounter, lastPlayed");
         addToPlaylists("Discover","rating=0", "rating=0", "RANDOM()");
         addToPlaylists("More","rating>2 AND rating<5", "rating>0 AND rating<3", "playCounter, lastPlayed");
-        localPlaylists.add(new PlayList("All", "1", "", musicLibrary));
+        localPlaylists.add(new PlayList("All", "1", ""));
         localSelectedPlaylist = localPlaylists.get(0);
 
         arrayAdapter =
                 new ArrayAdapter<PlayList>(this, android.R.layout.simple_spinner_item, localPlaylists);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        setupSpinner(localSelectedPlaylist);
+        setupSpinner(arrayAdapter, localSelectedPlaylist);
     }
 
     private void addToPlaylists(String name, String where, String whereEnfantin, String order) {
@@ -1932,8 +1909,7 @@ public class MainActivity extends AppCompatActivity {
         for(Map.Entry<String, Integer> entry : genres.entrySet()) {
             localPlaylists.add(new PlayList(name + " " + entry.getKey(),
                     "genre=\"" + entry.getKey() + "\" AND " + where,
-                    order,
-                    musicLibrary));
+                    order));
         }
         String in = getInSqlList(genres);
         if(!in.equals("")) {
@@ -1943,7 +1919,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addToPlaylists(String name, String where, String order) {
-        localPlaylists.add(new PlayList(name, where, order, musicLibrary));
+        localPlaylists.add(new PlayList(name, where, order));
     }
 
     private String getInSqlList(Map<String, Integer> list) {
@@ -1966,7 +1942,8 @@ public class MainActivity extends AppCompatActivity {
         return mWifi.isConnected();
     }
 
-    private void setupSpinner(final PlayList selectedPlaylist) {
+    private void setupSpinner(final ArrayAdapter<PlayList> arrayAdapter,
+                              final PlayList selectedPlaylist) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -2268,13 +2245,12 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 playlists.add(playList);
                             }
-                            localPlaylists=playlists;
-                            arrayAdapter =
+                            ArrayAdapter<PlayList> arrayAdapter =
                                     new ArrayAdapter<PlayList>(MainActivity.this,
-                                            android.R.layout.simple_spinner_item, localPlaylists);
+                                            android.R.layout.simple_spinner_item, playlists);
                             arrayAdapter.setDropDownViewResource(
                                     android.R.layout.simple_spinner_dropdown_item);
-                            setupSpinner(temp);
+                            setupSpinner(arrayAdapter, temp);
                             break;
                         case "currentPosition":
                             final int currentPosition = jObject.getInt("currentPosition");
@@ -2331,7 +2307,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             stopRemote();
-            setupSpinner(localSelectedPlaylist);
+            setupSpinner(arrayAdapter, localSelectedPlaylist);
             displayedTrack = localTrack;
             displayTrack();
         }
@@ -2665,7 +2641,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void stopRemote() {
         stopClient(clientRemote, buttonRemote, R.drawable.remote_off, true);
-        setupSpinner(localSelectedPlaylist);
+        setupSpinner(arrayAdapter, localSelectedPlaylist);
         displayedTrack = localTrack;
         displayTrack();
     }
