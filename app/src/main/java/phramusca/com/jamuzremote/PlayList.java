@@ -2,7 +2,6 @@ package phramusca.com.jamuzremote;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -126,13 +125,6 @@ public class PlayList {
         return in;
     }
 
-    private String getTagClause(Map.Entry<String, TriStateButton.STATE> tag) {
-        String name = tag.getKey();
-        TriStateButton.STATE state = tag.getValue();
-        return state.equals(TriStateButton.STATE.ANY)?" 1 ":
-                " tags "+(state.equals(TriStateButton.STATE.FALSE)?"NOT":"")+" LIKE "+"\"%"+name+"%\" ";
-    }
-
     private String getHaving() {
         //FILTER by TAGS
         String in;
@@ -142,15 +134,19 @@ public class PlayList {
             //Include or exclude tags according to states
             in = " HAVING ( ";
             if(tags.size()>0) {
-                Iterator<Map.Entry<String, TriStateButton.STATE>> iterator = tags.entrySet().iterator();
-                if (iterator.hasNext()) {
-                    Map.Entry<String, TriStateButton.STATE> tag = iterator.next();
-                    in+=" "+getTagClause(tag);
+                ArrayList<String> include = new ArrayList<>();
+                ArrayList<String> exclude = new ArrayList<>();
+                for (Map.Entry<String, TriStateButton.STATE> entry : tags.entrySet()) {
+                    switch (entry.getValue()) {
+                        case FALSE:
+                            exclude.add(entry.getKey()); break;
+                        case TRUE:
+                            include.add(entry.getKey()); break;
+                    }
                 }
-                while (iterator.hasNext()) {
-                    Map.Entry<String, TriStateButton.STATE> tag = iterator.next();
-                    in+="\n AND "+getTagClause(tag);
-                }
+
+                in += getInClause(include, include.size());
+                in += "\n AND " + getInClause(exclude, 0);
             } else {
                 in+=" 1 ";
             }
@@ -161,6 +157,21 @@ public class PlayList {
             } else if(unTaggedState.equals(TriStateButton.STATE.FALSE)) {
                 in += "\n AND tags IS NOT NULL ";
             }
+        }
+        return in;
+    }
+
+    private String getInClause(ArrayList<String> include, int length) {
+        String in;
+        if(include.size()>0) {
+            in = " sum(case when tag.value IN (";
+            for(String entry : include) {
+                in+="\""+entry+"\",";
+            }
+            in = in.substring(0, in.length()-1);
+            in += " ) then 1 else 0 end) = "+length;
+        }  else {
+            in = " 1 ";
         }
         return in;
     }
