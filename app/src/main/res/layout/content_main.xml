@@ -388,7 +388,7 @@
             <Button
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
-                android:id="@+id/button_rating"
+                android:id="@+id/button_rating_operator"
                 android:text=">="
                 android:background="@drawable/ic_button"
                 android:layout_gravity="center_vertical"
