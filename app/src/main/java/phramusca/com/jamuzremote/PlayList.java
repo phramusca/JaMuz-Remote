@@ -24,7 +24,7 @@ public class PlayList {
         this.name = name;
     }
 
-    public PlayList(String name, String query, String order, MusicLibrary musicLibrary) {
+    public PlayList(String name, String query, String order) {
         this(name);
         this.query = query;
         this.order = order;
