@@ -32,7 +32,7 @@ public class PlayList {
 
     public ArrayList<Track> getTracks() {
         if(query==null) {
-            return MainActivity.musicLibrary.getTracks(getWhere(), getHaving(), "");
+            return MainActivity.musicLibrary.getTracks(getWhere(), getHaving(), "ORDER BY playCounter, lastPlayed");
         } else {
             return MainActivity.musicLibrary.getTracks(query, order);
         }
@@ -153,9 +153,9 @@ public class PlayList {
             in += " ) ";
             //Include or exclude untagged
             if(unTaggedState.equals(TriStateButton.STATE.ANY)) {
-                in += "\n OR tags IS NULL ";
+                in += "\n OR tag.value IS NULL ";
             } else if(unTaggedState.equals(TriStateButton.STATE.FALSE)) {
-                in += "\n AND tags IS NOT NULL ";
+                in += "\n AND tag.value IS NOT NULL ";
             }
         }
         return in;
@@ -182,8 +182,9 @@ public class PlayList {
 
     @Override
     public String toString() {
-        //FIXME: getNb for "Selected" playlist
-        return query==null?name:name+" ("+ MainActivity.musicLibrary.getNb(query) +")";
+        return name+" ("+(query==null?
+                MainActivity.musicLibrary.getNb(getWhere(), getHaving())
+                :MainActivity.musicLibrary.getNb(query)) +")";
     }
 
     /**
