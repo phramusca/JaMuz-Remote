@@ -19,13 +19,15 @@ public class PlayList {
     private Operator ratingOperator = PlayList.Operator.GREATERTHAN;
     private String genre="";
     private String genreExclude="";
+    private boolean isLocal;
 
-    public PlayList(String name) {
+    public PlayList(String name, boolean isLocal) {
         this.name = name;
+        this.isLocal = isLocal;
     }
 
     public PlayList(String name, String query, String order) {
-        this(name);
+        this(name, true);
         this.query = query;
         this.order = order;
     }
@@ -182,9 +184,12 @@ public class PlayList {
 
     @Override
     public String toString() {
-        return name+" ("+(query==null?
-                MainActivity.musicLibrary.getNb(getWhere(), getHaving())
-                :MainActivity.musicLibrary.getNb(query)) +")";
+        return isLocal?name
+                +" ("+(query==null?
+                    MainActivity.musicLibrary.getNb(getWhere(), getHaving())
+                    :MainActivity.musicLibrary.getNb(query))
+                +")"
+                :name;
     }
 
     /**

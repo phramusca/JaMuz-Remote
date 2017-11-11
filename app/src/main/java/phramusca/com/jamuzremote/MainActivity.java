@@ -680,6 +680,8 @@ public class MainActivity extends AppCompatActivity {
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
+        registerButtonReceiver();
+
         //Start BT HeadSet connexion detection
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter != null)
@@ -694,9 +696,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        receiverMediaButtonName = new ComponentName(getPackageName(),
-                ReceiverMediaButton.class.getName());
-        audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
 
         //TODO: Why this one needs registerReceiver whereas ReceiverPhoneCall does not
         registerReceiver(receiverHeadSetPlugged,
@@ -1037,7 +1036,14 @@ public class MainActivity extends AppCompatActivity {
             buttonRemote.performClick();
         }
 
-        receiverMediaButtonName = new ComponentName(getPackageName(), ReceiverMediaButton.class.getName());
+        //FIXME: Test to see if it fixes the button receiver lost bug
+        audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
+        registerButtonReceiver();
+    }
+
+    private void registerButtonReceiver() {
+        receiverMediaButtonName = new ComponentName(getPackageName(),
+                ReceiverMediaButton.class.getName());
         audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
     }
 
@@ -1076,7 +1082,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     TextToSpeech textToSpeech;
-
 
     @Override
     protected void onDestroy() {
@@ -1264,7 +1269,7 @@ public class MainActivity extends AppCompatActivity {
                     checkAbort();
                     //Scan deleted files
                     //TODO: No need to check what scanned previously ...
-                    List<Track> tracks = new PlayList("All").getTracks();
+                    List<Track> tracks = new PlayList("All", false).getTracks();
                     nbFilesTotal = tracks.size();
                     nbFiles=0;
                     for(Track track : tracks) {
@@ -1866,7 +1871,7 @@ public class MainActivity extends AppCompatActivity {
     private void setupLocalPlaylists() {
         localPlaylists = new ArrayList<PlayList>();
         //Read localPlaylist
-        localPlaylist = new PlayList("Selection");
+        localPlaylist = new PlayList("Selection", true);
         String readJson = HelperTextFile.read(this, "localPlaylist.txt");
         if(!readJson.equals("")) {
             Gson gson = new Gson();
@@ -2234,12 +2239,12 @@ public class MainActivity extends AppCompatActivity {
                     switch(type) {
                         case "playlists":
                             String selectedPlaylist = jObject.getString("selectedPlaylist");
-                            PlayList temp = new PlayList(selectedPlaylist);
+                            PlayList temp = new PlayList(selectedPlaylist, false);
                             final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists");
                             final List<PlayList> playlists = new ArrayList<PlayList>();
                             for(int i=0; i<jsonPlaylists.length(); i++) {
                                 String playlist = (String) jsonPlaylists.get(i);
-                                PlayList playList = new PlayList(playlist);
+                                PlayList playList = new PlayList(playlist, false);
                                 if(playlist.equals(selectedPlaylist)) {
                                     playList=temp;
                                 }
@@ -2773,10 +2778,14 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if (state == BluetoothHeadset.STATE_DISCONNECTED)
                 {
-                    //TODO: This situation (at least) can endup with other receivers (headsethook at least)
+                    //FIXME: This situation (at least) can endup with other receivers (headsethook at least)
                     //not to trigger anymore => Why ?
                     Log.i(TAG, "BT DISconnected");
                     audioPlayer.pause();
+
+                    //FIXME: Test to see if it fixes the button receiver lost bug
+                    audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
+                    registerButtonReceiver();
                 }
             }/*
             else // BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED
