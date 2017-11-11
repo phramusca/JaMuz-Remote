@@ -131,19 +131,6 @@ public class MusicLibrary {
         return -1;
     }
 
-    private ArrayList<Track> getTracks(Cursor cursor) {
-        ArrayList<Track> tracks = new ArrayList<>();
-        if(cursor != null && cursor.moveToFirst())
-        {
-            do {
-                Track track = cursorToTrack(cursor);
-                tracks.add(track);
-            } while(cursor.moveToNext());
-        }
-        cursor.close();
-        return tracks;
-    }
-
     public synchronized long insertTrack(Track track){
         try {
             if(db.insert(musicLibraryDb.TABLE_TRACKS, null, TrackToValues(track))<0) {
@@ -175,6 +162,19 @@ public class MusicLibrary {
             Log.e(TAG, "deleteTrack("+path+")", ex);
         }
         return -1;
+    }
+
+    private ArrayList<Track> getTracks(Cursor cursor) {
+        ArrayList<Track> tracks = new ArrayList<>();
+        if(cursor != null && cursor.moveToFirst())
+        {
+            do {
+                Track track = cursorToTrack(cursor);
+                tracks.add(track);
+            } while(cursor.moveToNext());
+        }
+        cursor.close();
+        return tracks;
     }
 
     private ContentValues TrackToValues(Track track) {
