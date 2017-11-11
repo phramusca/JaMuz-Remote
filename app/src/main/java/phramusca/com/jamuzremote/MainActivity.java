@@ -653,7 +653,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz Remote", "coverHash",
+        localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz", "coverHash",
                 "relativeFullPath", "---", new Date(0), new Date(0), 0);
         displayedTrack = localTrack;
         setTextView(textViewFileInfo, Html.fromHtml("<html><h1>"
