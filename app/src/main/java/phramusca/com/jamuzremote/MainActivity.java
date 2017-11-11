@@ -80,6 +80,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -1417,8 +1418,6 @@ public class MainActivity extends AppCompatActivity {
                     track.setAddedDate(fileInfoReception.addedDate);
                     track.setLastPlayed(fileInfoReception.lastPlayed);
                     track.setPlayCounter(fileInfoReception.playCounter);
-
-                    //FIXME TAGS & GENRE : test insertion from FileInfoReception
                     track.setTags(fileInfoReception.tags);
                     track.setGenre(fileInfoReception.genre); //TODO Do not if genre read from file is better
                 }
@@ -2357,26 +2356,44 @@ public class MainActivity extends AppCompatActivity {
                             requestNextFile(true);
                             break;
                         case "tags":
+                            //Addsing missing tags
                             final JSONArray jsonTags = (JSONArray) jObject.get("tags");
                             for(int i=0; i<jsonTags.length(); i++) {
                                 final String tag = (String) jsonTags.get(i);
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if(!tags.values().contains(tag)) {
-                                            if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                                                int idTag = musicLibrary.addTag(tag);
-                                                if(idTag>0) {
-                                                    tags.put(idTag, tag);
-                                                    makeButtonTag(idTag, tag);
-                                                    makeButtonTagPlaylist(idTag, tag);
-                                                }
-                                            }
+                                if(!tags.values().contains(tag)) {
+                                    if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                                        int idTag = musicLibrary.addTag(tag);
+                                        if(idTag>0) {
+                                            tags.put(idTag, tag);
                                         }
                                     }
-                                });
-
+                                }
                             }
+                            //Deleting tags that have been removed in server
+                            final List<String> list = new ArrayList<String>();
+                            for(int i = 0; i < jsonTags.length(); i++){
+                                list.add((String) jsonTags.get(i));
+                            }
+                            Iterator<Map.Entry<Integer, String>> it = tags.entrySet().iterator();
+                            while (it.hasNext())
+                            {
+                                Map.Entry<Integer, String> tag = it.next();
+                                if(!list.contains(tag.getValue())) {
+                                    if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                                        int deleted = musicLibrary.deleteTag(tag.getKey());
+                                        if(deleted>0) {
+                                            it.remove();
+                                        }
+                                    }
+                                }
+                            }
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setupTags();
+                                }
+                            });
+
                             break;
                         case "genres":
                             final JSONArray jsonGenres = (JSONArray) jObject.get("genres");

@@ -325,6 +325,15 @@ public class MusicLibrary {
         return idTag;
     }
 
+    public synchronized int deleteTag(int idTag){
+        try {
+            return db.delete("tag", "id = \"" +idTag+"\"", null);
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "deleteTag("+idTag+")", ex);
+        }
+        return -1;
+    }
+
     public synchronized boolean removeTag(int idFile, String tag){
         try {
             int idTag=getIdTag(tag);
