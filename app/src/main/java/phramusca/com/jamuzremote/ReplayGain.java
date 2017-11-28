@@ -19,11 +19,7 @@ package phramusca.com.jamuzremote;
 import com.beaglebuddy.ape.APEItem;
 import com.beaglebuddy.ape.APETag;
 import com.beaglebuddy.mp3.MP3;
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
@@ -36,6 +32,12 @@ import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
 import org.jaudiotagger.tag.id3.AbstractTagFrameBody;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTXXX;
 import org.jaudiotagger.tag.vorbiscomment.VorbisCommentTag;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -100,8 +102,9 @@ public class ReplayGain {
 	private static GainValues readReplayGainFromFlac(File path) {
 		GainValues gv = new GainValues();
 		try {
-            //FIXME: java.lang.NoSuchMethodError: No virtual method toPath()Ljava/nio/file/Path; in class Ljava/io/File; or its super classes (declaration of 'java.io.File' appears in /system/framework/core-libart.jar)
-            //https://bitbucket.org/ijabz/jaudiotagger/issues/149/some-nio-classes-are-unavailable-while
+            //FIXME: USE jaudiotagger 2.2.4 instead of 2.2.6 to avoid : java.lang.NoSuchMethodError: No virtual method toPath()Ljava/nio/file/Path; in class Ljava/io/File; or its super classes (declaration of 'java.io.File' appears in /system/framework/core-libart.jar)
+            // => DOES NOT SEEM TO WORK. DOES IT ?
+			//https://bitbucket.org/ijabz/jaudiotagger/issues/149/some-nio-classes-are-unavailable-while
 			org.jaudiotagger.audio.AudioFile f = AudioFileIO.read(path);
 			FlacTag tag = (FlacTag) f.getTag();
 			VorbisCommentTag vcTag = tag.getVorbisCommentTag();

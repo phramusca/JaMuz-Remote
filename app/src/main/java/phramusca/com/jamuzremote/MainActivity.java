@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
     private List<PlayList> localPlaylists = new ArrayList<PlayList>();
     private ArrayAdapter<PlayList> arrayAdapter;
     private PlayList localSelectedPlaylist;
-    private PlayList localPlaylist;
+    private PlayList localPlaylist = new PlayList("Selection", true);
     private Map<Integer, String> tags = new HashMap<>();
     private List<String> genres = new ArrayList<>();
 
@@ -186,6 +186,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "MainActivity onCreate");
         setContentView(R.layout.activity_main);
+
+        arrayAdapter =
+                new ArrayAdapter<PlayList>(this, android.R.layout.simple_spinner_item, localPlaylists);
 
         textToSpeech =new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
@@ -1037,9 +1040,9 @@ public class MainActivity extends AppCompatActivity {
             buttonRemote.performClick();
         }
 
-        //FIXME: Test to see if it fixes the button receiver lost bug
-        audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
-        registerButtonReceiver();
+        //Only re-enable the following if loosing media button receiver again
+        /*audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
+        registerButtonReceiver();*/
     }
 
     private void registerButtonReceiver() {
@@ -1776,7 +1779,8 @@ public class MainActivity extends AppCompatActivity {
         genres = new ArrayList<>();
         genres = musicLibrary.getGenres();
         setupSpinnerGenre(genres, displayedTrack.getGenre());
-        setupSpinnerGenrePlaylist(genres, genres.get(0), genres.get(0));
+        String firstGenre = genres.size()>0?genres.get(0):"";
+        setupSpinnerGenrePlaylist(genres, firstGenre, firstGenre);
     }
 
     private void askPermissions() {
@@ -2100,7 +2104,7 @@ public class MainActivity extends AppCompatActivity {
                         ArrayList<String> fileTags = displayedTrack.getTags();
                         for(Map.Entry<Integer, String> tag : tags.entrySet()) {
                             ToggleButton button = (ToggleButton) layoutTags.findViewById(tag.getKey());
-                            if(button.isChecked()!=fileTags.contains(tag.getValue())) {
+                            if(button!=null && button.isChecked()!=fileTags.contains(tag.getValue())) {
                                 button.setChecked(fileTags.contains(tag.getValue()));
                             }
                             setTagButtonTextColor(button);
@@ -2638,6 +2642,11 @@ public class MainActivity extends AppCompatActivity {
                 //stopClient(clientSync,buttonSync, R.drawable.connect_off, true);
 
                 //Resend add request in case missed for some reason
+                //FIXME: DO NOT resend insertDeviceFile for all
+                // Indeed, it takes long time before server inserts the ids so merge is not available
+                // => do an ACK from server to client so do not
+                // send insertDeviceFile when already done
+                // (Use another list filesToInsert to keep track)
                 if(filesToKeep!=null) {
                     for(FileInfoReception file : filesToKeep.values()) {
                         if(!filesToGet.containsKey(file.idFile)) {
@@ -2735,7 +2744,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        if(intent.getAction().equals("android.intent.action.VIEW")) {
+        if(intent.getAction()!=null && intent.getAction().equals("android.intent.action.VIEW")) {
             getFromQRcode(intent.getDataString());
         }
     }
@@ -2795,12 +2804,12 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if (state == BluetoothHeadset.STATE_DISCONNECTED)
                 {
-                    //FIXME: This situation (at least) can endup with other receivers (headsethook at least)
-                    //not to trigger anymore => Why ?
                     Log.i(TAG, "BT DISconnected");
                     audioPlayer.pause();
 
-                    //FIXME: Test to see if it fixes the button receiver lost bug
+                    //Somehow, this situation (at least) (can) endup with other receivers (headsethook at least)
+                    //not to trigger anymore => Why ?
+                    //So re-registering button receiver. Seems to work
                     audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
                     registerButtonReceiver();
                 }
