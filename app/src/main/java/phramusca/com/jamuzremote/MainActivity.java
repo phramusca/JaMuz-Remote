@@ -789,8 +789,10 @@ public class MainActivity extends AppCompatActivity {
     //This is a trick since the following (not in listner) is not working:
     //button.setTextColor(ContextCompat.getColor(this, R.color.toggle_text));
     private void setTagButtonTextColor(ToggleButton b) {
-        boolean checked = b.isChecked();
-        b.setTextColor(ContextCompat.getColor(this, checked?R.color.textColor:R.color.colorPrimaryDark));
+        if(b!=null) {
+            boolean checked = b.isChecked();
+            b.setTextColor(ContextCompat.getColor(this, checked?R.color.textColor:R.color.colorPrimaryDark));
+        }
     }
 
     private void setTagButtonTextColor(TriStateButton button, TriStateButton.STATE state) {
@@ -1886,8 +1888,10 @@ public class MainActivity extends AppCompatActivity {
             setTagButtonTextColor(nullButton, localPlaylist.getUnTaggedState());
             for(Map.Entry<String, TriStateButton.STATE> entry : localPlaylist.getTags()) {
                 TriStateButton button = (TriStateButton) layoutTagsPlaylist.findViewWithTag(entry.getKey());
-                button.setState(entry.getValue());
-                setTagButtonTextColor(button, entry.getValue());
+                if(button!=null) {
+                    button.setState(entry.getValue());
+                    setTagButtonTextColor(button, entry.getValue());
+                }
             }
             buttonRatingOperator.setText(localPlaylist.getRatingOperator());
             ratingBarPlaylist.setRating(localPlaylist.getRating());
@@ -2106,8 +2110,8 @@ public class MainActivity extends AppCompatActivity {
                             ToggleButton button = (ToggleButton) layoutTags.findViewById(tag.getKey());
                             if(button!=null && button.isChecked()!=fileTags.contains(tag.getValue())) {
                                 button.setChecked(fileTags.contains(tag.getValue()));
+                                setTagButtonTextColor(button);
                             }
-                            setTagButtonTextColor(button);
                         }
                     }
                 }
@@ -2642,6 +2646,7 @@ public class MainActivity extends AppCompatActivity {
                 //stopClient(clientSync,buttonSync, R.drawable.connect_off, true);
 
                 //Resend add request in case missed for some reason
+                //FIXME: insertDeviceFile preventing merge to start quickly
                 //FIXME: DO NOT resend insertDeviceFile for all
                 // Indeed, it takes long time before server inserts the ids so merge is not available
                 // => do an ACK from server to client so do not
