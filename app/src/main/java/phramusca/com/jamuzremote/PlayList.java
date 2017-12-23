@@ -43,8 +43,52 @@ public class PlayList {
         return tags.entrySet();
     }
 
+    public String getTagsString() {
+        return getString(tags);
+    }
+
     public Set<Map.Entry<String, TriStateButton.STATE>> getGenres() {
         return genres.entrySet();
+    }
+
+    public String getGenresString() {
+        return getString(genres);
+    }
+
+    private String getString(Map<String, TriStateButton.STATE> stateMap) {
+        String in = "In: ";
+        String out = "Out: ";
+        if(stateMap.size()>0) {
+            ArrayList<String> include = new ArrayList<>();
+            ArrayList<String> exclude = new ArrayList<>();
+            for (Map.Entry<String, TriStateButton.STATE> entry : stateMap.entrySet()) {
+                switch (entry.getValue()) {
+                    case FALSE:
+                        exclude.add(entry.getKey()); break;
+                    case TRUE:
+                        include.add(entry.getKey()); break;
+                }
+            }
+            in+=getString(include, 1);
+            out+=getString(exclude, 1);
+        }
+        return in+"\n"+out;
+    }
+
+    private String getString(ArrayList<String> strings, int max) {
+        String out = "";
+        if(strings.size()>0) {
+            for(int i=0; i<max; i++) {
+                if(strings.size()>i) {
+                    out+=strings.get(i)+", ";
+                }
+            }
+            out = out.substring(0, out.length()-2);
+            if(strings.size()>max) {
+                out+=" ...";
+            }
+        }
+        return out;
     }
 
     public TriStateButton.STATE getUnTaggedState() {
@@ -93,19 +137,7 @@ public class PlayList {
     private String getWhere() {
 
         //FILTER by RATING
-        String in = " WHERE rating ";
-        switch (ratingOperator) {
-            case GREATERTHAN:
-                in += " >= ";
-                break;
-            case IS:
-                in += " = ";
-                break;
-            case LESSTHAN:
-                in += " <= ";
-                break;
-        }
-        in +=rating+" ";
+        String in = " WHERE rating "+getRatingString()+" ";
 
         //FILTER by GENRE
         ArrayList<String> include = new ArrayList<>();
@@ -126,6 +158,23 @@ public class PlayList {
             in += "\n AND genre NOT IN ("+getInClause(exclude)+") ";
         }
 
+        return in;
+    }
+
+    public String getRatingString() {
+        String in="";
+        switch (ratingOperator) {
+            case GREATERTHAN:
+                in += ">=";
+                break;
+            case IS:
+                in += "=";
+                break;
+            case LESSTHAN:
+                in += "<=";
+                break;
+        }
+        in +=rating;
         return in;
     }
 
