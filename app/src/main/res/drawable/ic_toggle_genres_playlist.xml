@@ -2,9 +2,9 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:state_checked="false"
-        android:drawable="@drawable/ic_action_toggle_edit" />
+        android:drawable="@drawable/ic_action_toggle_genre" />
 
     <item android:state_checked="true"
-        android:drawable="@drawable/ic_action_toggle_edit_red" />
+        android:drawable="@drawable/ic_action_toggle_genre_red" />
 
 </selector>
