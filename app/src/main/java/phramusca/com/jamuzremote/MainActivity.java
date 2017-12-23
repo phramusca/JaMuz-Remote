@@ -131,6 +131,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewFileInfo;
     private EditText editTextConnectInfo;
     private TextView textViewPath;
+    private TextView textViewRating;
+    private TextView textViewTag;
+    private TextView textViewGenre;
     private Button buttonConfigConnection;
     private Button buttonRemote;
     private Button buttonSync;
@@ -262,6 +265,10 @@ public class MainActivity extends AppCompatActivity {
 
         textViewPath = (TextView) findViewById(R.id.textViewPath);
 
+        textViewRating = (TextView) findViewById(R.id.editText_rating);
+        textViewTag = (TextView) findViewById(R.id.editText_tag);
+        textViewGenre = (TextView) findViewById(R.id.editText_genre);
+
         buttonConfigConnection = (Button) findViewById(R.id.button_config_connection);
         buttonConfigConnection.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -337,6 +344,9 @@ public class MainActivity extends AppCompatActivity {
                         //Queue may not be valid as value changed
                         queue.clear();
                         setupSpinner(arrayAdapter, localPlaylist);
+                        textViewRating.setText(localPlaylist.getRatingString());
+                        textViewTag.setText(localPlaylist.getTagsString());
+                        textViewGenre.setText(localPlaylist.getGenresString());
                     }
                     ratingBarPlaylist.setEnabled(true);
                 }

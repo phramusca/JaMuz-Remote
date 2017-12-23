@@ -368,17 +368,15 @@
         android:layout_column="0"
         android:layout_gravity="center_horizontal">
 
-
-
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal">
 
             <GridLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent">
 
                 <ToggleButton
                     android:id="@+id/button_rating_layout"
@@ -389,23 +387,44 @@
                     style="@style/ToggleButton"
                     android:background="@drawable/ic_toggle_rating_playlist" />
 
-                <ToggleButton
-                    android:id="@+id/button_tags_panel_toggle"
+                <TextView android:id="@+id/editText_rating"
                     android:layout_row="0"
                     android:layout_column="1"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    style="@style/ToggleButton"
-                    android:background="@drawable/ic_toggle_tags_playlist" />
+                    android:textColor="@color/textColor"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:layout_gravity="left|right|center_vertical"/>
 
                 <ToggleButton
-                    android:id="@+id/button_genres_panel_toggle"
+                    android:id="@+id/button_tags_panel_toggle"
                     android:layout_row="0"
                     android:layout_column="2"
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     style="@style/ToggleButton"
+                    android:background="@drawable/ic_toggle_tags_playlist" />
+
+                <TextView android:id="@+id/editText_tag"
+                    android:layout_row="0"
+                    android:layout_column="3"
+                    android:textColor="@color/textColor"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:layout_gravity="left|right|center_vertical"/>
+
+                <ToggleButton
+                    android:id="@+id/button_genres_panel_toggle"
+                    android:layout_row="0"
+                    android:layout_column="4"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    style="@style/ToggleButton"
                     android:background="@drawable/ic_toggle_genres_playlist"/>
+
+                <TextView android:id="@+id/editText_genre"
+                    android:layout_row="0"
+                    android:layout_column="5"
+                    android:textColor="@color/textColor"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:layout_gravity="left|right|center_vertical"/>
             </GridLayout>
         </LinearLayout>
 
