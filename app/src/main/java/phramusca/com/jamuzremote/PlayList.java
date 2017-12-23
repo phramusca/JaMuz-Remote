@@ -18,8 +18,6 @@ public class PlayList {
     private TriStateButton.STATE unTaggedState = TriStateButton.STATE.ANY;
     private int rating=0;
     private Operator ratingOperator = PlayList.Operator.GREATERTHAN;
-    private String genre="";
-    private String genreExclude="";
     private boolean isLocal;
 
     public PlayList(String name, boolean isLocal) {
@@ -57,14 +55,6 @@ public class PlayList {
         return rating;
     }
 
-    public String getGenre() {
-        return genre;
-    }
-
-    public String getGenreExclude() {
-        return genreExclude;
-    }
-
     public String getRatingOperator() {
         return ratingOperator.toString();
     }
@@ -98,14 +88,6 @@ public class PlayList {
 
     public void setRating(int rating) {
         this.rating = rating;
-    }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
-
-    public void setGenreExclude(String genreExclude) {
-        this.genreExclude = genreExclude;
     }
 
     private String getWhere() {

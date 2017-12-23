@@ -368,7 +368,49 @@
         android:layout_column="0"
         android:layout_gravity="center_horizontal">
 
+
+
         <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ToggleButton
+                    android:id="@+id/button_rating_layout"
+                    android:layout_row="0"
+                    android:layout_column="0"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    style="@style/ToggleButton"
+                    android:background="@drawable/ic_toggle_rating_playlist" />
+
+                <ToggleButton
+                    android:id="@+id/button_tags_panel_toggle"
+                    android:layout_row="0"
+                    android:layout_column="1"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    style="@style/ToggleButton"
+                    android:background="@drawable/ic_toggle_tags_playlist" />
+
+                <ToggleButton
+                    android:id="@+id/button_genres_panel_toggle"
+                    android:layout_row="0"
+                    android:layout_column="2"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    style="@style/ToggleButton"
+                    android:background="@drawable/ic_toggle_genres_playlist"/>
+            </GridLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/panel_rating_playlist_layout"
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -403,36 +445,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal">
-
-            <GridLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <ToggleButton
-                    android:id="@+id/button_tags_panel_toggle"
-                    android:layout_row="0"
-                    android:layout_column="0"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    style="@style/ToggleButton"
-                    android:background="@drawable/ic_toggle_tags_playlist" />
-
-                <ToggleButton
-                    android:id="@+id/button_genres_panel_toggle"
-                    android:layout_row="0"
-                    android:layout_column="1"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    style="@style/ToggleButton"
-                    android:background="@drawable/ic_toggle_genres_playlist"/>
-            </GridLayout>
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/panel_tags_playlist_layout"
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -455,6 +467,7 @@
                 app:alignContent="flex_end" >
             </com.google.android.flexbox.FlexboxLayout>
         </LinearLayout>
+
         <LinearLayout
                 android:id="@+id/panel_genre_playlist_layout"
                 android:orientation="vertical"
