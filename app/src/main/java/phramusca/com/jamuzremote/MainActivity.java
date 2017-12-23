@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton toggleButtonDimMode;
     private ToggleButton toggleButtonControls;
     private ToggleButton toggleButtonTagsPanel;
+    private ToggleButton toggleButtonRatingPanel;
     private ToggleButton toggleButtonGenresPanel;
     private ToggleButton toggleButtonTags;
     private ToggleButton toggleButtonPlaylist;
@@ -169,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
     private FlexboxLayout layoutTagsPlaylist;
     private FlexboxLayout layoutGenrePlaylist;
     private LinearLayout layoutTagsPlaylistLayout;
+    private LinearLayout layoutRatingPlaylistLayout;
     private LinearLayout layoutGenrePlaylistLayout;
     private LinearLayout layoutAttributes;
     private LinearLayout layoutPlaylist;
@@ -237,6 +239,7 @@ public class MainActivity extends AppCompatActivity {
         layoutTagsPlaylist = (FlexboxLayout) findViewById(R.id.panel_tags_playlist);
         layoutGenrePlaylist = (FlexboxLayout) findViewById(R.id.panel_genre_playlist);
         layoutTagsPlaylistLayout = (LinearLayout) findViewById(R.id.panel_tags_playlist_layout);
+        layoutRatingPlaylistLayout = (LinearLayout) findViewById(R.id.panel_rating_playlist_layout);
         layoutGenrePlaylistLayout = (LinearLayout) findViewById(R.id.panel_genre_playlist_layout);
         layoutAttributes = (LinearLayout) findViewById(R.id.panel_attributes);
         layoutPlaylist = (LinearLayout) findViewById(R.id.panel_playlist);
@@ -449,6 +452,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        toggleButtonRatingPanel = (ToggleButton) findViewById(R.id.button_rating_layout);
+        toggleButtonRatingPanel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dimOn();
+                toggle(layoutRatingPlaylistLayout, !toggleButtonRatingPanel.isChecked());
+
+            }
+        });
+
+
 
         toggleButtonGenresPanel = (ToggleButton) findViewById(R.id.button_genres_panel_toggle);
         toggleButtonGenresPanel.setOnClickListener(new View.OnClickListener() {
@@ -729,6 +744,7 @@ public class MainActivity extends AppCompatActivity {
         toggle(layoutPlaylist, true);
         toggle(layoutGenrePlaylistLayout, true);
         toggle(layoutTagsPlaylistLayout, true);
+        toggle(layoutRatingPlaylistLayout, true);
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
@@ -882,56 +898,6 @@ public class MainActivity extends AppCompatActivity {
                 applyPlaylist(playList);
             }
             spinnerPlaylistSend = true;
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> adapterView) {
-            dimOn();
-        }
-    };
-
-    Spinner.OnItemSelectedListener spinnerGenrePlaylistListener = new Spinner.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view,
-                                   int pos, long id) {
-            if(spinnerGenrePlaylistSend) {
-                String genre = (String) parent.getItemAtPosition(pos);
-                if(!isRemoteConnected()) {
-                    localPlaylist.setGenre(genre);
-                    if(localSelectedPlaylist.equals(localPlaylist)) {
-                        //Queue may not be valid as value changed
-                        queue.clear();
-                        setupSpinner(arrayAdapter, localPlaylist);
-                    }
-                }
-                dimOn();
-            }
-            spinnerGenrePlaylistSend=true;
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> adapterView) {
-            dimOn();
-        }
-    };
-
-    Spinner.OnItemSelectedListener spinnerGenreExcludedPlaylistListener = new Spinner.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view,
-                                   int pos, long id) {
-            if(spinnerGenreExcludedPlaylistSend) {
-                String genre = (String) parent.getItemAtPosition(pos);
-                if(!isRemoteConnected()) {
-                    localPlaylist.setGenreExclude(genre);
-                    if(localSelectedPlaylist.equals(localPlaylist)) {
-                        //Queue may not be valid as value changed
-                        queue.clear();
-                        setupSpinner(arrayAdapter, localPlaylist);
-                    }
-                }
-                dimOn();
-            }
-            spinnerGenreExcludedPlaylistSend=true;
         }
 
         @Override
