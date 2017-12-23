@@ -155,8 +155,6 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBarPosition;
     private Spinner spinnerPlaylist;
     private Spinner spinnerGenre;
-    private Spinner spinnerGenrePlaylist;
-    private Spinner spinnerGenreExcludePlaylist;
     private static boolean spinnerPlaylistSend=false;
     private static boolean spinnerGenreSend=false;
     private static boolean spinnerGenrePlaylistSend=false;
@@ -411,28 +409,6 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-
-        spinnerGenrePlaylist = (Spinner) findViewById(R.id.spinnerGenrePlaylist);
-        spinnerGenrePlaylist.setOnItemSelectedListener(spinnerGenrePlaylistListener);
-        spinnerGenrePlaylist.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                dimOn();
-                return false;
-            }
-        });
-
-        spinnerGenreExcludePlaylist = (Spinner) findViewById(R.id.spinnerGenreExcludePlaylist);
-        spinnerGenreExcludePlaylist.setOnItemSelectedListener(spinnerGenreExcludedPlaylistListener);
-        spinnerGenreExcludePlaylist.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                dimOn();
-                return false;
-            }
-        });
-
-
 
         buttonPrevious = setupButton(buttonPrevious, R.id.button_previous, "previousTrack");
         buttonPlay = setupButton(buttonPlay, R.id.button_play, "playTrack");
@@ -752,7 +728,7 @@ public class MainActivity extends AppCompatActivity {
         toggle(layoutAttributes, true);
         toggle(layoutPlaylist, true);
         toggle(layoutGenrePlaylistLayout, true);
-        /*toggle(layoutTagsPlaylistLayout, true);*/
+        toggle(layoutTagsPlaylistLayout, true);
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
@@ -1851,14 +1827,10 @@ public class MainActivity extends AppCompatActivity {
         genres = new ArrayList<>();
         genres = musicLibrary.getGenres();
         setupSpinnerGenre(genres, displayedTrack.getGenre());
-        String firstGenre = genres.size()>0?genres.get(0):"";
-        setupSpinnerGenrePlaylist(genres, firstGenre, firstGenre);
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 for(String genre : genres) {
-                    //FIXME: Set genre id (to be retrieved first)
                     makeButtonGenrePlaylist(-1, genre);
                 }
             }
@@ -1982,7 +1954,6 @@ public class MainActivity extends AppCompatActivity {
             }
             buttonRatingOperator.setText(localPlaylist.getRatingOperator());
             ratingBarPlaylist.setRating(localPlaylist.getRating());
-            setupSpinnerGenrePlaylist(genres, localPlaylist.getGenre(), localPlaylist.getGenreExclude());
         }
         localPlaylists.add(localPlaylist);
         addToPlaylists("Top", "rating=5", "rating>2", "playCounter, lastPlayed");
@@ -2066,35 +2037,6 @@ public class MainActivity extends AppCompatActivity {
                 spinnerGenre.setAdapter(arrayAdapter);
                 if(!genre.equals("")) {
                     spinnerGenre.setSelection(arrayAdapter.getPosition(genre));
-                }
-            }
-        });
-    }
-
-    private void setupSpinnerGenrePlaylist(final List<String> genres
-            , final String genreIncluded
-            , final String genreExcluded) {
-
-        ArrayList<String> strings = new ArrayList<>();
-        strings.add("");
-        strings.addAll(genres);
-
-        final ArrayAdapter<String> arrayAdapter =
-                new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, strings);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                spinnerGenrePlaylistSend=false;
-                spinnerGenreExcludedPlaylistSend=false;
-                spinnerGenrePlaylist.setAdapter(arrayAdapter);
-                spinnerGenreExcludePlaylist.setAdapter(arrayAdapter);
-                if(!genreIncluded.equals("")) {
-                    spinnerGenrePlaylist.setSelection(arrayAdapter.getPosition(genreIncluded));
-                }
-                if(!genreExcluded.equals("")) {
-                    spinnerGenreExcludePlaylist.setSelection(arrayAdapter.getPosition(genreExcluded));
                 }
             }
         });
@@ -2509,7 +2451,6 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                             setupSpinnerGenre(genres, displayedTrack.getGenre());
-                            setupSpinnerGenrePlaylist(genres, localPlaylist.getGenre(), localPlaylist.getGenreExclude());
                             break;
                     }
                 } catch (JSONException e) {
