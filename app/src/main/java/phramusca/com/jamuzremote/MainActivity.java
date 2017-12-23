@@ -136,6 +136,8 @@ public class MainActivity extends AppCompatActivity {
     private Button buttonSync;
     private ToggleButton toggleButtonDimMode;
     private ToggleButton toggleButtonControls;
+    private ToggleButton toggleButtonTagsPanel;
+    private ToggleButton toggleButtonGenresPanel;
     private ToggleButton toggleButtonTags;
     private ToggleButton toggleButtonPlaylist;
     private ToggleButton toggleButtonOptions;
@@ -167,6 +169,9 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout layoutControls;
     private FlexboxLayout layoutTags;
     private FlexboxLayout layoutTagsPlaylist;
+    private FlexboxLayout layoutGenrePlaylist;
+    private LinearLayout layoutTagsPlaylistLayout;
+    private LinearLayout layoutGenrePlaylistLayout;
     private LinearLayout layoutAttributes;
     private LinearLayout layoutPlaylist;
     private GridLayout layoutOptions;
@@ -232,6 +237,9 @@ public class MainActivity extends AppCompatActivity {
 
         layoutTags = (FlexboxLayout) findViewById(R.id.panel_tags);
         layoutTagsPlaylist = (FlexboxLayout) findViewById(R.id.panel_tags_playlist);
+        layoutGenrePlaylist = (FlexboxLayout) findViewById(R.id.panel_genre_playlist);
+        layoutTagsPlaylistLayout = (LinearLayout) findViewById(R.id.panel_tags_playlist_layout);
+        layoutGenrePlaylistLayout = (LinearLayout) findViewById(R.id.panel_genre_playlist_layout);
         layoutAttributes = (LinearLayout) findViewById(R.id.panel_attributes);
         layoutPlaylist = (LinearLayout) findViewById(R.id.panel_playlist);
         layoutControls = (LinearLayout) findViewById(R.id.panel_controls);
@@ -449,6 +457,34 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dimOn();
                 toggle(layoutControls, !toggleButtonControls.isChecked());
+            }
+        });
+
+        toggleButtonTagsPanel = (ToggleButton) findViewById(R.id.button_tags_panel_toggle);
+        toggleButtonTagsPanel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dimOn();
+                toggle(layoutTagsPlaylistLayout, !toggleButtonTagsPanel.isChecked());
+
+                if(toggleButtonTagsPanel.isChecked()) {
+                    toggleButtonGenresPanel.setChecked(false);
+                    toggle(layoutGenrePlaylistLayout, true);
+                }
+            }
+        });
+
+        toggleButtonGenresPanel = (ToggleButton) findViewById(R.id.button_genres_panel_toggle);
+        toggleButtonGenresPanel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dimOn();
+                toggle(layoutGenrePlaylistLayout, !toggleButtonGenresPanel.isChecked());
+
+                if(toggleButtonGenresPanel.isChecked()) {
+                    toggleButtonTagsPanel.setChecked(false);
+                    toggle(layoutTagsPlaylistLayout, true);
+                }
             }
         });
 
@@ -715,6 +751,8 @@ public class MainActivity extends AppCompatActivity {
         toggle(layoutControls, true);
         toggle(layoutAttributes, true);
         toggle(layoutPlaylist, true);
+        toggle(layoutGenrePlaylistLayout, true);
+        /*toggle(layoutTagsPlaylistLayout, true);*/
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
@@ -784,6 +822,38 @@ public class MainActivity extends AppCompatActivity {
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
                 ActionBar.LayoutParams.WRAP_CONTENT);
         layoutTagsPlaylist.addView(button, lp);
+    }
+
+    private void makeButtonGenrePlaylist(int key, String value) {
+        TriStateButton button = new TriStateButton(this);
+        button.setId(key);
+        button.setTag(value);
+        button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        button.setBackgroundResource(R.drawable.ic_tags);
+        button.setAlpha(0.7F);
+        button.setAllCaps(false);
+        button.setText(value);
+        button.setState(TriStateButton.STATE.ANY);
+        setTagButtonTextColor(button, TriStateButton.STATE.ANY);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dimOn();
+                TriStateButton button = (TriStateButton)view;
+                TriStateButton.STATE state = button.getState();
+                setTagButtonTextColor(button, state);
+                String buttonText = button.getText().toString();
+                localPlaylist.toggleGenre(buttonText, state);
+                if(localSelectedPlaylist.equals(localPlaylist)) {
+                    //Queue may not be valid as value changed
+                    queue.clear();
+                    setupSpinner(arrayAdapter, localPlaylist);
+                }
+            }
+        });
+        ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
+                ActionBar.LayoutParams.WRAP_CONTENT);
+        layoutGenrePlaylist.addView(button, lp);
     }
 
     //This is a trick since the following (not in listner) is not working:
@@ -1783,6 +1853,16 @@ public class MainActivity extends AppCompatActivity {
         setupSpinnerGenre(genres, displayedTrack.getGenre());
         String firstGenre = genres.size()>0?genres.get(0):"";
         setupSpinnerGenrePlaylist(genres, firstGenre, firstGenre);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                for(String genre : genres) {
+                    //FIXME: Set genre id (to be retrieved first)
+                    makeButtonGenrePlaylist(-1, genre);
+                }
+            }
+        });
     }
 
     private void askPermissions() {
@@ -1888,6 +1968,13 @@ public class MainActivity extends AppCompatActivity {
             setTagButtonTextColor(nullButton, localPlaylist.getUnTaggedState());
             for(Map.Entry<String, TriStateButton.STATE> entry : localPlaylist.getTags()) {
                 TriStateButton button = (TriStateButton) layoutTagsPlaylist.findViewWithTag(entry.getKey());
+                if(button!=null) {
+                    button.setState(entry.getValue());
+                    setTagButtonTextColor(button, entry.getValue());
+                }
+            }
+            for(Map.Entry<String, TriStateButton.STATE> entry : localPlaylist.getGenres()) {
+                TriStateButton button = (TriStateButton) layoutGenrePlaylist.findViewWithTag(entry.getKey());
                 if(button!=null) {
                     button.setState(entry.getValue());
                     setTagButtonTextColor(button, entry.getValue());

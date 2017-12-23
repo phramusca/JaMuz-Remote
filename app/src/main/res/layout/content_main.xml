@@ -367,18 +367,76 @@
         android:layout_row="0"
         android:layout_column="0">
 
-        <com.google.android.flexbox.FlexboxLayout
-            android:id="@+id/panel_tags_playlist"
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ToggleButton
+                android:id="@+id/button_tags_panel_toggle"
+                android:layout_row="0"
+                android:layout_column="0"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                style="@style/ToggleButton"
+                android:background="@drawable/ic_toggle_controls"
+                android:checked="true"/>
+
+            <ToggleButton
+                android:id="@+id/button_genres_panel_toggle"
+                android:layout_row="0"
+                android:layout_column="1"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                style="@style/ToggleButton"
+                android:background="@drawable/ic_toggle_tags" />
+        </GridLayout>
+
+        <LinearLayout
+            android:id="@+id/panel_tags_playlist_layout"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:paddingTop="5dp"
-            app:flexWrap="wrap"
-            app:alignItems="flex_start"
-            app:alignContent="flex_end" >
-        </com.google.android.flexbox.FlexboxLayout>
+            android:background="@color/colorPrimary"
+            android:paddingBottom="5dp"
+            android:layout_row="0"
+            android:layout_column="0">
+
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/panel_tags_playlist"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingTop="5dp"
+                app:flexWrap="wrap"
+                app:alignItems="flex_start"
+                app:alignContent="flex_end" >
+            </com.google.android.flexbox.FlexboxLayout>
+        </LinearLayout>
+        <LinearLayout
+                android:id="@+id/panel_genre_playlist_layout"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
+                android:paddingBottom="5dp"
+                android:layout_row="0"
+                android:layout_column="0">
+
+                <com.google.android.flexbox.FlexboxLayout
+                    android:id="@+id/panel_genre_playlist"
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:paddingTop="5dp"
+                    app:flexWrap="wrap"
+                    app:alignItems="flex_start"
+                    app:alignContent="flex_end" >
+                </com.google.android.flexbox.FlexboxLayout>
+        </LinearLayout>
 
         <LinearLayout
             android:orientation="horizontal"

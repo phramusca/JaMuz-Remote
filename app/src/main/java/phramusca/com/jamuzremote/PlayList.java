@@ -14,6 +14,7 @@ public class PlayList {
     private String query;
     private String order;
     private Map<String, TriStateButton.STATE> tags = new HashMap<>();
+    private Map<String, TriStateButton.STATE> genres = new HashMap<>();
     private TriStateButton.STATE unTaggedState = TriStateButton.STATE.ANY;
     private int rating=0;
     private Operator ratingOperator = PlayList.Operator.GREATERTHAN;
@@ -44,6 +45,10 @@ public class PlayList {
         return tags.entrySet();
     }
 
+    public Set<Map.Entry<String, TriStateButton.STATE>> getGenres() {
+        return genres.entrySet();
+    }
+
     public TriStateButton.STATE getUnTaggedState() {
         return unTaggedState;
     }
@@ -70,6 +75,10 @@ public class PlayList {
         } else {
             tags.put(value, state);
         }
+    }
+
+    public void toggleGenre(String value, TriStateButton.STATE state) {
+        genres.put(value, state);
     }
 
     public String setRatingOperator() {
