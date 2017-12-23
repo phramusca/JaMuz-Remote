@@ -126,11 +126,22 @@ public class PlayList {
         in +=rating+" ";
 
         //FILTER by GENRE
-        if(!genre.equals("")) {
-            in += "\n AND genre=\""+genre+"\" ";
+        ArrayList<String> include = new ArrayList<>();
+        ArrayList<String> exclude = new ArrayList<>();
+        for (Map.Entry<String, TriStateButton.STATE> entry : genres.entrySet()) {
+            switch (entry.getValue()) {
+                case FALSE:
+                    exclude.add(entry.getKey()); break;
+                case TRUE:
+                    include.add(entry.getKey()); break;
+            }
         }
-        if(!genreExclude.equals("")) {
-            in += "\n AND genre!=\""+genreExclude+"\" ";
+
+        if(include.size()>0) {
+            in += "\n AND genre IN ("+getInClause(include)+") ";
+        }
+        if(exclude.size()>0) {
+            in += "\n AND genre NOT IN ("+getInClause(exclude)+") ";
         }
 
         return in;
@@ -155,7 +166,6 @@ public class PlayList {
                             include.add(entry.getKey()); break;
                     }
                 }
-
                 in += getInClause(include, include.size());
                 in += "\n AND " + getInClause(exclude, 0);
             } else {
@@ -169,6 +179,15 @@ public class PlayList {
                 in += "\n AND tag.value IS NOT NULL ";
             }
         }
+        return in;
+    }
+
+    private String getInClause(ArrayList<String> include) {
+        String in="";
+        for(String entry : include) {
+            in+="\""+entry+"\",";
+        }
+        in = in.substring(0, in.length()-1);
         return in;
     }
 

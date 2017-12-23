@@ -419,8 +419,7 @@
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     style="@style/ToggleButton"
-                    android:background="@drawable/ic_toggle_tags_playlist"
-                    android:checked="true"/>
+                    android:background="@drawable/ic_toggle_tags_playlist" />
 
                 <ToggleButton
                     android:id="@+id/button_genres_panel_toggle"
@@ -480,59 +479,6 @@
                 </com.google.android.flexbox.FlexboxLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView android:text="Include : "
-
-                android:layout_row="0"
-                android:layout_column="1"
-                android:textColor="@color/textColor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"/>
-
-            <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/spinnerGenrePlaylist"
-            android:popupBackground="#DDFFFFFF"
-            android:background="@drawable/ic_gradient_spinner"
-            android:layout_gravity="center"
-            android:paddingStart="10dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:alpha="0.7"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView android:text="Exclude : "
-
-                android:layout_row="0"
-                android:layout_column="1"
-                android:textColor="@color/textColor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"/>
-
-            <Spinner
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/spinnerGenreExcludePlaylist"
-                android:popupBackground="#DDFFFFFF"
-                android:background="@drawable/ic_gradient_spinner"
-                android:layout_gravity="center"
-                android:paddingStart="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:alpha="0.7"/>
-        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
