@@ -81,7 +81,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1183,15 +1182,14 @@ public class MainActivity extends AppCompatActivity {
 
         saveFilesLists();
 
-        //Write localPlaylist
-        if(localPlaylist!=null) {
-            Gson gson = new Gson();
-            HelperTextFile.write(this, "localPlaylist.txt", gson.toJson(localPlaylist));
-        }
+        //FIXME: Save playlists
+        savePlaylist(localPlaylist);
 
         //Close all notifications
         mNotifyManager.cancelAll();
     }
+
+
 
     //TODO: Do not saveFilesLists ALL everytime !! (not in receivedFile at least)
     private void saveFilesLists() {
@@ -1914,40 +1912,13 @@ public class MainActivity extends AppCompatActivity {
     private void setupLocalPlaylists() {
         localPlaylists = new ArrayList<PlayList>();
         //Read localPlaylist
-        localPlaylist = new PlayList("Selection", true);
-        String readJson = HelperTextFile.read(this, "localPlaylist.txt");
-        if(!readJson.equals("")) {
-            Gson gson = new Gson();
-            Type mapType = new TypeToken<PlayList>(){}.getType();
-            localPlaylist = gson.fromJson(readJson, mapType);
-            //Display retrieved playlist filter
-            TriStateButton nullButton = (TriStateButton) layoutTagsPlaylist.findViewWithTag("null");
-            nullButton.setState(localPlaylist.getUnTaggedState());
-            setTagButtonTextColor(nullButton, localPlaylist.getUnTaggedState());
-            for(Map.Entry<String, TriStateButton.STATE> entry : localPlaylist.getTags()) {
-                TriStateButton button = (TriStateButton) layoutTagsPlaylist.findViewWithTag(entry.getKey());
-                if(button!=null) {
-                    button.setState(entry.getValue());
-                    setTagButtonTextColor(button, entry.getValue());
-                }
-            }
-            for(Map.Entry<String, TriStateButton.STATE> entry : localPlaylist.getGenres()) {
-                TriStateButton button = (TriStateButton) layoutGenrePlaylist.findViewWithTag(entry.getKey());
-                if(button!=null) {
-                    button.setState(entry.getValue());
-                    setTagButtonTextColor(button, entry.getValue());
-                }
-            }
-            buttonRatingOperator.setText(localPlaylist.getRatingOperator());
-            ratingBarPlaylist.setRating(localPlaylist.getRating());
-            textViewRating.setText(localPlaylist.getRatingString());
-            textViewTag.setText(localPlaylist.getTagsString());
-            textViewGenre.setText(localPlaylist.getGenresString());
-        }
+        /*localPlaylist = new PlayList("Selection", true);*/
+        localPlaylist = readFromFile("localPlaylist.txt");
+        displayPlaylist(localPlaylist);
         localPlaylists.add(localPlaylist);
-        addToPlaylists("Top", "rating=5", "rating>2", "playCounter, lastPlayed");
+        /*addToPlaylists("Top", "rating=5", "rating>2", "playCounter, lastPlayed");
         addToPlaylists("Discover","rating=0", "rating=0", "RANDOM()");
-        addToPlaylists("More","rating>2 AND rating<5", "rating>0 AND rating<3", "playCounter, lastPlayed");
+        addToPlaylists("More","rating>2 AND rating<5", "rating>0 AND rating<3", "playCounter, lastPlayed");*/
         localPlaylists.add(new PlayList("All", "1", ""));
         localSelectedPlaylist = localPlaylists.get(0);
 
@@ -1958,7 +1929,50 @@ public class MainActivity extends AppCompatActivity {
         setupSpinner(arrayAdapter, localSelectedPlaylist);
     }
 
-    private void addToPlaylists(String name, String where, String whereEnfantin, String order) {
+    private void savePlaylist(PlayList playList) {
+        if(playList!=null) {
+            Gson gson = new Gson();
+            HelperTextFile.write(this, playList.getName()+".txt", gson.toJson(playList));
+        }
+    }
+
+    private PlayList readFromFile(String filename) {
+        PlayList playlist = new PlayList(filename.replaceFirst("[.][^.]+$", ""), true);
+        String readJson = HelperTextFile.read(this, filename);
+        if(!readJson.equals("")) {
+            Gson gson = new Gson();
+            Type mapType = new TypeToken<PlayList>(){}.getType();
+            playlist = gson.fromJson(readJson, mapType);
+        }
+        return playlist;
+    }
+
+    private void displayPlaylist(PlayList playlist) {
+        TriStateButton nullButton = (TriStateButton) layoutTagsPlaylist.findViewWithTag("null");
+        nullButton.setState(playlist.getUnTaggedState());
+        setTagButtonTextColor(nullButton, playlist.getUnTaggedState());
+        for(Map.Entry<String, TriStateButton.STATE> entry : playlist.getTags()) {
+            TriStateButton button = (TriStateButton) layoutTagsPlaylist.findViewWithTag(entry.getKey());
+            if(button!=null) {
+                button.setState(entry.getValue());
+                setTagButtonTextColor(button, entry.getValue());
+            }
+        }
+        for(Map.Entry<String, TriStateButton.STATE> entry : playlist.getGenres()) {
+            TriStateButton button = (TriStateButton) layoutGenrePlaylist.findViewWithTag(entry.getKey());
+            if(button!=null) {
+                button.setState(entry.getValue());
+                setTagButtonTextColor(button, entry.getValue());
+            }
+        }
+        buttonRatingOperator.setText(playlist.getRatingOperator());
+        ratingBarPlaylist.setRating(playlist.getRating());
+        textViewRating.setText(playlist.getRatingString());
+        textViewTag.setText(playlist.getTagsString());
+        textViewGenre.setText(playlist.getGenresString());
+    }
+
+    /*private void addToPlaylists(String name, String where, String whereEnfantin, String order) {
         String enfantin = "Enfantin";
 
         addToPlaylists(name, "genre!=\""+enfantin+"\" AND " + where, order);
@@ -1975,11 +1989,11 @@ public class MainActivity extends AppCompatActivity {
             in+=",\""+enfantin+"\"";
             addToPlaylists(name+" Autre", "genre NOT IN ("+in+") AND " + where, order);
         }
-    }
+    }*/
 
-    private void addToPlaylists(String name, String where, String order) {
+    /*private void addToPlaylists(String name, String where, String order) {
         localPlaylists.add(new PlayList(name, where, order));
-    }
+    }*/
 
     private String getInSqlList(Map<String, Integer> list) {
         String in = "";

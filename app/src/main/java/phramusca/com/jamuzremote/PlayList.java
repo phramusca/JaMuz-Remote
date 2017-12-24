@@ -321,5 +321,5 @@ public class PlayList {
         public String toString() {
             return display;
         }
-    };
+    }
 }
