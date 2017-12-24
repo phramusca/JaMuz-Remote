@@ -340,14 +340,7 @@ public class MainActivity extends AppCompatActivity {
                     dimOn();
                     ratingBarPlaylist.setEnabled(false);
                     localPlaylist.setRating(Math.round(rating));
-                    if(localSelectedPlaylist.equals(localPlaylist)) {
-                        //Queue may not be valid as value changed
-                        queue.clear();
-                        setupSpinner(arrayAdapter, localPlaylist);
-                        textViewRating.setText(localPlaylist.getRatingString());
-                        textViewTag.setText(localPlaylist.getTagsString());
-                        textViewGenre.setText(localPlaylist.getGenresString());
-                    }
+                    refreshPlaylist();
                     ratingBarPlaylist.setEnabled(true);
                 }
             }
@@ -359,11 +352,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ratingBarPlaylist.setRating(0F);
                 localPlaylist.setRating(0);
-                if(localSelectedPlaylist.equals(localPlaylist)) {
-                    //Queue may not be valid as value changed
-                    queue.clear();
-                    setupSpinner(arrayAdapter, localPlaylist);
-                }
+                refreshPlaylist();
             }
         });
 
@@ -372,11 +361,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 buttonRatingOperator.setText(localPlaylist.setRatingOperator());
-                if(localSelectedPlaylist.equals(localPlaylist)) {
-                    //Queue may not be valid as value changed
-                    queue.clear();
-                    setupSpinner(arrayAdapter, localPlaylist);
-                }
+                refreshPlaylist();
             }
         });
 
@@ -758,6 +743,17 @@ public class MainActivity extends AppCompatActivity {
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
+    private void refreshPlaylist() {
+        if(localSelectedPlaylist.equals(localPlaylist)) {
+            //Queue may not be valid as value changed
+            queue.clear();
+            setupSpinner(arrayAdapter, localPlaylist);
+            textViewRating.setText(localPlaylist.getRatingString());
+            textViewTag.setText(localPlaylist.getTagsString());
+            textViewGenre.setText(localPlaylist.getGenresString());
+        }
+    }
+
     private void setConfig(String id, String value) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(id, value);
@@ -814,11 +810,7 @@ public class MainActivity extends AppCompatActivity {
                 setTagButtonTextColor(button, state);
                 String buttonText = button.getText().toString();
                 localPlaylist.toggleTag(buttonText, state);
-                if(localSelectedPlaylist.equals(localPlaylist)) {
-                    //Queue may not be valid as value changed
-                    queue.clear();
-                    setupSpinner(arrayAdapter, localPlaylist);
-                }
+                refreshPlaylist();
             }
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
@@ -846,11 +838,7 @@ public class MainActivity extends AppCompatActivity {
                 setTagButtonTextColor(button, state);
                 String buttonText = button.getText().toString();
                 localPlaylist.toggleGenre(buttonText, state);
-                if(localSelectedPlaylist.equals(localPlaylist)) {
-                    //Queue may not be valid as value changed
-                    queue.clear();
-                    setupSpinner(arrayAdapter, localPlaylist);
-                }
+                refreshPlaylist();
             }
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
@@ -1930,6 +1918,9 @@ public class MainActivity extends AppCompatActivity {
             }
             buttonRatingOperator.setText(localPlaylist.getRatingOperator());
             ratingBarPlaylist.setRating(localPlaylist.getRating());
+            textViewRating.setText(localPlaylist.getRatingString());
+            textViewTag.setText(localPlaylist.getTagsString());
+            textViewGenre.setText(localPlaylist.getGenresString());
         }
         localPlaylists.add(localPlaylist);
         addToPlaylists("Top", "rating=5", "rating>2", "playCounter, lastPlayed");
