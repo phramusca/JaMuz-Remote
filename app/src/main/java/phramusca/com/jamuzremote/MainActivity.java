@@ -265,9 +265,9 @@ public class MainActivity extends AppCompatActivity {
 
         textViewPath = (TextView) findViewById(R.id.textViewPath);
 
-        textViewRating = (TextView) findViewById(R.id.editText_rating);
-        textViewTag = (TextView) findViewById(R.id.editText_tag);
-        textViewGenre = (TextView) findViewById(R.id.editText_genre);
+        textViewRating = (TextView) findViewById(R.id.textViewRating);
+        textViewTag = (TextView) findViewById(R.id.textViewTag);
+        textViewGenre = (TextView) findViewById(R.id.textViewGenre);
 
         buttonConfigConnection = (Button) findViewById(R.id.button_config_connection);
         buttonConfigConnection.setOnClickListener(new View.OnClickListener() {
@@ -340,7 +340,12 @@ public class MainActivity extends AppCompatActivity {
                     dimOn();
                     ratingBarPlaylist.setEnabled(false);
                     localPlaylist.setRating(Math.round(rating));
-                    refreshPlaylist();
+                    if(localSelectedPlaylist.equals(localPlaylist)) {
+                        //Queue may not be valid as value changed
+                        queue.clear();
+                        setupSpinner(arrayAdapter, localPlaylist);
+                        textViewRating.setText(localPlaylist.getRatingString());
+                    }
                     ratingBarPlaylist.setEnabled(true);
                 }
             }
@@ -352,7 +357,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ratingBarPlaylist.setRating(0F);
                 localPlaylist.setRating(0);
-                refreshPlaylist();
+                if(localSelectedPlaylist.equals(localPlaylist)) {
+                    //Queue may not be valid as value changed
+                    queue.clear();
+                    setupSpinner(arrayAdapter, localPlaylist);
+                    textViewRating.setText(localPlaylist.getRatingString());
+                }
             }
         });
 
@@ -361,7 +371,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 buttonRatingOperator.setText(localPlaylist.setRatingOperator());
-                refreshPlaylist();
+                if(localSelectedPlaylist.equals(localPlaylist)) {
+                    //Queue may not be valid as value changed
+                    queue.clear();
+                    setupSpinner(arrayAdapter, localPlaylist);
+                    textViewRating.setText(localPlaylist.getRatingString());
+                }
             }
         });
 
@@ -751,17 +766,6 @@ public class MainActivity extends AppCompatActivity {
         toggle(layout, true);
     }
 
-    private void refreshPlaylist() {
-        if(localSelectedPlaylist.equals(localPlaylist)) {
-            //Queue may not be valid as value changed
-            queue.clear();
-            setupSpinner(arrayAdapter, localPlaylist);
-            textViewRating.setText(localPlaylist.getRatingString());
-            textViewTag.setText(localPlaylist.getTagsString());
-            textViewGenre.setText(localPlaylist.getGenresString());
-        }
-    }
-
     private void setConfig(String id, String value) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(id, value);
@@ -818,7 +822,12 @@ public class MainActivity extends AppCompatActivity {
                 setTagButtonTextColor(button, state);
                 String buttonText = button.getText().toString();
                 localPlaylist.toggleTag(buttonText, state);
-                refreshPlaylist();
+                if(localSelectedPlaylist.equals(localPlaylist)) {
+                    //Queue may not be valid as value changed
+                    queue.clear();
+                    setupSpinner(arrayAdapter, localPlaylist);
+                    textViewTag.setText(localPlaylist.getTagsString());
+                }
             }
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
@@ -846,7 +855,12 @@ public class MainActivity extends AppCompatActivity {
                 setTagButtonTextColor(button, state);
                 String buttonText = button.getText().toString();
                 localPlaylist.toggleGenre(buttonText, state);
-                refreshPlaylist();
+                if(localSelectedPlaylist.equals(localPlaylist)) {
+                    //Queue may not be valid as value changed
+                    queue.clear();
+                    setupSpinner(arrayAdapter, localPlaylist);
+                    textViewGenre.setText(localPlaylist.getGenresString());
+                }
             }
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,

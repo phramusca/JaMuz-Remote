@@ -44,7 +44,16 @@ public class PlayList {
     }
 
     public String getTagsString() {
-        return getString(tags);
+        String nullStatus="";
+        switch (unTaggedState) {
+            case TRUE:
+                nullStatus= "null only"; break;
+            case FALSE:
+                nullStatus= "Not null"; break;
+            case ANY:
+                nullStatus="null incl."; break;
+        }
+        return getString(tags)+"\n"+nullStatus;
     }
 
     public Set<Map.Entry<String, TriStateButton.STATE>> getGenres() {
@@ -85,7 +94,7 @@ public class PlayList {
             }
             out = out.substring(0, out.length()-2);
             if(strings.size()>max) {
-                out+=" ...";
+                out+=" (+"+(strings.size()-max)+")";
             }
         }
         return out;

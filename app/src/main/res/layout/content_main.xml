@@ -387,7 +387,7 @@
                     style="@style/ToggleButton"
                     android:background="@drawable/ic_toggle_rating_playlist" />
 
-                <TextView android:id="@+id/editText_rating"
+                <TextView android:id="@+id/textViewRating"
                     android:layout_row="0"
                     android:layout_column="1"
                     android:textColor="@color/textColor"
@@ -403,7 +403,7 @@
                     style="@style/ToggleButton"
                     android:background="@drawable/ic_toggle_tags_playlist" />
 
-                <TextView android:id="@+id/editText_tag"
+                <TextView android:id="@+id/textViewTag"
                     android:layout_row="0"
                     android:layout_column="3"
                     android:textColor="@color/textColor"
@@ -419,7 +419,7 @@
                     style="@style/ToggleButton"
                     android:background="@drawable/ic_toggle_genres_playlist"/>
 
-                <TextView android:id="@+id/editText_genre"
+                <TextView android:id="@+id/textViewGenre"
                     android:layout_row="0"
                     android:layout_column="5"
                     android:textColor="@color/textColor"
