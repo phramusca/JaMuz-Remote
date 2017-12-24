@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton toggleButtonTagsPanel;
     private ToggleButton toggleButtonRatingPanel;
     private ToggleButton toggleButtonGenresPanel;
-    private ToggleButton toggleButtonTags;
+    private ToggleButton toggleButtonEditTags;
     private ToggleButton toggleButtonPlaylist;
     private ToggleButton toggleButtonOptions;
     private Button buttonClearRating;
@@ -473,14 +473,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        toggleButtonTags = (ToggleButton) findViewById(R.id.button_tags_toggle);
-        toggleButtonTags.setOnClickListener(new View.OnClickListener() {
+        toggleButtonEditTags = (ToggleButton) findViewById(R.id.button_edit_toggle);
+        toggleButtonEditTags.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dimOn();
-                toggle(layoutAttributes, !toggleButtonTags.isChecked());
-                if(toggleButtonTags.isChecked()) {
+                toggle(layoutAttributes, !toggleButtonEditTags.isChecked());
+                if(toggleButtonEditTags.isChecked()) {
                     toggleOff(toggleButtonPlaylist, layoutPlaylist);
+                    toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
+                    toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
+                    toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
                 }
             }
         });
@@ -492,7 +495,7 @@ public class MainActivity extends AppCompatActivity {
                 dimOn();
                 toggle(layoutPlaylist, !toggleButtonPlaylist.isChecked());
                 if(toggleButtonPlaylist.isChecked()) {
-                    toggleOff(toggleButtonTags, layoutAttributes);
+                    toggleOff(toggleButtonEditTags, layoutAttributes);
                 } else {
                     toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
                     toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
