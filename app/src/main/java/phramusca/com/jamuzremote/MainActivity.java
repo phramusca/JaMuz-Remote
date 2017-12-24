@@ -440,10 +440,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dimOn();
                 toggle(layoutTagsPlaylistLayout, !toggleButtonTagsPanel.isChecked());
-
                 if(toggleButtonTagsPanel.isChecked()) {
-                    toggleButtonGenresPanel.setChecked(false);
-                    toggle(layoutGenrePlaylistLayout, true);
+                    toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
+                    toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
                 }
             }
         });
@@ -454,11 +453,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dimOn();
                 toggle(layoutRatingPlaylistLayout, !toggleButtonRatingPanel.isChecked());
-
+                if(toggleButtonRatingPanel.isChecked()) {
+                    toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
+                    toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
+                }
             }
         });
-
-
 
         toggleButtonGenresPanel = (ToggleButton) findViewById(R.id.button_genres_panel_toggle);
         toggleButtonGenresPanel.setOnClickListener(new View.OnClickListener() {
@@ -466,10 +466,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dimOn();
                 toggle(layoutGenrePlaylistLayout, !toggleButtonGenresPanel.isChecked());
-
                 if(toggleButtonGenresPanel.isChecked()) {
-                    toggleButtonTagsPanel.setChecked(false);
-                    toggle(layoutTagsPlaylistLayout, true);
+                    toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
+                    toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
                 }
             }
         });
@@ -481,10 +480,8 @@ public class MainActivity extends AppCompatActivity {
                 dimOn();
                 toggle(layoutAttributes, !toggleButtonTags.isChecked());
                 if(toggleButtonTags.isChecked()) {
-                    toggleButtonPlaylist.setChecked(false);
-                    toggle(layoutPlaylist, true);
+                    toggleOff(toggleButtonPlaylist, layoutPlaylist);
                 }
-
             }
         });
 
@@ -495,8 +492,11 @@ public class MainActivity extends AppCompatActivity {
                 dimOn();
                 toggle(layoutPlaylist, !toggleButtonPlaylist.isChecked());
                 if(toggleButtonPlaylist.isChecked()) {
-                    toggleButtonTags.setChecked(false);
-                    toggle(layoutAttributes, true);
+                    toggleOff(toggleButtonTags, layoutAttributes);
+                } else {
+                    toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
+                    toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
+                    toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
                 }
             }
         });
@@ -741,6 +741,11 @@ public class MainActivity extends AppCompatActivity {
         toggle(layoutTagsPlaylistLayout, true);
         toggle(layoutRatingPlaylistLayout, true);
         setDimMode(toggleButtonDimMode.isChecked());
+    }
+
+    private void toggleOff(ToggleButton button, LinearLayout layout) {
+        button.setChecked(false);
+        toggle(layout, true);
     }
 
     private void refreshPlaylist() {
