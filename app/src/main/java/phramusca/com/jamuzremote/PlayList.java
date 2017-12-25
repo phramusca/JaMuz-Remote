@@ -11,8 +11,6 @@ import java.util.Set;
 public class PlayList {
 
     private String name;
-    private String query;
-    private String order;
     private Map<String, TriStateButton.STATE> tags = new HashMap<>();
     private Map<String, TriStateButton.STATE> genres = new HashMap<>();
     private TriStateButton.STATE unTaggedState = TriStateButton.STATE.ANY;
@@ -25,18 +23,8 @@ public class PlayList {
         this.isLocal = isLocal;
     }
 
-    public PlayList(String name, String query, String order) {
-        this(name, true);
-        this.query = query;
-        this.order = order;
-    }
-
     public ArrayList<Track> getTracks() {
-        if(query==null) {
-            return MainActivity.musicLibrary.getTracks(getWhere(), getHaving(), "ORDER BY playCounter, lastPlayed");
-        } else {
-            return MainActivity.musicLibrary.getTracks(query, order);
-        }
+        return MainActivity.musicLibrary.getTracks(getWhere(), getHaving(), "ORDER BY playCounter, lastPlayed");
     }
 
     public Set<Map.Entry<String, TriStateButton.STATE>> getTags() {
@@ -47,7 +35,7 @@ public class PlayList {
         String nullStatus="";
         switch (unTaggedState) {
             case TRUE:
-                nullStatus= "null only"; break;
+                return "null\nonly";
             case FALSE:
                 nullStatus= "Not null"; break;
             case ANY:
@@ -252,11 +240,8 @@ public class PlayList {
 
     @Override
     public String toString() {
-        return isLocal?name
-                +" ("+(query==null?
-                    MainActivity.musicLibrary.getNb(getWhere(), getHaving())
-                    :MainActivity.musicLibrary.getNb(query))
-                +")"
+        return isLocal?
+                name+" ("+MainActivity.musicLibrary.getNb(getWhere(), getHaving())+")"
                 :name;
     }
 
