@@ -341,36 +341,34 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:alpha="0.7"
-        android:paddingTop="5dp">
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <Spinner
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/spinner_playlist"
+            android:popupBackground="#DDFFFFFF"
+            android:background="@drawable/ic_gradient_spinner"
+            android:layout_gravity="center_vertical|left|right"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
             android:paddingEnd="20dp"
             android:paddingStart="20dp"
-            android:paddingBottom="5dp"
             android:layout_row="0"
-            android:layout_column="1">
+            android:layout_column="0"/>
 
-            <Spinner
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/spinner_playlist"
-                android:popupBackground="#DDFFFFFF"
-                android:background="@drawable/ic_gradient_spinner"
-                android:layout_gravity="center_vertical"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                />
-        </LinearLayout>
-
-        <Button android:id="@+id/button_save"
-            android:background="@drawable/ic_button_save"
+        <Button android:id="@+id/button_new"
+            android:background="@drawable/ic_button_new"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
             android:layout_row="0"
-            android:layout_column="0"
+            android:layout_column="1"
             android:layout_gravity="center_vertical"/>
+
     </GridLayout>
 
     <LinearLayout
@@ -380,6 +378,7 @@
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:paddingBottom="5dp"
+        android:paddingTop="5dp"
         android:layout_row="0"
         android:layout_column="0"
         android:layout_gravity="center_horizontal">
@@ -388,7 +387,7 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal">
+            android:layout_gravity="center_horizontal" >
 
             <GridLayout
                 android:layout_width="match_parent"
@@ -441,6 +440,8 @@
                     android:textColor="@color/textColor"
                     android:inputType="textCapSentences|textMultiLine"
                     android:layout_gravity="left|right|center_vertical"/>
+
+
             </GridLayout>
         </LinearLayout>
 
@@ -485,7 +486,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
-            android:paddingBottom="5dp"
             android:layout_row="0"
             android:layout_column="0">
 
@@ -509,7 +509,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/colorPrimary"
-                android:paddingBottom="5dp"
                 android:layout_row="0"
                 android:layout_column="0">
 
