@@ -3,12 +3,13 @@ package phramusca.com.jamuzremote;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * Created by raph on 11/06/17.
  */
-public class PlayList {
+public class PlayList implements Comparable {
 
     private String name;
     private Map<String, TriStateButton.STATE> tags = new HashMap<>();
@@ -243,6 +244,30 @@ public class PlayList {
         return isLocal?
                 name+" ("+MainActivity.musicLibrary.getNb(getWhere(), getHaving())+")"
                 :name;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return (this.name.compareTo(((PlayList) o).name));
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 71 * hash + Objects.hashCode(this.name);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final PlayList other = (PlayList) obj;
+        return Objects.equals(this.name, other.name);
     }
 
     /**
