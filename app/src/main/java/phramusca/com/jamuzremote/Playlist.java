@@ -9,17 +9,17 @@ import java.util.Set;
 /**
  * Created by raph on 11/06/17.
  */
-public class PlayList implements Comparable {
+public class Playlist implements Comparable {
 
     private String name;
     private Map<String, TriStateButton.STATE> tags = new HashMap<>();
     private Map<String, TriStateButton.STATE> genres = new HashMap<>();
     private TriStateButton.STATE unTaggedState = TriStateButton.STATE.ANY;
     private int rating=0;
-    private Operator ratingOperator = PlayList.Operator.GREATERTHAN;
+    private Operator ratingOperator = Playlist.Operator.GREATERTHAN;
     private boolean isLocal;
 
-    public PlayList(String name, boolean isLocal) {
+    public Playlist(String name, boolean isLocal) {
         this.name = name;
         this.isLocal = isLocal;
     }
@@ -248,7 +248,7 @@ public class PlayList implements Comparable {
 
     @Override
     public int compareTo(Object o) {
-        return (this.name.compareTo(((PlayList) o).name));
+        return (this.name.compareTo(((Playlist) o).name));
     }
 
     @Override
@@ -266,7 +266,7 @@ public class PlayList implements Comparable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final PlayList other = (PlayList) obj;
+        final Playlist other = (Playlist) obj;
         return Objects.equals(this.name, other.name);
     }
 
