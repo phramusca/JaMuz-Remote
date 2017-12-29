@@ -117,10 +117,9 @@ public class MainActivity extends AppCompatActivity {
     private int nbFilesTotal = 0;
     private List<Track> queue = new ArrayList<>();
     private List<Track> queueHistory = new ArrayList<>();
-    private List<PlayList> localPlaylists = new ArrayList<PlayList>();
-    private ArrayAdapter<PlayList> playListArrayAdapter;
-    private PlayList localSelectedPlaylist;
-    /*private PlayList localPlaylist = new PlayList("Selection", true);*/
+    private List<Playlist> localPlaylists = new ArrayList<Playlist>();
+    private ArrayAdapter<Playlist> playListArrayAdapter;
+    private Playlist localSelectedPlaylist;
     private Map<Integer, String> tags = new HashMap<>();
     private List<String> genres = new ArrayList<>();
 
@@ -584,18 +583,18 @@ public class MainActivity extends AppCompatActivity {
                         //FIXME: Check if it does not yet exist
                         String text = input.getText().toString();
                         localPlaylists = localPlaylists.subList(0, localPlaylists.size()-1);
-                        PlayList newPlayList  = new PlayList(text.trim(), true);
-                        localPlaylists.add(newPlayList);
+                        Playlist newPlaylist = new Playlist(text.trim(), true);
+                        localPlaylists.add(newPlaylist);
                         Collections.sort(localPlaylists);
-                        localPlaylists.add(new PlayList("All", true));
+                        localPlaylists.add(new Playlist("All", true));
 
                         playListArrayAdapter =
-                                new ArrayAdapter<PlayList>(MainActivity.this, android.R.layout.simple_spinner_item, localPlaylists);
+                                new ArrayAdapter<Playlist>(MainActivity.this, android.R.layout.simple_spinner_item, localPlaylists);
                         playListArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         spinnerPlaylist.setAdapter(playListArrayAdapter);
 
-                        setupSpinner(playListArrayAdapter, newPlayList);
-                        displayPlaylist(newPlayList);
+                        setupSpinner(playListArrayAdapter, newPlaylist);
+                        displayPlaylist(newPlaylist);
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -925,16 +924,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void applyPlaylist(PlayList playList) {
+    private void applyPlaylist(Playlist playlist) {
         if(!isRemoteConnected()) {
-            displayPlaylist(playList);
+            displayPlaylist(playlist);
             if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                queue = playList.getTracks();
+                queue = playlist.getTracks();
             }
-            localSelectedPlaylist = playList;
+            localSelectedPlaylist = playlist;
             playNext();
         } else {
-            clientRemote.send("setPlaylist".concat(playList.toString()));
+            clientRemote.send("setPlaylist".concat(playlist.toString()));
         }
         dimOn();
     }
@@ -944,8 +943,8 @@ public class MainActivity extends AppCompatActivity {
         public void onItemSelected(AdapterView<?> parent, View view,
         int pos, long id) {
             if (spinnerPlaylistSend) {
-                PlayList playList = (PlayList) parent.getItemAtPosition(pos);
-                applyPlaylist(playList);
+                Playlist playlist = (Playlist) parent.getItemAtPosition(pos);
+                applyPlaylist(playlist);
             }
             spinnerPlaylistSend = true;
         }
@@ -1133,9 +1132,9 @@ public class MainActivity extends AppCompatActivity {
                     RecognizerIntent.EXTRA_RESULTS);
             String spokenText = results.get(0);
             boolean foundPlaylist=false;
-            for(PlayList playList : localPlaylists) {
-                if(playList.getName().equalsIgnoreCase(spokenText)) {
-                    applyPlaylist(playList);
+            for(Playlist playlist : localPlaylists) {
+                if(playlist.getName().equalsIgnoreCase(spokenText)) {
+                    applyPlaylist(playlist);
                     playListArrayAdapter.notifyDataSetChanged();
                     foundPlaylist=true;
                     break;
@@ -1213,8 +1212,8 @@ public class MainActivity extends AppCompatActivity {
 
         saveFilesLists();
 
-        for(PlayList playList : localPlaylists) {
-            savePlaylist(playList);
+        for(Playlist playlist : localPlaylists) {
+            savePlaylist(playlist);
         }
 
         mNotifyManager.cancelAll();
@@ -1334,7 +1333,7 @@ public class MainActivity extends AppCompatActivity {
                     checkAbort();
                     //Scan deleted files
                     //TODO: No need to check what scanned previously ...
-                    List<Track> tracks = new PlayList("All", false).getTracks();
+                    List<Track> tracks = new Playlist("All", false).getTracks();
                     nbFilesTotal = tracks.size();
                     nbFiles=0;
                     for(Track track : tracks) {
@@ -1569,7 +1568,7 @@ public class MainActivity extends AppCompatActivity {
             //Fill the queue
             if(queue.size()<5) {
                 if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                    List<Track> addToQueue = ((PlayList) spinnerPlaylist.getSelectedItem()).getTracks();
+                    List<Track> addToQueue = ((Playlist) spinnerPlaylist.getSelectedItem()).getTracks();
                     queue.addAll(addToQueue);
                 }
             }
@@ -1939,47 +1938,47 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupLocalPlaylists() {
-        localPlaylists = new ArrayList<PlayList>();
+        localPlaylists = new ArrayList<Playlist>();
         for(String file : fileList()) {
             if(file.endsWith(".plli")) {
-                PlayList playList = readPlaylist(file);
-                if(playList!=null && !playList.getName().equals("All")) { //FIXME: Use an editable bool
-                    localPlaylists.add(playList);
+                Playlist playlist = readPlaylist(file);
+                if(playlist !=null && !playlist.getName().equals("All")) { //FIXME: Use an editable bool
+                    localPlaylists.add(playlist);
                 }
             }
         }
         Collections.sort(localPlaylists);
-        localPlaylists.add(new PlayList("All", true)); //FIXME: Make "All" playlist UNtouchable !
+        localPlaylists.add(new Playlist("All", true)); //FIXME: Make "All" Playlist UNtouchable !
         localSelectedPlaylist = localPlaylists.get(0);
         displayPlaylist(localSelectedPlaylist);
 
         playListArrayAdapter =
-                new ArrayAdapter<PlayList>(this, android.R.layout.simple_spinner_item, localPlaylists);
+                new ArrayAdapter<Playlist>(this, android.R.layout.simple_spinner_item, localPlaylists);
         playListArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         setupSpinner(playListArrayAdapter, localSelectedPlaylist);
     }
 
-    private void savePlaylist(PlayList playList) {
-        if(playList!=null && !playList.getName().equals("All")) { //FIXME: Use a n editableflag
+    private void savePlaylist(Playlist playlist) {
+        if(playlist !=null && !playlist.getName().equals("All")) { //FIXME: Use a n editableflag
             Gson gson = new Gson();
-            HelperTextFile.write(this, playList.getName()+".plli", gson.toJson(playList));
+            HelperTextFile.write(this, playlist.getName()+".plli", gson.toJson(playlist));
         }
     }
 
-    private PlayList readPlaylist(String filename) {
+    private Playlist readPlaylist(String filename) {
         String readJson = HelperTextFile.read(this, filename);
         if(!readJson.equals("")) {
-            PlayList playlist = new PlayList(filename.replaceFirst("[.][^.]+$", ""), true);
+            Playlist playlist = new Playlist(filename.replaceFirst("[.][^.]+$", ""), true);
             Gson gson = new Gson();
-            Type mapType = new TypeToken<PlayList>(){}.getType();
+            Type mapType = new TypeToken<Playlist>(){}.getType();
             playlist = gson.fromJson(readJson, mapType);
             return playlist;
         }
         return null;
     }
 
-    private void displayPlaylist(PlayList playlist) {
+    private void displayPlaylist(Playlist playlist) {
         for(int i=0; i<layoutTagsPlaylist.getFlexItemCount();i++) {
             TriStateButton button = (TriStateButton)layoutTagsPlaylist.getFlexItemAt(i);
             if(button!=null) {
@@ -2027,8 +2026,8 @@ public class MainActivity extends AppCompatActivity {
         return mWifi.isConnected();
     }
 
-    private void setupSpinner(final ArrayAdapter<PlayList> arrayAdapter,
-                              final PlayList selectedPlaylist) {
+    private void setupSpinner(final ArrayAdapter<Playlist> arrayAdapter,
+                              final Playlist selectedPlaylist) {
         localSelectedPlaylist=selectedPlaylist;
         runOnUiThread(new Runnable() {
             @Override
@@ -2291,19 +2290,19 @@ public class MainActivity extends AppCompatActivity {
                     switch(type) {
                         case "playlists":
                             String selectedPlaylist = jObject.getString("selectedPlaylist");
-                            PlayList temp = new PlayList(selectedPlaylist, false);
+                            Playlist temp = new Playlist(selectedPlaylist, false);
                             final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists");
-                            final List<PlayList> playlists = new ArrayList<PlayList>();
+                            final List<Playlist> playlists = new ArrayList<Playlist>();
                             for(int i=0; i<jsonPlaylists.length(); i++) {
                                 String playlist = (String) jsonPlaylists.get(i);
-                                PlayList playList = new PlayList(playlist, false);
+                                Playlist playList = new Playlist(playlist, false);
                                 if(playlist.equals(selectedPlaylist)) {
                                     playList=temp;
                                 }
                                 playlists.add(playList);
                             }
-                            ArrayAdapter<PlayList> arrayAdapter =
-                                    new ArrayAdapter<PlayList>(MainActivity.this,
+                            ArrayAdapter<Playlist> arrayAdapter =
+                                    new ArrayAdapter<Playlist>(MainActivity.this,
                                             android.R.layout.simple_spinner_item, playlists);
                             arrayAdapter.setDropDownViewResource(
                                     android.R.layout.simple_spinner_dropdown_item);
