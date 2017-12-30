@@ -239,11 +239,17 @@ public class Playlist implements Comparable {
         return name;
     }
 
+    private int nbFiles=-1;
+
     @Override
     public String toString() {
         return isLocal?
-                name+" ("+MainActivity.musicLibrary.getNb(getWhere(), getHaving())+")"
+                name+" ("+nbFiles+")"
                 :name;
+    }
+
+    public void getNbFiles() {
+        nbFiles=MainActivity.musicLibrary.getNb(getWhere(), getHaving());
     }
 
     @Override

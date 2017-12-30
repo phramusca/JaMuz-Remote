@@ -340,6 +340,7 @@ public class MainActivity extends AppCompatActivity {
                     localSelectedPlaylist.setRating(Math.round(rating));
                     //Queue may not be valid as value changed
                     queue.clear();
+                    localSelectedPlaylist.getNbFiles();
                     playListArrayAdapter.notifyDataSetChanged();
                     textViewRating.setText(localSelectedPlaylist.getRatingString());
                     ratingBarPlaylist.setEnabled(true);
@@ -355,6 +356,7 @@ public class MainActivity extends AppCompatActivity {
                 localSelectedPlaylist.setRating(0);
                 //Queue may not be valid as value changed
                 queue.clear();
+                localSelectedPlaylist.getNbFiles();
                 playListArrayAdapter.notifyDataSetChanged();
                 textViewRating.setText(localSelectedPlaylist.getRatingString());
             }
@@ -367,6 +369,7 @@ public class MainActivity extends AppCompatActivity {
                 buttonRatingOperator.setText(localSelectedPlaylist.setRatingOperator());
                 //Queue may not be valid as value changed
                 queue.clear();
+                localSelectedPlaylist.getNbFiles();
                 playListArrayAdapter.notifyDataSetChanged();
                 textViewRating.setText(localSelectedPlaylist.getRatingString());
             }
@@ -585,16 +588,10 @@ public class MainActivity extends AppCompatActivity {
                         localPlaylists = localPlaylists.subList(0, localPlaylists.size()-1);
                         Playlist newPlaylist = new Playlist(text.trim(), true);
                         localPlaylists.add(newPlaylist);
-                        Collections.sort(localPlaylists);
-                        localPlaylists.add(new Playlist("All", true));
-
-                        playListArrayAdapter =
-                                new ArrayAdapter<Playlist>(MainActivity.this, android.R.layout.simple_spinner_item, localPlaylists);
-                        playListArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        spinnerPlaylist.setAdapter(playListArrayAdapter);
-
-                        setupSpinner(playListArrayAdapter, newPlaylist);
-                        displayPlaylist(newPlaylist);
+                        localSelectedPlaylist=newPlaylist;
+                        setupLocalPlaylistAll();
+                        displayPlaylist(localSelectedPlaylist);
+                        setupSpinner();
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -856,6 +853,7 @@ public class MainActivity extends AppCompatActivity {
                 localSelectedPlaylist.toggleTag(buttonText, state);
                 //Queue may not be valid as value changed
                 queue.clear();
+                localSelectedPlaylist.getNbFiles();
                 playListArrayAdapter.notifyDataSetChanged();
                 textViewTag.setText(localSelectedPlaylist.getTagsString());
             }
@@ -887,6 +885,7 @@ public class MainActivity extends AppCompatActivity {
                 localSelectedPlaylist.toggleGenre(buttonText, state);
                 //Queue may not be valid as value changed
                 queue.clear();
+                localSelectedPlaylist.getNbFiles();
                 playListArrayAdapter.notifyDataSetChanged();
                 textViewGenre.setText(localSelectedPlaylist.getGenresString());
             }
@@ -1135,6 +1134,7 @@ public class MainActivity extends AppCompatActivity {
             for(Playlist playlist : localPlaylists) {
                 if(playlist.getName().equalsIgnoreCase(spokenText)) {
                     applyPlaylist(playlist);
+                    localSelectedPlaylist.getNbFiles();
                     playListArrayAdapter.notifyDataSetChanged();
                     foundPlaylist=true;
                     break;
@@ -1579,6 +1579,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(TAG, "playQueue(1/"+queue.size()+")");
                 play();
             } else {
+                localSelectedPlaylist.getNbFiles();
                 playListArrayAdapter.notifyDataSetChanged();
                 toastLong("Empty Playlist.");
             }
@@ -1655,6 +1656,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void playAudio(){
         localTrack = displayedTrack;
+        localSelectedPlaylist.getNbFiles();
         playListArrayAdapter.notifyDataSetChanged();
         audioPlayer.stop(false);
         String msg = audioPlayer.play(displayedTrack);
@@ -1731,7 +1733,7 @@ public class MainActivity extends AppCompatActivity {
                     buttonRemote.setBackgroundResource(R.drawable.remote_on);
                 } else {
                     buttonRemote.setBackgroundResource(R.drawable.remote_off);
-                    setupSpinner(playListArrayAdapter, localSelectedPlaylist);
+                    setupSpinner();
                 }
                 editTextConnectInfo.setEnabled(enable);
                 buttonRemote.setEnabled(true);
@@ -1943,20 +1945,26 @@ public class MainActivity extends AppCompatActivity {
             if(file.endsWith(".plli")) {
                 Playlist playlist = readPlaylist(file);
                 if(playlist !=null && !playlist.getName().equals("All")) { //FIXME: Use an editable bool
+                    playlist.getNbFiles();
                     localPlaylists.add(playlist);
                 }
             }
         }
-        Collections.sort(localPlaylists);
-        localPlaylists.add(new Playlist("All", true)); //FIXME: Make "All" Playlist UNtouchable !
+        setupLocalPlaylistAll();
         localSelectedPlaylist = localPlaylists.get(0);
         displayPlaylist(localSelectedPlaylist);
+        setupSpinner();
+    }
 
+    private void setupLocalPlaylistAll() {
+        Collections.sort(localPlaylists);
+        Playlist playlist = new Playlist("All", true);
+        playlist.getNbFiles();
+        localPlaylists.add(playlist); //FIXME: Make "All" Playlist UNtouchable !
         playListArrayAdapter =
                 new ArrayAdapter<Playlist>(this, android.R.layout.simple_spinner_item, localPlaylists);
         playListArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        setupSpinner(playListArrayAdapter, localSelectedPlaylist);
     }
 
     private void savePlaylist(Playlist playlist) {
@@ -2026,9 +2034,13 @@ public class MainActivity extends AppCompatActivity {
         return mWifi.isConnected();
     }
 
+    private void setupSpinner() {
+        localSelectedPlaylist.getNbFiles();
+        setupSpinner(playListArrayAdapter, localSelectedPlaylist);
+    }
+
     private void setupSpinner(final ArrayAdapter<Playlist> arrayAdapter,
                               final Playlist selectedPlaylist) {
-        localSelectedPlaylist=selectedPlaylist;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -2363,7 +2375,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             stopRemote();
-            setupSpinner(playListArrayAdapter, localSelectedPlaylist);
+            setupSpinner();
             displayedTrack = localTrack;
             displayTrack();
         }
@@ -2720,7 +2732,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void stopRemote() {
         stopClient(clientRemote, buttonRemote, R.drawable.remote_off, true);
-        setupSpinner(playListArrayAdapter, localSelectedPlaylist);
+        setupSpinner();
         displayedTrack = localTrack;
         displayTrack();
     }
