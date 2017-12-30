@@ -1961,10 +1961,8 @@ public class MainActivity extends AppCompatActivity {
         Playlist playlist = new Playlist("All", true);
         playlist.getNbFiles();
         localPlaylists.add(playlist); //FIXME: Make "All" Playlist UNtouchable !
-        playListArrayAdapter =
-                new ArrayAdapter<Playlist>(this, android.R.layout.simple_spinner_item, localPlaylists);
-        playListArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
+        playListArrayAdapter = new ArrayAdapter<Playlist>(this, R.layout.spinner_item, localPlaylists);
+        //playListArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     }
 
     private void savePlaylist(Playlist playlist) {
