@@ -618,11 +618,12 @@ public class MainActivity extends AppCompatActivity {
                         {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                localPlaylists.remove(localSelectedPlaylist);
-                                localSelectedPlaylist=localPlaylists.get(0);
-                                displayPlaylist(localSelectedPlaylist);
-                                setupSpinner();
-                                deleteFile(localSelectedPlaylist.getName()+".plli");
+                                if(deleteFile(localSelectedPlaylist.getName()+".plli")) {
+                                    localPlaylists.remove(localSelectedPlaylist);
+                                    localSelectedPlaylist=localPlaylists.get(0);
+                                    displayPlaylist(localSelectedPlaylist);
+                                    setupSpinner();
+                                }
                             }
                         })
                         .setNegativeButton("No", null)
