@@ -458,8 +458,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
         toggleButtonRatingPanel = (ToggleButton) findViewById(R.id.button_rating_layout);
         toggleButtonRatingPanel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -494,6 +492,8 @@ public class MainActivity extends AppCompatActivity {
                 toggle(layoutAttributes, !toggleButtonEditTags.isChecked());
                 if(toggleButtonEditTags.isChecked()) {
                     toggleOff(toggleButtonPlaylist, layoutPlaylist);
+                    toggleOff(toggleButtonOptions, layoutOptions);
+
                     toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
                     toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
                     toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
@@ -509,6 +509,7 @@ public class MainActivity extends AppCompatActivity {
                 toggle(layoutPlaylist, !toggleButtonPlaylist.isChecked());
                 if(toggleButtonPlaylist.isChecked()) {
                     toggleOff(toggleButtonEditTags, layoutAttributes);
+                    toggleOff(toggleButtonOptions, layoutOptions);
                 } else {
                     toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
                     toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
@@ -523,6 +524,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dimOn();
                 toggle(layoutOptions, !toggleButtonOptions.isChecked());
+                if(toggleButtonOptions.isChecked()) {
+                    toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
+                    toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
+                    toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
+
+                    toggleOff(toggleButtonEditTags, layoutAttributes);
+                    toggleOff(toggleButtonPlaylist, layoutPlaylist);
+                }
             }
         });
 
@@ -817,7 +826,7 @@ public class MainActivity extends AppCompatActivity {
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
-    private void toggleOff(ToggleButton button, LinearLayout layout) {
+    private void toggleOff(ToggleButton button, View layout) {
         button.setChecked(false);
         toggle(layout, true);
     }
