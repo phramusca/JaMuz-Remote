@@ -157,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
     private Button buttonVolDown;
     private Button button_speech;
     private Button button_new;
+    private Button button_delete;
     private SeekBar seekBarPosition;
     private Spinner spinnerPlaylist;
     private Spinner spinnerGenre;
@@ -602,6 +603,30 @@ public class MainActivity extends AppCompatActivity {
                 });
 
                 builder.show();
+            }
+        });
+
+        button_delete = (Button) findViewById(R.id.button_delete);
+        button_delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(MainActivity.this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle("Delete playlist ?")
+                        .setMessage("Are you sure you want to delete \""+localSelectedPlaylist.getName()+"\" playlist ?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                localPlaylists.remove(localSelectedPlaylist);
+                                localSelectedPlaylist=localPlaylists.get(0);
+                                displayPlaylist(localSelectedPlaylist);
+                                setupSpinner();
+                                deleteFile(localSelectedPlaylist.getName()+".plli");
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
             }
         });
 
