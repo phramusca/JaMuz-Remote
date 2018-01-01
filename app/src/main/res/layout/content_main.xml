@@ -16,8 +16,7 @@
         android:background="@color/colorPrimaryDark"
         android:alpha="0.9">
 
-        <ToggleButton
-            android:id="@+id/button_controls_toggle"
+        <ToggleButton android:id="@+id/button_controls_toggle"
             android:layout_row="0"
             android:layout_column="0"
             android:layout_width="40dp"
@@ -25,8 +24,7 @@
             style="@style/ToggleButton"
             android:background="@drawable/ic_toggle_controls" />
 
-        <ToggleButton
-            android:id="@+id/button_edit_toggle"
+        <ToggleButton android:id="@+id/button_edit_toggle"
             android:layout_row="0"
             android:layout_column="1"
             android:layout_width="40dp"
@@ -42,8 +40,7 @@
             style="@style/ToggleButton"
             android:background="@drawable/ic_toggle_filter" />
 
-        <Button
-            android:id="@+id/button_connect"
+        <Button android:id="@+id/button_connect"
             android:background="@drawable/remote_off"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
@@ -54,8 +51,7 @@
             android:textSize="10sp"
             android:textAllCaps="false" />
 
-        <Button
-            android:id="@+id/button_speech"
+        <Button android:id="@+id/button_speech"
             android:background="@drawable/ic_action_speech"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
@@ -67,8 +63,7 @@
             android:textAllCaps="false"
             android:layout_gravity="center"/>
 
-        <Button
-            android:id="@+id/button_sync"
+        <Button android:id="@+id/button_sync"
             android:background="@drawable/connect_off_new"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
@@ -79,8 +74,7 @@
             android:textSize="10sp"
             android:textAllCaps="false"/>
 
-        <ToggleButton
-            android:id="@+id/button_dim_mode"
+        <ToggleButton android:id="@+id/button_dim_mode"
             android:layout_row="0"
             android:layout_column="6"
             android:layout_width="40dp"
@@ -88,8 +82,7 @@
             style="@style/ToggleButton"
             android:background="@drawable/ic_toggle_lightbulb"/>
 
-        <ToggleButton
-            android:id="@+id/button_connect_toggle"
+        <ToggleButton android:id="@+id/button_connect_toggle"
             android:layout_row="0"
             android:layout_column="7"
             android:layout_width="40dp"
