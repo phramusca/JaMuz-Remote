@@ -923,14 +923,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void applyPlaylist(Playlist playlist) {
+    private void applyPlaylist(Playlist playlist, boolean playNext) {
         if(!isRemoteConnected()) {
             displayPlaylist(playlist);
-            if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                queue = playlist.getTracks();
-            }
             localSelectedPlaylist = playlist;
-            playNext();
+            if(playNext) {
+                if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                    queue = playlist.getTracks();
+                }
+                playNext();
+            } else {
+                queue.clear();
+            }
         } else {
             clientRemote.send("setPlaylist".concat(playlist.toString()));
         }
@@ -943,7 +947,7 @@ public class MainActivity extends AppCompatActivity {
         int pos, long id) {
             if (spinnerPlaylistSend) {
                 Playlist playlist = (Playlist) parent.getItemAtPosition(pos);
-                applyPlaylist(playlist);
+                applyPlaylist(playlist, false);
             }
             spinnerPlaylistSend = true;
         }
@@ -1133,7 +1137,7 @@ public class MainActivity extends AppCompatActivity {
             boolean foundPlaylist=false;
             for(Playlist playlist : localPlaylists) {
                 if(playlist.getName().equalsIgnoreCase(spokenText)) {
-                    applyPlaylist(playlist);
+                    applyPlaylist(playlist, true);
                     localSelectedPlaylist.getNbFiles();
                     setupSpinner();
                     foundPlaylist=true;
