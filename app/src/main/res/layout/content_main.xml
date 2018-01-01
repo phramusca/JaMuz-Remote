@@ -344,10 +344,9 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp">
 
-        <Spinner
+        <Spinner android:id="@+id/spinner_playlist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/spinner_playlist"
             android:popupBackground="#DDFFFFFF"
             android:background="@drawable/ic_gradient_spinner"
             android:layout_gravity="center_vertical|left|right"

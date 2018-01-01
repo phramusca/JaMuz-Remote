@@ -1135,7 +1135,7 @@ public class MainActivity extends AppCompatActivity {
                 if(playlist.getName().equalsIgnoreCase(spokenText)) {
                     applyPlaylist(playlist);
                     localSelectedPlaylist.getNbFiles();
-                    playListArrayAdapter.notifyDataSetChanged();
+                    setupSpinner();
                     foundPlaylist=true;
                     break;
                 }
