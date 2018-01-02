@@ -179,6 +179,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout layoutGenrePlaylistLayout;
     private LinearLayout layoutAttributes;
     private LinearLayout layoutPlaylist;
+    private LinearLayout layoutPlaylistEditBar;
+    private LinearLayout layoutPlaylistToolBar;
     private GridLayout layoutOptions;
     private SeekBar seekBarReplayGain;
 
@@ -245,6 +247,10 @@ public class MainActivity extends AppCompatActivity {
         layoutGenrePlaylistLayout = (LinearLayout) findViewById(R.id.panel_genre_playlist_layout);
         layoutAttributes = (LinearLayout) findViewById(R.id.panel_attributes);
         layoutPlaylist = (LinearLayout) findViewById(R.id.panel_playlist);
+
+        layoutPlaylistToolBar = (LinearLayout) findViewById(R.id.panel_playlist_toolbar);
+        layoutPlaylistEditBar = (LinearLayout) findViewById(R.id.panel_playlist_editbar);
+
         layoutControls = (LinearLayout) findViewById(R.id.panel_controls);
         layoutOptions = (GridLayout) findViewById(R.id.panel_options);
 
@@ -533,13 +539,18 @@ public class MainActivity extends AppCompatActivity {
                 enableGUI(buttonRemote, false);
                 buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
                 if(buttonRemote.getText().equals("Connect")) {
+                    if(!checkConnectedViaWifi())  {
+                        toastLong("You must connect to WiFi network.");
+                        enableConnect(true);
+                        return;
+                    }
                     String infoConnect = editTextConnectInfo.getText().toString();
                     String[] split = infoConnect.split(":");  //NOI18N
                     if(split.length<2) {
-                        enableConnect(true);
                         toastLong("Bad format:\t"+infoConnect+"" +
                                 "\nExpected:\t\t<IP>:<Port>" +
                                 "\nEx:\t\t\t\t\t\t\t192.168.0.12:2013");
+                        enableConnect(true);
                         return;
                     }
                     String address = split[0];
@@ -552,8 +563,8 @@ public class MainActivity extends AppCompatActivity {
                     CallBackRemote callBackRemote = new CallBackRemote();
                     clientRemote = new Client(address, port,
                             Settings.Secure.getString(MainActivity.this.getContentResolver(),
-                            Settings.Secure.ANDROID_ID), "tata", callBackRemote);
-                   new Thread() {
+                                    Settings.Secure.ANDROID_ID), "tata", callBackRemote);
+                    new Thread() {
                         public void run() {
                             if(clientRemote.connect()) {
                                 setConfig("connectionString", editTextConnectInfo.getText().toString());
@@ -585,15 +596,19 @@ public class MainActivity extends AppCompatActivity {
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        //FIXME: Check if it does not yet exist
-                        String text = input.getText().toString();
-                        localPlaylists = localPlaylists.subList(0, localPlaylists.size()-1);
-                        Playlist newPlaylist = new Playlist(text.trim(), true);
-                        localPlaylists.add(newPlaylist);
-                        localSelectedPlaylist=newPlaylist;
-                        setupLocalPlaylistAll();
-                        displayPlaylist(localSelectedPlaylist);
-                        setupSpinner();
+                        String text = input.getText().toString().trim();
+                        if(!localPlaylists.contains(text)) {
+                            localPlaylists = localPlaylists.subList(0, localPlaylists.size()-1);
+                            Playlist newPlaylist = new Playlist(text, true);
+                            localPlaylists.add(newPlaylist);
+                            localSelectedPlaylist=newPlaylist;
+                            setupLocalPlaylistAll();
+                            displayPlaylist(localSelectedPlaylist);
+                            setupSpinner();
+                        } else {
+                            toastLong("Playlist \""+text+"\" already exist.");
+                        }
+
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -647,9 +662,17 @@ public class MainActivity extends AppCompatActivity {
                 enableGUI(buttonSync, false);
                 buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
                 if(buttonSync.getText().equals("Connect")) {
+                    if(!checkConnectedViaWifi())  {
+                        toastLong("You must connect to WiFi network.");
+                        enableSync(true);
+                        return;
+                    }
                     String infoConnect = editTextConnectInfo.getText().toString();
                     String[] split = infoConnect.split(":");  //NOI18N
                     if(split.length<2) {
+                        toastLong("Bad format:\t"+infoConnect+"" +
+                                "\nExpected:\t\t<IP>:<Port>" +
+                                "\nEx:\t\t\t\t\t\t\t192.168.0.12:2013");
                         enableSync(true);
                         return;
                     }
@@ -807,13 +830,13 @@ public class MainActivity extends AppCompatActivity {
         //service = new Intent(this, MyService.class);
         //startService(service);
 
-        toggle(layoutOptions, true);
         toggle(layoutControls, true);
         toggle(layoutAttributes, true);
-        toggle(layoutPlaylist, true);
         toggle(layoutGenrePlaylistLayout, true);
         toggle(layoutTagsPlaylistLayout, true);
         toggle(layoutRatingPlaylistLayout, true);
+        toggle(layoutPlaylist, true);
+        toggle(layoutOptions, true);
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
@@ -1529,6 +1552,11 @@ public class MainActivity extends AppCompatActivity {
     private void connectDatabase() {
         musicLibrary = new MusicLibrary(this);
         musicLibrary.open();
+
+        setupTags();
+        setupGenres();
+        scanLibrayInThread();
+        setupLocalPlaylists();
     }
 
     private Track getTrack(final String absolutePath) {
@@ -1765,6 +1793,7 @@ public class MainActivity extends AppCompatActivity {
                     buttonRemote.setBackgroundResource(R.drawable.remote_on);
                 } else {
                     buttonRemote.setBackgroundResource(R.drawable.remote_off);
+                    enablePlaylistEdit(true);
                     setupSpinner();
                 }
                 editTextConnectInfo.setEnabled(enable);
@@ -1785,6 +1814,16 @@ public class MainActivity extends AppCompatActivity {
                 }
                 editTextConnectInfo.setEnabled(enable);
                 buttonSync.setEnabled(true);
+            }
+        });
+    }
+
+    private void enablePlaylistEdit(final boolean enable) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                toggle(layoutPlaylistEditBar, !enable);
+                layoutPlaylistToolBar.setVisibility(enable?View.VISIBLE:View.GONE);
             }
         });
     }
@@ -1845,10 +1884,6 @@ public class MainActivity extends AppCompatActivity {
             alertDialog.show();
         } else {
             connectDatabase();
-            setupTags();
-            setupGenres();
-            scanLibrayInThread();
-            setupLocalPlaylists();
         }
     }
 
@@ -1866,6 +1901,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
+
+            //Dirty trick to recalculate display
+            //and prevent a display glitch
+            //BUT does not work well
+            /*toggle(layoutTagsPlaylistLayout, false);
+            toggle(layoutPlaylist, false);
+            toggle(layoutTagsPlaylistLayout, true);
+            toggle(layoutPlaylist, true);*/
         }
     }
 
@@ -1905,10 +1948,6 @@ public class MainActivity extends AppCompatActivity {
             case REQUEST: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     connectDatabase();
-                    setupTags();
-                    setupGenres();
-                    scanLibrayInThread();
-                    setupLocalPlaylists();
                 }
             }
         }
@@ -1994,7 +2033,6 @@ public class MainActivity extends AppCompatActivity {
         playlist.getNbFiles();
         localPlaylists.add(playlist); //FIXME: Make "All" Playlist UNtouchable !
         playListArrayAdapter = new ArrayAdapter<Playlist>(this, R.layout.spinner_item, localPlaylists);
-        //playListArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     }
 
     private void savePlaylist(Playlist playlist) {
@@ -2057,7 +2095,6 @@ public class MainActivity extends AppCompatActivity {
 
     ///TODO: Detect WIFI connection to allow/disallow "Connect" buttons
     //https://stackoverflow.com/questions/5888502/how-to-detect-when-wifi-connection-has-been-established-in-android
-
     private boolean checkConnectedViaWifi() {
         ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mWifi = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -2345,10 +2382,9 @@ public class MainActivity extends AppCompatActivity {
                             }
                             ArrayAdapter<Playlist> arrayAdapter =
                                     new ArrayAdapter<Playlist>(MainActivity.this,
-                                            android.R.layout.simple_spinner_item, playlists);
-                            arrayAdapter.setDropDownViewResource(
-                                    android.R.layout.simple_spinner_dropdown_item);
+                                            R.layout.spinner_item, playlists);
                             setupSpinner(arrayAdapter, temp);
+                            enablePlaylistEdit(false);
                             break;
                         case "currentPosition":
                             final int currentPosition = jObject.getInt("currentPosition");
@@ -2451,7 +2487,7 @@ public class MainActivity extends AppCompatActivity {
                             requestNextFile(true);
                             break;
                         case "tags":
-                            //Addsing missing tags
+                            //Adding missing tags
                             final JSONArray jsonTags = (JSONArray) jObject.get("tags");
                             for(int i=0; i<jsonTags.length(); i++) {
                                 final String tag = (String) jsonTags.get(i);
