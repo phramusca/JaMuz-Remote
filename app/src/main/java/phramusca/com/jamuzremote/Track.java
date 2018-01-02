@@ -24,6 +24,8 @@ public class Track {
     public int playCounter=0;
     private ArrayList<String> tags = null;
     private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
+    public String source="";
+
 
     //TODO: Store replaygain, no to read too often
 
