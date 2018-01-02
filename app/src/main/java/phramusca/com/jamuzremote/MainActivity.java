@@ -539,31 +539,13 @@ public class MainActivity extends AppCompatActivity {
                 enableGUI(buttonRemote, false);
                 buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
                 if(buttonRemote.getText().equals("Connect")) {
-                    if(!checkConnectedViaWifi())  {
-                        toastLong("You must connect to WiFi network.");
+                    Client client = getClient(new CallBackRemote(), "");
+                    if(client!=null) {
+                        clientRemote = client;
+                    } else {
                         enableConnect(true);
                         return;
                     }
-                    String infoConnect = editTextConnectInfo.getText().toString();
-                    String[] split = infoConnect.split(":");  //NOI18N
-                    if(split.length<2) {
-                        toastLong("Bad format:\t"+infoConnect+"" +
-                                "\nExpected:\t\t<IP>:<Port>" +
-                                "\nEx:\t\t\t\t\t\t\t192.168.0.12:2013");
-                        enableConnect(true);
-                        return;
-                    }
-                    String address = split[0];
-                    int port;
-                    try {
-                        port = Integer.parseInt(split[1]);
-                    } catch(NumberFormatException ex) {
-                        port=2013;
-                    }
-                    CallBackRemote callBackRemote = new CallBackRemote();
-                    clientRemote = new Client(address, port,
-                            Settings.Secure.getString(MainActivity.this.getContentResolver(),
-                                    Settings.Secure.ANDROID_ID), "tata", callBackRemote);
                     new Thread() {
                         public void run() {
                             if(clientRemote.connect()) {
@@ -662,31 +644,13 @@ public class MainActivity extends AppCompatActivity {
                 enableGUI(buttonSync, false);
                 buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
                 if(buttonSync.getText().equals("Connect")) {
-                    if(!checkConnectedViaWifi())  {
-                        toastLong("You must connect to WiFi network.");
+                    Client client = getClient(new CallBackSync(), "-data");
+                    if(client!=null) {
+                        clientSync = client;
+                    } else {
                         enableSync(true);
                         return;
                     }
-                    String infoConnect = editTextConnectInfo.getText().toString();
-                    String[] split = infoConnect.split(":");  //NOI18N
-                    if(split.length<2) {
-                        toastLong("Bad format:\t"+infoConnect+"" +
-                                "\nExpected:\t\t<IP>:<Port>" +
-                                "\nEx:\t\t\t\t\t\t\t192.168.0.12:2013");
-                        enableSync(true);
-                        return;
-                    }
-                    String address = split[0];
-                    int port;
-                    try {
-                        port = Integer.parseInt(split[1]);
-                    } catch(NumberFormatException ex) {
-                        port=2013;
-                    }
-                    CallBackSync callBackSync = new CallBackSync();
-                    clientSync = new Client(address, port,
-                            Settings.Secure.getString(MainActivity.this.getContentResolver(),
-                            Settings.Secure.ANDROID_ID)+"-data", "tata", callBackSync);
                     new Thread() {
                         public void run() {
                             if(clientSync.connect()) {
@@ -838,6 +802,31 @@ public class MainActivity extends AppCompatActivity {
         toggle(layoutPlaylist, true);
         toggle(layoutOptions, true);
         setDimMode(toggleButtonDimMode.isChecked());
+    }
+
+    private Client getClient(ICallBackReception callback, String suffix) {
+        if(!checkConnectedViaWifi())  {
+            toastLong("You must connect to WiFi network.");
+            return null;
+        }
+        String infoConnect = editTextConnectInfo.getText().toString();
+        String[] split = infoConnect.split(":");  //NOI18N
+        if(split.length<2) {
+            toastLong("Bad format:\t"+infoConnect+"" +
+                    "\nExpected:\t\t<IP>:<Port>" +
+                    "\nEx:\t\t\t\t\t\t\t192.168.0.12:2013");
+            return null;
+        }
+        String address = split[0];
+        int port;
+        try {
+            port = Integer.parseInt(split[1]);
+        } catch(NumberFormatException ex) {
+            port=2013;
+        }
+        return new Client(address, port,
+                Settings.Secure.getString(MainActivity.this.getContentResolver(),
+                        Settings.Secure.ANDROID_ID)+(suffix.equals("")?"":suffix), "tata", callback);
     }
 
     private void toggleOff(ToggleButton button, View layout) {
@@ -2015,7 +2004,7 @@ public class MainActivity extends AppCompatActivity {
         for(String file : fileList()) {
             if(file.endsWith(".plli")) {
                 Playlist playlist = readPlaylist(file);
-                if(playlist !=null && !playlist.getName().equals("All")) { //FIXME: Use an editable bool
+                if(playlist !=null && !playlist.getName().equals("All")) { //FIXME: "All" Playlist Use an editable bool
                     playlist.getNbFiles();
                     localPlaylists.add(playlist);
                 }
@@ -2031,12 +2020,12 @@ public class MainActivity extends AppCompatActivity {
         Collections.sort(localPlaylists);
         Playlist playlist = new Playlist("All", true);
         playlist.getNbFiles();
-        localPlaylists.add(playlist); //FIXME: Make "All" Playlist UNtouchable !
+        localPlaylists.add(playlist); //FIXME: "All" Playlist make UNtouchable !
         playListArrayAdapter = new ArrayAdapter<Playlist>(this, R.layout.spinner_item, localPlaylists);
     }
 
     private void savePlaylist(Playlist playlist) {
-        if(playlist !=null && !playlist.getName().equals("All")) { //FIXME: Use a n editableflag
+        if(playlist !=null && !playlist.getName().equals("All")) { //FIXME: "All" Playlist Use an editableflag
             Gson gson = new Gson();
             HelperTextFile.write(this, playlist.getName()+".plli", gson.toJson(playlist));
         }
@@ -2768,8 +2757,8 @@ public class MainActivity extends AppCompatActivity {
                 //stopClient(clientSync,buttonSync, R.drawable.connect_off, true);
 
                 //Resend add request in case missed for some reason
-                //FIXME: insertDeviceFile preventing merge to start quickly
-                //FIXME: DO NOT resend insertDeviceFile for all
+                //FIXME TOP TOP FIXME: insertDeviceFile preventing merge to start quickly
+                //DO NOT resend insertDeviceFile for all
                 // Indeed, it takes long time before server inserts the ids so merge is not available
                 // => do an ACK from server to client so do not
                 // send insertDeviceFile when already done
