@@ -102,9 +102,6 @@ public class ReplayGain {
 	private static GainValues readReplayGainFromFlac(File path) {
 		GainValues gv = new GainValues();
 		try {
-            //FIXME: USE jaudiotagger 2.2.4 instead of 2.2.6 to avoid : java.lang.NoSuchMethodError: No virtual method toPath()Ljava/nio/file/Path; in class Ljava/io/File; or its super classes (declaration of 'java.io.File' appears in /system/framework/core-libart.jar)
-            // => DOES NOT SEEM TO WORK. DOES IT ?
-			//https://bitbucket.org/ijabz/jaudiotagger/issues/149/some-nio-classes-are-unavailable-while
 			org.jaudiotagger.audio.AudioFile f = AudioFileIO.read(path);
 			FlacTag tag = (FlacTag) f.getTag();
 			VorbisCommentTag vcTag = tag.getVorbisCommentTag();
@@ -185,9 +182,15 @@ public class ReplayGain {
 		return rg_float;
 	}
 
-	//TODO: Check if jaudiotagger > 2.2.6 supports REPLAYGAIN tags as generic fields
+    //FIXME: Read FLAC ReplayGain
+    //=> using jaudiotagger 2.2.4 instead of 2.2.6 to avoid : java.lang.NoSuchMethodError: ...
+    //https://bitbucket.org/ijabz/jaudiotagger/issues/149/some-nio-classes-are-unavailable-while
+    //=> but 2.2.4 does not (seem to) read FLAC replaygain
+    //=> can a higher version solve the issue ?
+
+	//TODO: Check if jaudiotagger > 2.2.6 supports REPLAYGAIN tags as generic fields for MP3 (and FLAC)
 	//https://bitbucket.org/ijabz/jaudiotagger/issues/37/add-generic-support-for-reading-writing
-	
+
 	private static GainValues readReplayGainFromID3(File path) {
 		GainValues gv = new GainValues();
 		try {
@@ -230,7 +233,7 @@ public class ReplayGain {
 				}
 			}
 		} catch (NoSuchMethodError | CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException ex) {
-			//FIXME: Same NoSuchMethodError problem as with FLAC ?
+			//TODO: Same NoSuchMethodError problem as with FLAC ?
             //Not tested but catching NoSuchMethodError as it should be the same
             Logger.getLogger(ReplayGain.class.getName()).log(Level.SEVERE, null, ex);
 		}
