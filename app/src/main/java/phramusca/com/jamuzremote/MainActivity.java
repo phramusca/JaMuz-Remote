@@ -321,8 +321,7 @@ public class MainActivity extends AppCompatActivity {
                     displayedTrack.setRating(Math.round(rating));
                     if(!isRemoteConnected()) {
                         musicLibrary.updateTrack(displayedTrack);
-                        //Queue may not be valid as value changed
-                        queue.clear();
+                        clearQueue();
                     } else {
                         clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
                     }
@@ -339,10 +338,7 @@ public class MainActivity extends AppCompatActivity {
                     dimOn();
                     ratingBarPlaylist.setEnabled(false);
                     localSelectedPlaylist.setRating(Math.round(rating));
-                    //Queue may not be valid as value changed
-                    queue.clear();
-                    localSelectedPlaylist.getNbFiles();
-                    playListArrayAdapter.notifyDataSetChanged();
+                    clearQueue();
                     textViewRating.setText(localSelectedPlaylist.getRatingString());
                     ratingBarPlaylist.setEnabled(true);
                 }
@@ -355,10 +351,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ratingBarPlaylist.setRating(0F);
                 localSelectedPlaylist.setRating(0);
-                //Queue may not be valid as value changed
-                queue.clear();
-                localSelectedPlaylist.getNbFiles();
-                playListArrayAdapter.notifyDataSetChanged();
+                clearQueue();
                 textViewRating.setText(localSelectedPlaylist.getRatingString());
             }
         });
@@ -368,10 +361,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 buttonRatingOperator.setText(localSelectedPlaylist.setRatingOperator());
-                //Queue may not be valid as value changed
-                queue.clear();
-                localSelectedPlaylist.getNbFiles();
-                playListArrayAdapter.notifyDataSetChanged();
+                clearQueue();
                 textViewRating.setText(localSelectedPlaylist.getRatingString());
             }
         });
@@ -765,9 +755,10 @@ public class MainActivity extends AppCompatActivity {
         localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz", "coverHash",
                 "relativeFullPath", "---", new Date(0), new Date(0), 0);
         displayedTrack = localTrack;
-        setTextView(textViewFileInfo, Html.fromHtml("<html><h1>"
+        /*setTextView(textViewFileInfo, Html.fromHtml("<html><h1>"
                 .concat(displayedTrack.toString())
-                .concat("<BR/></h1></html>")), false);
+                .concat("<BR/></h1></html>")), false);*/
+        displayTrack();
 
         enableGUI(buttonSync, false);
         enableGUI(buttonRemote, false);
@@ -887,10 +878,7 @@ public class MainActivity extends AppCompatActivity {
                 setTagButtonTextColor(button, state);
                 String buttonText = button.getText().toString();
                 localSelectedPlaylist.toggleTag(buttonText, state);
-                //Queue may not be valid as value changed
-                queue.clear();
-                localSelectedPlaylist.getNbFiles();
-                playListArrayAdapter.notifyDataSetChanged();
+                clearQueue();
                 textViewTag.setText(localSelectedPlaylist.getTagsString());
             }
         });
@@ -919,16 +907,19 @@ public class MainActivity extends AppCompatActivity {
                 setTagButtonTextColor(button, state);
                 String buttonText = button.getText().toString();
                 localSelectedPlaylist.toggleGenre(buttonText, state);
-                //Queue may not be valid as value changed
-                queue.clear();
-                localSelectedPlaylist.getNbFiles();
-                playListArrayAdapter.notifyDataSetChanged();
+                clearQueue();
                 textViewGenre.setText(localSelectedPlaylist.getGenresString());
             }
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
                 ActionBar.LayoutParams.WRAP_CONTENT);
         layoutGenrePlaylist.addView(button, lp);
+    }
+
+    private void clearQueue() {
+        queue.clear();
+        localSelectedPlaylist.getNbFiles();
+        playListArrayAdapter.notifyDataSetChanged();
     }
 
     //This is a trick since the following (not in listner) is not working:
@@ -969,7 +960,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 playNext();
             } else {
-                queue.clear();
+                clearQueue();
             }
         } else {
             clientRemote.send("setPlaylist".concat(playlist.toString()));
@@ -1568,7 +1559,7 @@ public class MainActivity extends AppCompatActivity {
     private void playHistory() {
         displayedTrack = queueHistory.get(queueHistoryIndex);
         Log.i(TAG, "playHistory("+(queueHistoryIndex+1)+"/"+queueHistory.size()+")");
-        playAudio();
+        playAudio("History "+(queueHistoryIndex+1)+"/"+queueHistory.size()+"");
     }
 
     private void play() {
@@ -1576,7 +1567,7 @@ public class MainActivity extends AppCompatActivity {
         if(file.exists()) {
             queueHistory.add(displayedTrack);
             queueHistoryIndex = queueHistory.size()-1;
-            playAudio();
+            playAudio("");
         } else {
             Log.d(TAG, "play(): Remove track from db:"+displayedTrack);
             musicLibrary.deleteTrack(displayedTrack.getPath());
@@ -1608,7 +1599,7 @@ public class MainActivity extends AppCompatActivity {
             //Fill the queue
             if(queue.size()<5) {
                 if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                    List<Track> addToQueue = ((Playlist) spinnerPlaylist.getSelectedItem()).getTracks();
+                    List<Track> addToQueue = localSelectedPlaylist.getTracks();
                     queue.addAll(addToQueue);
                 }
             }
@@ -1694,11 +1685,12 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public void playAudio(){
+    public void playAudio(String source){
         localTrack = displayedTrack;
         localSelectedPlaylist.getNbFiles();
         playListArrayAdapter.notifyDataSetChanged();
         audioPlayer.stop(false);
+        displayedTrack.source=source.equals("")?localSelectedPlaylist.toString():source;
         String msg = audioPlayer.play(displayedTrack);
         if(!msg.equals("")) {
             toastLong(msg);
@@ -2136,11 +2128,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static void showToast(Context context, String text) {
-        Toast.makeText(context, text, Toast.LENGTH_LONG).show();
-    }
-
-
     private void notifyScan(final String action, int every) {
         nbFiles++;
         if(((nbFiles-1) % every) == 0) { //To prevent UI from freezing
@@ -2188,7 +2175,12 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    setTextView(textViewFileInfo, trimTrailingWhitespace(Html.fromHtml("<html><h1>"
+                    setTextView(textViewFileInfo, trimTrailingWhitespace(Html.fromHtml(
+                            "<html>"+
+                            (displayedTrack.source.equals("")?""
+                                    :"<u>".concat(displayedTrack.source).concat("</u>:"))
+                            +""
+                            .concat("<h1>")
                             .concat(displayedTrack.toString())
                             .concat("</h1></html>"))), false);
                     ratingBar.setEnabled(false);
@@ -2375,11 +2367,12 @@ public class MainActivity extends AppCompatActivity {
                                     jObject.getString("genre"),
                                     new Date(),
                                     new Date(0),0);
+                            displayedTrack.source="Remote";//TODO: Add Playlist name and nbFiles
                             displayTrack();
                             break;
                     }
                 } catch (JSONException e) {
-                    setTextView(textViewFileInfo, Html.fromHtml(e.toString()), false);
+                    Log.e(TAG, e.toString());
                 }
             }
         }
@@ -2519,7 +2512,7 @@ public class MainActivity extends AppCompatActivity {
                             break;
                     }
                 } catch (JSONException e) {
-                    setTextView(textViewFileInfo, Html.fromHtml(e.toString()), false);
+                    Log.e(TAG, e.toString());
                 }
             }
         }
