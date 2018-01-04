@@ -2454,6 +2454,25 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
+            else if(msg.startsWith("insertedDeviceFile")) {
+                String subMsg = msg.substring("insertedDeviceFile".length());
+                String status = subMsg.substring(0, 2);
+                if(status.equals("OK")) {
+                    int idFile = Integer.parseInt(subMsg.substring(2, subMsg.length()));
+
+                    //FIXME: Store status to manage what to do at any stage
+                    //1-TOGET
+                    //2-GOT
+                    //3-InsertOK
+
+                    //e-InsertKO
+                    //e-ERROR (reading tags for instance; to be read at last with max retry count)
+                    if(filesToGet.containsKey(idFile)) {
+                        filesToGet.remove(idFile);
+                    }
+                }
+                requestNextFile(true);
+            }
             else {
                 try {
                     JSONObject jObject = new JSONObject(msg);
@@ -2469,9 +2488,13 @@ public class MainActivity extends AppCompatActivity {
                                 File localFile = new File(getAppDataPath(), fileReceived.relativeFullPath);
                                 if(!localFile.exists()) {
                                     filesToGet.put(fileReceived.idFile, fileReceived);
-                                } else {
-                                    clientSync.send("insertDeviceFile"+fileReceived.idFile);
                                 }
+                                //FIXME: we should send insertDeviceFile in this case
+                                //BUT we do not want to request next file
+                                //at status reception !
+                                /*else {
+                                    clientSync.send("insertDeviceFile"+fileReceived.idFile);
+                                }*/
                             }
                             requestNextFile(true);
                             break;
@@ -2545,7 +2568,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void receivedFile(final FileInfoReception fileInfoReception) {
             cancelWatchTimeOut();
-            Log.i(TAG, "Received file\n"+fileInfoReception+"\nRemaining : "+filesToGet.size()+"/"+filesToKeep.size());
+            Log.i(TAG, "Received file\n"+fileInfoReception
+                    +"\nRemaining : "+filesToGet.size()+"/"+filesToKeep.size());
             File path = getAppDataPath();
             File receivedFile = new File(path.getAbsolutePath()+File.separator
                     +fileInfoReception.relativeFullPath);
@@ -2554,11 +2578,16 @@ public class MainActivity extends AppCompatActivity {
                     if (receivedFile.length() == fileInfoReception.size) {
                         Log.i(TAG, "Saved file size: " + receivedFile.length());
                         if(insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception)) {
-                            filesToGet.remove(fileInfoReception.idFile);
                             clientSync.send("insertDeviceFile" + fileInfoReception.idFile);
+                            return;
                         } else {
                             Log.w(TAG, "File tags could not be read. Deleting " + receivedFile.getAbsolutePath());
                             receivedFile.delete();
+                            //FIXME: Cannot read tags of received file : What to do in this case
+                            //to avoid it to be requested over and over ?
+                            //=> merge filesToGet and filesToKeep
+                            //=> add a status in FileInfoReception (refer to other FIXME)
+                            //=> add a retry counter
                         }
                     } else {
                         Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
@@ -2709,15 +2738,11 @@ public class MainActivity extends AppCompatActivity {
         if(filesToKeep!=null) {
             saveFilesLists();
             if(filesToGet.size()>0) {
-                final FileInfoReception fileInfoReception = filesToGet.entrySet().iterator().next().getValue();
-                File receivedFile = new File(getAppDataPath(), fileInfoReception.relativeFullPath);
-                if(receivedFile.exists() && receivedFile.length() == fileInfoReception.size) {
-                    Log.i(TAG, "File already exists. Remove from filesToGet list: "+fileInfoReception);
-                    clientSync.send("insertDeviceFile"+fileInfoReception.idFile);
-                    //No need to request this one, it already exists (how can this be ?)
-                    filesToGet.remove(fileInfoReception.idFile);
-                    //Request next one then
-                    requestNextFile(scanLibrary);
+                final FileInfoReception fileToGetInfo = filesToGet.entrySet().iterator().next().getValue();
+                File fileToGet = new File(getAppDataPath(), fileToGetInfo.relativeFullPath);
+                if(fileToGet.exists() && fileToGet.length() == fileToGetInfo.size) {
+                    Log.i(TAG, "File already exists. Remove from filesToGet list: "+fileToGetInfo);
+                    clientSync.send("insertDeviceFile"+fileToGetInfo.idFile);
                 } else {
                     //Wait (after connection) and send request
                     //final int id = filesToGet.entrySet().iterator().next().getKey();
@@ -2733,9 +2758,9 @@ public class MainActivity extends AppCompatActivity {
                                 } catch (InterruptedException e) {
                                 }
                             }
-                            watchTimeOut(fileInfoReception.size);
+                            watchTimeOut(fileToGetInfo.size);
                             synchronized(timerWatchTimeout) {
-                                clientSync.send("sendFile"+fileInfoReception.idFile);
+                                clientSync.send("sendFile"+fileToGetInfo.idFile);
                             }
                         }
                     }.start();
@@ -2756,20 +2781,6 @@ public class MainActivity extends AppCompatActivity {
                 //enableSync(true);
                 //stopClient(clientSync,buttonSync, R.drawable.connect_off, true);
 
-                //Resend add request in case missed for some reason
-                //FIXME TOP TOP FIXME: insertDeviceFile preventing merge to start quickly
-                //DO NOT resend insertDeviceFile for all
-                // Indeed, it takes long time before server inserts the ids so merge is not available
-                // => do an ACK from server to client so do not
-                // send insertDeviceFile when already done
-                // (Use another list filesToInsert to keep track)
-                if(filesToKeep!=null) {
-                    for(FileInfoReception file : filesToKeep.values()) {
-                        if(!filesToGet.containsKey(file.idFile)) {
-                            clientSync.send("insertDeviceFile"+file.idFile);
-                        }
-                    }
-                }
                 if(scanLibrary) {
                     checkPermissionsThenScanLibrary();
                 }
