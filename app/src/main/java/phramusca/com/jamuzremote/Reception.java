@@ -53,6 +53,9 @@ public class Reception  extends ProcessAbstract {
                     Log.d(TAG, "RECEIVED null");
                     callback.disconnected("");
                 }
+                else if (msg.startsWith("insertedDeviceFile")) {
+                    callback.received(msg);
+                }
                 else if (msg.startsWith("MSG_")) {
                     callback.received(msg);
                 }
