@@ -1249,10 +1249,6 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
         }
 
-        if(musicLibrary!=null) {
-            musicLibrary.close();
-        }
-
         saveFilesLists();
 
         for(Playlist playlist : localPlaylists) {
@@ -1260,6 +1256,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mNotifyManager.cancelAll();
+
+        Log.i(TAG, "musicLibrary closing");
+        if(musicLibrary!=null) {
+            musicLibrary.close();
+            musicLibrary=null;
+        }
+        Log.i(TAG, "musicLibrary closed");
     }
 
     //TODO: Do not saveFilesLists ALL everytime !! (not in receivedFile at least)
@@ -1362,17 +1365,9 @@ public class MainActivity extends AppCompatActivity {
                         }
                     };
                     processBrowseFScount.start();
-
-                    try {
-                        processBrowseFS.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        processBrowseFScount.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    checkAbort();
+                    processBrowseFS.join();
+                    processBrowseFScount.join();
                     checkAbort();
                     //Scan deleted files
                     //TODO: No need to check what scanned previously ...
