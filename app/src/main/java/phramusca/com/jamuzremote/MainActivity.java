@@ -325,11 +325,11 @@ public class MainActivity extends AppCompatActivity {
                     dimOn();
                     ratingBar.setEnabled(false);
                     displayedTrack.setRating(Math.round(rating));
-                    if(!isRemoteConnected()) {
+                    if (isRemoteConnected()) {
+                        clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
+                    } else {
                         musicLibrary.updateTrack(displayedTrack);
                         clearQueueAndRefreshSpinner(true);
-                    } else {
-                        clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
                     }
                     ratingBar.setEnabled(true);
                 }
@@ -680,38 +680,38 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSwipeTop() {
                 Log.v(TAG, "onSwipeTop");
-                if(!isRemoteConnected()) {
-                    audioPlayer.forward();
-                } else {
+                if (isRemoteConnected()) {
                     clientRemote.send("forward");
+                } else {
+                    audioPlayer.forward();
                 }
 
             }
             @Override
             public void onSwipeRight() {
                 Log.v(TAG, "onSwipeRight");
-                if(!isRemoteConnected()) {
-                    playPrevious();
-                } else {
+                if (isRemoteConnected()) {
                     clientRemote.send("previousTrack");
+                } else {
+                    playPrevious();
                 }
             }
             @Override
             public void onSwipeLeft() {
                 Log.v(TAG, "onSwipeLeft");
-                if(!isRemoteConnected()) {
-                    playNext();
-                } else {
+                if (isRemoteConnected()) {
                     clientRemote.send("nextTrack");
+                } else {
+                    playNext();
                 }
             }
             @Override
             public void onSwipeBottom() {
                 Log.v(TAG, "onSwipeBottom");
-                if(!isRemoteConnected()) {
-                    audioPlayer.rewind();
-                } else {
+                if (isRemoteConnected()) {
                     clientRemote.send("rewind");
+                } else {
+                    audioPlayer.rewind();
                 }
             }
             @Override
@@ -866,8 +866,8 @@ public class MainActivity extends AppCompatActivity {
                     displayedTrack.toggleTag(buttonText);
                     clearQueueAndRefreshSpinner(true);
                 } else {
-                    //TODO
-                    //clientRemote.send("setTag".concat(String.valueOf(Math.round(rating))));
+                    //displayedTrack.toggleTag(buttonText); //TODO: Manage this too
+                    //clientRemote.send("setTag".concat(String.valueOf(Math.round(rating)))); //TODO
                 }
             }
         });
@@ -980,7 +980,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void applyPlaylist(Playlist playlist, boolean playNext) {
-        if(!isRemoteConnected()) {
+        dimOn();
+        if (isRemoteConnected()) {
+            clientRemote.send("setPlaylist".concat(playlist.toString()));
+        } else {
             displayPlaylist(playlist);
             localSelectedPlaylist = playlist;
             if(playNext) {
@@ -991,10 +994,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 clearQueueAndRefreshSpinner(false);
             }
-        } else {
-            clientRemote.send("setPlaylist".concat(playlist.toString()));
         }
-        dimOn();
     }
 
     Spinner.OnItemSelectedListener spinnerListener = new Spinner.OnItemSelectedListener() {
@@ -1019,6 +1019,7 @@ public class MainActivity extends AppCompatActivity {
         public void onItemSelected(AdapterView<?> parent, View view,
                                    int pos, long id) {
             if(spinnerGenreSend) {
+                dimOn();
                 String genre = (String) parent.getItemAtPosition(pos);
                 if(!isRemoteConnected()) {
                     if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
@@ -1026,7 +1027,6 @@ public class MainActivity extends AppCompatActivity {
                         musicLibrary.updateGenre(displayedTrack);
                     }
                 }
-                dimOn();
             }
             spinnerGenreSend=true;
         }
@@ -1715,6 +1715,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void playAudio(String source){
+        dimOn();
         localTrack = displayedTrack;
         localSelectedPlaylist.getNbFiles();
         playListArrayAdapter.notifyDataSetChanged();
@@ -1724,7 +1725,6 @@ public class MainActivity extends AppCompatActivity {
         if(!msg.equals("")) {
             toastLong(msg);
         }
-        dimOn();
     }
 
     private void dim(final boolean on) {
@@ -1966,7 +1966,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void doAction(String msg) {
-        if(!isRemoteConnected()) {
+        dimOn();
+        if (isRemoteConnected()) {
+            clientRemote.send(msg);
+        } else {
             switch (msg) {
                 case "previousTrack":
                     playPrevious();
@@ -1976,38 +1979,29 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case "playTrack":
                     audioPlayer.togglePlay();
-                    dimOn();
                     break;
                 case "pullup":
                     audioPlayer.pullUp();
-                    dimOn();
                     break;
                 case "rewind":
                     audioPlayer.rewind();
-                    dimOn();
                     break;
                 case "forward":
                     audioPlayer.forward();
-                    dimOn();
                     break;
                 case "volUp":
                     audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
                             AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
-                    dimOn();
                     break;
                 case "volDown":
                     audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
                             AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
-                    dimOn();
                     break;
                 default:
                     //Popup("Error", "Not implemented");
                     toastLong("Not implemented");
                     break;
             }
-        } else {
-            dimOn();
-            clientRemote.send(msg);
         }
     }
 
