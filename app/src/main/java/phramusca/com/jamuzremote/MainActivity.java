@@ -327,7 +327,7 @@ public class MainActivity extends AppCompatActivity {
                     displayedTrack.setRating(Math.round(rating));
                     if(!isRemoteConnected()) {
                         musicLibrary.updateTrack(displayedTrack);
-                        clearQueue();
+                        clearQueueAndRefreshSpinner(true);
                     } else {
                         clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
                     }
@@ -344,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
                     dimOn();
                     ratingBarPlaylist.setEnabled(false);
                     localSelectedPlaylist.setRating(Math.round(rating));
-                    clearQueue();
+                    clearQueueAndRefreshSpinner(false);
                     textViewRating.setText(localSelectedPlaylist.getRatingString());
                     ratingBarPlaylist.setEnabled(true);
                 }
@@ -357,7 +357,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ratingBarPlaylist.setRating(0F);
                 localSelectedPlaylist.setRating(0);
-                clearQueue();
+                clearQueueAndRefreshSpinner(false);
                 textViewRating.setText(localSelectedPlaylist.getRatingString());
             }
         });
@@ -367,7 +367,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 buttonRatingOperator.setText(localSelectedPlaylist.setRatingOperator());
-                clearQueue();
+                clearQueueAndRefreshSpinner(false);
                 textViewRating.setText(localSelectedPlaylist.getRatingString());
             }
         });
@@ -862,7 +862,13 @@ public class MainActivity extends AppCompatActivity {
                 ToggleButton button = (ToggleButton)view;
                 setTagButtonTextColor(button);
                 String buttonText = button.getText().toString();
-                displayedTrack.toggleTag(buttonText);
+                if(!isRemoteConnected()) {
+                    displayedTrack.toggleTag(buttonText);
+                    clearQueueAndRefreshSpinner(true);
+                } else {
+                    //TODO
+                    //clientRemote.send("setTag".concat(String.valueOf(Math.round(rating))));
+                }
             }
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
@@ -890,7 +896,7 @@ public class MainActivity extends AppCompatActivity {
                 setTagButtonTextColor(button, state);
                 String buttonText = button.getText().toString();
                 localSelectedPlaylist.toggleTag(buttonText, state);
-                clearQueue();
+                clearQueueAndRefreshSpinner(false);
                 textViewTag.setText(localSelectedPlaylist.getTagsString());
             }
         });
@@ -919,7 +925,7 @@ public class MainActivity extends AppCompatActivity {
                 setTagButtonTextColor(button, state);
                 String buttonText = button.getText().toString();
                 localSelectedPlaylist.toggleGenre(buttonText, state);
-                clearQueue();
+                clearQueueAndRefreshSpinner(false);
                 textViewGenre.setText(localSelectedPlaylist.getGenresString());
             }
         });
@@ -928,9 +934,20 @@ public class MainActivity extends AppCompatActivity {
         layoutGenrePlaylist.addView(button, lp);
     }
 
-    private void clearQueue() {
+    private void clearQueueAndRefreshSpinner(boolean refreshAll) {
         queue.clear();
-        localSelectedPlaylist.getNbFiles();
+        refreshSpinner(refreshAll);
+    }
+
+    private void refreshSpinner(boolean refreshAll) {
+        //TODO: Do this in a separate thread (if not already done)
+        if(refreshAll) {
+            for(Playlist playlist : localPlaylists) {
+                playlist.getNbFiles();
+            }
+        } else {
+            localSelectedPlaylist.getNbFiles();
+        }
         playListArrayAdapter.notifyDataSetChanged();
     }
 
@@ -972,7 +989,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 playNext();
             } else {
-                clearQueue();
+                clearQueueAndRefreshSpinner(false);
             }
         } else {
             clientRemote.send("setPlaylist".concat(playlist.toString()));
@@ -2454,6 +2471,13 @@ public class MainActivity extends AppCompatActivity {
                 String status = subMsg.substring(0, 2);
                 if(status.equals("OK")) {
                     int idFile = Integer.parseInt(subMsg.substring(2, subMsg.length()));
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            refreshSpinner(false);
+                        }
+                    });
 
                     //FIXME: Store status to manage what to do at any stage
                     //1-TOGET
