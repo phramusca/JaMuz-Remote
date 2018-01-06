@@ -52,12 +52,13 @@ public class Reception  extends ProcessAbstract {
                 if(msg==null) {
                     Log.d(TAG, "RECEIVED null");
                     callback.disconnected("");
+                    //FIXME: Set wasConnected (see other usage of disconnected first)
                 }
-                else if (msg.startsWith("insertedDeviceFile")) {
-                    callback.received(msg);
+                else if (msg.equals("MSG_ERROR_CONNECTION")) {
+                    callback.disconnected(msg);
                 }
-                else if (msg.startsWith("MSG_")) {
-                    callback.received(msg);
+                else if (msg.equals("MSG_CONNECTED")) {
+                    //Connected and authenticated
                 }
                 else if (msg.startsWith("JSON_")) {
                     callback.received(msg.substring(5));
