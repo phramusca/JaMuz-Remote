@@ -38,7 +38,8 @@
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             style="@style/ToggleButton"
-            android:background="@drawable/ic_toggle_filter" />
+            android:background="@drawable/ic_toggle_filter"
+            android:checked="true"/>
 
         <Button android:id="@+id/button_connect"
             android:background="@drawable/remote_off"
