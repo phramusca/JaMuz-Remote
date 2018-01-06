@@ -78,7 +78,7 @@ public class Client {
 					}
 				}
 			}
-			callback.received("MSG_ERROR_UNAUTHORIZED");
+			callback.disconnected("Unauthorized");
 			return false;
 			
 		} catch (IOException ex) {
@@ -92,7 +92,7 @@ public class Client {
 	}
 
 	private void callbackWithException(Exception ex) {
-		callback.received("MSG_ERROR: ".concat(ex.toString()));
+		callback.disconnected(ex.toString());
         Log.w(TAG, "", ex);
 	}
 
@@ -163,7 +163,7 @@ public class Client {
 			} catch (SocketException ex) {
                 Log.e(TAG, "", ex);
 				close();
-				callback.disconnected("");
+				callback.disconnected(ex.toString());
 			} catch (IOException ex) {
                 Log.e(TAG, "", ex);
 			}
