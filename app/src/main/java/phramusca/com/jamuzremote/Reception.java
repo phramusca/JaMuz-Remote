@@ -51,14 +51,7 @@ public class Reception  extends ProcessAbstract {
 				String msg = bufferedReader.readLine();
                 if(msg==null) {
                     Log.d(TAG, "RECEIVED null");
-                    callback.disconnected("");
-                    //FIXME: Set wasConnected (see other usage of disconnected first)
-                }
-                else if (msg.equals("MSG_ERROR_CONNECTION")) {
-                    callback.disconnected(msg);
-                }
-                else if (msg.equals("MSG_CONNECTED")) {
-                    //Connected and authenticated
+                    callback.disconnected("Socket closed");
                 }
                 else if (msg.startsWith("JSON_")) {
                     callback.received(msg.substring(5));

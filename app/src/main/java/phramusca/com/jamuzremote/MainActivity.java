@@ -163,8 +163,6 @@ public class MainActivity extends AppCompatActivity {
     private Spinner spinnerGenre;
     private static boolean spinnerPlaylistSend=false;
     private static boolean spinnerGenreSend=false;
-    private static boolean spinnerGenrePlaylistSend=false;
-    private static boolean spinnerGenreExcludedPlaylistSend=false;
     private RatingBar ratingBar;
     private RatingBar ratingBarPlaylist;
     private ImageView imageViewCover;
@@ -1388,7 +1386,7 @@ public class MainActivity extends AppCompatActivity {
                     checkAbort();
                     //Scan deleted files
                     //TODO: No need to check what scanned previously ...
-                    List<Track> tracks = new Playlist("All", false).getTracks();
+                    List<Track> tracks = new Playlist("ScanFolder", false).getTracks();
                     nbFilesTotal = tracks.size();
                     nbFiles=0;
                     for(Track track : tracks) {
@@ -2024,6 +2022,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupLocalPlaylistAll() {
         Collections.sort(localPlaylists);
+
+        //FIXME: Some playlists can be deleted, find a better a way of managing "All"
+
         Playlist playlist = new Playlist("All", true);
         playlist.getNbFiles();
         localPlaylists.add(playlist); //FIXME: "All" Playlist make UNtouchable !
@@ -2389,7 +2390,8 @@ public class MainActivity extends AppCompatActivity {
                                 jObject.getString("genre"),
                                 new Date(),
                                 new Date(0),0);
-                        displayedTrack.source="Remote";//TODO: Add Playlist name and nbFiles
+                        //TODO: Add Playlist name and nbFiles
+                        displayedTrack.source="Remote";
                         displayTrack();
                         break;
                 }
@@ -2786,7 +2788,7 @@ public class MainActivity extends AppCompatActivity {
                 //Resend add request in case missed for some reason
 
 
-                //FIXME TOP TOP FIXME: Remove this temp as no use now
+                //FIXME: Only send if not already (need to store ackFileReception status)
                 /*if(filesToKeep!=null) {
                     for(FileInfoReception file : filesToKeep.values()) {
                         if(!filesToGet.containsKey(file.idFile)) {
