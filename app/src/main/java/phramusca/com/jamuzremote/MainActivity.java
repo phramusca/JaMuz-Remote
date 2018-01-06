@@ -1331,7 +1331,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void scanLibrayInThread() {
         scanFolder(getAppDataPath());
-        new Thread() {
+        Thread thread = new Thread() {
             public void run() {
                 try {
                     if(scanLibray!=null) {
@@ -1345,7 +1345,22 @@ public class MainActivity extends AppCompatActivity {
                     scanFolder(folder);
                 }
             }
-        }.start();
+        };
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+        }
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String msg = "Database updated.";
+                toastLong(msg);
+                notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, 5000);
+
+            }
+        });
     }
 
     private void scanFolder(final File path) {
@@ -1398,15 +1413,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                         notifyScan("JaMuz is scanning deleted files ... ", 200);
                     }
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String msg = "Database updated.";
-                            toastLong(msg);
-                            notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, 5000);
-
-                        }
-                    });
                 } catch (InterruptedException e) {
                     Log.w(TAG, "Thread.MainActivity.scanLibrayInThread InterruptedException");
                 }
@@ -2601,10 +2607,12 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    String msg = filesToGet.size() + "/" + filesToKeep.size()
-                            + " remaining. Receiving: "+fileInfoReception.relativeFullPath;
+                    String msg = "- "+filesToGet.size() + "/" + filesToKeep.size()
+                            + " | "+StringManager.humanReadableByteCount(
+                                        fileInfoReception.size, false)
+                            +" | "+fileInfoReception.relativeFullPath;
                     int max=filesToKeep.size();
-                    int progress=filesToKeep.size()-filesToGet.size();
+                    int progress=max-filesToGet.size();
                     notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, max, progress, false, true, true);
                 }
             });
@@ -2703,6 +2711,11 @@ public class MainActivity extends AppCompatActivity {
                         public void onFinish() {
                             Log.w(TAG, "Timeout. Dis-connecting");
                             stopSync();
+
+                            //FIXME: Re-connect if wifi got disconnected
+                            //while sync as connected
+                            //(make sthg similiar to wasRemoteConnected)
+                            //=> Need to detect WiFi connection
                             Log.i(TAG, "Re-connecting");
                             buttonSync.performClick();
                         }
@@ -2822,6 +2835,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void stopSync() {
         stopClient(clientSync,buttonSync, R.drawable.connect_off_new, true);
+        mNotifyManager.cancel(ID_NOTIFIER_SYNC);
         cancelWatchTimeOut();
     }
 
