@@ -327,7 +327,8 @@ public class MainActivity extends AppCompatActivity {
                         clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
                     } else {
                         musicLibrary.updateTrack(displayedTrack);
-                        clearQueueAndRefreshSpinner(true);
+                        //clearQueueAndRefreshSpinner(true);
+                        refreshSpinner(true);
                     }
                     ratingBar.setEnabled(true);
                 }
@@ -342,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
                     dimOn();
                     ratingBarPlaylist.setEnabled(false);
                     localSelectedPlaylist.setRating(Math.round(rating));
-                    clearQueueAndRefreshSpinner(false);
+                    clearQueueAndRefreshSpinner();
                     textViewRating.setText(localSelectedPlaylist.getRatingString());
                     ratingBarPlaylist.setEnabled(true);
                 }
@@ -355,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ratingBarPlaylist.setRating(0F);
                 localSelectedPlaylist.setRating(0);
-                clearQueueAndRefreshSpinner(false);
+                clearQueueAndRefreshSpinner();
                 textViewRating.setText(localSelectedPlaylist.getRatingString());
             }
         });
@@ -365,7 +366,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 buttonRatingOperator.setText(localSelectedPlaylist.setRatingOperator());
-                clearQueueAndRefreshSpinner(false);
+                clearQueueAndRefreshSpinner();
                 textViewRating.setText(localSelectedPlaylist.getRatingString());
             }
         });
@@ -579,6 +580,7 @@ public class MainActivity extends AppCompatActivity {
                         String text = input.getText().toString().trim();
                         if(!localPlaylists.contains(text)) {
                             localPlaylists = localPlaylists.subList(0, localPlaylists.size()-1);
+                            //FIXME: Duplicate current playlist (clone) instead of new
                             Playlist newPlaylist = new Playlist(text, true);
                             localPlaylists.add(newPlaylist);
                             localSelectedPlaylist=newPlaylist;
@@ -797,7 +799,7 @@ public class MainActivity extends AppCompatActivity {
         toggle(layoutGenrePlaylistLayout, true);
         toggle(layoutTagsPlaylistLayout, true);
         toggle(layoutRatingPlaylistLayout, true);
-        toggle(layoutPlaylist, true);
+        //toggle(layoutPlaylist, true);
         toggle(layoutOptions, true);
         setDimMode(toggleButtonDimMode.isChecked());
     }
@@ -862,7 +864,8 @@ public class MainActivity extends AppCompatActivity {
                 String buttonText = button.getText().toString();
                 if(!isRemoteConnected()) {
                     displayedTrack.toggleTag(buttonText);
-                    clearQueueAndRefreshSpinner(true);
+                    //clearQueueAndRefreshSpinner(true);
+                    refreshSpinner(true);
                 } else {
                     //displayedTrack.toggleTag(buttonText); //TODO: Manage this too
                     //clientRemote.send("setTag".concat(String.valueOf(Math.round(rating)))); //TODO
@@ -894,7 +897,7 @@ public class MainActivity extends AppCompatActivity {
                 setTagButtonTextColor(button, state);
                 String buttonText = button.getText().toString();
                 localSelectedPlaylist.toggleTag(buttonText, state);
-                clearQueueAndRefreshSpinner(false);
+                clearQueueAndRefreshSpinner();
                 textViewTag.setText(localSelectedPlaylist.getTagsString());
             }
         });
@@ -923,7 +926,7 @@ public class MainActivity extends AppCompatActivity {
                 setTagButtonTextColor(button, state);
                 String buttonText = button.getText().toString();
                 localSelectedPlaylist.toggleGenre(buttonText, state);
-                clearQueueAndRefreshSpinner(false);
+                clearQueueAndRefreshSpinner();
                 textViewGenre.setText(localSelectedPlaylist.getGenresString());
             }
         });
@@ -932,9 +935,9 @@ public class MainActivity extends AppCompatActivity {
         layoutGenrePlaylist.addView(button, lp);
     }
 
-    private void clearQueueAndRefreshSpinner(boolean refreshAll) {
+    private void clearQueueAndRefreshSpinner() {
         queue.clear();
-        refreshSpinner(refreshAll);
+        refreshSpinner(false);
     }
 
     private void refreshSpinner(boolean refreshAll) {
@@ -990,7 +993,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 playNext();
             } else {
-                clearQueueAndRefreshSpinner(false);
+                clearQueueAndRefreshSpinner();
             }
         }
     }
@@ -2030,6 +2033,7 @@ public class MainActivity extends AppCompatActivity {
         Collections.sort(localPlaylists);
 
         //FIXME: Some playlists can be deleted, find a better a way of managing "All"
+        //(sort and remove are not worth using together)
 
         Playlist playlist = new Playlist("All", true);
         playlist.getNbFiles();
