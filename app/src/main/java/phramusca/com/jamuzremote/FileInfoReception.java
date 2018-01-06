@@ -1,17 +1,9 @@
 package phramusca.com.jamuzremote;
 
-import android.media.MediaMetadataRetriever;
-import android.util.Log;
-
-import com.google.gson.Gson;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 

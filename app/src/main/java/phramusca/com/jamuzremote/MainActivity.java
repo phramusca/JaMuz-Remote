@@ -2349,62 +2349,52 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void received(final String msg) {
-            if(msg.startsWith("MSG_")) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            toastShort(msg);
+            try {
+                JSONObject jObject = new JSONObject(msg);
+                String type = jObject.getString("type");
+                switch(type) {
+                    case "playlists":
+                        String selectedPlaylist = jObject.getString("selectedPlaylist");
+                        Playlist temp = new Playlist(selectedPlaylist, false);
+                        final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists");
+                        final List<Playlist> playlists = new ArrayList<Playlist>();
+                        for(int i=0; i<jsonPlaylists.length(); i++) {
+                            String playlist = (String) jsonPlaylists.get(i);
+                            Playlist playList = new Playlist(playlist, false);
+                            if(playlist.equals(selectedPlaylist)) {
+                                playList=temp;
+                            }
+                            playlists.add(playList);
                         }
-                    });
-            }
-            else {
-                try {
-                    JSONObject jObject = new JSONObject(msg);
-                    String type = jObject.getString("type");
-                    switch(type) {
-                        case "playlists":
-                            String selectedPlaylist = jObject.getString("selectedPlaylist");
-                            Playlist temp = new Playlist(selectedPlaylist, false);
-                            final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists");
-                            final List<Playlist> playlists = new ArrayList<Playlist>();
-                            for(int i=0; i<jsonPlaylists.length(); i++) {
-                                String playlist = (String) jsonPlaylists.get(i);
-                                Playlist playList = new Playlist(playlist, false);
-                                if(playlist.equals(selectedPlaylist)) {
-                                    playList=temp;
-                                }
-                                playlists.add(playList);
-                            }
-                            ArrayAdapter<Playlist> arrayAdapter =
-                                    new ArrayAdapter<Playlist>(MainActivity.this,
-                                            R.layout.spinner_item, playlists);
-                            setupSpinner(arrayAdapter, temp);
-                            enablePlaylistEdit(false);
-                            break;
-                        case "currentPosition":
-                            final int currentPosition = jObject.getInt("currentPosition");
-                            final int total = jObject.getInt("total");
-                            if(isRemoteConnected()) {
-                                setSeekBar(currentPosition, total);
-                            }
-                            break;
-                        case "fileInfoInt":
-                            displayedTrack = new Track(-1,
-                                    jObject.getInt("rating"),
-                                    jObject.getString("title"),
-                                    jObject.getString("album"),
-                                    jObject.getString("artist"),
-                                    jObject.getString("coverHash"), "",
-                                    jObject.getString("genre"),
-                                    new Date(),
-                                    new Date(0),0);
-                            displayedTrack.source="Remote";//TODO: Add Playlist name and nbFiles
-                            displayTrack();
-                            break;
-                    }
-                } catch (JSONException e) {
-                    Log.e(TAG, e.toString());
+                        ArrayAdapter<Playlist> arrayAdapter =
+                                new ArrayAdapter<Playlist>(MainActivity.this,
+                                        R.layout.spinner_item, playlists);
+                        setupSpinner(arrayAdapter, temp);
+                        enablePlaylistEdit(false);
+                        break;
+                    case "currentPosition":
+                        final int currentPosition = jObject.getInt("currentPosition");
+                        final int total = jObject.getInt("total");
+                        if(isRemoteConnected()) {
+                            setSeekBar(currentPosition, total);
+                        }
+                        break;
+                    case "fileInfoInt":
+                        displayedTrack = new Track(-1,
+                                jObject.getInt("rating"),
+                                jObject.getString("title"),
+                                jObject.getString("album"),
+                                jObject.getString("artist"),
+                                jObject.getString("coverHash"), "",
+                                jObject.getString("genre"),
+                                new Date(),
+                                new Date(0),0);
+                        displayedTrack.source="Remote";//TODO: Add Playlist name and nbFiles
+                        displayTrack();
+                        break;
                 }
+            } catch (JSONException e) {
+                Log.e(TAG, e.toString());
             }
         }
 
@@ -2449,132 +2439,120 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void received(final String msg) {
-            if(msg.equals("MSG_SEND_DB")) {
-                clientSync.sendDatabase();
-            }
-            else if(msg.startsWith("MSG_")) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        toastShort(msg);
-                    }
-                });
-            }
-            else if(msg.startsWith("insertedDeviceFile")) {
-                String subMsg = msg.substring("insertedDeviceFile".length());
-                String status = subMsg.substring(0, 2);
-                if(status.equals("OK")) {
-                    int idFile = Integer.parseInt(subMsg.substring(2, subMsg.length()));
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            refreshSpinner(false);
-                        }
-                    });
-
-                    //FIXME: Store status to manage what to do at any stage
-                    //1-TOGET
-                    //2-GOT
-                    //3-InsertOK
-
-                    //e-InsertKO
-                    //e-ERROR (reading tags for instance; to be read at last with max retry count)
-                    if(filesToGet.containsKey(idFile)) {
-                        filesToGet.remove(idFile);
-                    }
-                }
-                requestNextFile(true);
-            }
-            else {
-                try {
-                    JSONObject jObject = new JSONObject(msg);
-                    String type = jObject.getString("type");
-                    switch(type) {
-                        case "FilesToGet":
-                            filesToGet = new HashMap<>();
-                            filesToKeep = new HashMap<>();
-                            JSONArray files = (JSONArray) jObject.get("files");
-                            for(int i=0; i<files.length(); i++) {
-                                FileInfoReception fileReceived = new FileInfoReception((JSONObject) files.get(i));
-                                filesToKeep.put(fileReceived.relativeFullPath, fileReceived);
-                                File localFile = new File(getAppDataPath(), fileReceived.relativeFullPath);
-                                if(!localFile.exists()) {
-                                    filesToGet.put(fileReceived.idFile, fileReceived);
-                                }
-                                //FIXME: we should send insertDeviceFile in this case
-                                //BUT we do not want to request next file
-                                //at status reception !
-                                /*else {
-                                    clientSync.send("insertDeviceFile"+fileReceived.idFile);
-                                }*/
-                            }
-                            requestNextFile(true);
-                            break;
-                        case "tags":
-                            //Adding missing tags
-                            final JSONArray jsonTags = (JSONArray) jObject.get("tags");
-                            for(int i=0; i<jsonTags.length(); i++) {
-                                final String tag = (String) jsonTags.get(i);
-                                if(!tags.values().contains(tag)) {
-                                    if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                                        int idTag = musicLibrary.addTag(tag);
-                                        if(idTag>0) {
-                                            tags.put(idTag, tag);
-                                        }
-                                    }
-                                }
-                            }
-                            //Deleting tags that have been removed in server
-                            final List<String> list = new ArrayList<String>();
-                            for(int i = 0; i < jsonTags.length(); i++){
-                                list.add((String) jsonTags.get(i));
-                            }
-                            Iterator<Map.Entry<Integer, String>> it = tags.entrySet().iterator();
-                            while (it.hasNext())
-                            {
-                                Map.Entry<Integer, String> tag = it.next();
-                                if(!list.contains(tag.getValue())) {
-                                    if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                                        int deleted = musicLibrary.deleteTag(tag.getKey());
-                                        if(deleted>0) {
-                                            it.remove();
-                                        }
-                                    }
-                                }
-                            }
+            try {
+                JSONObject jObject = new JSONObject(msg);
+                String type = jObject.getString("type");
+                switch(type) {
+                    case "insertDeviceFileAck":
+                        String status = jObject.getString("status");
+                        int idFile = jObject.getInt("idFile");
+                        boolean requestNextFile = jObject.getBoolean("requestNextFile");
+                        if(status.equals("OK")) {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    setupTags();
+                                    refreshSpinner(true);
                                 }
                             });
 
-                            break;
-                        case "genres":
-                            final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
-                            for(int i=0; i<jsonGenres.length(); i++) {
-                                final String genre = (String) jsonGenres.get(i);
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if(!genres.contains(genre)) {
-                                            if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
-                                                if (musicLibrary.addGenre(genre)) {
-                                                    genres.add(genre);
-                                                }
+                            //FIXME: Store status to manage what to do at any stage
+                            //1-TOGET
+                            //2-GOT
+                            //3-InsertOK
+
+                            //e-InsertKO
+                            //e-ERROR (reading tags for instance; to be read at last with max retry count)
+                            if(filesToGet.containsKey(idFile)) {
+                                filesToGet.remove(idFile);
+                            }
+                        }
+                        if(requestNextFile) {
+                            requestNextFile(true);
+                        }
+                        break;
+                    case "SEND_DB":
+                        clientSync.sendDatabase();
+                        break;
+                    case "FilesToGet":
+                        filesToGet = new HashMap<>();
+                        filesToKeep = new HashMap<>();
+                        JSONArray files = (JSONArray) jObject.get("files");
+                        for(int i=0; i<files.length(); i++) {
+                            FileInfoReception fileReceived = new FileInfoReception((JSONObject) files.get(i));
+                            filesToKeep.put(fileReceived.relativeFullPath, fileReceived);
+                            File localFile = new File(getAppDataPath(), fileReceived.relativeFullPath);
+                            if(!localFile.exists()) {
+                                filesToGet.put(fileReceived.idFile, fileReceived);
+                            }
+                            else {
+                                ackFileReception(fileReceived.idFile, false);
+                            }
+                        }
+                        requestNextFile(true);
+                        break;
+                    case "tags":
+                        //Adding missing tags
+                        final JSONArray jsonTags = (JSONArray) jObject.get("tags");
+                        for(int i=0; i<jsonTags.length(); i++) {
+                            final String tag = (String) jsonTags.get(i);
+                            if(!tags.values().contains(tag)) {
+                                if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                                    int idTag = musicLibrary.addTag(tag);
+                                    if(idTag>0) {
+                                        tags.put(idTag, tag);
+                                    }
+                                }
+                            }
+                        }
+                        //Deleting tags that have been removed in server
+                        final List<String> list = new ArrayList<String>();
+                        for(int i = 0; i < jsonTags.length(); i++){
+                            list.add((String) jsonTags.get(i));
+                        }
+                        Iterator<Map.Entry<Integer, String>> it = tags.entrySet().iterator();
+                        while (it.hasNext())
+                        {
+                            Map.Entry<Integer, String> tag = it.next();
+                            if(!list.contains(tag.getValue())) {
+                                if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                                    int deleted = musicLibrary.deleteTag(tag.getKey());
+                                    if(deleted>0) {
+                                        it.remove();
+                                    }
+                                }
+                            }
+                        }
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                setupTags();
+                            }
+                        });
+
+                        break;
+                    case "genres":
+                        final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
+                        for(int i=0; i<jsonGenres.length(); i++) {
+                            final String genre = (String) jsonGenres.get(i);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if(!genres.contains(genre)) {
+                                        if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                                            if (musicLibrary.addGenre(genre)) {
+                                                genres.add(genre);
                                             }
                                         }
                                     }
-                                });
+                                }
+                            });
 
-                            }
-                            setupSpinnerGenre(genres, displayedTrack.getGenre());
-                            break;
-                    }
-                } catch (JSONException e) {
-                    Log.e(TAG, e.toString());
+                        }
+                        setupSpinnerGenre(genres, displayedTrack.getGenre());
+                        break;
                 }
+            } catch (JSONException e) {
+                Log.e(TAG, e.toString());
             }
         }
 
@@ -2591,7 +2569,7 @@ public class MainActivity extends AppCompatActivity {
                     if (receivedFile.length() == fileInfoReception.size) {
                         Log.i(TAG, "Saved file size: " + receivedFile.length());
                         if(insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception)) {
-                            clientSync.send("insertDeviceFile" + fileInfoReception.idFile);
+                            ackFileReception(fileInfoReception.idFile, true);
                             return;
                         } else {
                             Log.w(TAG, "File tags could not be read. Deleting " + receivedFile.getAbsolutePath());
@@ -2661,6 +2639,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             stopSync();
+        }
+    }
+
+    private void ackFileReception(int idFile, boolean requestNextFile) {
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("type", "ackFileReception");
+            obj.put("idFile", idFile);
+            obj.put("requestNextFile", requestNextFile);
+            clientSync.send("JSON_"+obj.toString());
+        } catch (JSONException e) {
         }
     }
 
@@ -2755,7 +2744,7 @@ public class MainActivity extends AppCompatActivity {
                 File fileToGet = new File(getAppDataPath(), fileToGetInfo.relativeFullPath);
                 if(fileToGet.exists() && fileToGet.length() == fileToGetInfo.size) {
                     Log.i(TAG, "File already exists. Remove from filesToGet list: "+fileToGetInfo);
-                    clientSync.send("insertDeviceFile"+fileToGetInfo.idFile);
+                    ackFileReception(fileToGetInfo.idFile, true);
                 } else {
                     //Wait (after connection) and send request
                     //final int id = filesToGet.entrySet().iterator().next().getKey();
@@ -2793,6 +2782,18 @@ public class MainActivity extends AppCompatActivity {
                 //sent by the server. User can still close
                 //enableSync(true);
                 //stopClient(clientSync,buttonSync, R.drawable.connect_off, true);
+
+                //Resend add request in case missed for some reason
+
+
+                //FIXME TOP TOP FIXME: Remove this temp as no use now
+                /*if(filesToKeep!=null) {
+                    for(FileInfoReception file : filesToKeep.values()) {
+                        if(!filesToGet.containsKey(file.idFile)) {
+                            ackFileReception(file.idFile, false);
+                        }
+                    }
+                }*/
 
                 if(scanLibrary) {
                     checkPermissionsThenScanLibrary();
