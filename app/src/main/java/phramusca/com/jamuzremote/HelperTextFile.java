@@ -23,7 +23,7 @@ public class HelperTextFile {
         try {
             FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
             PrintWriter printWriter = new PrintWriter(fos);
-            Log.i(TAG, "Writing "+filename+"\n"+json+"\n");
+            Log.i(TAG, "Writing "+filename+"\n"+(json.length()<150?json:json.substring(0, 150))+"\n");
             printWriter.write(json);
             printWriter.flush();
             printWriter.close();
