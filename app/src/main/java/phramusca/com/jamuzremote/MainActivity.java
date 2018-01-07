@@ -70,6 +70,7 @@ import android.widget.ToggleButton;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
@@ -212,7 +213,11 @@ public class MainActivity extends AppCompatActivity {
             filesToKeep = new HashMap<>();
             Gson gson = new Gson();
             Type mapType = new TypeToken<HashMap<String, FileInfoReception>>(){}.getType();
-            filesToKeep = gson.fromJson(readJson,mapType);
+            try {
+                filesToKeep = gson.fromJson(readJson,mapType);
+            } catch (JsonSyntaxException ex) {
+                Log.e(TAG, "", ex);
+            }
         }
         //Read filesToGet file to get list of files to retrieve
         readJson = HelperTextFile.read(this, "filesToGet.txt");
@@ -220,7 +225,11 @@ public class MainActivity extends AppCompatActivity {
             filesToGet = new HashMap<>();
             Gson gson = new Gson();
             Type mapType = new TypeToken<HashMap<Integer, FileInfoReception>>(){}.getType();
-            filesToGet = gson.fromJson(readJson, mapType);
+            try {
+                filesToGet = gson.fromJson(readJson, mapType);
+            } catch (JsonSyntaxException ex) {
+                Log.e(TAG, "", ex);
+            }
         }
 
         mNotifyManager =
@@ -667,7 +676,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     enableSync(true);
-                    stopSync();
+                    stopSync(false);
                 }
             }
         });
@@ -1240,7 +1249,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         stopRemote();
-        stopSync();
+        stopSync(false);
 
         //Abort and wait scanLibrayInThread is aborted
         //So it does not crash if scanLib not completed
@@ -1333,37 +1342,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void scanLibrayInThread() {
-        scanFolder(getAppDataPath());
-        Thread thread = new Thread() {
+        new Thread() {
             public void run() {
-                try {
-                    if(scanLibray!=null) {
-                        scanLibray.join();
-                    }
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
-                }
+                //Scan JaMuz path on SD card
+                scanFolder(getAppDataPath());
+                waitScanFolder();
+
+                //Scan user folder
                 if(!m_chosenDir.equals("/")) {
                     File folder = new File(m_chosenDir);
                     scanFolder(folder);
+                    waitScanFolder();
                 }
+
+                //Scan complete, warn user
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String msg = "Database updated.";
+                        toastLong(msg);
+                        notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, 5000);
+
+                    }
+                });
             }
-        };
-        thread.start();
+        }.start();
+    }
+
+    private void waitScanFolder() {
         try {
-            thread.join();
-        } catch (InterruptedException e) {
-        }
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                String msg = "Database updated.";
-                toastLong(msg);
-                notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, 5000);
-
+            if(scanLibray!=null) {
+                scanLibray.join();
             }
-        });
+        } catch (InterruptedException e) {
+            Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
+        }
     }
 
     private void scanFolder(final File path) {
@@ -2054,7 +2067,11 @@ public class MainActivity extends AppCompatActivity {
             Playlist playlist = new Playlist(filename.replaceFirst("[.][^.]+$", ""), true);
             Gson gson = new Gson();
             Type mapType = new TypeToken<Playlist>(){}.getType();
-            playlist = gson.fromJson(readJson, mapType);
+            try {
+                playlist = gson.fromJson(readJson, mapType);
+            } catch (JsonSyntaxException ex) {
+                Log.e(TAG, "", ex);
+            }
             return playlist;
         }
         return null;
@@ -2652,7 +2669,8 @@ public class MainActivity extends AppCompatActivity {
                     toastShort(msg);
                 }
             });
-            stopSync();
+            //FIXME: reconnect, but not in all cases: need a new param to callback method
+            stopSync(false);
         }
     }
 
@@ -2714,14 +2732,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onFinish() {
                             Log.w(TAG, "Timeout. Dis-connecting");
-                            stopSync();
-
-                            //FIXME: Re-connect if wifi got disconnected
-                            //while sync as connected
-                            //(make sthg similiar to wasRemoteConnected)
-                            //=> Need to detect WiFi connection
-                            Log.i(TAG, "Re-connecting");
-                            buttonSync.performClick();
+                            stopSync(true);
                         }
                     };
                     Log.i(TAG, "timerWatchTimeout.start()");
@@ -2837,10 +2848,29 @@ public class MainActivity extends AppCompatActivity {
         displayTrack();
     }
 
-    private void stopSync() {
+    private void stopSync(boolean reconnect) {
         stopClient(clientSync,buttonSync, R.drawable.connect_off_new, true);
         mNotifyManager.cancel(ID_NOTIFIER_SYNC);
         cancelWatchTimeOut();
+
+        if(reconnect) {
+            //FIXME: Re-connect. Manage a retry count and a delay btw retries + check Wifi
+            //FIXME: Re-connect too if wifi got disconnected
+            //while sync as connected
+            //(make sthg similiar to wasRemoteConnected)
+            //=> Need to detect WiFi connection
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+            }
+            Log.i(TAG, "Re-connecting");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    buttonSync.performClick();
+                }
+            });
+        }
     }
 
     private void stopClient(Client client, final Button button, final int resId, final boolean enable) {

@@ -10,8 +10,6 @@ package phramusca.com.jamuzremote;
 import java.io.PrintWriter;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Emission extends ProcessAbstract {
 

@@ -19,7 +19,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketException;
 
 /**
  *
@@ -78,11 +77,13 @@ public class Client {
 					}
 				}
 			}
-			callback.disconnected("Unauthorized");
+            callback.disconnected("Authentication failed.");
 			return false;
 			
 		} catch (IOException ex) {
-			callbackWithException(ex);
+            //Includes SocketException
+            Log.w(TAG, "", ex);
+            callback.disconnected(ex.getMessage());
 			return false;
 		}
 	}
@@ -91,10 +92,6 @@ public class Client {
 		return socket!=null && socket.isConnected();
 	}
 
-	private void callbackWithException(Exception ex) {
-		callback.disconnected(ex.toString());
-        Log.w(TAG, "", ex);
-	}
 
 	public void close() {
 		try {
@@ -124,7 +121,8 @@ public class Client {
 				}
 			}
 		} catch (IOException ex) {
-			callbackWithException(ex);
+            //Includes SocketException
+            Log.w(TAG, "", ex);
 			return false;
 		}
 	}
@@ -160,12 +158,10 @@ public class Client {
                 }
 				dos.flush();
 				Log.i(TAG, "File successfully sent!");
-			} catch (SocketException ex) {
-                Log.e(TAG, "", ex);
-				close();
-				callback.disconnected(ex.toString());
 			} catch (IOException ex) {
+                //This includes SocketException
                 Log.e(TAG, "", ex);
+                callback.disconnected(ex.getMessage());
 			}
 		}
 	}
