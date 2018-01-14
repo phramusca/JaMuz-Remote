@@ -21,7 +21,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.SocketException;
 
 import static phramusca.com.jamuzremote.MainActivity.getAppDataPath;
 
@@ -51,7 +50,7 @@ public class Reception  extends ProcessAbstract {
 				String msg = bufferedReader.readLine();
                 if(msg==null) {
                     Log.d(TAG, "RECEIVED null");
-                    callback.disconnected("Socket closed");
+                    callback.disconnected("Socket closed (received null)");
                 }
                 else if (msg.startsWith("JSON_")) {
                     callback.received(msg.substring(5));
@@ -112,9 +111,9 @@ public class Reception  extends ProcessAbstract {
                 }
 			}
 		} catch (InterruptedException ex) {
-        } catch (SocketException ex) {
-		} catch (IOException ex) {
+        } catch (IOException ex) {
             //Ex: java.io.IOException: write failed: ENOSPC (No space left on device)
+            //+ SocketException
             callback.disconnected(ex.getMessage());
 		}
 		finally {
