@@ -40,6 +40,7 @@ public class Client {
 	private InputStream inputStream;
     private OutputStream outputStream;
 
+
 	public Client(String address, int port, String login, String password, ICallBackReception callback){
 		this.port = port;
 		this.login = login;
@@ -50,36 +51,34 @@ public class Client {
 	
 	public boolean connect() {
 		try {
-			//TODO: Secure connexion
+            //TODO: Secure connexion
             //http://www.java2s.com/Code/Java/Network-Protocol/SecureCommunicationwithJSSE.htm
-			socket = new Socket(address, port);
+            socket = new Socket(address, port);
             if(!socket.isConnected()) {
                 socket.connect(new InetSocketAddress(address, port));
-				socket.setSoTimeout(10000);
+                socket.setSoTimeout(10000);
             }
-
             inputStream = socket.getInputStream();
-			bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-			//Starting emission thread
+            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            //Starting emission thread
             outputStream = socket.getOutputStream();
-			emission = new Emission(new PrintWriter(outputStream));
-			emission.start();
+            emission = new Emission(new PrintWriter(outputStream));
+            emission.start();
 
-			//Authenticating
-			if(waitPrompt("MSG_ENTER_LOGIN")) {
-				send(login);
-				if(waitPrompt("MSG_ENTER_PWD")) {
-					send(password);
-					if(waitPrompt("MSG_CONNECTED")) {
-						reception = new Reception(inputStream, callback, login);
-						reception.start();
-						return true;
-					}
-				}
-			}
+            //Authenticating
+            if(waitPrompt("MSG_ENTER_LOGIN")) {
+                send(login);
+                if(waitPrompt("MSG_ENTER_PWD")) {
+                    send(password);
+                    if(waitPrompt("MSG_CONNECTED")) {
+                        reception = new Reception(inputStream, callback, login);
+                        reception.start();
+                        return true;
+                    }
+                }
+            }
             callback.disconnected("Authentication failed.");
-			return false;
-			
+            return false;
 		} catch (IOException ex) {
             //Includes SocketException
             Log.w(TAG, "", ex);
