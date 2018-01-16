@@ -11,13 +11,13 @@ import java.io.PrintWriter;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class Emission extends ProcessAbstract {
+public class ClientEmission extends ProcessAbstract {
 
 	private final PrintWriter printWriter;
 	private final BlockingQueue<String> outQueue;
 	
-	public Emission(PrintWriter printWriter) {
-		super("Thread.Client.Emission");
+	public ClientEmission(PrintWriter printWriter) {
+		super("Thread.Client.ClientEmission");
 		this.printWriter = printWriter;
 		outQueue = new LinkedBlockingQueue<>();
 	}
@@ -28,7 +28,7 @@ public class Emission extends ProcessAbstract {
 			outQueue.put(msg);
 			return true;
 		} catch (InterruptedException ex) {
-//			Logger.getLogger(Emission.class.getName()).log(Level.SEVERE, null, ex);
+//			Logger.getLogger(ClientEmission.class.getName()).log(Level.SEVERE, null, ex);
 			return false;
 		}
 	}
@@ -44,7 +44,7 @@ public class Emission extends ProcessAbstract {
 				printWriter.flush();
 			}
 		} catch (InterruptedException ex) {
-//			Logger.getLogger(Emission.class.getName()).log(Level.SEVERE, null, ex);
+//			Logger.getLogger(ClientEmission.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 }

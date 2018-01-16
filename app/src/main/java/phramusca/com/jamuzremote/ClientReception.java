@@ -24,22 +24,19 @@ import java.io.InputStreamReader;
 
 import static phramusca.com.jamuzremote.MainActivity.getAppDataPath;
 
-public class Reception  extends ProcessAbstract {
+public class ClientReception extends ProcessAbstract {
 
-    private static final String TAG = Reception.class.getSimpleName();
+    private static final String TAG = ClientReception.class.getSimpleName();
 	private final BufferedReader bufferedReader;
 	private InputStream inputStream;
 	private final ICallBackReception callback;
-	private final String login;
 
-	
-	public Reception(InputStream inputStream, ICallBackReception callback, String login) {
-		super("Thread.Client.Reception");
+	public ClientReception(InputStream inputStream, ICallBackReception callback) {
+		super("Thread.Client.ClientReception");
 		this.inputStream = inputStream;
 
 		this.callback = callback; 
 		this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-		this.login = login;
 	}
 	
 	@Override
