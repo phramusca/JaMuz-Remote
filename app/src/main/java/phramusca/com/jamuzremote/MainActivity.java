@@ -1226,6 +1226,13 @@ public class MainActivity extends AppCompatActivity {
         stopSync(false);
         stopRemote();
 
+        synchronized (syncStatus) {
+            syncStatus.status = Status.USER_STOP;
+            logStatus("Disconnecting (onDestroy)");
+            stopSync(false);
+        }
+        stopRemote();
+
         //Better unregister as it does not trigger anyway + raises exceptions if not
         unregisterReceiver(receiverHeadSetPlugged);
         try {
@@ -2774,7 +2781,11 @@ public class MainActivity extends AppCompatActivity {
                                 clientSync.requestFile(fileToGetInfo.idFile);
                             }
                         }
-                    }.start();
+                    }*/
+
+                    if (scanLibrary) {
+                        checkPermissionsThenScanLibrary();
+                    }
                 }
             } else {
                 final String msg = "No more files to download.\n\nAll " + filesToKeep.size() + " files" +
@@ -2784,7 +2795,8 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        toastLong(msg);
+                        toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
+                                "export a list of files to retrieve, based on playlists.");
                     }
                 });
                 //Not disconnecting to be able to receive a new list
@@ -2808,15 +2820,6 @@ public class MainActivity extends AppCompatActivity {
                     checkPermissionsThenScanLibrary();
                 }
             }
-        } else {
-            Log.i(TAG, "filesToKeep is null");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
-                            "export a list of files to retrieve, based on playlists.");
-                }
-            });
         }
     }
 
