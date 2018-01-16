@@ -21,26 +21,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.SocketException;
 
 import static phramusca.com.jamuzremote.MainActivity.getAppDataPath;
 
-public class Reception  extends ProcessAbstract {
+public class ClientReception extends ProcessAbstract {
 
-    private static final String TAG = Reception.class.getSimpleName();
+    private static final String TAG = ClientReception.class.getSimpleName();
 	private final BufferedReader bufferedReader;
 	private InputStream inputStream;
 	private final ICallBackReception callback;
-	private final String login;
 
-	
-	public Reception(InputStream inputStream, ICallBackReception callback, String login) {
-		super("Thread.Client.Reception");
+	public ClientReception(InputStream inputStream, ICallBackReception callback) {
+		super("Thread.Client.ClientReception");
 		this.inputStream = inputStream;
 
 		this.callback = callback; 
 		this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-		this.login = login;
 	}
 	
 	@Override
@@ -51,7 +47,7 @@ public class Reception  extends ProcessAbstract {
 				String msg = bufferedReader.readLine();
                 if(msg==null) {
                     Log.d(TAG, "RECEIVED null");
-                    callback.disconnected("Socket closed");
+                    callback.disconnected("Socket closed (received null)");
                 }
                 else if (msg.startsWith("JSON_")) {
                     callback.received(msg.substring(5));
@@ -112,9 +108,9 @@ public class Reception  extends ProcessAbstract {
                 }
 			}
 		} catch (InterruptedException ex) {
-        } catch (SocketException ex) {
-		} catch (IOException ex) {
+        } catch (IOException ex) {
             //Ex: java.io.IOException: write failed: ENOSPC (No space left on device)
+            //+ SocketException
             callback.disconnected(ex.getMessage());
 		}
 		finally {
