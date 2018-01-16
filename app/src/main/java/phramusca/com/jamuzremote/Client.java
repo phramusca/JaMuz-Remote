@@ -7,7 +7,6 @@ package phramusca.com.jamuzremote;
 
 import android.util.Log;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -26,52 +25,48 @@ import java.net.Socket;
  */
 public class Client {
 	private static final String TAG = Client.class.getSimpleName();
-
-	private final int port;
-	private final String login;
-	private final String password;
 	
 	private Socket socket = null;
-	private Emission emission;
-	private Reception reception;
-	private final String address;
-	private final ICallBackReception callback;
+	private ClientEmission emission;
+	private ClientReception reception;
+
+	private ICallBackReception callback;
     private BufferedReader bufferedReader;
 	private InputStream inputStream;
-    private OutputStream outputStream;
+    protected OutputStream outputStream;
+    protected ClientInfo clientInfo;
 
+    public Client(ClientInfo clientInfo){
+        this.clientInfo = clientInfo;
+    }
 
-	public Client(String address, int port, String login, String password, ICallBackReception callback){
-		this.port = port;
-		this.login = login;
-		this.password = password;
-		this.address = address;
-		this.callback = callback;
-	}
-	
-	public boolean connect() {
+    public void setCallback(ICallBackReception callback) {
+        this.callback = callback;
+    }
+
+    public boolean connect() {
 		try {
             //TODO: Secure connexion
             //http://www.java2s.com/Code/Java/Network-Protocol/SecureCommunicationwithJSSE.htm
-            socket = new Socket(address, port);
+            socket = new Socket(clientInfo.getAddress(), clientInfo.getPort());
             if(!socket.isConnected()) {
-                socket.connect(new InetSocketAddress(address, port));
+                socket.connect(new InetSocketAddress(clientInfo.getAddress(), clientInfo.getPort()));
                 socket.setSoTimeout(10000);
             }
             inputStream = socket.getInputStream();
             bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             //Starting emission thread
             outputStream = socket.getOutputStream();
-            emission = new Emission(new PrintWriter(outputStream));
+            emission = new ClientEmission(new PrintWriter(outputStream));
             emission.start();
 
             //Authenticating
             if(waitPrompt("MSG_ENTER_LOGIN")) {
-                send(login);
+                send(clientInfo.getLogin());
                 if(waitPrompt("MSG_ENTER_PWD")) {
-                    send(password);
+                    send(clientInfo.getPassword());
                     if(waitPrompt("MSG_CONNECTED")) {
-                        reception = new Reception(inputStream, callback, login);
+                        reception = new ClientReception(inputStream, callback);
                         reception.start();
                         return true;
                     }
@@ -133,25 +128,14 @@ public class Client {
 		}
 	}
 
-	public void sendDatabase() {
-        File file = MainActivity.musicLibraryDbFile;
-		if(file.exists()&&file.isFile())
-		{
-			send("SENDING_DB");
-			DataOutputStream dos = new DataOutputStream(
-					new BufferedOutputStream(outputStream));
-			sendFile(file, dos);
-		}
-	}
-
-	private void sendFile(File file, DataOutputStream dos) {
+	protected void sendFile(File file, DataOutputStream dos) {
 		if(dos!=null&&file.exists()&&file.isFile())
 		{
 			try (FileInputStream input = new FileInputStream(file)) {
 				Log.i(TAG, "Sending : "+file.getAbsolutePath());
 				Log.i(TAG, "Size : "+file.length());
                 dos.writeLong(file.length());
-				int read = 0;
+				int read;
 				while ((read = input.read()) != -1) {
                     dos.writeByte(read);
                 }
