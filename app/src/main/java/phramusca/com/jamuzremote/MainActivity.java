@@ -96,8 +96,8 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private Client clientRemote;
-    private Client clientSync;
+    private ClientRemote clientRemote;
+    private ClientSync clientSync;
     private Track displayedTrack;
     private Track localTrack;
     private Map coverMap = new HashMap();
@@ -547,9 +547,9 @@ public class MainActivity extends AppCompatActivity {
                 enableGUI(buttonRemote, false);
                 buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
                 if(buttonRemote.getText().equals("Connect")) {
-                    Client client = getClient(new CallBackRemote(), "");
-                    if(client!=null) {
-                        clientRemote = client;
+                    ClientInfo clientInfo = getClientInfo("");
+                    if(clientInfo!=null) {
+                        clientRemote =  new ClientRemote(clientInfo, new CallBackRemote());;
                     } else {
                         enableConnect(true);
                         return;
@@ -589,7 +589,7 @@ public class MainActivity extends AppCompatActivity {
                         String text = input.getText().toString().trim();
                         if(!localPlaylists.contains(text)) {
                             localPlaylists = localPlaylists.subList(0, localPlaylists.size()-1);
-                            //FIXME: Duplicate current playlist (clone) instead of new
+                            //TODO: Duplicate current playlist (clone) instead of new
                             Playlist newPlaylist = new Playlist(text, true);
                             localPlaylists.add(newPlaylist);
                             localSelectedPlaylist=newPlaylist;
@@ -645,39 +645,31 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        //FIXME: buttonSync should be enable/disable sync only
+        //Its state should not be changed
+        //Instead, use notifications to display:
+        //-connecting, retrying, connnected, ...
         buttonSync = (Button) findViewById(R.id.button_sync);
         buttonSync.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dimOn();
-                enableGUI(buttonSync, false);
-                buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
-                if(buttonSync.getText().equals("Connect")) {
-                    Client client = getClient(new CallBackSync(), "-data");
-                    if(client!=null) {
-                        clientSync = client;
-                    } else {
-                        enableSync(true);
-                        return;
-                    }
+            dimOn();
+            buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
+            if(buttonSync.getText().equals("Connect")) {
+                enableSync(false);
+                ClientInfo clientInfo = getClientInfo("-data");
+                if(clientInfo!=null) {
+                    clientSync =  new ClientSync(clientInfo, new CallBackSync());
                     new Thread() {
-                        public void run() {
-                            if(clientSync.connect()) {
-                                setConfig("connectionString", editTextConnectInfo.getText().toString());
-                                enableGUI(buttonSync, true);
-                                enableSync(false);
-                                requestNextFile(false);
-                            }
-                            else {
-                                enableSync(true);
-                            }
-                        }
+                        public void run() { clientSync.connect(); }
                     }.start();
                 }
-                else {
-                    enableSync(true);
-                    stopSync(false);
-                }
+            }
+            else {
+                enableSync(true);
+                stopSync(false);
+            }
             }
         });
 
@@ -756,7 +748,6 @@ public class MainActivity extends AppCompatActivity {
                 .concat("<BR/></h1></html>")), false);*/
         displayTrack();
 
-        enableGUI(buttonSync, false);
         enableGUI(buttonRemote, false);
         getFromQRcode(getIntent().getDataString());
         editTextConnectInfo.setEnabled(true);
@@ -813,7 +804,16 @@ public class MainActivity extends AppCompatActivity {
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
-    private Client getClient(ICallBackReception callback, String suffix) {
+    private void stopSync(boolean reconnect) {
+        if(clientSync!=null) {
+            clientSync.close(reconnect);
+        }
+        stopClient(buttonSync, R.drawable.connect_off_new, true);
+        mNotifyManager.cancel(ID_NOTIFIER_SYNC);
+        cancelWatchTimeOut();
+    }
+
+    private ClientInfo getClientInfo(String suffix) {
         if(!checkConnectedViaWifi())  {
             toastLong("You must connect to WiFi network.");
             return null;
@@ -833,9 +833,8 @@ public class MainActivity extends AppCompatActivity {
         } catch(NumberFormatException ex) {
             port=2013;
         }
-        return new Client(address, port,
-                Settings.Secure.getString(MainActivity.this.getContentResolver(),
-                        Settings.Secure.ANDROID_ID)+(suffix.equals("")?"":suffix), "tata", callback);
+        return new ClientInfo(address, port, Settings.Secure.getString(MainActivity.this.getContentResolver(),
+                        Settings.Secure.ANDROID_ID)+(suffix.equals("")?"":suffix), "tata");
     }
 
     private void toggleOff(ToggleButton button, View layout) {
@@ -1224,6 +1223,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "MainActivity onDestroy");
+        stopSync(false);
+        stopRemote();
 
         //Better unregister as it does not trigger anyway + raises exceptions if not
         unregisterReceiver(receiverHeadSetPlugged);
@@ -1247,9 +1248,6 @@ public class MainActivity extends AppCompatActivity {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
-
-        stopRemote();
-        stopSync(false);
 
         //Abort and wait scanLibrayInThread is aborted
         //So it does not crash if scanLib not completed
@@ -1509,8 +1507,12 @@ public class MainActivity extends AppCompatActivity {
 
     //Ends a notification
     private void notifyBar(NotificationCompat.Builder builder, int id, String msg, long millisInFuture) {
-        notifyBar(builder, id, msg, 0, 0, false, true, false);
+        notifyBar(builder, id, msg);
         disableNotificationIn(millisInFuture, id);
+    }
+
+    private void notifyBar(NotificationCompat.Builder builder, int id, String msg) {
+        notifyBar(builder, id, msg, 0, 0, false, true, false);
     }
 
     private void notifyBar(NotificationCompat.Builder builder, int id, String msg,
@@ -1827,11 +1829,11 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if(!enable) {
+                if (enable) {
+                    buttonSync.setBackgroundResource(R.drawable.connect_off_new);
+                } else {
                     buttonSync.setText("Close");
                     buttonSync.setBackgroundResource(R.drawable.connect_on);
-                } else {
-                    buttonSync.setBackgroundResource(R.drawable.connect_off_new);
                 }
                 editTextConnectInfo.setEnabled(enable);
                 buttonSync.setEnabled(true);
@@ -2371,7 +2373,7 @@ public class MainActivity extends AppCompatActivity {
         return image;
     }
 
-    class CallBackRemote implements ICallBackReception {
+    class CallBackRemote implements ICallBackRemote {
 
         private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackRemote.class.getSimpleName();
 
@@ -2428,13 +2430,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void receivedFile(final FileInfoReception fileInfoReception) { }
-        @Override
-        public void receivingFile(FileInfoReception fileInfoReception) { }
-        @Override
-        public void receivedDatabase() { }
-
-        @Override
         public void receivedBitmap(final Bitmap bitmap) {
             Log.d(TAG, "receivedBitmap: callback");
             Log.d(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight());
@@ -2462,7 +2457,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    class CallBackSync implements ICallBackReception {
+    class CallBackSync implements ICallBackSync {
 
         private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackSync.class.getSimpleName();
 
@@ -2493,6 +2488,7 @@ public class MainActivity extends AppCompatActivity {
                             //e-ERROR (reading tags for instance; to be read at last with max retry count)
                             if(filesToGet.containsKey(idFile)) {
                                 filesToGet.remove(idFile);
+                                cancelWatchTimeOut();
                             }
                         }
                         if(requestNextFile) {
@@ -2500,7 +2496,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         break;
                     case "SEND_DB":
-                        clientSync.sendDatabase();
+                        clientSync.sendDatabase(); //TODO: Move to ClientSync
                         break;
                     case "FilesToGet":
                         filesToGet = new HashMap<>();
@@ -2514,9 +2510,10 @@ public class MainActivity extends AppCompatActivity {
                                 filesToGet.put(fileReceived.idFile, fileReceived);
                             }
                             else {
-                                ackFileReception(fileReceived.idFile, false);
+                                clientSync.ackFileReception(fileReceived.idFile, false);
                             }
                         }
+                        //FIXME: Manage stopping current previous sync process, if any
                         requestNextFile(true);
                         break;
                     case "tags":
@@ -2587,7 +2584,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void receivedFile(final FileInfoReception fileInfoReception) {
-            cancelWatchTimeOut();
             Log.i(TAG, "Received file\n"+fileInfoReception
                     +"\nRemaining : "+filesToGet.size()+"/"+filesToKeep.size());
             File path = getAppDataPath();
@@ -2598,7 +2594,7 @@ public class MainActivity extends AppCompatActivity {
                     if (receivedFile.length() == fileInfoReception.size) {
                         Log.i(TAG, "Saved file size: " + receivedFile.length());
                         if(insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception)) {
-                            ackFileReception(fileInfoReception.idFile, true);
+                            clientSync.ackFileReception(fileInfoReception.idFile, true);
                             return;
                         } else {
                             Log.w(TAG, "File tags could not be read. Deleting " + receivedFile.getAbsolutePath());
@@ -2620,7 +2616,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.w(TAG, "File not requested. Deleting "+receivedFile.getAbsolutePath());
                 receivedFile.delete();
             }
-            requestNextFile(true);
         }
 
         @Override
@@ -2658,30 +2653,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void receivedBitmap(final Bitmap bitmap) {
+        public void connected() {
+            setConfig("connectionString", editTextConnectInfo.getText().toString());
+            //enableGUI(buttonSync, true);
+            notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, "Connected ... ");
+            requestNextFile(false);
         }
 
         @Override
         public void disconnected(final String msg) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    toastShort(msg);
-                }
-            });
-            //FIXME: reconnect, but not in all cases: need a new param to callback method
-            stopSync(false);
-        }
-    }
-
-    private void ackFileReception(int idFile, boolean requestNextFile) {
-        JSONObject obj = new JSONObject();
-        try {
-            obj.put("type", "ackFileReception");
-            obj.put("idFile", idFile);
-            obj.put("requestNextFile", requestNextFile);
-            clientSync.send("JSON_"+obj.toString());
-        } catch (JSONException e) {
+            notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg);
         }
     }
 
@@ -2718,7 +2699,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 synchronized(timerWatchTimeout) {
 
-                    long minTimeout =  10 * 1000;  //Min timeout 10s (+ 10s by Mo)
+                    long minTimeout =  15 * 1000;  //Min timeout 15s (+ 15s by Mo)
                     long maxTimeout =  120 * 1000; //Max timeout 2 min
 
                     long timeout = size<1000000?minTimeout:((size / 1000000) * minTimeout);
@@ -2731,7 +2712,6 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public void onFinish() {
-                            Log.w(TAG, "Timeout. Dis-connecting");
                             stopSync(true);
                         }
                     };
@@ -2749,7 +2729,7 @@ public class MainActivity extends AppCompatActivity {
                 CountDownTimer timer = new CountDownTimer(millisInFuture, millisInFuture/10) {
                     @Override
                     public void onTick(long millisUntilFinished) {
-                        Log.i(TAG, (millisUntilFinished/1000)+"s remaining before " +
+                        Log.d(TAG, (millisUntilFinished/1000)+"s remaining before " +
                                 "disabling notification");
                     }
 
@@ -2763,44 +2743,43 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //TODO: Move to a ProcessSync class (to be made)
     private Map<Integer, FileInfoReception> filesToGet = null;
     private Map<String, FileInfoReception> filesToKeep = null;
 
     private void requestNextFile(final boolean scanLibrary) {
-        if(filesToKeep!=null) {
+        if (filesToKeep != null) {
             saveFilesLists();
-            if(filesToGet.size()>0) {
+            if (filesToGet.size() > 0) {
                 final FileInfoReception fileToGetInfo = filesToGet.entrySet().iterator().next().getValue();
                 File fileToGet = new File(getAppDataPath(), fileToGetInfo.relativeFullPath);
-                if(fileToGet.exists() && fileToGet.length() == fileToGetInfo.size) {
-                    Log.i(TAG, "File already exists. Remove from filesToGet list: "+fileToGetInfo);
-                    ackFileReception(fileToGetInfo.idFile, true);
+                if (fileToGet.exists() && fileToGet.length() == fileToGetInfo.size) {
+                    Log.i(TAG, "File already exists. Remove from filesToGet list: " + fileToGetInfo);
+                    clientSync.ackFileReception(fileToGetInfo.idFile, true);
                 } else {
-                    //Wait (after connection) and send request
-                    //final int id = filesToGet.entrySet().iterator().next().getKey();
-                    //final FileInfoReception id = filesToGet.entrySet().iterator().next().getValue();
                     new Thread() {
                         @Override
                         public void run() {
-                            if(!scanLibrary) {
+                            if (!scanLibrary) {
                                 try {
                                     //Waits a little after connection
                                     Log.i(TAG, "Waiting 2s");
+                                    notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, "Waiting 2s before request ... ");
                                     Thread.sleep(2000);
                                 } catch (InterruptedException e) {
                                 }
                             }
                             watchTimeOut(fileToGetInfo.size);
-                            synchronized(timerWatchTimeout) {
-                                clientSync.send("sendFile"+fileToGetInfo.idFile);
+                            synchronized (timerWatchTimeout) {
+                                clientSync.requestFile(fileToGetInfo.idFile);
                             }
                         }
                     }.start();
                 }
             } else {
-                final String msg = "No more files to download.\n\nAll "+filesToKeep.size()+" files" +
+                final String msg = "No more files to download.\n\nAll " + filesToKeep.size() + " files" +
                         " have been retrieved successfully.";
-                Log.i(TAG, msg+" Updating library:"+scanLibrary);
+                Log.i(TAG, msg + " Updating library:" + scanLibrary);
                 notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, 5000);
                 runOnUiThread(new Runnable() {
                     @Override
@@ -2825,7 +2804,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }*/
 
-                if(scanLibrary) {
+                if (scanLibrary) {
                     checkPermissionsThenScanLibrary();
                 }
             }
@@ -2842,42 +2821,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stopRemote() {
-        stopClient(clientRemote, buttonRemote, R.drawable.remote_off, true);
+        if(clientRemote!=null) {
+            clientRemote.close();
+        }
+        stopClient(buttonRemote, R.drawable.remote_off, true);
         setupSpinner();
         displayedTrack = localTrack;
         displayTrack();
     }
 
-    private void stopSync(boolean reconnect) {
-        stopClient(clientSync,buttonSync, R.drawable.connect_off_new, true);
-        mNotifyManager.cancel(ID_NOTIFIER_SYNC);
-        cancelWatchTimeOut();
-
-        if(reconnect) {
-            //FIXME: Re-connect. Manage a retry count and a delay btw retries + check Wifi
-            //FIXME: Re-connect too if wifi got disconnected
-            //while sync as connected
-            //(make sthg similiar to wasRemoteConnected)
-            //=> Need to detect WiFi connection
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-            }
-            Log.i(TAG, "Re-connecting");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    buttonSync.performClick();
-                }
-            });
-        }
-    }
-
-    private void stopClient(Client client, final Button button, final int resId, final boolean enable) {
-        if(client!=null) {
-            client.close();
-        }
-
+    private void stopClient(final Button button, final int resId, final boolean enable) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
