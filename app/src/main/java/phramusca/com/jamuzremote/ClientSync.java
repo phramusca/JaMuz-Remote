@@ -103,7 +103,7 @@ public class ClientSync extends Client {
                     }
                 }.start();
             } else {
-                callback.disconnected("User stopped or max retries.");
+                callback.disconnected("User stopped or max retries.", true);
                 syncStatus.status=Status.USER_STOP;
             }
         }
@@ -112,8 +112,8 @@ public class ClientSync extends Client {
     class CallBackReception implements ICallBackReception {
 
 		@Override
-		public void received(String msg) {
-			callback.received(msg);
+		public void receivedJson(String msg) {
+			callback.receivedJson(msg);
 		}
 
         @Override
@@ -140,7 +140,11 @@ public class ClientSync extends Client {
                 logStatus("disconnected()");
                 if(syncStatus.status.equals(Status.CONNECTED)
                         || syncStatus.status.equals(Status.CONNECTING)) {
-                    callback.disconnected("Attempt "+syncStatus.nbRetries+": "+msg);
+                    String finalMsg;
+
+                    callback.disconnected(
+                            (syncStatus.nbRetries>0?"Attempt "+syncStatus.nbRetries
+                            :"Disconnected")+": "+msg, false);
                     close(true);
                 }
             }

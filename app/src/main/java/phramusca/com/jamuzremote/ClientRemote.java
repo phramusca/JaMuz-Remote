@@ -15,6 +15,7 @@ public class ClientRemote extends Client {
 	private static final String TAG = ClientRemote.class.getSimpleName();
 
 	private final ICallBackRemote callback;
+	private boolean userStop=false;
 
 	public ClientRemote(ClientInfo clientInfo, ICallBackRemote callback){
 		super(clientInfo);
@@ -22,11 +23,23 @@ public class ClientRemote extends Client {
         super.setCallback(new CallBackReception());
 	}
 
-	class CallBackReception implements ICallBackReception {
+    @Override
+    public boolean connect() {
+        userStop=false;
+        return super.connect();
+    }
+
+    @Override
+    public void close() {
+        userStop=true;
+        super.close();
+    }
+
+    class CallBackReception implements ICallBackReception {
 
 		@Override
-		public void received(String msg) {
-			callback.received(msg);
+		public void receivedJson(String msg) {
+			callback.receivedJson(msg);
 		}
 
         @Override
@@ -45,7 +58,9 @@ public class ClientRemote extends Client {
 
         @Override
 		public void disconnected(String msg) {
-            callback.disconnected(msg);
+            if(!userStop) {
+                callback.disconnected(msg);
+            }
 		}
 	}
 }
