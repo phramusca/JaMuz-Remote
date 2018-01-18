@@ -140,8 +140,8 @@ public class ClientSync extends Client {
                 logStatus("disconnected()");
                 if(syncStatus.status.equals(Status.CONNECTED)
                         || syncStatus.status.equals(Status.CONNECTING)) {
-                    close(true);
                     callback.disconnected("Attempt "+syncStatus.nbRetries+": "+msg);
+                    close(true);
                 }
             }
 		}
