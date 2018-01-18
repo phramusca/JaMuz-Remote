@@ -151,12 +151,19 @@ public class Track {
         return art;
     }
 
+    public boolean update() {
+        if(MainActivity.musicLibrary!=null) {
+            return MainActivity.musicLibrary.updateTrack(this);
+        }
+        return false;
+    }
+
     /**
      *
      * @return
      */
-    public ArrayList<String> getTags() {
-        if(tags==null) {
+    public ArrayList<String> getTags(boolean force) {
+        if(MainActivity.musicLibrary!=null && (force || tags==null)) {
             tags = MainActivity.musicLibrary.getTags(id);
         }
         return tags;
@@ -171,7 +178,7 @@ public class Track {
      * @param value
      */
     public void toggleTag(String value) {
-        if(getTags().contains(value)) {
+        if(getTags(false).contains(value)) {
             tags.remove(value);
             MainActivity.musicLibrary.removeTag(id, value);
         }

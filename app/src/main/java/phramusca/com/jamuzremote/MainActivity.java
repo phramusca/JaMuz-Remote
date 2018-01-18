@@ -335,8 +335,7 @@ public class MainActivity extends AppCompatActivity {
                     if (isRemoteConnected()) {
                         clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
                     } else {
-                        musicLibrary.updateTrack(displayedTrack);
-                        //clearQueueAndRefreshSpinner(true);
+                        displayedTrack.update();
                         refreshSpinner(true);
                     }
                     ratingBar.setEnabled(true);
@@ -351,9 +350,11 @@ public class MainActivity extends AppCompatActivity {
                 if(fromUser) {
                     dimOn();
                     ratingBarPlaylist.setEnabled(false);
-                    localSelectedPlaylist.setRating(Math.round(rating));
-                    clearQueueAndRefreshSpinner();
-                    textViewRating.setText(localSelectedPlaylist.getRatingString());
+                    if(localSelectedPlaylist!=null) {
+                        localSelectedPlaylist.setRating(Math.round(rating));
+                        clearQueueAndRefreshSpinner();
+                        textViewRating.setText(localSelectedPlaylist.getRatingString());
+                    }
                     ratingBarPlaylist.setEnabled(true);
                 }
             }
@@ -364,9 +365,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ratingBarPlaylist.setRating(0F);
-                localSelectedPlaylist.setRating(0);
-                clearQueueAndRefreshSpinner();
-                textViewRating.setText(localSelectedPlaylist.getRatingString());
+                if(localSelectedPlaylist!=null) {
+                    localSelectedPlaylist.setRating(0);
+                    clearQueueAndRefreshSpinner();
+                    textViewRating.setText(localSelectedPlaylist.getRatingString());
+                }
             }
         });
 
@@ -374,9 +377,11 @@ public class MainActivity extends AppCompatActivity {
         buttonRatingOperator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                buttonRatingOperator.setText(localSelectedPlaylist.setRatingOperator());
-                clearQueueAndRefreshSpinner();
-                textViewRating.setText(localSelectedPlaylist.getRatingString());
+                if(localSelectedPlaylist!=null) {
+                    buttonRatingOperator.setText(localSelectedPlaylist.setRatingOperator());
+                    clearQueueAndRefreshSpinner();
+                    textViewRating.setText(localSelectedPlaylist.getRatingString());
+                }
             }
         });
 
@@ -588,6 +593,10 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         String text = input.getText().toString().trim();
                         if(!localPlaylists.contains(text)) {
+
+                            //FIXME: localPlaylists is empty at startup !!
+                            //=> Definitly manage "All" Playlist well
+
                             localPlaylists = localPlaylists.subList(0, localPlaylists.size()-1);
                             //TODO: Duplicate current playlist (clone) instead of new
                             Playlist newPlaylist = new Playlist(text, true);
@@ -599,7 +608,6 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             toastLong("Playlist \""+text+"\" already exist.");
                         }
-
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -617,23 +625,26 @@ public class MainActivity extends AppCompatActivity {
         button_delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setTitle("Delete playlist ?")
-                        .setMessage("Are you sure you want to delete \""+localSelectedPlaylist.getName()+"\" playlist ?")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                deleteFile(localSelectedPlaylist.getName()+".plli");
-                                localPlaylists.remove(localSelectedPlaylist);
-                                localSelectedPlaylist=localPlaylists.get(0);
-                                displayPlaylist(localSelectedPlaylist);
-                                setupSpinner();
-                            }
-                        })
-                        .setNegativeButton("No", null)
-                        .show();
+                if(localSelectedPlaylist!=null) {
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setTitle("Delete playlist ?")
+                            .setMessage("Are you sure you want to delete " +
+                                    "\""+localSelectedPlaylist.getName()+"\" playlist ?")
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    deleteFile(localSelectedPlaylist.getName()+".plli");
+                                    localPlaylists.remove(localSelectedPlaylist);
+                                    localSelectedPlaylist=localPlaylists.get(0);
+                                    displayPlaylist(localSelectedPlaylist);
+                                    setupSpinner();
+                                }
+                            })
+                            .setNegativeButton("No", null)
+                            .show();
+                }
             }
         });
 
@@ -741,7 +752,7 @@ public class MainActivity extends AppCompatActivity {
         /*setTextView(textViewFileInfo, Html.fromHtml("<html><h1>"
                 .concat(displayedTrack.toString())
                 .concat("<BR/></h1></html>")), false);*/
-        displayTrack();
+        displayTrack(false);
 
         enableClient(buttonRemote, false);
         getFromQRcode(getIntent().getDataString());
@@ -867,7 +878,6 @@ public class MainActivity extends AppCompatActivity {
                 String buttonText = button.getText().toString();
                 if(!isRemoteConnected()) {
                     displayedTrack.toggleTag(buttonText);
-                    //clearQueueAndRefreshSpinner(true);
                     refreshSpinner(true);
                 } else {
                     //displayedTrack.toggleTag(buttonText); //TODO: Manage this too
@@ -898,10 +908,12 @@ public class MainActivity extends AppCompatActivity {
                 TriStateButton button = (TriStateButton)view;
                 TriStateButton.STATE state = button.getState();
                 setTagButtonTextColor(button, state);
-                String buttonText = button.getText().toString();
-                localSelectedPlaylist.toggleTag(buttonText, state);
-                clearQueueAndRefreshSpinner();
-                textViewTag.setText(localSelectedPlaylist.getTagsString());
+                if(localSelectedPlaylist!=null) {
+                    String buttonText = button.getText().toString();
+                    localSelectedPlaylist.toggleTag(buttonText, state);
+                    clearQueueAndRefreshSpinner();
+                    textViewTag.setText(localSelectedPlaylist.getTagsString());
+                }
             }
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
@@ -928,9 +940,11 @@ public class MainActivity extends AppCompatActivity {
                 TriStateButton.STATE state = button.getState();
                 setTagButtonTextColor(button, state);
                 String buttonText = button.getText().toString();
-                localSelectedPlaylist.toggleGenre(buttonText, state);
-                clearQueueAndRefreshSpinner();
-                textViewGenre.setText(localSelectedPlaylist.getGenresString());
+                if(localSelectedPlaylist!=null) {
+                    localSelectedPlaylist.toggleGenre(buttonText, state);
+                    clearQueueAndRefreshSpinner();
+                    textViewGenre.setText(localSelectedPlaylist.getGenresString());
+                }
             }
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
@@ -943,16 +957,26 @@ public class MainActivity extends AppCompatActivity {
         refreshSpinner(false);
     }
 
-    private void refreshSpinner(boolean refreshAll) {
-        //TODO: Do this in a separate thread (if not already done)
-        if(refreshAll) {
-            for(Playlist playlist : localPlaylists) {
-                playlist.getNbFiles();
-            }
-        } else {
-            localSelectedPlaylist.getNbFiles();
+    private void refreshSpinner(final boolean refreshAll) {
+        if(localSelectedPlaylist!=null) {
+            new Thread() {
+                public void run() {
+                    if(refreshAll) {
+                        for(Playlist playlist : localPlaylists) {
+                            playlist.getNbFiles();
+                        }
+                    } else {
+                        localSelectedPlaylist.getNbFiles();
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            playListArrayAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            }.start();
         }
-        playListArrayAdapter.notifyDataSetChanged();
     }
 
     //This is a trick since the following (not in listner) is not working:
@@ -991,7 +1015,7 @@ public class MainActivity extends AppCompatActivity {
             displayPlaylist(playlist);
             localSelectedPlaylist = playlist;
             if(playNext) {
-                if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                if(musicLibrary!=null) {
                     queue = playlist.getTracks();
                 }
                 playNext();
@@ -1026,8 +1050,12 @@ public class MainActivity extends AppCompatActivity {
                 dimOn();
                 String genre = (String) parent.getItemAtPosition(pos);
                 if(!isRemoteConnected()) {
-                    if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                    if(musicLibrary!=null) {
                         displayedTrack.setGenre(genre);
+
+                        //FIXME:  UI thread load:
+                        // Move all musicLibrary updates to Track
+                        //And run on a different Thread than UI/main
                         musicLibrary.updateGenre(displayedTrack);
                     }
                 }
@@ -1641,10 +1669,10 @@ public class MainActivity extends AppCompatActivity {
             //Update lastPlayed and playCounter
             displayedTrack.setPlayCounter(displayedTrack.getPlayCounter()+1);
             displayedTrack.setLastPlayed(new Date());
-            musicLibrary.updateTrack(displayedTrack);
+            displayedTrack.update();
             //Fill the queue
             if(queue.size()<5) {
-                if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                if(musicLibrary!=null) {
                     List<Track> addToQueue = localSelectedPlaylist.getTracks();
                     queue.addAll(addToQueue);
                 }
@@ -1656,8 +1684,10 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(TAG, "playQueue(1/"+queue.size()+")");
                 play();
             } else {
-                localSelectedPlaylist.getNbFiles();
-                playListArrayAdapter.notifyDataSetChanged();
+                if(localSelectedPlaylist!=null) {
+                    localSelectedPlaylist.getNbFiles();
+                    playListArrayAdapter.notifyDataSetChanged();
+                }
                 toastLong("Empty Playlist.");
             }
         }
@@ -1702,7 +1732,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onPlayBackStart() {
-            displayTrack();
+            displayTrack(true);
         }
 
     }
@@ -1917,7 +1947,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupTags() {
-        if(tags.size()<=0) {
+        if(musicLibrary!=null && tags.size()<=0) {
             tags = new HashMap<>();
             tags = musicLibrary.getTags();
             makeButtonTagPlaylist(Integer.MAX_VALUE, "null");
@@ -1931,9 +1961,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            //Dirty trick to recalculate display
+            //TODO: recalculate display at startup
             //and prevent a display glitch
-            //BUT does not work well
+            //This dirty trick does not work well
             /*toggle(layoutTagsPlaylistLayout, false);
             toggle(layoutPlaylist, false);
             toggle(layoutTagsPlaylistLayout, true);
@@ -2038,7 +2068,8 @@ public class MainActivity extends AppCompatActivity {
         for(String file : fileList()) {
             if(file.endsWith(".plli")) {
                 Playlist playlist = readPlaylist(file);
-                if(playlist !=null && !playlist.getName().equals("All")) { //FIXME: "All" Playlist Use an editable bool
+                //FIXME: "All" Playlist Use an editable bool
+                if(playlist !=null && !playlist.getName().equals("All")) {
                     playlist.getNbFiles();
                     localPlaylists.add(playlist);
                 }
@@ -2058,12 +2089,14 @@ public class MainActivity extends AppCompatActivity {
 
         Playlist playlist = new Playlist("All", true);
         playlist.getNbFiles();
-        localPlaylists.add(playlist); //FIXME: "All" Playlist make UNtouchable !
+        //FIXME: "All" Playlist make UNtouchable !
+        localPlaylists.add(playlist);
         playListArrayAdapter = new ArrayAdapter<Playlist>(this, R.layout.spinner_item, localPlaylists);
     }
 
     private void savePlaylist(Playlist playlist) {
-        if(playlist !=null && !playlist.getName().equals("All")) { //FIXME: "All" Playlist Use an editableflag
+        //FIXME: "All" Playlist Use an editableflag
+        if(playlist !=null && !playlist.getName().equals("All")) {
             Gson gson = new Gson();
             HelperTextFile.write(this, playlist.getName()+".plli", gson.toJson(playlist));
         }
@@ -2133,8 +2166,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupSpinner() {
-        localSelectedPlaylist.getNbFiles();
-        setupSpinner(playListArrayAdapter, localSelectedPlaylist);
+        if(localSelectedPlaylist!=null) {
+            localSelectedPlaylist.getNbFiles();
+            setupSpinner(playListArrayAdapter, localSelectedPlaylist);
+        }
     }
 
     private void setupSpinner(final ArrayAdapter<Playlist> arrayAdapter,
@@ -2237,9 +2272,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void displayTrack() {
+    private void displayTrack(boolean forceReadTags) {
         if(displayedTrack!=null) {
-
+            if(forceReadTags && musicLibrary!=null) {
+                displayedTrack.getTags(true);
+            }
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -2257,15 +2294,12 @@ public class MainActivity extends AppCompatActivity {
                     setupSpinnerGenre(genres, displayedTrack.getGenre());
 
                     //Display file tags
-                    if(musicLibrary!=null) {
-                        musicLibrary.getTags(displayedTrack.getId()); //To refresh after merge
-                        ArrayList<String> fileTags = displayedTrack.getTags();
-                        for(Map.Entry<Integer, String> tag : tags.entrySet()) {
-                            ToggleButton button = (ToggleButton) layoutTags.findViewById(tag.getKey());
-                            if(button!=null && button.isChecked()!=fileTags.contains(tag.getValue())) {
-                                button.setChecked(fileTags.contains(tag.getValue()));
-                                setTagButtonTextColor(button);
-                            }
+                    ArrayList<String> fileTags = displayedTrack.getTags(false);
+                    for(Map.Entry<Integer, String> tag : tags.entrySet()) {
+                        ToggleButton button = (ToggleButton) layoutTags.findViewById(tag.getKey());
+                        if(button!=null && button.isChecked()!=fileTags.contains(tag.getValue())) {
+                            button.setChecked(fileTags.contains(tag.getValue()));
+                            setTagButtonTextColor(button);
                         }
                     }
                 }
@@ -2427,7 +2461,7 @@ public class MainActivity extends AppCompatActivity {
                                 new Date(0),0);
                         //TODO: Add Playlist name and nbFiles
                         displayedTrack.source="Remote";
-                        displayTrack();
+                        displayTrack(false);
                         break;
                 }
             } catch (JSONException e) {
@@ -2459,7 +2493,7 @@ public class MainActivity extends AppCompatActivity {
             stopRemote();
             setupSpinner();
             displayedTrack = localTrack;
-            displayTrack();
+            displayTrack(false);
         }
     }
 
@@ -2478,12 +2512,7 @@ public class MainActivity extends AppCompatActivity {
                         int idFile = jObject.getInt("idFile");
                         boolean requestNextFile = jObject.getBoolean("requestNextFile");
                         if(status.equals("OK")) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    refreshSpinner(true);
-                                }
-                            });
+                            refreshSpinner(true);
 
                             //FIXME: Store status to manage what to do at any stage
                             //1-TOGET
@@ -2528,7 +2557,7 @@ public class MainActivity extends AppCompatActivity {
                         for(int i=0; i<jsonTags.length(); i++) {
                             final String tag = (String) jsonTags.get(i);
                             if(!tags.values().contains(tag)) {
-                                if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                                if(musicLibrary!=null) { 
                                     int idTag = musicLibrary.addTag(tag);
                                     if(idTag>0) {
                                         tags.put(idTag, tag);
@@ -2546,7 +2575,7 @@ public class MainActivity extends AppCompatActivity {
                         {
                             Map.Entry<Integer, String> tag = it.next();
                             if(!list.contains(tag.getValue())) {
-                                if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                                if(musicLibrary!=null) { 
                                     int deleted = musicLibrary.deleteTag(tag.getKey());
                                     if(deleted>0) {
                                         it.remove();
@@ -2557,6 +2586,7 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                //FIXME: UI thread load
                                 setupTags();
                             }
                         });
@@ -2570,7 +2600,9 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     if(!genres.contains(genre)) {
-                                        if(musicLibrary!=null) { //Happens before write permission allowed so db not accessed
+                                        //FIXME: UI thread load
+
+                                        if(musicLibrary!=null) { 
                                             if (musicLibrary.addGenre(genre)) {
                                                 genres.add(genre);
                                             }
@@ -2599,6 +2631,9 @@ public class MainActivity extends AppCompatActivity {
                 if(receivedFile.exists()) {
                     if (receivedFile.length() == fileInfoReception.size) {
                         Log.i(TAG, "Saved file size: " + receivedFile.length());
+                        //FIXME: Either tags (user tags) are not sent, or not received,
+                        //or overwritten later by scan maybe
+                        //Anyhow, user tags are not inserted in db !!
                         if(insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception)) {
                             clientSync.ackFileReception(fileInfoReception.idFile, true);
                             return;
@@ -2608,7 +2643,7 @@ public class MainActivity extends AppCompatActivity {
                             //FIXME: Cannot read tags of received file : What to do in this case
                             //to avoid it to be requested over and over ?
                             //=> merge filesToGet and filesToKeep
-                            //=> add a status in FileInfoReception (refer to other FIXME)
+                            //=> add a status in FileInfoReception (refer to other FIX-ME)
                             //=> add a retry counter
                         }
                     } else {
@@ -2840,7 +2875,7 @@ public class MainActivity extends AppCompatActivity {
         enableClient(buttonRemote, R.drawable.remote_off);
         setupSpinner();
         displayedTrack = localTrack;
-        displayTrack();
+        displayTrack(false);
     }
 
 

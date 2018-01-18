@@ -249,7 +249,9 @@ public class Playlist implements Comparable {
     }
 
     public void getNbFiles() {
-        nbFiles=MainActivity.musicLibrary.getNb(getWhere(), getHaving());
+        if(MainActivity.musicLibrary!=null) {
+            nbFiles=MainActivity.musicLibrary.getNb(getWhere(), getHaving());
+        }
     }
 
     @Override
@@ -280,54 +282,9 @@ public class Playlist implements Comparable {
      * Operator for filters
      */
     public enum Operator {
-        /**
-         * String contains
-         */
-        CONTAINS("contains"), //NOI18N
-        /**
-         * String does not contain
-         */
-        DOESNOTCONTAIN("does not contain"), //NOI18N
-        /**
-         * Value (text) is
-         */
         IS("="), //NOI18N
-        /**
-         * Value (text) is not
-         */
-        ISNOT("is not"), //NOI18N
-        /**
-         * Value (numerical) is
-         */
-        NUMIS("is"), //NOI18N
-        /**
-         * Value (numerical) is not
-         */
-        NUMISNOT("is not"), //NOI18N
-        /**
-         * String starts with
-         */
-        STARTSWITH("starts with"), //NOI18N
-        /**
-         * String ends with
-         */
-        ENDSWITH("ends with"), //NOI18N
-        /**
-         * Value is less than
-         */
-        LESSTHAN("<="), //NOI18N
-        /**
-         * Value is greater than
-         */
-        GREATERTHAN(">="), //NOI18N
-        /**
-         * Value is less than
-         */
-        DATELESSTHAN("is before"), //NOI18N
-        /**
-         * Value is greater than
-         */
-        DATEGREATERTHAN("is after"); //NOI18N
+        LESSTHAN("<="), //NOI18
+        GREATERTHAN(">="); //NOI18N
 
         private final String display;
         private Operator(String display) {
