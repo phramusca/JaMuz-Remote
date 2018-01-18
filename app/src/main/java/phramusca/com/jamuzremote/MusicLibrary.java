@@ -131,11 +131,9 @@ public class MusicLibrary {
         return -1;
     }
 
-    public synchronized long insertTrack(Track track){
+    public synchronized void insertTrack(Track track){
         try {
-            if(db.insert(musicLibraryDb.TABLE_TRACKS, null, TrackToValues(track))<0) {
-                return -1;
-            }
+            db.insert(musicLibraryDb.TABLE_TRACKS, null, TrackToValues(track));
             for(String tag : track.getTags(false)) {
                 addTag(track.getId(), tag);
             }
@@ -143,7 +141,6 @@ public class MusicLibrary {
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "insertTrack("+track+")", ex);
         }
-        return -1;
     }
 
     public synchronized boolean updateTrack(Track track){

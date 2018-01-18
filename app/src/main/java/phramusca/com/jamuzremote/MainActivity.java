@@ -1565,31 +1565,33 @@ public class MainActivity extends AppCompatActivity {
     private boolean insertOrUpdateTrackInDatabase(String absolutePath,
                                                   FileInfoReception fileInfoReception) {
         boolean result=true;
-        int id = musicLibrary.getTrack(absolutePath);
-        if(id>=0) {
-            Log.d(TAG, "browseFS updateTrack " + absolutePath);
-            //TODDO: Update if file is modified only:
-            //based on lastModificationDate and/or size (not on content as longer than updateTrack)
-            //musicLibrary.updateTrack(id, track, false);
-            //Warning with genre now that it is part of merge
-        } else {
-            Track track = getTrack(absolutePath);
-            if(track!=null) {
-                Log.d(TAG, "browseFS insertTrack " + absolutePath);
-                if(fileInfoReception!=null) {
-                    track.setRating(fileInfoReception.rating);
-                    track.setAddedDate(fileInfoReception.addedDate);
-                    track.setLastPlayed(fileInfoReception.lastPlayed);
-                    track.setPlayCounter(fileInfoReception.playCounter);
-                    track.setTags(fileInfoReception.tags);
-                    track.setGenre(fileInfoReception.genre); //TODO Do not if genre read from file is better
-                }
-                musicLibrary.insertTrack(track);
+        if(musicLibrary!=null) {
+            int id = musicLibrary.getTrack(absolutePath);
+            if(id>=0) {
+                Log.d(TAG, "browseFS updateTrack " + absolutePath);
+                //TODDO: Update if file is modified only:
+                //based on lastModificationDate and/or size (not on content as longer than updateTrack)
+                //musicLibrary.updateTrack(id, track, false);
+                //Warning with genre now that it is part of merge
             } else {
-                //FIXME: Delete track ONLY if it is a song track that appears to be corrupted
-                Log.w(TAG, "browseFS delete file because cannot read tags of " + absolutePath);
-                new File(absolutePath).delete();
-                result=false;
+                Track track = getTrack(absolutePath);
+                if(track!=null) {
+                    Log.d(TAG, "browseFS insertTrack " + absolutePath);
+                    if(fileInfoReception!=null) {
+                        track.setRating(fileInfoReception.rating);
+                        track.setAddedDate(fileInfoReception.addedDate);
+                        track.setLastPlayed(fileInfoReception.lastPlayed);
+                        track.setPlayCounter(fileInfoReception.playCounter);
+                        track.setTags(fileInfoReception.tags);
+                        track.setGenre(fileInfoReception.genre); //TODO Do not if genre read from file is better
+                    }
+                    musicLibrary.insertTrack(track);
+                } else {
+                    //FIXME: Delete track ONLY if it is a song track that appears to be corrupted
+                    Log.w(TAG, "browseFS delete file because cannot read tags of " + absolutePath);
+                    new File(absolutePath).delete();
+                    result=false;
+                }
             }
         }
         return result;
@@ -1897,6 +1899,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //FIXME: Read it with sync too (as for remote)
     private void getFromQRcode(String content) {
         if(content!=null) {
             if(!content.equals("")) {
