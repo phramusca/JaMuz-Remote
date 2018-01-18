@@ -50,7 +50,7 @@ public class ClientReception extends ProcessAbstract {
                     callback.disconnected("Socket closed (received null)");
                 }
                 else if (msg.startsWith("JSON_")) {
-                    callback.received(msg.substring(5));
+                    callback.receivedJson(msg.substring(5));
                 }
 				else if (msg.equals("SENDING_COVER")) {
                     Bitmap bitmap=null;

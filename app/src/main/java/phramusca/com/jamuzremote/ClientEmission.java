@@ -28,7 +28,6 @@ public class ClientEmission extends ProcessAbstract {
 			outQueue.put(msg);
 			return true;
 		} catch (InterruptedException ex) {
-//			Logger.getLogger(ClientEmission.class.getName()).log(Level.SEVERE, null, ex);
 			return false;
 		}
 	}
@@ -37,14 +36,14 @@ public class ClientEmission extends ProcessAbstract {
 	public void run() {
 		try {
 			String msg;
+			//Retrieves and removes the head of outQueue, waiting if necessary
+			// until an element becomes available.
 			while ((msg = outQueue.take())!=null) {
 				checkAbort();
 				printWriter.println(msg);
-//                printWriter.println(msg+"\n");
 				printWriter.flush();
 			}
 		} catch (InterruptedException ex) {
-//			Logger.getLogger(ClientEmission.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 }

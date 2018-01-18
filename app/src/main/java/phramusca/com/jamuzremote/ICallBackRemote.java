@@ -12,7 +12,7 @@ import android.graphics.Bitmap;
  * @author phramusca
  */
 public interface ICallBackRemote {
-	void received(String msg);
+	void receivedJson(String msg);
 	void receivedBitmap(Bitmap bitmap);
 	void disconnected(String msg);
 }

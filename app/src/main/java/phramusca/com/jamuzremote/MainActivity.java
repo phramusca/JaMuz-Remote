@@ -2384,7 +2384,7 @@ public class MainActivity extends AppCompatActivity {
         private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackRemote.class.getSimpleName();
 
         @Override
-        public void received(final String msg) {
+        public void receivedJson(final String msg) {
             try {
                 JSONObject jObject = new JSONObject(msg);
                 String type = jObject.getString("type");
@@ -2468,7 +2468,7 @@ public class MainActivity extends AppCompatActivity {
         private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackSync.class.getSimpleName();
 
         @Override
-        public void received(final String msg) {
+        public void receivedJson(final String msg) {
             try {
                 JSONObject jObject = new JSONObject(msg);
                 String type = jObject.getString("type");
@@ -2666,8 +2666,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void disconnected(final String msg) {
-            notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg);
+        public void disconnected(final String msg, boolean disable) {
+            if(disable) {
+                notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, 5000);
+                enableSync(true);
+            } else {
+                notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg);
+            }
         }
     }
 
@@ -2782,14 +2787,14 @@ public class MainActivity extends AppCompatActivity {
                     }.start();
                 }
             } else {
-                final String msg = "No more files to download.\n\nAll " + filesToKeep.size() + " files" +
-                        " have been retrieved successfully.";
+                final String msg = "No more files to download.";
                 Log.i(TAG, msg + " Updating library:" + scanLibrary);
-                notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, 5000);
+                notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        toastLong(msg);
+                        toastLong(msg+"\n\nAll " + filesToKeep.size() + " files" +
+                                " have been retrieved successfully.");
                     }
                 });
                 //Not disconnecting to be able to receive a new list
@@ -2797,10 +2802,13 @@ public class MainActivity extends AppCompatActivity {
                 //enableClient(true);
                 //enableClient(clientSync,buttonSync, R.drawable.connect_off, true);
 
-                //Resend add request in case missed for some reason
 
 
                 //FIXME: Only send if not already (need to store ackFileReception status)
+                //=> !! Check first if still necessary since we (should)
+                //          request ack from server now
+
+                //Resend add request in case missed for some reason
                 /*if(filesToKeep!=null) {
                     for(FileInfoReception file : filesToKeep.values()) {
                         if(!filesToGet.containsKey(file.idFile)) {
