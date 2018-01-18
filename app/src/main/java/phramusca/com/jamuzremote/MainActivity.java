@@ -544,7 +544,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dimOn();
-                enableGUI(buttonRemote, false);
+                enableClient(buttonRemote, false);
                 buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
                 if(buttonRemote.getText().equals("Connect")) {
                     ClientInfo clientInfo = getClientInfo("");
@@ -558,7 +558,7 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             if(clientRemote.connect()) {
                                 setConfig("connectionString", editTextConnectInfo.getText().toString());
-                                enableGUI(buttonRemote, true);
+                                enableClient(buttonRemote, true);
                                 enableConnect(false);
                             }
                             else {
@@ -645,31 +645,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        //FIXME: buttonSync should be enable/disable sync only
-        //Its state should not be changed
-        //Instead, use notifications to display:
-        //-connecting, retrying, connnected, ...
         buttonSync = (Button) findViewById(R.id.button_sync);
         buttonSync.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            dimOn();
-            buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
-            if(buttonSync.getText().equals("Connect")) {
-                enableSync(false);
-                ClientInfo clientInfo = getClientInfo("-data");
-                if(clientInfo!=null) {
-                    clientSync =  new ClientSync(clientInfo, new CallBackSync());
-                    new Thread() {
-                        public void run() { clientSync.connect(); }
-                    }.start();
+                dimOn();
+                buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
+                if(buttonSync.getText().equals("Connect")) {
+                    enableSync(false);
+                    ClientInfo clientInfo = getClientInfo("-data");
+                    if(clientInfo!=null) {
+                        clientSync =  new ClientSync(clientInfo, new CallBackSync());
+                        new Thread() {
+                            public void run() { clientSync.connect(); }
+                        }.start();
+                    }
                 }
-            }
-            else {
-                enableSync(true);
-                stopSync(false);
-            }
+                else {
+                    enableSync(true);
+                    stopSync(false);
+                }
             }
         });
 
@@ -748,11 +743,9 @@ public class MainActivity extends AppCompatActivity {
                 .concat("<BR/></h1></html>")), false);*/
         displayTrack();
 
-        enableGUI(buttonRemote, false);
+        enableClient(buttonRemote, false);
         getFromQRcode(getIntent().getDataString());
-        editTextConnectInfo.setEnabled(true);
-        buttonRemote.setEnabled(true);
-        buttonSync.setEnabled(true);
+        enableClient(buttonRemote, true);
 
         //TODO: MAke this an option somehow
 
@@ -805,12 +798,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stopSync(boolean reconnect) {
+        cancelWatchTimeOut();
         if(clientSync!=null) {
             clientSync.close(reconnect);
         }
-        stopClient(buttonSync, R.drawable.connect_off_new, true);
-        mNotifyManager.cancel(ID_NOTIFIER_SYNC);
-        cancelWatchTimeOut();
+        if(!reconnect) {
+            enableClient(buttonSync, R.drawable.connect_off_new);
+            mNotifyManager.cancel(ID_NOTIFIER_SYNC);
+        }
     }
 
     private ClientInfo getClientInfo(String suffix) {
@@ -1166,7 +1161,7 @@ public class MainActivity extends AppCompatActivity {
             dimOn();
         }
         else if(wasRemoteConnected && !audioPlayer.isPlaying()) {
-            enableGUI(buttonRemote, false);
+            enableClient(buttonRemote, false);
             getFromQRcode(getIntent().getDataString());
             buttonRemote.performClick();
         }
@@ -1811,13 +1806,13 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if(!enable) {
-                    buttonRemote.setText("Close");
-                    buttonRemote.setBackgroundResource(R.drawable.remote_on);
-                } else {
+                if (enable) {
                     buttonRemote.setBackgroundResource(R.drawable.remote_off);
                     enablePlaylistEdit(true);
                     setupSpinner();
+                } else {
+                    buttonRemote.setText("Close");
+                    buttonRemote.setBackgroundResource(R.drawable.remote_on);
                 }
                 editTextConnectInfo.setEnabled(enable);
                 buttonRemote.setEnabled(true);
@@ -1836,7 +1831,28 @@ public class MainActivity extends AppCompatActivity {
                     buttonSync.setBackgroundResource(R.drawable.connect_on);
                 }
                 editTextConnectInfo.setEnabled(enable);
-                buttonSync.setEnabled(true);
+            }
+        });
+    }
+
+    private void enableClient(final Button button, final int resId) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                enableClient(button, false);
+                button.setText("Connect");
+                button.setBackgroundResource(resId);
+                enableClient(button, true);
+            }
+        });
+    }
+
+    private void enableClient(final Button button, final boolean enable) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                editTextConnectInfo.setEnabled(enable);
+                button.setEnabled(enable);
             }
         });
     }
@@ -1847,16 +1863,6 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 toggle(layoutPlaylistEditBar, !enable);
                 layoutPlaylistToolBar.setVisibility(enable?View.VISIBLE:View.GONE);
-            }
-        });
-    }
-
-    private void enableGUI(final Button button, final boolean enable) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                editTextConnectInfo.setEnabled(enable);
-                button.setEnabled(enable);
             }
         });
     }
@@ -2655,7 +2661,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void connected() {
             setConfig("connectionString", editTextConnectInfo.getText().toString());
-            //enableGUI(buttonSync, true);
             notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, "Connected ... ");
             requestNextFile(false);
         }
@@ -2789,8 +2794,8 @@ public class MainActivity extends AppCompatActivity {
                 });
                 //Not disconnecting to be able to receive a new list
                 //sent by the server. User can still close
-                //enableSync(true);
-                //stopClient(clientSync,buttonSync, R.drawable.connect_off, true);
+                //enableClient(true);
+                //enableClient(clientSync,buttonSync, R.drawable.connect_off, true);
 
                 //Resend add request in case missed for some reason
 
@@ -2824,24 +2829,13 @@ public class MainActivity extends AppCompatActivity {
         if(clientRemote!=null) {
             clientRemote.close();
         }
-        stopClient(buttonRemote, R.drawable.remote_off, true);
+        enableClient(buttonRemote, R.drawable.remote_off);
         setupSpinner();
         displayedTrack = localTrack;
         displayTrack();
     }
 
-    private void stopClient(final Button button, final int resId, final boolean enable) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                enableGUI(button, false);
-                button.setText("Connect");
-                button.setBackgroundResource(resId);
-                button.setEnabled(enable);
-                editTextConnectInfo.setEnabled(enable);
-            }
-        });
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
