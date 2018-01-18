@@ -136,7 +136,7 @@ public class MusicLibrary {
             if(db.insert(musicLibraryDb.TABLE_TRACKS, null, TrackToValues(track))<0) {
                 return -1;
             }
-            for(String tag : track.getTags()) {
+            for(String tag : track.getTags(false)) {
                 addTag(track.getId(), tag);
             }
 
@@ -146,13 +146,16 @@ public class MusicLibrary {
         return -1;
     }
 
-    public synchronized int updateTrack(Track track){
+    public synchronized boolean updateTrack(Track track){
         try {
-            return db.update(musicLibraryDb.TABLE_TRACKS, TrackToValues(track), musicLibraryDb.COL_ID + " = " +track.getId(), null);
+            if(db.update(musicLibraryDb.TABLE_TRACKS, TrackToValues(track),
+                    musicLibraryDb.COL_ID + " = " +track.getId(), null)==1) {
+                return true;
+            }
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "updateTrack("+track.getId()+","+track+")", ex);
         }
-        return -1;
+        return false;
     }
 
     public synchronized int deleteTrack(String path){

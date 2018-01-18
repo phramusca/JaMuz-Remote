@@ -140,8 +140,6 @@ public class ClientSync extends Client {
                 logStatus("disconnected()");
                 if(syncStatus.status.equals(Status.CONNECTED)
                         || syncStatus.status.equals(Status.CONNECTING)) {
-                    String finalMsg;
-
                     callback.disconnected(
                             (syncStatus.nbRetries>0?"Attempt "+syncStatus.nbRetries
                             :"Disconnected")+": "+msg, false);
