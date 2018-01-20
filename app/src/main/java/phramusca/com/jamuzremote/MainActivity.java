@@ -3,8 +3,6 @@ package phramusca.com.jamuzremote;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
@@ -37,7 +35,6 @@ import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -93,6 +90,8 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private SharedPreferences preferences;
+    private HelperToast helperToast = new HelperToast(this);
     private ClientRemote clientRemote;
     private Track displayedTrack;
     private Track localTrack;
@@ -109,28 +108,12 @@ public class MainActivity extends AppCompatActivity {
     public static File musicLibraryDbFile = new File(
             Environment.getExternalStorageDirectory()+"/JaMuz/JaMuzRemote.db");
 
-    private int nbFiles=0;
-    private int nbFilesTotal = 0;
+
     private List<Track> queue = new ArrayList<>();
     private List<Track> queueHistory = new ArrayList<>();
     private List<Playlist> localPlaylists = new ArrayList<Playlist>();
     private ArrayAdapter<Playlist> playListArrayAdapter;
     private Playlist localSelectedPlaylist;
-
-    private String m_chosenDir = "/";
-    private SharedPreferences preferences;
-
-    //Notifications
-    private NotificationManager mNotifyManager;
-    private NotificationCompat.Builder mBuilderScan;
-    private static final int ID_NOTIFIER_SCAN = 2;
-    private HelperNotification helperNotification;
-    private HelperToast helperToast = new HelperToast(this);
-
-    //TODO: Move to a service (as for sync)
-    private ProcessAbstract scanLibray;
-    private ProcessAbstract processBrowseFS;
-    private ProcessAbstract processBrowseFScount;
 
     // GUI elements
     private TextView textViewFileInfo;
@@ -202,17 +185,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mNotifyManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        helperNotification = new HelperNotification(getApplicationIntent(), mNotifyManager);
-
-        mBuilderScan = new NotificationCompat.Builder(this);
-        mBuilderScan.setContentTitle("Scan")
-                .setContentText("Scan in progress")
-                .setUsesChronometer(true)
-                .setSmallIcon(R.drawable.ic_process);
-
         layoutTags = (FlexboxLayout) findViewById(R.id.panel_tags);
         layoutTagsPlaylist = (FlexboxLayout) findViewById(R.id.panel_tags_playlist);
         layoutGenrePlaylist = (FlexboxLayout) findViewById(R.id.panel_genre_playlist);
@@ -256,10 +228,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        m_chosenDir = preferences.getString("m_chosenDir", "/");
-        String display = m_chosenDir.equals("/")?
+        String userPath = preferences.getString("userPath", "/");
+        String display = userPath.equals("/")?
                 "Choose an additional local path for music. Note that it is recommended to use JaMuz though."
-                :m_chosenDir;
+                :userPath;
         textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
                 .concat(display)
                 .concat("</html>"))));
@@ -277,17 +249,16 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void onChosenDir(String chosenDir)
                                     {
-                                        m_chosenDir = chosenDir;
                                         textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
                                                 .concat(chosenDir)
                                                 .concat("</html>"))));
-                                        setConfig("m_chosenDir", m_chosenDir);
+                                        setConfig("userPath", chosenDir);
                                         checkPermissionsThenScanLibrary();
 
                                     }
                                 });
                 directoryChooserDialog.setNewFolderEnabled(m_newFolderEnabled);
-                directoryChooserDialog.chooseDirectory(m_chosenDir);
+                directoryChooserDialog.chooseDirectory(preferences.getString("userPath", "/"));
             }
         });
 
@@ -1209,43 +1180,14 @@ public class MainActivity extends AppCompatActivity {
 
         audioPlayer.stop(true);
 
-        if(textToSpeech !=null){
+        if(textToSpeech != null){
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
 
-        //Abort and wait scanLibrayInThread is aborted
-        //So it does not crash if scanLib not completed
-        if(processBrowseFS!=null) {
-            processBrowseFS.abort();
-        }
-        if(processBrowseFScount!=null) {
-            processBrowseFScount.abort();
-        }
-        if(scanLibray!=null) {
-            scanLibray.abort();
-        }
-        try {
-            if(processBrowseFS!=null) {
-                processBrowseFS.join();
-            }
-            if(processBrowseFScount!=null) {
-                processBrowseFScount.join();
-            }
-            if(scanLibray!=null) {
-                scanLibray.join();
-            }
-        } catch (InterruptedException e) {
-            Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
-        }
-
-
-
         for(Playlist playlist : localPlaylists) {
             savePlaylist(playlist);
         }
-
-        mNotifyManager.cancelAll();
 
         //FIXME: MusicLibray is used elsewhere. Do not close
         //Need to make it live until all application and services are done
@@ -1258,208 +1200,13 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "musicLibrary closed");
     }
 
-
-
-    public static File getExtSDcard(String path) {
-        String removableStoragePath;
-        File fileList[] = new File("/storage/").listFiles();
-        for (File file : fileList)
-        {
-            if(!file.getAbsolutePath().equalsIgnoreCase(
-                    Environment.getExternalStorageDirectory().getAbsolutePath())
-                    && file.isDirectory() && file.canRead())
-                return new File(file.getAbsolutePath()+File.separator+path);
-        }
-        //If not found, use external storage which turns out to be ... internal SD card + internal phone memory
-        //filtered and emulated
-        // and not the actual external SD card as any could expect
-        return new File(Environment.getExternalStorageDirectory()+File.separator+"JaMuz");
-                //+File.separator+"Android/data/"+BuildConfig.APPLICATION_ID);
-    }
-
     private static File[] externalFilesDir;
-
     public static File getAppDataPath() {
-
         File path =  externalFilesDir[1];
-        /*
-        File path = getExtSDcard("Android/data/org.phramusca.jamuz/");
-        //File path = new File("/storage/3515-1C15/Android/data/org.phramusca.jamuz/files/");
-        if(!path.exists()) {
-            path.mkdir();
-        }
-        path = getExtSDcard("Android/data/org.phramusca.jamuz/files/");*/
         if(!path.exists()) {
             path.mkdirs();
         }
         return path;
-    }
-
-    private void scanLibrayInThread() {
-        new Thread() {
-            public void run() {
-                //Scan JaMuz path on SD card
-                scanFolder(getAppDataPath());
-                waitScanFolder();
-
-                //Scan user folder
-                if(!m_chosenDir.equals("/")) {
-                    File folder = new File(m_chosenDir);
-                    scanFolder(folder);
-                    waitScanFolder();
-                }
-
-                //Scan complete, warn user
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String msg = "Database updated.";
-                        helperToast.toastLong(msg);
-                        helperNotification.notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, 5000);
-                    }
-                });
-            }
-        }.start();
-    }
-
-    private void waitScanFolder() {
-        try {
-            if(scanLibray!=null) {
-                scanLibray.join();
-            }
-        } catch (InterruptedException e) {
-            Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
-        }
-    }
-
-    private void scanFolder(final File path) {
-        scanLibray = new ProcessAbstract("Thread.MainActivity.scanLibrayInThread") {
-            public void run() {
-                try {
-                    checkAbort();
-                    nbFiles=0;
-                    nbFilesTotal=0;
-                    checkAbort();
-                    //Scan android filesystem for files
-                    processBrowseFS = new ProcessAbstract("Thread.MainActivity.browseFS") {
-                        public void run() {
-                            try {
-                                browseFS(path);
-                            } catch (IllegalStateException | InterruptedException e) {
-                                Log.w(TAG, "Thread.MainActivity.browseFS InterruptedException");
-                                scanLibray.abort();
-                            }
-                        }
-                    };
-                    processBrowseFS.start();
-                    //Get total number of files
-                    processBrowseFScount = new ProcessAbstract("Thread.MainActivity.browseFScount") {
-                        public void run() {
-                            try {
-                                browseFScount(path);
-                            } catch (InterruptedException e) {
-                                Log.w(TAG, "Thread.MainActivity.browseFScount InterruptedException");
-                                scanLibray.abort();
-                            }
-                        }
-                    };
-                    processBrowseFScount.start();
-                    checkAbort();
-                    processBrowseFS.join();
-                    processBrowseFScount.join();
-                    checkAbort();
-                    //Scan deleted files
-                    //TODO: No need to check what scanned previously ...
-                    List<Track> tracks = new Playlist("ScanFolder", false).getTracks();
-                    nbFilesTotal = tracks.size();
-                    nbFiles=0;
-                    for(Track track : tracks) {
-                        checkAbort();
-                        File file = new File(track.getPath());
-                        if(!file.exists()) {
-                            Log.d(TAG, "Remove track from db: "+track);
-                            musicLibrary.deleteTrack(track.getPath());
-                        }
-                        notifyScan("JaMuz is scanning deleted files ... ", 200);
-                    }
-                } catch (InterruptedException e) {
-                    Log.w(TAG, "Thread.MainActivity.scanLibrayInThread InterruptedException");
-                }
-            }
-
-            private void browseFS(File path) throws InterruptedException {
-                checkAbort();
-                if (path.isDirectory()) {
-                    File[] files = path.listFiles();
-                    if (files != null) {
-                        if(files.length>0) {
-                            for (File file : files) {
-                                checkAbort();
-                                if (file.isDirectory()) {
-                                    browseFS(file);
-                                }
-                                else {
-                                    String absolutePath=file.getAbsolutePath();
-                                    if(absolutePath.startsWith(getAppDataPath().getAbsolutePath())) {
-                                        //Scanning private sd card path
-                                        //=> Files from JaMuz Sync
-                                        String fileKey = absolutePath.substring(
-                                                getAppDataPath().getAbsolutePath().length()+1);
-
-                                        //FIXME: Re-enable filesToKeep check in scan !!!
-                                        /*if(filesToKeep!=null && !filesToKeep.containsKey(fileKey)) {
-                                            Log.i(TAG, "Deleting file "+absolutePath);
-                                            file.delete();
-                                        } else if(filesToKeep!=null && filesToKeep.containsKey(fileKey)) {
-                                            FileInfoReception fileInfoReception=filesToKeep.get(fileKey);
-                                            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, fileInfoReception);
-                                        } else {*/
-                                            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
-                                        //}
-                                    }
-                                    else {
-                                        //Scanning extra local folder
-                                        List<String> audioExtenstions = new ArrayList<>();
-                                        audioExtenstions.add("mp3");
-                                        audioExtenstions.add("flac");
-                                        /*audioFiles.add("ogg");*/
-                                        String ext = absolutePath.substring(absolutePath.lastIndexOf(".")+1);
-                                        if(audioExtenstions.contains(ext)) {
-                                            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
-                                        }
-                                    }
-                                    notifyScan("JaMuz is scanning files ... ", 13);
-                                }
-                            }
-                        } else {
-                            Log.i(TAG, "Deleting empty folder "+path.getAbsolutePath());
-                            path.delete();
-                        }
-                    }
-                }
-            }
-
-            private void browseFScount(File path) throws InterruptedException {
-                checkAbort();
-                if (path.isDirectory()) {
-                    File[] files = path.listFiles();
-                    if (files != null) {
-                        if(files.length>0) {
-                            for (File file : files) {
-                                checkAbort();
-                                if (file.isDirectory()) {
-                                    browseFScount(file);
-                                }
-                                else {
-                                    nbFilesTotal++;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        };
-        scanLibray.start();
     }
 
     private void connectDatabase() {
@@ -1468,8 +1215,13 @@ public class MainActivity extends AppCompatActivity {
 
         setupTags();
         setupGenres();
-        scanLibrayInThread();
         setupLocalPlaylists();
+
+        //Start Scan Service
+        Intent service = new Intent(getApplicationContext(), ServiceScan.class);
+        service.putExtra("userPath", preferences.getString("userPath", "/"));
+        service.putExtra("getAppDataPath", getAppDataPath());
+        startService(service);
     }
 
     private void playHistory() {
@@ -1537,8 +1289,6 @@ public class MainActivity extends AppCompatActivity {
 
     class CallBackPlayer implements ICallBackPlayer {
 
-        private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackPlayer.class.getSimpleName();
-
         @Override
         public void onPlayBackEnd() {
             if(!isRemoteConnected()) {
@@ -1579,7 +1329,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public Handler mHandler = new Handler(Looper.getMainLooper()) {
+    private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message message) {
             String msg = (String) message.obj;
@@ -1714,12 +1464,15 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                enableClient(buttonSync, false);
                 if (enable) {
-                    enableClient(buttonSync, R.drawable.connect_off_new);
+                    buttonSync.setText("Connect");
+                    buttonSync.setBackgroundResource(R.drawable.connect_off_new);
                 } else {
                     buttonSync.setText("Close");
                     buttonSync.setBackgroundResource(R.drawable.connect_on);
                 }
+                enableClient(buttonSync, true);
                 editTextConnectInfo.setEnabled(enable);
             }
         });
@@ -2077,43 +1830,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void notifyScan(final String action, int every) {
-        nbFiles++;
-        if(((nbFiles-1) % every) == 0) { //To prevent UI from freezing
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    String msg = nbFiles + "/" + nbFilesTotal + " " + action;
-                    helperNotification.notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, nbFilesTotal, nbFiles, false, false, false);
-                }
-            });
-        }
-    }
-
     private void setSeekBar(final int currentPosition, final int total) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 seekBarPosition.setMax(total);
                 seekBarPosition.setProgress(currentPosition);
-            }
-        });
-    }
-
-    public void popup(final String title, final CharSequence msg) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-                alertDialog.setTitle(title);
-                alertDialog.setMessage(msg);
-                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                alertDialog.show();
             }
         });
     }
@@ -2341,17 +2063,6 @@ public class MainActivity extends AppCompatActivity {
             displayedTrack = localTrack;
             displayTrack(false);
         }
-    }
-
-    //This is to have application opened when clicking on notification
-    private PendingIntent getApplicationIntent() {
-        Intent notificationIntent = new Intent(getApplicationContext(),
-                MainActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent intent = PendingIntent.getActivity(getApplicationContext(), 0,
-                notificationIntent, 0);
-        return intent;
     }
 
     private void stopRemote() {
