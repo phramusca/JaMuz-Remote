@@ -55,6 +55,7 @@
         </receiver>
 
         <service android:name=".ServiceSync" android:exported="false"/>
+        <service android:name=".ServiceScan" android:exported="false"/>
 
     </application>
 

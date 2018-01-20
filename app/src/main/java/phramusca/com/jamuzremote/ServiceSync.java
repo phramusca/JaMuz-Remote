@@ -4,16 +4,8 @@ package phramusca.com.jamuzremote;
  * Created by raph on 10/06/17.
  */
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.CountDownTimer;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -33,51 +25,32 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class ServiceSync extends Service {
+public class ServiceSync extends ServiceBase {
 
     private static final String TAG = ServiceSync.class.getSimpleName();
     private ClientSync clientSync;
     private NotificationCompat.Builder mBuilderSync;
     private static final int ID_NOTIFIER_SYNC = 1;
-    private NotificationManager mNotifyManager;
-    private Handler mHandler = new Handler(Looper.getMainLooper());
-    private File getAppDataPath;
-    private HelperNotification helperNotification;
-    private HelperToast helperToast = new HelperToast(this);
 
-    @Override
-    public IBinder onBind(Intent intent){
-        return null;
-    }
     @Override
     public void onCreate(){
-
-        mNotifyManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        helperNotification= new HelperNotification(getApplicationIntent(), mNotifyManager);
-
-
         mBuilderSync = new NotificationCompat.Builder(this);
         mBuilderSync.setContentTitle("Sync")
                 .setContentText("Download in progress")
                 .setUsesChronometer(true)
                 .setSmallIcon(R.drawable.ic_process);
-
         super.onCreate();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
+        super.onStartCommand(intent, flags, startId);
         ClientInfo clientInfo = (ClientInfo)intent.getSerializableExtra("clientInfo");
-        getAppDataPath = (File)intent.getSerializableExtra("getAppDataPath");
-
         readFilesLists();
-
         clientSync =  new ClientSync(clientInfo, new CallBackSync());
         new Thread() {
             public void run() { clientSync.connect(); }
         }.start();
-
         return START_STICKY;
     }
 
@@ -88,15 +61,7 @@ public class ServiceSync extends Service {
         super.onDestroy();
     }
 
-    private void sendMessage(String msg) {
-        Message completeMessage =
-                mHandler.obtainMessage(1, msg);
-        completeMessage.sendToTarget();
-    }
-
-    private void runOnUiThread(Runnable runnable) {
-        mHandler.post(runnable);
-    }
+    private static final Object timerLock = new Object();
 
     private CountDownTimer timerWatchTimeout= new CountDownTimer(0, 0) {
         @Override
@@ -115,7 +80,7 @@ public class ServiceSync extends Service {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                synchronized(timerWatchTimeout) {
+                synchronized(timerLock) {
                     if(timerWatchTimeout!=null) {
                         timerWatchTimeout.cancel(); //Cancel previous if any
                     }
@@ -129,7 +94,7 @@ public class ServiceSync extends Service {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                synchronized(timerWatchTimeout) {
+                synchronized(timerLock) {
 
                     long minTimeout =  15 * 1000;  //Min timeout 15s (+ 15s by Mo)
                     long maxTimeout =  120 * 1000; //Max timeout 2 min
@@ -161,7 +126,7 @@ public class ServiceSync extends Service {
         }
         if(!reconnect) {
             sendMessage("enableSync");
-            mNotifyManager.cancel(ID_NOTIFIER_SYNC);
+            //mNotifyManager.cancel(ID_NOTIFIER_SYNC);
         }
     }
 
@@ -227,7 +192,7 @@ public class ServiceSync extends Service {
                             RepositoryTags.add(tag);
                         }
                         //Deleting tags that have been removed in server
-                        final List<String> list = new ArrayList<String>();
+                        final List<String> list = new ArrayList<>();
                         for(int i = 0; i < jsonTags.length(); i++){
                             list.add((String) jsonTags.get(i));
                         }
@@ -275,7 +240,6 @@ public class ServiceSync extends Service {
                         //Anyhow, user tags are not inserted in db !!
                         if(HelperLibrary.insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception)) {
                             clientSync.ackFileReception(fileInfoReception.idFile, true);
-                            return;
                         } else {
                             Log.w(TAG, "File tags could not be read. Deleting " + receivedFile.getAbsolutePath());
                             receivedFile.delete();
@@ -371,7 +335,7 @@ public class ServiceSync extends Service {
                                     watchTimeOut(fileToGetInfo.size);
                                 }
                             });
-                            synchronized (timerWatchTimeout) {
+                            synchronized (timerLock) {
                                 clientSync.requestFile(fileToGetInfo.idFile);
                             }
                         }
@@ -414,16 +378,8 @@ public class ServiceSync extends Service {
         }
     }
 
-    //This is to have application opened when clicking on notification
-    private PendingIntent getApplicationIntent() {
-        Intent notificationIntent = new Intent(getApplicationContext(),
-                MainActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent intent = PendingIntent.getActivity(getApplicationContext(), 0,
-                notificationIntent, 0);
-        return intent;
-    }
+    //FIXME: Read and write in threads (make sure they are read before starting)
+    //Do this in an Helper to have access in MainActivity too (to be ServiceScan)
 
     //TODO: Do not saveFilesLists ALL everytime !! (not in receivedFile at least)
     private void saveFilesLists() {

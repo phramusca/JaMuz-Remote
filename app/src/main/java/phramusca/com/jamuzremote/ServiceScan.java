@@ -1,0 +1,258 @@
+package phramusca.com.jamuzremote;
+
+/**
+ * Created by raph on 10/06/17.
+ */
+
+import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
+import android.util.Log;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ServiceScan extends ServiceBase {
+
+    private static final String TAG = ServiceScan.class.getSimpleName();
+    private static final int ID_NOTIFIER_SCAN = 2;
+    private NotificationCompat.Builder mBuilderScan;
+    private int nbFiles=0;
+    private int nbFilesTotal = 0;
+    private ProcessAbstract scanLibray;
+    private ProcessAbstract processBrowseFS;
+    private ProcessAbstract processBrowseFScount;
+    private String userPath;
+
+    @Override
+    public void onCreate(){
+        mBuilderScan = new NotificationCompat.Builder(this);
+        mBuilderScan.setContentTitle("Scan")
+                .setContentText("Scan in progress")
+                .setUsesChronometer(true)
+                .setSmallIcon(R.drawable.ic_process);
+        super.onCreate();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId){
+        super.onStartCommand(intent, flags, startId);
+        userPath = intent.getStringExtra("userPath");
+        scanLibrayInThread();
+        return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy(){
+        stop();
+        super.onDestroy();
+    }
+
+    private void scanLibrayInThread() {
+        new Thread() {
+            public void run() {
+                //Scan JaMuz path on SD card
+                scanFolder(getAppDataPath);
+                waitScanFolder();
+
+                //Scan user folder
+                if(!userPath.equals("/")) {
+                    File folder = new File(userPath);
+                    scanFolder(folder);
+                    waitScanFolder();
+                }
+
+                //Scan complete, warn user
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String msg = "Database updated.";
+                        helperToast.toastLong(msg);
+                        helperNotification.notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, 5000);
+                    }
+                });
+            }
+        }.start();
+    }
+
+    private void waitScanFolder() {
+        try {
+            if(scanLibray!=null) {
+                scanLibray.join();
+            }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
+        }
+    }
+
+    private void scanFolder(final File path) {
+        scanLibray = new ProcessAbstract("Thread.MainActivity.scanLibrayInThread") {
+            public void run() {
+                try {
+                    checkAbort();
+                    nbFiles=0;
+                    nbFilesTotal=0;
+                    checkAbort();
+                    //Scan android filesystem for files
+                    processBrowseFS = new ProcessAbstract("Thread.MainActivity.browseFS") {
+                        public void run() {
+                            try {
+                                browseFS(path);
+                            } catch (IllegalStateException | InterruptedException e) {
+                                Log.w(TAG, "Thread.MainActivity.browseFS InterruptedException");
+                                scanLibray.abort();
+                            }
+                        }
+                    };
+                    processBrowseFS.start();
+                    //Get total number of files
+                    processBrowseFScount = new ProcessAbstract("Thread.MainActivity.browseFScount") {
+                        public void run() {
+                            try {
+                                browseFScount(path);
+                            } catch (InterruptedException e) {
+                                Log.w(TAG, "Thread.MainActivity.browseFScount InterruptedException");
+                                scanLibray.abort();
+                            }
+                        }
+                    };
+                    processBrowseFScount.start();
+                    checkAbort();
+                    processBrowseFS.join();
+                    processBrowseFScount.join();
+                    checkAbort();
+                    //Scan deleted files
+                    //TODO: No need to check what scanned previously ...
+                    List<Track> tracks = new Playlist("ScanFolder", false).getTracks();
+                    nbFilesTotal = tracks.size();
+                    nbFiles=0;
+                    for(Track track : tracks) {
+                        checkAbort();
+                        File file = new File(track.getPath());
+                        if(!file.exists()) {
+                            Log.d(TAG, "Remove track from db: "+track);
+                            MainActivity.musicLibrary.deleteTrack(track.getPath());
+                        }
+                        notifyScan("JaMuz is scanning deleted files ... ", 200);
+                    }
+                } catch (InterruptedException e) {
+                    Log.w(TAG, "Thread.MainActivity.scanLibrayInThread InterruptedException");
+                }
+            }
+
+            private void browseFS(File path) throws InterruptedException {
+                checkAbort();
+                if (path.isDirectory()) {
+                    File[] files = path.listFiles();
+                    if (files != null) {
+                        if(files.length>0) {
+                            for (File file : files) {
+                                checkAbort();
+                                if (file.isDirectory()) {
+                                    browseFS(file);
+                                }
+                                else {
+                                    String absolutePath=file.getAbsolutePath();
+                                    if(absolutePath.startsWith(getAppDataPath.getAbsolutePath())) {
+                                        //Scanning private sd card path
+                                        //=> Files from JaMuz Sync
+                                        String fileKey = absolutePath.substring(
+                                                getAppDataPath.getAbsolutePath().length()+1);
+
+                                        //FIXME: Re-enable filesToKeep check in scan !!!
+                                        /*if(filesToKeep!=null && !filesToKeep.containsKey(fileKey)) {
+                                            Log.i(TAG, "Deleting file "+absolutePath);
+                                            file.delete();
+                                        } else if(filesToKeep!=null && filesToKeep.containsKey(fileKey)) {
+                                            FileInfoReception fileInfoReception=filesToKeep.get(fileKey);
+                                            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, fileInfoReception);
+                                        } else {*/
+                                        HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
+                                        //}
+                                    }
+                                    else {
+                                        //Scanning extra local folder
+                                        List<String> audioExtenstions = new ArrayList<>();
+                                        audioExtenstions.add("mp3");
+                                        audioExtenstions.add("flac");
+                                        /*audioFiles.add("ogg");*/
+                                        String ext = absolutePath.substring(absolutePath.lastIndexOf(".")+1);
+                                        if(audioExtenstions.contains(ext)) {
+                                            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
+                                        }
+                                    }
+                                    notifyScan("JaMuz is scanning files ... ", 13);
+                                }
+                            }
+                        } else {
+                            Log.i(TAG, "Deleting empty folder "+path.getAbsolutePath());
+                            path.delete();
+                        }
+                    }
+                }
+            }
+
+            private void browseFScount(File path) throws InterruptedException {
+                checkAbort();
+                if (path.isDirectory()) {
+                    File[] files = path.listFiles();
+                    if (files != null) {
+                        if(files.length>0) {
+                            for (File file : files) {
+                                checkAbort();
+                                if (file.isDirectory()) {
+                                    browseFScount(file);
+                                }
+                                else {
+                                    nbFilesTotal++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        scanLibray.start();
+    }
+
+    private void notifyScan(final String action, int every) {
+        nbFiles++;
+        if(((nbFiles-1) % every) == 0) { //To prevent UI from freezing
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String msg = nbFiles + "/" + nbFilesTotal + " " + action;
+                    helperNotification.notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, nbFilesTotal, nbFiles, false, false, false);
+                }
+            });
+        }
+    }
+
+    private void stop() {
+        //Abort and wait scanLibrayInThread is aborted
+        //So it does not crash if scanLib not completed
+        if(processBrowseFS!=null) {
+            processBrowseFS.abort();
+        }
+        if(processBrowseFScount!=null) {
+            processBrowseFScount.abort();
+        }
+        if(scanLibray!=null) {
+            scanLibray.abort();
+        }
+        try {
+            if(processBrowseFS!=null) {
+                processBrowseFS.join();
+            }
+            if(processBrowseFScount!=null) {
+                processBrowseFScount.join();
+            }
+            if(scanLibray!=null) {
+                scanLibray.join();
+            }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
+        }
+    }
+
+}
