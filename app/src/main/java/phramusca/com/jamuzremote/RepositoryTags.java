@@ -16,9 +16,9 @@ public final class RepositoryTags {
     }
 
     public synchronized static Map<Integer, String> read() {
-        if(MainActivity.musicLibrary!=null && tags.size()<=0) {
+        if(HelperLibrary.musicLibrary!=null && tags.size()<=0) {
             tags = new HashMap<>();
-            tags = MainActivity.musicLibrary.getTags();
+            tags = HelperLibrary.musicLibrary.getTags();
         }
         return tags;
     }
@@ -29,10 +29,10 @@ public final class RepositoryTags {
 
     public synchronized static void add(final String tag) {
         if(!RepositoryTags.getTags().values().contains(tag)) {
-            if(MainActivity.musicLibrary!=null) {
+            if(HelperLibrary.musicLibrary!=null) {
                 new Thread() {
                     public void run() {
-                        int idTag = MainActivity.musicLibrary.addTag(tag);
+                        int idTag = HelperLibrary.musicLibrary.addTag(tag);
                         if(idTag>0) {
                             tags.put(idTag, tag);
                         }

@@ -125,7 +125,7 @@ public class ServiceScan extends ServiceBase {
                         File file = new File(track.getPath());
                         if(!file.exists()) {
                             Log.d(TAG, "Remove track from db: "+track);
-                            MainActivity.musicLibrary.deleteTrack(track.getPath());
+                            HelperLibrary.musicLibrary.deleteTrack(track.getPath());
                         }
                         notifyScan("JaMuz is scanning deleted files ... ", 200);
                     }
@@ -166,12 +166,12 @@ public class ServiceScan extends ServiceBase {
                                     }
                                     else {
                                         //Scanning extra local folder
-                                        List<String> audioExtenstions = new ArrayList<>();
-                                        audioExtenstions.add("mp3");
-                                        audioExtenstions.add("flac");
+                                        List<String> audioExtensions = new ArrayList<>();
+                                        audioExtensions.add("mp3");
+                                        audioExtensions.add("flac");
                                         /*audioFiles.add("ogg");*/
                                         String ext = absolutePath.substring(absolutePath.lastIndexOf(".")+1);
-                                        if(audioExtenstions.contains(ext)) {
+                                        if(audioExtensions.contains(ext)) {
                                             HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
                                         }
                                     }

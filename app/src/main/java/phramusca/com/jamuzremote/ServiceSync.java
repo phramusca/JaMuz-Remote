@@ -197,8 +197,8 @@ public class ServiceSync extends ServiceBase {
                         {
                             Map.Entry<Integer, String> tag = it.next();
                             if(!list.contains(tag.getValue())) {
-                                if(MainActivity.musicLibrary!=null) {
-                                    int deleted = MainActivity.musicLibrary.deleteTag(tag.getKey());
+                                if(HelperLibrary.musicLibrary!=null) {
+                                    int deleted = HelperLibrary.musicLibrary.deleteTag(tag.getKey());
                                     if(deleted>0) {
                                         it.remove();
                                     }
@@ -239,6 +239,10 @@ public class ServiceSync extends ServiceBase {
                         } else {
                             Log.w(TAG, "File tags could not be read. Deleting " + receivedFile.getAbsolutePath());
                             receivedFile.delete();
+                            //NOTES:
+                            // - File is already deleted
+                            // -Can happen also if databse is null (not only if tags are not read)
+
                             //FIXME: Cannot read tags of received file : What to do in this case
                             //to avoid it to be requested over and over ?
                             //=> merge filesToGet and filesToKeep

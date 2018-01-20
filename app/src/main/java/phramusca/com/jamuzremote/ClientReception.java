@@ -97,7 +97,7 @@ public class ClientReception extends ProcessAbstract {
 				} else if (msg.startsWith("SENDING_DB")) {
                     try {
                         Log.i(TAG, "Start database reception");
-                        MainActivity.musicLibrary.receive(inputStream); //To lock db while receiving
+                        HelperLibrary.musicLibrary.receive(inputStream); //To lock db while receiving
                         Log.i(TAG, "database received");
                         callback.receivedDatabase();
                         checkAbort();

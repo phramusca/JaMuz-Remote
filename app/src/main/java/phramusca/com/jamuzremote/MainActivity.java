@@ -2,6 +2,7 @@ package phramusca.com.jamuzremote;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
@@ -99,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
     private Map coverMap = new HashMap();
     private AudioManager audioManager;
     public static AudioPlayer audioPlayer;
-    public static MusicLibrary musicLibrary;
 
     //In internal SD emulated storage:
     //TODO: Change folder as we now have rights
@@ -108,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
     //      "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;
     public static File musicLibraryDbFile = new File(
             Environment.getExternalStorageDirectory()+"/JaMuz/JaMuzRemote.db");
-
 
     private List<Track> queue = new ArrayList<>();
     private List<Track> queueHistory = new ArrayList<>();
@@ -605,10 +604,12 @@ public class MainActivity extends AppCompatActivity {
                     enableSync(false);
                     ClientInfo clientInfo = getClientInfo("-data");
                     if(clientInfo!=null) {
-                        Intent service = new Intent(getApplicationContext(), ServiceSync.class);
-                        service.putExtra("clientInfo", clientInfo);
-                        service.putExtra("getAppDataPath", getAppDataPath());
-                        startService(service);
+                        if(!isMyServiceRunning(ServiceSync.class)) {
+                            Intent service = new Intent(getApplicationContext(), ServiceSync.class);
+                            service.putExtra("clientInfo", clientInfo);
+                            service.putExtra("getAppDataPath", getAppDataPath());
+                            startService(service);
+                        }
                     }
                 }
                 else {
@@ -730,6 +731,10 @@ public class MainActivity extends AppCompatActivity {
         //TODO: Why this one needs registerReceiver whereas ReceiverPhoneCall does not
         registerReceiver(receiverHeadSetPlugged,
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG));
+
+        if(isMyServiceRunning(ServiceSync.class)) {
+            enableSync(false);
+        }
 
         toggle(layoutControls, true);
         toggle(layoutAttributes, true);
@@ -937,9 +942,7 @@ public class MainActivity extends AppCompatActivity {
             displayPlaylist(playlist);
             localSelectedPlaylist = playlist;
             if(playNext) {
-                if(musicLibrary!=null) {
-                    queue = playlist.getTracks();
-                }
+                queue = playlist.getTracks();
                 playNext();
             } else {
                 clearQueueAndRefreshSpinner();
@@ -1197,12 +1200,9 @@ public class MainActivity extends AppCompatActivity {
         //FIXME: MusicLibray is used elsewhere. Do not close
         //Need to make it live until all application and services are done
 
-        Log.i(TAG, "musicLibrary closing");
-        if(musicLibrary!=null) {
-            musicLibrary.close();
-            musicLibrary=null;
-        }
-        Log.i(TAG, "musicLibrary closed");
+        /*Log.i(TAG, "musicLibrary closing");
+        HelperLibrary.close();
+        Log.i(TAG, "musicLibrary closed");*/
     }
 
     private static File[] externalFilesDir;
@@ -1215,18 +1215,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void connectDatabase() {
-        musicLibrary = new MusicLibrary(this);
-        musicLibrary.open();
+        HelperLibrary.open(this);
 
         setupTags();
         setupGenres();
         setupLocalPlaylists();
 
         //Start Scan Service
-        Intent service = new Intent(getApplicationContext(), ServiceScan.class);
-        service.putExtra("userPath", preferences.getString("userPath", "/"));
-        service.putExtra("getAppDataPath", getAppDataPath());
-        startService(service);
+        if(!isMyServiceRunning(ServiceScan.class)) {
+            Intent service = new Intent(getApplicationContext(), ServiceScan.class);
+            service.putExtra("userPath", preferences.getString("userPath", "/"));
+            service.putExtra("getAppDataPath", getAppDataPath());
+            startService(service);
+        }
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void playHistory() {
@@ -1243,7 +1254,7 @@ public class MainActivity extends AppCompatActivity {
             playAudio("");
         } else {
             Log.d(TAG, "play(): Remove track from db:"+displayedTrack);
-            musicLibrary.deleteTrack(displayedTrack.getPath());
+            HelperLibrary.musicLibrary.deleteTrack(displayedTrack.getPath());
             playNext();
         }
     }
@@ -1271,7 +1282,7 @@ public class MainActivity extends AppCompatActivity {
             displayedTrack.update();
             //Fill the queue
             if(queue.size()<5) {
-                if(musicLibrary!=null) {
+                if(HelperLibrary.musicLibrary!=null) {
                     List<Track> addToQueue = localSelectedPlaylist.getTracks();
                     queue.addAll(addToQueue);
                 }
@@ -1358,6 +1369,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    //FIXME: Use BroadcastReceiver (same of new ones)
+    //to handle messages from other threads or services
+    //Especially for audioPlayer (some weird message back&forwarding occuring)
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -1858,7 +1873,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void displayTrack(boolean forceReadTags) {
         if(displayedTrack!=null) {
-            if(forceReadTags && musicLibrary!=null) {
+            if(forceReadTags && HelperLibrary.musicLibrary!=null) {
                 displayedTrack.getTags(true);
             }
             runOnUiThread(new Runnable() {

@@ -27,7 +27,7 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.*;
 
 public class MusicLibrary {
 
-    private SQLiteDatabase db;
+    protected SQLiteDatabase db;
     private MusicLibraryDb musicLibraryDb;
     private static final String TAG = MusicLibrary.class.getSimpleName();
 
