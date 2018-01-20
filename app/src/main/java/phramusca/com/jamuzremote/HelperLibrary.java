@@ -58,8 +58,8 @@ public final class HelperLibrary {
                     musicLibrary.insertTrack(track);
                     result=true;
                 } else {
-                    //FIXME: Delete track ONLY if it is a song track that appears to be corrupted
-                    Log.w(TAG, "browseFS delete file because cannot read tags of " + absolutePath);
+                    //TODO: Delete track ONLY if it is a song track that appears to be corrupted
+                    Log.w(TAG, "insertOrUpdateTrackInDatabase: delete file because cannot read tags of " + absolutePath);
                     new File(absolutePath).delete();
                 }
             }

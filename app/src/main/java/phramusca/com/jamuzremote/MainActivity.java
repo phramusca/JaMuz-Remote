@@ -532,7 +532,7 @@ public class MainActivity extends AppCompatActivity {
                         String text = input.getText().toString().trim();
                         if(!localPlaylists.contains(text)) {
 
-                            //FIXME: localPlaylists is empty at startup !!
+                            //FIXME: localPlaylists is empty at startup (before first connected to db) !!
                             //=> Definitly manage "All" Playlist well
 
                             localPlaylists = localPlaylists.subList(0, localPlaylists.size()-1);
@@ -1196,13 +1196,6 @@ public class MainActivity extends AppCompatActivity {
         for(Playlist playlist : localPlaylists) {
             savePlaylist(playlist);
         }
-
-        //FIXME: MusicLibray is used elsewhere. Do not close
-        //Need to make it live until all application and services are done
-
-        /*Log.i(TAG, "musicLibrary closing");
-        HelperLibrary.close();
-        Log.i(TAG, "musicLibrary closed");*/
     }
 
     private static File[] externalFilesDir;
@@ -1370,7 +1363,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    //FIXME: Use BroadcastReceiver (same of new ones)
+    //FIXME: Use BroadcastReceiver (same or new ones)
     //to handle messages from other threads or services
     //Especially for audioPlayer (some weird message back&forwarding occuring)
 

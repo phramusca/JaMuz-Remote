@@ -65,6 +65,7 @@ public class ServiceScan extends ServiceBase {
                         helperNotification.notifyBar(notificationScan, msg, 5000);
                     }
                 });
+                stopSelf();
             }
         }.start();
     }
