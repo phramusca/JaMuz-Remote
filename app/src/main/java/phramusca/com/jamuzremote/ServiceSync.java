@@ -133,7 +133,7 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void receivedJson(final String msg) {
             try {
-                JSONObject jObject = new JSONObject(msg);
+                final JSONObject jObject = new JSONObject(msg);
                 String type = jObject.getString("type");
                 switch(type) {
                     case "insertDeviceFileAck":
@@ -181,39 +181,55 @@ public class ServiceSync extends ServiceBase {
                         requestNextFile(true);
                         break;
                     case "tags":
-                        //Adding missing tags
-                        final JSONArray jsonTags = (JSONArray) jObject.get("tags");
-                        for(int i=0; i<jsonTags.length(); i++) {
-                            final String tag = (String) jsonTags.get(i);
-                            RepositoryTags.add(tag);
-                        }
-                        //Deleting tags that have been removed in server
-                        final List<String> list = new ArrayList<>();
-                        for(int i = 0; i < jsonTags.length(); i++){
-                            list.add((String) jsonTags.get(i));
-                        }
-                        Iterator<Map.Entry<Integer, String>> it = RepositoryTags.getTags().entrySet().iterator();
-                        while (it.hasNext())
-                        {
-                            Map.Entry<Integer, String> tag = it.next();
-                            if(!list.contains(tag.getValue())) {
-                                if(HelperLibrary.musicLibrary!=null) {
-                                    int deleted = HelperLibrary.musicLibrary.deleteTag(tag.getKey());
-                                    if(deleted>0) {
-                                        it.remove();
+                        new Thread() {
+                            public void run() {
+                                try {
+                                    //Adding missing tags
+                                    final JSONArray jsonTags = (JSONArray) jObject.get("tags");
+                                    for(int i=0; i<jsonTags.length(); i++) {
+                                        final String tag = (String) jsonTags.get(i);
+                                        RepositoryTags.add(tag);
                                     }
+                                    //Deleting tags that have been removed in server
+                                    final List<String> list = new ArrayList<>();
+                                    for(int i = 0; i < jsonTags.length(); i++){
+                                        list.add((String) jsonTags.get(i));
+                                    }
+                                    Iterator<Map.Entry<Integer, String>> it = RepositoryTags.getTags().entrySet().iterator();
+                                    while (it.hasNext())
+                                    {
+                                        Map.Entry<Integer, String> tag = it.next();
+                                        if(!list.contains(tag.getValue())) {
+                                            if(HelperLibrary.musicLibrary!=null) {
+                                                int deleted = HelperLibrary.musicLibrary.deleteTag(tag.getKey());
+                                                if(deleted>0) {
+                                                    it.remove();
+                                                }
+                                            }
+                                        }
+                                    }
+                                    sendMessage("setupTags");
+                                } catch (JSONException e) {
+                                    Log.e(TAG, e.toString());
                                 }
                             }
-                        }
-                        sendMessage("setupTags");
+                        }.start();
                         break;
                     case "genres":
-                        final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
-                        for(int i=0; i<jsonGenres.length(); i++) {
-                            final String genre = (String) jsonGenres.get(i);
-                            RepositoryGenres.add(genre);
-                        }
-                        sendMessage("setupSpinnerGenre");
+                        new Thread() {
+                            public void run() {
+                                try {
+                                    final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
+                                    for(int i=0; i<jsonGenres.length(); i++) {
+                                        final String genre = (String) jsonGenres.get(i);
+                                        RepositoryGenres.add(genre);
+                                    }
+                                    sendMessage("setupSpinnerGenre");
+                                } catch (JSONException e) {
+                                    Log.e(TAG, e.toString());
+                                }
+                            }
+                        }.start();
                         break;
                 }
             } catch (JSONException e) {
