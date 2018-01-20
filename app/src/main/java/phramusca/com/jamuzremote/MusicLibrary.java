@@ -23,6 +23,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static phramusca.com.jamuzremote.MusicLibraryDb.*;
+
 public class MusicLibrary {
 
     private SQLiteDatabase db;
@@ -60,15 +62,15 @@ public class MusicLibrary {
 
     public synchronized int getTrack(String path){
         try {
-            Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
-                    new String[] {musicLibraryDb.COL_ID},
-                    musicLibraryDb.COL_PATH + " LIKE \"" + path +"\"",
+            Cursor cursor = db.query(TABLE_TRACKS,
+                    new String[] {COL_ID},
+                    COL_PATH + " LIKE \"" + path +"\"",
                     null, null, null, null);
-            if (cursor.getCount() == 0)
+            if (cursor.getCount() == 0) {
                 return -1;
-
+            }
             cursor.moveToFirst();
-            int id = cursor.getInt(cursor.getColumnIndex(musicLibraryDb.COL_ID));
+            int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
             cursor.close();
             return id;
         } catch (SQLiteException | IllegalStateException ex) {
@@ -80,7 +82,7 @@ public class MusicLibrary {
     public synchronized ArrayList<Track> getTracks(String query, String order) {
         ArrayList<Track> tracks = new ArrayList<>();
         try {
-            Cursor cursor = db.query(musicLibraryDb.TABLE_TRACKS,
+            Cursor cursor = db.query(TABLE_TRACKS,
                     null,
                     query,
                     null, null, null,
@@ -115,6 +117,7 @@ public class MusicLibrary {
     }
 
     public synchronized int getNb(String where, String having){
+        Cursor cursor=null;
         try {
             String query = "SELECT * \n" +
                     " FROM tracks \n" +
@@ -123,17 +126,21 @@ public class MusicLibrary {
                     " " + where + " \n" +
                     " GROUP BY tracks.ID \n" +
                     " " + having;
-            Cursor cursor = db.rawQuery(query, new String [] {});
+            cursor = db.rawQuery(query, new String [] {});
             return cursor.getCount();
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "getNb("+where+","+having+")", ex);
+        } finally {
+            if(cursor!=null) {
+                cursor.close();
+            }
         }
         return -1;
     }
 
     public synchronized void insertTrack(Track track){
         try {
-            db.insert(musicLibraryDb.TABLE_TRACKS, null, TrackToValues(track));
+            db.insert(TABLE_TRACKS, null, TrackToValues(track));
             for(String tag : track.getTags(false)) {
                 addTag(track.getId(), tag);
             }
@@ -145,8 +152,8 @@ public class MusicLibrary {
 
     public synchronized boolean updateTrack(Track track){
         try {
-            if(db.update(musicLibraryDb.TABLE_TRACKS, TrackToValues(track),
-                    musicLibraryDb.COL_ID + " = " +track.getId(), null)==1) {
+            if(db.update(TABLE_TRACKS, TrackToValues(track),
+                    COL_ID + " = " +track.getId(), null)==1) {
                 return true;
             }
         } catch (SQLiteException | IllegalStateException ex) {
@@ -157,7 +164,7 @@ public class MusicLibrary {
 
     public synchronized int deleteTrack(String path){
         try {
-            return db.delete(musicLibraryDb.TABLE_TRACKS, musicLibraryDb.COL_PATH + " = \"" +path+"\"", null);
+            return db.delete(TABLE_TRACKS, COL_PATH + " = \"" +path+"\"", null);
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "deleteTrack("+path+")", ex);
         }
@@ -173,54 +180,55 @@ public class MusicLibrary {
                 tracks.add(track);
             } while(cursor.moveToNext());
         }
-        cursor.close();
+        if (cursor != null) {
+            cursor.close();
+        }
         return tracks;
     }
 
     private ContentValues TrackToValues(Track track) {
         ContentValues values = new ContentValues();
-        values.put(musicLibraryDb.COL_TITLE, track.getTitle());
-        values.put(musicLibraryDb.COL_ALBUM, track.getAlbum());
-        values.put(musicLibraryDb.COL_ARTIST, track.getArtist());
-        values.put(musicLibraryDb.COL_COVER_HASH, track.getCoverHash());
-        values.put(musicLibraryDb.COL_GENRE, track.getGenre());
-        values.put(musicLibraryDb.COL_PATH, track.getPath());
-        values.put(musicLibraryDb.COL_RATING, track.getRating());
-        values.put(musicLibraryDb.COL_ADDED_DATE, track.getFormattedAddedDate());
-        values.put(musicLibraryDb.COL_LAST_PLAYED, track.getFormattedLastPlayed());
-        values.put(musicLibraryDb.COL_PLAY_COUNTER, track.getPlayCounter());
+        values.put(COL_TITLE, track.getTitle());
+        values.put(COL_ALBUM, track.getAlbum());
+        values.put(COL_ARTIST, track.getArtist());
+        values.put(COL_COVER_HASH, track.getCoverHash());
+        values.put(COL_GENRE, track.getGenre());
+        values.put(COL_PATH, track.getPath());
+        values.put(COL_RATING, track.getRating());
+        values.put(COL_ADDED_DATE, track.getFormattedAddedDate());
+        values.put(COL_LAST_PLAYED, track.getFormattedLastPlayed());
+        values.put(COL_PLAY_COUNTER, track.getPlayCounter());
         return values;
     }
 
     private Track cursorToTrack(Cursor c){
 
-        int id = c.getInt(c.getColumnIndex(musicLibraryDb.COL_ID));
-        int rating=c.getInt(c.getColumnIndex(musicLibraryDb.COL_RATING));
-        String title=c.getString(c.getColumnIndex(musicLibraryDb.COL_TITLE));
-        String album=c.getString(c.getColumnIndex(musicLibraryDb.COL_ALBUM));
-        String artist=c.getString(c.getColumnIndex(musicLibraryDb.COL_ARTIST));
-        String coverHash=c.getString(c.getColumnIndex(musicLibraryDb.COL_COVER_HASH));
-        String path=c.getString(c.getColumnIndex(musicLibraryDb.COL_PATH));
-        String genre=c.getString(c.getColumnIndex(musicLibraryDb.COL_GENRE));
+        int id = c.getInt(c.getColumnIndex(COL_ID));
+        int rating=c.getInt(c.getColumnIndex(COL_RATING));
+        String title=c.getString(c.getColumnIndex(COL_TITLE));
+        String album=c.getString(c.getColumnIndex(COL_ALBUM));
+        String artist=c.getString(c.getColumnIndex(COL_ARTIST));
+        String coverHash=c.getString(c.getColumnIndex(COL_COVER_HASH));
+        String path=c.getString(c.getColumnIndex(COL_PATH));
+        String genre=c.getString(c.getColumnIndex(COL_GENRE));
 
         Date addedDate=HelperDateTime.parseSqlUtc(
-                c.getString(c.getColumnIndex(musicLibraryDb.COL_ADDED_DATE)));
+                c.getString(c.getColumnIndex(COL_ADDED_DATE)));
         Date lastPlayed=HelperDateTime.parseSqlUtc(
-                c.getString(c.getColumnIndex(musicLibraryDb.COL_LAST_PLAYED)));
-        int playCounter=c.getInt(c.getColumnIndex(musicLibraryDb.COL_PLAY_COUNTER));
-        Track track = new Track(id, rating, title, album, artist, coverHash, path, genre,
+                c.getString(c.getColumnIndex(COL_LAST_PLAYED)));
+        int playCounter=c.getInt(c.getColumnIndex(COL_PLAY_COUNTER));
+        return new Track(id, rating, title, album, artist, coverHash, path, genre,
                 addedDate, lastPlayed, playCounter);
-        return track;
     }
 
     public synchronized LinkedHashMap<String, Integer> getGenres(String where) {
         LinkedHashMap<String, Integer> genres = new LinkedHashMap<>();
-        Cursor cursor = db.rawQuery("SELECT " + musicLibraryDb.COL_GENRE + ", count(*) " +
-                " FROM " + musicLibraryDb.TABLE_TRACKS +
+        Cursor cursor = db.rawQuery("SELECT " + COL_GENRE + ", count(*) " +
+                " FROM " + TABLE_TRACKS +
                 " WHERE " + where +
-                " GROUP BY " + musicLibraryDb.COL_GENRE +
+                " GROUP BY " + COL_GENRE +
                 " HAVING count(*)>10" +
-                " ORDER BY count(*) desc," + musicLibraryDb.COL_GENRE, new String [] {});
+                " ORDER BY count(*) desc," + COL_GENRE, new String [] {});
 
         if(cursor != null && cursor.moveToFirst())
         {
@@ -229,7 +237,9 @@ public class MusicLibrary {
                 genres.put(cursor.getString(0), nb);
             } while(cursor.moveToNext());
         }
-        cursor.close();
+        if (cursor != null) {
+            cursor.close();
+        }
         return genres;
     }
 
@@ -243,13 +253,15 @@ public class MusicLibrary {
                 genres.add(cursor.getString(1));
             } while(cursor.moveToNext());
         }
-        cursor.close();
+        if (cursor != null) {
+            cursor.close();
+        }
         return genres;
     }
 
     public synchronized int getNb(String where){
         try {
-            Cursor cursor = db.rawQuery("SELECT count(*) FROM "+musicLibraryDb.TABLE_TRACKS +
+            Cursor cursor = db.rawQuery("SELECT count(*) FROM "+ TABLE_TRACKS +
                     " WHERE " + where, new String [] {});
             if (cursor.getCount() == 0)
                 return 0;
@@ -273,7 +285,9 @@ public class MusicLibrary {
                 tags.put(cursor.getInt(0), cursor.getString(1));
             } while(cursor.moveToNext());
         }
-        cursor.close();
+        if (cursor != null) {
+            cursor.close();
+        }
         return tags;
     }
 
@@ -289,7 +303,9 @@ public class MusicLibrary {
                 tags.add(cursor.getString(0));
             } while(cursor.moveToNext());
         }
-        cursor.close();
+        if (cursor != null) {
+            cursor.close();
+        }
         return tags;
     }
 
@@ -367,11 +383,11 @@ public class MusicLibrary {
     public synchronized int updateGenre(Track track){
         try {
             ContentValues values = new ContentValues();
-            values.put(musicLibraryDb.COL_GENRE, track.getGenre());
+            values.put(COL_GENRE, track.getGenre());
 
-            return db.update(musicLibraryDb.TABLE_TRACKS,
+            return db.update(TABLE_TRACKS,
                     values,
-                    musicLibraryDb.COL_ID + " = " +track.getId(), null);
+                    COL_ID + " = " +track.getId(), null);
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "updateGenre("+track.getId()+","+track+")", ex);
         }

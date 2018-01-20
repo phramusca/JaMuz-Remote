@@ -23,7 +23,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
-import android.media.MediaMetadataRetriever;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -65,7 +64,6 @@ import android.widget.RatingBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.flexbox.FlexboxLayout;
@@ -83,7 +81,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -97,11 +94,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private ClientRemote clientRemote;
-    private ClientSync clientSync;
     private Track displayedTrack;
     private Track localTrack;
     private Map coverMap = new HashMap();
-    private Intent service; //Not yet used
     private AudioManager audioManager;
     public static AudioPlayer audioPlayer;
     public static MusicLibrary musicLibrary;
@@ -121,9 +116,18 @@ public class MainActivity extends AppCompatActivity {
     private List<Playlist> localPlaylists = new ArrayList<Playlist>();
     private ArrayAdapter<Playlist> playListArrayAdapter;
     private Playlist localSelectedPlaylist;
-    private Map<Integer, String> tags = new HashMap<>();
-    private List<String> genres = new ArrayList<>();
 
+    private String m_chosenDir = "/";
+    private SharedPreferences preferences;
+
+    //Notifications
+    private NotificationManager mNotifyManager;
+    private NotificationCompat.Builder mBuilderScan;
+    private static final int ID_NOTIFIER_SCAN = 2;
+    private HelperNotification helperNotification;
+    private HelperToast helperToast = new HelperToast(this);
+
+    //TODO: Move to a service (as for sync)
     private ProcessAbstract scanLibray;
     private ProcessAbstract processBrowseFS;
     private ProcessAbstract processBrowseFScount;
@@ -183,15 +187,6 @@ public class MainActivity extends AppCompatActivity {
     private GridLayout layoutOptions;
     private SeekBar seekBarReplayGain;
 
-    //Notifications
-    private NotificationManager mNotifyManager;
-    private NotificationCompat.Builder mBuilderSync;
-    private NotificationCompat.Builder mBuilderScan;
-    private static final int ID_NOTIFIER_SYNC = 1;
-    private static final int ID_NOTIFIER_SCAN = 2;
-    private String m_chosenDir = "/";
-    private SharedPreferences preferences;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -207,41 +202,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //Read FilesToKeep file to get list of files to maintain in db
-        String readJson = HelperTextFile.read(this, "FilesToKeep.txt");
-        if(!readJson.equals("")) {
-            filesToKeep = new HashMap<>();
-            Gson gson = new Gson();
-            Type mapType = new TypeToken<HashMap<String, FileInfoReception>>(){}.getType();
-            try {
-                filesToKeep = gson.fromJson(readJson,mapType);
-            } catch (JsonSyntaxException ex) {
-                Log.e(TAG, "", ex);
-            }
-        }
-        //Read filesToGet file to get list of files to retrieve
-        readJson = HelperTextFile.read(this, "filesToGet.txt");
-        if(!readJson.equals("")) {
-            filesToGet = new HashMap<>();
-            Gson gson = new Gson();
-            Type mapType = new TypeToken<HashMap<Integer, FileInfoReception>>(){}.getType();
-            try {
-                filesToGet = gson.fromJson(readJson, mapType);
-            } catch (JsonSyntaxException ex) {
-                Log.e(TAG, "", ex);
-            }
-        }
-
         mNotifyManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mBuilderSync = new NotificationCompat.Builder(this);
-        mBuilderSync.setContentTitle("JaMuz Sync")
-                .setContentText("Download in progress")
-                .setUsesChronometer(true)
-                .setSmallIcon(R.drawable.ic_process);
+
+        helperNotification = new HelperNotification(getApplicationIntent(), mNotifyManager);
 
         mBuilderScan = new NotificationCompat.Builder(this);
-        mBuilderScan.setContentTitle("JaMuz Scan")
+        mBuilderScan.setContentTitle("Scan")
                 .setContentText("Scan in progress")
                 .setUsesChronometer(true)
                 .setSmallIcon(R.drawable.ic_process);
@@ -398,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(TAG, "seekBarReplayGain: "+value);
                 String msg = audioPlayer.setVolume(value, displayedTrack);
                 if(!msg.equals("")) {
-                    toastLong(msg);
+                    helperToast.toastLong(msg);
                 }
             }
 
@@ -606,7 +573,7 @@ public class MainActivity extends AppCompatActivity {
                             displayPlaylist(localSelectedPlaylist);
                             setupSpinner();
                         } else {
-                            toastLong("Playlist \""+text+"\" already exist.");
+                            helperToast.toastLong("Playlist \""+text+"\" already exist.");
                         }
                     }
                 });
@@ -666,15 +633,16 @@ public class MainActivity extends AppCompatActivity {
                     enableSync(false);
                     ClientInfo clientInfo = getClientInfo("-data");
                     if(clientInfo!=null) {
-                        clientSync =  new ClientSync(clientInfo, new CallBackSync());
-                        new Thread() {
-                            public void run() { clientSync.connect(); }
-                        }.start();
+                        Intent service = new Intent(getApplicationContext(), ServiceSync.class);
+                        service.putExtra("clientInfo", clientInfo);
+                        service.putExtra("getAppDataPath", getAppDataPath());
+                        startService(service);
                     }
                 }
                 else {
+                    Intent service = new Intent(getApplicationContext(), ServiceSync.class);
+                    stopService(service);
                     enableSync(true);
-                    stopSync(false);
                 }
             }
         });
@@ -787,16 +755,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-
         //TODO: Why this one needs registerReceiver whereas ReceiverPhoneCall does not
         registerReceiver(receiverHeadSetPlugged,
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG));
-
-        //Start background service
-        //Not yet used but can be used to scan library
-        //What is the benefit ??
-        //service = new Intent(this, MyService.class);
-        //startService(service);
 
         toggle(layoutControls, true);
         toggle(layoutAttributes, true);
@@ -808,26 +769,15 @@ public class MainActivity extends AppCompatActivity {
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
-    private void stopSync(boolean reconnect) {
-        cancelWatchTimeOut();
-        if(clientSync!=null) {
-            clientSync.close(reconnect);
-        }
-        if(!reconnect) {
-            enableClient(buttonSync, R.drawable.connect_off_new);
-            mNotifyManager.cancel(ID_NOTIFIER_SYNC);
-        }
-    }
-
     private ClientInfo getClientInfo(String suffix) {
         if(!checkConnectedViaWifi())  {
-            toastLong("You must connect to WiFi network.");
+            helperToast.toastLong("You must connect to WiFi network.");
             return null;
         }
         String infoConnect = editTextConnectInfo.getText().toString();
         String[] split = infoConnect.split(":");  //NOI18N
         if(split.length<2) {
-            toastLong("Bad format:\t"+infoConnect+"" +
+            helperToast.toastLong("Bad format:\t"+infoConnect+"" +
                     "\nExpected:\t\t<IP>:<Port>" +
                     "\nEx:\t\t\t\t\t\t\t192.168.0.12:2013");
             return null;
@@ -1050,14 +1000,10 @@ public class MainActivity extends AppCompatActivity {
                 dimOn();
                 String genre = (String) parent.getItemAtPosition(pos);
                 if(!isRemoteConnected()) {
-                    if(musicLibrary!=null) {
-                        displayedTrack.setGenre(genre);
-
-                        //FIXME:  UI thread load:
-                        // Move all musicLibrary updates to Track
-                        //And run on a different Thread than UI/main
-                        musicLibrary.updateGenre(displayedTrack);
-                    }
+                    //FIXME:  UI thread load:
+                    // Move all musicLibrary updates to Track
+                    //And run on a different Thread than UI/main
+                    displayedTrack.updateGenre(genre);
                 }
             }
             spinnerGenreSend=true;
@@ -1233,7 +1179,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             if(!foundPlaylist) {
-                toastLong("Playlist not found:\n\""+spokenText+"\"");
+                helperToast.toastLong("Playlist not found:\n\""+spokenText+"\"");
                 textToSpeech.speak(spokenText, TextToSpeech.QUEUE_FLUSH, null);
             }
         }
@@ -1246,7 +1192,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "MainActivity onDestroy");
-        stopSync(false);
         stopRemote();
 
         //Better unregister as it does not trigger anyway + raises exceptions if not
@@ -1263,9 +1208,6 @@ public class MainActivity extends AppCompatActivity {
         audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
 
         audioPlayer.stop(true);
-        if(service!=null) {
-            stopService(service);
-        }
 
         if(textToSpeech !=null){
             textToSpeech.stop();
@@ -1297,13 +1239,16 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
         }
 
-        saveFilesLists();
+
 
         for(Playlist playlist : localPlaylists) {
             savePlaylist(playlist);
         }
 
         mNotifyManager.cancelAll();
+
+        //FIXME: MusicLibray is used elsewhere. Do not close
+        //Need to make it live until all application and services are done
 
         Log.i(TAG, "musicLibrary closing");
         if(musicLibrary!=null) {
@@ -1313,19 +1258,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "musicLibrary closed");
     }
 
-    //TODO: Do not saveFilesLists ALL everytime !! (not in receivedFile at least)
-    private void saveFilesLists() {
-        //Write list of files to maintain in db
-        if(filesToKeep!=null) {
-            Gson gson = new Gson();
-            HelperTextFile.write(this, "FilesToKeep.txt", gson.toJson(filesToKeep));
-        }
-        //Write list of files to retrieve
-        if(filesToGet!=null) {
-            Gson gson = new Gson();
-            HelperTextFile.write(this, "filesToGet.txt", gson.toJson(filesToGet));
-        }
-    }
+
 
     public static File getExtSDcard(String path) {
         String removableStoragePath;
@@ -1381,9 +1314,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         String msg = "Database updated.";
-                        toastLong(msg);
-                        notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, 5000);
-
+                        helperToast.toastLong(msg);
+                        helperNotification.notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, 5000);
                     }
                 });
             }
@@ -1473,15 +1405,17 @@ public class MainActivity extends AppCompatActivity {
                                         //=> Files from JaMuz Sync
                                         String fileKey = absolutePath.substring(
                                                 getAppDataPath().getAbsolutePath().length()+1);
-                                        if(filesToKeep!=null && !filesToKeep.containsKey(fileKey)) {
+
+                                        //FIXME: Re-enable filesToKeep check in scan !!!
+                                        /*if(filesToKeep!=null && !filesToKeep.containsKey(fileKey)) {
                                             Log.i(TAG, "Deleting file "+absolutePath);
                                             file.delete();
                                         } else if(filesToKeep!=null && filesToKeep.containsKey(fileKey)) {
                                             FileInfoReception fileInfoReception=filesToKeep.get(fileKey);
-                                            insertOrUpdateTrackInDatabase(absolutePath, fileInfoReception);
-                                        } else {
-                                            insertOrUpdateTrackInDatabase(absolutePath, null);
-                                        }
+                                            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, fileInfoReception);
+                                        } else {*/
+                                            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
+                                        //}
                                     }
                                     else {
                                         //Scanning extra local folder
@@ -1491,7 +1425,7 @@ public class MainActivity extends AppCompatActivity {
                                         /*audioFiles.add("ogg");*/
                                         String ext = absolutePath.substring(absolutePath.lastIndexOf(".")+1);
                                         if(audioExtenstions.contains(ext)) {
-                                            insertOrUpdateTrackInDatabase(absolutePath, null);
+                                            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
                                         }
                                     }
                                     notifyScan("JaMuz is scanning files ... ", 13);
@@ -1528,75 +1462,6 @@ public class MainActivity extends AppCompatActivity {
         scanLibray.start();
     }
 
-    //Ends a notification
-    private void notifyBar(NotificationCompat.Builder builder, int id, String msg, long millisInFuture) {
-        notifyBar(builder, id, msg);
-        disableNotificationIn(millisInFuture, id);
-    }
-
-    private void notifyBar(NotificationCompat.Builder builder, int id, String msg) {
-        notifyBar(builder, id, msg, 0, 0, false, true, false);
-    }
-
-    private void notifyBar(NotificationCompat.Builder builder, int id, String msg,
-                           int max, int progress, boolean indeterminate,boolean setWhen,
-                           boolean usesChronometer) {
-        builder.setContentText(msg);
-        if(setWhen) {
-            builder.setWhen(System.currentTimeMillis());
-        }
-        builder.setUsesChronometer(usesChronometer);
-        builder.setProgress(max, progress, indeterminate);
-        builder.setContentIntent(getApplicationIntent());
-        mNotifyManager.notify(id, builder.build());
-    }
-
-    //This is to have application opened when clicking on notification
-    private PendingIntent getApplicationIntent() {
-        Intent notificationIntent = new Intent(getApplicationContext(),
-                MainActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent intent = PendingIntent.getActivity(getApplicationContext(), 0,
-                notificationIntent, 0);
-        return intent;
-    }
-
-    private boolean insertOrUpdateTrackInDatabase(String absolutePath,
-                                                  FileInfoReception fileInfoReception) {
-        boolean result=true;
-        if(musicLibrary!=null) {
-            int id = musicLibrary.getTrack(absolutePath);
-            if(id>=0) {
-                Log.d(TAG, "browseFS updateTrack " + absolutePath);
-                //TODDO: Update if file is modified only:
-                //based on lastModificationDate and/or size (not on content as longer than updateTrack)
-                //musicLibrary.updateTrack(id, track, false);
-                //Warning with genre now that it is part of merge
-            } else {
-                Track track = getTrack(absolutePath);
-                if(track!=null) {
-                    Log.d(TAG, "browseFS insertTrack " + absolutePath);
-                    if(fileInfoReception!=null) {
-                        track.setRating(fileInfoReception.rating);
-                        track.setAddedDate(fileInfoReception.addedDate);
-                        track.setLastPlayed(fileInfoReception.lastPlayed);
-                        track.setPlayCounter(fileInfoReception.playCounter);
-                        track.setTags(fileInfoReception.tags);
-                        track.setGenre(fileInfoReception.genre); //TODO Do not if genre read from file is better
-                    }
-                    musicLibrary.insertTrack(track);
-                } else {
-                    //FIXME: Delete track ONLY if it is a song track that appears to be corrupted
-                    Log.w(TAG, "browseFS delete file because cannot read tags of " + absolutePath);
-                    new File(absolutePath).delete();
-                    result=false;
-                }
-            }
-        }
-        return result;
-    }
-
     private void connectDatabase() {
         musicLibrary = new MusicLibrary(this);
         musicLibrary.open();
@@ -1605,31 +1470,6 @@ public class MainActivity extends AppCompatActivity {
         setupGenres();
         scanLibrayInThread();
         setupLocalPlaylists();
-    }
-
-    private Track getTrack(final String absolutePath) {
-        Track track=null;
-        try {
-            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-            mmr.setDataSource(absolutePath);
-
-            String album =
-                    mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-            String artist =
-                    mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-            String title =
-                    mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-            String genre =
-                    mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
-
-            int rating = 0;
-            String coverHash="";
-            track = new Track(-1, rating, title, album, artist, coverHash, absolutePath, genre ,
-                    new Date(), new Date(0), 0);
-        } catch (final RuntimeException ex) {
-            Log.e(TAG, "Error reading file tags "+absolutePath, ex);
-        }
-        return track;
     }
 
     private void playHistory() {
@@ -1658,7 +1498,7 @@ public class MainActivity extends AppCompatActivity {
             queueHistoryIndex--;
             playHistory();
         } else {
-            toastLong("No tracks beyond.");
+            helperToast.toastLong("No tracks beyond.");
         }
     }
 
@@ -1690,7 +1530,7 @@ public class MainActivity extends AppCompatActivity {
                     localSelectedPlaylist.getNbFiles();
                     playListArrayAdapter.notifyDataSetChanged();
                 }
-                toastLong("Empty Playlist.");
+                helperToast.toastLong("Empty Playlist.");
             }
         }
     }
@@ -1739,7 +1579,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public static Handler mHandler = new Handler(Looper.getMainLooper()) {
+    public Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message message) {
             String msg = (String) message.obj;
@@ -1759,6 +1599,24 @@ public class MainActivity extends AppCompatActivity {
                 case "playPrevious":
                     audioPlayer.playPrevious();
                     break;
+                case "enableSync":
+                    enableSync(true);
+                    break;
+                case "refreshSpinner(true)":
+                    refreshSpinner(true);
+                    break;
+                case "connectedSync":
+                    setConfig("connectionString", editTextConnectInfo.getText().toString());
+                    break;
+                case "checkPermissionsThenScanLibrary":
+                    checkPermissionsThenScanLibrary();
+                    break;
+                case "setupSpinnerGenre":
+                    setupSpinnerGenre(RepositoryGenres.get(), displayedTrack.getGenre());
+                    break;
+                case "setupTags":
+                    setupTags();
+                    break;
             }
         }
     };
@@ -1772,7 +1630,7 @@ public class MainActivity extends AppCompatActivity {
         displayedTrack.source=source.equals("")?localSelectedPlaylist.toString():source;
         String msg = audioPlayer.play(displayedTrack);
         if(!msg.equals("")) {
-            toastLong(msg);
+            helperToast.toastLong(msg);
         }
     }
 
@@ -1857,7 +1715,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (enable) {
-                    buttonSync.setBackgroundResource(R.drawable.connect_off_new);
+                    enableClient(buttonSync, R.drawable.connect_off_new);
                 } else {
                     buttonSync.setText("Close");
                     buttonSync.setBackgroundResource(R.drawable.connect_on);
@@ -1950,9 +1808,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupTags() {
-        if(musicLibrary!=null && tags.size()<=0) {
-            tags = new HashMap<>();
-            tags = musicLibrary.getTags();
+        if(RepositoryTags.getTags().size()<=0) {
+            final Map<Integer, String> tags = RepositoryTags.read();
             makeButtonTagPlaylist(Integer.MAX_VALUE, "null");
             runOnUiThread(new Runnable() {
                 @Override
@@ -1975,13 +1832,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupGenres() {
-        genres = new ArrayList<>();
-        genres = musicLibrary.getGenres();
-        setupSpinnerGenre(genres, displayedTrack.getGenre());
+        RepositoryGenres.read();
+        setupSpinnerGenre(RepositoryGenres.get(), displayedTrack.getGenre());
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                for(String genre : genres) {
+                for(String genre : RepositoryGenres.get()) {
                     makeButtonGenrePlaylist(-1, genre);
                 }
             }
@@ -2060,7 +1916,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 default:
                     //Popup("Error", "Not implemented");
-                    toastLong("Not implemented");
+                    helperToast.toastLong("Not implemented");
                     break;
             }
         }
@@ -2137,8 +1993,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         TriStateButton nullButton = (TriStateButton) layoutTagsPlaylist.findViewWithTag("null");
-        nullButton.setState(playlist.getUnTaggedState());
-        setTagButtonTextColor(nullButton, playlist.getUnTaggedState());
+        if(nullButton!=null) {
+            nullButton.setState(playlist.getUnTaggedState());
+            setTagButtonTextColor(nullButton, playlist.getUnTaggedState());
+        }
         for(Map.Entry<String, TriStateButton.STATE> entry : playlist.getTags()) {
             TriStateButton button = (TriStateButton) layoutTagsPlaylist.findViewWithTag(entry.getKey());
             if(button!=null) {
@@ -2219,21 +2077,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void toastLong(final String msg) {
-        toast(msg, Toast.LENGTH_LONG);
-    }
-
-    private void toastShort(final String msg) {
-        toast(msg, Toast.LENGTH_SHORT);
-    }
-
-    private void toast(final String msg, int duration) {
-        if(!msg.equals("")) {
-            Log.i(TAG, "Toast makeText "+msg);
-            Toast.makeText(MainActivity.this, msg, duration).show();
-        }
-    }
-
     private void notifyScan(final String action, int every) {
         nbFiles++;
         if(((nbFiles-1) % every) == 0) { //To prevent UI from freezing
@@ -2241,7 +2084,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     String msg = nbFiles + "/" + nbFilesTotal + " " + action;
-                    notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, nbFilesTotal, nbFiles, false, false, false);
+                    helperNotification.notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, nbFilesTotal, nbFiles, false, false, false);
                 }
             });
         }
@@ -2294,11 +2137,11 @@ public class MainActivity extends AppCompatActivity {
                     ratingBar.setEnabled(false);
                     ratingBar.setRating(displayedTrack.getRating());
                     ratingBar.setEnabled(true);
-                    setupSpinnerGenre(genres, displayedTrack.getGenre());
+                    setupSpinnerGenre(RepositoryGenres.get(), displayedTrack.getGenre());
 
                     //Display file tags
                     ArrayList<String> fileTags = displayedTrack.getTags(false);
-                    for(Map.Entry<Integer, String> tag : tags.entrySet()) {
+                    for(Map.Entry<Integer, String> tag : RepositoryTags.getTags().entrySet()) {
                         ToggleButton button = (ToggleButton) layoutTags.findViewById(tag.getKey());
                         if(button!=null && button.isChecked()!=fileTags.contains(tag.getValue())) {
                             button.setChecked(fileTags.contains(tag.getValue()));
@@ -2490,7 +2333,7 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    toastShort(msg);
+                    helperToast.toastShort(msg);
                 }
             });
             stopRemote();
@@ -2500,375 +2343,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    class CallBackSync implements ICallBackSync {
-
-        private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackSync.class.getSimpleName();
-
-        @Override
-        public void receivedJson(final String msg) {
-            try {
-                JSONObject jObject = new JSONObject(msg);
-                String type = jObject.getString("type");
-                switch(type) {
-                    case "insertDeviceFileAck":
-                        String status = jObject.getString("status");
-                        int idFile = jObject.getInt("idFile");
-                        boolean requestNextFile = jObject.getBoolean("requestNextFile");
-                        if(status.equals("OK")) {
-                            refreshSpinner(true);
-
-                            //FIXME: Store status to manage what to do at any stage
-                            //1-TOGET
-                            //2-GOT
-                            //3-InsertOK
-
-                            //e-InsertKO
-                            //e-ERROR (reading tags for instance; to be read at last with max retry count)
-                            if(filesToGet.containsKey(idFile)) {
-                                filesToGet.remove(idFile);
-                                cancelWatchTimeOut();
-                            }
-                        }
-                        if(requestNextFile) {
-                            requestNextFile(true);
-                        }
-                        break;
-                    case "SEND_DB":
-                        clientSync.sendDatabase(); //TODO: Move to ClientSync
-                        break;
-                    case "FilesToGet":
-                        filesToGet = new HashMap<>();
-                        filesToKeep = new HashMap<>();
-                        JSONArray files = (JSONArray) jObject.get("files");
-                        for(int i=0; i<files.length(); i++) {
-                            FileInfoReception fileReceived = new FileInfoReception((JSONObject) files.get(i));
-                            filesToKeep.put(fileReceived.relativeFullPath, fileReceived);
-                            File localFile = new File(getAppDataPath(), fileReceived.relativeFullPath);
-                            if(!localFile.exists()) {
-                                filesToGet.put(fileReceived.idFile, fileReceived);
-                            }
-                            else {
-                                clientSync.ackFileReception(fileReceived.idFile, false);
-                            }
-                        }
-                        //FIXME: Manage stopping current previous sync process, if any
-                        requestNextFile(true);
-                        break;
-                    case "tags":
-                        //Adding missing tags
-                        final JSONArray jsonTags = (JSONArray) jObject.get("tags");
-                        for(int i=0; i<jsonTags.length(); i++) {
-                            final String tag = (String) jsonTags.get(i);
-                            if(!tags.values().contains(tag)) {
-                                if(musicLibrary!=null) { 
-                                    int idTag = musicLibrary.addTag(tag);
-                                    if(idTag>0) {
-                                        tags.put(idTag, tag);
-                                    }
-                                }
-                            }
-                        }
-                        //Deleting tags that have been removed in server
-                        final List<String> list = new ArrayList<String>();
-                        for(int i = 0; i < jsonTags.length(); i++){
-                            list.add((String) jsonTags.get(i));
-                        }
-                        Iterator<Map.Entry<Integer, String>> it = tags.entrySet().iterator();
-                        while (it.hasNext())
-                        {
-                            Map.Entry<Integer, String> tag = it.next();
-                            if(!list.contains(tag.getValue())) {
-                                if(musicLibrary!=null) { 
-                                    int deleted = musicLibrary.deleteTag(tag.getKey());
-                                    if(deleted>0) {
-                                        it.remove();
-                                    }
-                                }
-                            }
-                        }
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                //FIXME: UI thread load
-                                setupTags();
-                            }
-                        });
-
-                        break;
-                    case "genres":
-                        final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
-                        for(int i=0; i<jsonGenres.length(); i++) {
-                            final String genre = (String) jsonGenres.get(i);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if(!genres.contains(genre)) {
-                                        //FIXME: UI thread load
-
-                                        if(musicLibrary!=null) { 
-                                            if (musicLibrary.addGenre(genre)) {
-                                                genres.add(genre);
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-
-                        }
-                        setupSpinnerGenre(genres, displayedTrack.getGenre());
-                        break;
-                }
-            } catch (JSONException e) {
-                Log.e(TAG, e.toString());
-            }
-        }
-
-        @Override
-        public void receivedFile(final FileInfoReception fileInfoReception) {
-            Log.i(TAG, "Received file\n"+fileInfoReception
-                    +"\nRemaining : "+filesToGet.size()+"/"+filesToKeep.size());
-            File path = getAppDataPath();
-            File receivedFile = new File(path.getAbsolutePath()+File.separator
-                    +fileInfoReception.relativeFullPath);
-            if(filesToGet.containsKey(fileInfoReception.idFile)) {
-                if(receivedFile.exists()) {
-                    if (receivedFile.length() == fileInfoReception.size) {
-                        Log.i(TAG, "Saved file size: " + receivedFile.length());
-                        //FIXME: Either tags (user tags) are not sent, or not received,
-                        //or overwritten later by scan maybe
-                        //Anyhow, user tags are not inserted in db !!
-                        if(insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception)) {
-                            clientSync.ackFileReception(fileInfoReception.idFile, true);
-                            return;
-                        } else {
-                            Log.w(TAG, "File tags could not be read. Deleting " + receivedFile.getAbsolutePath());
-                            receivedFile.delete();
-                            //FIXME: Cannot read tags of received file : What to do in this case
-                            //to avoid it to be requested over and over ?
-                            //=> merge filesToGet and filesToKeep
-                            //=> add a status in FileInfoReception (refer to other FIX-ME)
-                            //=> add a retry counter
-                        }
-                    } else {
-                        Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
-                        receivedFile.delete();
-                    }
-                } else {
-                    Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
-                }
-            } else {
-                Log.w(TAG, "File not requested. Deleting "+receivedFile.getAbsolutePath());
-                receivedFile.delete();
-            }
-        }
-
-        @Override
-        public void receivingFile(final FileInfoReception fileInfoReception) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    String msg = "- "+filesToGet.size() + "/" + filesToKeep.size()
-                            + " | "+StringManager.humanReadableByteCount(
-                                        fileInfoReception.size, false)
-                            +" | "+fileInfoReception.relativeFullPath;
-                    int max=filesToKeep.size();
-                    int progress=max-filesToGet.size();
-                    notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, max, progress, false, true, true);
-                }
-            });
-        }
-
-        @Override
-        public void receivedDatabase() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    String msg = "Statistics merged.";
-                    toastLong(msg);
-                    notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, 5000);
-                }
-            });
-
-            // TODO MERGE: Update FilesToKeep and FilesToGet
-            // as received merged db is the new reference
-            // (not urgent since values should only be
-            // used again if file has been removed from db
-            // somehow, as if db crashes and remade)
-        }
-
-        @Override
-        public void connected() {
-            setConfig("connectionString", editTextConnectInfo.getText().toString());
-            notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, "Connected ... ");
-            requestNextFile(false);
-        }
-
-        @Override
-        public void disconnected(final String msg, boolean disable) {
-            if(disable) {
-                notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, 5000);
-                enableSync(true);
-            } else {
-                notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg);
-            }
-        }
-    }
-
-    private CountDownTimer timerWatchTimeout= new CountDownTimer(0, 0) {
-        @Override
-        public void onTick(long l) {
-
-        }
-
-        @Override
-        public void onFinish() {
-
-        }
-    };
-
-    private void cancelWatchTimeOut() {
-        Log.i(TAG, "timerWatchTimeout.cancel()");
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                synchronized(timerWatchTimeout) {
-                    if(timerWatchTimeout!=null) {
-                        timerWatchTimeout.cancel(); //Cancel previous if any
-                    }
-                }
-            }
-        });
-    }
-
-    private void watchTimeOut(final long size) {
-        cancelWatchTimeOut();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                synchronized(timerWatchTimeout) {
-
-                    long minTimeout =  15 * 1000;  //Min timeout 15s (+ 15s by Mo)
-                    long maxTimeout =  120 * 1000; //Max timeout 2 min
-
-                    long timeout = size<1000000?minTimeout:((size / 1000000) * minTimeout);
-                    timeout = timeout>maxTimeout?maxTimeout:timeout;
-                    timerWatchTimeout = new CountDownTimer(timeout, timeout/10) {
-                        @Override
-                        public void onTick(long millisUntilFinished) {
-                            Log.i(TAG, "Seconds Remaining: "+ (millisUntilFinished/1000));
-                        }
-
-                        @Override
-                        public void onFinish() {
-                            stopSync(true);
-                        }
-                    };
-                    Log.i(TAG, "timerWatchTimeout.start()");
-                    timerWatchTimeout.start();
-                }
-            }
-        });
-    }
-
-    private void disableNotificationIn(final long millisInFuture, final int id) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                CountDownTimer timer = new CountDownTimer(millisInFuture, millisInFuture/10) {
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-                        Log.d(TAG, (millisUntilFinished/1000)+"s remaining before " +
-                                "disabling notification");
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        mNotifyManager.cancel(id);
-                    }
-                };
-                timer.start();
-            }
-        });
-    }
-
-    //TODO: Move to a ProcessSync class (to be made)
-    private Map<Integer, FileInfoReception> filesToGet = null;
-    private Map<String, FileInfoReception> filesToKeep = null;
-
-    private void requestNextFile(final boolean scanLibrary) {
-        if (filesToKeep != null) {
-            saveFilesLists();
-            if (filesToGet.size() > 0) {
-                final FileInfoReception fileToGetInfo = filesToGet.entrySet().iterator().next().getValue();
-                File fileToGet = new File(getAppDataPath(), fileToGetInfo.relativeFullPath);
-                if (fileToGet.exists() && fileToGet.length() == fileToGetInfo.size) {
-                    Log.i(TAG, "File already exists. Remove from filesToGet list: " + fileToGetInfo);
-                    clientSync.ackFileReception(fileToGetInfo.idFile, true);
-                } else {
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            if (!scanLibrary) {
-                                try {
-                                    //Waits a little after connection
-                                    Log.i(TAG, "Waiting 2s");
-                                    notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, "Waiting 2s before request ... ");
-                                    Thread.sleep(2000);
-                                } catch (InterruptedException e) {
-                                }
-                            }
-                            watchTimeOut(fileToGetInfo.size);
-                            synchronized (timerWatchTimeout) {
-                                clientSync.requestFile(fileToGetInfo.idFile);
-                            }
-                        }
-                    }.start();
-                }
-            } else {
-                final String msg = "No more files to download.";
-                Log.i(TAG, msg + " Updating library:" + scanLibrary);
-                notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        toastLong(msg+"\n\nAll " + filesToKeep.size() + " files" +
-                                " have been retrieved successfully.");
-                    }
-                });
-                //Not disconnecting to be able to receive a new list
-                //sent by the server. User can still close
-                //enableClient(true);
-                //enableClient(clientSync,buttonSync, R.drawable.connect_off, true);
-
-
-
-                //FIXME: Only send if not already (need to store ackFileReception status)
-                //=> !! Check first if still necessary since we (should)
-                //          request ack from server now
-
-                //Resend add request in case missed for some reason
-                /*if(filesToKeep!=null) {
-                    for(FileInfoReception file : filesToKeep.values()) {
-                        if(!filesToGet.containsKey(file.idFile)) {
-                            ackFileReception(file.idFile, false);
-                        }
-                    }
-                }*/
-
-                if (scanLibrary) {
-                    checkPermissionsThenScanLibrary();
-                }
-            }
-        } else {
-            Log.i(TAG, "filesToKeep is null");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
-                            "export a list of files to retrieve, based on playlists.");
-                }
-            });
-        }
+    //This is to have application opened when clicking on notification
+    private PendingIntent getApplicationIntent() {
+        Intent notificationIntent = new Intent(getApplicationContext(),
+                MainActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent intent = PendingIntent.getActivity(getApplicationContext(), 0,
+                notificationIntent, 0);
+        return intent;
     }
 
     private void stopRemote() {
@@ -2880,8 +2363,6 @@ public class MainActivity extends AppCompatActivity {
         displayedTrack = localTrack;
         displayTrack(false);
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
