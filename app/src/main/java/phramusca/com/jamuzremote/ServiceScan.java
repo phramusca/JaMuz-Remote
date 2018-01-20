@@ -126,7 +126,7 @@ public class ServiceScan extends ServiceBase {
                         File file = new File(track.getPath());
                         if(!file.exists()) {
                             Log.d(TAG, "Remove track from db: "+track);
-                            HelperLibrary.musicLibrary.deleteTrack(track.getPath());
+                            track.delete();
                         }
                         notifyScan("JaMuz is scanning deleted files ... ", 200);
                     }
