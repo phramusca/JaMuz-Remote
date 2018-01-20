@@ -1274,7 +1274,7 @@ public class MainActivity extends AppCompatActivity {
             displayedTrack.setLastPlayed(new Date());
             displayedTrack.update();
             //Fill the queue
-            if(queue.size()<5) {
+            if(queue.size()<5 && localSelectedPlaylist!=null) {
                 List<Track> addToQueue = localSelectedPlaylist.getTracks();
                 queue.addAll(addToQueue);
             }
@@ -1587,10 +1587,10 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 if(RepositoryTags.getTags().size()<=0) {
                     final Map<Integer, String> tags = RepositoryTags.read();
-                    makeButtonTagPlaylist(Integer.MAX_VALUE, "null");
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            makeButtonTagPlaylist(Integer.MAX_VALUE, "null");
                             for(Map.Entry<Integer, String> tag : tags.entrySet()) {
                                 makeButtonTag(tag.getKey(), tag.getValue());
                                 makeButtonTagPlaylist(tag.getKey(), tag.getValue());
@@ -1612,10 +1612,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupGenres() {
         RepositoryGenres.read();
-        setupSpinnerGenre(RepositoryGenres.get(), displayedTrack.getGenre());
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                setupSpinnerGenre(RepositoryGenres.get(), displayedTrack.getGenre());
                 for(String genre : RepositoryGenres.get()) {
                     makeButtonGenrePlaylist(-1, genre);
                 }
