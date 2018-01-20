@@ -159,6 +159,9 @@ public class ServiceSync extends ServiceBase {
                             requestNextFile(true);
                         }
                         break;
+                    case "StartSync":
+                        requestNextFile(false);
+                        break;
                     case "SEND_DB":
                         clientSync.sendDatabase(); //TODO: Move to ClientSync
                         break;
@@ -177,7 +180,6 @@ public class ServiceSync extends ServiceBase {
                                 clientSync.ackFileReception(fileReceived.idFile, false);
                             }
                         }
-                        //FIXME: Manage stopping current previous sync process, if any
                         requestNextFile(true);
                         break;
                     case "tags":
@@ -257,7 +259,7 @@ public class ServiceSync extends ServiceBase {
                             receivedFile.delete();
                             //NOTES:
                             // - File is already deleted
-                            // -Can happen also if databse is null (not only if tags are not read)
+                            // - Can happen also if database is null (not only if tags are not read)
 
                             //FIXME: Cannot read tags of received file : What to do in this case
                             //to avoid it to be requested over and over ?
@@ -306,7 +308,8 @@ public class ServiceSync extends ServiceBase {
         public void connected() {
             sendMessage("connectedSync");
             helperNotification.notifyBar(notificationSync, "Connected ... ");
-            requestNextFile(false);
+            //Server will send tags, genres and list of new files to get
+            //Then, we will request next file
         }
 
         @Override
