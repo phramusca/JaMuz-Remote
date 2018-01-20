@@ -1209,10 +1209,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void connectDatabase() {
         HelperLibrary.open(this);
-
         setupTags();
-        setupGenres();
-        setupLocalPlaylists();
+        new Thread() {
+            public void run() {
+                setupGenres();
+                setupLocalPlaylists();
+            }
+        }.start();
 
         //Start Scan Service
         if(!isMyServiceRunning(ServiceScan.class)) {
@@ -1583,27 +1586,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupTags() {
-        if(RepositoryTags.getTags().size()<=0) {
-            final Map<Integer, String> tags = RepositoryTags.read();
-            makeButtonTagPlaylist(Integer.MAX_VALUE, "null");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    for(Map.Entry<Integer, String> tag : tags.entrySet()) {
-                        makeButtonTag(tag.getKey(), tag.getValue());
-                        makeButtonTagPlaylist(tag.getKey(), tag.getValue());
-                    }
-                }
-            });
+        new Thread() {
+            public void run() {
+                if(RepositoryTags.getTags().size()<=0) {
+                    final Map<Integer, String> tags = RepositoryTags.read();
+                    makeButtonTagPlaylist(Integer.MAX_VALUE, "null");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            for(Map.Entry<Integer, String> tag : tags.entrySet()) {
+                                makeButtonTag(tag.getKey(), tag.getValue());
+                                makeButtonTagPlaylist(tag.getKey(), tag.getValue());
+                            }
+                        }
+                    });
 
-            //TODO: recalculate display at startup
-            //and prevent a display glitch
-            //This dirty trick does not work well
+                    //TODO: recalculate display at startup
+                    //and prevent a display glitch
+                    //This dirty trick does not work well
             /*toggle(layoutTagsPlaylistLayout, false);
             toggle(layoutPlaylist, false);
             toggle(layoutTagsPlaylistLayout, true);
             toggle(layoutPlaylist, true);*/
-        }
+                }
+            }
+        }.start();
     }
 
     private void setupGenres() {
