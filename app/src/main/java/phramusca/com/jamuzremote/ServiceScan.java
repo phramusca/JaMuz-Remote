@@ -5,7 +5,6 @@ package phramusca.com.jamuzremote;
  */
 
 import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.io.File;
@@ -15,8 +14,7 @@ import java.util.List;
 public class ServiceScan extends ServiceBase {
 
     private static final String TAG = ServiceScan.class.getSimpleName();
-    private static final int ID_NOTIFIER_SCAN = 2;
-    private NotificationCompat.Builder mBuilderScan;
+    private Notification notificationScan;
     private int nbFiles=0;
     private int nbFilesTotal = 0;
     private ProcessAbstract scanLibray;
@@ -26,11 +24,7 @@ public class ServiceScan extends ServiceBase {
 
     @Override
     public void onCreate(){
-        mBuilderScan = new NotificationCompat.Builder(this);
-        mBuilderScan.setContentTitle("Scan")
-                .setContentText("Scan in progress")
-                .setUsesChronometer(true)
-                .setSmallIcon(R.drawable.ic_process);
+        notificationScan = new Notification(this, 2, "Scan");
         super.onCreate();
     }
 
@@ -63,12 +57,12 @@ public class ServiceScan extends ServiceBase {
                 }
 
                 //Scan complete, warn user
+                final String msg = "Database updated.";
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        String msg = "Database updated.";
                         helperToast.toastLong(msg);
-                        helperNotification.notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, 5000);
+                        helperNotification.notifyBar(notificationScan, msg, 5000);
                     }
                 });
             }
@@ -218,13 +212,8 @@ public class ServiceScan extends ServiceBase {
     private void notifyScan(final String action, int every) {
         nbFiles++;
         if(((nbFiles-1) % every) == 0) { //To prevent UI from freezing
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    String msg = nbFiles + "/" + nbFilesTotal + " " + action;
-                    helperNotification.notifyBar(mBuilderScan, ID_NOTIFIER_SCAN, msg, nbFilesTotal, nbFiles, false, false, false);
-                }
-            });
+            String msg = nbFiles + "/" + nbFilesTotal + " " + action;
+            helperNotification.notifyBar(notificationScan, msg, nbFilesTotal, nbFiles, false, false, false);
         }
     }
 

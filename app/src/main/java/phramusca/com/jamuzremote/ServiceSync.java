@@ -6,7 +6,6 @@ package phramusca.com.jamuzremote;
 
 import android.content.Intent;
 import android.os.CountDownTimer;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -29,16 +28,11 @@ public class ServiceSync extends ServiceBase {
 
     private static final String TAG = ServiceSync.class.getSimpleName();
     private ClientSync clientSync;
-    private NotificationCompat.Builder mBuilderSync;
-    private static final int ID_NOTIFIER_SYNC = 1;
+    private Notification notificationSync;
 
     @Override
     public void onCreate(){
-        mBuilderSync = new NotificationCompat.Builder(this);
-        mBuilderSync.setContentTitle("Sync")
-                .setContentText("Download in progress")
-                .setUsesChronometer(true)
-                .setSmallIcon(R.drawable.ic_process);
+        notificationSync = new Notification(this, 1, "Sync");
         super.onCreate();
     }
 
@@ -46,8 +40,10 @@ public class ServiceSync extends ServiceBase {
     public int onStartCommand(Intent intent, int flags, int startId){
         super.onStartCommand(intent, flags, startId);
         ClientInfo clientInfo = (ClientInfo)intent.getSerializableExtra("clientInfo");
+        helperNotification.notifyBar(notificationSync, "Reading lists ... ");
         readFilesLists();
         clientSync =  new ClientSync(clientInfo, new CallBackSync());
+        helperNotification.notifyBar(notificationSync, "Connecting ... ");
         new Thread() {
             public void run() { clientSync.connect(); }
         }.start();
@@ -270,14 +266,14 @@ public class ServiceSync extends ServiceBase {
                     +" | "+fileInfoReception.relativeFullPath;
             int max=filesToKeep.size();
             int progress=max-filesToGet.size();
-            helperNotification.notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, max, progress, false, true, true);
+            helperNotification.notifyBar(notificationSync, msg, max, progress, false, true, true);
         }
 
         @Override
         public void receivedDatabase() {
             String msg = "Statistics merged.";
             helperToast.toastLong(msg);
-            helperNotification.notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, 5000);
+            helperNotification.notifyBar(notificationSync, msg, 5000);
 
             // TODO MERGE: Update FilesToKeep and FilesToGet
             // as received merged db is the new reference
@@ -289,17 +285,17 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void connected() {
             sendMessage("connectedSync");
-            helperNotification.notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, "Connected ... ");
+            helperNotification.notifyBar(notificationSync, "Connected ... ");
             requestNextFile(false);
         }
 
         @Override
         public void disconnected(final String msg, boolean disable) {
             if(disable) {
-                helperNotification.notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg, 5000);
+                helperNotification.notifyBar(notificationSync, msg, 5000);
                 sendMessage("enableSync");
             } else {
-                helperNotification.notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg);
+                helperNotification.notifyBar(notificationSync, msg);
             }
         }
     }
@@ -324,7 +320,7 @@ public class ServiceSync extends ServiceBase {
                                 try {
                                     //Waits a little after connection
                                     Log.i(TAG, "Waiting 2s");
-                                    helperNotification.notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, "Waiting 2s before request ... ");
+                                    helperNotification.notifyBar(notificationSync, "Waiting 2s before request ... ");
                                     Thread.sleep(2000);
                                 } catch (InterruptedException e) {
                                 }
@@ -344,7 +340,7 @@ public class ServiceSync extends ServiceBase {
             } else {
                 final String msg = "No more files to download.";
                 Log.i(TAG, msg + " Updating library:" + scanLibrary);
-                helperNotification.notifyBar(mBuilderSync, ID_NOTIFIER_SYNC, msg);
+                helperNotification.notifyBar(notificationSync, msg);
                 helperToast.toastLong(msg+"\n\nAll " + filesToKeep.size() + " files" +
                         " have been retrieved successfully.");
                 //Not disconnecting to be able to receive a new list

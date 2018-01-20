@@ -36,6 +36,7 @@ import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
@@ -1075,6 +1076,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "MainActivity onPause");
         wasRemoteConnected=isRemoteConnected();
         stopRemote();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
     @Override
@@ -1101,6 +1103,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.i(TAG, "MainActivity onResume");
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                        new IntentFilter("ServiceBase"));
 
         if(toggleButtonDimMode.isChecked()) {
             dimOn();
@@ -1329,10 +1334,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private Handler mHandler = new Handler(Looper.getMainLooper()) {
+    public static Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message message) {
             String msg = (String) message.obj;
+            Log.i(TAG, "handleMessage("+msg+")");
             switch (msg) {
                 case "play":
                     audioPlayer.play();
@@ -1349,6 +1355,16 @@ public class MainActivity extends AppCompatActivity {
                 case "playPrevious":
                     audioPlayer.playPrevious();
                     break;
+            }
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String msg = intent.getStringExtra("message");
+            Log.i(TAG, "Broadcast.onReceive("+msg+")");
+            switch (msg) {
                 case "enableSync":
                     enableSync(true);
                     break;
