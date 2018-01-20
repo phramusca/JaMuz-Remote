@@ -55,8 +55,7 @@ public final class HelperLibrary {
                         track.setTags(fileInfoReception.tags);
                         track.setGenre(fileInfoReception.genre); //TODO Do not if genre read from file is better
                     }
-                    musicLibrary.insertTrack(track);
-                    result=true;
+                    result=musicLibrary.insertTrack(track);
                 } else {
                     //TODO: Delete track ONLY if it is a song track that appears to be corrupted
                     Log.w(TAG, "insertOrUpdateTrackInDatabase: delete file because cannot read tags of " + absolutePath);

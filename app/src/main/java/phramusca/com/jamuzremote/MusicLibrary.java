@@ -138,16 +138,22 @@ public class MusicLibrary {
         return -1;
     }
 
-    public synchronized void insertTrack(Track track){
+    public synchronized boolean insertTrack(Track track){
         try {
-            db.insert(TABLE_TRACKS, null, TrackToValues(track));
-            for(String tag : track.getTags(false)) {
-                addTag(track.getId(), tag);
+            int id = (int) db.insert(TABLE_TRACKS, null, TrackToValues(track));
+            if(id>0) {
+                track.setId(id);
+                for(String tag : track.getTags(false)) {
+                    if(!addTag(id, tag)) {
+                        return false;
+                    }
+                }
+                return true;
             }
-
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "insertTrack("+track+")", ex);
         }
+        return false;
     }
 
     public synchronized boolean updateTrack(Track track){
@@ -317,8 +323,7 @@ public class MusicLibrary {
                 ContentValues values = new ContentValues();
                 values.put("idFile", idFile);
                 values.put("idTag", idTag);
-                db.insertWithOnConflict("tagfile", BaseColumns._ID, values,
-                        SQLiteDatabase.CONFLICT_IGNORE);
+                db.insertWithOnConflict("tagfile", BaseColumns._ID, values, SQLiteDatabase.CONFLICT_IGNORE);
                 return true;
             }
         } catch (SQLiteException | IllegalStateException ex) {
