@@ -11,13 +11,13 @@ import java.util.Date;
  * Created by raph on 01/05/17.
  */
 public class Track {
-    private int id;
+    private int id=-1;
     private int rating=0;
     private String title="";
     private String album="";
     private String artist="";
     private String coverHash="";
-    private String path;
+    private String path="";
     private String genre="";
     public Date addedDate = new Date(0);
     public Date lastPlayed = new Date(0);
@@ -25,6 +25,7 @@ public class Track {
     private ArrayList<String> tags = null;
     private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
     public String source="";
+    private static final String TAG = Track.class.getSimpleName();
 
 
     //TODO: Store replaygain, no to read too often
@@ -43,6 +44,19 @@ public class Track {
         this.addedDate = addedDate;
         this.lastPlayed = lastPlayed;
         this.playCounter = playCounter;
+    }
+
+    public Track(String absolutePath) {
+        try {
+            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(absolutePath);
+            album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+            artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+            title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+            genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
+        } catch (final RuntimeException ex) {
+            Log.e(TAG, "Error reading file tags "+absolutePath, ex);
+        }
     }
 
     @Override
@@ -81,34 +95,32 @@ public class Track {
     }
 
     /**
-     * Returns last played date in "yyyy-MM-dd HH:mm:ss" format
-     * @return
+     * Get Last Played Date (utc)
+     * @return date in "yyyy-MM-dd HH:mm:ss" format
      */
     public String getFormattedLastPlayed() {
         return HelperDateTime.formatUTCtoSqlUTC(this.lastPlayed);
     }
 
     /**
-     * Returns last played date in "yyyy-MM-dd HH:mm:ss" format,
-     * translated to local time.
-     * @return
+     *  Get Last Played Date (local)
+     * @return date in "yyyy-MM-dd HH:mm:ss" format,
      */
     public String getLastPlayedLocalTime() {
         return HelperDateTime.formatUTCtoSqlLocal(this.lastPlayed);
     }
 
     /**
-     * Returns added date in "yyyy-MM-dd HH:mm:ss" format
-     * @return
+     * Get Added Date (utc)
+     * @return date in "yyyy-MM-dd HH:mm:ss" format
      */
     public String getFormattedAddedDate() {
         return HelperDateTime.formatUTCtoSqlUTC(this.addedDate);
     }
 
     /**
-     * Returns added date date in "yyyy-MM-dd HH:mm:ss" format,
-     * translated to local time.
-     * @return
+     * Get Added Date (local)
+     * @return date in "yyyy-MM-dd HH:mm:ss" format,
      */
     public String getAddedDateLocalTime() {
         return HelperDateTime.formatUTCtoSqlLocal(this.addedDate);
@@ -160,7 +172,7 @@ public class Track {
 
     /**
      *
-     * @return
+     * @return boolean
      */
     public ArrayList<String> getTags(boolean force) {
         if(MainActivity.musicLibrary!=null && (force || tags==null)) {
@@ -174,18 +186,26 @@ public class Track {
     }
 
     /**
-     *
-     * @param value
+     * @param value Tag value
      */
     public void toggleTag(String value) {
-        if(getTags(false).contains(value)) {
-            tags.remove(value);
-            MainActivity.musicLibrary.removeTag(id, value);
+        if(MainActivity.musicLibrary!=null) {
+            if (getTags(false).contains(value)) {
+                tags.remove(value);
+                MainActivity.musicLibrary.removeTag(id, value);
+            } else {
+                tags.add(value);
+                MainActivity.musicLibrary.addTag(id, value);
+            }
         }
-        else {
-            tags.add(value);
-            MainActivity.musicLibrary.addTag(id, value);
+    }
+
+    public boolean updateGenre(String genre) {
+        if(MainActivity.musicLibrary!=null) {
+            setGenre(genre);
+            MainActivity.musicLibrary.updateGenre(this);
         }
+        return false;
     }
 
     public void setGenre(String genre) {

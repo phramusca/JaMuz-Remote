@@ -54,7 +54,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".MyService" android:exported="false"/>
+        <service android:name=".ServiceSync" android:exported="false"/>
 
     </application>
 

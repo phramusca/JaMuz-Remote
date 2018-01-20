@@ -70,6 +70,8 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        //TODO: How to warn user he needs to sync before upgrading version ?
+        // in case database change and this is called.
         db.execSQL("DROP TABLE " + TABLE_TRACKS + ";");
         db.execSQL("DROP TABLE tags");
         db.execSQL("DROP TABLE tagfile");
