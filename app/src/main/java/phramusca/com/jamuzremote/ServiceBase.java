@@ -12,12 +12,14 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import java.io.File;
 
 public class ServiceBase extends Service {
 
+    private static final String TAG = ServiceBase.class.getSimpleName();
     protected File getAppDataPath;
     private Handler mHandler = new Handler(Looper.getMainLooper());
     protected HelperNotification helperNotification;
@@ -46,10 +48,18 @@ public class ServiceBase extends Service {
         super.onDestroy();
     }
 
-    protected void sendMessage(String msg) {
+    /*protected void sendMessage(String msg) {
+        Log.i(TAG, "sendMessage("+msg+")");
         Message completeMessage =
                 mHandler.obtainMessage(1, msg);
         completeMessage.sendToTarget();
+    }*/
+
+    protected void sendMessage(String msg) {
+        Log.i(TAG, "Broadcast.sendMessage("+msg+")");
+        Intent intent = new Intent("ServiceBase");
+        intent.putExtra("message", msg);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     protected void runOnUiThread(Runnable runnable) {

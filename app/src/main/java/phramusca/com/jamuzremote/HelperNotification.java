@@ -3,7 +3,6 @@ package phramusca.com.jamuzremote;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.os.CountDownTimer;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 /**
@@ -23,26 +22,26 @@ public class HelperNotification {
     }
 
     //Ends a notification
-    public void notifyBar(NotificationCompat.Builder builder, int id, String msg, long millisInFuture) {
-        notifyBar(builder, id, msg);
-        disableNotificationIn(millisInFuture, id);
+    public void notifyBar(Notification notification, String msg, long millisInFuture) {
+        notifyBar(notification, msg);
+        disableNotificationIn(millisInFuture, notification.id);
     }
 
-    public void notifyBar(NotificationCompat.Builder builder, int id, String msg) {
-        notifyBar(builder, id, msg, 0, 0, false, true, false);
+    public void notifyBar(Notification notification, String msg) {
+        notifyBar(notification, msg, 0, 0, false, true, false);
     }
 
-    public void notifyBar(NotificationCompat.Builder builder, int id, String msg,
+    public void notifyBar(Notification notification, String msg,
                           int max, int progress, boolean indeterminate, boolean setWhen,
                           boolean usesChronometer) {
-        builder.setContentText(msg);
+        notification.builder.setContentText(msg);
         if(setWhen) {
-            builder.setWhen(System.currentTimeMillis());
+            notification.builder.setWhen(System.currentTimeMillis());
         }
-        builder.setUsesChronometer(usesChronometer);
-        builder.setProgress(max, progress, indeterminate);
-        builder.setContentIntent(pendingIntent);
-        notificationManager.notify(id, builder.build());
+        notification.builder.setUsesChronometer(usesChronometer);
+        notification.builder.setProgress(max, progress, indeterminate);
+        notification.builder.setContentIntent(pendingIntent);
+        notificationManager.notify(notification.id, notification.builder.build());
     }
 
     private void disableNotificationIn(final long millisInFuture, final int id) {

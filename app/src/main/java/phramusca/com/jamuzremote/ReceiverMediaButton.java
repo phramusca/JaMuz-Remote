@@ -2,8 +2,6 @@ package phramusca.com.jamuzremote;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.support.v4.media.session.MediaButtonReceiver;
@@ -23,7 +21,6 @@ public class ReceiverMediaButton extends MediaButtonReceiver
     private static long sLastClickTime = 0;
     private static Timer timer;
     private static TimerTask timerTask;
-    private Handler mHandler = new Handler(Looper.getMainLooper());
 
     @Override
     public void onReceive(Context context, Intent intent)
@@ -103,7 +100,7 @@ public class ReceiverMediaButton extends MediaButtonReceiver
 
     private void sendMessage(String msg) {
         Message completeMessage =
-                mHandler.obtainMessage(1, msg);
+                MainActivity.mHandler.obtainMessage(1, msg);
         completeMessage.sendToTarget();
     }
 }
