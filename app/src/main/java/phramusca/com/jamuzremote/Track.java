@@ -218,4 +218,10 @@ public class Track {
         }
         return replayGain;
     }
+
+    public void delete() {
+        if(HelperLibrary.musicLibrary!=null) {
+            HelperLibrary.musicLibrary.deleteTrack(path);
+        }
+    }
 }

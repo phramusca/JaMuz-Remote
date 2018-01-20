@@ -28,17 +28,15 @@ public final class RepositoryTags {
     }
 
     public synchronized static void add(final String tag) {
-        if(!RepositoryTags.getTags().values().contains(tag)) {
-            if(HelperLibrary.musicLibrary!=null) {
-                new Thread() {
-                    public void run() {
-                        int idTag = HelperLibrary.musicLibrary.addTag(tag);
-                        if(idTag>0) {
-                            tags.put(idTag, tag);
-                        }
+        if(HelperLibrary.musicLibrary!=null && !RepositoryTags.getTags().values().contains(tag)) {
+            new Thread() {
+                public void run() {
+                    int idTag = HelperLibrary.musicLibrary.addTag(tag);
+                    if(idTag>0) {
+                        tags.put(idTag, tag);
                     }
-                }.start();
-            }
+                }
+            }.start();
         }
     }
 }

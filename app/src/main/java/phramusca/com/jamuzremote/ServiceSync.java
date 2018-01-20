@@ -296,11 +296,14 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void disconnected(final String msg, boolean disable) {
             if(disable) {
-                helperNotification.notifyBar(notificationSync, msg, 5000);
                 sendMessage("enableSync");
-            } else {
-                helperNotification.notifyBar(notificationSync, msg);
             }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    helperNotification.notifyBar(notificationSync, msg);
+                }
+            });
         }
     }
 

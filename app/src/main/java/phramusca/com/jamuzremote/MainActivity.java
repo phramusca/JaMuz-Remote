@@ -1247,7 +1247,7 @@ public class MainActivity extends AppCompatActivity {
             playAudio("");
         } else {
             Log.d(TAG, "play(): Remove track from db:"+displayedTrack);
-            HelperLibrary.musicLibrary.deleteTrack(displayedTrack.getPath());
+            displayedTrack.delete();
             playNext();
         }
     }
@@ -1275,10 +1275,8 @@ public class MainActivity extends AppCompatActivity {
             displayedTrack.update();
             //Fill the queue
             if(queue.size()<5) {
-                if(HelperLibrary.musicLibrary!=null) {
-                    List<Track> addToQueue = localSelectedPlaylist.getTracks();
-                    queue.addAll(addToQueue);
-                }
+                List<Track> addToQueue = localSelectedPlaylist.getTracks();
+                queue.addAll(addToQueue);
             }
             //Play first track in queue
             if(queue.size()>0) {
@@ -1866,7 +1864,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void displayTrack(boolean forceReadTags) {
         if(displayedTrack!=null) {
-            if(forceReadTags && HelperLibrary.musicLibrary!=null) {
+            if(forceReadTags) {
                 displayedTrack.getTags(true);
             }
             runOnUiThread(new Runnable() {
