@@ -122,7 +122,7 @@ public class ServiceSync extends ServiceBase {
         }
         if(!reconnect) {
             sendMessage("enableSync");
-            //mNotifyManager.cancel(ID_NOTIFIER_SYNC);
+            stopSelf();
         }
     }
 
@@ -370,11 +370,13 @@ public class ServiceSync extends ServiceBase {
                 if (scanLibrary) {
                     sendMessage("checkPermissionsThenScanLibrary");
                 }
+                stopSelf();
             }
         } else {
             Log.i(TAG, "filesToKeep is null");
             helperToast.toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
                     "export a list of files to retrieve, based on playlists.");
+            stopSelf();
         }
     }
 
