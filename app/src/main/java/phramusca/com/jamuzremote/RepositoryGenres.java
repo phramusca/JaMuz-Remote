@@ -16,9 +16,9 @@ public final class RepositoryGenres {
     }
 
     public synchronized static List<String> read() {
-        if(MainActivity.musicLibrary!=null && genres.size()<=0) {
+        if(HelperLibrary.musicLibrary!=null && genres.size()<=0) {
             genres = new ArrayList<>();
-            genres = MainActivity.musicLibrary.getGenres();
+            genres = HelperLibrary.musicLibrary.getGenres();
         }
         return genres;
     }
@@ -28,10 +28,10 @@ public final class RepositoryGenres {
     }
 
     public synchronized static void add(final String genre) {
-        if(MainActivity.musicLibrary!=null && !genres.contains(genre)) {
+        if(HelperLibrary.musicLibrary!=null && !genres.contains(genre)) {
             new Thread() {
                 public void run() {
-                    if (MainActivity.musicLibrary.addGenre(genre)) {
+                    if (HelperLibrary.musicLibrary.addGenre(genre)) {
                         genres.add(genre);
                     }
                 }

@@ -164,8 +164,8 @@ public class Track {
     }
 
     public boolean update() {
-        if(MainActivity.musicLibrary!=null) {
-            return MainActivity.musicLibrary.updateTrack(this);
+        if(HelperLibrary.musicLibrary!=null) {
+            return HelperLibrary.musicLibrary.updateTrack(this);
         }
         return false;
     }
@@ -175,8 +175,8 @@ public class Track {
      * @return boolean
      */
     public ArrayList<String> getTags(boolean force) {
-        if(MainActivity.musicLibrary!=null && (force || tags==null)) {
-            tags = MainActivity.musicLibrary.getTags(id);
+        if(HelperLibrary.musicLibrary!=null && (force || tags==null)) {
+            tags = HelperLibrary.musicLibrary.getTags(id);
         }
         return tags;
     }
@@ -189,21 +189,21 @@ public class Track {
      * @param value Tag value
      */
     public void toggleTag(String value) {
-        if(MainActivity.musicLibrary!=null) {
+        if(HelperLibrary.musicLibrary!=null) {
             if (getTags(false).contains(value)) {
                 tags.remove(value);
-                MainActivity.musicLibrary.removeTag(id, value);
+                HelperLibrary.musicLibrary.removeTag(id, value);
             } else {
                 tags.add(value);
-                MainActivity.musicLibrary.addTag(id, value);
+                HelperLibrary.musicLibrary.addTag(id, value);
             }
         }
     }
 
     public boolean updateGenre(String genre) {
-        if(MainActivity.musicLibrary!=null) {
+        if(HelperLibrary.musicLibrary!=null) {
             setGenre(genre);
-            MainActivity.musicLibrary.updateGenre(this);
+            HelperLibrary.musicLibrary.updateGenre(this);
         }
         return false;
     }

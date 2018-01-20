@@ -25,7 +25,10 @@ public class Playlist implements Comparable {
     }
 
     public ArrayList<Track> getTracks() {
-        return MainActivity.musicLibrary.getTracks(getWhere(), getHaving(), "ORDER BY playCounter, lastPlayed");
+        if(HelperLibrary.musicLibrary!=null) {
+            return HelperLibrary.musicLibrary.getTracks(getWhere(), getHaving(), "ORDER BY playCounter, lastPlayed");
+        }
+        return new ArrayList<>();
     }
 
     public Set<Map.Entry<String, TriStateButton.STATE>> getTags() {
@@ -249,8 +252,8 @@ public class Playlist implements Comparable {
     }
 
     public void getNbFiles() {
-        if(MainActivity.musicLibrary!=null) {
-            nbFiles=MainActivity.musicLibrary.getNb(getWhere(), getHaving());
+        if(HelperLibrary.musicLibrary!=null) {
+            nbFiles=HelperLibrary.musicLibrary.getNb(getWhere(), getHaving());
         }
     }
 

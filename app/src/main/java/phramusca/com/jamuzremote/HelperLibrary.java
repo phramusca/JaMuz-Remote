@@ -1,5 +1,6 @@
 package phramusca.com.jamuzremote;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.File;
@@ -11,15 +12,30 @@ import java.io.File;
 public final class HelperLibrary {
 
     private static final String TAG = HelperLibrary.class.getSimpleName();
+    public static MusicLibrary musicLibrary;
 
     private HelperLibrary () {
+    }
+
+    public static void open(Context context) {
+        if(musicLibrary==null || musicLibrary.db.isOpen()) {
+            musicLibrary = new MusicLibrary(context);
+            musicLibrary.open();
+        }
+    }
+
+    public static void close() {
+        if(musicLibrary!=null) {
+            musicLibrary.close();
+            musicLibrary=null;
+        }
     }
 
     public static boolean insertOrUpdateTrackInDatabase(String absolutePath,
                                                         FileInfoReception fileInfoReception) {
         boolean result=false;
-        if(MainActivity.musicLibrary!=null) {
-            int id = MainActivity.musicLibrary.getTrack(absolutePath);
+        if(musicLibrary!=null) {
+            int id = musicLibrary.getTrack(absolutePath);
             if(id>=0) {
                 Log.d(TAG, "browseFS updateTrack " + absolutePath);
                 //TODDO: Update if file is modified only:
@@ -39,13 +55,12 @@ public final class HelperLibrary {
                         track.setTags(fileInfoReception.tags);
                         track.setGenre(fileInfoReception.genre); //TODO Do not if genre read from file is better
                     }
-                    MainActivity.musicLibrary.insertTrack(track);
+                    musicLibrary.insertTrack(track);
                     result=true;
                 } else {
                     //FIXME: Delete track ONLY if it is a song track that appears to be corrupted
                     Log.w(TAG, "browseFS delete file because cannot read tags of " + absolutePath);
                     new File(absolutePath).delete();
-
                 }
             }
         }
