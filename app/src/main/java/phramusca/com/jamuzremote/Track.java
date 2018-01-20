@@ -224,4 +224,8 @@ public class Track {
             HelperLibrary.musicLibrary.deleteTrack(path);
         }
     }
+
+    public void setId(int id) {
+        this.id=id;
+    }
 }

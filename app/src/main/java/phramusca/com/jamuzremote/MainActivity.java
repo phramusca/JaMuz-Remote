@@ -975,9 +975,6 @@ public class MainActivity extends AppCompatActivity {
                 dimOn();
                 String genre = (String) parent.getItemAtPosition(pos);
                 if(!isRemoteConnected()) {
-                    //FIXME:  UI thread load:
-                    // Move all musicLibrary updates to Track
-                    //And run on a different Thread than UI/main
                     displayedTrack.updateGenre(genre);
                 }
             }
@@ -1364,7 +1361,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    //FIXME: Use BroadcastReceiver (same or new ones)
+    //TODO: Use BroadcastReceiver (same or new ones)
     //to handle messages from other threads or services
     //Especially for audioPlayer (some weird message back&forwarding occuring)
 
@@ -1718,14 +1715,19 @@ public class MainActivity extends AppCompatActivity {
         }
         setupLocalPlaylistAll();
         localSelectedPlaylist = localPlaylists.get(0);
-        displayPlaylist(localSelectedPlaylist);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                displayPlaylist(localSelectedPlaylist);
+            }
+        });
         setupSpinner();
     }
 
     private void setupLocalPlaylistAll() {
         Collections.sort(localPlaylists);
 
-        //FIXME: Some playlists can be deleted, find a better a way of managing "All"
+        //FIXME: "All" Playlist. Some playlists can be deleted, find a better a way of managing "All"
         //(sort and remove are not worth using together)
 
         Playlist playlist = new Playlist("All", true);
