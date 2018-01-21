@@ -39,13 +39,15 @@ public class ServiceSync extends ServiceBase {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         super.onStartCommand(intent, flags, startId);
-        ClientInfo clientInfo = (ClientInfo)intent.getSerializableExtra("clientInfo");
-        helperNotification.notifyBar(notificationSync, "Reading lists ... ");
-        readFilesLists();
-        clientSync =  new ClientSync(clientInfo, new CallBackSync());
-        helperNotification.notifyBar(notificationSync, "Connecting ... ");
+        final ClientInfo clientInfo = (ClientInfo)intent.getSerializableExtra("clientInfo");
         new Thread() {
-            public void run() { clientSync.connect(); }
+            public void run() {
+                helperNotification.notifyBar(notificationSync, "Reading lists ... ");
+                readFilesLists();
+                clientSync =  new ClientSync(clientInfo, new CallBackSync());
+                helperNotification.notifyBar(notificationSync, "Connecting ... ");
+                clientSync.connect();
+            }
         }.start();
         return START_STICKY;
     }
@@ -160,12 +162,15 @@ public class ServiceSync extends ServiceBase {
                         }
                         break;
                     case "StartSync":
+                        helperNotification.notifyBar(notificationSync, "Requested first file ... ");
                         requestNextFile(false);
                         break;
                     case "SEND_DB":
+                        helperNotification.notifyBar(notificationSync, "Sending database ... ");
                         clientSync.sendDatabase(); //TODO: Move to ClientSync
                         break;
                     case "FilesToGet":
+                        helperNotification.notifyBar(notificationSync, "Received new list of files to get ... ");
                         filesToGet = new HashMap<>();
                         filesToKeep = new HashMap<>();
                         JSONArray files = (JSONArray) jObject.get("files");
@@ -183,6 +188,7 @@ public class ServiceSync extends ServiceBase {
                         requestNextFile(true);
                         break;
                     case "tags":
+                        helperNotification.notifyBar(notificationSync, "Received tags ... ");
                         new Thread() {
                             public void run() {
                                 try {
@@ -218,6 +224,7 @@ public class ServiceSync extends ServiceBase {
                         }.start();
                         break;
                     case "genres":
+                        helperNotification.notifyBar(notificationSync, "Received genres ... ");
                         new Thread() {
                             public void run() {
                                 try {
@@ -249,9 +256,6 @@ public class ServiceSync extends ServiceBase {
                 if(receivedFile.exists()) {
                     if (receivedFile.length() == fileInfoReception.size) {
                         Log.i(TAG, "Saved file size: " + receivedFile.length());
-                        //FIXME: Either tags (user tags) are not sent, or not received,
-                        //or overwritten later by scan maybe
-                        //Anyhow, user tags are not inserted in db !!
                         if(HelperLibrary.insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception)) {
                             clientSync.ackFileReception(fileInfoReception.idFile, true);
                         } else {
@@ -342,7 +346,7 @@ public class ServiceSync extends ServiceBase {
                     new Thread() {
                         @Override
                         public void run() {
-                            if (!scanLibrary) {
+                            /*if (!scanLibrary) {
                                 try {
                                     //Waits a little after connection
                                     Log.i(TAG, "Waiting 2s");
@@ -350,7 +354,7 @@ public class ServiceSync extends ServiceBase {
                                     Thread.sleep(2000);
                                 } catch (InterruptedException e) {
                                 }
-                            }
+                            }*/
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
