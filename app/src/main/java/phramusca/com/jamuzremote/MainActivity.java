@@ -74,7 +74,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -482,6 +487,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //FIXME: We stay in remote mode even if remote is closed
+        //Requiring to restart app :(
         buttonRemote = (Button) findViewById(R.id.button_connect);
         buttonRemote.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -573,7 +580,9 @@ public class MainActivity extends AppCompatActivity {
                             {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    deleteFile(localSelectedPlaylist.getName()+".plli");
+                                    File file = new File(
+                                            Environment.getExternalStorageDirectory()+"/JaMuz/Playlists/"+localSelectedPlaylist.getName()+".plli");
+                                    file.delete();
                                     localPlaylists.remove(localSelectedPlaylist);
                                     localSelectedPlaylist=localPlaylists.get(0);
                                     displayPlaylist(localSelectedPlaylist);
@@ -1703,7 +1712,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupLocalPlaylists() {
         localPlaylists = new ArrayList<Playlist>();
-        for(String file : fileList()) {
+        File playlistFolder = new File(
+                Environment.getExternalStorageDirectory()+"/JaMuz/Playlists/");
+        playlistFolder.mkdirs();
+        for(String file : playlistFolder.list()) {
             if(file.endsWith(".plli")) {
                 Playlist playlist = readPlaylist(file);
                 //FIXME: "All" Playlist Use an editable bool
@@ -1741,12 +1753,43 @@ public class MainActivity extends AppCompatActivity {
         //FIXME: "All" Playlist Use an editableflag
         if(playlist !=null && !playlist.getName().equals("All")) {
             Gson gson = new Gson();
-            HelperTextFile.write(this, playlist.getName()+".plli", gson.toJson(playlist));
+            File playlistFile = new File(
+            Environment.getExternalStorageDirectory()+"/JaMuz/Playlists/"+playlist.getName()+".plli");
+            File playlistFolder = new File(
+                    Environment.getExternalStorageDirectory()+"/JaMuz/Playlists/");
+            playlistFolder.mkdirs();
+            try {
+                BufferedWriter out = new BufferedWriter(new FileWriter(playlistFile.getAbsolutePath(), false));
+                out.write(gson.toJson(playlist));
+                out.flush();
+                out.close();
+            } catch (IOException e) {
+                Log.e(TAG, "Error saving playlist: "+playlist, e);
+            }
         }
     }
 
     private Playlist readPlaylist(String filename) {
-        String readJson = HelperTextFile.read(this, filename);
+        File file = new File(
+                Environment.getExternalStorageDirectory()+"/JaMuz/Playlists/"+filename);
+        File playlistFolder = new File(
+                Environment.getExternalStorageDirectory()+"/JaMuz/Playlists/");
+        playlistFolder.mkdirs();
+        StringBuilder text = new StringBuilder();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = br.readLine()) != null) {
+                text.append(line);
+                text.append('\n');
+            }
+            br.close();
+        }
+        catch (IOException e) {
+            Log.e(TAG, "Error reading playlist: "+filename, e);
+        }
+        String readJson = text.toString();
+
         if(!readJson.equals("")) {
             Playlist playlist = new Playlist(filename.replaceFirst("[.][^.]+$", ""), true);
             Gson gson = new Gson();

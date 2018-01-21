@@ -48,6 +48,7 @@ public class Track {
 
     public Track(String absolutePath) {
         try {
+            this.path = absolutePath;
             MediaMetadataRetriever mmr = new MediaMetadataRetriever();
             mmr.setDataSource(absolutePath);
             album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
