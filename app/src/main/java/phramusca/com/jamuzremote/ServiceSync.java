@@ -185,6 +185,7 @@ public class ServiceSync extends ServiceBase {
                                 clientSync.ackFileReception(fileReceived.idFile, false);
                             }
                         }
+                        saveFilesLists();
                         requestNextFile(true);
                         break;
                     case "tags":
@@ -344,13 +345,14 @@ public class ServiceSync extends ServiceBase {
 
     private void requestNextFile(final boolean scanLibrary) {
         if (filesToKeep != null) {
-            notifyFile("Saving lists ... ");
-            saveFilesLists();
+            //notifyFile("Saving lists ... ");
+            //saveFilesLists();
             if (filesToGet.size() > 0) {
                 final FileInfoReception fileToGetInfo = filesToGet.entrySet().iterator().next().getValue();
                 File fileToGet = new File(getAppDataPath, fileToGetInfo.relativeFullPath);
                 if (fileToGet.exists() && fileToGet.length() == fileToGetInfo.size) {
                     Log.i(TAG, "File already exists. Remove from filesToGet list: " + fileToGetInfo);
+                    notifyFile("Already received, request ack");
                     clientSync.ackFileReception(fileToGetInfo.idFile, true);
                 } else {
                     new Thread() {
@@ -402,8 +404,13 @@ public class ServiceSync extends ServiceBase {
             }
         } else {
             Log.i(TAG, "filesToKeep is null");
-            helperToast.toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
-                    "export a list of files to retrieve, based on playlists.");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    helperToast.toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
+                            "export a list of files to retrieve, based on playlists.");
+                }
+            });
             stopSelf();
         }
     }
@@ -413,19 +420,19 @@ public class ServiceSync extends ServiceBase {
         //Write list of files to maintain in db
         if(filesToKeep!=null) {
             Gson gson = new Gson();
-            HelperTextFile.write(this, "FilesToKeep.txt", gson.toJson(filesToKeep));
+            HelperFile.write("Sync", "FilesToKeep.txt", gson.toJson(filesToKeep));
         }
         //Write list of files to retrieve
         if(filesToGet!=null) {
             Gson gson = new Gson();
-            HelperTextFile.write(this, "filesToGet.txt", gson.toJson(filesToGet));
+            HelperFile.write("Sync", "filesToGet.txt", gson.toJson(filesToGet));
         }
     }
 
     //FIXME: Make an Helper tor read filesToKeep & co (to make it available to ServiceScan)
     private void readFilesLists() {
         //Read FilesToKeep file to get list of files to maintain in db
-        String readJson = HelperTextFile.read(this, "FilesToKeep.txt");
+        String readJson = HelperFile.read("Sync", "FilesToKeep.txt");
         if(!readJson.equals("")) {
             filesToKeep = new HashMap<>();
             Gson gson = new Gson();
@@ -437,7 +444,7 @@ public class ServiceSync extends ServiceBase {
             }
         }
         //Read filesToGet file to get list of files to retrieve
-        readJson = HelperTextFile.read(this, "filesToGet.txt");
+        readJson = HelperFile.read("Sync", "filesToGet.txt");
         if(!readJson.equals("")) {
             filesToGet = new HashMap<>();
             Gson gson = new Gson();
