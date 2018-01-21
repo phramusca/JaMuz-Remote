@@ -284,6 +284,7 @@ public class ServiceSync extends ServiceBase {
             }
         }
 
+        //TODO: Remove this callback if no more used
         @Override
         public void receivingFile(final FileInfoReception fileInfoReception) {
             //notifyFile(fileInfoReception);
@@ -325,10 +326,14 @@ public class ServiceSync extends ServiceBase {
     }
 
     private void notifyFile(FileInfoReception fileInfoReception) {
-        String msg = "- "+filesToGet.size() + "/" + filesToKeep.size()
-                + " | "+StringManager.humanReadableByteCount(
+        notifyFile(StringManager.humanReadableByteCount(
                 fileInfoReception.size, false)
-                +" | "+fileInfoReception.relativeFullPath;
+                +" | "+fileInfoReception.relativeFullPath);
+    }
+
+    private void notifyFile(String text) {
+        String msg = "- "+filesToGet.size() + "/" + filesToKeep.size()
+                + " | "+text;
         int max=filesToKeep.size();
         int progress=max-filesToGet.size();
         helperNotification.notifyBar(notificationSync, msg, max, progress, false, true, true);
@@ -339,7 +344,7 @@ public class ServiceSync extends ServiceBase {
 
     private void requestNextFile(final boolean scanLibrary) {
         if (filesToKeep != null) {
-            helperNotification.notifyBar(notificationSync, "Saving lists ... ");
+            notifyFile("Saving lists ... ");
             saveFilesLists();
             if (filesToGet.size() > 0) {
                 final FileInfoReception fileToGetInfo = filesToGet.entrySet().iterator().next().getValue();
@@ -351,15 +356,6 @@ public class ServiceSync extends ServiceBase {
                     new Thread() {
                         @Override
                         public void run() {
-                            /*if (!scanLibrary) {
-                                try {
-                                    //Waits a little after connection
-                                    Log.i(TAG, "Waiting 2s");
-                                    helperNotification.notifyBar(notificationSync, "Waiting 2s before request ... ");
-                                    Thread.sleep(2000);
-                                } catch (InterruptedException e) {
-                                }
-                            }*/
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -412,10 +408,7 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    //FIXME: Read and write in threads (make sure they are read before starting)
-    //Do this in an Helper to have access in MainActivity too (to be ServiceScan)
-
-    //TODO: Do not saveFilesLists ALL everytime !! (not in receivedFile at least)
+    //FIXME: Do not saveFilesLists ALL everytime !! (not in receivedFile at least)
     private void saveFilesLists() {
         //Write list of files to maintain in db
         if(filesToKeep!=null) {
@@ -429,6 +422,7 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
+    //FIXME: Make an Helper tor read filesToKeep & co (to make it available to ServiceScan)
     private void readFilesLists() {
         //Read FilesToKeep file to get list of files to maintain in db
         String readJson = HelperTextFile.read(this, "FilesToKeep.txt");

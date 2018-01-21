@@ -17,6 +17,8 @@ import java.io.PrintWriter;
 
 public class HelperTextFile {
 
+    //FIXME: Replace by HelperFile
+
     private static final String TAG = HelperTextFile.class.getSimpleName();
 
     public static void write(Context context, String filename, String json) {
