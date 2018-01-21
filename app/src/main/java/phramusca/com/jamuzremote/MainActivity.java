@@ -1744,7 +1744,7 @@ public class MainActivity extends AppCompatActivity {
         //FIXME: "All" Playlist Use an editableflag
         if(playlist !=null && !playlist.getName().equals("All")) {
             Gson gson = new Gson();
-            HelperFile.save("Playlists", playlist.getName()+".plli",gson.toJson(playlist));
+            HelperFile.write("Playlists", playlist.getName()+".plli",gson.toJson(playlist));
         }
     }
 

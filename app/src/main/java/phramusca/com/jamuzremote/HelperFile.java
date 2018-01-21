@@ -1,14 +1,19 @@
 package phramusca.com.jamuzremote;
 
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 
 /**
  * Created by raph on 01/05/17.
@@ -31,7 +36,7 @@ public final class HelperFile {
         return new File(path+folder+"/");
     }
 
-    private static File getFile(String folder, String filename) {
+    public static File getFile(String folder, String filename) {
         return new File(path+folder+"/"+filename);
     }
 
@@ -53,7 +58,7 @@ public final class HelperFile {
         return text.toString();
     }
 
-    public static void save(String folder, String filename, String text) {
+    public static void write(String folder, String filename, String text) {
         File file = getFile(folder, filename);
         createFolder(folder);
         try {
@@ -68,6 +73,45 @@ public final class HelperFile {
 
     public static void delete(String folder, String filename) {
         getFile(folder, filename).delete();
+    }
+
+    //Writes to internal memory application folder. File is removed when application is uninstalled
+    public static void write(Context context, String filename, String text) {
+        try {
+            FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
+            PrintWriter printWriter = new PrintWriter(fos);
+            Log.i(TAG, "Writing "+filename+"\n"+(text.length()<150?text:text.substring(0, 150))+"\n");
+            printWriter.write(text);
+            printWriter.flush();
+            printWriter.close();
+            fos.close();
+        } catch (IOException e) {
+            Log.e(TAG, "write", e);
+        }
+    }
+
+    //reads from internal memory application folder. File is removed when application is uninstalled
+    public static String read(Context context, String filename) {
+        String ret = "";
+        try {
+            InputStream inputStream = context.openFileInput(filename);
+            Log.i(TAG, "Reading "+filename);
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append(receiveString);
+                }
+                inputStream.close();
+                ret = stringBuilder.toString();
+                Log.d(TAG, "Read \n"+ret+"\n");
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "read" + e.toString());
+        }
+        return ret;
     }
 
 }
