@@ -2,6 +2,7 @@
 
     <!-- Application theme. -->
     <!-- TODO: Make some themes  -->
+    <!-- http://www.hidroh.com/2015/02/25/support-multiple-themes-android-app-part-2/ -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>

@@ -91,10 +91,14 @@ public class ClientSync extends Client {
 
             if (reconnect && syncStatus.nbRetries < 100 //TODO: Make max nbRetries configurable
                     && syncStatus.status.equals(Status.NOT_CONNECTED)) {
-                logStatus("Re-connecting in 5s");
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
+                if(syncStatus.nbRetries<2) {
+                    RepoSync.saveFilesToGet();
+                } else {
+                    logStatus("Re-connecting in 5s");
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                    }
                 }
                 logStatus("Re-connecting now");
                 new Thread() {
@@ -103,6 +107,7 @@ public class ClientSync extends Client {
                     }
                 }.start();
             } else {
+                RepoSync.saveFilesToGet();
                 callback.disconnected("User stopped or max retries.", true);
                 syncStatus.status=Status.USER_STOP;
             }

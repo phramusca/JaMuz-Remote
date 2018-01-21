@@ -86,9 +86,6 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-//TODO: Support Themes
-//http://www.hidroh.com/2015/02/25/support-multiple-themes-android-app-part-2/
-
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -102,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
     public static AudioPlayer audioPlayer;
 
     //In internal SD emulated storage:
-    //TODO: Change folder as we now have rights
+    //TODO: Eventually, change database location to external SD as we now have rights
     //In external SD. Does not seem to work !
     //private static final String DB_PATH =
     //      "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;

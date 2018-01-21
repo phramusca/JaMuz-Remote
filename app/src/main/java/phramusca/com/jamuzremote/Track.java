@@ -28,7 +28,8 @@ public class Track {
     private static final String TAG = Track.class.getSimpleName();
 
 
-    //TODO: Store replaygain, no to read too often
+    //TODO: Store replaygain, no to read too often AND as a workaround for flac
+    // replaygain that cannot be read
 
     public Track(int id, int rating, String title, String album,
                  String artist, String coverHash, String path, String genre,
