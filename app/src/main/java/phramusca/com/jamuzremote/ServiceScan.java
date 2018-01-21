@@ -153,17 +153,18 @@ public class ServiceScan extends ServiceBase {
                                         //=> Files from JaMuz Sync
                                         String fileKey = absolutePath.substring(
                                                 getAppDataPath.getAbsolutePath().length()+1);
-
-                                        //FIXME: Re-enable filesToKeep check in scan !!!
-                                        /*if(filesToKeep!=null && !filesToKeep.containsKey(fileKey)) {
+                                        if(RepositorySync.getFilesToKeep()!=null
+                                                && !RepositorySync.getFilesToKeep().containsKey(fileKey)) {
                                             Log.i(TAG, "Deleting file "+absolutePath);
                                             file.delete();
-                                        } else if(filesToKeep!=null && filesToKeep.containsKey(fileKey)) {
-                                            FileInfoReception fileInfoReception=filesToKeep.get(fileKey);
+                                        } else if(RepositorySync.getFilesToKeep()!=null
+                                                && RepositorySync.getFilesToKeep().containsKey(fileKey)) {
+                                            FileInfoReception fileInfoReception=
+                                                    RepositorySync.getFilesToKeep().get(fileKey);
                                             HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, fileInfoReception);
-                                        } else {*/
-                                        HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
-                                        //}
+                                        } else {
+                                            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
+                                        }
                                     }
                                     else {
                                         //Scanning extra local folder
