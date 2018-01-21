@@ -1,5 +1,9 @@
 package phramusca.com.jamuzremote;
 
+/**
+ * Created by raph on 10/06/17.
+ */
+
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -11,29 +15,64 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by raph on 10/06/17.
- */
-
-//FIXME: Make this a real RepositorySync (only moved out of ServiceSync for now)
 public final class RepoSync {
 
     private static final String TAG = RepoSync.class.getSimpleName();
 
     private static Map<Integer, FileInfoReception> filesToGet = null;
-    //FIXME: private static BlockingQueue<FileInfoReception> filesToGet = new LinkedBlockingQueue<>();
-
     private static Map<String, FileInfoReception> filesToKeep = null;
 
     private RepoSync() {
     }
 
-    public synchronized static Map<Integer, FileInfoReception> getFilesToGet() {
-        return filesToGet;
+    public synchronized static void scannedFile(File getAppDataPath, File file) {
+        String absolutePath=file.getAbsolutePath();
+        String fileKey = absolutePath.substring(getAppDataPath.getAbsolutePath().length()+1);
+        if(filesToKeep!=null && !filesToKeep.containsKey(fileKey)) {
+            Log.i(TAG, "Deleting file "+absolutePath);
+            file.delete();
+        } else if(filesToKeep!=null && filesToKeep.containsKey(fileKey)) {
+            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, filesToKeep.get(fileKey));
+        } else {
+            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
+        }
     }
 
-    public static Map<String, FileInfoReception> getFilesToKeep() {
-        return filesToKeep;
+    public static boolean received(File getAppDataPath, FileInfoReception fileInfoReception) {
+        File receivedFile = new File(getAppDataPath.getAbsolutePath()+File.separator
+                +fileInfoReception.relativeFullPath);
+        if(filesToGet.containsKey(fileInfoReception.idFile)) {
+            if(receivedFile.exists()) {
+                if (receivedFile.length() == fileInfoReception.size) {
+                    Log.i(TAG, "Saved file size: " + receivedFile.length());
+                    if(HelperLibrary.insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception)) {
+                        return true;
+                    } else {
+                        Log.w(TAG, "File tags could not be read. Deleting " + receivedFile.getAbsolutePath());
+                        receivedFile.delete();
+                        //NOTES:
+                        // - File is already deleted
+                        // - Can happen also if database is null (not only if tags are not read)
+                    }
+                } else {
+                    Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
+                    receivedFile.delete();
+                }
+            } else {
+                Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
+            }
+        } else {
+            //FIXME: It can be in filesToKeep though, do NOT delete in this case
+            Log.w(TAG, "File not requested. Deleting "+receivedFile.getAbsolutePath());
+            receivedFile.delete();
+        }
+        return false;
+    }
+
+    public static void receivedAck(int idFile) {
+        if(filesToGet.containsKey(idFile)) {
+            filesToGet.remove(idFile);
+        }
     }
 
     public synchronized static void set(File getAppDataPath, Map<Integer, FileInfoReception> newTracks) {
@@ -47,40 +86,10 @@ public final class RepoSync {
                 filesToGet.put(fileReceived.idFile, fileReceived);
             }
         }
-        saveFilesLists();
+        save();
     }
 
-    /*
-    public synchronized static void set(Map<String, Track> newTracks) {
-        //Adding missing tracks
-        for(Map.Entry<String, Track> tag : newTracks.entrySet()) {
-            if(tracks.containsKey(tag.getKey())) {
-
-            }
-            add(tag);
-        }
-        //Removing tracks not in input list
-        final Iterator<Map.Entry<Integer, String>> it = get().entrySet().iterator();
-        while (it.hasNext())
-        {
-            final Map.Entry<Integer, String> tag = it.next();
-            if(HelperLibrary.musicLibrary!=null && !newTags.contains(tag.getValue())) {
-                new Thread() {
-                    public void run() {
-                        int deleted = HelperLibrary.musicLibrary.deleteTag(tag.getKey());
-                        if(deleted>0) {
-                            it.remove();
-                        }
-                    }
-                }.start();
-            }
-        }
-
-    }*/
-
-    //FIXME: Read lists separately as they change not in sync
-
-    protected synchronized static void saveFilesLists() {
+    protected synchronized static void save() {
         //Write list of files to maintain in db
         if(filesToKeep!=null) {
             Gson gson = new Gson();
@@ -93,20 +102,22 @@ public final class RepoSync {
         }
     }
 
-    protected static synchronized void readFilesLists() {
+    protected static synchronized void read() {
         String readJson;
         if(filesToKeep==null) {
             //Read FilesToKeep file to get list of files to maintain in db
             readJson = HelperFile.read("Sync", "FilesToKeep.txt");
             if (!readJson.equals("")) {
-                filesToKeep = new HashMap<>();
+                Map<String, FileInfoReception> readList = new HashMap<>();
                 Gson gson = new Gson();
-                Type mapType = new TypeToken<HashMap<String, FileInfoReception>>() {
-                }.getType();
+                Type mapType = new TypeToken<HashMap<String, FileInfoReception>>() {}.getType();
                 try {
-                    filesToKeep = gson.fromJson(readJson, mapType);
+                    readList = gson.fromJson(readJson, mapType);
                 } catch (JsonSyntaxException ex) {
                     Log.e(TAG, "", ex);
+                }
+                if(readList.size()>0) {
+                    filesToKeep=readList;
                 }
             }
         }
@@ -115,22 +126,36 @@ public final class RepoSync {
             //Read filesToGet file to get list of files to retrieve
             readJson = HelperFile.read("Sync", "filesToGet.txt");
             if (!readJson.equals("")) {
-                filesToGet = new HashMap<>();
+                Map<Integer, FileInfoReception> readList = new HashMap<>();
                 Gson gson = new Gson();
                 Type mapType = new TypeToken<HashMap<Integer, FileInfoReception>>() {
                 }.getType();
                 try {
-                    filesToGet = gson.fromJson(readJson, mapType);
+                    readList = gson.fromJson(readJson, mapType);
                 } catch (JsonSyntaxException ex) {
                     Log.e(TAG, "", ex);
+                }
+                if(readList.size()>0) {
+                    filesToGet=readList;
                 }
             }
         }
     }
 
-    public static void received(int idFile) {
-        if(filesToGet.containsKey(idFile)) {
-            filesToGet.remove(idFile);
+    public static int getRemainingSize() {
+        return filesToGet==null?0:filesToGet.size();
+    }
+
+    public static int getTotalSize() {
+        return filesToKeep==null?0:filesToKeep.size();
+    }
+
+    public static FileInfoReception take() {
+        if (filesToKeep != null && filesToGet != null) {
+            if (filesToGet.size() > 0) {
+                return filesToGet.entrySet().iterator().next().getValue();
+            }
         }
+        return null;
     }
 }

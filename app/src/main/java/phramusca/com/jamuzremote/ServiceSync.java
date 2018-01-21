@@ -37,7 +37,7 @@ public class ServiceSync extends ServiceBase {
         new Thread() {
             public void run() {
                 helperNotification.notifyBar(notificationSync, "Reading lists ... ");
-                RepoSync.readFilesLists();
+                RepoSync.read();
                 clientSync =  new ClientSync(clientInfo, new CallBackSync());
                 helperNotification.notifyBar(notificationSync, "Connecting ... ");
                 clientSync.connect();
@@ -49,7 +49,7 @@ public class ServiceSync extends ServiceBase {
     @Override
     public void onDestroy(){
         stopSync(false);
-        RepoSync.saveFilesLists();
+        RepoSync.save();
         super.onDestroy();
     }
 
@@ -154,7 +154,7 @@ public class ServiceSync extends ServiceBase {
                             //e-InsertKO
                             //e-ERROR (reading tags for instance; to be read at last with max retry count)
 
-                            RepoSync.received(idFile);
+                            RepoSync.receivedAck(idFile);
                         }
                         if(requestNextFile) {
                             requestNextFile(true);
@@ -230,34 +230,10 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void receivedFile(final FileInfoReception fileInfoReception) {
             Log.i(TAG, "Received file\n"+fileInfoReception
-                    +"\nRemaining : "+ RepoSync.getFilesToGet().size()+"/"+ RepoSync.getFilesToKeep().size());
-            File receivedFile = new File(getAppDataPath.getAbsolutePath()+File.separator
-                    +fileInfoReception.relativeFullPath);
+                    +"\nRemaining : "+ RepoSync.getRemainingSize()+"/"+ RepoSync.getTotalSize());
             notifyBar("3/4", fileInfoReception);
-            if(RepoSync.getFilesToGet().containsKey(fileInfoReception.idFile)) {
-                if(receivedFile.exists()) {
-                    if (receivedFile.length() == fileInfoReception.size) {
-                        Log.i(TAG, "Saved file size: " + receivedFile.length());
-                        if(HelperLibrary.insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception)) {
-                            clientSync.ackFileReception(fileInfoReception.idFile, true);
-                        } else {
-                            Log.w(TAG, "File tags could not be read. Deleting " + receivedFile.getAbsolutePath());
-                            receivedFile.delete();
-                            //NOTES:
-                            // - File is already deleted
-                            // - Can happen also if database is null (not only if tags are not read)
-                        }
-                    } else {
-                        Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
-                        receivedFile.delete();
-                    }
-                } else {
-                    Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
-                }
-            } else {
-                //FIXME: It can be in filesToKeep though, do NOT delete in this case
-                Log.w(TAG, "File not requested. Deleting "+receivedFile.getAbsolutePath());
-                receivedFile.delete();
+            if(RepoSync.received(getAppDataPath, fileInfoReception)) {
+                clientSync.ackFileReception(fileInfoReception.idFile, true);
             }
         }
 
@@ -290,7 +266,7 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void disconnected(final String msg, boolean disable) {
             helperNotification.notifyBar(notificationSync, "Saving lists ... ");
-            RepoSync.saveFilesLists();
+            RepoSync.save();
             if(disable) {
                 sendMessage("enableSync");
             }
@@ -310,73 +286,69 @@ public class ServiceSync extends ServiceBase {
     }
 
     private void notifyBar(String text) {
-        String msg = "- "+ RepoSync.getFilesToGet().size() + "/" + RepoSync.getFilesToKeep().size()
+        String msg = "- "+ RepoSync.getRemainingSize() + "/" + RepoSync.getTotalSize()
                 + " | "+text;
-        int max= RepoSync.getFilesToKeep().size();
-        int progress=max- RepoSync.getFilesToGet().size();
+        int max= RepoSync.getTotalSize();
+        int progress=max- RepoSync.getRemainingSize();
         helperNotification.notifyBar(notificationSync, msg, max, progress, false, true, true);
     }
 
-
-
     private void requestNextFile(final boolean scanLibrary) {
-        if (RepoSync.getFilesToKeep() != null) {
-            if (RepoSync.getFilesToGet().size() > 0) {
-                final FileInfoReception fileToGetInfo = RepoSync.getFilesToGet().entrySet().iterator().next().getValue();
-                File fileToGet = new File(getAppDataPath, fileToGetInfo.relativeFullPath);
-                if (fileToGet.exists() && fileToGet.length() == fileToGetInfo.size) {
-                    Log.i(TAG, "File already exists. Remove from filesToGet list: " + fileToGetInfo);
-                    clientSync.ackFileReception(fileToGetInfo.idFile, true);
-                } else {
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    notifyBar("1/4", fileToGetInfo);
-                                    watchTimeOut(fileToGetInfo.size);
-                                }
-                            });
-                            synchronized (timerLock) {
-                                clientSync.requestFile(fileToGetInfo.idFile);
-                            }
-                        }
-                    }.start();
-                }
+
+        final FileInfoReception fileToGetInfo = RepoSync.take();
+        if (fileToGetInfo != null) {
+            File fileToGet = new File(getAppDataPath, fileToGetInfo.relativeFullPath);
+            if (fileToGet.exists() && fileToGet.length() == fileToGetInfo.size) {
+                Log.i(TAG, "File already exists. Remove from filesToGet list: " + fileToGetInfo);
+                clientSync.ackFileReception(fileToGetInfo.idFile, true);
             } else {
-                final String msg = "No more files to download.";
-                Log.i(TAG, msg + " Updating library:" + scanLibrary);
-                helperNotification.notifyBar(notificationSync, msg);
-                helperToast.toastLong(msg+"\n\nAll " + RepoSync.getFilesToKeep().size() + " files" +
-                        " have been retrieved successfully.");
-                //Not disconnecting to be able to receive a new list
-                //sent by the server. User can still close
-                //enableClient(true);
-                //enableClient(clientSync,buttonSync, R.drawable.connect_off, true);
-
-
-
-                //FIXME: Only send if not already (need to store ackFileReception status)
-                //=> !! Check first if still necessary since we (should)
-                //          request ack from server now
-
-                //Resend add request in case missed for some reason
-                /*if(filesToKeep!=null) {
-                    for(FileInfoReception file : filesToKeep.values()) {
-                        if(!filesToGet.containsKey(file.idFile)) {
-                            ackFileReception(file.idFile, false);
+                new Thread() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                notifyBar("1/4", fileToGetInfo);
+                                watchTimeOut(fileToGetInfo.size);
+                            }
+                        });
+                        synchronized (timerLock) {
+                            clientSync.requestFile(fileToGetInfo.idFile);
                         }
                     }
-                }*/
-
-                if (scanLibrary) {
-                    sendMessage("checkPermissionsThenScanLibrary");
-                }
-                stopSelf();
+                }.start();
             }
+        } else if(RepoSync.getTotalSize()>0) {
+            final String msg = "No more files to download.";
+            Log.i(TAG, msg + " Updating library:" + scanLibrary);
+            helperNotification.notifyBar(notificationSync, msg);
+            helperToast.toastLong(msg + "\n\nAll " + RepoSync.getTotalSize() + " files" +
+                    " have been retrieved successfully.");
+            //Not disconnecting to be able to receive a new list
+            //sent by the server. User can still close
+            //enableClient(true);
+            //enableClient(clientSync,buttonSync, R.drawable.connect_off, true);
+
+
+            //FIXME: Only send if not already (need to store ackFileReception status)
+            //=> !! Check first if still necessary since we (should)
+            //          request ack from server now
+
+            //Resend add request in case missed for some reason
+            /*if(filesToKeep!=null) {
+                for(FileInfoReception file : filesToKeep.values()) {
+                    if(!filesToGet.containsKey(file.idFile)) {
+                        ackFileReception(file.idFile, false);
+                    }
+                }
+            }*/
+
+            if (scanLibrary) {
+                sendMessage("checkPermissionsThenScanLibrary");
+            }
+            stopSelf();
         } else {
-            Log.i(TAG, "filesToKeep is null");
+            Log.i(TAG, "No files to download.");
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -387,7 +359,4 @@ public class ServiceSync extends ServiceBase {
             stopSelf();
         }
     }
-
-
-
 }
