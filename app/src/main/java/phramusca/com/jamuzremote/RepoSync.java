@@ -16,16 +16,16 @@ import java.util.Map;
  */
 
 //FIXME: Make this a real RepositorySync (only moved out of ServiceSync for now)
-public final class RepositorySync {
+public final class RepoSync {
 
-    private static final String TAG = RepositorySync.class.getSimpleName();
+    private static final String TAG = RepoSync.class.getSimpleName();
 
     private static Map<Integer, FileInfoReception> filesToGet = null;
     //FIXME: private static BlockingQueue<FileInfoReception> filesToGet = new LinkedBlockingQueue<>();
 
     private static Map<String, FileInfoReception> filesToKeep = null;
 
-    private RepositorySync() {
+    private RepoSync() {
     }
 
     public synchronized static Map<Integer, FileInfoReception> getFilesToGet() {
