@@ -20,7 +20,6 @@ import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -198,30 +197,12 @@ public class ServiceSync extends ServiceBase {
                         new Thread() {
                             public void run() {
                                 try {
-                                    //Adding missing tags
                                     final JSONArray jsonTags = (JSONArray) jObject.get("tags");
-                                    for(int i=0; i<jsonTags.length(); i++) {
-                                        final String tag = (String) jsonTags.get(i);
-                                        RepositoryTags.add(tag);
-                                    }
-                                    //Deleting tags that have been removed in server
-                                    final List<String> list = new ArrayList<>();
+                                    final List<String> newTags = new ArrayList<>();
                                     for(int i = 0; i < jsonTags.length(); i++){
-                                        list.add((String) jsonTags.get(i));
+                                        newTags.add((String) jsonTags.get(i));
                                     }
-                                    Iterator<Map.Entry<Integer, String>> it = RepositoryTags.getTags().entrySet().iterator();
-                                    while (it.hasNext())
-                                    {
-                                        Map.Entry<Integer, String> tag = it.next();
-                                        if(!list.contains(tag.getValue())) {
-                                            if(HelperLibrary.musicLibrary!=null) {
-                                                int deleted = HelperLibrary.musicLibrary.deleteTag(tag.getKey());
-                                                if(deleted>0) {
-                                                    it.remove();
-                                                }
-                                            }
-                                        }
-                                    }
+                                    RepositoryTags.set(newTags);
                                     sendMessage("setupTags");
                                 } catch (JSONException e) {
                                     Log.e(TAG, e.toString());
@@ -235,11 +216,13 @@ public class ServiceSync extends ServiceBase {
                             public void run() {
                                 try {
                                     final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
+                                    final List<String> newGenres = new ArrayList<>();
                                     for(int i=0; i<jsonGenres.length(); i++) {
                                         final String genre = (String) jsonGenres.get(i);
-                                        RepositoryGenres.add(genre);
+                                        newGenres.add(genre);
                                     }
-                                    sendMessage("setupSpinnerGenre");
+                                    RepositoryGenres.set(newGenres);
+                                    sendMessage("setupGenres");
                                 } catch (JSONException e) {
                                     Log.e(TAG, e.toString());
                                 }
