@@ -412,4 +412,13 @@ public class MusicLibrary {
             return false;
         }
     }
+
+    public synchronized int deleteGenre(String genre) {
+        try {
+            return db.delete("genre", "value = \"" +genre+"\"", null);
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "deleteGenre("+genre+")", ex);
+        }
+        return -1;
+    }
 }

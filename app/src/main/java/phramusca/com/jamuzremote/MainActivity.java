@@ -1208,9 +1208,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void connectDatabase() {
         HelperLibrary.open(this);
-        setupTags();
+
         new Thread() {
             public void run() {
+                setupTags();
                 setupGenres();
                 setupLocalPlaylists();
             }
@@ -1385,8 +1386,8 @@ public class MainActivity extends AppCompatActivity {
                 case "checkPermissionsThenScanLibrary":
                     checkPermissionsThenScanLibrary();
                     break;
-                case "setupSpinnerGenre":
-                    setupSpinnerGenre(RepositoryGenres.get(), displayedTrack.getGenre());
+                case "setupGenres":
+                    setupGenres();
                     break;
                 case "setupTags":
                     setupTags();
@@ -1585,41 +1586,51 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupTags() {
-        new Thread() {
-            public void run() {
-                if(RepositoryTags.getTags().size()<=0) {
-                    final Map<Integer, String> tags = RepositoryTags.read();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            makeButtonTagPlaylist(Integer.MAX_VALUE, "null");
-                            for(Map.Entry<Integer, String> tag : tags.entrySet()) {
-                                makeButtonTag(tag.getKey(), tag.getValue());
-                                makeButtonTagPlaylist(tag.getKey(), tag.getValue());
-                            }
-                        }
-                    });
-
-                    //TODO: recalculate display at startup
-                    //and prevent a display glitch
-                    //This dirty trick does not work well
-            /*toggle(layoutTagsPlaylistLayout, false);
-            toggle(layoutPlaylist, false);
-            toggle(layoutTagsPlaylistLayout, true);
-            toggle(layoutPlaylist, true);*/
-                }
-            }
-        }.start();
-    }
-
-    private void setupGenres() {
-        RepositoryGenres.read();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                setupSpinnerGenre(RepositoryGenres.get(), displayedTrack.getGenre());
+                layoutTags.removeAllViews();
+                layoutTagsPlaylist.removeAllViews();
+                makeButtonTagPlaylist(Integer.MAX_VALUE, "null");
+                for(Map.Entry<Integer, String> tag : RepositoryTags.get().entrySet()) {
+                    makeButtonTag(tag.getKey(), tag.getValue());
+                    makeButtonTagPlaylist(tag.getKey(), tag.getValue());
+                }
+                //Re-display track and playlist
+                displayTrack(false);
+                displayPlaylist(localSelectedPlaylist);
+            }
+        });
+    }
+
+    private void setupGenres() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                layoutGenrePlaylist.removeAllViews();
                 for(String genre : RepositoryGenres.get()) {
                     makeButtonGenrePlaylist(-1, genre);
+                }
+                //Re-display track and playlist
+                displayTrack(false); //spinner genre is re-set in there
+                displayPlaylist(localSelectedPlaylist);
+            }
+        });
+    }
+
+    private void setupSpinnerGenre(final List<String> genres, final String genre) {
+
+        final ArrayAdapter<String> arrayAdapter =
+                new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, genres);
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                spinnerGenreSend=false;
+                spinnerGenre.setAdapter(arrayAdapter);
+                if(!genre.equals("")) {
+                    spinnerGenre.setSelection(arrayAdapter.getPosition(genre));
                 }
             }
         });
@@ -1832,24 +1843,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setupSpinnerGenre(final List<String> genres, final String genre) {
-
-        final ArrayAdapter<String> arrayAdapter =
-                new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, genres);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                spinnerGenreSend=false;
-                spinnerGenre.setAdapter(arrayAdapter);
-                if(!genre.equals("")) {
-                    spinnerGenre.setSelection(arrayAdapter.getPosition(genre));
-                }
-            }
-        });
-    }
-
     private void setTextView(final TextView textview, final Spanned msg, final boolean append) {
         runOnUiThread(new Runnable() {
             @Override
@@ -1897,7 +1890,7 @@ public class MainActivity extends AppCompatActivity {
 
                     //Display file tags
                     ArrayList<String> fileTags = displayedTrack.getTags(false);
-                    for(Map.Entry<Integer, String> tag : RepositoryTags.getTags().entrySet()) {
+                    for(Map.Entry<Integer, String> tag : RepositoryTags.get().entrySet()) {
                         ToggleButton button = (ToggleButton) layoutTags.findViewById(tag.getKey());
                         if(button!=null && button.isChecked()!=fileTags.contains(tag.getValue())) {
                             button.setChecked(fileTags.contains(tag.getValue()));

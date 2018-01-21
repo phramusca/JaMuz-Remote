@@ -1,6 +1,8 @@
 package phramusca.com.jamuzremote;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,7 +17,7 @@ public final class RepositoryTags {
     private RepositoryTags () {
     }
 
-    public synchronized static Map<Integer, String> read() {
+    public synchronized static Map<Integer, String> get() {
         if(HelperLibrary.musicLibrary!=null && tags.size()<=0) {
             tags = new HashMap<>();
             tags = HelperLibrary.musicLibrary.getTags();
@@ -23,12 +25,31 @@ public final class RepositoryTags {
         return tags;
     }
 
-    public synchronized static Map<Integer, String> getTags() {
-        return tags;
+    public synchronized static void set(final List<String> newTags) {
+        //Adding missing tags
+        for(String tag : newTags) {
+            add(tag);
+        }
+        //Removing tags not in input list
+        final Iterator<Map.Entry<Integer, String>> it = get().entrySet().iterator();
+        while (it.hasNext())
+        {
+            final Map.Entry<Integer, String> tag = it.next();
+            if(HelperLibrary.musicLibrary!=null && !newTags.contains(tag.getValue())) {
+                new Thread() {
+                    public void run() {
+                        int deleted = HelperLibrary.musicLibrary.deleteTag(tag.getKey());
+                        if(deleted>0) {
+                            it.remove();
+                        }
+                    }
+                }.start();
+            }
+        }
     }
 
-    public synchronized static void add(final String tag) {
-        if(HelperLibrary.musicLibrary!=null && !RepositoryTags.getTags().values().contains(tag)) {
+    private synchronized static void add(final String tag) {
+        if(HelperLibrary.musicLibrary!=null && !get().values().contains(tag)) {
             new Thread() {
                 public void run() {
                     int idTag = HelperLibrary.musicLibrary.addTag(tag);

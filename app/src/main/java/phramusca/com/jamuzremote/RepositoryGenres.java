@@ -1,6 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -15,7 +16,7 @@ public final class RepositoryGenres {
     private RepositoryGenres() {
     }
 
-    public synchronized static List<String> read() {
+    public synchronized static List<String> get() {
         if(HelperLibrary.musicLibrary!=null && genres.size()<=0) {
             genres = new ArrayList<>();
             genres = HelperLibrary.musicLibrary.getGenres();
@@ -23,12 +24,31 @@ public final class RepositoryGenres {
         return genres;
     }
 
-    public synchronized static List<String> get() {
-        return genres;
+    public synchronized static void set(final List<String> newGenres) {
+        //Adding missing tags
+        for(String tag : newGenres) {
+            add(tag);
+        }
+        //Removing tags not in input list
+        final Iterator<String> it = get().iterator();
+        while (it.hasNext())
+        {
+            final String genre = it.next();
+            if(HelperLibrary.musicLibrary!=null && !newGenres.contains(genre)) {
+                new Thread() {
+                    public void run() {
+                        int deleted = HelperLibrary.musicLibrary.deleteGenre(genre);
+                        if(deleted>0) {
+                            it.remove();
+                        }
+                    }
+                }.start();
+            }
+        }
     }
 
     public synchronized static void add(final String genre) {
-        if(HelperLibrary.musicLibrary!=null && !genres.contains(genre)) {
+        if(HelperLibrary.musicLibrary!=null && !get().contains(genre)) {
             new Thread() {
                 public void run() {
                     if (HelperLibrary.musicLibrary.addGenre(genre)) {
