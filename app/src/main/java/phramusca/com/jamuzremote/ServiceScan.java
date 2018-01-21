@@ -149,22 +149,8 @@ public class ServiceScan extends ServiceBase {
                                 else {
                                     String absolutePath=file.getAbsolutePath();
                                     if(absolutePath.startsWith(getAppDataPath.getAbsolutePath())) {
-                                        //Scanning private sd card path
-                                        //=> Files from JaMuz Sync
-                                        String fileKey = absolutePath.substring(
-                                                getAppDataPath.getAbsolutePath().length()+1);
-                                        if(RepoSync.getFilesToKeep()!=null
-                                                && !RepoSync.getFilesToKeep().containsKey(fileKey)) {
-                                            Log.i(TAG, "Deleting file "+absolutePath);
-                                            file.delete();
-                                        } else if(RepoSync.getFilesToKeep()!=null
-                                                && RepoSync.getFilesToKeep().containsKey(fileKey)) {
-                                            FileInfoReception fileInfoReception=
-                                                    RepoSync.getFilesToKeep().get(fileKey);
-                                            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, fileInfoReception);
-                                        } else {
-                                            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
-                                        }
+                                        //Scanning private sd card path => Files from JaMuz Sync
+                                        RepoSync.scannedFile(getAppDataPath, file);
                                     }
                                     else {
                                         //Scanning extra local folder
