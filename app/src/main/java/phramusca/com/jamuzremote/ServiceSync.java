@@ -139,6 +139,9 @@ public class ServiceSync extends ServiceBase {
                 String type = jObject.getString("type");
                 switch(type) {
                     case "insertDeviceFileAck":
+                        //FIXME: Display a benchmark instead
+                        //as not well displayed as aligned to the rigth
+                        notifyBar("4/4 | Acknowledged");
                         String status = jObject.getString("status");
                         int idFile = jObject.getInt("idFile");
                         boolean requestNextFile = jObject.getBoolean("requestNextFile");
@@ -146,6 +149,9 @@ public class ServiceSync extends ServiceBase {
                             sendMessage("refreshSpinner(true)");
 
                             //FIXME: Store status to manage what to do at any stage
+                            //+Merge filesToKeep and filesToGet in a single file
+                            //(even if 2 maps as 2 different keys)
+
                             //1-TOGET
                             //2-GOT
                             //3-InsertOK
@@ -162,7 +168,6 @@ public class ServiceSync extends ServiceBase {
                         }
                         break;
                     case "StartSync":
-                        //helperNotification.notifyBar(notificationSync, "Requesting first file ... ");
                         requestNextFile(false);
                         break;
                     case "SEND_DB":
@@ -253,6 +258,7 @@ public class ServiceSync extends ServiceBase {
                     +"\nRemaining : "+filesToGet.size()+"/"+filesToKeep.size());
             File receivedFile = new File(getAppDataPath.getAbsolutePath()+File.separator
                     +fileInfoReception.relativeFullPath);
+            notifyBar("3/4", fileInfoReception);
             if(filesToGet.containsKey(fileInfoReception.idFile)) {
                 if(receivedFile.exists()) {
                     if (receivedFile.length() == fileInfoReception.size) {
@@ -265,12 +271,6 @@ public class ServiceSync extends ServiceBase {
                             //NOTES:
                             // - File is already deleted
                             // - Can happen also if database is null (not only if tags are not read)
-
-                            //FIXME: Cannot read tags of received file : What to do in this case
-                            //to avoid it to be requested over and over ?
-                            //=> merge filesToGet and filesToKeep
-                            //=> add a status in FileInfoReception (refer to other FIX-ME)
-                            //=> add a retry counter
                         }
                     } else {
                         Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
@@ -285,10 +285,9 @@ public class ServiceSync extends ServiceBase {
             }
         }
 
-        //TODO: Remove this callback if no more used
         @Override
         public void receivingFile(final FileInfoReception fileInfoReception) {
-            //notifyFile(fileInfoReception);
+            notifyBar("2/4", fileInfoReception);
         }
 
         @Override
@@ -314,6 +313,8 @@ public class ServiceSync extends ServiceBase {
 
         @Override
         public void disconnected(final String msg, boolean disable) {
+            helperNotification.notifyBar(notificationSync, "Saving lists ... ");
+            saveFilesLists();
             if(disable) {
                 sendMessage("enableSync");
             }
@@ -326,13 +327,13 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    private void notifyFile(FileInfoReception fileInfoReception) {
-        notifyFile(StringManager.humanReadableByteCount(
+    private void notifyBar(String text, FileInfoReception fileInfoReception) {
+        notifyBar(text+" | "+StringManager.humanReadableByteCount(
                 fileInfoReception.size, false)
                 +" | "+fileInfoReception.relativeFullPath);
     }
 
-    private void notifyFile(String text) {
+    private void notifyBar(String text) {
         String msg = "- "+filesToGet.size() + "/" + filesToKeep.size()
                 + " | "+text;
         int max=filesToKeep.size();
@@ -345,14 +346,13 @@ public class ServiceSync extends ServiceBase {
 
     private void requestNextFile(final boolean scanLibrary) {
         if (filesToKeep != null) {
-            //notifyFile("Saving lists ... ");
+            //notifyBar("Saving lists ... ");
             //saveFilesLists();
             if (filesToGet.size() > 0) {
                 final FileInfoReception fileToGetInfo = filesToGet.entrySet().iterator().next().getValue();
                 File fileToGet = new File(getAppDataPath, fileToGetInfo.relativeFullPath);
                 if (fileToGet.exists() && fileToGet.length() == fileToGetInfo.size) {
                     Log.i(TAG, "File already exists. Remove from filesToGet list: " + fileToGetInfo);
-                    notifyFile("Already received, request ack");
                     clientSync.ackFileReception(fileToGetInfo.idFile, true);
                 } else {
                     new Thread() {
@@ -361,7 +361,7 @@ public class ServiceSync extends ServiceBase {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    notifyFile(fileToGetInfo);
+                                    notifyBar("1/4", fileToGetInfo);
                                     watchTimeOut(fileToGetInfo.size);
                                 }
                             });
@@ -415,7 +415,6 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    //FIXME: Do not saveFilesLists ALL everytime !! (not in receivedFile at least)
     private void saveFilesLists() {
         //Write list of files to maintain in db
         if(filesToKeep!=null) {
@@ -430,6 +429,7 @@ public class ServiceSync extends ServiceBase {
     }
 
     //FIXME: Make an Helper tor read filesToKeep & co (to make it available to ServiceScan)
+    //+ avoid reading/writing files too often
     private void readFilesLists() {
         //Read FilesToKeep file to get list of files to maintain in db
         String readJson = HelperFile.read("Sync", "FilesToKeep.txt");
