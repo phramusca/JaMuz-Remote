@@ -8,16 +8,11 @@ import android.content.Intent;
 import android.os.CountDownTimer;
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +37,7 @@ public class ServiceSync extends ServiceBase {
         new Thread() {
             public void run() {
                 helperNotification.notifyBar(notificationSync, "Reading lists ... ");
-                readFilesLists();
+                RepositorySync.readFilesLists();
                 clientSync =  new ClientSync(clientInfo, new CallBackSync());
                 helperNotification.notifyBar(notificationSync, "Connecting ... ");
                 clientSync.connect();
@@ -54,7 +49,7 @@ public class ServiceSync extends ServiceBase {
     @Override
     public void onDestroy(){
         stopSync(false);
-        saveFilesLists();
+        RepositorySync.saveFilesLists();
         super.onDestroy();
     }
 
@@ -146,6 +141,7 @@ public class ServiceSync extends ServiceBase {
                         boolean requestNextFile = jObject.getBoolean("requestNextFile");
                         if(status.equals("OK")) {
                             sendMessage("refreshSpinner(true)");
+                            cancelWatchTimeOut();
 
                             //FIXME: Store status to manage what to do at any stage
                             //+Merge filesToKeep and filesToGet in a single file
@@ -157,10 +153,8 @@ public class ServiceSync extends ServiceBase {
 
                             //e-InsertKO
                             //e-ERROR (reading tags for instance; to be read at last with max retry count)
-                            if(filesToGet.containsKey(idFile)) {
-                                filesToGet.remove(idFile);
-                                cancelWatchTimeOut();
-                            }
+
+                            RepositorySync.received(idFile);
                         }
                         if(requestNextFile) {
                             requestNextFile(true);
@@ -175,21 +169,19 @@ public class ServiceSync extends ServiceBase {
                         break;
                     case "FilesToGet":
                         helperNotification.notifyBar(notificationSync, "Received new list of files to get ... ");
-                        filesToGet = new HashMap<>();
-                        filesToKeep = new HashMap<>();
+                        Map<Integer, FileInfoReception> newTracks = new HashMap<>();
                         JSONArray files = (JSONArray) jObject.get("files");
                         for(int i=0; i<files.length(); i++) {
                             FileInfoReception fileReceived = new FileInfoReception((JSONObject) files.get(i));
-                            filesToKeep.put(fileReceived.relativeFullPath, fileReceived);
+                            newTracks.put(fileReceived.idFile, fileReceived);
+
+                            //Ack reception, request ack from server (ack for insertion in deviceFile table)
                             File localFile = new File(getAppDataPath, fileReceived.relativeFullPath);
-                            if(!localFile.exists()) {
-                                filesToGet.put(fileReceived.idFile, fileReceived);
-                            }
-                            else {
+                            if (localFile.exists()) {
                                 clientSync.ackFileReception(fileReceived.idFile, false);
                             }
                         }
-                        saveFilesLists();
+                        RepositorySync.set(getAppDataPath, newTracks);
                         requestNextFile(true);
                         break;
                     case "tags":
@@ -238,11 +230,11 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void receivedFile(final FileInfoReception fileInfoReception) {
             Log.i(TAG, "Received file\n"+fileInfoReception
-                    +"\nRemaining : "+filesToGet.size()+"/"+filesToKeep.size());
+                    +"\nRemaining : "+RepositorySync.getFilesToGet().size()+"/"+RepositorySync.getFilesToKeep().size());
             File receivedFile = new File(getAppDataPath.getAbsolutePath()+File.separator
                     +fileInfoReception.relativeFullPath);
             notifyBar("3/4", fileInfoReception);
-            if(filesToGet.containsKey(fileInfoReception.idFile)) {
+            if(RepositorySync.getFilesToGet().containsKey(fileInfoReception.idFile)) {
                 if(receivedFile.exists()) {
                     if (receivedFile.length() == fileInfoReception.size) {
                         Log.i(TAG, "Saved file size: " + receivedFile.length());
@@ -263,6 +255,7 @@ public class ServiceSync extends ServiceBase {
                     Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
                 }
             } else {
+                //FIXME: It can be in filesToKeep though, do NOT delete in this case
                 Log.w(TAG, "File not requested. Deleting "+receivedFile.getAbsolutePath());
                 receivedFile.delete();
             }
@@ -297,7 +290,7 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void disconnected(final String msg, boolean disable) {
             helperNotification.notifyBar(notificationSync, "Saving lists ... ");
-            saveFilesLists();
+            RepositorySync.saveFilesLists();
             if(disable) {
                 sendMessage("enableSync");
             }
@@ -317,22 +310,19 @@ public class ServiceSync extends ServiceBase {
     }
 
     private void notifyBar(String text) {
-        String msg = "- "+filesToGet.size() + "/" + filesToKeep.size()
+        String msg = "- "+RepositorySync.getFilesToGet().size() + "/" + RepositorySync.getFilesToKeep().size()
                 + " | "+text;
-        int max=filesToKeep.size();
-        int progress=max-filesToGet.size();
+        int max=RepositorySync.getFilesToKeep().size();
+        int progress=max-RepositorySync.getFilesToGet().size();
         helperNotification.notifyBar(notificationSync, msg, max, progress, false, true, true);
     }
 
-    private Map<Integer, FileInfoReception> filesToGet = null;
-    private Map<String, FileInfoReception> filesToKeep = null;
+
 
     private void requestNextFile(final boolean scanLibrary) {
-        if (filesToKeep != null) {
-            //notifyBar("Saving lists ... ");
-            //saveFilesLists();
-            if (filesToGet.size() > 0) {
-                final FileInfoReception fileToGetInfo = filesToGet.entrySet().iterator().next().getValue();
+        if (RepositorySync.getFilesToKeep() != null) {
+            if (RepositorySync.getFilesToGet().size() > 0) {
+                final FileInfoReception fileToGetInfo = RepositorySync.getFilesToGet().entrySet().iterator().next().getValue();
                 File fileToGet = new File(getAppDataPath, fileToGetInfo.relativeFullPath);
                 if (fileToGet.exists() && fileToGet.length() == fileToGetInfo.size) {
                     Log.i(TAG, "File already exists. Remove from filesToGet list: " + fileToGetInfo);
@@ -358,7 +348,7 @@ public class ServiceSync extends ServiceBase {
                 final String msg = "No more files to download.";
                 Log.i(TAG, msg + " Updating library:" + scanLibrary);
                 helperNotification.notifyBar(notificationSync, msg);
-                helperToast.toastLong(msg+"\n\nAll " + filesToKeep.size() + " files" +
+                helperToast.toastLong(msg+"\n\nAll " + RepositorySync.getFilesToKeep().size() + " files" +
                         " have been retrieved successfully.");
                 //Not disconnecting to be able to receive a new list
                 //sent by the server. User can still close
@@ -398,46 +388,6 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    private void saveFilesLists() {
-        //Write list of files to maintain in db
-        if(filesToKeep!=null) {
-            Gson gson = new Gson();
-            HelperFile.write("Sync", "FilesToKeep.txt", gson.toJson(filesToKeep));
-        }
-        //Write list of files to retrieve
-        if(filesToGet!=null) {
-            Gson gson = new Gson();
-            HelperFile.write("Sync", "filesToGet.txt", gson.toJson(filesToGet));
-        }
-    }
 
-    //FIXME: Make an Helper tor read filesToKeep & co (to make it available to ServiceScan)
-    //+ avoid reading/writing files too often
-    private void readFilesLists() {
-        //Read FilesToKeep file to get list of files to maintain in db
-        String readJson = HelperFile.read("Sync", "FilesToKeep.txt");
-        if(!readJson.equals("")) {
-            filesToKeep = new HashMap<>();
-            Gson gson = new Gson();
-            Type mapType = new TypeToken<HashMap<String, FileInfoReception>>(){}.getType();
-            try {
-                filesToKeep = gson.fromJson(readJson,mapType);
-            } catch (JsonSyntaxException ex) {
-                Log.e(TAG, "", ex);
-            }
-        }
-        //Read filesToGet file to get list of files to retrieve
-        readJson = HelperFile.read("Sync", "filesToGet.txt");
-        if(!readJson.equals("")) {
-            filesToGet = new HashMap<>();
-            Gson gson = new Gson();
-            Type mapType = new TypeToken<HashMap<Integer, FileInfoReception>>(){}.getType();
-            try {
-                filesToGet = gson.fromJson(readJson, mapType);
-            } catch (JsonSyntaxException ex) {
-                Log.e(TAG, "", ex);
-            }
-        }
-    }
 
 }
