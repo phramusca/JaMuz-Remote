@@ -162,7 +162,7 @@ public class ServiceSync extends ServiceBase {
                         }
                         break;
                     case "StartSync":
-                        helperNotification.notifyBar(notificationSync, "Requested first file ... ");
+                        //helperNotification.notifyBar(notificationSync, "Requesting first file ... ");
                         requestNextFile(false);
                         break;
                     case "SEND_DB":
@@ -286,13 +286,7 @@ public class ServiceSync extends ServiceBase {
 
         @Override
         public void receivingFile(final FileInfoReception fileInfoReception) {
-            String msg = "- "+filesToGet.size() + "/" + filesToKeep.size()
-                    + " | "+StringManager.humanReadableByteCount(
-                    fileInfoReception.size, false)
-                    +" | "+fileInfoReception.relativeFullPath;
-            int max=filesToKeep.size();
-            int progress=max-filesToGet.size();
-            helperNotification.notifyBar(notificationSync, msg, max, progress, false, true, true);
+            //notifyFile(fileInfoReception);
         }
 
         @Override
@@ -330,11 +324,22 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
+    private void notifyFile(FileInfoReception fileInfoReception) {
+        String msg = "- "+filesToGet.size() + "/" + filesToKeep.size()
+                + " | "+StringManager.humanReadableByteCount(
+                fileInfoReception.size, false)
+                +" | "+fileInfoReception.relativeFullPath;
+        int max=filesToKeep.size();
+        int progress=max-filesToGet.size();
+        helperNotification.notifyBar(notificationSync, msg, max, progress, false, true, true);
+    }
+
     private Map<Integer, FileInfoReception> filesToGet = null;
     private Map<String, FileInfoReception> filesToKeep = null;
 
     private void requestNextFile(final boolean scanLibrary) {
         if (filesToKeep != null) {
+            helperNotification.notifyBar(notificationSync, "Saving lists ... ");
             saveFilesLists();
             if (filesToGet.size() > 0) {
                 final FileInfoReception fileToGetInfo = filesToGet.entrySet().iterator().next().getValue();
@@ -358,6 +363,7 @@ public class ServiceSync extends ServiceBase {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    notifyFile(fileToGetInfo);
                                     watchTimeOut(fileToGetInfo.size);
                                 }
                             });

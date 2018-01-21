@@ -74,12 +74,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -580,9 +575,7 @@ public class MainActivity extends AppCompatActivity {
                             {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    File file = new File(
-                                            Environment.getExternalStorageDirectory()+"/JaMuz/Playlists/"+localSelectedPlaylist.getName()+".plli");
-                                    file.delete();
+                                    HelperFile.delete("Playlists", localSelectedPlaylist.getName()+".plli");
                                     localPlaylists.remove(localSelectedPlaylist);
                                     localSelectedPlaylist=localPlaylists.get(0);
                                     displayPlaylist(localSelectedPlaylist);
@@ -1712,9 +1705,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupLocalPlaylists() {
         localPlaylists = new ArrayList<Playlist>();
-        File playlistFolder = new File(
-                Environment.getExternalStorageDirectory()+"/JaMuz/Playlists/");
-        playlistFolder.mkdirs();
+        File playlistFolder = HelperFile.createFolder("Playlists");
         for(String file : playlistFolder.list()) {
             if(file.endsWith(".plli")) {
                 Playlist playlist = readPlaylist(file);
@@ -1753,43 +1744,12 @@ public class MainActivity extends AppCompatActivity {
         //FIXME: "All" Playlist Use an editableflag
         if(playlist !=null && !playlist.getName().equals("All")) {
             Gson gson = new Gson();
-            File playlistFile = new File(
-            Environment.getExternalStorageDirectory()+"/JaMuz/Playlists/"+playlist.getName()+".plli");
-            File playlistFolder = new File(
-                    Environment.getExternalStorageDirectory()+"/JaMuz/Playlists/");
-            playlistFolder.mkdirs();
-            try {
-                BufferedWriter out = new BufferedWriter(new FileWriter(playlistFile.getAbsolutePath(), false));
-                out.write(gson.toJson(playlist));
-                out.flush();
-                out.close();
-            } catch (IOException e) {
-                Log.e(TAG, "Error saving playlist: "+playlist, e);
-            }
+            HelperFile.save("Playlists", playlist.getName()+".plli",gson.toJson(playlist));
         }
     }
 
     private Playlist readPlaylist(String filename) {
-        File file = new File(
-                Environment.getExternalStorageDirectory()+"/JaMuz/Playlists/"+filename);
-        File playlistFolder = new File(
-                Environment.getExternalStorageDirectory()+"/JaMuz/Playlists/");
-        playlistFolder.mkdirs();
-        StringBuilder text = new StringBuilder();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = br.readLine()) != null) {
-                text.append(line);
-                text.append('\n');
-            }
-            br.close();
-        }
-        catch (IOException e) {
-            Log.e(TAG, "Error reading playlist: "+filename, e);
-        }
-        String readJson = text.toString();
-
+        String readJson = HelperFile.read("Playlists", filename);
         if(!readJson.equals("")) {
             Playlist playlist = new Playlist(filename.replaceFirst("[.][^.]+$", ""), true);
             Gson gson = new Gson();
