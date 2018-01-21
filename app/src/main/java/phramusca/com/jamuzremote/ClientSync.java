@@ -89,7 +89,7 @@ public class ClientSync extends Client {
                 syncStatus.nbRetries++;
             }
 
-            if (reconnect && syncStatus.nbRetries < 10
+            if (reconnect && syncStatus.nbRetries < 100 //TODO: Make max nbRetries configurable
                     && syncStatus.status.equals(Status.NOT_CONNECTED)) {
                 logStatus("Re-connecting in 5s");
                 try {
