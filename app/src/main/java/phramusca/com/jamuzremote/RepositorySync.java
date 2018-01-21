@@ -78,7 +78,7 @@ public final class RepositorySync {
 
     }*/
 
-    //FIXME: Save/Read lists separately as they change not in sync
+    //FIXME: Read lists separately as they change not in sync
 
     protected synchronized static void saveFilesLists() {
         //Write list of files to maintain in db
@@ -94,28 +94,36 @@ public final class RepositorySync {
     }
 
     protected static synchronized void readFilesLists() {
-        //Read FilesToKeep file to get list of files to maintain in db
-        String readJson = HelperFile.read("Sync", "FilesToKeep.txt");
-        if(!readJson.equals("")) {
-            filesToKeep = new HashMap<>();
-            Gson gson = new Gson();
-            Type mapType = new TypeToken<HashMap<String, FileInfoReception>>(){}.getType();
-            try {
-                filesToKeep = gson.fromJson(readJson,mapType);
-            } catch (JsonSyntaxException ex) {
-                Log.e(TAG, "", ex);
+        String readJson;
+        if(filesToKeep==null) {
+            //Read FilesToKeep file to get list of files to maintain in db
+            readJson = HelperFile.read("Sync", "FilesToKeep.txt");
+            if (!readJson.equals("")) {
+                filesToKeep = new HashMap<>();
+                Gson gson = new Gson();
+                Type mapType = new TypeToken<HashMap<String, FileInfoReception>>() {
+                }.getType();
+                try {
+                    filesToKeep = gson.fromJson(readJson, mapType);
+                } catch (JsonSyntaxException ex) {
+                    Log.e(TAG, "", ex);
+                }
             }
         }
-        //Read filesToGet file to get list of files to retrieve
-        readJson = HelperFile.read("Sync", "filesToGet.txt");
-        if(!readJson.equals("")) {
-            filesToGet = new HashMap<>();
-            Gson gson = new Gson();
-            Type mapType = new TypeToken<HashMap<Integer, FileInfoReception>>(){}.getType();
-            try {
-                filesToGet = gson.fromJson(readJson, mapType);
-            } catch (JsonSyntaxException ex) {
-                Log.e(TAG, "", ex);
+
+        if(filesToGet==null) {
+            //Read filesToGet file to get list of files to retrieve
+            readJson = HelperFile.read("Sync", "filesToGet.txt");
+            if (!readJson.equals("")) {
+                filesToGet = new HashMap<>();
+                Gson gson = new Gson();
+                Type mapType = new TypeToken<HashMap<Integer, FileInfoReception>>() {
+                }.getType();
+                try {
+                    filesToGet = gson.fromJson(readJson, mapType);
+                } catch (JsonSyntaxException ex) {
+                    Log.e(TAG, "", ex);
+                }
             }
         }
     }
