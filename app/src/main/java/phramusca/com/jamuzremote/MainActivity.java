@@ -534,7 +534,7 @@ public class MainActivity extends AppCompatActivity {
                         String text = input.getText().toString().trim();
                         if(!localPlaylists.contains(text)) {
 
-                            //FIXME: localPlaylists is empty at startup (before first connected to db) !!
+                            //FIXME: "All" Playlist: localPlaylists is empty at startup (before first connected to db) !!
                             //=> Definitly manage "All" Playlist well
 
                             localPlaylists = localPlaylists.subList(0, localPlaylists.size()-1);
@@ -1534,7 +1534,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    //FIXME: Read it with sync too (as for remote)
+    //FIXME: getFromQRcode with sync too (as for remote)
     private void getFromQRcode(String content) {
         if(content!=null) {
             if(!content.equals("")) {
