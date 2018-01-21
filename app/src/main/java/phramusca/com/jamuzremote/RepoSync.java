@@ -45,15 +45,7 @@ public final class RepoSync {
             if(receivedFile.exists()) {
                 if (receivedFile.length() == fileInfoReception.size) {
                     Log.i(TAG, "Saved file size: " + receivedFile.length());
-                    if(HelperLibrary.insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception)) {
-                        return true;
-                    } else {
-                        Log.w(TAG, "File tags could not be read. Deleting " + receivedFile.getAbsolutePath());
-                        receivedFile.delete();
-                        //NOTES:
-                        // - File is already deleted
-                        // - Can happen also if database is null (not only if tags are not read)
-                    }
+                    HelperLibrary.insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception);
                 } else {
                     Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
                     receivedFile.delete();
@@ -61,8 +53,7 @@ public final class RepoSync {
             } else {
                 Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
             }
-        } else {
-            //FIXME: It can be in filesToKeep though, do NOT delete in this case
+        } else if(!filesToKeep.containsKey(fileInfoReception.relativeFullPath)) {
             Log.w(TAG, "File not requested. Deleting "+receivedFile.getAbsolutePath());
             receivedFile.delete();
         }
@@ -72,6 +63,7 @@ public final class RepoSync {
     public static void receivedAck(int idFile) {
         if(filesToGet.containsKey(idFile)) {
             filesToGet.remove(idFile);
+            saveFilesToGet();
         }
     }
 
@@ -86,19 +78,27 @@ public final class RepoSync {
                 filesToGet.put(fileReceived.idFile, fileReceived);
             }
         }
-        save();
+        saveBothLists();
     }
 
-    protected synchronized static void save() {
-        //Write list of files to maintain in db
-        if(filesToKeep!=null) {
-            Gson gson = new Gson();
-            HelperFile.write("Sync", "FilesToKeep.txt", gson.toJson(filesToKeep));
-        }
+    protected synchronized static void saveBothLists() {
+        saveFileToKeep();
+        saveFilesToGet();
+    }
+
+    public static void saveFilesToGet() {
         //Write list of files to retrieve
         if(filesToGet!=null) {
             Gson gson = new Gson();
             HelperFile.write("Sync", "filesToGet.txt", gson.toJson(filesToGet));
+        }
+    }
+
+    private synchronized static void saveFileToKeep() {
+        //Write list of files to maintain in db
+        if(filesToKeep!=null) {
+            Gson gson = new Gson();
+            HelperFile.write("Sync", "FilesToKeep.txt", gson.toJson(filesToKeep));
         }
     }
 

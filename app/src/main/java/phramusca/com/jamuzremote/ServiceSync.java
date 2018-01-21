@@ -49,7 +49,7 @@ public class ServiceSync extends ServiceBase {
     @Override
     public void onDestroy(){
         stopSync(false);
-        RepoSync.save();
+        RepoSync.saveBothLists();
         super.onDestroy();
     }
 
@@ -153,7 +153,6 @@ public class ServiceSync extends ServiceBase {
 
                             //e-InsertKO
                             //e-ERROR (reading tags for instance; to be read at last with max retry count)
-
                             RepoSync.receivedAck(idFile);
                         }
                         if(requestNextFile) {
@@ -265,8 +264,6 @@ public class ServiceSync extends ServiceBase {
 
         @Override
         public void disconnected(final String msg, boolean disable) {
-            helperNotification.notifyBar(notificationSync, "Saving lists ... ");
-            RepoSync.save();
             if(disable) {
                 sendMessage("enableSync");
             }
