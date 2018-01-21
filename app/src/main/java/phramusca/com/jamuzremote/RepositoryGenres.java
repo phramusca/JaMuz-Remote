@@ -47,7 +47,7 @@ public final class RepositoryGenres {
         }
     }
 
-    public synchronized static void add(final String genre) {
+    private synchronized static void add(final String genre) {
         if(HelperLibrary.musicLibrary!=null && !get().contains(genre)) {
             new Thread() {
                 public void run() {

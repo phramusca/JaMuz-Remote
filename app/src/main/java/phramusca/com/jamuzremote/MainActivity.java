@@ -1776,44 +1776,46 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displayPlaylist(Playlist playlist) {
-        for(int i=0; i<layoutTagsPlaylist.getFlexItemCount();i++) {
-            TriStateButton button = (TriStateButton)layoutTagsPlaylist.getFlexItemAt(i);
-            if(button!=null) {
-                button.setState(TriStateButton.STATE.ANY);
-                setTagButtonTextColor(button, TriStateButton.STATE.ANY);
+        if(playlist!=null) {
+            for(int i=0; i<layoutTagsPlaylist.getFlexItemCount();i++) {
+                TriStateButton button = (TriStateButton)layoutTagsPlaylist.getFlexItemAt(i);
+                if(button!=null) {
+                    button.setState(TriStateButton.STATE.ANY);
+                    setTagButtonTextColor(button, TriStateButton.STATE.ANY);
+                }
             }
-        }
-        for(int i=0; i<layoutGenrePlaylist.getFlexItemCount();i++) {
-            TriStateButton button = (TriStateButton)layoutGenrePlaylist.getFlexItemAt(i);
-            if(button!=null) {
-                button.setState(TriStateButton.STATE.ANY);
-                setTagButtonTextColor(button, TriStateButton.STATE.ANY);
+            for(int i=0; i<layoutGenrePlaylist.getFlexItemCount();i++) {
+                TriStateButton button = (TriStateButton)layoutGenrePlaylist.getFlexItemAt(i);
+                if(button!=null) {
+                    button.setState(TriStateButton.STATE.ANY);
+                    setTagButtonTextColor(button, TriStateButton.STATE.ANY);
+                }
             }
-        }
-        TriStateButton nullButton = (TriStateButton) layoutTagsPlaylist.findViewWithTag("null");
-        if(nullButton!=null) {
-            nullButton.setState(playlist.getUnTaggedState());
-            setTagButtonTextColor(nullButton, playlist.getUnTaggedState());
-        }
-        for(Map.Entry<String, TriStateButton.STATE> entry : playlist.getTags()) {
-            TriStateButton button = (TriStateButton) layoutTagsPlaylist.findViewWithTag(entry.getKey());
-            if(button!=null) {
-                button.setState(entry.getValue());
-                setTagButtonTextColor(button, entry.getValue());
+            TriStateButton nullButton = (TriStateButton) layoutTagsPlaylist.findViewWithTag("null");
+            if(nullButton!=null) {
+                nullButton.setState(playlist.getUnTaggedState());
+                setTagButtonTextColor(nullButton, playlist.getUnTaggedState());
             }
-        }
-        for(Map.Entry<String, TriStateButton.STATE> entry : playlist.getGenres()) {
-            TriStateButton button = (TriStateButton) layoutGenrePlaylist.findViewWithTag(entry.getKey());
-            if(button!=null) {
-                button.setState(entry.getValue());
-                setTagButtonTextColor(button, entry.getValue());
+            for(Map.Entry<String, TriStateButton.STATE> entry : playlist.getTags()) {
+                TriStateButton button = (TriStateButton) layoutTagsPlaylist.findViewWithTag(entry.getKey());
+                if(button!=null) {
+                    button.setState(entry.getValue());
+                    setTagButtonTextColor(button, entry.getValue());
+                }
             }
+            for(Map.Entry<String, TriStateButton.STATE> entry : playlist.getGenres()) {
+                TriStateButton button = (TriStateButton) layoutGenrePlaylist.findViewWithTag(entry.getKey());
+                if(button!=null) {
+                    button.setState(entry.getValue());
+                    setTagButtonTextColor(button, entry.getValue());
+                }
+            }
+            buttonRatingOperator.setText(playlist.getRatingOperator());
+            ratingBarPlaylist.setRating(playlist.getRating());
+            textViewRating.setText(playlist.getRatingString());
+            textViewTag.setText(playlist.getTagsString());
+            textViewGenre.setText(playlist.getGenresString());
         }
-        buttonRatingOperator.setText(playlist.getRatingOperator());
-        ratingBarPlaylist.setRating(playlist.getRating());
-        textViewRating.setText(playlist.getRatingString());
-        textViewTag.setText(playlist.getTagsString());
-        textViewGenre.setText(playlist.getGenresString());
     }
 
     ///TODO: Detect WIFI connection to allow/disallow "Connect" buttons
