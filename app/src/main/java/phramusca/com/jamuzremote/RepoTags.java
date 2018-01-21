@@ -9,12 +9,12 @@ import java.util.Map;
  * Created by raph on 10/06/17.
  */
 
-public final class RepositoryTags {
+public final class RepoTags {
 
-    private static final String TAG = RepositoryTags.class.getSimpleName();
+    private static final String TAG = RepoTags.class.getSimpleName();
     private static Map<Integer, String> tags = new HashMap<>();
 
-    private RepositoryTags () {
+    private RepoTags() {
     }
 
     public synchronized static Map<Integer, String> get() {

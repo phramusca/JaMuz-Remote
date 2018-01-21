@@ -37,7 +37,7 @@ public class ServiceSync extends ServiceBase {
         new Thread() {
             public void run() {
                 helperNotification.notifyBar(notificationSync, "Reading lists ... ");
-                RepositorySync.readFilesLists();
+                RepoSync.readFilesLists();
                 clientSync =  new ClientSync(clientInfo, new CallBackSync());
                 helperNotification.notifyBar(notificationSync, "Connecting ... ");
                 clientSync.connect();
@@ -49,7 +49,7 @@ public class ServiceSync extends ServiceBase {
     @Override
     public void onDestroy(){
         stopSync(false);
-        RepositorySync.saveFilesLists();
+        RepoSync.saveFilesLists();
         super.onDestroy();
     }
 
@@ -154,7 +154,7 @@ public class ServiceSync extends ServiceBase {
                             //e-InsertKO
                             //e-ERROR (reading tags for instance; to be read at last with max retry count)
 
-                            RepositorySync.received(idFile);
+                            RepoSync.received(idFile);
                         }
                         if(requestNextFile) {
                             requestNextFile(true);
@@ -181,7 +181,7 @@ public class ServiceSync extends ServiceBase {
                                 clientSync.ackFileReception(fileReceived.idFile, false);
                             }
                         }
-                        RepositorySync.set(getAppDataPath, newTracks);
+                        RepoSync.set(getAppDataPath, newTracks);
                         requestNextFile(true);
                         break;
                     case "tags":
@@ -194,7 +194,7 @@ public class ServiceSync extends ServiceBase {
                                     for(int i = 0; i < jsonTags.length(); i++){
                                         newTags.add((String) jsonTags.get(i));
                                     }
-                                    RepositoryTags.set(newTags);
+                                    RepoTags.set(newTags);
                                     sendMessage("setupTags");
                                 } catch (JSONException e) {
                                     Log.e(TAG, e.toString());
@@ -213,7 +213,7 @@ public class ServiceSync extends ServiceBase {
                                         final String genre = (String) jsonGenres.get(i);
                                         newGenres.add(genre);
                                     }
-                                    RepositoryGenres.set(newGenres);
+                                    RepoGenres.set(newGenres);
                                     sendMessage("setupGenres");
                                 } catch (JSONException e) {
                                     Log.e(TAG, e.toString());
@@ -230,11 +230,11 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void receivedFile(final FileInfoReception fileInfoReception) {
             Log.i(TAG, "Received file\n"+fileInfoReception
-                    +"\nRemaining : "+RepositorySync.getFilesToGet().size()+"/"+RepositorySync.getFilesToKeep().size());
+                    +"\nRemaining : "+ RepoSync.getFilesToGet().size()+"/"+ RepoSync.getFilesToKeep().size());
             File receivedFile = new File(getAppDataPath.getAbsolutePath()+File.separator
                     +fileInfoReception.relativeFullPath);
             notifyBar("3/4", fileInfoReception);
-            if(RepositorySync.getFilesToGet().containsKey(fileInfoReception.idFile)) {
+            if(RepoSync.getFilesToGet().containsKey(fileInfoReception.idFile)) {
                 if(receivedFile.exists()) {
                     if (receivedFile.length() == fileInfoReception.size) {
                         Log.i(TAG, "Saved file size: " + receivedFile.length());
@@ -290,7 +290,7 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void disconnected(final String msg, boolean disable) {
             helperNotification.notifyBar(notificationSync, "Saving lists ... ");
-            RepositorySync.saveFilesLists();
+            RepoSync.saveFilesLists();
             if(disable) {
                 sendMessage("enableSync");
             }
@@ -310,19 +310,19 @@ public class ServiceSync extends ServiceBase {
     }
 
     private void notifyBar(String text) {
-        String msg = "- "+RepositorySync.getFilesToGet().size() + "/" + RepositorySync.getFilesToKeep().size()
+        String msg = "- "+ RepoSync.getFilesToGet().size() + "/" + RepoSync.getFilesToKeep().size()
                 + " | "+text;
-        int max=RepositorySync.getFilesToKeep().size();
-        int progress=max-RepositorySync.getFilesToGet().size();
+        int max= RepoSync.getFilesToKeep().size();
+        int progress=max- RepoSync.getFilesToGet().size();
         helperNotification.notifyBar(notificationSync, msg, max, progress, false, true, true);
     }
 
 
 
     private void requestNextFile(final boolean scanLibrary) {
-        if (RepositorySync.getFilesToKeep() != null) {
-            if (RepositorySync.getFilesToGet().size() > 0) {
-                final FileInfoReception fileToGetInfo = RepositorySync.getFilesToGet().entrySet().iterator().next().getValue();
+        if (RepoSync.getFilesToKeep() != null) {
+            if (RepoSync.getFilesToGet().size() > 0) {
+                final FileInfoReception fileToGetInfo = RepoSync.getFilesToGet().entrySet().iterator().next().getValue();
                 File fileToGet = new File(getAppDataPath, fileToGetInfo.relativeFullPath);
                 if (fileToGet.exists() && fileToGet.length() == fileToGetInfo.size) {
                     Log.i(TAG, "File already exists. Remove from filesToGet list: " + fileToGetInfo);
@@ -348,7 +348,7 @@ public class ServiceSync extends ServiceBase {
                 final String msg = "No more files to download.";
                 Log.i(TAG, msg + " Updating library:" + scanLibrary);
                 helperNotification.notifyBar(notificationSync, msg);
-                helperToast.toastLong(msg+"\n\nAll " + RepositorySync.getFilesToKeep().size() + " files" +
+                helperToast.toastLong(msg+"\n\nAll " + RepoSync.getFilesToKeep().size() + " files" +
                         " have been retrieved successfully.");
                 //Not disconnecting to be able to receive a new list
                 //sent by the server. User can still close

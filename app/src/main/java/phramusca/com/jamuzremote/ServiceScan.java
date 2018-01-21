@@ -153,14 +153,14 @@ public class ServiceScan extends ServiceBase {
                                         //=> Files from JaMuz Sync
                                         String fileKey = absolutePath.substring(
                                                 getAppDataPath.getAbsolutePath().length()+1);
-                                        if(RepositorySync.getFilesToKeep()!=null
-                                                && !RepositorySync.getFilesToKeep().containsKey(fileKey)) {
+                                        if(RepoSync.getFilesToKeep()!=null
+                                                && !RepoSync.getFilesToKeep().containsKey(fileKey)) {
                                             Log.i(TAG, "Deleting file "+absolutePath);
                                             file.delete();
-                                        } else if(RepositorySync.getFilesToKeep()!=null
-                                                && RepositorySync.getFilesToKeep().containsKey(fileKey)) {
+                                        } else if(RepoSync.getFilesToKeep()!=null
+                                                && RepoSync.getFilesToKeep().containsKey(fileKey)) {
                                             FileInfoReception fileInfoReception=
-                                                    RepositorySync.getFilesToKeep().get(fileKey);
+                                                    RepoSync.getFilesToKeep().get(fileKey);
                                             HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, fileInfoReception);
                                         } else {
                                             HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);

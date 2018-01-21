@@ -1592,7 +1592,7 @@ public class MainActivity extends AppCompatActivity {
                 layoutTags.removeAllViews();
                 layoutTagsPlaylist.removeAllViews();
                 makeButtonTagPlaylist(Integer.MAX_VALUE, "null");
-                for(Map.Entry<Integer, String> tag : RepositoryTags.get().entrySet()) {
+                for(Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
                     makeButtonTag(tag.getKey(), tag.getValue());
                     makeButtonTagPlaylist(tag.getKey(), tag.getValue());
                 }
@@ -1608,7 +1608,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 layoutGenrePlaylist.removeAllViews();
-                for(String genre : RepositoryGenres.get()) {
+                for(String genre : RepoGenres.get()) {
                     makeButtonGenrePlaylist(-1, genre);
                 }
                 //Re-display track and playlist
@@ -1888,11 +1888,11 @@ public class MainActivity extends AppCompatActivity {
                     ratingBar.setEnabled(false);
                     ratingBar.setRating(displayedTrack.getRating());
                     ratingBar.setEnabled(true);
-                    setupSpinnerGenre(RepositoryGenres.get(), displayedTrack.getGenre());
+                    setupSpinnerGenre(RepoGenres.get(), displayedTrack.getGenre());
 
                     //Display file tags
                     ArrayList<String> fileTags = displayedTrack.getTags(false);
-                    for(Map.Entry<Integer, String> tag : RepositoryTags.get().entrySet()) {
+                    for(Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
                         ToggleButton button = (ToggleButton) layoutTags.findViewById(tag.getKey());
                         if(button!=null && button.isChecked()!=fileTags.contains(tag.getValue())) {
                             button.setChecked(fileTags.contains(tag.getValue()));

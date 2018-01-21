@@ -8,12 +8,12 @@ import java.util.List;
  * Created by raph on 10/06/17.
  */
 
-public final class RepositoryGenres {
+public final class RepoGenres {
 
-    private static final String TAG = RepositoryGenres.class.getSimpleName();
+    private static final String TAG = RepoGenres.class.getSimpleName();
     private static List<String> genres = new ArrayList<>();
 
-    private RepositoryGenres() {
+    private RepoGenres() {
     }
 
     public synchronized static List<String> get() {
