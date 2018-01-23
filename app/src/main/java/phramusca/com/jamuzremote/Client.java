@@ -55,7 +55,6 @@ public class Client {
             }
             inputStream = socket.getInputStream();
             bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            //Starting emission thread
             outputStream = socket.getOutputStream();
             emission = new ClientEmission(new PrintWriter(outputStream));
             emission.start();

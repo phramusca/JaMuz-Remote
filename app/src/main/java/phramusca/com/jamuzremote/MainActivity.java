@@ -531,8 +531,11 @@ public class MainActivity extends AppCompatActivity {
                         String text = input.getText().toString().trim();
                         if(!localPlaylists.contains(text)) {
 
-                            //FIXME: "All" Playlist: localPlaylists is empty at startup (before first connected to db) !!
-                            //=> Definitly manage "All" Playlist well
+                            //FIXME: "All" Playlist:
+                            // EASY WAY: Make it a default normal playlist, added when there are none
+                            // - localPlaylists is empty at startup (before first connected to db) !!
+                            // - Use an editable /"savable" bool(s)
+                            // - Search \"All\"" in whole project to make sure all occurences are managed
 
                             localPlaylists = localPlaylists.subList(0, localPlaylists.size()-1);
                             //TODO: Duplicate current playlist (clone) instead of new
@@ -1717,7 +1720,6 @@ public class MainActivity extends AppCompatActivity {
         for(String file : playlistFolder.list()) {
             if(file.endsWith(".plli")) {
                 Playlist playlist = readPlaylist(file);
-                //FIXME: "All" Playlist Use an editable bool
                 if(playlist !=null && !playlist.getName().equals("All")) {
                     playlist.getNbFiles();
                     localPlaylists.add(playlist);
@@ -1737,19 +1739,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupLocalPlaylistAll() {
         Collections.sort(localPlaylists);
-
-        //FIXME: "All" Playlist. Some playlists can be deleted, find a better a way of managing "All"
-        //(sort and remove are not worth using together)
-
         Playlist playlist = new Playlist("All", true);
         playlist.getNbFiles();
-        //FIXME: "All" Playlist make UNtouchable !
         localPlaylists.add(playlist);
         playListArrayAdapter = new ArrayAdapter<Playlist>(this, R.layout.spinner_item, localPlaylists);
     }
 
     private void savePlaylist(Playlist playlist) {
-        //FIXME: "All" Playlist Use an editableflag
         if(playlist !=null && !playlist.getName().equals("All")) {
             Gson gson = new Gson();
             HelperFile.write("Playlists", playlist.getName()+".plli",gson.toJson(playlist));
@@ -2012,9 +2008,9 @@ public class MainActivity extends AppCompatActivity {
         private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackRemote.class.getSimpleName();
 
         @Override
-        public void receivedJson(final String msg) {
+        public void receivedJson(final String json) {
             try {
-                JSONObject jObject = new JSONObject(msg);
+                JSONObject jObject = new JSONObject(json);
                 String type = jObject.getString("type");
                 switch(type) {
                     case "playlists":

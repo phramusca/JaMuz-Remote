@@ -48,7 +48,7 @@ public class ServiceSync extends ServiceBase {
 
     @Override
     public void onDestroy(){
-        stopSync(false);
+        stopSync(false, "");
         RepoSync.saveBothLists();
         super.onDestroy();
     }
@@ -101,7 +101,7 @@ public class ServiceSync extends ServiceBase {
 
                         @Override
                         public void onFinish() {
-                            stopSync(true);
+                            stopSync(true, "");
                         }
                     };
                     Log.i(TAG, "timerWatchTimeout.start()");
@@ -111,10 +111,10 @@ public class ServiceSync extends ServiceBase {
         });
     }
 
-    private void stopSync(boolean reconnect) {
+    private void stopSync(boolean reconnect, String msg) {
         cancelWatchTimeOut();
         if(clientSync!=null) {
-            clientSync.close(reconnect);
+            clientSync.close(reconnect, msg);
         }
         if(!reconnect) {
             sendMessage("enableSync");
@@ -127,14 +127,14 @@ public class ServiceSync extends ServiceBase {
         private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackSync.class.getSimpleName();
 
         @Override
-        public void receivedJson(final String msg) {
+        public void receivedJson(final String json) {
             try {
-                final JSONObject jObject = new JSONObject(msg);
+                final JSONObject jObject = new JSONObject(json);
                 String type = jObject.getString("type");
                 switch(type) {
                     case "insertDeviceFileAck":
-                        //FIXME: Display a benchmark instead
-                        //as not well displayed as aligned to the rigth
+                        //TODO: Display a benchmark instead
+                        //as not well displayed as aligned to the right
                         notifyBar("4/4 | Acknowledged");
                         String status = jObject.getString("status");
                         int idFile = jObject.getInt("idFile");
@@ -144,7 +144,7 @@ public class ServiceSync extends ServiceBase {
                             cancelWatchTimeOut();
 
                             //FIXME: Store status to manage what to do at any stage
-                            //+Merge filesToKeep and filesToGet in a single file
+                            // + Merge filesToKeep and filesToGet in a single file
                             //(even if 2 maps as 2 different keys)
 
                             //1-TOGET
@@ -263,8 +263,8 @@ public class ServiceSync extends ServiceBase {
         }
 
         @Override
-        public void disconnected(final String msg, boolean disable) {
-            if(disable) {
+        public void disconnected(final String msg, boolean reconnect) {
+            if(!reconnect) {
                 sendMessage("enableSync");
             }
             runOnUiThread(new Runnable() {
@@ -316,20 +316,9 @@ public class ServiceSync extends ServiceBase {
                 }.start();
             }
         } else if(RepoSync.getTotalSize()>0) {
-            final String msg = "No more files to download.";
-            Log.i(TAG, msg + " Updating library:" + scanLibrary);
-            helperNotification.notifyBar(notificationSync, msg);
-            helperToast.toastLong(msg + "\n\nAll " + RepoSync.getTotalSize() + " files" +
-                    " have been retrieved successfully.");
-            //Not disconnecting to be able to receive a new list
-            //sent by the server. User can still close
-            //enableClient(true);
-            //enableClient(clientSync,buttonSync, R.drawable.connect_off, true);
 
-
-            //FIXME: Only send if not already (need to store ackFileReception status)
-            //=> !! Check first if still necessary since we (should)
-            //          request ack from server now
+            //FIXME: Still need to resend ack when sync is over ?
+            // If so, only send if not already (need to store ackFileReception status)
 
             //Resend add request in case missed for some reason
             /*if(filesToKeep!=null) {
@@ -340,10 +329,15 @@ public class ServiceSync extends ServiceBase {
                 }
             }*/
 
+            final String msg = "No more files to download.";
+            Log.i(TAG, msg + " Updating library:" + scanLibrary);
+            helperToast.toastLong(msg + "\n\nAll " + RepoSync.getTotalSize() + " files" +
+                    " have been retrieved successfully.");
+
             if (scanLibrary) {
                 sendMessage("checkPermissionsThenScanLibrary");
             }
-            stopSelf();
+            stopSync(false, msg);
         } else {
             Log.i(TAG, "No files to download.");
             runOnUiThread(new Runnable() {

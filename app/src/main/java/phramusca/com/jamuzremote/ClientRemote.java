@@ -38,8 +38,8 @@ public class ClientRemote extends Client {
     class CallBackReception implements ICallBackReception {
 
 		@Override
-		public void receivedJson(String msg) {
-			callback.receivedJson(msg);
+		public void receivedJson(String json) {
+			callback.receivedJson(json);
 		}
 
         @Override
