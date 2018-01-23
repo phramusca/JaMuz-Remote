@@ -46,6 +46,7 @@ public final class RepoSync {
                 if (receivedFile.length() == fileInfoReception.size) {
                     Log.i(TAG, "Saved file size: " + receivedFile.length());
                     HelperLibrary.insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception);
+                    return true;
                 } else {
                     Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
                     receivedFile.delete();

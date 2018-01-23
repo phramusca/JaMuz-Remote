@@ -156,7 +156,7 @@ public class ServiceSync extends ServiceBase {
                             RepoSync.receivedAck(idFile);
                         }
                         if(requestNextFile) {
-                            requestNextFile(true);
+                            requestNextFile();
                         }
                         break;
                     case "StartSync":
@@ -181,7 +181,7 @@ public class ServiceSync extends ServiceBase {
                             }
                         }
                         RepoSync.set(getAppDataPath, newTracks);
-                        requestNextFile(true);
+                        requestNextFile();
                         break;
                     case "tags":
                         helperNotification.notifyBar(notificationSync, "Received tags ... ");
@@ -233,6 +233,8 @@ public class ServiceSync extends ServiceBase {
             notifyBar("3/4", fileInfoReception);
             if(RepoSync.received(getAppDataPath, fileInfoReception)) {
                 clientSync.ackFileReception(fileInfoReception.idFile, true);
+            } else {
+                requestNextFile();
             }
         }
 
@@ -290,6 +292,10 @@ public class ServiceSync extends ServiceBase {
         int max= RepoSync.getTotalSize();
         int progress=max- RepoSync.getRemainingSize();
         helperNotification.notifyBar(notificationSync, msg, max, progress, false, true, true);
+    }
+
+    private void requestNextFile() {
+        requestNextFile(true);
     }
 
     private void requestNextFile(final boolean scanLibrary) {
