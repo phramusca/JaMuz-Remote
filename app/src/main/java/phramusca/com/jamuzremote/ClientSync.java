@@ -24,7 +24,7 @@ public class ClientSync extends Client {
 
 	private final ICallBackSync callback;
 
-    private SyncStatus syncStatus = new SyncStatus(Status.NOT_CONNECTED, 0);
+    private final SyncStatus syncStatus = new SyncStatus(Status.NOT_CONNECTED, 0);
 
     private enum Status {
         NOT_CONNECTED,
@@ -70,7 +70,8 @@ public class ClientSync extends Client {
             if (syncStatus.status.equals(Status.NOT_CONNECTED)) {
                 syncStatus.status=Status.CONNECTING;
                 if (super.connect()) {
-                    syncStatus = new SyncStatus(Status.CONNECTED, 0);
+                    syncStatus.status=Status.CONNECTED;
+                    syncStatus.nbRetries=0;
                     logStatus("Connected");
                     callback.connected();
                     return true;
@@ -80,7 +81,7 @@ public class ClientSync extends Client {
         }
     }
 
-    public void close(boolean reconnect) {
+    public void close(boolean reconnect, String msg) {
         synchronized (syncStatus) {
             logStatus("close()");
             if(!syncStatus.status.equals(Status.NOT_CONNECTED)) {
@@ -88,7 +89,9 @@ public class ClientSync extends Client {
                 syncStatus.status=Status.NOT_CONNECTED;
                 syncStatus.nbRetries++;
             }
-
+            if(!msg.equals("")) {
+                callback.disconnected(msg, reconnect);
+            }
             if (reconnect && syncStatus.nbRetries < 100 //TODO: Make max nbRetries configurable
                     && syncStatus.status.equals(Status.NOT_CONNECTED)) {
                 if(syncStatus.nbRetries<2) {
@@ -108,7 +111,6 @@ public class ClientSync extends Client {
                 }.start();
             } else {
                 RepoSync.saveFilesToGet();
-                callback.disconnected("User stopped or max retries.", true);
                 syncStatus.status=Status.USER_STOP;
             }
         }
@@ -117,8 +119,8 @@ public class ClientSync extends Client {
     class CallBackReception implements ICallBackReception {
 
 		@Override
-		public void receivedJson(String msg) {
-			callback.receivedJson(msg);
+		public void receivedJson(String json) {
+			callback.receivedJson(json);
 		}
 
         @Override
@@ -145,10 +147,8 @@ public class ClientSync extends Client {
                 logStatus("disconnected()");
                 if(syncStatus.status.equals(Status.CONNECTED)
                         || syncStatus.status.equals(Status.CONNECTING)) {
-                    callback.disconnected(
-                            (syncStatus.nbRetries>0?"Attempt "+syncStatus.nbRetries
-                            :"Disconnected")+": "+msg, false);
-                    close(true);
+                    close(true, (syncStatus.nbRetries>0?"Attempt "+syncStatus.nbRetries
+                            :"Disconnected")+": "+msg);
                 }
             }
 		}

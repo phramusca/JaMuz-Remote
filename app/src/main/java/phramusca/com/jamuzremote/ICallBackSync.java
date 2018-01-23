@@ -10,10 +10,10 @@ package phramusca.com.jamuzremote;
  * @author phramusca
  */
 public interface ICallBackSync {
-	void receivedJson(String msg);
+	void receivedJson(String json);
 	void receivingFile(FileInfoReception fileInfoReception);
 	void receivedFile(FileInfoReception fileInfoReception);
 	void receivedDatabase();
 	void connected();
-	void disconnected(String msg, boolean disable);
+	void disconnected(String msg, boolean reconnect);
 }
