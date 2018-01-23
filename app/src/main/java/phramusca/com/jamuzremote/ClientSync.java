@@ -89,30 +89,36 @@ public class ClientSync extends Client {
                 syncStatus.status=Status.NOT_CONNECTED;
                 syncStatus.nbRetries++;
             }
-            if(!msg.equals("")) {
-                callback.disconnected(msg, reconnect);
-            }
-            if (reconnect && syncStatus.nbRetries < 100 //TODO: Make max nbRetries configurable
-                    && syncStatus.status.equals(Status.NOT_CONNECTED)) {
-                if(syncStatus.nbRetries<2) {
-                    RepoSync.saveFilesToGet();
+            if (reconnect) {
+                if(syncStatus.nbRetries < 100 //TODO: Make max nbRetries configurable
+                        && syncStatus.status.equals(Status.NOT_CONNECTED)) {
+                    if (syncStatus.nbRetries < 2) {
+                        RepoSync.saveFilesToGet();
+                    } else {
+                        logStatus("Re-connecting in 5s");
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                    logStatus("Re-connecting now");
+                    new Thread() {
+                        public void run() {
+                            connect();
+                        }
+                    }.start();
                 } else {
-                    logStatus("Re-connecting in 5s");
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                    }
+                    RepoSync.saveFilesToGet();
+                    msg="Too many retries ("+syncStatus.nbRetries+").";
+                    syncStatus.status=Status.USER_STOP;
                 }
-                logStatus("Re-connecting now");
-                new Thread() {
-                    public void run() {
-                        connect();
-                    }
-                }.start();
             } else {
                 RepoSync.saveFilesToGet();
+                msg=msg.equals("")?"User stopped.":msg;
                 syncStatus.status=Status.USER_STOP;
             }
+
+            callback.disconnected(reconnect, msg);
         }
     }
 

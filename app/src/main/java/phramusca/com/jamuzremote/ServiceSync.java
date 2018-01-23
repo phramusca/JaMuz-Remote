@@ -101,7 +101,7 @@ public class ServiceSync extends ServiceBase {
 
                         @Override
                         public void onFinish() {
-                            stopSync(true, "");
+                            stopSync(true, "Timed out waiting on file.");
                         }
                     };
                     Log.i(TAG, "timerWatchTimeout.start()");
@@ -263,16 +263,18 @@ public class ServiceSync extends ServiceBase {
         }
 
         @Override
-        public void disconnected(final String msg, boolean reconnect) {
+        public void disconnected(boolean reconnect, final String msg) {
             if(!reconnect) {
                 sendMessage("enableSync");
             }
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    helperNotification.notifyBar(notificationSync, msg);
-                }
-            });
+            if(!msg.equals("")) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        helperNotification.notifyBar(notificationSync, msg);
+                    }
+                });
+            }
         }
     }
 
