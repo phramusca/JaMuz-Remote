@@ -30,7 +30,7 @@ public class ClientSync extends Client {
         NOT_CONNECTED,
         CONNECTING,
         CONNECTED,
-        USER_STOP
+        STOPPING
     }
 
     private class SyncStatus {
@@ -111,12 +111,11 @@ public class ClientSync extends Client {
                 } else {
                     RepoSync.saveFilesToGet();
                     msg="Too many retries ("+syncStatus.nbRetries+").";
-                    syncStatus.status=Status.USER_STOP;
+                    syncStatus.status=Status.STOPPING;
                 }
             } else {
                 RepoSync.saveFilesToGet();
-                msg=msg.equals("")?"User stopped.":msg;
-                syncStatus.status=Status.USER_STOP;
+                syncStatus.status=Status.STOPPING;
             }
 
             callback.disconnected(reconnect, msg);
