@@ -1933,7 +1933,7 @@ public class MainActivity extends AppCompatActivity {
         return new SpannableString(source.subSequence(0, i+1));
     }
 
-    private static final String AVRCP_PLAYSTATE_CHANGED = "com.android.music.playstatechanged";
+    //private static final String AVRCP_PLAYSTATE_CHANGED = "com.android.music.playstatechanged";
     private static final String AVRCP_META_CHANGED = "com.android.music.metachanged";
 
     private void bluetoothNotifyChange(String what) {

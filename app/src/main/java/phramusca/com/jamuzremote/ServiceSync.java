@@ -48,12 +48,6 @@ public class ServiceSync extends ServiceBase {
 
     @Override
     public void onDestroy(){
-        //FIXME: Do not display "User stopped" right after "No more files to download." !!
-        //but only when it really is user that stopped
-        // => H2 distinguish stopSelf(); from stopService(service); ?
-        stopSync(false, "");
-        //FIXME: some list may have been already saved in stopSync ... check all usages
-        RepoSync.saveBothLists();
         super.onDestroy();
     }
 
@@ -117,12 +111,7 @@ public class ServiceSync extends ServiceBase {
 
     private void stopSync(boolean reconnect, String msg) {
         cancelWatchTimeOut();
-        /*if(clientSync!=null) {*/
-            clientSync.close(reconnect, msg);
-        /*}
-        if(!reconnect) {
-            sendMessage("enableSync");
-        }*/
+        clientSync.close(reconnect, msg);
     }
 
     class CallBackSync implements ICallBackSync {
@@ -248,9 +237,14 @@ public class ServiceSync extends ServiceBase {
 
         @Override
         public void receivedDatabase() {
-            String msg = "Statistics merged.";
-            helperToast.toastLong(msg);
-            helperNotification.notifyBar(notificationSync, msg, 5000);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String msg = "Statistics merged.";
+                    helperToast.toastLong(msg);
+                    helperNotification.notifyBar(notificationSync, msg, 5000);
+                }
+            });
 
             // TODO MERGE: Update FilesToKeep and FilesToGet
             // as received merged db is the new reference
@@ -347,13 +341,12 @@ public class ServiceSync extends ServiceBase {
                 public void run() {
                     helperToast.toastLong(msg + "\n\nAll " + RepoSync.getTotalSize() + " files" +
                             " have been retrieved successfully.");
+                    helperNotification.notifyBar(notificationSync, msg);
                 }
             });
-
             if (scanLibrary) {
                 sendMessage("checkPermissionsThenScanLibrary");
             }
-            stopSync(false, msg);
             stopSelf();
         } else {
             Log.i(TAG, "No files to download.");
