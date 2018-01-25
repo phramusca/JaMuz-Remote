@@ -615,8 +615,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 else {
-                    Intent service = new Intent(getApplicationContext(), ServiceSync.class);
-                    stopService(service);
+                    Log.i(TAG, "Broadcast("+ServiceSync.USER_STOP_SERVICE_REQUEST+")");
+                    sendBroadcast(new Intent(ServiceSync.USER_STOP_SERVICE_REQUEST));
                     enableSync(true);
                 }
             }

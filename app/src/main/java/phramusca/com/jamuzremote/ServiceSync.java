@@ -4,7 +4,10 @@ package phramusca.com.jamuzremote;
  * Created by raph on 10/06/17.
  */
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.CountDownTimer;
 import android.util.Log;
 
@@ -23,10 +26,14 @@ public class ServiceSync extends ServiceBase {
     private static final String TAG = ServiceSync.class.getSimpleName();
     private ClientSync clientSync;
     private Notification notificationSync;
+    final public static String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE";
+    private BroadcastReceiver userStopReceiver;
 
     @Override
     public void onCreate(){
         notificationSync = new Notification(this, 1, "Sync");
+        userStopReceiver=new UserStopServiceReceiver();
+        registerReceiver(userStopReceiver,  new IntentFilter(USER_STOP_SERVICE_REQUEST));
         super.onCreate();
     }
 
@@ -38,8 +45,8 @@ public class ServiceSync extends ServiceBase {
             public void run() {
                 helperNotification.notifyBar(notificationSync, "Reading lists ... ");
                 RepoSync.read();
-                clientSync =  new ClientSync(clientInfo, new CallBackSync());
                 helperNotification.notifyBar(notificationSync, "Connecting ... ");
+                clientSync =  new ClientSync(clientInfo, new CallBackSync());
                 clientSync.connect();
             }
         }.start();
@@ -48,7 +55,19 @@ public class ServiceSync extends ServiceBase {
 
     @Override
     public void onDestroy(){
+        unregisterReceiver(userStopReceiver);
         super.onDestroy();
+    }
+
+    public class UserStopServiceReceiver extends BroadcastReceiver
+    {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            Log.i(TAG, "UserStopServiceReceiver.onReceive()");
+            stopSync(false, "User stopped.");
+            stopSelf();
+        }
     }
 
     private static final Object timerLock = new Object();
@@ -111,7 +130,9 @@ public class ServiceSync extends ServiceBase {
 
     private void stopSync(boolean reconnect, String msg) {
         cancelWatchTimeOut();
-        clientSync.close(reconnect, msg);
+        if(clientSync!=null) {
+            clientSync.close(reconnect, msg);
+        }
     }
 
     class CallBackSync implements ICallBackSync {
@@ -347,7 +368,6 @@ public class ServiceSync extends ServiceBase {
             if (scanLibrary) {
                 sendMessage("checkPermissionsThenScanLibrary");
             }
-            stopSelf();
         } else {
             Log.i(TAG, "No files to download.");
             runOnUiThread(new Runnable() {
@@ -357,7 +377,6 @@ public class ServiceSync extends ServiceBase {
                             "export a list of files to retrieve, based on playlists.");
                 }
             });
-            stopSelf();
         }
     }
 }
