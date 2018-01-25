@@ -74,6 +74,7 @@ public class ClientSync extends Client {
                     syncStatus.nbRetries=0;
                     logStatus("Connected");
                     callback.connected();
+                    RepoSync.saveFilesToGet();
                     return true;
                 }
             }
