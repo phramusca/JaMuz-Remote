@@ -43,7 +43,7 @@ public class ServiceSync extends ServiceBase {
         final ClientInfo clientInfo = (ClientInfo)intent.getSerializableExtra("clientInfo");
         new Thread() {
             public void run() {
-                helperNotification.notifyBar(notificationSync, "Reading lists ... ");
+                helperNotification.notifyBar(notificationSync, "Reading list ... ");
                 RepoSync.read();
                 helperNotification.notifyBar(notificationSync, "Connecting ... ");
                 clientSync =  new ClientSync(clientInfo, new CallBackSync());
@@ -66,7 +66,6 @@ public class ServiceSync extends ServiceBase {
         {
             Log.i(TAG, "UserStopServiceReceiver.onReceive()");
             stopSync(false, "User stopped.");
-            stopSelf();
         }
     }
 
@@ -133,6 +132,9 @@ public class ServiceSync extends ServiceBase {
         if(clientSync!=null) {
             clientSync.close(reconnect, msg);
         }
+        if(!reconnect) {
+            stopSelf();
+        }
     }
 
     class CallBackSync implements ICallBackSync {
@@ -150,7 +152,6 @@ public class ServiceSync extends ServiceBase {
                         //as not well displayed as aligned to the right
                         notifyBar("4/4 | Acknowledged");
                         String status = jObject.getString("status");
-                        int idFile = jObject.getInt("idFile");
                         boolean requestNextFile = jObject.getBoolean("requestNextFile");
                         if(status.equals("OK")) {
                             sendMessage("refreshSpinner(true)");
@@ -166,7 +167,9 @@ public class ServiceSync extends ServiceBase {
 
                             //e-InsertKO
                             //e-ERROR (reading tags for instance; to be read at last with max retry count)
-                            RepoSync.receivedAck(idFile);
+
+                            FileInfoReception fileReceived = new FileInfoReception(jObject.getJSONObject("file"));
+                            RepoSync.receivedAck(fileReceived);
                         }
                         if(requestNextFile) {
                             requestNextFile();
@@ -322,7 +325,7 @@ public class ServiceSync extends ServiceBase {
         if (fileToGetInfo != null) {
             File fileToGet = new File(getAppDataPath, fileToGetInfo.relativeFullPath);
             if (fileToGet.exists() && fileToGet.length() == fileToGetInfo.size) {
-                Log.i(TAG, "File already exists. Remove from filesToGet list: " + fileToGetInfo);
+                Log.i(TAG, "File already exists. Sendind ack.: " + fileToGetInfo);
                 clientSync.ackFileReception(fileToGetInfo.idFile, true);
             } else {
                 new Thread() {
@@ -362,9 +365,10 @@ public class ServiceSync extends ServiceBase {
                 public void run() {
                     helperToast.toastLong(msg + "\n\nAll " + RepoSync.getTotalSize() + " files" +
                             " have been retrieved successfully.");
-                    helperNotification.notifyBar(notificationSync, msg);
+                    //helperNotification.notifyBar(notificationSync, msg);
                 }
             });
+            stopSync(false, msg);
             if (scanLibrary) {
                 sendMessage("checkPermissionsThenScanLibrary");
             }
@@ -375,8 +379,10 @@ public class ServiceSync extends ServiceBase {
                 public void run() {
                     helperToast.toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
                             "export a list of files to retrieve, based on playlists.");
+                    //helperNotification.notifyBar(notificationSync, "No files to download.");
                 }
             });
+            stopSync(false, "No files to download.");
         }
     }
 }

@@ -74,7 +74,7 @@ public class ClientSync extends Client {
                     syncStatus.nbRetries=0;
                     logStatus("Connected");
                     callback.connected();
-                    RepoSync.saveFilesToGet();
+                    RepoSync.saveFiles();
                     return true;
                 }
             }
@@ -94,7 +94,7 @@ public class ClientSync extends Client {
                 if(syncStatus.nbRetries < 100 //TODO: Make max nbRetries configurable
                         && syncStatus.status.equals(Status.NOT_CONNECTED)) {
                     if (syncStatus.nbRetries < 2) {
-                        RepoSync.saveFilesToGet();
+                        RepoSync.saveFiles();
                     } else {
                         logStatus("Re-connecting in 5s");
                         try {
@@ -109,12 +109,12 @@ public class ClientSync extends Client {
                         }
                     }.start();
                 } else {
-                    RepoSync.saveFilesToGet();
+                    RepoSync.saveFiles();
                     msg="Too many retries ("+syncStatus.nbRetries+").";
                     syncStatus.status=Status.STOPPING;
                 }
             } else {
-                RepoSync.saveFilesToGet();
+                RepoSync.saveFiles();
                 syncStatus.status=Status.STOPPING;
             }
 

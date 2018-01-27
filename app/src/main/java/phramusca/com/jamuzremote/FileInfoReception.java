@@ -20,11 +20,29 @@ public class FileInfoReception {
     public int playCounter;
     public ArrayList<String> tags = null;
     public String genre;
+    public Status status=Status.NEW;
 
+    public FileInfoReception() {
+    }
+
+    public enum Status {
+        NEW, LOCAL, ACK;
+
+        Status() {
+        }
+    }
+
+    /**
+     * @param json
+     * @throws JSONException
+     */
     public FileInfoReception(String json) throws JSONException {
         this(new JSONObject(json));
     }
 
+    /**
+     * @param file
+     */
     public FileInfoReception(JSONObject file) {
         try {
             relativeFullPath = file.getString("path");
@@ -46,6 +64,11 @@ public class FileInfoReception {
         }
     }
 
+    /**
+     * @param file
+     * @param id
+     * @return
+     */
     private Date getDate(JSONObject file, String id) {
         String dateStr = "";
         try {
