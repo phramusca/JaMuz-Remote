@@ -6,42 +6,43 @@ package phramusca.com.jamuzremote;
 
 import android.util.Log;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.lang.reflect.Type;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public final class RepoSync {
 
     private static final String TAG = RepoSync.class.getSimpleName();
 
-    private static Map<Integer, FileInfoReception> filesToGet = null;
-    private static Map<String, FileInfoReception> filesToKeep = null;
-
-    private RepoSync() {
-    }
+    private static Table<String, FileInfoReception.Status, FileInfoReception> files = null;
 
     public synchronized static void scannedFile(File getAppDataPath, File file) {
         String absolutePath=file.getAbsolutePath();
-        String fileKey = absolutePath.substring(getAppDataPath.getAbsolutePath().length()+1);
-        if(filesToKeep!=null && !filesToKeep.containsKey(fileKey)) {
+        String relativeFullPath = absolutePath.substring(getAppDataPath.getAbsolutePath().length()+1);
+        if(files!=null && !files.containsRow(relativeFullPath)) {
             Log.i(TAG, "Deleting file "+absolutePath);
             file.delete();
-        } else if(filesToKeep!=null && filesToKeep.containsKey(fileKey)) {
-            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, filesToKeep.get(fileKey));
+        } else if(files!=null && files.containsRow(relativeFullPath)) {
+            Map<FileInfoReception.Status, FileInfoReception> map = files.row(relativeFullPath);
+            FileInfoReception fileInfoReception = map.entrySet().iterator().next().getValue();
+            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, fileInfoReception);
         } else {
             HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
         }
     }
 
-    public static boolean received(File getAppDataPath, FileInfoReception fileInfoReception) {
+    public synchronized static boolean received(File getAppDataPath, FileInfoReception fileInfoReception) {
         File receivedFile = new File(getAppDataPath.getAbsolutePath()+File.separator
                 +fileInfoReception.relativeFullPath);
-        if(filesToGet.containsKey(fileInfoReception.idFile)) {
+        if(files.containsRow(fileInfoReception.relativeFullPath)) {
             if(receivedFile.exists()) {
                 if (receivedFile.length() == fileInfoReception.size) {
                     Log.i(TAG, "Saved file size: " + receivedFile.length());
@@ -54,108 +55,84 @@ public final class RepoSync {
             } else {
                 Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
             }
-        } else if(!filesToKeep.containsKey(fileInfoReception.relativeFullPath)) {
-            Log.w(TAG, "File not requested. Deleting "+receivedFile.getAbsolutePath());
+        } else {
             receivedFile.delete();
         }
         return false;
     }
 
-    public static void receivedAck(int idFile) {
-        if(filesToGet.containsKey(idFile)) {
-            filesToGet.remove(idFile);
-            saveFilesToGet();
+    public synchronized static void receivedAck(FileInfoReception fileInfoReception) {
+        if(files.containsRow(fileInfoReception.relativeFullPath)) {
+            files.row(fileInfoReception.relativeFullPath).clear();
+            fileInfoReception.status=FileInfoReception.Status.ACK;
+            files.put(fileInfoReception.relativeFullPath, fileInfoReception.status, fileInfoReception);
+            saveFiles();
         }
     }
 
     public synchronized static void set(File getAppDataPath, Map<Integer, FileInfoReception> newTracks) {
-        filesToGet = new HashMap<>();
-        filesToKeep = new HashMap<>();
+        files = HashBasedTable.create();
         for(Map.Entry<Integer, FileInfoReception> entry : newTracks.entrySet()) {
             FileInfoReception fileReceived = entry.getValue();
-            filesToKeep.put(fileReceived.relativeFullPath, fileReceived);
             File localFile = new File(getAppDataPath, fileReceived.relativeFullPath);
-            if(!localFile.exists()) {
-                filesToGet.put(fileReceived.idFile, fileReceived);
+            fileReceived.status = localFile.exists()?FileInfoReception.Status.LOCAL:FileInfoReception.Status.NEW;
+            files.put(fileReceived.relativeFullPath, fileReceived.status, fileReceived);
+        }
+        saveFiles();
+    }
+
+    //FIXME: Save less often, especially NOT after each ack
+    //=> It should not be important if status is not saved for any reason
+    //At read(), status should be checked:
+    // - NEW : NEW or LOCAL
+    // - LOCAL : LOCAL or NEW
+    // - ACK : ACK or NEW
+    public synchronized static void saveFiles() {
+        if(files!=null) {
+            List<FileInfoReception> filesList = new ArrayList<>();
+            for(FileInfoReception file : files.values()) {
+                filesList.add(file);
             }
-        }
-        saveBothLists();
-    }
-
-    protected synchronized static void saveBothLists() {
-        saveFileToKeep();
-        saveFilesToGet();
-    }
-
-    public static void saveFilesToGet() {
-        //Write list of files to retrieve
-        if(filesToGet!=null) {
             Gson gson = new Gson();
-            HelperFile.write("Sync", "filesToGet.txt", gson.toJson(filesToGet));
+            HelperFile.write("Sync", "Files.txt", gson.toJson(filesList));
         }
     }
 
-    private synchronized static void saveFileToKeep() {
-        //Write list of files to maintain in db
-        if(filesToKeep!=null) {
-            Gson gson = new Gson();
-            HelperFile.write("Sync", "FilesToKeep.txt", gson.toJson(filesToKeep));
-        }
-    }
-
-    protected static synchronized void read() {
+    protected synchronized static void read() {
         String readJson;
-        if(filesToKeep==null) {
-            //Read FilesToKeep file to get list of files to maintain in db
-            readJson = HelperFile.read("Sync", "FilesToKeep.txt");
+        if(files==null) {
+            readJson = HelperFile.read("Sync", "Files.txt");
             if (!readJson.equals("")) {
-                Map<String, FileInfoReception> readList = new HashMap<>();
+                List<FileInfoReception> readList = new ArrayList<>();
                 Gson gson = new Gson();
-                Type mapType = new TypeToken<HashMap<String, FileInfoReception>>() {}.getType();
+                Type mapType = new TypeToken<List<FileInfoReception>>() {}.getType();
                 try {
                     readList = gson.fromJson(readJson, mapType);
                 } catch (JsonSyntaxException ex) {
                     Log.e(TAG, "", ex);
                 }
                 if(readList.size()>0) {
-                    filesToKeep=readList;
-                }
-            }
-        }
-
-        if(filesToGet==null) {
-            //Read filesToGet file to get list of files to retrieve
-            readJson = HelperFile.read("Sync", "filesToGet.txt");
-            if (!readJson.equals("")) {
-                Map<Integer, FileInfoReception> readList = new HashMap<>();
-                Gson gson = new Gson();
-                Type mapType = new TypeToken<HashMap<Integer, FileInfoReception>>() {
-                }.getType();
-                try {
-                    readList = gson.fromJson(readJson, mapType);
-                } catch (JsonSyntaxException ex) {
-                    Log.e(TAG, "", ex);
-                }
-                if(readList.size()>0) {
-                    filesToGet=readList;
+                    Table<String, FileInfoReception.Status, FileInfoReception> temp = HashBasedTable.create();
+                    for(FileInfoReception file : readList) {
+                        temp.put(file.relativeFullPath, file.status, file);
+                    }
+                    files = temp;
                 }
             }
         }
     }
 
-    public static int getRemainingSize() {
-        return filesToGet==null?0:filesToGet.size();
+    public synchronized static int getRemainingSize() {
+        return files==null?0:files.column(FileInfoReception.Status.NEW).size();
     }
 
-    public static int getTotalSize() {
-        return filesToKeep==null?0:filesToKeep.size();
+    public synchronized static int getTotalSize() {
+        return files==null?0:files.size();
     }
 
-    public static FileInfoReception take() {
-        if (filesToKeep != null && filesToGet != null) {
-            if (filesToGet.size() > 0) {
-                return filesToGet.entrySet().iterator().next().getValue();
-            }
+    public synchronized static FileInfoReception take() {
+        if (files != null && files.column(FileInfoReception.Status.NEW).size() > 0) {
+            return files.column(FileInfoReception.Status.NEW).entrySet().iterator().next().getValue();
         }
         return null;
     }
