@@ -141,6 +141,8 @@ public class StringManager {
     public static String humanReadableSeconds(long seconds) {
         if (seconds <= 0) {
             return "-";
+        } else if (seconds <= 59) {
+            return "<1m";
         }
 
         final long days = TimeUnit.SECONDS.toDays(seconds);
@@ -148,9 +150,6 @@ public class StringManager {
         final long hours = TimeUnit.SECONDS.toHours(seconds);
         seconds -= TimeUnit.HOURS.toSeconds(hours);
         final long minutes = TimeUnit.SECONDS.toMinutes(seconds);
-        seconds -= TimeUnit.MINUTES.toSeconds(minutes);
-//        final long seconds = TimeUnit.SECONDS.toSeconds(millis);
-//        millis -= TimeUnit.SECONDS.toMillis(seconds);
 
         final StringBuilder sb = new StringBuilder();
         if (days > 0) {
@@ -163,16 +162,8 @@ public class StringManager {
         }
         if (minutes > 0) {
             sb.append(String.format("%02d", minutes));
-            sb.append("m ");
+            sb.append("m");
         }
-        if (seconds > 0) {
-            sb.append(String.format("%02d", seconds));
-            sb.append("s");
-        }
-//        if ((seconds <= 0) && (millis > 0) && showMS) {
-//            sb.append(String.format("%02d", millis));
-//            sb.append("ms");
-//        }
 
         return sb.toString();
     }

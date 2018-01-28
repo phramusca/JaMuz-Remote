@@ -45,6 +45,7 @@ public class ServiceSync extends ServiceBase {
             public void run() {
                 helperNotification.notifyBar(notificationSync, "Reading list ... ");
                 RepoSync.read();
+                bench = new Benchmark(RepoSync.getRemainingSize());
                 helperNotification.notifyBar(notificationSync, "Connecting ... ");
                 clientSync =  new ClientSync(clientInfo, new CallBackSync());
                 clientSync.connect();
@@ -104,10 +105,11 @@ public class ServiceSync extends ServiceBase {
             public void run() {
                 synchronized(timerLock) {
 
-                    long minTimeout =  15 * 1000;  //Min timeout 15s (+ 15s by Mo)
+                    //FIXME: Make sync timeouts configurable (use bench, to be based on size not nb)
+                    long minTimeout =  15 * 1000;  //Min timeout 15s (or 15s by 5Mo)
                     long maxTimeout =  120 * 1000; //Max timeout 2 min
 
-                    long timeout = size<1000000?minTimeout:((size / 1000000) * minTimeout);
+                    long timeout = size<5000000?minTimeout:((size / 5000000) * minTimeout);
                     timeout = timeout>maxTimeout?maxTimeout:timeout;
                     timerWatchTimeout = new CountDownTimer(timeout, timeout/10) {
                         @Override
@@ -148,29 +150,20 @@ public class ServiceSync extends ServiceBase {
                 String type = jObject.getString("type");
                 switch(type) {
                     case "insertDeviceFileAck":
-                        //TODO: Display a benchmark instead
-                        //as not well displayed as aligned to the right
-                        notifyBar("4/4 | Acknowledged");
                         String status = jObject.getString("status");
                         boolean requestNextFile = jObject.getBoolean("requestNextFile");
                         if(status.equals("OK")) {
                             sendMessage("refreshSpinner(true)");
                             cancelWatchTimeOut();
-
-                            //FIXME: Store status to manage what to do at any stage
-                            // + Merge filesToKeep and filesToGet in a single file
-                            //(even if 2 maps as 2 different keys)
-
-                            //1-TOGET
-                            //2-GOT
-                            //3-InsertOK
-
-                            //e-InsertKO
-                            //e-ERROR (reading tags for instance; to be read at last with max retry count)
-
                             FileInfoReception fileReceived = new FileInfoReception(jObject.getJSONObject("file"));
                             RepoSync.receivedAck(fileReceived);
+                            bench.get();
+                        } else {
+                            //FIXME: Store more status to manage what to do at any stage
+                            // * InsertKO (here) => What to do in this case ?
+                            // * ERROR (reading tags for instance; to be read at last with max retry count)
                         }
+                        notifyBar(bench.getLast()+" | 4/4 | Acknowledged");
                         if(requestNextFile) {
                             requestNextFile();
                         }
@@ -197,6 +190,7 @@ public class ServiceSync extends ServiceBase {
                             }
                         }
                         RepoSync.set(getAppDataPath, newTracks);
+                        bench = new Benchmark(RepoSync.getRemainingSize());
                         requestNextFile();
                         break;
                     case "tags":
@@ -302,7 +296,7 @@ public class ServiceSync extends ServiceBase {
     }
 
     private void notifyBar(String text, FileInfoReception fileInfoReception) {
-        notifyBar(text+" | "+StringManager.humanReadableByteCount(
+        notifyBar(bench.getLast()+" | "+text+" | "+StringManager.humanReadableByteCount(
                 fileInfoReception.size, false)
                 +" | "+fileInfoReception.relativeFullPath);
     }
@@ -318,6 +312,8 @@ public class ServiceSync extends ServiceBase {
     private void requestNextFile() {
         requestNextFile(true);
     }
+
+    Benchmark bench;
 
     private void requestNextFile(final boolean scanLibrary) {
 
