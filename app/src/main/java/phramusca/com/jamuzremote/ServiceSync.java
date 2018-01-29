@@ -24,9 +24,10 @@ import java.util.Map;
 public class ServiceSync extends ServiceBase {
 
     private static final String TAG = ServiceSync.class.getSimpleName();
+    public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE";
+
     private ClientSync clientSync;
     private Notification notificationSync;
-    final public static String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE";
     private BroadcastReceiver userStopReceiver;
 
     @Override
@@ -183,12 +184,6 @@ public class ServiceSync extends ServiceBase {
                         for(int i=0; i<files.length(); i++) {
                             FileInfoReception fileReceived = new FileInfoReception((JSONObject) files.get(i));
                             newTracks.put(fileReceived.idFile, fileReceived);
-
-                            //Ack reception, request ack from server (ack for insertion in deviceFile table)
-                            File localFile = new File(getAppDataPath, fileReceived.relativeFullPath);
-                            if (localFile.exists()) {
-                                clientSync.ackFileReception(fileReceived.idFile, false);
-                            }
                         }
                         RepoSync.set(getAppDataPath, newTracks);
                         bench = new Benchmark(RepoSync.getRemainingSize());
@@ -242,12 +237,18 @@ public class ServiceSync extends ServiceBase {
             Log.i(TAG, "Received file\n"+fileInfoReception
                     +"\nRemaining : "+ RepoSync.getRemainingSize()+"/"+ RepoSync.getTotalSize());
             notifyBar("3/4", fileInfoReception);
+
+            //FIXME: !!!!!!! MOVE THIS BELOW TO requestNextFile() in switch
+            // =>  always goto requestNextFile() at last
+
+
             if(RepoSync.checkFile(getAppDataPath, fileInfoReception,  FileInfoReception.Status.LOCAL)) {
                 if(HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath.getAbsolutePath()+File.separator
                         +fileInfoReception.relativeFullPath).getAbsolutePath(), fileInfoReception)) {
                     clientSync.ackFileReception(fileInfoReception.idFile, true);
                 }
                 Log.w(TAG, "File NOT inserted in db. " + fileInfoReception.relativeFullPath);
+                //FIXME: Do sthg here or sync will stop
             } else {
                 //TODO: This will request the same if any error occurs
                 //So, use Status to ignore those failed ones and retry them later
@@ -323,44 +324,39 @@ public class ServiceSync extends ServiceBase {
     Benchmark bench;
 
     private void requestNextFile(final boolean scanLibrary) {
-
-        final FileInfoReception fileToGetInfo = RepoSync.take();
+        final FileInfoReception fileToGetInfo = RepoSync.take(getAppDataPath);
         if (fileToGetInfo != null) {
-            File fileToGet = new File(getAppDataPath, fileToGetInfo.relativeFullPath);
-            if (fileToGet.exists() && fileToGet.length() == fileToGetInfo.size) {
-                Log.i(TAG, "File already exists. Sendind ack.: " + fileToGetInfo);
-                clientSync.ackFileReception(fileToGetInfo.idFile, true);
-            } else {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyBar("1/4", fileToGetInfo);
-                                watchTimeOut(fileToGetInfo.size);
+            switch (fileToGetInfo.status) {
+                case NEW:
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    notifyBar("1/4", fileToGetInfo);
+                                    watchTimeOut(fileToGetInfo.size);
+                                }
+                            });
+                            synchronized (timerLock) {
+                                clientSync.requestFile(fileToGetInfo.idFile);
                             }
-                        });
-                        synchronized (timerLock) {
-                            clientSync.requestFile(fileToGetInfo.idFile);
                         }
-                    }
-                }.start();
+                    }.start();
+                    break;
+                case LOCAL:
+                    clientSync.ackFileReception(fileToGetInfo.idFile, true);
+                    break;
+                /*case IN_DB:
+                    //We should not get there !!! as taking from "NEW" list
+                    //FIXME: Manage this case
+                    break;*/
+                case ACK:
+                    //We should not get there !!! as taking from "NEW" list
+                    //TODO: Manage this case
+                    break;
             }
         } else if(RepoSync.getTotalSize()>0) {
-
-            //FIXME: Still need to resend ack when sync is over ?
-            // If so, only send if not already (need to store ackFileReception status)
-
-            //Resend add request in case missed for some reason
-            /*if(filesToKeep!=null) {
-                for(FileInfoReception file : filesToKeep.values()) {
-                    if(!filesToGet.containsKey(file.idFile)) {
-                        ackFileReception(file.idFile, false);
-                    }
-                }
-            }*/
-
             final String msg = "No more files to download.";
             Log.i(TAG, msg + " Updating library:" + scanLibrary);
             runOnUiThread(new Runnable() {
@@ -368,7 +364,6 @@ public class ServiceSync extends ServiceBase {
                 public void run() {
                     helperToast.toastLong(msg + "\n\nAll " + RepoSync.getTotalSize() + " files" +
                             " have been retrieved successfully.");
-                    //helperNotification.notifyBar(notificationSync, msg);
                 }
             });
             stopSync(false, msg);
@@ -383,7 +378,6 @@ public class ServiceSync extends ServiceBase {
                 public void run() {
                     helperToast.toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
                             "export a list of files to retrieve, based on playlists.");
-                    //helperNotification.notifyBar(notificationSync, "No files to download.");
                 }
             });
             stopSync(false, "No files to download.");

@@ -20,12 +20,12 @@ public class FileInfoReception {
     public int playCounter;
     public ArrayList<String> tags = null;
     public String genre;
-    public Status status=Status.NEW; //FIXME: DO NOT change from ACK to LOCAL (only to NEW if missing file)
+    public Status status=Status.NEW;
 
     public FileInfoReception() {
     }
 
-    //FIXME: Either use or remove LOCAL status from enum
+    //FIXME: Add IN_DB status
     public enum Status {
         NEW, LOCAL, ACK;
 
