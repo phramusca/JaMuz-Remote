@@ -45,12 +45,27 @@ public final class RepoSync {
         files.put(fileInfoReception.idFile, fileInfoReception.status, fileInfoReception);
     }
 
+    private synchronized static boolean checkFile(FileInfoReception fileInfoReception,
+                                                 File receivedFile) {
+        if(receivedFile.exists()) {
+            if (receivedFile.length() == fileInfoReception.size) {
+                Log.i(TAG, "Correct file size: " + receivedFile.length());
+                return true;
+            } else {
+                Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
+                receivedFile.delete();
+            }
+        } else {
+            Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
+        }
+        return false;
+    }
+
     public synchronized static boolean checkFile(File getAppDataPath,
                                                  FileInfoReception fileInfoReception,
                                                  FileInfoReception.Status status) {
 
-        File receivedFile = new File(getAppDataPath.getAbsolutePath()+File.separator
-                +fileInfoReception.relativeFullPath);
+        File receivedFile = new File(getAppDataPath, fileInfoReception.relativeFullPath);
 
         if(files.containsRow(fileInfoReception.idFile)) {
             if(checkFile(fileInfoReception, receivedFile)) {
@@ -68,46 +83,34 @@ public final class RepoSync {
         return false;
     }
 
-    public synchronized static boolean checkFile(FileInfoReception fileInfoReception,
-                                                 File receivedFile) {
-        if(receivedFile.exists()) {
-            if (receivedFile.length() == fileInfoReception.size) {
-                Log.i(TAG, "Correct file size: " + receivedFile.length());
-                return true;
-            } else {
-                Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
-                receivedFile.delete();
+    public synchronized static FileInfoReception checkFile(File getAppDataPath, FileInfoReception fileInfoReception) {
+        File file = new File(getAppDataPath, fileInfoReception.relativeFullPath);
+        if(checkFile(fileInfoReception, file)) {
+            if (!fileInfoReception.status.equals(FileInfoReception.Status.ACK)) {
+                fileInfoReception.status = FileInfoReception.Status.LOCAL;
             }
         } else {
-            Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
+            fileInfoReception.status = FileInfoReception.Status.NEW;
         }
-        return false;
+        return fileInfoReception;
     }
 
     public synchronized static void receivedAck(File getAppDataPath, FileInfoReception fileInfoReception) {
         if(checkFile(getAppDataPath, fileInfoReception,  FileInfoReception.Status.ACK)) {
-            save();
+            //save();
         }
     }
 
     public synchronized static void set(File getAppDataPath, Map<Integer, FileInfoReception> newTracks) {
         files = HashBasedTable.create();
         for(Map.Entry<Integer, FileInfoReception> entry : newTracks.entrySet()) {
-            FileInfoReception fileReceived = entry.getValue();
-            File localFile = new File(getAppDataPath, fileReceived.relativeFullPath);
-            fileReceived.status= checkFile(fileReceived, localFile)?
-                    FileInfoReception.Status.LOCAL:FileInfoReception.Status.NEW;
-            files.put(fileReceived.idFile, fileReceived.status, fileReceived);
+            FileInfoReception fileInfoReception = entry.getValue();
+            fileInfoReception=RepoSync.checkFile(getAppDataPath, fileInfoReception);
+            files.put(fileInfoReception.idFile, fileInfoReception.status, fileInfoReception);
         }
         save();
     }
 
-    //FIXME: Save less often, especially NOT after each ack
-    //=> It should not be important if status is not saved for any reason
-    //At read(), status should be checked:
-    // - NEW => NEW or LOCAL
-    // - LOCAL => LOCAL or NEW
-    // - ACK => ACK or NEW
     public synchronized static void save() {
         if(files!=null) {
             List<FileInfoReception> filesList = new ArrayList<>();
@@ -134,11 +137,9 @@ public final class RepoSync {
                 }
                 if(readList.size()>0) {
                     Table<Integer, FileInfoReception.Status, FileInfoReception> temp = HashBasedTable.create();
-                    for(FileInfoReception file : readList) {
-                        File localFile = new File(getAppDataPath, file.relativeFullPath);
-                        file.status= checkFile(file, localFile)?
-                                FileInfoReception.Status.LOCAL:FileInfoReception.Status.NEW;
-                        temp.put(file.idFile, file.status, file);
+                    for(FileInfoReception fileInfoReception : readList) {
+                        fileInfoReception=RepoSync.checkFile(getAppDataPath, fileInfoReception);
+                        temp.put(fileInfoReception.idFile, fileInfoReception.status, fileInfoReception);
                     }
                     files = temp;
                 }
@@ -154,9 +155,13 @@ public final class RepoSync {
         return files==null?0:files.size();
     }
 
-    public synchronized static FileInfoReception take() {
+    public synchronized static FileInfoReception take(File getAppDataPath) {
         if (files != null && files.column(FileInfoReception.Status.NEW).size() > 0) {
-            return files.column(FileInfoReception.Status.NEW).entrySet().iterator().next().getValue();
+            FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.NEW).entrySet().iterator().next().getValue();
+            return checkFile(getAppDataPath, fileInfoReception);
+        } else if (files != null && files.column(FileInfoReception.Status.LOCAL).size() > 0) {
+            FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.LOCAL).entrySet().iterator().next().getValue();
+            return checkFile(getAppDataPath, fileInfoReception);
         }
         return null;
     }
