@@ -44,7 +44,10 @@ public class ServiceSync extends ServiceBase {
         new Thread() {
             public void run() {
                 helperNotification.notifyBar(notificationSync, "Reading list ... ");
-                RepoSync.read();
+                RepoSync.read(getAppDataPath);
+                //FIXME: Loop on RepoSync.files and if LOCAL, Ask request
+
+
                 bench = new Benchmark(RepoSync.getRemainingSize());
                 helperNotification.notifyBar(notificationSync, "Connecting ... ");
                 clientSync =  new ClientSync(clientInfo, new CallBackSync());
@@ -156,12 +159,10 @@ public class ServiceSync extends ServiceBase {
                             sendMessage("refreshSpinner(true)");
                             cancelWatchTimeOut();
                             FileInfoReception fileReceived = new FileInfoReception(jObject.getJSONObject("file"));
-                            RepoSync.receivedAck(fileReceived);
+                            RepoSync.receivedAck(getAppDataPath, fileReceived);
                             bench.get();
                         } else {
-                            //FIXME: Store more status to manage what to do at any stage
-                            // * InsertKO (here) => What to do in this case ?
-                            // * ERROR (reading tags for instance; to be read at last with max retry count)
+                            //FIXME: Store InsertKO status IF worth doing it
                         }
                         notifyBar(bench.getLast()+" | 4/4 | Acknowledged");
                         if(requestNextFile) {
@@ -241,9 +242,15 @@ public class ServiceSync extends ServiceBase {
             Log.i(TAG, "Received file\n"+fileInfoReception
                     +"\nRemaining : "+ RepoSync.getRemainingSize()+"/"+ RepoSync.getTotalSize());
             notifyBar("3/4", fileInfoReception);
-            if(RepoSync.received(getAppDataPath, fileInfoReception)) {
-                clientSync.ackFileReception(fileInfoReception.idFile, true);
+            if(RepoSync.checkFile(getAppDataPath, fileInfoReception,  FileInfoReception.Status.LOCAL)) {
+                if(HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath.getAbsolutePath()+File.separator
+                        +fileInfoReception.relativeFullPath).getAbsolutePath(), fileInfoReception)) {
+                    clientSync.ackFileReception(fileInfoReception.idFile, true);
+                }
+                Log.w(TAG, "File NOT inserted in db. " + fileInfoReception.relativeFullPath);
             } else {
+                //TODO: This will request the same if any error occurs
+                //So, use Status to ignore those failed ones and retry them later
                 requestNextFile();
             }
         }

@@ -20,7 +20,7 @@ public class FileInfoReception {
     public int playCounter;
     public ArrayList<String> tags = null;
     public String genre;
-    public Status status=Status.NEW;
+    public Status status=Status.NEW; //FIXME: DO NOT change from ACK to LOCAL (only to NEW if missing file)
 
     public FileInfoReception() {
     }
