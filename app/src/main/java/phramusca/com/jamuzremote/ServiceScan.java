@@ -46,8 +46,9 @@ public class ServiceScan extends ServiceBase {
         new Thread() {
             public void run() {
                 //Scan JaMuz path on SD card
-                scanFolder(getAppDataPath);
-                waitScanFolder();
+                //FIXME: Replace JaMuz "internal" scan with some loops on files in ServiceSync
+               /* scanFolder(getAppDataPath);
+                waitScanFolder();*/
 
                 //Scan user folder
                 if(!userPath.equals("/")) {
@@ -125,6 +126,7 @@ public class ServiceScan extends ServiceBase {
                         checkAbort();
                         File file = new File(track.getPath());
                         if(!file.exists()) {
+                            //TODO: File may be currently being inserted ... handle that situation
                             Log.d(TAG, "Remove track from db: "+track);
                             track.delete();
                         }
@@ -148,11 +150,7 @@ public class ServiceScan extends ServiceBase {
                                 }
                                 else {
                                     String absolutePath=file.getAbsolutePath();
-                                    if(absolutePath.startsWith(getAppDataPath.getAbsolutePath())) {
-                                        //Scanning private sd card path => Files from JaMuz Sync
-                                        RepoSync.scannedFile(getAppDataPath, file);
-                                    }
-                                    else {
+                                    if (!absolutePath.startsWith(getAppDataPath.getAbsolutePath())) {
                                         //Scanning extra local folder
                                         List<String> audioExtensions = new ArrayList<>();
                                         audioExtensions.add("mp3");
@@ -162,7 +160,10 @@ public class ServiceScan extends ServiceBase {
                                         if(audioExtensions.contains(ext)) {
                                             HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
                                         }
-                                    }
+                                    } /*else {
+                                        //Scanning private sd card path => Files from JaMuz Sync
+                                        RepoSync.scannedFile(getAppDataPath, file);
+                                    }*/
                                     notifyScan("JaMuz is scanning files ... ", 13);
                                 }
                             }

@@ -25,6 +25,7 @@ public class FileInfoReception {
     public FileInfoReception() {
     }
 
+    //FIXME: Either use or remove LOCAL status from enum
     public enum Status {
         NEW, LOCAL, ACK;
 

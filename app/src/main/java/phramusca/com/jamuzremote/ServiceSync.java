@@ -105,11 +105,11 @@ public class ServiceSync extends ServiceBase {
             public void run() {
                 synchronized(timerLock) {
 
-                    //FIXME: Make sync timeouts configurable (use bench, to be based on size not nb)
-                    long minTimeout =  15 * 1000;  //Min timeout 15s (or 15s by 5Mo)
+                    //TODO: Make sync timeouts configurable (use bench, to be based on size not nb)
+                    long minTimeout =  15 * 1000;  //Min timeout 15s (or 15s by 4Mo)
                     long maxTimeout =  120 * 1000; //Max timeout 2 min
 
-                    long timeout = size<5000000?minTimeout:((size / 5000000) * minTimeout);
+                    long timeout = size<4000000?minTimeout:((size / 4000000) * minTimeout);
                     timeout = timeout>maxTimeout?maxTimeout:timeout;
                     timerWatchTimeout = new CountDownTimer(timeout, timeout/10) {
                         @Override
@@ -366,6 +366,7 @@ public class ServiceSync extends ServiceBase {
             });
             stopSync(false, msg);
             if (scanLibrary) {
+                //TODO: Scan only "internal" folder (scan deleted only), not the user folder
                 sendMessage("checkPermissionsThenScanLibrary");
             }
         } else {

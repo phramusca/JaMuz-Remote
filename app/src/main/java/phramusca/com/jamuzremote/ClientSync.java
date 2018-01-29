@@ -169,6 +169,8 @@ public class ClientSync extends Client {
         }
     }
 
+    //FIXME: Add timeout for every request
+    //And make all communication request/answer, all initiated by client (JaMuzRemote)
     public void ackFileReception(int idFile, boolean requestNextFile) {
         synchronized (syncStatus) {
             logStatus("ackFileReception()");
