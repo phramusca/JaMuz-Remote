@@ -40,40 +40,53 @@ public final class RepoSync {
         }
     }*/
 
-    public synchronized static boolean received(File getAppDataPath, FileInfoReception fileInfoReception) {
+    private synchronized static void updateFiles(FileInfoReception fileInfoReception) {
+        files.row(fileInfoReception.idFile).clear();
+        files.put(fileInfoReception.idFile, fileInfoReception.status, fileInfoReception);
+    }
+
+    public synchronized static boolean checkFile(File getAppDataPath,
+                                                 FileInfoReception fileInfoReception,
+                                                 FileInfoReception.Status status) {
+
         File receivedFile = new File(getAppDataPath.getAbsolutePath()+File.separator
                 +fileInfoReception.relativeFullPath);
+
         if(files.containsRow(fileInfoReception.idFile)) {
-            if(receivedFile.exists()) {
-                if (receivedFile.length() == fileInfoReception.size) {
-                    Log.i(TAG, "Saved file size: " + receivedFile.length());
-
-                    //FIXME: fileInfoReception.relativeFullPath may have changed and so be different to files
-                    //=> Update files ? Is this needed ?
-
-
-                    HelperLibrary.insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception);
-                    return true;
-                } else {
-                    Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
-                    receivedFile.delete();
-                }
+            if(checkFile(fileInfoReception, receivedFile)) {
+                fileInfoReception.status = status;
+                updateFiles(fileInfoReception);
+                return true;
             } else {
-                Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
+                fileInfoReception.status = FileInfoReception.Status.NEW;
+                updateFiles(fileInfoReception);
             }
         } else {
-            //TODO: Pb (unlikely): file has been requested (taken from files) BUT not found in files ! => Looping on that file
+            Log.w(TAG, "files does not contain file. Deleting " + receivedFile.getAbsolutePath());
             receivedFile.delete();
         }
         return false;
     }
 
-    public synchronized static void receivedAck(FileInfoReception fileInfoReception) {
-        if(files.containsRow(fileInfoReception.idFile)) {
-            files.row(fileInfoReception.idFile).clear();
-            fileInfoReception.status=FileInfoReception.Status.ACK;
-            files.put(fileInfoReception.idFile, fileInfoReception.status, fileInfoReception);
-            saveFiles();
+    public synchronized static boolean checkFile(FileInfoReception fileInfoReception,
+                                                 File receivedFile) {
+        if(receivedFile.exists()) {
+            if (receivedFile.length() == fileInfoReception.size) {
+                Log.i(TAG, "Correct file size: " + receivedFile.length());
+                return true;
+            } else {
+                Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
+                receivedFile.delete();
+            }
+        } else {
+            Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
+        }
+        return false;
+    }
+
+    public synchronized static void receivedAck(File getAppDataPath, FileInfoReception fileInfoReception) {
+        if(checkFile(getAppDataPath, fileInfoReception,  FileInfoReception.Status.ACK)) {
+            save();
         }
     }
 
@@ -82,10 +95,11 @@ public final class RepoSync {
         for(Map.Entry<Integer, FileInfoReception> entry : newTracks.entrySet()) {
             FileInfoReception fileReceived = entry.getValue();
             File localFile = new File(getAppDataPath, fileReceived.relativeFullPath);
-            fileReceived.status = localFile.exists()?FileInfoReception.Status.LOCAL:FileInfoReception.Status.NEW;
+            fileReceived.status= checkFile(fileReceived, localFile)?
+                    FileInfoReception.Status.LOCAL:FileInfoReception.Status.NEW;
             files.put(fileReceived.idFile, fileReceived.status, fileReceived);
         }
-        saveFiles();
+        save();
     }
 
     //FIXME: Save less often, especially NOT after each ack
@@ -94,7 +108,7 @@ public final class RepoSync {
     // - NEW => NEW or LOCAL
     // - LOCAL => LOCAL or NEW
     // - ACK => ACK or NEW
-    public synchronized static void saveFiles() {
+    public synchronized static void save() {
         if(files!=null) {
             List<FileInfoReception> filesList = new ArrayList<>();
             for(FileInfoReception file : files.values()) {
@@ -105,7 +119,7 @@ public final class RepoSync {
         }
     }
 
-    protected synchronized static void read() {
+    protected synchronized static void read(File getAppDataPath) {
         String readJson;
         if(files==null) {
             readJson = HelperFile.read("Sync", "Files.txt");
@@ -121,6 +135,9 @@ public final class RepoSync {
                 if(readList.size()>0) {
                     Table<Integer, FileInfoReception.Status, FileInfoReception> temp = HashBasedTable.create();
                     for(FileInfoReception file : readList) {
+                        File localFile = new File(getAppDataPath, file.relativeFullPath);
+                        file.status= checkFile(file, localFile)?
+                                FileInfoReception.Status.LOCAL:FileInfoReception.Status.NEW;
                         temp.put(file.idFile, file.status, file);
                     }
                     files = temp;
