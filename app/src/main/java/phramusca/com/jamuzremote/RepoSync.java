@@ -22,9 +22,10 @@ public final class RepoSync {
 
     private static final String TAG = RepoSync.class.getSimpleName();
 
-    private static Table<String, FileInfoReception.Status, FileInfoReception> files = null;
+    private static Table<Integer, FileInfoReception.Status, FileInfoReception> files = null;
 
-    public synchronized static void scannedFile(File getAppDataPath, File file) {
+    //FIXME: Use the following for the "internal" scan replacement
+/*    public synchronized static void scannedFile(File getAppDataPath, File file) {
         String absolutePath=file.getAbsolutePath();
         String relativeFullPath = absolutePath.substring(getAppDataPath.getAbsolutePath().length()+1);
         if(files!=null && !files.containsRow(relativeFullPath)) {
@@ -37,15 +38,20 @@ public final class RepoSync {
         } else {
             HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
         }
-    }
+    }*/
 
     public synchronized static boolean received(File getAppDataPath, FileInfoReception fileInfoReception) {
         File receivedFile = new File(getAppDataPath.getAbsolutePath()+File.separator
                 +fileInfoReception.relativeFullPath);
-        if(files.containsRow(fileInfoReception.relativeFullPath)) {
+        if(files.containsRow(fileInfoReception.idFile)) {
             if(receivedFile.exists()) {
                 if (receivedFile.length() == fileInfoReception.size) {
                     Log.i(TAG, "Saved file size: " + receivedFile.length());
+
+                    //FIXME: fileInfoReception.relativeFullPath may have changed and so be different to files
+                    //=> Update files ? Is this needed ?
+
+
                     HelperLibrary.insertOrUpdateTrackInDatabase(receivedFile.getAbsolutePath(), fileInfoReception);
                     return true;
                 } else {
@@ -56,16 +62,17 @@ public final class RepoSync {
                 Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
             }
         } else {
+            //TODO: Pb (unlikely): file has been requested (taken from files) BUT not found in files ! => Looping on that file
             receivedFile.delete();
         }
         return false;
     }
 
     public synchronized static void receivedAck(FileInfoReception fileInfoReception) {
-        if(files.containsRow(fileInfoReception.relativeFullPath)) {
-            files.row(fileInfoReception.relativeFullPath).clear();
+        if(files.containsRow(fileInfoReception.idFile)) {
+            files.row(fileInfoReception.idFile).clear();
             fileInfoReception.status=FileInfoReception.Status.ACK;
-            files.put(fileInfoReception.relativeFullPath, fileInfoReception.status, fileInfoReception);
+            files.put(fileInfoReception.idFile, fileInfoReception.status, fileInfoReception);
             saveFiles();
         }
     }
@@ -76,7 +83,7 @@ public final class RepoSync {
             FileInfoReception fileReceived = entry.getValue();
             File localFile = new File(getAppDataPath, fileReceived.relativeFullPath);
             fileReceived.status = localFile.exists()?FileInfoReception.Status.LOCAL:FileInfoReception.Status.NEW;
-            files.put(fileReceived.relativeFullPath, fileReceived.status, fileReceived);
+            files.put(fileReceived.idFile, fileReceived.status, fileReceived);
         }
         saveFiles();
     }
@@ -84,9 +91,9 @@ public final class RepoSync {
     //FIXME: Save less often, especially NOT after each ack
     //=> It should not be important if status is not saved for any reason
     //At read(), status should be checked:
-    // - NEW : NEW or LOCAL
-    // - LOCAL : LOCAL or NEW
-    // - ACK : ACK or NEW
+    // - NEW => NEW or LOCAL
+    // - LOCAL => LOCAL or NEW
+    // - ACK => ACK or NEW
     public synchronized static void saveFiles() {
         if(files!=null) {
             List<FileInfoReception> filesList = new ArrayList<>();
@@ -112,9 +119,9 @@ public final class RepoSync {
                     Log.e(TAG, "", ex);
                 }
                 if(readList.size()>0) {
-                    Table<String, FileInfoReception.Status, FileInfoReception> temp = HashBasedTable.create();
+                    Table<Integer, FileInfoReception.Status, FileInfoReception> temp = HashBasedTable.create();
                     for(FileInfoReception file : readList) {
-                        temp.put(file.relativeFullPath, file.status, file);
+                        temp.put(file.idFile, file.status, file);
                     }
                     files = temp;
                 }
