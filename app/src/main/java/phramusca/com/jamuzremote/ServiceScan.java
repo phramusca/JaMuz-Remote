@@ -45,12 +45,7 @@ public class ServiceScan extends ServiceBase {
     private void scanLibrayInThread() {
         new Thread() {
             public void run() {
-                //Scan JaMuz path on SD card
-                //FIXME: Replace JaMuz "internal" scan with some loops on files in ServiceSync
-               /* scanFolder(getAppDataPath);
-                waitScanFolder();*/
-
-                //Scan user folder
+                  //Scan user folder
                 if(!userPath.equals("/")) {
                     File folder = new File(userPath);
                     scanFolder(folder);
@@ -118,7 +113,8 @@ public class ServiceScan extends ServiceBase {
                     processBrowseFScount.join();
                     checkAbort();
                     //Scan deleted files
-                    //TODO: No need to check what scanned previously ...
+                    //This will remove from db files not in filesystem
+                    //It IS compatible with ServiceSync
                     List<Track> tracks = new Playlist("ScanFolder", false).getTracks();
                     nbFilesTotal = tracks.size();
                     nbFiles=0;
@@ -126,7 +122,8 @@ public class ServiceScan extends ServiceBase {
                         checkAbort();
                         File file = new File(track.getPath());
                         if(!file.exists()) {
-                            //TODO: File may be currently being inserted ... handle that situation
+                            //TODO: File may be currently being inserted by ServiceSync ...
+                            // => handle that situation
                             Log.d(TAG, "Remove track from db: "+track);
                             track.delete();
                         }
@@ -150,6 +147,7 @@ public class ServiceScan extends ServiceBase {
                                 }
                                 else {
                                     String absolutePath=file.getAbsolutePath();
+                                    //getAppDataPath is managed in ServiceSync
                                     if (!absolutePath.startsWith(getAppDataPath.getAbsolutePath())) {
                                         //Scanning extra local folder
                                         List<String> audioExtensions = new ArrayList<>();
@@ -160,10 +158,7 @@ public class ServiceScan extends ServiceBase {
                                         if(audioExtensions.contains(ext)) {
                                             HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
                                         }
-                                    } /*else {
-                                        //Scanning private sd card path => Files from JaMuz Sync
-                                        RepoSync.scannedFile(getAppDataPath, file);
-                                    }*/
+                                    }
                                     notifyScan("JaMuz is scanning files ... ", 13);
                                 }
                             }

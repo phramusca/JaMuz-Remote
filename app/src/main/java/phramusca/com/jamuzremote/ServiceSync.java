@@ -27,6 +27,19 @@ public class ServiceSync extends ServiceBase {
     public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE";
 
     private ClientSync clientSync;
+    private static final Object timerLock = new Object();
+    private CountDownTimer timerWatchTimeout= new CountDownTimer(0, 0) {
+        @Override
+        public void onTick(long l) {
+
+        }
+
+        @Override
+        public void onFinish() {
+
+        }
+    };
+    private Benchmark bench;
     private Notification notificationSync;
     private BroadcastReceiver userStopReceiver;
 
@@ -46,9 +59,6 @@ public class ServiceSync extends ServiceBase {
             public void run() {
                 helperNotification.notifyBar(notificationSync, "Reading list ... ");
                 RepoSync.read(getAppDataPath);
-                //FIXME: Loop on RepoSync.files and if LOCAL, Ask request
-
-
                 bench = new Benchmark(RepoSync.getRemainingSize());
                 helperNotification.notifyBar(notificationSync, "Connecting ... ");
                 clientSync =  new ClientSync(clientInfo, new CallBackSync());
@@ -73,20 +83,6 @@ public class ServiceSync extends ServiceBase {
             stopSync(false, "User stopped.");
         }
     }
-
-    private static final Object timerLock = new Object();
-
-    private CountDownTimer timerWatchTimeout= new CountDownTimer(0, 0) {
-        @Override
-        public void onTick(long l) {
-
-        }
-
-        @Override
-        public void onFinish() {
-
-        }
-    };
 
     private void cancelWatchTimeOut() {
         Log.i(TAG, "timerWatchTimeout.cancel()");
@@ -237,23 +233,8 @@ public class ServiceSync extends ServiceBase {
             Log.i(TAG, "Received file\n"+fileInfoReception
                     +"\nRemaining : "+ RepoSync.getRemainingSize()+"/"+ RepoSync.getTotalSize());
             notifyBar("3/4", fileInfoReception);
-
-            //FIXME: !!!!!!! MOVE THIS BELOW TO requestNextFile() in switch
-            // =>  always goto requestNextFile() at last
-
-
-            if(RepoSync.checkFile(getAppDataPath, fileInfoReception,  FileInfoReception.Status.LOCAL)) {
-                if(HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath.getAbsolutePath()+File.separator
-                        +fileInfoReception.relativeFullPath).getAbsolutePath(), fileInfoReception)) {
-                    clientSync.ackFileReception(fileInfoReception.idFile, true);
-                }
-                Log.w(TAG, "File NOT inserted in db. " + fileInfoReception.relativeFullPath);
-                //FIXME: Do sthg here or sync will stop
-            } else {
-                //TODO: This will request the same if any error occurs
-                //So, use Status to ignore those failed ones and retry them later
-                requestNextFile();
-            }
+            RepoSync.checkFile(getAppDataPath, fileInfoReception,  FileInfoReception.Status.LOCAL);
+            requestNextFile();
         }
 
         @Override
@@ -321,12 +302,11 @@ public class ServiceSync extends ServiceBase {
         requestNextFile(true);
     }
 
-    Benchmark bench;
-
     private void requestNextFile(final boolean scanLibrary) {
-        final FileInfoReception fileToGetInfo = RepoSync.take(getAppDataPath);
-        if (fileToGetInfo != null) {
-            switch (fileToGetInfo.status) {
+        final FileInfoReception fileInfoReception = RepoSync.take(getAppDataPath);
+        Log.i(TAG, "requestNextFile file: \n"+fileInfoReception);
+        if (fileInfoReception != null) {
+            switch (fileInfoReception.status) {
                 case NEW:
                     new Thread() {
                         @Override
@@ -334,25 +314,29 @@ public class ServiceSync extends ServiceBase {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    notifyBar("1/4", fileToGetInfo);
-                                    watchTimeOut(fileToGetInfo.size);
+                                    notifyBar("1/4", fileInfoReception);
+                                    watchTimeOut(fileInfoReception.size);
                                 }
                             });
                             synchronized (timerLock) {
-                                clientSync.requestFile(fileToGetInfo.idFile);
+                                clientSync.requestFile(fileInfoReception.idFile);
                             }
                         }
                     }.start();
                     break;
                 case LOCAL:
-                    clientSync.ackFileReception(fileToGetInfo.idFile, true);
+                    if(HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath,
+                            fileInfoReception.relativeFullPath).getAbsolutePath(), fileInfoReception)) {
+                        if(RepoSync.checkFile(getAppDataPath, fileInfoReception, FileInfoReception.Status.IN_DB)) {
+                            clientSync.ackFileReception(fileInfoReception.idFile, true);
+                        }
+                    }
                     break;
-                /*case IN_DB:
-                    //We should not get there !!! as taking from "NEW" list
-                    //FIXME: Manage this case
-                    break;*/
+                case IN_DB:
+                    clientSync.ackFileReception(fileInfoReception.idFile, true);
+                    break;
                 case ACK:
-                    //We should not get there !!! as taking from "NEW" list
+                    //We should not get there !!! as NOT taking from "ACK" list
                     //TODO: Manage this case
                     break;
             }
