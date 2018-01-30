@@ -25,9 +25,8 @@ public class FileInfoReception {
     public FileInfoReception() {
     }
 
-    //FIXME: Add IN_DB status
     public enum Status {
-        NEW, LOCAL, ACK;
+        NEW, LOCAL, IN_DB, ACK;
 
         Status() {
         }
@@ -81,6 +80,6 @@ public class FileInfoReception {
 
     @Override
     public String toString() {
-        return relativeFullPath+"\nSize: "+size+" bytes. idFile="+idFile;
+        return relativeFullPath+"\nSize: "+size+" bytes. idFile="+idFile+". status="+status;
     }
 }

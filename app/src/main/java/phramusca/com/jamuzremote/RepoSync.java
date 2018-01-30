@@ -24,7 +24,11 @@ public final class RepoSync {
 
     private static Table<Integer, FileInfoReception.Status, FileInfoReception> files = null;
 
-    //FIXME: Use the following for the "internal" scan replacement
+    //FIXME: Missing "internal" cleanup now that removed from ServiceScan
+    // => Add a loop (in ServiceSync or here) on files in filesystem
+    //and remove those if not in files, if files not null
+    // => Need to get ServiceScan browser capabilities
+
 /*    public synchronized static void scannedFile(File getAppDataPath, File file) {
         String absolutePath=file.getAbsolutePath();
         String relativeFullPath = absolutePath.substring(getAppDataPath.getAbsolutePath().length()+1);
@@ -86,7 +90,7 @@ public final class RepoSync {
     public synchronized static FileInfoReception checkFile(File getAppDataPath, FileInfoReception fileInfoReception) {
         File file = new File(getAppDataPath, fileInfoReception.relativeFullPath);
         if(checkFile(fileInfoReception, file)) {
-            if (!fileInfoReception.status.equals(FileInfoReception.Status.ACK)) {
+            if (fileInfoReception.status.equals(FileInfoReception.Status.NEW)) {
                 fileInfoReception.status = FileInfoReception.Status.LOCAL;
             }
         } else {
@@ -148,7 +152,9 @@ public final class RepoSync {
     }
 
     public synchronized static int getRemainingSize() {
-        return files==null?0:files.column(FileInfoReception.Status.NEW).size();
+        return files==null?0:(files.column(FileInfoReception.Status.NEW).size()
+                +files.column(FileInfoReception.Status.LOCAL).size()
+                +files.column(FileInfoReception.Status.IN_DB).size());
     }
 
     public synchronized static int getTotalSize() {
@@ -156,11 +162,14 @@ public final class RepoSync {
     }
 
     public synchronized static FileInfoReception take(File getAppDataPath) {
-        if (files != null && files.column(FileInfoReception.Status.NEW).size() > 0) {
-            FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.NEW).entrySet().iterator().next().getValue();
+        if (files != null && files.column(FileInfoReception.Status.IN_DB).size() > 0) {
+            FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.IN_DB).entrySet().iterator().next().getValue();
             return checkFile(getAppDataPath, fileInfoReception);
         } else if (files != null && files.column(FileInfoReception.Status.LOCAL).size() > 0) {
             FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.LOCAL).entrySet().iterator().next().getValue();
+            return checkFile(getAppDataPath, fileInfoReception);
+        } else if (files != null && files.column(FileInfoReception.Status.NEW).size() > 0) {
+            FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.NEW).entrySet().iterator().next().getValue();
             return checkFile(getAppDataPath, fileInfoReception);
         }
         return null;
