@@ -739,12 +739,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         toggle(layoutControls, true);
+        toggle(layoutOptions, true);
         toggle(layoutAttributes, true);
         toggle(layoutGenrePlaylistLayout, true);
         toggle(layoutTagsPlaylistLayout, true);
         toggle(layoutRatingPlaylistLayout, true);
         //toggle(layoutPlaylist, true);
-        toggle(layoutOptions, true);
+
         setDimMode(toggleButtonDimMode.isChecked());
     }
 

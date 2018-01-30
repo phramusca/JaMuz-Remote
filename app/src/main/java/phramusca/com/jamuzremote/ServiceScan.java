@@ -45,12 +45,10 @@ public class ServiceScan extends ServiceBase {
     private void scanLibrayInThread() {
         new Thread() {
             public void run() {
-                  //Scan user folder
-                if(!userPath.equals("/")) {
-                    File folder = new File(userPath);
-                    scanFolder(folder);
-                    waitScanFolder();
-                }
+                //Scan user folder
+                File folder = new File(userPath);
+                scanFolder(folder);
+                waitScanFolder();
 
                 //Scan complete, warn user
                 final String msg = "Database updated.";
@@ -80,41 +78,44 @@ public class ServiceScan extends ServiceBase {
         scanLibray = new ProcessAbstract("Thread.MainActivity.scanLibrayInThread") {
             public void run() {
                 try {
-                    checkAbort();
-                    nbFiles=0;
-                    nbFilesTotal=0;
-                    checkAbort();
-                    //Scan android filesystem for files
-                    processBrowseFS = new ProcessAbstract("Thread.MainActivity.browseFS") {
-                        public void run() {
-                            try {
-                                browseFS(path);
-                            } catch (IllegalStateException | InterruptedException e) {
-                                Log.w(TAG, "Thread.MainActivity.browseFS InterruptedException");
-                                scanLibray.abort();
+                    if(!userPath.equals("/")) {
+                        checkAbort();
+                        nbFiles = 0;
+                        nbFilesTotal = 0;
+                        checkAbort();
+                        //Scan android filesystem for files
+                        processBrowseFS = new ProcessAbstract("Thread.MainActivity.browseFS") {
+                            public void run() {
+                                try {
+                                    browseFS(path);
+                                } catch (IllegalStateException | InterruptedException e) {
+                                    Log.w(TAG, "Thread.MainActivity.browseFS InterruptedException");
+                                    scanLibray.abort();
+                                }
                             }
-                        }
-                    };
-                    processBrowseFS.start();
-                    //Get total number of files
-                    processBrowseFScount = new ProcessAbstract("Thread.MainActivity.browseFScount") {
-                        public void run() {
-                            try {
-                                browseFScount(path);
-                            } catch (InterruptedException e) {
-                                Log.w(TAG, "Thread.MainActivity.browseFScount InterruptedException");
-                                scanLibray.abort();
+                        };
+                        processBrowseFS.start();
+                        //Get total number of files
+                        processBrowseFScount = new ProcessAbstract("Thread.MainActivity.browseFScount") {
+                            public void run() {
+                                try {
+                                    browseFScount(path);
+                                } catch (InterruptedException e) {
+                                    Log.w(TAG, "Thread.MainActivity.browseFScount InterruptedException");
+                                    scanLibray.abort();
+                                }
                             }
-                        }
-                    };
-                    processBrowseFScount.start();
-                    checkAbort();
-                    processBrowseFS.join();
-                    processBrowseFScount.join();
-                    checkAbort();
+                        };
+                        processBrowseFScount.start();
+                        checkAbort();
+                        processBrowseFS.join();
+                        processBrowseFScount.join();
+                    }
+
                     //Scan deleted files
                     //This will remove from db files not in filesystem
                     //It IS compatible with ServiceSync
+                    checkAbort();
                     List<Track> tracks = new Playlist("ScanFolder", false).getTracks();
                     nbFilesTotal = tracks.size();
                     nbFiles=0;

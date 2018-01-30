@@ -80,7 +80,7 @@ public class ServiceSync extends ServiceBase {
         public void onReceive(Context context, Intent intent)
         {
             Log.i(TAG, "UserStopServiceReceiver.onReceive()");
-            stopSync(false, "User stopped.");
+            stopSync(false, "User stopped.", 5000);
         }
     }
 
@@ -119,7 +119,7 @@ public class ServiceSync extends ServiceBase {
 
                         @Override
                         public void onFinish() {
-                            stopSync(true, "Timed out waiting on file.");
+                            stopSync(true, "Timed out waiting on file.", -1);
                         }
                     };
                     Log.i(TAG, "timerWatchTimeout.start()");
@@ -129,10 +129,10 @@ public class ServiceSync extends ServiceBase {
         });
     }
 
-    private void stopSync(boolean reconnect, String msg) {
+    private void stopSync(boolean reconnect, String msg, long millisInFuture) {
         cancelWatchTimeOut();
         if(clientSync!=null) {
-            clientSync.close(reconnect, msg);
+            clientSync.close(reconnect, msg, millisInFuture);
         }
         if(!reconnect) {
             stopSelf();
@@ -253,7 +253,7 @@ public class ServiceSync extends ServiceBase {
                 }
             });
 
-            // TODO MERGE: Update FilesToKeep and FilesToGet
+            // TODO MERGE: Update RepoSync
             // as received merged db is the new reference
             // (not urgent since values should only be
             // used again if file has been removed from db
@@ -269,7 +269,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         @Override
-        public void disconnected(boolean reconnect, final String msg) {
+        public void disconnected(boolean reconnect, final String msg, final long millisInFuture) {
             if(!reconnect) {
                 sendMessage("enableSync");
             }
@@ -277,7 +277,7 @@ public class ServiceSync extends ServiceBase {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        helperNotification.notifyBar(notificationSync, msg);
+                        helperNotification.notifyBar(notificationSync, msg, millisInFuture);
                     }
                 });
             }
@@ -342,16 +342,21 @@ public class ServiceSync extends ServiceBase {
             }
         } else if(RepoSync.getTotalSize()>0) {
             final String msg = "No more files to download.";
+            final String msg2 = "All " + RepoSync.getTotalSize() + " files" +
+                    " have been retrieved successfully.";
             Log.i(TAG, msg + " Updating library:" + scanLibrary);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    helperToast.toastLong(msg + "\n\nAll " + RepoSync.getTotalSize() + " files" +
-                            " have been retrieved successfully.");
+                    helperToast.toastLong(msg + "\n\n" + msg2);
+                    helperNotification.notifyBar(notificationSync, msg2, 10000);
                 }
             });
-            stopSync(false, msg);
+            //NOT stopping to be able to merge statistics
+            //stopSync(false, msg2, 10000);
             if (scanLibrary) {
+                //FIXME: Scan unwanted files (not in files but existing in "internal" folder)
+
                 //TODO: Scan only "internal" folder (scan deleted only), not the user folder
                 sendMessage("checkPermissionsThenScanLibrary");
             }
@@ -364,7 +369,7 @@ public class ServiceSync extends ServiceBase {
                             "export a list of files to retrieve, based on playlists.");
                 }
             });
-            stopSync(false, "No files to download.");
+            stopSync(false, "No files to download.", 5000);
         }
     }
 }

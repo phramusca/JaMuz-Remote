@@ -24,26 +24,6 @@ public final class RepoSync {
 
     private static Table<Integer, FileInfoReception.Status, FileInfoReception> files = null;
 
-    //FIXME: Missing "internal" cleanup now that removed from ServiceScan
-    // => Add a loop (in ServiceSync or here) on files in filesystem
-    //and remove those if not in files, if files not null
-    // => Need to get ServiceScan browser capabilities
-
-/*    public synchronized static void scannedFile(File getAppDataPath, File file) {
-        String absolutePath=file.getAbsolutePath();
-        String relativeFullPath = absolutePath.substring(getAppDataPath.getAbsolutePath().length()+1);
-        if(files!=null && !files.containsRow(relativeFullPath)) {
-            Log.i(TAG, "Deleting file "+absolutePath);
-            file.delete();
-        } else if(files!=null && files.containsRow(relativeFullPath)) {
-            Map<FileInfoReception.Status, FileInfoReception> map = files.row(relativeFullPath);
-            FileInfoReception fileInfoReception = map.entrySet().iterator().next().getValue();
-            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, fileInfoReception);
-        } else {
-            HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
-        }
-    }*/
-
     private synchronized static void updateFiles(FileInfoReception fileInfoReception) {
         files.row(fileInfoReception.idFile).clear();
         files.put(fileInfoReception.idFile, fileInfoReception.status, fileInfoReception);

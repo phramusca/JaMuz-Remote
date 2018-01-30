@@ -82,7 +82,7 @@ public class ClientSync extends Client {
         }
     }
 
-    public void close(boolean reconnect, String msg) {
+    public void close(boolean reconnect, String msg, long millisInFuture) {
         synchronized (syncStatus) {
             logStatus("close()");
             if(!syncStatus.status.equals(Status.NOT_CONNECTED)) {
@@ -118,7 +118,7 @@ public class ClientSync extends Client {
                 syncStatus.status=Status.STOPPING;
             }
 
-            callback.disconnected(reconnect, msg);
+            callback.disconnected(reconnect, msg, millisInFuture);
         }
     }
 
@@ -154,7 +154,7 @@ public class ClientSync extends Client {
                 if(syncStatus.status.equals(Status.CONNECTED)
                         || syncStatus.status.equals(Status.CONNECTING)) {
                     close(true, (syncStatus.nbRetries>0?"Attempt "+syncStatus.nbRetries
-                            :"Disconnected")+": "+msg);
+                            :"Disconnected")+": "+msg, -1);
                 }
             }
 		}
@@ -179,6 +179,7 @@ public class ClientSync extends Client {
                 try {
                     obj.put("type", "ackFileReception");
                     obj.put("idFile", idFile);
+                    //TODO: Remove requestNextFile as (apparently) no more used
                     obj.put("requestNextFile", requestNextFile);
                     send("JSON_" + obj.toString());
                 } catch (JSONException e) {

@@ -15,5 +15,5 @@ public interface ICallBackSync {
 	void receivedFile(FileInfoReception fileInfoReception);
 	void receivedDatabase();
 	void connected();
-	void disconnected(boolean reconnect, String msg);
+	void disconnected(boolean reconnect, String msg, long millisInFuture);
 }

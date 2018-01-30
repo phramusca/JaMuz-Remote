@@ -45,18 +45,20 @@ public class HelperNotification {
     }
 
     private void disableNotificationIn(final long millisInFuture, final int id) {
-        CountDownTimer timer = new CountDownTimer(millisInFuture, millisInFuture/10) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                Log.d(TAG, (millisUntilFinished/1000)+"s remaining before " +
-                        "disabling notification");
-            }
+        if(millisInFuture>0) {
+            CountDownTimer timer = new CountDownTimer(millisInFuture, millisInFuture / 10) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    Log.d(TAG, (millisUntilFinished / 1000) + "s remaining before " +
+                            "disabling notification");
+                }
 
-            @Override
-            public void onFinish() {
-                notificationManager.cancel(id);
-            }
-        };
-        timer.start();
+                @Override
+                public void onFinish() {
+                    notificationManager.cancel(id);
+                }
+            };
+            timer.start();
+        }
     }
 }
