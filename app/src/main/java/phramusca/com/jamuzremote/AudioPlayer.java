@@ -48,7 +48,7 @@ public class AudioPlayer {
 
         } catch (IOException e) {
             Log.e(TAG, "Error playing (\""+track+"\") => DELETING IT !!!!!!", e);
-            //TODO: Put back in FilesToGet if in FilesToKeep (take info from there)
+            //TODO: Put back in RepoSync (take info from there)
             stop(false);
             File file = new File(track.getPath());
             file.delete();

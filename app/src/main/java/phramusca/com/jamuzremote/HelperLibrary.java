@@ -18,7 +18,7 @@ public final class HelperLibrary {
     }
 
     public static void open(Context context) {
-        if(musicLibrary==null || musicLibrary.db.isOpen()) {
+        if(musicLibrary==null || !musicLibrary.db.isOpen()) {
             musicLibrary = new MusicLibrary(context);
             musicLibrary.open();
         }
