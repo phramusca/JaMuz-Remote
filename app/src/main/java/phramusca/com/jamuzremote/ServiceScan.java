@@ -78,7 +78,7 @@ public class ServiceScan extends ServiceBase {
         scanLibray = new ProcessAbstract("Thread.MainActivity.scanLibrayInThread") {
             public void run() {
                 try {
-                    if(!userPath.equals("/")) {
+                    if(!path.equals("/")) {
                         checkAbort();
                         nbFiles = 0;
                         nbFilesTotal = 0;

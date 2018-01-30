@@ -29,6 +29,11 @@ public final class RepoSync {
         files.put(fileInfoReception.idFile, fileInfoReception.status, fileInfoReception);
     }
 
+    /**
+     * @param fileInfoReception
+     * @param receivedFile
+     * @return true if receivedFile exists and length()==fileInfoReception.size
+     */
     private synchronized static boolean checkFile(FileInfoReception fileInfoReception,
                                                  File receivedFile) {
         if(receivedFile.exists()) {
@@ -45,6 +50,15 @@ public final class RepoSync {
         return false;
     }
 
+    /**
+     * Sets status to NEW if fileInfoReception does not exists
+     * or to given status if fileInfoReception exists and has correct size.
+     * File is deleted if not requested (not in files).
+     * @param getAppDataPath
+     * @param fileInfoReception
+     * @param status
+     * @return true if receivedFile exists and length()==fileInfoReception.size
+     */
     public synchronized static boolean checkFile(File getAppDataPath,
                                                  FileInfoReception fileInfoReception,
                                                  FileInfoReception.Status status) {
@@ -67,6 +81,12 @@ public final class RepoSync {
         return false;
     }
 
+    /**
+     * @param getAppDataPath
+     * @param fileInfoReception
+     * @return modified fileInfoReception with status to LOCAL if it exists and status was NEW
+     *
+     */
     public synchronized static FileInfoReception checkFile(File getAppDataPath, FileInfoReception fileInfoReception) {
         File file = new File(getAppDataPath, fileInfoReception.relativeFullPath);
         if(checkFile(fileInfoReception, file)) {

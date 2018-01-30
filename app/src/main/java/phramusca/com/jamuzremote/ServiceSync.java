@@ -356,6 +356,9 @@ public class ServiceSync extends ServiceBase {
             //stopSync(false, msg2, 10000);
             if (scanLibrary) {
                 //FIXME: Scan unwanted files (not in files but existing in "internal" folder)
+                // => Require browse skills from ProcessScan
+                //scanFolder(getAppDataPath);
+
 
                 //TODO: Scan only "internal" folder (scan deleted only), not the user folder
                 sendMessage("checkPermissionsThenScanLibrary");
@@ -371,5 +374,49 @@ public class ServiceSync extends ServiceBase {
             });
             stopSync(false, "No files to download.", 5000);
         }
+    }
+
+    private void scanFolder(final File path) {
+        ProcessAbstract processAbstract = new ProcessAbstract("Thread.MainActivity.ScanUnWantedRepoSync") {
+            public void run() {
+                try {
+                    if(!path.equals("/")) {
+                        browseFS(path);
+                    }
+                } catch (InterruptedException e) {
+                    Log.w(TAG, "Thread.MainActivity.ScanUnWantedRepoSync InterruptedException");
+                }
+            }
+
+            private void browseFS(File path) throws InterruptedException {
+                checkAbort();
+                if (path.isDirectory()) {
+                    File[] files = path.listFiles();
+                    if (files != null) {
+                        if(files.length>0) {
+                            for (File file : files) {
+                                checkAbort();
+                                if (file.isDirectory()) {
+                                    browseFS(file);
+                                }
+                                else {
+                                    String absolutePath=file.getAbsolutePath();
+                                    String relativeFullPath = absolutePath.substring(getAppDataPath.getAbsolutePath().length()+1);
+
+                                    ///FIXME: CONTINUE FROM HERE !!!!!!!!
+                                    /*if(!RepoSync.files.containsValue(new FileInfoReception(relativeFullPath))) {
+                                        notifyScan("JaMuz is scanning files ... ", 13);
+                                    }*/
+                                }
+                            }
+                        } else {
+                            Log.i(TAG, "Deleting empty folder "+path.getAbsolutePath());
+                            path.delete();
+                        }
+                    }
+                }
+            }
+        };
+        processAbstract.start();
     }
 }
