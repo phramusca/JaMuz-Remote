@@ -83,6 +83,19 @@ public class FileInfoReception {
         return relativeFullPath+"\nSize: "+size+" bytes. idFile="+idFile+". status="+status;
     }
 
-    //FIXME: Override equals (and whatever hash) to be equal on relativePath
-    //for serviceSync cleanup to be able to do files.containsValue(new FileInfoReception(relativePath))
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FileInfoReception that = (FileInfoReception) o;
+
+        return relativeFullPath != null ? relativeFullPath.equals(that.relativeFullPath) : that.relativeFullPath == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return relativeFullPath != null ? relativeFullPath.hashCode() : 0;
+    }
 }

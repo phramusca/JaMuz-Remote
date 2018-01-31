@@ -45,7 +45,7 @@ public class ServiceScan extends ServiceBase {
     private void scanLibrayInThread() {
         new Thread() {
             public void run() {
-                //Scan user folder
+                //Scan user folder and cleanup library
                 File folder = new File(userPath);
                 scanFolder(folder);
                 waitScanFolder();
@@ -78,7 +78,7 @@ public class ServiceScan extends ServiceBase {
         scanLibray = new ProcessAbstract("Thread.MainActivity.scanLibrayInThread") {
             public void run() {
                 try {
-                    if(!path.equals("/")) {
+                    if(!path.getAbsolutePath().equals("/")) {
                         checkAbort();
                         nbFiles = 0;
                         nbFilesTotal = 0;
@@ -128,7 +128,7 @@ public class ServiceScan extends ServiceBase {
                             Log.d(TAG, "Remove track from db: "+track);
                             track.delete();
                         }
-                        notifyScan("JaMuz is scanning deleted files ... ", 200);
+                        notifyScan("Scanning deleted files ... ", 200);
                     }
                 } catch (InterruptedException e) {
                     Log.w(TAG, "Thread.MainActivity.scanLibrayInThread InterruptedException");
@@ -160,7 +160,7 @@ public class ServiceScan extends ServiceBase {
                                             HelperLibrary.insertOrUpdateTrackInDatabase(absolutePath, null);
                                         }
                                     }
-                                    notifyScan("JaMuz is scanning files ... ", 13);
+                                    notifyScan("Scanning files ... ", 13);
                                 }
                             }
                         } else {
@@ -196,10 +196,7 @@ public class ServiceScan extends ServiceBase {
 
     private void notifyScan(final String action, int every) {
         nbFiles++;
-        if(((nbFiles-1) % every) == 0) { //To prevent UI from freezing
-            String msg = nbFiles + "/" + nbFilesTotal + " " + action;
-            helperNotification.notifyBar(notificationScan, msg, nbFilesTotal, nbFiles, false, false, false);
-        }
+        helperNotification.notifyBar(notificationScan, action, every, nbFiles, nbFilesTotal);
     }
 
     private void stop() {

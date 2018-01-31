@@ -42,6 +42,8 @@ public class ServiceSync extends ServiceBase {
     private Benchmark bench;
     private Notification notificationSync;
     private BroadcastReceiver userStopReceiver;
+    private int nbFiles;
+    private int nbDeleted;
 
     @Override
     public void onCreate(){
@@ -159,7 +161,9 @@ public class ServiceSync extends ServiceBase {
                             RepoSync.receivedAck(getAppDataPath, fileReceived);
                             bench.get();
                         } else {
-                            //FIXME: Store InsertKO status IF worth doing it
+                            // FIXME: Store a new FAIL status ?
+                            // If so, add other failures too (make different statuses ?)
+                            // What to do with it ? Retry ? How many times ? How to report ?
                         }
                         notifyBar(bench.getLast()+" | 4/4 | Acknowledged");
                         if(requestNextFile) {
@@ -344,22 +348,25 @@ public class ServiceSync extends ServiceBase {
             final String msg = "No more files to download.";
             final String msg2 = "All " + RepoSync.getTotalSize() + " files" +
                     " have been retrieved successfully.";
-            Log.i(TAG, msg + " Updating library:" + scanLibrary);
+            Log.i(TAG, msg);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     helperToast.toastLong(msg + "\n\n" + msg2);
-                    helperNotification.notifyBar(notificationSync, msg2, 10000);
                 }
             });
+            //Scan unwanted files (not in files but existing in "internal" folder)
+            scanFolder(getAppDataPath);
+
             //NOT stopping to be able to merge statistics
             //stopSync(false, msg2, 10000);
+
+            //FIXME: Delete from db whenever deleting a file in "internal" folder
+            //          (may already be done, check that FIRST)
+            //So that it is not required to scan (deleted) after sync (below)
+
+            Log.i(TAG, "Updating library:" + scanLibrary);
             if (scanLibrary) {
-                //FIXME: Scan unwanted files (not in files but existing in "internal" folder)
-                // => Require browse skills from ProcessScan
-                //scanFolder(getAppDataPath);
-
-
                 //TODO: Scan only "internal" folder (scan deleted only), not the user folder
                 sendMessage("checkPermissionsThenScanLibrary");
             }
@@ -381,7 +388,15 @@ public class ServiceSync extends ServiceBase {
             public void run() {
                 try {
                     if(!path.equals("/")) {
+                        nbFiles = 0;
+                        nbDeleted = 0;
                         browseFS(path);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                helperNotification.notifyBar(notificationSync, "Sync complete.", 10000);
+                            }
+                        });
                     }
                 } catch (InterruptedException e) {
                     Log.w(TAG, "Thread.MainActivity.ScanUnWantedRepoSync InterruptedException");
@@ -402,11 +417,13 @@ public class ServiceSync extends ServiceBase {
                                 else {
                                     String absolutePath=file.getAbsolutePath();
                                     String relativeFullPath = absolutePath.substring(getAppDataPath.getAbsolutePath().length()+1);
-
-                                    ///FIXME: CONTINUE FROM HERE !!!!!!!!
-                                    /*if(!RepoSync.files.containsValue(new FileInfoReception(relativeFullPath))) {
-                                        notifyScan("JaMuz is scanning files ... ", 13);
-                                    }*/
+                                    if(!RepoSync.checkFile(getAppDataPath, relativeFullPath)) {
+                                        //RepoSync.checkFile deletes file. Not couting deleted
+                                        //to match RepoSync.getTotalSize() at the end (hopefully)
+                                        nbFiles++;
+                                    } else { nbDeleted++; }
+                                    helperNotification.notifyBar(notificationSync, "Deleting not requested files: "+nbDeleted+" so far.", 50,
+                                            nbFiles, RepoSync.getTotalSize());
                                 }
                             }
                         } else {
