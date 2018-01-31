@@ -1537,6 +1537,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //FIXME: getFromQRcode with sync too (as for remote)
+    // And manage settings panel enabling better than now !! (remember there are 2 services sharing it)
+    // => Why not let it enabled ll time and use latest change at every connection ?
     private void getFromQRcode(String content) {
         if(content!=null) {
             if(!content.equals("")) {

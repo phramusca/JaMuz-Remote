@@ -27,6 +27,14 @@ public class HelperNotification {
         disableNotificationIn(millisInFuture, notification.id);
     }
 
+    public void notifyBar(Notification notification, final String action, int every,
+                          int nbFiles, int nbFilesTotal) {
+        if(((nbFiles-1) % every) == 0) { //To prevent UI from freezing
+            String msg = nbFiles + "/" + nbFilesTotal + " " + action;
+            notifyBar(notification, msg, nbFilesTotal, nbFiles, false, false, false);
+        }
+    }
+
     public void notifyBar(Notification notification, String msg) {
         notifyBar(notification, msg, 0, 0, false, true, false);
     }

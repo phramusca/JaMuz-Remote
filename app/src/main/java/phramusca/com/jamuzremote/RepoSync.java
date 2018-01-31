@@ -101,7 +101,12 @@ public final class RepoSync {
 
     public synchronized static void receivedAck(File getAppDataPath, FileInfoReception fileInfoReception) {
         if(checkFile(getAppDataPath, fileInfoReception,  FileInfoReception.Status.ACK)) {
-            //save();
+            //Save in case of crash or android kill or reboot or whatever issue can occur
+            //but not too often not to destroy storage
+            //Is every 10 ack. enough or too much ?
+            if(((RepoSync.getRemainingSize()-1) % 10) == 0) {
+                save();
+            }
         }
     }
 
@@ -173,5 +178,21 @@ public final class RepoSync {
             return checkFile(getAppDataPath, fileInfoReception);
         }
         return null;
+    }
+
+    /**
+     * Checks if relativeFullPath is in files. Delete file if not.
+     * @param relativeFullPath
+     */
+    public synchronized static boolean checkFile(File getAppDataPath, String relativeFullPath) {
+        FileInfoReception fileInfoReception = new FileInfoReception();
+        fileInfoReception.relativeFullPath=relativeFullPath;
+        if(files != null && !files.containsValue(fileInfoReception)) {
+            Log.i(TAG, "DELETE UNWANTED: "+relativeFullPath);
+            File file = new File(getAppDataPath, fileInfoReception.relativeFullPath);
+            file.delete();
+            return true;
+        }
+        return false;
     }
 }
