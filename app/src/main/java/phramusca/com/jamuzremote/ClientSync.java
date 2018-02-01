@@ -111,6 +111,7 @@ public class ClientSync extends Client {
                 } else {
                     RepoSync.save();
                     msg="Too many retries ("+syncStatus.nbRetries+").";
+                    reconnect=false;
                     syncStatus.status=Status.STOPPING;
                 }
             } else {
@@ -150,8 +151,10 @@ public class ClientSync extends Client {
         @Override
 		public void disconnected(String msg) {
             synchronized (syncStatus) {
-                logStatus("disconnected()");
-                if(syncStatus.status.equals(Status.CONNECTED)
+                logStatus("disconnected(\""+msg+"\")");
+                if(msg.equals("ENOSPC")) {
+                    close(false, "No more space on device. Check your playlist limits and available space in your SD card.", -1);
+                } else if(syncStatus.status.equals(Status.CONNECTED)
                         || syncStatus.status.equals(Status.CONNECTING)) {
                     close(true, (syncStatus.nbRetries>0?"Attempt "+syncStatus.nbRetries
                             :"Disconnected")+": "+msg, -1);

@@ -9,6 +9,8 @@ package phramusca.com.jamuzremote;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.system.ErrnoException;
+import android.system.OsConstants;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -109,9 +111,18 @@ public class ClientReception extends ProcessAbstract {
 			}
 		} catch (InterruptedException ex) {
         } catch (IOException ex) {
-            //Ex: java.io.IOException: write failed: ENOSPC (No space left on device)
-            //+ SocketException
-            callback.disconnected(ex.getMessage());
+            boolean isENOSPC = false;
+            if (ex.getCause() instanceof ErrnoException) {
+                int errno = ((ErrnoException)ex.getCause()).errno;
+                isENOSPC = errno == OsConstants.ENOSPC;
+            }
+            if (isENOSPC) {
+                //Ex: java.io.IOException: write failed: ENOSPC (No space left on device)
+                callback.disconnected("ENOSPC");
+            } else {
+                // Other IOExceptions incl. SocketException
+                callback.disconnected(ex.getMessage());
+            }
 		}
 		finally {
 			try {

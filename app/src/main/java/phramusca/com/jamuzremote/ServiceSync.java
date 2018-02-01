@@ -136,9 +136,6 @@ public class ServiceSync extends ServiceBase {
         if(clientSync!=null) {
             clientSync.close(reconnect, msg, millisInFuture);
         }
-        if(!reconnect) {
-            stopSelf();
-        }
     }
 
     class CallBackSync implements ICallBackSync {
@@ -274,9 +271,7 @@ public class ServiceSync extends ServiceBase {
 
         @Override
         public void disconnected(boolean reconnect, final String msg, final long millisInFuture) {
-            if(!reconnect) {
-                sendMessage("enableSync");
-            }
+            cancelWatchTimeOut();
             if(!msg.equals("")) {
                 runOnUiThread(new Runnable() {
                     @Override
@@ -284,6 +279,10 @@ public class ServiceSync extends ServiceBase {
                         helperNotification.notifyBar(notificationSync, msg, millisInFuture);
                     }
                 });
+            }
+            if(!reconnect) {
+                sendMessage("enableSync");
+                stopSelf();
             }
         }
     }
