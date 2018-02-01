@@ -1,8 +1,10 @@
 package phramusca.com.jamuzremote;
 
+import com.google.common.collect.EvictingQueue;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Created by raph on 01/05/17.
@@ -13,29 +15,37 @@ public class Benchmark {
     private int index;
     private final long startTime;
     private long partialTime;
-    private final List<Long> partialTimes;
+    private Collection<Long> partialTimes;
 
     public Benchmark(int size) {
         this.size=size;
-        this.index=0;
-        this.partialTimes = new ArrayList<>();
-        this.startTime = System.currentTimeMillis();
-        this.partialTime = this.startTime;
+        index=0;
+        partialTimes = new ArrayList<>();
+        startTime = System.currentTimeMillis();
+        partialTime = startTime;
+    }
+
+    public Benchmark(int size, int max) {
+        this.size=size;
+        index=0;
+        partialTimes = EvictingQueue.create(max);
+        startTime = System.currentTimeMillis();
+        partialTime = startTime;
     }
 
     public String get() {
         long currentTime=System.currentTimeMillis();
-        long elapsedTime=currentTime-this.startTime;
-        long actionTime=currentTime-this.partialTime;
-        this.partialTime=currentTime;
-        this.partialTimes.add(actionTime);
-        long remainingTime = mean(this.partialTimes)*(this.size-this.index);
-        this.index++;
+        long elapsedTime=currentTime-startTime;
+        long actionTime=currentTime-partialTime;
+        partialTime=currentTime;
+        partialTimes.add(actionTime);
+        long remainingTime = mean(partialTimes)*(size-index);
+        index++;
 
-        String elapsed = StringManager.humanReadableSeconds(elapsedTime/1000);
-        String remaining = StringManager.humanReadableSeconds(remainingTime/1000);
+        String elapsed = StringManager.humanReadableSeconds(elapsedTime/1000, "+");
+        String remaining = StringManager.humanReadableSeconds(remainingTime/1000, "-");
 
-        lastMsg=MessageFormat.format("{0} | {1}", elapsed, remaining); //NOI18N
+        lastMsg=MessageFormat.format("| {0}/{1} |", elapsed, remaining); //NOI18N
         return lastMsg;
     }
 
@@ -49,11 +59,11 @@ public class Benchmark {
         this.size = size;
     }
 
-    public static long mean(List<Long> numbers) {
+    public static long mean(Collection<Long> numbers) {
         return sum(numbers)/numbers.size();
     }
 
-    public static long sum(List<Long> numbers) {
+    public static long sum(Collection<Long> numbers) {
         long sum=0;
         for(long number : numbers) {
             sum+=number;

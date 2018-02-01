@@ -136,7 +136,7 @@ public class StringManager {
      * @return
      */
     @NonNull
-    public static String humanReadableSeconds(long seconds) {
+    public static String humanReadableSeconds(long seconds, String sign) {
         if (seconds <= 0) {
             return "-";
         } else if (seconds <= 59) {
@@ -150,6 +150,7 @@ public class StringManager {
         final long minutes = TimeUnit.SECONDS.toMinutes(seconds);
 
         final StringBuilder sb = new StringBuilder();
+        sb.append(sign);
         if (days > 0) {
             sb.append(days);
             sb.append("d ");
