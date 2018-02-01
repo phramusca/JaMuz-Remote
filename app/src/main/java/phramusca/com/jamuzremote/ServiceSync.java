@@ -63,7 +63,7 @@ public class ServiceSync extends ServiceBase {
             public void run() {
                 helperNotification.notifyBar(notificationSync, "Reading list ... ");
                 RepoSync.read(getAppDataPath);
-                bench = new Benchmark(RepoSync.getRemainingSize());
+                bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                 helperNotification.notifyBar(notificationSync, "Connecting ... ");
                 clientSync =  new ClientSync(clientInfo, new CallBackSync());
                 clientSync.connect();
@@ -158,13 +158,13 @@ public class ServiceSync extends ServiceBase {
                             cancelWatchTimeOut();
                             FileInfoReception fileReceived = new FileInfoReception(jObject.getJSONObject("file"));
                             RepoSync.receivedAck(getAppDataPath, fileReceived);
+                            notifyBar("Ack.", fileReceived);
                             bench.get();
                         } else {
                             // FIXME: Store a new FAIL status ?
                             // If so, add other failures too (make different statuses ?)
                             // What to do with it ? Retry ? How many times ? How to report ?
                         }
-                        notifyBar(bench.getLast()+" | 4/4 | Acknowledged");
                         if(requestNextFile) {
                             requestNextFile();
                         }
@@ -186,7 +186,7 @@ public class ServiceSync extends ServiceBase {
                         }
                         RepoSync.set(getAppDataPath, newTracks);
                         scanAndDeleteUnwanted(getAppDataPath);
-                        bench = new Benchmark(RepoSync.getRemainingSize());
+                        bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                         requestNextFile();
                         break;
                     case "tags":
@@ -236,14 +236,14 @@ public class ServiceSync extends ServiceBase {
         public void receivedFile(final FileInfoReception fileInfoReception) {
             Log.i(TAG, "Received file\n"+fileInfoReception
                     +"\nRemaining : "+ RepoSync.getRemainingSize()+"/"+ RepoSync.getTotalSize());
-            notifyBar("3/4", fileInfoReception);
+            notifyBar("Recep.", fileInfoReception);
             RepoSync.checkFile(getAppDataPath, fileInfoReception,  FileInfoReception.Status.LOCAL);
             requestNextFile();
         }
 
         @Override
         public void receivingFile(final FileInfoReception fileInfoReception) {
-            notifyBar("2/4", fileInfoReception);
+            notifyBar("Down.", fileInfoReception);
         }
 
         @Override
@@ -291,14 +291,10 @@ public class ServiceSync extends ServiceBase {
     }
 
     private void notifyBar(String text, FileInfoReception fileInfoReception) {
-        notifyBar(bench.getLast()+" | "+text+" | "+StringManager.humanReadableByteCount(
-                fileInfoReception.size, false)
-                +" | "+fileInfoReception.relativeFullPath);
-    }
-
-    private void notifyBar(String text) {
         String msg = "- "+ RepoSync.getRemainingSize() + "/" + RepoSync.getTotalSize()
-                + " | "+text;
+                + " "+bench.getLast()+" "+text+" "+StringManager.humanReadableByteCount(
+                fileInfoReception.size, false)
+                +" ("+fileInfoReception.relativeFullPath+")";
         int max= RepoSync.getTotalSize();
         int progress=max- RepoSync.getRemainingSize();
         helperNotification.notifyBar(notificationSync, msg, max, progress, false, true, true);
@@ -320,7 +316,7 @@ public class ServiceSync extends ServiceBase {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    notifyBar("1/4", fileInfoReception);
+                                    notifyBar("Req.", fileInfoReception);
                                     watchTimeOut(fileInfoReception.size);
                                 }
                             });
@@ -396,7 +392,7 @@ public class ServiceSync extends ServiceBase {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                helperNotification.notifyBar(notificationSyncScan, "Deleted \"+nbDeleted+\" unrequested files.", 10000);
+                                helperNotification.notifyBar(notificationSyncScan, "Deleted \""+nbDeleted+"\" unrequested files.", 10000);
                             }
                         });
                     }
