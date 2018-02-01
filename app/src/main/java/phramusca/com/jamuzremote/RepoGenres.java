@@ -10,7 +10,6 @@ import java.util.List;
 
 public final class RepoGenres {
 
-    private static final String TAG = RepoGenres.class.getSimpleName();
     private static List<String> genres = new ArrayList<>();
 
     private RepoGenres() {

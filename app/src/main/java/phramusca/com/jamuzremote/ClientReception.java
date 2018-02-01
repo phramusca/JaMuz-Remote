@@ -44,7 +44,8 @@ public class ClientReception extends ProcessAbstract {
 	@Override
 	public void run() {
 		try {
-			while(true) {
+            //noinspection InfiniteLoopStatement
+            while(true) {
 				checkAbort();
 				String msg = bufferedReader.readLine();
                 if(msg==null) {
@@ -59,14 +60,15 @@ public class ClientReception extends ProcessAbstract {
                     try {
                         bitmap = BitmapFactory.decodeStream(inputStream);
                         Log.d(TAG, "receivedBitmap");
-                    } catch (OutOfMemoryError ex) {
+                    } catch (OutOfMemoryError ignored) {
+                        //Handed in callback
                     } finally {
                         Log.d(TAG, "receivedBitmap: calling callback");
                         callback.receivedBitmap(bitmap);
                     }
                 }
 				else if (msg.startsWith("SENDING_FILE")) {
-                    FileInfoReception fileInfoReception = null;
+                    FileInfoReception fileInfoReception;
                     try {
                         String json = msg.substring("SENDING_FILE".length());
                         fileInfoReception = new FileInfoReception(json);
@@ -109,7 +111,7 @@ public class ClientReception extends ProcessAbstract {
                     }
                 }
 			}
-		} catch (InterruptedException ex) {
+		} catch (InterruptedException ignored) {
         } catch (IOException ex) {
             boolean isENOSPC = false;
             if (ex.getCause() instanceof ErrnoException) {
@@ -127,7 +129,7 @@ public class ClientReception extends ProcessAbstract {
 		finally {
 			try {
                 inputStream.close();
-			} catch (IOException e) {
+			} catch (IOException ignored) {
 			}
 		}
 	}

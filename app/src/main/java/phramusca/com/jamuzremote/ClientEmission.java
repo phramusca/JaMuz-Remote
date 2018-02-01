@@ -43,7 +43,7 @@ public class ClientEmission extends ProcessAbstract {
 				printWriter.println(msg);
 				printWriter.flush();
 			}
-		} catch (InterruptedException ex) {
+		} catch (InterruptedException ignored) {
 		}
 	}
 }

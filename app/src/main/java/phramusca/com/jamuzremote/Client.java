@@ -32,8 +32,7 @@ public class Client {
 
 	private ICallBackReception callback;
     private BufferedReader bufferedReader;
-	private InputStream inputStream;
-    protected OutputStream outputStream;
+	protected OutputStream outputStream;
     protected ClientInfo clientInfo;
 
     public Client(ClientInfo clientInfo){
@@ -53,7 +52,7 @@ public class Client {
                 socket.connect(new InetSocketAddress(clientInfo.getAddress(), clientInfo.getPort()));
                 socket.setSoTimeout(10000);
             }
-            inputStream = socket.getInputStream();
+			InputStream inputStream = socket.getInputStream();
             bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             outputStream = socket.getOutputStream();
             emission = new ClientEmission(new PrintWriter(outputStream));

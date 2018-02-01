@@ -12,7 +12,6 @@ import java.io.Serializable;
  * @author phramusca
  */
 public class ClientInfo implements Serializable {
-	private static final String TAG = ClientInfo.class.getSimpleName();
 
 	private final String address;
 	private final int port;

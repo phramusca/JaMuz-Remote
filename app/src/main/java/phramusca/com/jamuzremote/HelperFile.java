@@ -28,7 +28,11 @@ public final class HelperFile {
 
     public static File createFolder(String folder) {
         File file = getFolder(folder);
-        file.mkdirs();
+        if(!file.exists()) {
+            if(!file.mkdirs()) {
+                return null;
+            }
+        }
         return file;
     }
 
@@ -72,6 +76,7 @@ public final class HelperFile {
     }
 
     public static void delete(String folder, String filename) {
+        //noinspection ResultOfMethodCallIgnored
         getFile(folder, filename).delete();
     }
 
@@ -99,7 +104,7 @@ public final class HelperFile {
             if ( inputStream != null ) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
+                String receiveString;
                 StringBuilder stringBuilder = new StringBuilder();
                 while ( (receiveString = bufferedReader.readLine()) != null ) {
                     stringBuilder.append(receiveString);

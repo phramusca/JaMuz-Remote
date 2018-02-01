@@ -10,11 +10,12 @@ import java.util.concurrent.TimeUnit;
  * Created by raph on 01/05/17.
  */
 public class StringManager {
+
     /**
      * Return left portion of a string
-     * @param text
-     * @param length
-     * @return
+     * @param text string
+     * @param length string lenght
+     * @return left of string up to length
      */
     @NonNull
     public static String Left(String text, int length)
@@ -22,11 +23,10 @@ public class StringManager {
         return text.substring(0, length);
     }
 
-    /**
-     * Return right portion of a string
-     * @param text
-     * @param length
-     * @return
+    /** Return left portion of a string
+     * @param text string
+     * @param length string length
+     * @return right portion of a string
      */
     @NonNull
     public static String Right(String text, int length)
@@ -36,10 +36,10 @@ public class StringManager {
 
     /**
      * Return portion of a string
-     * @param text
-     * @param start
-     * @param end
-     * @return
+     * @param text string
+     * @param start where to start
+     * @param end where to end
+     * @return portion of a string
      */
     @NonNull
     public static String Mid(String text, int start, int end)
@@ -49,9 +49,9 @@ public class StringManager {
 
     /**
      * Return portion of a string
-     * @param text
-     * @param start
-     * @return
+     * @param text string
+     * @param start where to start
+     * @return portion of a string
      */
     @NonNull
     public static String Mid(String text, int start)
@@ -65,8 +65,8 @@ public class StringManager {
      * Windows has much more that Linux but removing on both
      * systems for compatibility. Anyway, not that important characters
      * for an audio filename ...
-     * @param str
-     * @return
+     * @param str string
+     * @return string with illegal chars replaced by "_"
      */
     public static String removeIllegal(String str) {
         String pattern = "[\\\\/:\"*?<>|.!]+"; //NOI18N
@@ -74,9 +74,8 @@ public class StringManager {
     }
 
     /**
-     *
-     * @param text
-     * @return
+     * @param text string
+     * @return text or "null"
      */
     public static String getNullableText(String text) {
         if(text==null) {
@@ -89,10 +88,9 @@ public class StringManager {
 
     /**
      * Convert number of bytes into human readable formatDisplay (Kio, Ko, ...)
-     *
-     * @param bytes
-     * @param si
-     * @return
+     * @param bytes number of bytes
+     * @param si Use SI (International System of Units) or not.
+     * @return Human readable file size
      */
     public static String humanReadableByteCount(long bytes, boolean si) {
         if (bytes < 0) {
@@ -111,7 +109,7 @@ public class StringManager {
     /**
      *
      * @param seconds
-     * @return
+     * @return MM:SS
      */
     public static String secondsToMMSS(int seconds) {
         return String.format("%02d:%02d", //NOI18N

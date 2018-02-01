@@ -12,7 +12,6 @@ import android.graphics.Bitmap;
  * @author phramusca
  */
 public class ClientRemote extends Client {
-	private static final String TAG = ClientRemote.class.getSimpleName();
 
 	private final ICallBackRemote callback;
 	private boolean userStop=false;

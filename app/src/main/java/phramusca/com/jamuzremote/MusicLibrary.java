@@ -19,11 +19,21 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static phramusca.com.jamuzremote.MusicLibraryDb.*;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ADDED_DATE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ALBUM;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ARTIST;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_COVER_HASH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_GENRE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LAST_PLAYED;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PATH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PLAY_COUNTER;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TITLE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.TABLE_TRACKS;
 
 public class MusicLibrary {
 
@@ -77,22 +87,6 @@ public class MusicLibrary {
             Log.e(TAG, "getTrack("+path+")", ex);
         }
         return -1;
-    }
-
-    public synchronized ArrayList<Track> getTracks(String query, String order) {
-        ArrayList<Track> tracks = new ArrayList<>();
-        try {
-            Cursor cursor = db.query(TABLE_TRACKS,
-                    null,
-                    query,
-                    null, null, null,
-                    order, null);
-
-            tracks = getTracks(cursor);
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getTracks(\""+query+"\", \""+order+"\")", ex);
-        }
-        return tracks;
     }
 
     public synchronized ArrayList<Track> getTracks(String where, String having, String order) {
@@ -227,28 +221,6 @@ public class MusicLibrary {
                 addedDate, lastPlayed, playCounter);
     }
 
-    public synchronized LinkedHashMap<String, Integer> getGenres(String where) {
-        LinkedHashMap<String, Integer> genres = new LinkedHashMap<>();
-        Cursor cursor = db.rawQuery("SELECT " + COL_GENRE + ", count(*) " +
-                " FROM " + TABLE_TRACKS +
-                " WHERE " + where +
-                " GROUP BY " + COL_GENRE +
-                " HAVING count(*)>10" +
-                " ORDER BY count(*) desc," + COL_GENRE, new String [] {});
-
-        if(cursor != null && cursor.moveToFirst())
-        {
-            do {
-                Integer nb = cursor.getInt(1);
-                genres.put(cursor.getString(0), nb);
-            } while(cursor.moveToNext());
-        }
-        if (cursor != null) {
-            cursor.close();
-        }
-        return genres;
-    }
-
     public synchronized List<String> getGenres() {
         List<String> genres = new ArrayList<>();
         Cursor cursor = db.rawQuery("SELECT id, value FROM genre", new String [] {});
@@ -263,23 +235,6 @@ public class MusicLibrary {
             cursor.close();
         }
         return genres;
-    }
-
-    public synchronized int getNb(String where){
-        try {
-            Cursor cursor = db.rawQuery("SELECT count(*) FROM "+ TABLE_TRACKS +
-                    " WHERE " + where, new String [] {});
-            if (cursor.getCount() == 0)
-                return 0;
-
-            cursor.moveToFirst();
-            Integer nb = cursor.getInt(0);
-            cursor.close();
-            return nb;
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getNb("+where+")", ex);
-        }
-        return -1;
     }
 
     public synchronized Map<Integer, String> getTags() {

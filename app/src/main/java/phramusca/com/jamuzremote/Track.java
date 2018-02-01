@@ -166,10 +166,7 @@ public class Track {
     }
 
     public boolean update() {
-        if(HelperLibrary.musicLibrary!=null) {
-            return HelperLibrary.musicLibrary.updateTrack(this);
-        }
-        return false;
+        return HelperLibrary.musicLibrary != null && HelperLibrary.musicLibrary.updateTrack(this);
     }
 
     /**

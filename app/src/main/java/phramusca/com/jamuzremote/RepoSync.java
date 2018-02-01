@@ -30,18 +30,19 @@ public final class RepoSync {
     }
 
     /**
-     * @param fileInfoReception
-     * @param receivedFile
+     * @param fileInfoReception the one to check
+     * @param receivedFile the corresponding File
      * @return true if receivedFile exists and length()==fileInfoReception.size
      */
     private synchronized static boolean checkFile(FileInfoReception fileInfoReception,
-                                                 File receivedFile) {
+                                                  File receivedFile) {
         if(receivedFile.exists()) {
             if (receivedFile.length() == fileInfoReception.size) {
                 Log.i(TAG, "Correct file size: " + receivedFile.length());
                 return true;
             } else {
                 Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
+                //noinspection ResultOfMethodCallIgnored
                 receivedFile.delete();
             }
         } else {
@@ -54,9 +55,9 @@ public final class RepoSync {
      * Sets status to NEW if fileInfoReception does not exists
      * or to given status if fileInfoReception exists and has correct size.
      * File is deleted if not requested (not in files).
-     * @param getAppDataPath
-     * @param fileInfoReception
-     * @param status
+     * @param getAppDataPath application path
+     * @param fileInfoReception the one to check
+     * @param status status to set if returns true
      * @return true if receivedFile exists and length()==fileInfoReception.size
      */
     public synchronized static boolean checkFile(File getAppDataPath,
@@ -76,14 +77,15 @@ public final class RepoSync {
             }
         } else {
             Log.w(TAG, "files does not contain file. Deleting " + receivedFile.getAbsolutePath());
+            //noinspection ResultOfMethodCallIgnored
             receivedFile.delete();
         }
         return false;
     }
 
     /**
-     * @param getAppDataPath
-     * @param fileInfoReception
+     * @param getAppDataPath application path
+     * @param fileInfoReception the one to check
      * @return modified fileInfoReception with status to LOCAL if it exists and status was NEW
      *
      */
@@ -182,7 +184,7 @@ public final class RepoSync {
 
     /**
      * Checks if relativeFullPath is in files. Delete file if not.
-     * @param relativeFullPath
+     * @param relativeFullPath relative full path
      */
     public synchronized static boolean checkFile(File getAppDataPath, String relativeFullPath) {
         FileInfoReception fileInfoReception = new FileInfoReception();
@@ -190,6 +192,7 @@ public final class RepoSync {
         if(files != null && !files.containsValue(fileInfoReception)) {
             Log.i(TAG, "DELETE UNWANTED: "+relativeFullPath);
             File file = new File(getAppDataPath, fileInfoReception.relativeFullPath);
+            //noinspection ResultOfMethodCallIgnored
             file.delete();
             return true;
         }

@@ -1,5 +1,7 @@
 package phramusca.com.jamuzremote;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -258,7 +260,7 @@ public class Playlist implements Comparable {
     }
 
     @Override
-    public int compareTo(Object o) {
+    public int compareTo(@NonNull Object o) {
         return (this.name.compareTo(((Playlist) o).name));
     }
 
@@ -290,7 +292,7 @@ public class Playlist implements Comparable {
         GREATERTHAN(">="); //NOI18N
 
         private final String display;
-        private Operator(String display) {
+        Operator(String display) {
             this.display = display;
         }
         @Override
