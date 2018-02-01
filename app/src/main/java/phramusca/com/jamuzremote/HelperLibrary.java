@@ -3,8 +3,6 @@ package phramusca.com.jamuzremote;
 import android.content.Context;
 import android.util.Log;
 
-import java.io.File;
-
 /**
  * Created by raph on 10/06/17.
  */
@@ -45,22 +43,16 @@ public final class HelperLibrary {
                 result=true;
             } else {
                 Track track = new Track(absolutePath);
-                if(track!=null) {
-                    Log.d(TAG, "browseFS insertTrack " + absolutePath);
-                    if(fileInfoReception!=null) {
-                        track.setRating(fileInfoReception.rating);
-                        track.setAddedDate(fileInfoReception.addedDate);
-                        track.setLastPlayed(fileInfoReception.lastPlayed);
-                        track.setPlayCounter(fileInfoReception.playCounter);
-                        track.setTags(fileInfoReception.tags);
-                        track.setGenre(fileInfoReception.genre); //TODO Do not if genre read from file is better
-                    }
-                    result=musicLibrary.insertTrack(track);
-                } else {
-                    //TODO: Delete track ONLY if it is a song track that appears to be corrupted
-                    Log.w(TAG, "insertOrUpdateTrackInDatabase: delete file because cannot read tags of " + absolutePath);
-                    new File(absolutePath).delete();
+                Log.d(TAG, "browseFS insertTrack " + absolutePath);
+                if(fileInfoReception!=null) {
+                    track.setRating(fileInfoReception.rating);
+                    track.setAddedDate(fileInfoReception.addedDate);
+                    track.setLastPlayed(fileInfoReception.lastPlayed);
+                    track.setPlayCounter(fileInfoReception.playCounter);
+                    track.setTags(fileInfoReception.tags);
+                    track.setGenre(fileInfoReception.genre); //TODO Do not if genre read from file is better
                 }
+                result=musicLibrary.insertTrack(track);
             }
         }
         return result;

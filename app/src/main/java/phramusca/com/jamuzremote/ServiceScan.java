@@ -24,7 +24,7 @@ public class ServiceScan extends ServiceBase {
 
     @Override
     public void onCreate(){
-        notificationScan = new Notification(this, 2, "Scan");
+        notificationScan = new Notification(this, NotificationId.SCAN, "Scan");
         super.onCreate();
     }
 
@@ -165,6 +165,7 @@ public class ServiceScan extends ServiceBase {
                             }
                         } else {
                             Log.i(TAG, "Deleting empty folder "+path.getAbsolutePath());
+                            //noinspection ResultOfMethodCallIgnored
                             path.delete();
                         }
                     }

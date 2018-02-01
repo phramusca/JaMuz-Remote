@@ -48,13 +48,6 @@ public class ServiceBase extends Service {
         super.onDestroy();
     }
 
-    /*protected void sendMessage(String msg) {
-        Log.i(TAG, "sendMessage("+msg+")");
-        Message completeMessage =
-                mHandler.obtainMessage(1, msg);
-        completeMessage.sendToTarget();
-    }*/
-
     protected void sendMessage(String msg) {
         Log.i(TAG, "Broadcast.sendMessage("+msg+")");
         Intent intent = new Intent("ServiceBase");

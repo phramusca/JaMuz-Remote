@@ -3,15 +3,19 @@ package phramusca.com.jamuzremote;
 /**
  * Created by raph on 06/11/16.
  */
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.util.Base64;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import javax.crypto.*;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -28,8 +32,7 @@ public class Encryption {
             Cipher c = Cipher.getInstance(ALGO);
             c.init(Cipher.ENCRYPT_MODE, key);
             byte[] encVal = c.doFinal(Data.getBytes());
-            String encryptedValue = Base64.encodeToString(encVal, Base64.DEFAULT);
-            return encryptedValue;
+            return Base64.encodeToString(encVal, Base64.DEFAULT);
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException ex) {
             return "";
         }
@@ -40,10 +43,9 @@ public class Encryption {
             Key key = generateKey(secret);
             Cipher c = Cipher.getInstance(ALGO);
             c.init(Cipher.DECRYPT_MODE, key);
-            byte[] decordedValue = Base64.decode(encryptedData, Base64.DEFAULT);
-            byte[] decValue = c.doFinal(decordedValue);
-            String decryptedValue = new String(decValue);
-            return decryptedValue;
+            byte[] decodedValue = Base64.decode(encryptedData, Base64.DEFAULT);
+            byte[] decValue = c.doFinal(decodedValue);
+            return new String(decValue);
         } catch (UnsupportedEncodingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException ex) {
             return "";
         }

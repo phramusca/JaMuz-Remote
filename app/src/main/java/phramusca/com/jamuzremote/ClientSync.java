@@ -99,7 +99,7 @@ public class ClientSync extends Client {
                         logStatus("Re-connecting in 5s");
                         try {
                             Thread.sleep(5000);
-                        } catch (InterruptedException e) {
+                        } catch (InterruptedException ignored) {
                         }
                     }
                     logStatus("Re-connecting now");

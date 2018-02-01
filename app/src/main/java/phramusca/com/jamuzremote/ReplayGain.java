@@ -177,9 +177,10 @@ public class ReplayGain {
 		try {
 			String nums = dbFloat.replaceAll("[^0-9.-]","");
 			rg_float = Float.parseFloat(nums);
+			return rg_float;
 		} catch(Exception ex) {
+			return rg_float;
 		}
-		return rg_float;
 	}
 
     //FIXME: Read FLAC ReplayGain

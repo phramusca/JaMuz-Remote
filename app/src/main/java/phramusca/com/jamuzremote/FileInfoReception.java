@@ -33,7 +33,7 @@ public class FileInfoReception {
     }
 
     /**
-     * @param json
+     * @param json FileInfoReception as JSON string
      * @throws JSONException
      */
     public FileInfoReception(String json) throws JSONException {
@@ -41,7 +41,7 @@ public class FileInfoReception {
     }
 
     /**
-     * @param file
+     * @param file FileInfoReception as JSONObject
      */
     public FileInfoReception(JSONObject file) {
         try {
@@ -60,20 +60,20 @@ public class FileInfoReception {
                 String tag = (String) jsonTags.get(i);
                 tags.add(tag);
             }
-        } catch (JSONException e) {
+        } catch (JSONException ignored) {
         }
     }
 
     /**
-     * @param file
-     * @param id
-     * @return
+     * @param jsonObject the one including date to get
+     * @param id id where to get date from file
+     * @return Date from jsonObject
      */
-    private Date getDate(JSONObject file, String id) {
+    private Date getDate(JSONObject jsonObject, String id) {
         String dateStr = "";
         try {
-            dateStr = file.getString(id);
-        } catch (JSONException e) {
+            dateStr = jsonObject.getString(id);
+        } catch (JSONException ignored) {
         }
         return HelperDateTime.parseSqlUtc(dateStr);
     }

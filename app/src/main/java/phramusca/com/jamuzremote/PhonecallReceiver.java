@@ -3,12 +3,12 @@ package phramusca.com.jamuzremote;
 /**
  * Created by raph on 17/06/17.
  */
-import java.util.Date;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
+
+import java.util.Date;
 
 //https://stackoverflow.com/questions/15563921/how-to-detect-incoming-calls-in-an-android-device
 //https://gist.github.com/ftvs/e61ccb039f511eb288ee
@@ -33,14 +33,16 @@ public abstract class PhonecallReceiver extends BroadcastReceiver {
             String stateStr = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
             String number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
             int state = 0;
-            if(stateStr.equals(TelephonyManager.EXTRA_STATE_IDLE)){
-                state = TelephonyManager.CALL_STATE_IDLE;
-            }
-            else if(stateStr.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)){
-                state = TelephonyManager.CALL_STATE_OFFHOOK;
-            }
-            else if(stateStr.equals(TelephonyManager.EXTRA_STATE_RINGING)){
-                state = TelephonyManager.CALL_STATE_RINGING;
+            if (stateStr != null) {
+                if(stateStr.equals(TelephonyManager.EXTRA_STATE_IDLE)){
+                    state = TelephonyManager.CALL_STATE_IDLE;
+                }
+                else if(stateStr.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)){
+                    state = TelephonyManager.CALL_STATE_OFFHOOK;
+                }
+                else if(stateStr.equals(TelephonyManager.EXTRA_STATE_RINGING)){
+                    state = TelephonyManager.CALL_STATE_RINGING;
+                }
             }
             onCallStateChanged(context, state, number);
         }

@@ -11,7 +11,6 @@ import java.util.Map;
 
 public final class RepoTags {
 
-    private static final String TAG = RepoTags.class.getSimpleName();
     private static Map<Integer, String> tags = new HashMap<>();
 
     private RepoTags() {

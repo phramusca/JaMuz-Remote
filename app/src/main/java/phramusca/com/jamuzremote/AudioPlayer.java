@@ -51,6 +51,7 @@ public class AudioPlayer {
             //TODO: Put back in RepoSync (take info from there)
             stop(false);
             File file = new File(track.getPath());
+            //noinspection ResultOfMethodCallIgnored
             file.delete();
             callback.onPlayBackEnd();
         }
@@ -83,7 +84,7 @@ public class AudioPlayer {
             }
         }
 
-        if(mReplayGainAlbumEnabled == false && mReplayGainTrackEnabled == false) {
+        if(!mReplayGainAlbumEnabled && !mReplayGainTrackEnabled) {
 			/* Feature is disabled: Make sure that we are going to 100% volume */
             adjust = 0f;
         }
@@ -203,10 +204,7 @@ public class AudioPlayer {
     }
 
     public boolean isPlaying() {
-        if(mediaPlayer == null || !mediaPlayer.isPlaying()) {
-            return false;
-        }
-        return true;
+        return !(mediaPlayer == null || !mediaPlayer.isPlaying());
     }
 
     private void startTimer() {

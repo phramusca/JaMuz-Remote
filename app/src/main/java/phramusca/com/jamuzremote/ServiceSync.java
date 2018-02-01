@@ -41,13 +41,15 @@ public class ServiceSync extends ServiceBase {
     };
     private Benchmark bench;
     private Notification notificationSync;
+    private Notification notificationSyncScan;
     private BroadcastReceiver userStopReceiver;
     private int nbFiles;
     private int nbDeleted;
 
     @Override
     public void onCreate(){
-        notificationSync = new Notification(this, 1, "Sync");
+        notificationSync = new Notification(this, NotificationId.SYNC, "Sync");
+        notificationSyncScan = new Notification(this, NotificationId.SYNC_SCAN, "Sync");
         userStopReceiver=new UserStopServiceReceiver();
         registerReceiver(userStopReceiver,  new IntentFilter(USER_STOP_SERVICE_REQUEST));
         super.onCreate();
@@ -183,6 +185,7 @@ public class ServiceSync extends ServiceBase {
                             newTracks.put(fileReceived.idFile, fileReceived);
                         }
                         RepoSync.set(getAppDataPath, newTracks);
+                        scanAndDeleteUnwanted(getAppDataPath);
                         bench = new Benchmark(RepoSync.getRemainingSize());
                         requestNextFile();
                         break;
@@ -352,11 +355,9 @@ public class ServiceSync extends ServiceBase {
                 @Override
                 public void run() {
                     helperToast.toastLong(msg + "\n\n" + msg2);
+                    helperNotification.notifyBar(notificationSync, msg2, 10000);
                 }
             });
-            //Scan unwanted files (not in files but existing in "internal" folder)
-            scanFolder(getAppDataPath);
-
             //NOT stopping to be able to merge statistics
             //stopSync(false, msg2, 10000);
 
@@ -366,6 +367,8 @@ public class ServiceSync extends ServiceBase {
 
             Log.i(TAG, "Updating library:" + scanLibrary);
             if (scanLibrary) {
+                scanAndDeleteUnwanted(getAppDataPath);
+
                 //TODO: Scan only "internal" folder (scan deleted only), not the user folder
                 sendMessage("checkPermissionsThenScanLibrary");
             }
@@ -382,18 +385,18 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    private void scanFolder(final File path) {
+    private void scanAndDeleteUnwanted(final File path) {
         ProcessAbstract processAbstract = new ProcessAbstract("Thread.MainActivity.ScanUnWantedRepoSync") {
             public void run() {
                 try {
-                    if(!path.equals("/")) {
+                    if(!path.getAbsolutePath().equals("/")) {
                         nbFiles = 0;
                         nbDeleted = 0;
                         browseFS(path);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                helperNotification.notifyBar(notificationSync, "Sync complete.", 10000);
+                                helperNotification.notifyBar(notificationSyncScan, "Deleted \"+nbDeleted+\" unrequested files.", 10000);
                             }
                         });
                     }
@@ -421,12 +424,13 @@ public class ServiceSync extends ServiceBase {
                                         //to match RepoSync.getTotalSize() at the end (hopefully)
                                         nbFiles++;
                                     } else { nbDeleted++; }
-                                    helperNotification.notifyBar(notificationSync, "Deleting not requested files: "+nbDeleted+" so far.", 50,
+                                    helperNotification.notifyBar(notificationSyncScan, "Deleting unrequested: "+nbDeleted+" so far.", 50,
                                             nbFiles, RepoSync.getTotalSize());
                                 }
                             }
                         } else {
                             Log.i(TAG, "Deleting empty folder "+path.getAbsolutePath());
+                            //noinspection ResultOfMethodCallIgnored
                             path.delete();
                         }
                     }
