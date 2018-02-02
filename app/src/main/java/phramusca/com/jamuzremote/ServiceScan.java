@@ -45,6 +45,13 @@ public class ServiceScan extends ServiceBase {
     private void scanLibrayInThread() {
         new Thread() {
             public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        helperNotification.notifyBar(notificationScan, "Deleting tracks outside user folder.");
+                    }
+                });
+                HelperLibrary.musicLibrary.deleteTrack(getAppDataPath, userPath);
                 //Scan user folder and cleanup library
                 File folder = new File(userPath);
                 scanFolder(folder);
