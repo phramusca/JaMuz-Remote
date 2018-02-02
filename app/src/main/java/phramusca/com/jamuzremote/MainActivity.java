@@ -251,7 +251,6 @@ public class MainActivity extends AppCompatActivity {
                                                 .concat("</html>"))));
                                         setConfig("userPath", chosenDir);
                                         checkPermissionsThenScanLibrary();
-
                                     }
                                 });
                 directoryChooserDialog.setNewFolderEnabled(m_newFolderEnabled);

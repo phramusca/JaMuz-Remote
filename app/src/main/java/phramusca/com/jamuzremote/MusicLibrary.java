@@ -13,6 +13,7 @@ import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -373,6 +374,22 @@ public class MusicLibrary {
             return db.delete("genre", "value = \"" +genre+"\"", null);
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "deleteGenre("+genre+")", ex);
+        }
+        return -1;
+    }
+
+    /**
+     * @param getAppDataPath Application Folder to exclude from deletion
+     * @param userPath User path (new one) to exclude from deletion
+     * @return
+     */
+    public synchronized int deleteTrack(File getAppDataPath, String userPath){
+        try {
+            return db.delete(TABLE_TRACKS,
+                    COL_PATH+" NOT LIKE \""+getAppDataPath.getAbsolutePath()+"%\" " +
+                    "AND "+COL_PATH+" NOT LIKE \""+userPath+"%\"", null);
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "deleteTrack("+getAppDataPath.getAbsolutePath()+"\", \""+userPath+"\")", ex);
         }
         return -1;
     }
