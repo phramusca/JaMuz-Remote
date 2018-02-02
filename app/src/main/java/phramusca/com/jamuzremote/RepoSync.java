@@ -169,16 +169,16 @@ public final class RepoSync {
     }
 
     public synchronized static FileInfoReception take(File getAppDataPath) {
-        if (files != null && files.column(FileInfoReception.Status.NEW).size() > 0) {
-            FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.NEW)
+        if (files != null && files.column(FileInfoReception.Status.LOCAL).size() > 0) {
+            FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.LOCAL)
                     .entrySet().iterator().next().getValue();
             return checkFile(getAppDataPath, fileInfoReception);
         } else if (files != null && files.column(FileInfoReception.Status.IN_DB).size() > 0) {
             FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.IN_DB)
                     .entrySet().iterator().next().getValue();
             return checkFile(getAppDataPath, fileInfoReception);
-        } else if (files != null && files.column(FileInfoReception.Status.LOCAL).size() > 0) {
-            FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.LOCAL)
+        } else if (files != null && files.column(FileInfoReception.Status.NEW).size() > 0) {
+            FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.NEW)
                     .entrySet().iterator().next().getValue();
             return checkFile(getAppDataPath, fileInfoReception);
         }

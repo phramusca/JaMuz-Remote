@@ -392,7 +392,7 @@ public class ServiceSync extends ServiceBase {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                helperNotification.notifyBar(notificationSyncScan, "Deleted \""+nbDeleted+"\" unrequested files.", 10000);
+                                helperNotification.notifyBar(notificationSyncScan, "Deleted "+nbDeleted+" unrequested files.", 10000);
                             }
                         });
                     }
