@@ -161,8 +161,8 @@ public class ServiceSync extends ServiceBase {
                             notifyBar("Ack.", fileReceived);
                             bench.get();
                         } else {
-                            // FIXME: Store a new FAIL status ?
-                            // If so, add other failures too (make different statuses ?)
+                            // FIXME: Store a new FAIL status
+                            // add other failures too (make different statuses ?)
                             // What to do with it ? Retry ? How many times ? How to report ?
                         }
                         if(requestNextFile) {
