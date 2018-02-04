@@ -478,8 +478,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //FIXME: We stay in remote mode even if remote is closed
-        //Requiring to restart app :(
+        //FIXME: Remote and Sync modes interfere:
+        // - one can close the other on closure. why ?
+        // - remote<->local move can be difficult :(
         buttonRemote = (Button) findViewById(R.id.button_connect);
         buttonRemote.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -2076,12 +2077,14 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void disconnected(final String msg) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    helperToast.toastShort(msg);
-                }
-            });
+            if(!msg.equals("")) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        helperToast.toastShort(msg);
+                    }
+                });
+            }
             stopRemote();
             setupSpinner();
             displayedTrack = localTrack;

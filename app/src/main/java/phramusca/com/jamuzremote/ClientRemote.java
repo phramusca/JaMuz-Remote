@@ -57,9 +57,7 @@ public class ClientRemote extends Client {
 
         @Override
 		public void disconnected(String msg) {
-            if(!userStop) {
-                callback.disconnected(msg);
-            }
+            callback.disconnected(userStop?"":msg);
 		}
 	}
 }
