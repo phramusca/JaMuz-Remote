@@ -167,7 +167,13 @@ public class ClientSync extends Client {
         synchronized (syncStatus) {
             logStatus("requestFile()");
             if(checkStatus()) {
-                send("sendFile" + idFile);
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("type", "requestFile");
+                    obj.put("idFile", idFile);
+                    send("JSON_" + obj.toString());
+                } catch (JSONException e) {
+                }
             }
         }
     }
