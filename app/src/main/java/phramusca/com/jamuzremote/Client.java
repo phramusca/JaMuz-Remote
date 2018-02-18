@@ -7,6 +7,7 @@ package phramusca.com.jamuzremote;
 
 import android.util.Log;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -126,8 +127,9 @@ public class Client {
 		}
 	}
 
-	protected void sendFile(File file, DataOutputStream dos) {
-		if(dos!=null&&file.exists()&&file.isFile())
+	protected void sendFile(File file) {
+        DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(outputStream));
+		if(dos!=null && file.exists() && file.isFile())
 		{
 			try (FileInputStream input = new FileInputStream(file)) {
 				Log.i(TAG, "Sending : "+file.getAbsolutePath());

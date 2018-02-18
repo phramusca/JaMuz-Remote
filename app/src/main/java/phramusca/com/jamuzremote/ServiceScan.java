@@ -33,7 +33,7 @@ public class ServiceScan extends ServiceBase {
         super.onStartCommand(intent, flags, startId);
         userPath = intent.getStringExtra("userPath");
         scanLibrayInThread();
-        return START_STICKY;
+        return START_REDELIVER_INTENT;
     }
 
     @Override

@@ -15,18 +15,22 @@ public class ReceiverPhoneCall extends PhonecallReceiver {
     private static boolean wasPlaying = false;
 
     private void pause() {
-        wasPlaying = MainActivity.audioPlayer.isPlaying();
-        Log.i(TAG, "wasPlaying="+wasPlaying+"");
-        MainActivity.audioPlayer.pause();
+        if(MainActivity.audioPlayer!=null) {
+            wasPlaying = MainActivity.audioPlayer.isPlaying();
+            Log.i(TAG, "wasPlaying="+wasPlaying+"");
+            MainActivity.audioPlayer.pause();
+        }
     }
 
     private void resume() {
-        if(wasPlaying) {
-            Log.i(TAG, "wasPlaying => audioPlayer.resume");
-            MainActivity.audioPlayer.resume();
-            wasPlaying = false;
-        } else {
-            Log.i(TAG, "was NOT Playing => nothing");
+        if(MainActivity.audioPlayer!=null) {
+            if (wasPlaying) {
+                Log.i(TAG, "wasPlaying => audioPlayer.resume");
+                MainActivity.audioPlayer.resume();
+                wasPlaying = false;
+            } else {
+                Log.i(TAG, "was NOT Playing => nothing");
+            }
         }
     }
 

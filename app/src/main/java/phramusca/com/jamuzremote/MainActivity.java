@@ -86,6 +86,10 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+//FIXME: Make a relase and submit to F-Droid
+//https://gitlab.com/fdroid/fdroiddata/blob/master/CONTRIBUTING.md
+//https://f-droid.org/
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -2095,6 +2099,7 @@ public class MainActivity extends AppCompatActivity {
     private void stopRemote() {
         if(clientRemote!=null) {
             clientRemote.close();
+            clientRemote=null;
         }
         enableClient(buttonRemote, R.drawable.remote_off);
         setupSpinner();
