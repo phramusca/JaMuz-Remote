@@ -11,10 +11,6 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-
 /**
  *
  * @author phramusca
@@ -209,13 +205,7 @@ public class ClientSync extends Client {
         synchronized (syncStatus) {
             logStatus("sendDatabase()");
             if(checkStatus()) {
-                File file = MainActivity.musicLibraryDbFile;
-                if (file.exists() && file.isFile()) {
-                    send("SENDING_DB");
-                    DataOutputStream dos = new DataOutputStream(
-                            new BufferedOutputStream(outputStream));
-                    sendFile(file, dos);
-                }
+                HelperLibrary.musicLibrary.send(this);
             }
         }
 	}

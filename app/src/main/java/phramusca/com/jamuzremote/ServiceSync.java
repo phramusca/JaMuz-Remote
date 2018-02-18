@@ -69,7 +69,7 @@ public class ServiceSync extends ServiceBase {
                 clientSync.connect();
             }
         }.start();
-        return START_STICKY;
+        return START_REDELIVER_INTENT;
     }
 
     @Override

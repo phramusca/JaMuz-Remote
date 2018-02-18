@@ -40,7 +40,7 @@ public class ServiceBase extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         getAppDataPath = (File)intent.getSerializableExtra("getAppDataPath");
-        return START_STICKY;
+        return START_REDELIVER_INTENT;
     }
 
     @Override

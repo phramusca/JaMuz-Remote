@@ -54,6 +54,12 @@ public class MusicLibrary {
         db.close();
     }
 
+    //FIXME: Merge: a lot of playCounter issues
+
+    //FIXME: Database is corrupted after a merge
+    //Is this because of receive below ?
+    //=> Test with smaller list
+
     public synchronized void receive(InputStream inputStream) throws IOException {
         DataInputStream dis = new DataInputStream(
                 new BufferedInputStream(inputStream));
@@ -69,6 +75,11 @@ public class MusicLibrary {
             fileSize -= bytesRead;
         }
         fos.close();
+    }
+
+    public synchronized void send(ClientSync client) {
+        client.send("SENDING_DB");
+        client.sendFile(MainActivity.musicLibraryDbFile);
     }
 
     public synchronized int getTrack(String path){
@@ -172,7 +183,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    private ArrayList<Track> getTracks(Cursor cursor) {
+    private synchronized ArrayList<Track> getTracks(Cursor cursor) {
         ArrayList<Track> tracks = new ArrayList<>();
         if(cursor != null && cursor.moveToFirst())
         {
@@ -187,7 +198,7 @@ public class MusicLibrary {
         return tracks;
     }
 
-    private ContentValues TrackToValues(Track track) {
+    private synchronized ContentValues TrackToValues(Track track) {
         ContentValues values = new ContentValues();
         values.put(COL_TITLE, track.getTitle());
         values.put(COL_ALBUM, track.getAlbum());
@@ -202,7 +213,7 @@ public class MusicLibrary {
         return values;
     }
 
-    private Track cursorToTrack(Cursor c){
+    private synchronized Track cursorToTrack(Cursor c){
 
         int id = c.getInt(c.getColumnIndex(COL_ID));
         int rating=c.getInt(c.getColumnIndex(COL_RATING));
