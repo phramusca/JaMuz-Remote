@@ -98,18 +98,7 @@ public class ClientReception extends ProcessAbstract {
                     catch (OutOfMemoryError | JSONException e) {
                         Log.e(TAG, "receivedFile", e);
                     }
-				} else if (msg.startsWith("SENDING_DB")) {
-                    try {
-                        Log.i(TAG, "Start database reception");
-                        HelperLibrary.musicLibrary.receive(inputStream); //To lock db while receiving
-                        Log.i(TAG, "database received");
-                        callback.receivedDatabase();
-                        checkAbort();
-                    }
-                    catch (OutOfMemoryError e) {
-                        Log.e(TAG, "receivedDB", e);
-                    }
-                }
+				}
 			}
 		} catch (InterruptedException ignored) {
         } catch (IOException ex) {

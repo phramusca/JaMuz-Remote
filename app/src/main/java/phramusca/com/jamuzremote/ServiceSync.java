@@ -150,6 +150,9 @@ public class ServiceSync extends ServiceBase {
                 final JSONObject jObject = new JSONObject(json);
                 String type = jObject.getString("type");
                 switch(type) {
+                    case "StartSync":
+                        requestNextFile(false);
+                        break;
                     case "insertDeviceFileAck":
                         String status = jObject.getString("status");
                         boolean requestNextFile = jObject.getBoolean("requestNextFile");
@@ -169,13 +172,6 @@ public class ServiceSync extends ServiceBase {
                             requestNextFile();
                         }
                         break;
-                    case "StartSync":
-                        requestNextFile(false);
-                        break;
-                    case "SEND_DB":
-                        helperNotification.notifyBar(notificationSync, "Sending database ... ");
-                        clientSync.sendDatabase(); //TODO: Move to ClientSync
-                        break;
                     case "FilesToGet":
                         helperNotification.notifyBar(notificationSync, "Received new list of files to get ... ");
                         Map<Integer, FileInfoReception> newTracks = new HashMap<>();
@@ -188,6 +184,16 @@ public class ServiceSync extends ServiceBase {
                         scanAndDeleteUnwanted(getAppDataPath);
                         bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                         requestNextFile();
+                        break;
+                    case "mergeListDbSelected":
+                        JSONArray filesToUpdate = (JSONArray) jObject.get("files");
+                        for(int i=0; i<filesToUpdate.length(); i++) {
+                            FileInfoReception fileReceived = new FileInfoReception((JSONObject) filesToUpdate.get(i));
+                            HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath,
+                                    fileReceived.relativeFullPath).getAbsolutePath(), fileReceived);
+                        }
+                        stopSync(false, "Sync complete.", 20000);
+                        stopSelf();
                         break;
                     case "tags":
                         helperNotification.notifyBar(notificationSync, "Received tags ... ");
@@ -354,8 +360,11 @@ public class ServiceSync extends ServiceBase {
                     helperNotification.notifyBar(notificationSync, msg2, 10000);
                 }
             });
-            //NOT stopping to be able to merge statistics
+            //FIXME: STOP after merge, now that initiated from here
             //stopSync(false, msg2, 10000);
+
+            List<Track> tracks = new Playlist("FilesToMerge", false).getTracks();
+            clientSync.requestMerge(tracks, getAppDataPath);
 
             //FIXME: Delete from db whenever deleting a file in "internal" folder
             //          (may already be done, check that FIRST)

@@ -11,12 +11,7 @@ import android.database.sqlite.SQLiteException;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -52,34 +47,6 @@ public class MusicLibrary {
 
     public synchronized void close(){
         db.close();
-    }
-
-    //FIXME: Merge: a lot of playCounter issues
-
-    //FIXME: Database is corrupted after a merge
-    //Is this because of receive below ?
-    //=> Test with smaller list
-
-    public synchronized void receive(InputStream inputStream) throws IOException {
-        DataInputStream dis = new DataInputStream(
-                new BufferedInputStream(inputStream));
-        double fileSize = dis.readLong();
-        FileOutputStream fos = new FileOutputStream(
-                MainActivity.musicLibraryDbFile);
-        // TODO: Find best. Make a benchmark
-        //https://stackoverflow.com/questions/8748960/how-do-you-decide-what-byte-size-to-use-for-inputstream-read
-        byte[] buf = new byte[8192];
-        int bytesRead;
-        while (fileSize > 0 && (bytesRead = dis.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
-            fos.write(buf, 0, bytesRead);
-            fileSize -= bytesRead;
-        }
-        fos.close();
-    }
-
-    public synchronized void send(ClientSync client) {
-        client.send("SENDING_DB");
-        client.sendFile(MainActivity.musicLibraryDbFile);
     }
 
     public synchronized int getTrack(String path){
@@ -166,6 +133,12 @@ public class MusicLibrary {
         try {
             if(db.update(TABLE_TRACKS, TrackToValues(track),
                     COL_ID + " = " +track.getId(), null)==1) {
+                removeTags(track.getId());
+                for(String tag : track.getTags(false)) {
+                    if(!addTag(track.getId(), tag)) {
+                        return false;
+                    }
+                }
                 return true;
             }
         } catch (SQLiteException | IllegalStateException ex) {
@@ -332,6 +305,17 @@ public class MusicLibrary {
             return true;
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "removeTag("+idFile+","+tag+")", ex);
+        }
+        return false;
+    }
+
+    public synchronized boolean removeTags(int idFile){
+        try {
+            db.delete("tagfile", "idFile=?",
+                    new String[] { String.valueOf(idFile) });
+            return true;
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "removeTags("+idFile+")", ex);
         }
         return false;
     }

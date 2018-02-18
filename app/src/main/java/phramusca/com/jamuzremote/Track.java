@@ -3,6 +3,10 @@ package phramusca.com.jamuzremote;
 import android.media.MediaMetadataRetriever;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -226,5 +230,26 @@ public class Track {
 
     public void setId(int id) {
         this.id=id;
+    }
+
+    public JSONObject toJSONObject(File getAppDataPath) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("path", path.substring(getAppDataPath.getAbsolutePath().length()+1));
+            jsonObject.put("idFileRemote", id);
+            jsonObject.put("rating", rating);
+            jsonObject.put("addedDate", getFormattedAddedDate());
+            jsonObject.put("lastPlayed", getFormattedLastPlayed());
+            jsonObject.put("playCounter", playCounter);
+            jsonObject.put("genre", genre);
+            JSONArray tagsAsMap = new JSONArray();
+            getTags(false);
+            for(String tag : tags) {
+                tagsAsMap.put(tag);
+            }
+            jsonObject.put("tags", tagsAsMap);
+        } catch (JSONException e) {
+        }
+        return jsonObject;
     }
 }

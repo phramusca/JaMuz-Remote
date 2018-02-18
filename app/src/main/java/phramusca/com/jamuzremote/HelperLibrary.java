@@ -34,24 +34,23 @@ public final class HelperLibrary {
         boolean result=false;
         if(musicLibrary!=null) {
             int id = musicLibrary.getTrack(absolutePath);
+            Track track = new Track(absolutePath);
+            Log.d(TAG, "browseFS insertTrack " + absolutePath);
+            if(fileInfoReception!=null) {
+                track.setRating(fileInfoReception.rating);
+                track.setAddedDate(fileInfoReception.addedDate);
+                track.setLastPlayed(fileInfoReception.lastPlayed);
+                track.setPlayCounter(fileInfoReception.playCounter);
+                track.setTags(fileInfoReception.tags);
+                track.setGenre(fileInfoReception.genre);
+            }
             if(id>=0) {
                 Log.d(TAG, "browseFS updateTrack " + absolutePath);
-                //TODDO: Update if file is modified only:
+                //TODO: For user path only: update only if file is modified:
                 //based on lastModificationDate and/or size (not on content as longer than updateTrack)
-                //musicLibrary.updateTrack(id, track, false);
-                //Warning with genre now that it is part of merge
-                result=true;
+                track.setId(id);
+                result=musicLibrary.updateTrack(track);
             } else {
-                Track track = new Track(absolutePath);
-                Log.d(TAG, "browseFS insertTrack " + absolutePath);
-                if(fileInfoReception!=null) {
-                    track.setRating(fileInfoReception.rating);
-                    track.setAddedDate(fileInfoReception.addedDate);
-                    track.setLastPlayed(fileInfoReception.lastPlayed);
-                    track.setPlayCounter(fileInfoReception.playCounter);
-                    track.setTags(fileInfoReception.tags);
-                    track.setGenre(fileInfoReception.genre); //TODO Do not if genre read from file is better
-                }
                 result=musicLibrary.insertTrack(track);
             }
         }

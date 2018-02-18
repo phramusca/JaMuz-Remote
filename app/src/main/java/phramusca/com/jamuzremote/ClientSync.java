@@ -8,8 +8,12 @@ package phramusca.com.jamuzremote;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.File;
+import java.util.List;
 
 /**
  *
@@ -174,6 +178,26 @@ public class ClientSync extends Client {
         }
     }
 
+    public void requestMerge(List<Track> tracks, File getAppDataPath) {
+        synchronized (syncStatus) {
+            logStatus("requestFile()");
+            if(checkStatus()) {
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("type", "FilesToMerge");
+                    //JSONObject jsonAsMap = new JSONObject();
+                    JSONArray filesToMerge = new JSONArray();
+                    for (Track track : tracks) {
+                        filesToMerge.put(track.toJSONObject(getAppDataPath));
+                    }
+                    obj.put("files", filesToMerge);
+                    send("JSON_" + obj.toString());
+                } catch (JSONException e) {
+                }
+            }
+        }
+    }
+
     //FIXME: Add timeout for every request AND use FileInfoReception for merge/ack:
     // => Then,  make all communications (genres and tags especially, if not only) request/answer
     // (all requests being initiated by client (JaMuzRemote) of course)
@@ -200,15 +224,6 @@ public class ClientSync extends Client {
             }
         }
     }
-
-	public void sendDatabase() {
-        synchronized (syncStatus) {
-            logStatus("sendDatabase()");
-            if(checkStatus()) {
-                HelperLibrary.musicLibrary.send(this);
-            }
-        }
-	}
 
     private boolean checkStatus() {
         synchronized (syncStatus) {
