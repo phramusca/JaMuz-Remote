@@ -16,6 +16,5 @@ public interface ICallBackReception {
 	void receivedBitmap(Bitmap bitmap);
 	void receivingFile(FileInfoReception fileInfoReception);
 	void receivedFile(FileInfoReception fileInfoReception);
-	void receivedDatabase();
 	void disconnected(String msg);
 }

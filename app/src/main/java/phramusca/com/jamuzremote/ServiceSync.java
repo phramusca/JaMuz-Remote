@@ -253,24 +253,6 @@ public class ServiceSync extends ServiceBase {
         }
 
         @Override
-        public void receivedDatabase() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    String msg = "Statistics merged.";
-                    helperToast.toastLong(msg);
-                    helperNotification.notifyBar(notificationSync, msg, 5000);
-                }
-            });
-
-            // TODO MERGE: Update RepoSync
-            // as received merged db is the new reference
-            // (not urgent since values should only be
-            // used again if file has been removed from db
-            // somehow, as if db crashes and remade)
-        }
-
-        @Override
         public void connected() {
             sendMessage("connectedSync");
             helperNotification.notifyBar(notificationSync, "Connected ... ");
@@ -357,13 +339,16 @@ public class ServiceSync extends ServiceBase {
                 @Override
                 public void run() {
                     helperToast.toastLong(msg + "\n\n" + msg2);
-                    helperNotification.notifyBar(notificationSync, msg2, 10000);
+                    helperNotification.notifyBar(notificationSync, "Getting list of files for stats merge.");
                 }
             });
-            //FIXME: STOP after merge, now that initiated from here
-            //stopSync(false, msg2, 10000);
-
             List<Track> tracks = new Playlist("FilesToMerge", false).getTracks();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    helperNotification.notifyBar(notificationSync, "Requesting statistics merge.");
+                }
+            });
             clientSync.requestMerge(tracks, getAppDataPath);
 
             //FIXME: Delete from db whenever deleting a file in "internal" folder
