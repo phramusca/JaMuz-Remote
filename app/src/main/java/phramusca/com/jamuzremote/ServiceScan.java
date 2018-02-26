@@ -17,7 +17,7 @@ public class ServiceScan extends ServiceBase {
     private Notification notificationScan;
     private int nbFiles=0;
     private int nbFilesTotal = 0;
-    private ProcessAbstract scanLibray;
+    private ProcessAbstract scanLibrary;
     private ProcessAbstract processBrowseFS;
     private ProcessAbstract processBrowseFScount;
     private String userPath;
@@ -73,8 +73,8 @@ public class ServiceScan extends ServiceBase {
 
     private void waitScanFolder() {
         try {
-            if(scanLibray!=null) {
-                scanLibray.join();
+            if(scanLibrary !=null) {
+                scanLibrary.join();
             }
         } catch (InterruptedException e) {
             Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
@@ -82,7 +82,7 @@ public class ServiceScan extends ServiceBase {
     }
 
     private void scanFolder(final File path) {
-        scanLibray = new ProcessAbstract("Thread.MainActivity.scanLibrayInThread") {
+        scanLibrary = new ProcessAbstract("Thread.MainActivity.scanLibrayInThread") {
             public void run() {
                 try {
                     if(!path.getAbsolutePath().equals("/")) {
@@ -97,7 +97,7 @@ public class ServiceScan extends ServiceBase {
                                     browseFS(path);
                                 } catch (IllegalStateException | InterruptedException e) {
                                     Log.w(TAG, "Thread.MainActivity.browseFS InterruptedException");
-                                    scanLibray.abort();
+                                    scanLibrary.abort();
                                 }
                             }
                         };
@@ -109,7 +109,7 @@ public class ServiceScan extends ServiceBase {
                                     browseFScount(path);
                                 } catch (InterruptedException e) {
                                     Log.w(TAG, "Thread.MainActivity.browseFScount InterruptedException");
-                                    scanLibray.abort();
+                                    scanLibrary.abort();
                                 }
                             }
                         };
@@ -199,7 +199,7 @@ public class ServiceScan extends ServiceBase {
                 }
             }
         };
-        scanLibray.start();
+        scanLibrary.start();
     }
 
     private void notifyScan(final String action, int every) {
@@ -216,8 +216,8 @@ public class ServiceScan extends ServiceBase {
         if(processBrowseFScount!=null) {
             processBrowseFScount.abort();
         }
-        if(scanLibray!=null) {
-            scanLibray.abort();
+        if(scanLibrary !=null) {
+            scanLibrary.abort();
         }
         try {
             if(processBrowseFS!=null) {
@@ -226,8 +226,8 @@ public class ServiceScan extends ServiceBase {
             if(processBrowseFScount!=null) {
                 processBrowseFScount.join();
             }
-            if(scanLibray!=null) {
-                scanLibray.join();
+            if(scanLibrary !=null) {
+                scanLibrary.join();
             }
         } catch (InterruptedException e) {
             Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);

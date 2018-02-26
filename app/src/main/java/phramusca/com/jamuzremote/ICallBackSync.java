@@ -13,7 +13,6 @@ public interface ICallBackSync {
 	void receivedJson(String json);
 	void receivingFile(FileInfoReception fileInfoReception);
 	void receivedFile(FileInfoReception fileInfoReception);
-	void receivedDatabase();
 	void connected();
 	void disconnected(boolean reconnect, String msg, long millisInFuture);
 }

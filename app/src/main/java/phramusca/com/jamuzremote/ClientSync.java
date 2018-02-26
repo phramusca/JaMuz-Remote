@@ -144,11 +144,6 @@ public class ClientSync extends Client {
         }
 
         @Override
-        public void receivedDatabase() {
-            callback.receivedDatabase();
-        }
-
-        @Override
 		public void disconnected(String msg) {
             synchronized (syncStatus) {
                 logStatus("disconnected(\""+msg+"\")");

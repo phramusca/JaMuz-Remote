@@ -53,9 +53,6 @@ public class ClientRemote extends Client {
         public void receivedFile(FileInfoReception fileInfoReception) {        }
 
         @Override
-        public void receivedDatabase() {        }
-
-        @Override
 		public void disconnected(String msg) {
             callback.disconnected(userStop?"":msg);
 		}
