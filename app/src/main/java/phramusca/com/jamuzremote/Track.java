@@ -8,13 +8,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
 /**
  * Created by raph on 01/05/17.
  */
-public class Track {
+public class Track implements Serializable {
     private int id=-1;
     private int rating=0;
     private String title="";
@@ -67,7 +68,7 @@ public class Track {
 
     @Override
     public String toString() {
-        return   title + "<BR/>" +
+        return  title + "<BR/>" +
                 artist + "<BR/>"+
                 album + "<BR/>";
     }

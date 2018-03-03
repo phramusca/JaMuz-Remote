@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
     public static File musicLibraryDbFile = new File(
             Environment.getExternalStorageDirectory()+"/JaMuz/JaMuzRemote.db");
 
-    private List<Track> queue = new ArrayList<>();
+    private ArrayList<Track> queue = new ArrayList<>();
     private List<Track> queueHistory = new ArrayList<>();
     private List<Playlist> localPlaylists = new ArrayList<Playlist>();
     private ArrayAdapter<Playlist> playListArrayAdapter;
@@ -147,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
     private Button button_speech;
     private Button button_new;
     private Button button_delete;
+    private Button button_queue;
     private SeekBar seekBarPosition;
     private Spinner spinnerPlaylist;
     private Spinner spinnerGenre;
@@ -589,6 +590,23 @@ public class MainActivity extends AppCompatActivity {
                             .setNegativeButton("No", null)
                             .show();
                 }
+            }
+        });
+
+        button_queue = (Button) findViewById(R.id.button_queue);
+        button_queue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent = new Intent(getApplicationContext(), PlayQueueActivity.class);
+                int max = 10;
+                ArrayList<Track> list = queue==null?new ArrayList<Track>():
+                            queue.size()>max?new ArrayList<Track>(queue.subList(0, max)):queue;
+                //FIXME: Implement pagination
+                // https://stackoverflow.com/questions/16661662/how-to-implement-pagination-in-android-listview
+
+                intent.putExtra("queue", list);
+                startActivity(intent);
             }
         });
 
