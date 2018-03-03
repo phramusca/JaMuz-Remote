@@ -2,7 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:background="@color/background_color">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_gravity="center_horizontal"
+        android:contentDescription="Cover"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:paddingTop="5dp"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -12,22 +23,21 @@
         <TextView android:text="Artist" android:id="@+id/tv_artist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="1dp">
+            android:layout_margin="2dp"
+            android:textColor="@color/textColor">
         </TextView>
 
         <TextView android:text="Title" android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="1dp">
+            android:layout_margin="2dp"
+            android:textColor="@color/textColor">
         </TextView>
 
+        <TextView android:text="Album" android:id="@+id/tv_album"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp">
+        </TextView>
     </LinearLayout>
-
-    <TextView android:text="Album" android:id="@+id/tv_album"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginStart="20dp">
-    </TextView>
-
 </LinearLayout>
