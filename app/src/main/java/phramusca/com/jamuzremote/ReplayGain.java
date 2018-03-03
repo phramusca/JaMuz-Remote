@@ -35,6 +35,7 @@ import org.jaudiotagger.tag.vorbiscomment.VorbisCommentTag;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,7 +71,7 @@ public class ReplayGain {
 		return gainValues;
 	}
 	
-	public static class GainValues {
+	public static class GainValues implements Serializable {
 		private float albumGain=Float.NaN;
 		private float trackGain=Float.NaN;
 		

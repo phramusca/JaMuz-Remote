@@ -298,10 +298,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+                <Button android:id="@+id/button_queue"
+                    android:layout_row="0"
+                    android:layout_column="0"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_button_queue"/>
+
                 <ToggleButton
                     android:id="@+id/button_rating_layout"
                     android:layout_row="0"
-                    android:layout_column="0"
+                    android:layout_column="1"
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     style="@style/ToggleButton"
@@ -309,7 +316,7 @@
 
                 <TextView android:id="@+id/textViewRating"
                     android:layout_row="0"
-                    android:layout_column="1"
+                    android:layout_column="2"
                     android:textColor="@color/textColor"
                     android:inputType="textCapSentences|textMultiLine"
                     android:layout_gravity="left|right|center_vertical"/>
@@ -317,7 +324,7 @@
                 <ToggleButton
                     android:id="@+id/button_tags_panel_toggle"
                     android:layout_row="0"
-                    android:layout_column="2"
+                    android:layout_column="3"
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     style="@style/ToggleButton"
@@ -325,7 +332,7 @@
 
                 <TextView android:id="@+id/textViewTag"
                     android:layout_row="0"
-                    android:layout_column="3"
+                    android:layout_column="4"
                     android:textColor="@color/textColor"
                     android:inputType="textCapSentences|textMultiLine"
                     android:layout_gravity="left|right|center_vertical"/>
@@ -333,7 +340,7 @@
                 <ToggleButton
                     android:id="@+id/button_genres_panel_toggle"
                     android:layout_row="0"
-                    android:layout_column="4"
+                    android:layout_column="5"
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     style="@style/ToggleButton"
@@ -341,7 +348,7 @@
 
                 <TextView android:id="@+id/textViewGenre"
                     android:layout_row="0"
-                    android:layout_column="5"
+                    android:layout_column="6"
                     android:textColor="@color/textColor"
                     android:inputType="textCapSentences|textMultiLine"
                     android:layout_gravity="left|right|center_vertical"/>
