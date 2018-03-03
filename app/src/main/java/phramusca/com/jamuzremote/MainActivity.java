@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
     private ClientRemote clientRemote;
     private Track displayedTrack;
     private Track localTrack;
-    private Map coverMap = new HashMap();
+    protected static Map coverMap = new HashMap();
     private AudioManager audioManager;
     public static AudioPlayer audioPlayer;
 
@@ -111,10 +111,13 @@ public class MainActivity extends AppCompatActivity {
             Environment.getExternalStorageDirectory()+"/JaMuz/JaMuzRemote.db");
 
     private ArrayList<Track> queue = new ArrayList<>();
-    private List<Track> queueHistory = new ArrayList<>();
+    private ArrayList<Track> queueHistory = new ArrayList<>();
     private List<Playlist> localPlaylists = new ArrayList<Playlist>();
     private ArrayAdapter<Playlist> playListArrayAdapter;
     private Playlist localSelectedPlaylist;
+
+    private static final int SPEECH_REQUEST_CODE = 0;
+    private static final int QUEUE_REQUEST_CODE = 1;
 
     // GUI elements
     private TextView textViewFileInfo;
@@ -600,13 +603,17 @@ public class MainActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(getApplicationContext(), PlayQueueActivity.class);
                 int max = 10;
-                ArrayList<Track> list = queue==null?new ArrayList<Track>():
-                            queue.size()>max?new ArrayList<Track>(queue.subList(0, max)):queue;
+                ArrayList<Track> list = new ArrayList<Track>();
                 //FIXME: Implement pagination
                 // https://stackoverflow.com/questions/16661662/how-to-implement-pagination-in-android-listview
-
+                if(queueHistory!=null) {
+                    list.addAll(queueHistory.size()>max?new ArrayList<Track>(queueHistory.subList(0, max)):queueHistory);
+                }
+                if(queue!=null) {
+                    list.addAll(queue.size()>max?new ArrayList<Track>(queue.subList(0, max)):queue);
+                }
                 intent.putExtra("queue", list);
-                startActivity(intent);
+                startActivityForResult(intent, QUEUE_REQUEST_CODE);
             }
         });
 
@@ -770,6 +777,7 @@ public class MainActivity extends AppCompatActivity {
 
         setDimMode(toggleButtonDimMode.isChecked());
     }
+
 
     private ClientInfo getClientInfo(String suffix) {
         if(!checkConnectedViaWifi())  {
@@ -1153,7 +1161,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //https://developer.android.com/training/wearables/apps/voice.html
-    private static final int SPEECH_REQUEST_CODE = 0;
+
     public void displaySpeechRecognizer() {
         textToSpeech.speak("Je vous écoute.", TextToSpeech.QUEUE_FLUSH, null);
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -1183,6 +1191,10 @@ public class MainActivity extends AppCompatActivity {
                 helperToast.toastLong("Playlist not found:\n\""+spokenText+"\"");
                 textToSpeech.speak(spokenText, TextToSpeech.QUEUE_FLUSH, null);
             }
+        } else if (requestCode == QUEUE_REQUEST_CODE && resultCode == RESULT_OK) {
+            Track track = (Track)data.getSerializableExtra("track");
+            //FIXME: Play selected, NOT next
+            playNext();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -1268,6 +1280,7 @@ public class MainActivity extends AppCompatActivity {
     private void play() {
         File file = new File(displayedTrack.getPath());
         if(file.exists()) {
+            displayedTrack.setHistory(true);
             queueHistory.add(displayedTrack);
             queueHistoryIndex = queueHistory.size()-1;
             playAudio("");

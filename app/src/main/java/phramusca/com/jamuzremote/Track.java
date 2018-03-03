@@ -1,5 +1,7 @@
 package phramusca.com.jamuzremote;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.util.Log;
 
@@ -32,6 +34,15 @@ public class Track implements Serializable {
     public String source="";
     private static final String TAG = Track.class.getSimpleName();
 
+    private boolean isHistory=false;
+
+    public boolean isHistory() {
+        return isHistory;
+    }
+
+    public void setHistory(boolean history) {
+        isHistory = history;
+    }
 
     //TODO: Store replaygain, no to read too often AND as a workaround for flac
     // replaygain that cannot be read
@@ -168,6 +179,19 @@ public class Track implements Serializable {
             Log.e("Track", "Error reading art of "+toString());
         }
         return art;
+    }
+
+    private Bitmap thumb;
+
+    public Bitmap getTumb(boolean read) {
+        if(thumb==null && read) {
+            byte[]art=getArt();
+            if(art!=null) {
+                thumb = BitmapFactory.decodeByteArray(art, 0, art.length);
+                thumb = Bitmap.createScaledBitmap(thumb, 120, 120, false);
+            }
+        }
+        return thumb;
     }
 
     public boolean update() {
