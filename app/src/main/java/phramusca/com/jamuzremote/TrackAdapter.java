@@ -67,12 +67,13 @@ public class TrackAdapter extends BaseAdapter {
         //Or make it global as for Remote
         //TODO: Add a limit (FIFO) to those repos not to overload android memory
         Bitmap bitmap = tracks.get(position).getTumb(false);
-        if(bitmap!=null) {
-            ImageView imageViewCover = layoutItem.findViewById(R.id.imageView);
-            imageViewCover.setImageBitmap(bitmap);
-            BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);
-            bitmapDrawable.setAlpha(50);
+        if (bitmap == null) {
+            bitmap = BitMapHelper.getEmptyThumb();
         }
+        ImageView imageViewCover = layoutItem.findViewById(R.id.imageView);
+        imageViewCover.setImageBitmap(bitmap);
+        BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);
+        bitmapDrawable.setAlpha(50);
 
         if (tracks.get(position).isHistory()) {
             layoutItem.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
