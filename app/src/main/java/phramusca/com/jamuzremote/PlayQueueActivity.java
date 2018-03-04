@@ -13,19 +13,25 @@ import java.util.ArrayList;
 public class PlayQueueActivity extends AppCompatActivity implements TrackAdapter.TrackAdapterListener {
 
     TrackAdapter adapter;
+    int histSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_queue);
         Intent intent = getIntent();
-        final ArrayList<Track> queue = (ArrayList<Track>) intent.getSerializableExtra("queue");
+        final ArrayList<Track> queue = (ArrayList<Track>) intent.getSerializableExtra("queueArrayList");
         if(queue!=null) {
             //Display tracks
             ListView listView = (ListView) findViewById(R.id.list_queue);
             adapter = new TrackAdapter(this, queue);
             adapter.addListener(this);
             listView.setAdapter(adapter);
+            //Set "selected"
+            int histIndex = intent.getIntExtra("histIndex", 0);
+            histSize = intent.getIntExtra("histSize", 0);
+            int position = histIndex<=0?0:histIndex;
+            listView.setSelection(position);
 
             //Reads thumbnails in background
             new Thread() {
@@ -47,25 +53,39 @@ public class PlayQueueActivity extends AppCompatActivity implements TrackAdapter
     }
 
     @Override
-    public void onClick(final Track item, int position) {
+    public void onClick(final Track item, final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Play ?");
         builder.setMessage(Html.fromHtml(
                 "<html>".concat(item.toString()).concat("</html>")));
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("NOW !", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Intent data = new Intent();
-
-                //FIXME: BitMap (thumb) not serializable !
-                //+ only Need to send index in history or queue
-
-                //data.putExtra("track", item);
+                data.putExtra("queueItem", false);
+                data.putExtra("positionPlay", position);
+                data.putExtra("histSize", histSize);
                 setResult(RESULT_OK, data);
                 finish();
             }
         });
-        builder.setNegativeButton("No", null);
+
+        if(!item.isHistory()) {
+            builder.setNegativeButton("AFTER CURRENT.", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent data = new Intent();
+                    data.putExtra("queueItem", true);
+                    data.putExtra("positionPlay", position);
+                    data.putExtra("histSize", histSize);
+                    setResult(RESULT_OK, data);
+                    finish();
+                }
+            });
+        }
+
+        builder.setCancelable(true);
+
         builder.show();
     }
 }

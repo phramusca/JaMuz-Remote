@@ -17,9 +17,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
@@ -118,6 +115,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int SPEECH_REQUEST_CODE = 0;
     private static final int QUEUE_REQUEST_CODE = 1;
+
+    private static final int MAX_QUEUE = 10;
 
     // GUI elements
     private TextView textViewFileInfo;
@@ -600,19 +599,23 @@ public class MainActivity extends AppCompatActivity {
         button_queue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Intent intent = new Intent(getApplicationContext(), PlayQueueActivity.class);
-                int max = 10;
                 ArrayList<Track> list = new ArrayList<Track>();
                 //FIXME: Implement pagination
                 // https://stackoverflow.com/questions/16661662/how-to-implement-pagination-in-android-listview
                 if(queueHistory!=null) {
-                    list.addAll(queueHistory.size()>max?new ArrayList<Track>(queueHistory.subList(0, max)):queueHistory);
+                    list.addAll(queueHistory.size()> MAX_QUEUE ?
+                            new ArrayList<Track>(queueHistory.subList(queueHistory.size()- MAX_QUEUE, queueHistory.size()))
+                            :queueHistory);
                 }
                 if(queue!=null) {
-                    list.addAll(queue.size()>max?new ArrayList<Track>(queue.subList(0, max)):queue);
+                    list.addAll(queue.size()> MAX_QUEUE ?new ArrayList<Track>(queue.subList(0, MAX_QUEUE)):queue);
                 }
-                intent.putExtra("queue", list);
+                int histSize = queueHistory.size()> MAX_QUEUE ? MAX_QUEUE:queueHistory.size();
+                int offset = queueHistory.size()-histSize;
+                intent.putExtra("queueArrayList", list);
+                intent.putExtra("histIndex", queueHistoryIndex-offset);
+                intent.putExtra("histSize", histSize);
                 startActivityForResult(intent, QUEUE_REQUEST_CODE);
             }
         });
@@ -1192,9 +1195,41 @@ public class MainActivity extends AppCompatActivity {
                 textToSpeech.speak(spokenText, TextToSpeech.QUEUE_FLUSH, null);
             }
         } else if (requestCode == QUEUE_REQUEST_CODE && resultCode == RESULT_OK) {
-            Track track = (Track)data.getSerializableExtra("track");
-            //FIXME: Play selected, NOT next
-            playNext();
+            boolean enqueue = data.getBooleanExtra("queueItem", false);
+
+            int position = data.getIntExtra("positionPlay", -1);
+            int histSize = data.getIntExtra("histSize", -1);
+
+            if (position >= 0) {
+                int offset = queueHistory.size()-histSize;
+                position = position + offset;
+
+                if(position<queueHistory.size()) {
+                    queueHistoryIndex=position;
+                    playHistory();
+                } else {
+                    position = position-queueHistory.size();
+                    if(position<queue.size()) {
+                        Track track = queue.get(position);
+                        for(int i=0;i<=position;i++) {
+                            queue.remove(0);
+                        }
+                        Log.i(TAG, "playQueue(1/"+queue.size()+")");
+                        File file = new File(displayedTrack.getPath());
+                        if(file.exists()) {
+                            track.setHistory(true);
+                            queueHistory.add(track);
+                            queueHistoryIndex = queueHistory.size() - 1;
+                            if(!enqueue) {
+                                displayedTrack = track;
+                                playAudio("");
+                            } else {
+                                queueHistoryIndex--;
+                            }
+                        }
+                    }
+                }
+            }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -1271,24 +1306,23 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    public void playAudio(String source){
+        dimOn();
+        localTrack = displayedTrack;
+        localSelectedPlaylist.getNbFiles();
+        playListArrayAdapter.notifyDataSetChanged();
+        audioPlayer.stop(false);
+        displayedTrack.source=source.equals("")?localSelectedPlaylist.toString():source;
+        String msg = audioPlayer.play(displayedTrack);
+        if(!msg.equals("")) {
+            helperToast.toastLong(msg);
+        }
+    }
+
     private void playHistory() {
         displayedTrack = queueHistory.get(queueHistoryIndex);
         Log.i(TAG, "playHistory("+(queueHistoryIndex+1)+"/"+queueHistory.size()+")");
         playAudio("History "+(queueHistoryIndex+1)+"/"+queueHistory.size()+"");
-    }
-
-    private void play() {
-        File file = new File(displayedTrack.getPath());
-        if(file.exists()) {
-            displayedTrack.setHistory(true);
-            queueHistory.add(displayedTrack);
-            queueHistoryIndex = queueHistory.size()-1;
-            playAudio("");
-        } else {
-            Log.d(TAG, "play(): Remove track from db:"+displayedTrack);
-            displayedTrack.delete();
-            playNext();
-        }
     }
 
     private int queueHistoryIndex =-1;
@@ -1322,7 +1356,17 @@ public class MainActivity extends AppCompatActivity {
                 displayedTrack = queue.get(0);
                 queue.remove(0);
                 Log.i(TAG, "playQueue(1/"+queue.size()+")");
-                play();
+                File file = new File(displayedTrack.getPath());
+                if(file.exists()) {
+                    displayedTrack.setHistory(true);
+                    queueHistory.add(displayedTrack);
+                    queueHistoryIndex = queueHistory.size()-1;
+                    playAudio("");
+                } else {
+                    Log.d(TAG, "play(): Remove track from db:"+displayedTrack);
+                    displayedTrack.delete();
+                    playNext();
+                }
             } else {
                 if(localSelectedPlaylist!=null) {
                     localSelectedPlaylist.getNbFiles();
@@ -1431,19 +1475,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-
-    public void playAudio(String source){
-        dimOn();
-        localTrack = displayedTrack;
-        localSelectedPlaylist.getNbFiles();
-        playListArrayAdapter.notifyDataSetChanged();
-        audioPlayer.stop(false);
-        displayedTrack.source=source.equals("")?localSelectedPlaylist.toString():source;
-        String msg = audioPlayer.play(displayedTrack);
-        if(!msg.equals("")) {
-            helperToast.toastLong(msg);
-        }
-    }
 
     private void dim(final boolean on) {
         new CountDownTimer(500,50) {
@@ -2020,25 +2051,8 @@ public class MainActivity extends AppCompatActivity {
         if( art != null ){
             displayImage( BitmapFactory.decodeByteArray(art, 0, art.length));
         } else {
-            displayImage(getEmptyCover());
+            displayImage(BitMapHelper.getEmptyCover());
         }
-    }
-
-    private Bitmap getEmptyCover() {
-        return textAsBitmap("No cover");
-    }
-
-    public Bitmap textAsBitmap(String text) {
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setTextSize(35);
-        paint.setColor(Color.rgb(192, 192, 192));
-        int size = 500;
-        Bitmap image = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(image);
-        canvas.drawColor(Color.rgb(64, 64, 64));
-        canvas.drawText(text, (size/2)-(text.length()*12),
-                (size/2)+20, paint);
-        return image;
     }
 
     class CallBackRemote implements ICallBackRemote {
