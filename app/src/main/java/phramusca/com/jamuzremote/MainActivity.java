@@ -701,6 +701,7 @@ public class MainActivity extends AppCompatActivity {
             public void onTouch() {
                 dimOn();
             }
+
             @Override
             public void onTap() {
                 if(isDimOn) {
@@ -721,7 +722,10 @@ public class MainActivity extends AppCompatActivity {
                 //TODO: Do the same for remote when fixed on JaMuz
             }
 
-
+            @Override
+            public void onLongPressed() {
+                displaySpeechRecognizer();
+            }
         });
 
         localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz", "coverHash",
