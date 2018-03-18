@@ -1187,38 +1187,12 @@ public class MainActivity extends AppCompatActivity {
             List<String> results = data.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS);
 
-            //Define keywords
-            ArrayList<SearchKeyWord> searchKeyWords = new ArrayList<>();
-            searchKeyWords.add(new SearchKeyWord("liste", SearchType.PLAYLIST));
-            searchKeyWords.add(new SearchKeyWord("list", SearchType.PLAYLIST));
-            searchKeyWords.add(new SearchKeyWord("playlist", SearchType.PLAYLIST));
-            searchKeyWords.add(new SearchKeyWord("playliste", SearchType.PLAYLIST));
-            searchKeyWords.add(new SearchKeyWord("artiste en cours", SearchType.ARTIST_ONGOING));
-            searchKeyWords.add(new SearchKeyWord("artist en cours", SearchType.ARTIST_ONGOING));
-            searchKeyWords.add(new SearchKeyWord("ongoing artist", SearchType.ARTIST_ONGOING));
-            searchKeyWords.add(new SearchKeyWord("on going artist", SearchType.ARTIST_ONGOING));
-            searchKeyWords.add(new SearchKeyWord("artiste", SearchType.ARTIST));
-            searchKeyWords.add(new SearchKeyWord("artist", SearchType.ARTIST));
-            searchKeyWords.add(new SearchKeyWord("on going album", SearchType.ALBUM_ONGOING));
-            searchKeyWords.add(new SearchKeyWord("ongoing album", SearchType.ALBUM_ONGOING));
-            searchKeyWords.add(new SearchKeyWord("album en cours", SearchType.ALBUM_ONGOING));
-            searchKeyWords.add(new SearchKeyWord("album", SearchType.ALBUM));
-
-            //Search spoken text for keywords, PLAYLIST being default
-            String spokenText = results.get(0);
-            String searchValue=spokenText.toLowerCase().trim();
-            SearchType searchType = SearchType.PLAYLIST;
-            for(SearchKeyWord word : searchKeyWords) {
-                if(searchValue.startsWith(word.getKeyword())) {
-                    searchType=word.getType();
-                    searchValue=spokenText.substring(word.getKeyword().length()).trim();
-                    break;
-                }
-            }
-
             //Search
+            String spokenText = results.get(0);
+            Search.SearchKeyWord searchKeyWord = Search.get(spokenText);
+            String searchValue = searchKeyWord.getKeyword();
             String msg="Commande incomprise:\n\""+searchValue+"\".";
-            switch (searchType) {
+            switch (searchKeyWord.getType()) {
                 case PLAYLIST:
                     msg = "Playlist \"" + searchValue + "\" introuvable.";
                     for(Playlist playlist : localPlaylists) {
@@ -1235,7 +1209,11 @@ public class MainActivity extends AppCompatActivity {
                     searchValue = displayedTrack.getArtist();
                 case ARTIST:
                     msg = "Artiste \"" + searchValue + "\" introuvable.";
-                    if(HelperLibrary.musicLibrary.getArtist(searchValue)) {
+                    if(searchValue.equals("")) {
+                        //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
+                        msg = "Spécifiez un artiste.";
+                    }
+                    else if(HelperLibrary.musicLibrary.getArtist(searchValue)) {
                         Playlist playlist =new Playlist(searchValue, true);
                         playlist.setArtist(searchValue);
                         setupSpinner(playlist);
@@ -1246,7 +1224,11 @@ public class MainActivity extends AppCompatActivity {
                     searchValue = displayedTrack.getAlbum();
                 case ALBUM:
                     msg = "Album \"" + searchValue + "\" introuvable.";
-                    if(HelperLibrary.musicLibrary.getAlbum(searchValue)) {
+                    if(searchValue.equals("")) {
+                        //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
+                        msg = "Spécifiez un album.";
+                    }
+                    else if(HelperLibrary.musicLibrary.getAlbum(searchValue)) {
                         Playlist playlist =new Playlist(searchValue, true);
                         playlist.setAlbum(searchValue);
                         setupSpinner(playlist);
