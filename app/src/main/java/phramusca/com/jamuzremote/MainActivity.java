@@ -1174,6 +1174,11 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, SPEECH_REQUEST_CODE);
     }
 
+    enum SearchType {
+        //FIXME: Make an enum
+    }
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent data) {
@@ -1181,19 +1186,61 @@ public class MainActivity extends AppCompatActivity {
             List<String> results = data.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS);
             String spokenText = results.get(0);
-            boolean foundPlaylist=false;
-            for(Playlist playlist : localPlaylists) {
-                if(playlist.getName().equalsIgnoreCase(spokenText)) {
-                    applyPlaylist(playlist, true);
-                    localSelectedPlaylist.getNbFiles();
-                    setupSpinner();
-                    foundPlaylist=true;
-                    break;
+            String searchValue = spokenText;
+
+            boolean searchPlaylist=false;
+            boolean searchArtist=false;
+
+            String[] keywords = spokenText.split(" ");
+            if(keywords.length>1) {
+                String keyword=keywords[0].toLowerCase().trim();
+                boolean isKeyWordValid=true;
+                switch (keyword) {
+                    case "playlist":
+                    case "playliste":
+                        searchPlaylist=true;
+                        break;
+                    case "artiste":
+                    case "artist":
+                        searchArtist=true;
+                        break;
+                    //FIXME SEARCH: understand more commands
+                    default:
+                        searchPlaylist=true;
+                        isKeyWordValid=false;
+                        break;
                 }
+                if(isKeyWordValid) {
+                    searchValue=spokenText.substring(keyword.length()).trim();
+                }
+            } else {
+                searchPlaylist=true;
+                searchValue = spokenText;
             }
-            if(!foundPlaylist) {
-                helperToast.toastLong("Playlist not found:\n\""+spokenText+"\"");
-                textToSpeech.speak(spokenText, TextToSpeech.QUEUE_FLUSH, null);
+
+            String msg="Commande incomprise:\n\""+searchValue+"\"";
+            if(searchPlaylist) {
+                boolean foundPlaylist=false;
+                for(Playlist playlist : localPlaylists) {
+                    if(playlist.getName().equalsIgnoreCase(searchValue)) {
+                        applyPlaylist(playlist, true);
+                        localSelectedPlaylist.getNbFiles();
+                        setupSpinner();
+                        foundPlaylist=true;
+                        msg = "";
+                        break;
+                    }
+                }
+                if(!foundPlaylist) {
+                    msg = "Playlist \"" + searchValue + "\" introuvable";
+                }
+            } else if(searchArtist) {
+                //FIXME SEARCH: searchArtist
+                msg = "Artiste \"" + searchValue + "\" non cherché (a faire)";
+            }
+            if(!msg.equals("")) {
+                helperToast.toastLong(msg);
+                textToSpeech.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
             }
         } else if (requestCode == QUEUE_REQUEST_CODE && resultCode == RESULT_OK) {
             boolean enqueue = data.getBooleanExtra("queueItem", false);
