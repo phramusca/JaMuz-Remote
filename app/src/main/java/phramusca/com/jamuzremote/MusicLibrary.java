@@ -1,8 +1,8 @@
 package phramusca.com.jamuzremote;
-
 /**
  * Created by raph on 10/06/17.
  */
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -33,11 +33,11 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.TABLE_TRACKS;
 
 public class MusicLibrary {
 
-    protected SQLiteDatabase db;
+    SQLiteDatabase db;
     private MusicLibraryDb musicLibraryDb;
     private static final String TAG = MusicLibrary.class.getSimpleName();
 
-    public MusicLibrary(Context context){
+    MusicLibrary(Context context){
         musicLibraryDb = new MusicLibraryDb(context);
     }
 
@@ -49,7 +49,7 @@ public class MusicLibrary {
         db.close();
     }
 
-    public synchronized int getTrack(String path){
+    synchronized int getTrack(String path){
         try {
             Cursor cursor = db.query(TABLE_TRACKS,
                     new String[] {COL_ID},
@@ -68,7 +68,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    public synchronized ArrayList<Track> getTracks(String where, String having, String order) {
+    synchronized ArrayList<Track> getTracks(String where, String having, String order) {
         ArrayList<Track> tracks = new ArrayList<>();
         try {
             String query = "SELECT GROUP_CONCAT(tag.value) AS tags, tracks.* \n" +
@@ -208,7 +208,7 @@ public class MusicLibrary {
 
     public synchronized List<String> getGenres() {
         List<String> genres = new ArrayList<>();
-        Cursor cursor = db.rawQuery("SELECT id, value FROM genre", new String [] {});
+        Cursor cursor = db.rawQuery("SELECT id, value FROM genre ORDER BY value", new String [] {});
         if(cursor != null && cursor.moveToFirst())
         {
             do {
@@ -222,9 +222,11 @@ public class MusicLibrary {
         return genres;
     }
 
+    //FIXME TAGS: Order does not work
+
     public synchronized Map<Integer, String> getTags() {
         Map<Integer, String> tags = new HashMap<>();
-        Cursor cursor = db.rawQuery("SELECT id, value FROM tag", new String [] {});
+        Cursor cursor = db.rawQuery("SELECT id, value FROM tag ORDER BY value", new String [] {});
         if(cursor != null && cursor.moveToFirst())
         {
             do {
@@ -241,7 +243,8 @@ public class MusicLibrary {
         ArrayList<String> tags = new ArrayList<>();
         Cursor cursor = db.rawQuery("SELECT value FROM tag T " +
                 "JOIN tagFile F ON T.id=F.idTag " +
-                "WHERE F.idFile=?", new String[] { String.valueOf(idFile)});
+                "WHERE F.idFile=? " +
+                "ORDER BY value", new String[] { String.valueOf(idFile)});
 
         if(cursor != null && cursor.moveToFirst())
         {
