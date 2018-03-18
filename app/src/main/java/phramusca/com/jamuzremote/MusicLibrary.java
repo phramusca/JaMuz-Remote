@@ -391,4 +391,18 @@ public class MusicLibrary {
         }
         return -1;
     }
+
+    public synchronized boolean getArtist(String artist){
+        try {
+            Cursor cursor = db.query("tracks", null, "artist=?",
+                    new String[] { artist }, "", "", "");
+            if (cursor.getCount() > 0) {
+                cursor.close();
+                return true;
+            }
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "getArtist("+artist+")", ex);
+        }
+        return false;
+    }
 }
