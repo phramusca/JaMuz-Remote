@@ -405,4 +405,18 @@ public class MusicLibrary {
         }
         return false;
     }
+
+    public synchronized boolean getAlbum(String album){
+        try {
+            Cursor cursor = db.query("tracks", null, "album=?",
+                    new String[] { album }, "", "", "");
+            if (cursor.getCount() > 0) {
+                cursor.close();
+                return true;
+            }
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "getAlbum("+album+")", ex);
+        }
+        return false;
+    }
 }
