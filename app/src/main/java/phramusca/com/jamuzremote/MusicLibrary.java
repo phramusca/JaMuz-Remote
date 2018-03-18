@@ -45,7 +45,7 @@ public class MusicLibrary {
         db = musicLibraryDb.getWritableDatabase();
     }
 
-    public synchronized void close(){
+    synchronized void close(){
         db.close();
     }
 
@@ -89,7 +89,7 @@ public class MusicLibrary {
         return tracks;
     }
 
-    public synchronized int getNb(String where, String having){
+    synchronized int getNb(String where, String having){
         Cursor cursor=null;
         try {
             String query = "SELECT * \n" +
@@ -111,7 +111,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    public synchronized boolean insertTrack(Track track){
+    synchronized boolean insertTrack(Track track){
         try {
             int id = (int) db.insert(TABLE_TRACKS, null, TrackToValues(track));
             if(id>0) {
@@ -129,7 +129,7 @@ public class MusicLibrary {
         return false;
     }
 
-    public synchronized boolean updateTrack(Track track){
+    synchronized boolean updateTrack(Track track){
         try {
             if(db.update(TABLE_TRACKS, TrackToValues(track),
                     COL_ID + " = " +track.getId(), null)==1) {
@@ -147,7 +147,7 @@ public class MusicLibrary {
         return false;
     }
 
-    public synchronized int deleteTrack(String path){
+    synchronized int deleteTrack(String path){
         try {
             return db.delete(TABLE_TRACKS, COL_PATH + " = \"" +path+"\"", null);
         } catch (SQLiteException | IllegalStateException ex) {
@@ -206,7 +206,7 @@ public class MusicLibrary {
                 addedDate, lastPlayed, playCounter);
     }
 
-    public synchronized List<String> getGenres() {
+    synchronized List<String> getGenres() {
         List<String> genres = new ArrayList<>();
         Cursor cursor = db.rawQuery("SELECT id, value FROM genre ORDER BY value", new String [] {});
         if(cursor != null && cursor.moveToFirst())
@@ -239,7 +239,7 @@ public class MusicLibrary {
         return tags;
     }
 
-    public synchronized ArrayList<String> getTags(int idFile) {
+    synchronized ArrayList<String> getTags(int idFile) {
         ArrayList<String> tags = new ArrayList<>();
         Cursor cursor = db.rawQuery("SELECT value FROM tag T " +
                 "JOIN tagFile F ON T.id=F.idTag " +
@@ -258,7 +258,7 @@ public class MusicLibrary {
         return tags;
     }
 
-    public synchronized boolean addTag(int idFile, String tag){
+    synchronized boolean addTag(int idFile, String tag){
         try {
             int idTag=getIdTag(tag);
             if(idTag>0) {
@@ -275,7 +275,7 @@ public class MusicLibrary {
         return false;
     }
 
-    public synchronized int addTag(String tag) {
+    synchronized int addTag(String tag) {
         int idTag=-1;
         try {
             //Add the tag in db if it does not exist
@@ -289,7 +289,7 @@ public class MusicLibrary {
         return idTag;
     }
 
-    public synchronized int deleteTag(int idTag){
+    synchronized int deleteTag(int idTag){
         try {
             return db.delete("tag", "id = \"" +idTag+"\"", null);
         } catch (SQLiteException | IllegalStateException ex) {
@@ -298,7 +298,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    public synchronized boolean removeTag(int idFile, String tag){
+    synchronized boolean removeTag(int idFile, String tag){
         try {
             int idTag=getIdTag(tag);
             if (idTag > 0) {
@@ -312,7 +312,7 @@ public class MusicLibrary {
         return false;
     }
 
-    public synchronized boolean removeTags(int idFile){
+    private synchronized boolean removeTags(int idFile){
         try {
             db.delete("tagfile", "idFile=?",
                     new String[] { String.valueOf(idFile) });
@@ -339,7 +339,7 @@ public class MusicLibrary {
         return idTag;
     }
 
-    public synchronized int updateGenre(Track track){
+    synchronized int updateGenre(Track track){
         try {
             ContentValues values = new ContentValues();
             values.put(COL_GENRE, track.getGenre());
@@ -353,7 +353,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    public synchronized boolean addGenre(String genre) {
+    synchronized boolean addGenre(String genre) {
         try {
             //Add the genre in db if it does not exist
             ContentValues values = new ContentValues();
@@ -367,7 +367,7 @@ public class MusicLibrary {
         }
     }
 
-    public synchronized int deleteGenre(String genre) {
+    synchronized int deleteGenre(String genre) {
         try {
             return db.delete("genre", "value = \"" +genre+"\"", null);
         } catch (SQLiteException | IllegalStateException ex) {
@@ -379,9 +379,10 @@ public class MusicLibrary {
     /**
      * @param getAppDataPath Application Folder to exclude from deletion
      * @param userPath User path (new one) to exclude from deletion
-     * @return
+     * @return the number of rows affected if a whereClause is passed in, 0 otherwise.
+     * To remove all rows and get a count pass "1" as the whereClause.
      */
-    public synchronized int deleteTrack(File getAppDataPath, String userPath){
+    synchronized int deleteTrack(File getAppDataPath, String userPath){
         try {
             return db.delete(TABLE_TRACKS,
                     COL_PATH+" NOT LIKE \""+getAppDataPath.getAbsolutePath()+"%\" " +
@@ -392,7 +393,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    public synchronized boolean getArtist(String artist){
+    synchronized boolean getArtist(String artist){
         try {
             Cursor cursor = db.query("tracks", null, "artist=?",
                     new String[] { artist }, "", "", "");
@@ -406,7 +407,7 @@ public class MusicLibrary {
         return false;
     }
 
-    public synchronized boolean getAlbum(String album){
+    synchronized boolean getAlbum(String album){
         try {
             Cursor cursor = db.query("tracks", null, "album=?",
                     new String[] { album }, "", "", "");
