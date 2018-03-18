@@ -20,6 +20,7 @@ public class Playlist implements Comparable {
     private int rating=0;
     private Operator ratingOperator = Playlist.Operator.GREATERTHAN;
     private boolean isLocal;
+    private String artist;
 
     public Playlist(String name, boolean isLocal) {
         this.name = name;
@@ -161,6 +162,10 @@ public class Playlist implements Comparable {
             in += "\n AND genre NOT IN ("+getInClause(exclude)+") ";
         }
 
+        if(artist!=null) {
+            in += "\n AND artist LIKE \""+artist+"\" ";
+        }
+
         return in;
     }
 
@@ -281,6 +286,10 @@ public class Playlist implements Comparable {
         }
         final Playlist other = (Playlist) obj;
         return Objects.equals(this.name, other.name);
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
     }
 
     /**

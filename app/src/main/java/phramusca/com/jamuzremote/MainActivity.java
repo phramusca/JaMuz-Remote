@@ -1235,8 +1235,17 @@ public class MainActivity extends AppCompatActivity {
                     msg = "Playlist \"" + searchValue + "\" introuvable";
                 }
             } else if(searchArtist) {
-                //FIXME SEARCH: searchArtist
-                msg = "Artiste \"" + searchValue + "\" non cherché (a faire)";
+                if(HelperLibrary.musicLibrary.getArtist(searchValue)) {
+                    Playlist playlist =new Playlist(searchValue, true);
+                    playlist.setArtist(searchValue);
+                    applyPlaylist(playlist, true);
+                    localSelectedPlaylist.getNbFiles();
+                    //FIXME: What to do this spinner ?
+                    //setupSpinner();
+                    msg = "";
+                } else {
+                    msg = "Artiste \"" + searchValue + "\" introuvable";
+                }
             }
             if(!msg.equals("")) {
                 helperToast.toastLong(msg);
