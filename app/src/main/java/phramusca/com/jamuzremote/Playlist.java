@@ -21,6 +21,7 @@ public class Playlist implements Comparable {
     private Operator ratingOperator = Playlist.Operator.GREATERTHAN;
     private boolean isLocal;
     private String artist;
+    private String album;
 
     public Playlist(String name, boolean isLocal) {
         this.name = name;
@@ -163,7 +164,11 @@ public class Playlist implements Comparable {
         }
 
         if(artist!=null) {
-            in += "\n AND artist LIKE \""+artist+"\" ";
+            in += "\n AND artist LIKE \"%"+artist+"%\" ";
+        }
+
+        if(album!=null) {
+            in += "\n AND album LIKE \"%"+album+"%\" ";
         }
 
         return in;
@@ -290,6 +295,10 @@ public class Playlist implements Comparable {
 
     public void setArtist(String artist) {
         this.artist = artist;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
     }
 
     /**

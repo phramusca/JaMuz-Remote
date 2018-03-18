@@ -720,6 +720,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 //TODO: Do the same for remote when fixed on JaMuz
             }
+
+
         });
 
         localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz", "coverHash",
@@ -1174,83 +1176,86 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, SPEECH_REQUEST_CODE);
     }
 
-    enum SearchType {
-        //FIXME: Make an enum
-    }
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent data) {
         if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
             List<String> results = data.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS);
+
+            //Define keywords
+            ArrayList<SearchKeyWord> searchKeyWords = new ArrayList<>();
+            searchKeyWords.add(new SearchKeyWord("liste", SearchType.PLAYLIST));
+            searchKeyWords.add(new SearchKeyWord("list", SearchType.PLAYLIST));
+            searchKeyWords.add(new SearchKeyWord("playlist", SearchType.PLAYLIST));
+            searchKeyWords.add(new SearchKeyWord("playliste", SearchType.PLAYLIST));
+            searchKeyWords.add(new SearchKeyWord("artiste en cours", SearchType.ARTIST_ONGOING));
+            searchKeyWords.add(new SearchKeyWord("artist en cours", SearchType.ARTIST_ONGOING));
+            searchKeyWords.add(new SearchKeyWord("ongoing artist", SearchType.ARTIST_ONGOING));
+            searchKeyWords.add(new SearchKeyWord("on going artist", SearchType.ARTIST_ONGOING));
+            searchKeyWords.add(new SearchKeyWord("artiste", SearchType.ARTIST));
+            searchKeyWords.add(new SearchKeyWord("artist", SearchType.ARTIST));
+            searchKeyWords.add(new SearchKeyWord("on going album", SearchType.ALBUM_ONGOING));
+            searchKeyWords.add(new SearchKeyWord("ongoing album", SearchType.ALBUM_ONGOING));
+            searchKeyWords.add(new SearchKeyWord("album en cours", SearchType.ALBUM_ONGOING));
+            searchKeyWords.add(new SearchKeyWord("album", SearchType.ALBUM));
+
+            //Search spoken text for keywords, PLAYLIST being default
             String spokenText = results.get(0);
-            String searchValue = spokenText;
-
-            boolean searchPlaylist=false;
-            boolean searchArtist=false;
-
-            String[] keywords = spokenText.split(" ");
-            if(keywords.length>1) {
-                String keyword=keywords[0].toLowerCase().trim();
-                boolean isKeyWordValid=true;
-                switch (keyword) {
-                    case "playlist":
-                    case "playliste":
-                        searchPlaylist=true;
-                        break;
-                    case "artiste":
-                    case "artist":
-                        searchArtist=true;
-                        break;
-                    //FIXME SEARCH: understand more commands
-                    default:
-                        searchPlaylist=true;
-                        isKeyWordValid=false;
-                        break;
+            String searchValue=spokenText.toLowerCase().trim();
+            SearchType searchType = SearchType.PLAYLIST;
+            for(SearchKeyWord word : searchKeyWords) {
+                if(searchValue.startsWith(word.getKeyword())) {
+                    searchType=word.getType();
+                    searchValue=spokenText.substring(word.getKeyword().length()).trim();
+                    break;
                 }
-                if(isKeyWordValid) {
-                    searchValue=spokenText.substring(keyword.length()).trim();
-                }
-            } else {
-                searchPlaylist=true;
-                searchValue = spokenText;
             }
 
-            String msg="Commande incomprise:\n\""+searchValue+"\"";
-            if(searchPlaylist) {
-                boolean foundPlaylist=false;
-                for(Playlist playlist : localPlaylists) {
-                    if(playlist.getName().equalsIgnoreCase(searchValue)) {
-                        applyPlaylist(playlist, true);
-                        localSelectedPlaylist.getNbFiles();
-                        setupSpinner();
-                        foundPlaylist=true;
-                        msg = "";
-                        break;
+            //Search
+            String msg="Commande incomprise:\n\""+searchValue+"\".";
+            switch (searchType) {
+                case PLAYLIST:
+                    msg = "Playlist \"" + searchValue + "\" introuvable.";
+                    for(Playlist playlist : localPlaylists) {
+                        if(playlist.getName().equalsIgnoreCase(searchValue)) {
+                            applyPlaylist(playlist, true);
+                            localSelectedPlaylist.getNbFiles();
+                            setupSpinner();
+                            msg = "";
+                            break;
+                        }
                     }
-                }
-                if(!foundPlaylist) {
-                    msg = "Playlist \"" + searchValue + "\" introuvable";
-                }
-            } else if(searchArtist) {
-                if(HelperLibrary.musicLibrary.getArtist(searchValue)) {
-                    Playlist playlist =new Playlist(searchValue, true);
-                    playlist.setArtist(searchValue);
-                    applyPlaylist(playlist, true);
-                    localSelectedPlaylist.getNbFiles();
-                    //FIXME: What to do this spinner ?
-                    //setupSpinner();
-                    msg = "";
-                } else {
-                    msg = "Artiste \"" + searchValue + "\" introuvable";
-                }
+                    break;
+                case ARTIST_ONGOING:
+                    searchValue = displayedTrack.getArtist();
+                case ARTIST:
+                    msg = "Artiste \"" + searchValue + "\" introuvable.";
+                    if(HelperLibrary.musicLibrary.getArtist(searchValue)) {
+                        Playlist playlist =new Playlist(searchValue, true);
+                        playlist.setArtist(searchValue);
+                        setupSpinner(playlist);
+                        msg = "";
+                    }
+                    break;
+                case ALBUM_ONGOING:
+                    searchValue = displayedTrack.getAlbum();
+                case ALBUM:
+                    msg = "Album \"" + searchValue + "\" introuvable.";
+                    if(HelperLibrary.musicLibrary.getAlbum(searchValue)) {
+                        Playlist playlist =new Playlist(searchValue, true);
+                        playlist.setAlbum(searchValue);
+                        setupSpinner(playlist);
+                        msg = "";
+                    }
+                    break;
             }
+
             if(!msg.equals("")) {
                 helperToast.toastLong(msg);
                 textToSpeech.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
             }
+
         } else if (requestCode == QUEUE_REQUEST_CODE && resultCode == RESULT_OK) {
             boolean enqueue = data.getBooleanExtra("queueItem", false);
 
@@ -1943,6 +1948,14 @@ public class MainActivity extends AppCompatActivity {
         ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mWifi = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         return mWifi.isConnected();
+    }
+
+    private void setupSpinner(Playlist playlist) {
+        applyPlaylist(playlist, true);
+        localSelectedPlaylist.getNbFiles();
+        localPlaylists.add(playlist);
+        playListArrayAdapter = new ArrayAdapter<Playlist>(this, R.layout.spinner_item, localPlaylists);
+        setupSpinner();
     }
 
     private void setupSpinner() {

@@ -258,18 +258,9 @@
             android:paddingBottom="5dp"
             android:background="@color/colorPrimaryDark">
 
-            <Spinner android:id="@+id/spinner_playlist"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:popupBackground="#DDFFFFFF"
-                android:background="@drawable/ic_gradient_spinner"
-                android:layout_gravity="center_vertical|left|right"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="10dp"
+            <LinearLayout android:id="@+id/panel_playlist_toolbar"
                 android:layout_row="0"
-                android:layout_column="0"/>
-
-            <LinearLayout android:id="@+id/panel_playlist_toolbar">
+                android:layout_column="0">
 
                 <Button android:id="@+id/button_delete"
                     android:layout_row="0"
@@ -286,6 +277,17 @@
                     android:background="@drawable/ic_button_new"/>
 
             </LinearLayout>
+
+            <Spinner android:id="@+id/spinner_playlist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:popupBackground="#DDFFFFFF"
+                android:background="@drawable/ic_gradient_spinner"
+                android:layout_gravity="center_vertical|left|right"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="10dp"
+                android:layout_row="0"
+                android:layout_column="1"/>
         </GridLayout>
 
         <LinearLayout android:id="@+id/panel_playlist_editbar"
