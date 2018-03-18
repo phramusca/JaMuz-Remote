@@ -543,6 +543,7 @@ public class MainActivity extends AppCompatActivity {
                             // - localPlaylists is empty at startup (before first connected to db) !!
                             // - Use an editable /"savable" bool(s)
                             // - Search \"All\"" in whole project to make sure all occurences are managed
+                            // - *** Replace with a "Default" playlist selected by default as at 0
 
                             localPlaylists = localPlaylists.subList(0, localPlaylists.size()-1);
                             //TODO: Duplicate current playlist (clone) instead of new
