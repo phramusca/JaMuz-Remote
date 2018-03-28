@@ -22,7 +22,7 @@ public class FileInfoReception {
     public String genre;
     public Status status=Status.NEW;
 
-    public FileInfoReception() {
+    FileInfoReception() {
     }
 
     public enum Status {
@@ -34,16 +34,16 @@ public class FileInfoReception {
 
     /**
      * @param json FileInfoReception as JSON string
-     * @throws JSONException
+     * @throws JSONException on JSON failure
      */
-    public FileInfoReception(String json) throws JSONException {
+    FileInfoReception(String json) throws JSONException {
         this(new JSONObject(json));
     }
 
     /**
      * @param file FileInfoReception as JSONObject
      */
-    public FileInfoReception(JSONObject file) {
+    FileInfoReception(JSONObject file) {
         try {
             relativeFullPath = file.getString("path");
             size = file.getLong("size");
