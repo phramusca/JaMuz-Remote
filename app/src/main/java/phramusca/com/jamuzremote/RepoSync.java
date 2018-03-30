@@ -185,6 +185,10 @@ public final class RepoSync {
         return null;
     }
 
+    public synchronized static Map<Integer, FileInfoReception> getLocal() {
+        return files.column(FileInfoReception.Status.LOCAL);
+    }
+
     /**
      * Checks if relativeFullPath is in files. Delete file if not.
      * @param relativeFullPath relative full path

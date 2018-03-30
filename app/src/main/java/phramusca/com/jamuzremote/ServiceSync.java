@@ -183,9 +183,60 @@ public class ServiceSync extends ServiceBase {
                         RepoSync.set(getAppDataPath, newTracks);
                         scanAndDeleteUnwanted(getAppDataPath);
                         bench = new Benchmark(RepoSync.getRemainingSize(), 10);
+
+                        //FIXME: Refresh queue issue (when changing genre ?) !! (yes, that's not here)
+
+                        //FIXME: Do all OK at once => should be way faster !!!!
+                        //then only requestNextFile
+
+                        Map<Integer, FileInfoReception> locals = RepoSync.getLocal();
+
+
+                        for(Map.Entry<Integer, FileInfoReception> entry : newTracks.entrySet()) {
+                            /*final FileInfoReception fileInfoReception = RepoSync.checkFile(getAppDataPath, entry.getValue());
+                            Log.i(TAG, "requestNextFile file: \n"+fileInfoReception);
+                            if (fileInfoReception.status.equals()) {
+                                switch (fileInfoReception.status) {
+                                    case NEW:
+                                        new Thread() {
+                                            @Override
+                                            public void run() {
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        notifyBar("Req.", fileInfoReception);
+                                                        watchTimeOut(fileInfoReception.size);
+                                                    }
+                                                });
+                                                synchronized (timerLock) {
+                                                    clientSync.requestFile(fileInfoReception.idFile);
+                                                }
+                                            }
+                                        }.start();
+                                        break;
+                                    case LOCAL:
+                                        if(HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath,
+                                                fileInfoReception.relativeFullPath).getAbsolutePath(), fileInfoReception)) {
+                                            if(RepoSync.checkFile(getAppDataPath, fileInfoReception, FileInfoReception.Status.IN_DB)) {
+                                                clientSync.ackFileReception(fileInfoReception.idFile, true);
+                                            }
+                                        }
+                                        break;
+                                    case IN_DB:
+                                        clientSync.ackFileReception(fileInfoReception.idFile, true);
+                                        break;
+                                    case ACK:
+                                        //We should not get there !!! as NOT taking from "ACK" list
+                                        //TODO: Manage this case
+                                        break;
+                                }
+                            }*/
+                        }
+
                         requestNextFile();
                         break;
                     case "mergeListDbSelected":
+                        helperNotification.notifyBar(notificationSync, "Updating database with merge changes ... ");
                         JSONArray filesToUpdate = (JSONArray) jObject.get("files");
                         for(int i=0; i<filesToUpdate.length(); i++) {
                             FileInfoReception fileReceived = new FileInfoReception((JSONObject) filesToUpdate.get(i));
@@ -207,6 +258,7 @@ public class ServiceSync extends ServiceBase {
                                     }
                                     RepoTags.set(newTags);
                                     sendMessage("setupTags");
+                                    clientSync.request("requestGenres");
                                 } catch (JSONException e) {
                                     Log.e(TAG, e.toString());
                                 }
@@ -226,6 +278,7 @@ public class ServiceSync extends ServiceBase {
                                     }
                                     RepoGenres.set(newGenres);
                                     sendMessage("setupGenres");
+                                    clientSync.request("requestNewFiles");
                                 } catch (JSONException e) {
                                     Log.e(TAG, e.toString());
                                 }

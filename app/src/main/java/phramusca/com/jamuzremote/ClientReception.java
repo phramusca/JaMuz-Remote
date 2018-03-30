@@ -33,7 +33,7 @@ public class ClientReception extends ProcessAbstract {
 	private InputStream inputStream;
 	private final ICallBackReception callback;
 
-	public ClientReception(InputStream inputStream, ICallBackReception callback) {
+	ClientReception(InputStream inputStream, ICallBackReception callback) {
 		super("Thread.Client.ClientReception");
 		this.inputStream = inputStream;
 
