@@ -33,14 +33,14 @@ public class Client {
 
 	private ICallBackReception callback;
     private BufferedReader bufferedReader;
-	protected OutputStream outputStream;
-    protected ClientInfo clientInfo;
+	private OutputStream outputStream;
+    private ClientInfo clientInfo;
 
-    public Client(ClientInfo clientInfo){
+    Client(ClientInfo clientInfo){
         this.clientInfo = clientInfo;
     }
 
-    public void setCallback(ICallBackReception callback) {
+    void setCallback(ICallBackReception callback) {
         this.callback = callback;
     }
 
@@ -129,7 +129,7 @@ public class Client {
 
 	protected void sendFile(File file) {
         DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(outputStream));
-		if(dos!=null && file.exists() && file.isFile())
+		if(file.exists() && file.isFile())
 		{
 			try (FileInputStream input = new FileInputStream(file)) {
 				Log.i(TAG, "Sending : "+file.getAbsolutePath());

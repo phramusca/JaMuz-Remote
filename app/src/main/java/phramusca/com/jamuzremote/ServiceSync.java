@@ -1,9 +1,5 @@
 package phramusca.com.jamuzremote;
 
-/**
- * Created by raph on 10/06/17.
- */
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +17,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ *
+ * @author phramusca
+ */
 public class ServiceSync extends ServiceBase {
 
     private static final String TAG = ServiceSync.class.getSimpleName();
