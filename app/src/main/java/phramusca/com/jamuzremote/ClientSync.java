@@ -75,6 +75,7 @@ public class ClientSync extends Client {
                     logStatus("Connected");
                     callback.connected();
                     RepoSync.save();
+                    request("requestTags");
                     return true;
                 }
             }
@@ -166,6 +167,20 @@ public class ClientSync extends Client {
                 try {
                     obj.put("type", "requestFile");
                     obj.put("idFile", idFile);
+                    send("JSON_" + obj.toString());
+                } catch (JSONException e) {
+                }
+            }
+        }
+    }
+
+    public void request(String request) {
+        synchronized (syncStatus) {
+            logStatus("request(\""+request+"\")");
+            if(checkStatus()) {
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("type", request);
                     send("JSON_" + obj.toString());
                 } catch (JSONException e) {
                 }
