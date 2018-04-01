@@ -209,8 +209,6 @@ public class ClientSync extends Client {
     }
 
     //FIXME: Add timeout for every request AND use FileInfoReception for merge/ack:
-    // => Then,  make all communications (genres and tags especially, if not only) request/answer
-    // (all requests being initiated by client (JaMuzRemote) of course)
     // => Then, do NOT request genres and tags at every connection but only if required or on demand
     // => Then, avoid double acknowledgement:
     //          - Insert files in deviceFiles directly at export

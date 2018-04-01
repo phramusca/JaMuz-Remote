@@ -154,6 +154,7 @@ public class ServiceSync extends ServiceBase {
                     case "insertDeviceFileSAck":
                         JSONArray jsonArray = (JSONArray) jObject.get("filesAcked");
                         if(jsonArray.length()==1) {
+                            cancelWatchTimeOut();
                             FileInfoReception fileReceived = new FileInfoReception((JSONObject) jsonArray.get(0));
                             notifyBar("Ack.", fileReceived);
                             RepoSync.receivedAck(fileReceived);
@@ -184,8 +185,7 @@ public class ServiceSync extends ServiceBase {
                     case "mergeListDbSelected":
                         helperNotification.notifyBar(notificationSync, "Updating database with merge changes ... ");
                         JSONArray filesToUpdate = (JSONArray) jObject.get("files");
-                        //FIXME: Display progress
-                        //FIXME: Save list from time to time in case of crash somehow, as performed in: RepoSync.receivedAck
+                        //FIXME: Display merge progress
                         for(int i=0; i<filesToUpdate.length(); i++) {
                             FileInfoReception fileReceived = new FileInfoReception((JSONObject) filesToUpdate.get(i));
                             HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath,

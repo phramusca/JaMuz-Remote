@@ -1,7 +1,4 @@
 package phramusca.com.jamuzremote;
-/**
- * Created by raph on 10/06/17.
- */
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -32,6 +29,9 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TITLE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.TABLE_TRACKS;
 
+/**
+ * Created by raph on 12/06/17.
+ */
 public class MusicLibrary {
 
     SQLiteDatabase db;
@@ -170,9 +170,11 @@ public class MusicLibrary {
                     +COL_RATING+", "+COL_ADDED_DATE+", "
                     +COL_LAST_PLAYED+", "+COL_PLAY_COUNTER+") " +
                     " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            String sqlTags = "INSERT INTO tagfile (idFile, idTag) VALUES (?, (SELECT id FROM tag WHERE value=?))";
+            String sqlTagsDelete = "DELETE FROM tagFile WHERE idFile=?";
+            String sqlTags = "INSERT OR IGNORE INTO tagfile (idFile, idTag) VALUES (?, (SELECT id FROM tag WHERE value=?))";
             SQLiteStatement stmtTracks = db.compileStatement(sqlTracks);
             SQLiteStatement stmtTags = db.compileStatement(sqlTags);
+            SQLiteStatement stmtTagsDelete = db.compileStatement(sqlTagsDelete);
             for (Track track : tracks) {
                 stmtTracks.bindString(1, track.getTitle());
                 stmtTracks.bindString(2, track.getAlbum());
@@ -186,6 +188,9 @@ public class MusicLibrary {
                 stmtTracks.bindLong(10, track.getPlayCounter());
                 stmtTracks.execute();
                 stmtTracks.clearBindings();
+                stmtTagsDelete.bindLong(1, track.getId());
+                stmtTagsDelete.execute();
+                stmtTagsDelete.clearBindings();
                 for(String tag : track.getTags(false)) {
                     stmtTags.bindLong(1, track.getId());
                     stmtTags.bindString(2, tag);

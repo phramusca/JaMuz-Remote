@@ -61,15 +61,8 @@ public class ReceiverMediaButton extends MediaButtonReceiver
                                 sendMessage("playNext");
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                                //TODO: Allow this as an option as handy in car with no pause/play button
-                                boolean usePreviousButtonAsPauseButton=false;
-                                if(usePreviousButtonAsPauseButton) {
-                                    Log.i(TAG, keyExtraEvent+" => togglePlay");
-                                    sendMessage("togglePlay");
-                                } else {
-                                    Log.i(TAG, keyExtraEvent+" => playPrevious");
-                                    sendMessage("playPrevious");
-                                }
+                                Log.i(TAG, keyExtraEvent+" => playPrevious");
+                                sendMessage("playPrevious");
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_PLAY:
                                 Log.i(TAG, keyExtraEvent+" => play");
