@@ -56,6 +56,8 @@ import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -82,6 +84,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static phramusca.com.jamuzremote.Playlist.Order.*;
 
 //FIXME: Submit to f-droid.org
 //https://gitlab.com/fdroid/fdroiddata/blob/master/CONTRIBUTING.md
@@ -132,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton toggleButtonControls;
     private ToggleButton toggleButtonTagsPanel;
     private ToggleButton toggleButtonRatingPanel;
+    private ToggleButton toggleButtonOrderPanel;
     private ToggleButton toggleButtonGenresPanel;
     private ToggleButton toggleButtonEditTags;
     private ToggleButton toggleButtonPlaylist;
@@ -157,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
     private static boolean spinnerGenreSend=false;
     private RatingBar ratingBar;
     private RatingBar ratingBarPlaylist;
+    private RadioGroup layoutOrderPlaylistLayout;
     private ImageView imageViewCover;
     private LinearLayout layoutTrackInfo;
     private LinearLayout layoutMain;
@@ -194,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
         layoutGenrePlaylist = (FlexboxLayout) findViewById(R.id.panel_genre_playlist);
         layoutTagsPlaylistLayout = (LinearLayout) findViewById(R.id.panel_tags_playlist_layout);
         layoutRatingPlaylistLayout = (LinearLayout) findViewById(R.id.panel_rating_playlist_layout);
+        layoutOrderPlaylistLayout = (RadioGroup) findViewById(R.id.panel_order_playlist_layout);
         layoutGenrePlaylistLayout = (LinearLayout) findViewById(R.id.panel_genre_playlist_layout);
         layoutAttributes = (LinearLayout) findViewById(R.id.panel_attributes);
         layoutPlaylist = (LinearLayout) findViewById(R.id.panel_playlist);
@@ -404,6 +411,7 @@ public class MainActivity extends AppCompatActivity {
                 if(toggleButtonTagsPanel.isChecked()) {
                     toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
                     toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
+                    toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
                 }
             }
         });
@@ -417,6 +425,21 @@ public class MainActivity extends AppCompatActivity {
                 if(toggleButtonRatingPanel.isChecked()) {
                     toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
                     toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
+                    toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
+                }
+            }
+        });
+
+        toggleButtonOrderPanel = (ToggleButton) findViewById(R.id.button_order_panel_toggle);
+        toggleButtonOrderPanel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dimOn();
+                toggle(layoutOrderPlaylistLayout, !toggleButtonOrderPanel.isChecked());
+                if(toggleButtonOrderPanel.isChecked()) {
+                    toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
+                    toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
+                    toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
                 }
             }
         });
@@ -430,6 +453,7 @@ public class MainActivity extends AppCompatActivity {
                 if(toggleButtonGenresPanel.isChecked()) {
                     toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
                     toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
+                    toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
                 }
             }
         });
@@ -447,6 +471,7 @@ public class MainActivity extends AppCompatActivity {
                     toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
                     toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
                     toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
+                    toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
                 }
             }
         });
@@ -464,6 +489,7 @@ public class MainActivity extends AppCompatActivity {
                     toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
                     toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
                     toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
+                    toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
                 }
             }
         });
@@ -478,6 +504,7 @@ public class MainActivity extends AppCompatActivity {
                     toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
                     toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
                     toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
+                    toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
 
                     toggleOff(toggleButtonEditTags, layoutAttributes);
                     toggleOff(toggleButtonPlaylist, layoutPlaylist);
@@ -780,6 +807,7 @@ public class MainActivity extends AppCompatActivity {
         toggle(layoutControls, true);
         toggle(layoutOptions, true);
         toggle(layoutAttributes, true);
+        toggle(layoutOrderPlaylistLayout, true);
         toggle(layoutGenrePlaylistLayout, true);
         toggle(layoutTagsPlaylistLayout, true);
         toggle(layoutRatingPlaylistLayout, true);
@@ -1922,10 +1950,37 @@ public class MainActivity extends AppCompatActivity {
             }
             buttonRatingOperator.setText(playlist.getRatingOperator());
             ratingBarPlaylist.setRating(playlist.getRating());
+            switch(playlist.getOrder()) {
+                case RANDOM:
+                    layoutOrderPlaylistLayout.check(R.id.order_random);
+                    break;
+                case PLAYCOUNTER_LASTPLAYED:
+                    layoutOrderPlaylistLayout.check(R.id.order_playCounter_lastPlayed);
+                    break;
+            }
             textViewRating.setText(playlist.getRatingString());
             textViewTag.setText(playlist.getTagsString());
             textViewGenre.setText(playlist.getGenresString());
         }
+    }
+
+    public void onRadioButtonClicked(View view) {
+        dimOn();
+        layoutOrderPlaylistLayout.setEnabled(false);
+        boolean checked = ((RadioButton) view).isChecked();
+        if(checked && localSelectedPlaylist!=null) {
+            switch(view.getId()) {
+                case R.id.order_random:
+                    localSelectedPlaylist.setOrder(RANDOM);
+                    break;
+                case R.id.order_playCounter_lastPlayed:
+                    localSelectedPlaylist.setOrder(PLAYCOUNTER_LASTPLAYED);
+                    break;
+            }
+            clearQueueAndRefreshSpinner();
+            /*textViewRating.setText(localSelectedPlaylist.getRatingString());*/
+        }
+        layoutOrderPlaylistLayout.setEnabled(true);
     }
 
     ///TODO: Detect WIFI connection to allow/disallow "Connect" buttons

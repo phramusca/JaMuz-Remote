@@ -23,6 +23,7 @@ public class Playlist implements Comparable {
     private boolean isLocal;
     private String artist;
     private String album;
+    private Order order=Order.PLAYCOUNTER_LASTPLAYED;
 
     public Playlist(String name, boolean isLocal) {
         this.name = name;
@@ -31,7 +32,7 @@ public class Playlist implements Comparable {
 
     public List<Track> getTracks() {
         if(HelperLibrary.musicLibrary!=null) {
-            return HelperLibrary.musicLibrary.getTracks(getWhere(), getHaving(), "ORDER BY playCounter, lastPlayed");
+            return HelperLibrary.musicLibrary.getTracks(getWhere(), getHaving(), order.display);
         }
         return new ArrayList<>();
     }
@@ -312,6 +313,28 @@ public class Playlist implements Comparable {
 
         private final String display;
         Operator(String display) {
+            this.display = display;
+        }
+        @Override
+        public String toString() {
+            return display;
+        }
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
+    }
+
+    public enum Order {
+        RANDOM("ORDER BY RANDOM()"), //NOI18N
+        PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed"); //NOI18N
+
+        private final String display;
+        Order(String display) {
             this.display = display;
         }
         @Override

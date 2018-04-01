@@ -297,6 +297,15 @@
                 android:layout_height="match_parent">
 
                 <ToggleButton
+                    android:id="@+id/button_order_panel_toggle"
+                    android:layout_row="0"
+                    android:layout_column="0"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    style="@style/ToggleButton"
+                    android:background="@drawable/ic_toggle_order_playlist"/>
+
+                <ToggleButton
                     android:id="@+id/button_rating_layout"
                     android:layout_row="0"
                     android:layout_column="1"
@@ -344,7 +353,6 @@
                     android:inputType="textCapSentences|textMultiLine"
                     android:layout_gravity="left|right|center_vertical"/>
 
-
             </GridLayout>
         </LinearLayout>
 
@@ -382,6 +390,22 @@
                 android:theme="@style/RatingBar"
                 android:paddingTop="5dp"/>
         </LinearLayout>
+
+        <RadioGroup android:id="@+id/panel_order_playlist_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <RadioButton android:id="@+id/order_random"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Random"
+                android:onClick="onRadioButtonClicked"/>
+            <RadioButton android:id="@+id/order_playCounter_lastPlayed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Play counter, Last played"
+                android:onClick="onRadioButtonClicked"/>
+        </RadioGroup>
 
         <LinearLayout
             android:id="@+id/panel_tags_playlist_layout"
