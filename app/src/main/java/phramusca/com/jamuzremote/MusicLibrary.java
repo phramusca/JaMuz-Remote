@@ -8,6 +8,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.database.sqlite.SQLiteStatement;
 import android.provider.BaseColumns;
 import android.util.Log;
 
@@ -68,8 +69,8 @@ public class MusicLibrary {
         return -1;
     }
 
-    synchronized ArrayList<Track> getTracks(String where, String having, String order) {
-        ArrayList<Track> tracks = new ArrayList<>();
+    synchronized List<Track> getTracks(String where, String having, String order) {
+        List<Track> tracks = new ArrayList<>();
         try {
             String query = "SELECT GROUP_CONCAT(tag.value) AS tags, tracks.* \n" +
                     " FROM tracks \n" +
@@ -82,11 +83,41 @@ public class MusicLibrary {
             Log.i(TAG, query);
             Cursor cursor = db.rawQuery(query, new String[] { });
             tracks = getTracks(cursor);
-            Log.i(TAG, "getTracks: "+tracks.size()+"//"+cursor.getCount());
+            Log.i(TAG, "getTracks("+where+","+having+","+order+"): "+tracks.size()+"//"+cursor.getCount());
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "getTracks("+where+","+having+","+order+")", ex);
         }
         return tracks;
+    }
+
+    synchronized List<Track> getTracks(List<FileInfoReception> files, File getAppDataPath) {
+        List<Track> tracks = new ArrayList<>();
+        try {
+            String query = "SELECT GROUP_CONCAT(tag.value) AS tags, tracks.* \n" +
+                    " FROM tracks \n" +
+                    " LEFT JOIN tagfile ON tracks.ID=tagfile.idFile \n" +
+                    " LEFT JOIN tag ON tag.id=tagfile.idTag \n"+
+                    " WHERE " + COL_PATH + " IN "+getCSVlist(files, getAppDataPath)+" \n"+
+                    " GROUP BY tracks.ID";
+            Log.i(TAG, query);
+            Cursor cursor = db.rawQuery(query, new String[] { });
+            tracks = getTracks(cursor);
+            Log.i(TAG, "getTracks(): "+tracks.size()+"//"+cursor.getCount());
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "getTracks()", ex);
+        }
+        return tracks;
+    }
+
+    private String getCSVlist(List<FileInfoReception> files, File getAppDataPath) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("(");
+        for (FileInfoReception fileInfoReception : files) {
+            builder.append("\"").append(new File(getAppDataPath,
+                    fileInfoReception.relativeFullPath).getAbsolutePath()).append("\"").append(",");
+        }
+        builder.deleteCharAt(builder.length()-1).append(") ");
+        return builder.toString();
     }
 
     synchronized int getNb(String where, String having){
@@ -129,6 +160,67 @@ public class MusicLibrary {
         return false;
     }
 
+    synchronized boolean insertTracks(List<Track> tracks) {
+        db.beginTransaction();
+        try {
+            String sqlTracks = "INSERT INTO "+TABLE_TRACKS+" ("
+                    +COL_TITLE+", "+COL_ALBUM+", "
+                    +COL_ARTIST+", "+COL_COVER_HASH+", "
+                    +COL_GENRE+", "+COL_PATH+", "
+                    +COL_RATING+", "+COL_ADDED_DATE+", "
+                    +COL_LAST_PLAYED+", "+COL_PLAY_COUNTER+") " +
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String sqlTags = "INSERT INTO tagfile (idFile, idTag) VALUES (?, (SELECT id FROM tag WHERE value=?))";
+            SQLiteStatement stmtTracks = db.compileStatement(sqlTracks);
+            SQLiteStatement stmtTags = db.compileStatement(sqlTags);
+            for (Track track : tracks) {
+                stmtTracks.bindString(1, track.getTitle());
+                stmtTracks.bindString(2, track.getAlbum());
+                stmtTracks.bindString(3, track.getArtist());
+                stmtTracks.bindString(4, track.getCoverHash());
+                stmtTracks.bindString(5, track.getGenre());
+                stmtTracks.bindString(6, track.getPath());
+                stmtTracks.bindLong(7, track.getRating());
+                stmtTracks.bindString(8, track.getFormattedAddedDate());
+                stmtTracks.bindString(9, track.getFormattedLastPlayed());
+                stmtTracks.bindLong(10, track.getPlayCounter());
+                stmtTracks.execute();
+                stmtTracks.clearBindings();
+                for(String tag : track.getTags(false)) {
+                    stmtTags.bindLong(1, track.getId());
+                    stmtTags.bindString(2, tag);
+                    stmtTags.execute();
+                    stmtTags.clearBindings();
+                }
+            }
+            db.setTransactionSuccessful();
+            return true;
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "insertTracks("+tracks+")", ex);
+            return false;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    synchronized boolean addTag(int idFile, String tag){
+        try {
+            int idTag=getIdTag(tag);
+            if(idTag>0) {
+                //Add the tag in tagfile
+                ContentValues values = new ContentValues();
+                values.put("idFile", idFile);
+                values.put("idTag", idTag);
+                db.insertWithOnConflict("tagfile", BaseColumns._ID, values, SQLiteDatabase.CONFLICT_IGNORE);
+                return true;
+            }
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "addTag("+idFile+","+tag+")", ex);
+        }
+        return false;
+    }
+
+
     synchronized boolean updateTrack(Track track){
         try {
             if(db.update(TABLE_TRACKS, TrackToValues(track),
@@ -156,8 +248,8 @@ public class MusicLibrary {
         return -1;
     }
 
-    private synchronized ArrayList<Track> getTracks(Cursor cursor) {
-        ArrayList<Track> tracks = new ArrayList<>();
+    private synchronized List<Track> getTracks(Cursor cursor) {
+        List<Track> tracks = new ArrayList<>();
         if(cursor != null && cursor.moveToFirst())
         {
             do {
@@ -222,8 +314,7 @@ public class MusicLibrary {
         return genres;
     }
 
-    //FIXME TAGS: Order does not work
-
+    //FIXME: Order does not work for tags. Why ?
     public synchronized Map<Integer, String> getTags() {
         Map<Integer, String> tags = new HashMap<>();
         Cursor cursor = db.rawQuery("SELECT id, value FROM tag ORDER BY value", new String [] {});
@@ -256,23 +347,6 @@ public class MusicLibrary {
             cursor.close();
         }
         return tags;
-    }
-
-    synchronized boolean addTag(int idFile, String tag){
-        try {
-            int idTag=getIdTag(tag);
-            if(idTag>0) {
-                //Add the tag in tagfile
-                ContentValues values = new ContentValues();
-                values.put("idFile", idFile);
-                values.put("idTag", idTag);
-                db.insertWithOnConflict("tagfile", BaseColumns._ID, values, SQLiteDatabase.CONFLICT_IGNORE);
-                return true;
-            }
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "addTag("+idFile+","+tag+")", ex);
-        }
-        return false;
     }
 
     synchronized int addTag(String tag) {

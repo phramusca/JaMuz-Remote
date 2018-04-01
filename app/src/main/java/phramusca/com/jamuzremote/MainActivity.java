@@ -83,7 +83,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-//FIXME: Make a relase and submit to F-Droid
+//FIXME: Submit to f-droid.org
 //https://gitlab.com/fdroid/fdroiddata/blob/master/CONTRIBUTING.md
 //https://f-droid.org/
 
@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
     public static File musicLibraryDbFile = new File(
             Environment.getExternalStorageDirectory()+"/JaMuz/JaMuzRemote.db");
 
-    private ArrayList<Track> queue = new ArrayList<>();
+    private List<Track> queue = new ArrayList<>();
     private ArrayList<Track> queueHistory = new ArrayList<>();
     private List<Playlist> localPlaylists = new ArrayList<Playlist>();
     private ArrayAdapter<Playlist> playListArrayAdapter;
@@ -546,7 +546,7 @@ public class MainActivity extends AppCompatActivity {
                             // - *** Replace with a "Default" playlist selected by default as at 0
 
                             localPlaylists = localPlaylists.subList(0, localPlaylists.size()-1);
-                            //TODO: Duplicate current playlist (clone) instead of new
+                            //FIXME: Duplicate current playlist (clone) instead of new
                             Playlist newPlaylist = new Playlist(text, true);
                             localPlaylists.add(newPlaylist);
                             localSelectedPlaylist=newPlaylist;
