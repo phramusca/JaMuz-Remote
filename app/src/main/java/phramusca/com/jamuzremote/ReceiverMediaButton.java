@@ -17,7 +17,7 @@ import java.util.TimerTask;
 public class ReceiverMediaButton extends MediaButtonReceiver
 {
     private static final String TAG = ReceiverMediaButton.class.getSimpleName();
-    private static final int DOUBLE_CLICK_DELAY = 1000;
+    private static final int DOUBLE_CLICK_DELAY = 0; //TODO: Make this an option (0 to desactivate, 1000 to activate)
     private static long sLastClickTime = 0;
     private static Timer timer;
     private static TimerTask timerTask;
