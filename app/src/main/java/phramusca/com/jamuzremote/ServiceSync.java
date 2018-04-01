@@ -31,12 +31,10 @@ public class ServiceSync extends ServiceBase {
     private CountDownTimer timerWatchTimeout= new CountDownTimer(0, 0) {
         @Override
         public void onTick(long l) {
-
         }
 
         @Override
         public void onFinish() {
-
         }
     };
     private Benchmark bench;
@@ -153,95 +151,45 @@ public class ServiceSync extends ServiceBase {
                     case "StartSync":
                         requestNextFile(false);
                         break;
-                    case "insertDeviceFileAck":
-                        String status = jObject.getString("status");
-                        boolean requestNextFile = jObject.getBoolean("requestNextFile");
-                        if(status.equals("OK")) {
-                            sendMessage("refreshSpinner(true)");
-                            cancelWatchTimeOut();
-                            FileInfoReception fileReceived = new FileInfoReception(jObject.getJSONObject("file"));
-                            RepoSync.receivedAck(getAppDataPath, fileReceived);
+                    case "insertDeviceFileSAck":
+                        JSONArray jsonArray = (JSONArray) jObject.get("filesAcked");
+                        if(jsonArray.length()==1) {
+                            FileInfoReception fileReceived = new FileInfoReception((JSONObject) jsonArray.get(0));
                             notifyBar("Ack.", fileReceived);
+                            RepoSync.receivedAck(fileReceived);
                             bench.get();
                         } else {
-                            // FIXME: Store a new FAIL status
-                            // add other failures too (make different statuses ?)
-                            // What to do with it ? Retry ? How many times ? How to report ?
+                            notifyBar("Received ack from server");
+                            for(int i=0; i<jsonArray.length(); i++) {
+                                FileInfoReception fileReceived = new FileInfoReception((JSONObject) jsonArray.get(i));
+                                RepoSync.receivedAck(fileReceived);
+                            }
+                            bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                         }
-                        if(requestNextFile) {
-                            requestNextFile();
-                        }
+                        requestNextFile();
                         break;
                     case "FilesToGet":
-                        helperNotification.notifyBar(notificationSync, "Received new list of files to get ... ");
+                        helperNotification.notifyBar(notificationSync, "Received new list of files to get");
                         Map<Integer, FileInfoReception> newTracks = new HashMap<>();
                         JSONArray files = (JSONArray) jObject.get("files");
                         for(int i=0; i<files.length(); i++) {
                             FileInfoReception fileReceived = new FileInfoReception((JSONObject) files.get(i));
                             newTracks.put(fileReceived.idFile, fileReceived);
                         }
+                        helperNotification.notifyBar(notificationSync,"Checking if files are already on disk ... ");
                         RepoSync.set(getAppDataPath, newTracks);
-                        scanAndDeleteUnwanted(getAppDataPath);
-                        bench = new Benchmark(RepoSync.getRemainingSize(), 10);
-
-                        //FIXME: Refresh queue issue (when changing genre ?) !! (yes, that's not here)
-
-                        //FIXME: Do all OK at once => should be way faster !!!!
-                        //then only requestNextFile
-
-                        Map<Integer, FileInfoReception> locals = RepoSync.getLocal();
-
-
-                        for(Map.Entry<Integer, FileInfoReception> entry : newTracks.entrySet()) {
-                            /*final FileInfoReception fileInfoReception = RepoSync.checkFile(getAppDataPath, entry.getValue());
-                            Log.i(TAG, "requestNextFile file: \n"+fileInfoReception);
-                            if (fileInfoReception.status.equals()) {
-                                switch (fileInfoReception.status) {
-                                    case NEW:
-                                        new Thread() {
-                                            @Override
-                                            public void run() {
-                                                runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        notifyBar("Req.", fileInfoReception);
-                                                        watchTimeOut(fileInfoReception.size);
-                                                    }
-                                                });
-                                                synchronized (timerLock) {
-                                                    clientSync.requestFile(fileInfoReception.idFile);
-                                                }
-                                            }
-                                        }.start();
-                                        break;
-                                    case LOCAL:
-                                        if(HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath,
-                                                fileInfoReception.relativeFullPath).getAbsolutePath(), fileInfoReception)) {
-                                            if(RepoSync.checkFile(getAppDataPath, fileInfoReception, FileInfoReception.Status.IN_DB)) {
-                                                clientSync.ackFileReception(fileInfoReception.idFile, true);
-                                            }
-                                        }
-                                        break;
-                                    case IN_DB:
-                                        clientSync.ackFileReception(fileInfoReception.idFile, true);
-                                        break;
-                                    case ACK:
-                                        //We should not get there !!! as NOT taking from "ACK" list
-                                        //TODO: Manage this case
-                                        break;
-                                }
-                            }*/
-                        }
-
+                        scanAndDeleteUnwantedInThread(getAppDataPath);
                         requestNextFile();
                         break;
                     case "mergeListDbSelected":
                         helperNotification.notifyBar(notificationSync, "Updating database with merge changes ... ");
                         JSONArray filesToUpdate = (JSONArray) jObject.get("files");
+                        //FIXME: Display progress
+                        //FIXME: Save list from time to time in case of crash somehow, as performed in: RepoSync.receivedAck
                         for(int i=0; i<filesToUpdate.length(); i++) {
                             FileInfoReception fileReceived = new FileInfoReception((JSONObject) filesToUpdate.get(i));
                             HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath,
-                                    fileReceived.relativeFullPath).getAbsolutePath(), fileReceived);
+                                    fileReceived.relativeFullPath).getAbsolutePath(), fileReceived, true);
                         }
                         stopSync(false, "Sync complete.", 20000);
                         stopSelf();
@@ -294,23 +242,22 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void receivedFile(final FileInfoReception fileInfoReception) {
             Log.i(TAG, "Received file\n"+fileInfoReception
-                    +"\nRemaining : "+ RepoSync.getRemainingSize()+"/"+ RepoSync.getTotalSize());
-            notifyBar("Recep.", fileInfoReception);
+                    +"\nRemaining : "+ RepoSync.getRemainingSize()
+                    +"/"+ RepoSync.getTotalSize());
+            notifyBar("Rec.", fileInfoReception);
             RepoSync.checkFile(getAppDataPath, fileInfoReception,  FileInfoReception.Status.LOCAL);
             requestNextFile();
         }
 
         @Override
         public void receivingFile(final FileInfoReception fileInfoReception) {
-            notifyBar("Down.", fileInfoReception);
+            notifyBar("Down", fileInfoReception);
         }
 
         @Override
         public void connected() {
             sendMessage("connectedSync");
             helperNotification.notifyBar(notificationSync, "Connected ... ");
-            //Server will send tags, genres and list of new files to get
-            //Then, we will request next file
         }
 
         @Override
@@ -331,14 +278,22 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
+    private void notifyBar(String text) {
+        notifyBar(text, null);
+    }
+
     private void notifyBar(String text, FileInfoReception fileInfoReception) {
-        String msg = "- "+ RepoSync.getRemainingSize() + "/" + RepoSync.getTotalSize()
-                + " "+bench.getLast()+" "+text+" "+StringManager.humanReadableByteCount(
+        int max = RepoSync.getTotalSize();
+        int remaining = RepoSync.getRemainingSize();
+        int progress = max- remaining;
+
+        String msg = "- "+ remaining + "/" + max
+                + " "+bench.getLast()+" "+text+(fileInfoReception==null?"":
+                (" "+StringManager.humanReadableByteCount(
                 fileInfoReception.size, false)
-                +" ("+fileInfoReception.relativeFullPath+")";
-        int max= RepoSync.getTotalSize();
-        int progress=max- RepoSync.getRemainingSize();
-        helperNotification.notifyBar(notificationSync, msg, max, progress, false, true, true);
+                +" ("+fileInfoReception.relativeFullPath+")"));
+        helperNotification.notifyBar(notificationSync, msg, max, progress, false,
+                true, true);
     }
 
     private void requestNextFile() {
@@ -346,90 +301,137 @@ public class ServiceSync extends ServiceBase {
     }
 
     private void requestNextFile(final boolean scanLibrary) {
-        final FileInfoReception fileInfoReception = RepoSync.take(getAppDataPath);
-        Log.i(TAG, "requestNextFile file: \n"+fileInfoReception);
-        if (fileInfoReception != null) {
-            switch (fileInfoReception.status) {
-                case NEW:
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    notifyBar("Req.", fileInfoReception);
-                                    watchTimeOut(fileInfoReception.size);
-                                }
-                            });
-                            synchronized (timerLock) {
-                                clientSync.requestFile(fileInfoReception.idFile);
-                            }
+        //First inserting LOCAL in database if not already there
+        List<FileInfoReception> localFiles = RepoSync.getLocal();
+        if(localFiles.size()>1)  {
+            notifyBar("Checking if files are already in database ... ");
+        }
+        if(localFiles.size()>0) {
+            //Get tracks from database matching local tracks
+            List<Track> tracksInDb =
+                    HelperLibrary.musicLibrary.getTracks(localFiles, getAppDataPath);
+            if(localFiles.size()>tracksInDb.size()) {
+                //If some local files are not in database, inserting them
+                HashMap<String, Track> tracksInDbMap = new HashMap<>();
+                for (Track track : tracksInDb) {
+                    tracksInDbMap.put(track.getPath(), track);
+                }
+                if(localFiles.size()==1) {
+                    notifyBar("Read", localFiles.get(0));
+                } else {
+                    notifyBar("Reading files metadata for insertion ... ");
+                }
+                List<Track> tracksNotYetInDb = new ArrayList<>();
+                List<FileInfoReception> localFilesInserted = new ArrayList<>();
+                for (FileInfoReception fileInfoReception : localFiles) {
+                    String fullPath = new File(getAppDataPath, fileInfoReception.relativeFullPath).getAbsolutePath();
+                    if (!tracksInDbMap.containsKey(fullPath)) {
+                        tracksNotYetInDb.add(HelperLibrary.getTrack(fullPath, fileInfoReception));
+                        localFilesInserted.add(fileInfoReception);
+                    }
+                }
+                if(localFiles.size()==1) {
+                    notifyBar("Ins.", localFiles.get(0));
+                } else {
+                    notifyBar("Inserting missing tracks in database ... ");
+                }
+                if (HelperLibrary.musicLibrary.insertTracks(tracksNotYetInDb)) {
+                    for (FileInfoReception fileInfoReception : localFilesInserted) {
+                        /*notifyBar("Ins.", fileInfoReception);*/
+                        RepoSync.receivedInDb(fileInfoReception);
+                    }
+                }
+            } else {
+                for (FileInfoReception fileInfoReception : localFiles) {
+                    RepoSync.receivedInDb(fileInfoReception);
+                }
+            }
+        }
+        //Second, ack reception of the files IN_DB (server will insert in deviceFile table) and ack back
+        List<FileInfoReception> inDbFiles = RepoSync.getInDb();
+        if(inDbFiles.size()>0) {
+            if(localFiles.size()==1) {
+                notifyBar("Ack+", localFiles.get(0));
+            } else {
+                notifyBar("Sending ack to server and waiting ack from server ... ");
+            }
+            clientSync.ackFilesReception(inDbFiles);
+        } else {
+            //Finally request a NEW
+            final FileInfoReception fileInfoReception = RepoSync.takeNew();
+            Log.i(TAG, "requestNextFile file: \n"+fileInfoReception);
+            if (fileInfoReception != null) {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        //Save in case of crash or android kill or reboot or whatever issue can occur
+                        //but not too often not to destroy storage
+                        //Is every 10 ack. enough or too much ?
+                        if(((RepoSync.getRemainingSize()-1) % 10) == 0) {
+                            RepoSync.save();
                         }
-                    }.start();
-                    break;
-                case LOCAL:
-                    if(HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath,
-                            fileInfoReception.relativeFullPath).getAbsolutePath(), fileInfoReception)) {
-                        if(RepoSync.checkFile(getAppDataPath, fileInfoReception, FileInfoReception.Status.IN_DB)) {
-                            clientSync.ackFileReception(fileInfoReception.idFile, true);
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                notifyBar("Req.", fileInfoReception);
+                                watchTimeOut(fileInfoReception.size);
+                            }
+                        });
+                        synchronized (timerLock) {
+                            clientSync.requestFile(fileInfoReception.idFile);
                         }
                     }
-                    break;
-                case IN_DB:
-                    clientSync.ackFileReception(fileInfoReception.idFile, true);
-                    break;
-                case ACK:
-                    //We should not get there !!! as NOT taking from "ACK" list
-                    //TODO: Manage this case
-                    break;
+                }.start();
+            } else if(RepoSync.getTotalSize()>0) {
+                final String msg = "No more files to download.";
+                final String msg2 = "All " + RepoSync.getTotalSize() + " files" +
+                        " have been retrieved successfully.";
+                Log.i(TAG, msg);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        helperToast.toastLong(msg + "\n\n" + msg2);
+                        helperNotification.notifyBar(notificationSync,"Getting list of files for stats merge.");
+                    }
+                });
+                List<Track> tracks = new Playlist("FilesToMerge", false).getTracks();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        helperNotification.notifyBar(notificationSync,"Requesting statistics merge.");
+                    }
+                });
+                clientSync.requestMerge(tracks, getAppDataPath);
+
+                //FIXME: Delete from db whenever deleting a file in "internal" folder
+                //          (may already be done, check that FIRST)
+                //So that it is not required to scan (deleted) after sync (below)
+
+                Log.i(TAG, "Updating library:" + scanLibrary);
+                if (scanLibrary) {
+                    scanAndDeleteUnwantedInThread(getAppDataPath);
+
+                    //TODO: Scan only "internal" folder (scan deleted only), not the user folder
+                    sendMessage("checkPermissionsThenScanLibrary");
+                }
+            } else {
+                Log.i(TAG, "No files to download.");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        helperToast.toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
+                                "export a list of files to retrieve, based on playlists.");
+                    }
+                });
+                stopSync(false, "No files to download.", 5000);
             }
-        } else if(RepoSync.getTotalSize()>0) {
-            final String msg = "No more files to download.";
-            final String msg2 = "All " + RepoSync.getTotalSize() + " files" +
-                    " have been retrieved successfully.";
-            Log.i(TAG, msg);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    helperToast.toastLong(msg + "\n\n" + msg2);
-                    helperNotification.notifyBar(notificationSync, "Getting list of files for stats merge.");
-                }
-            });
-            List<Track> tracks = new Playlist("FilesToMerge", false).getTracks();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    helperNotification.notifyBar(notificationSync, "Requesting statistics merge.");
-                }
-            });
-            clientSync.requestMerge(tracks, getAppDataPath);
-
-            //FIXME: Delete from db whenever deleting a file in "internal" folder
-            //          (may already be done, check that FIRST)
-            //So that it is not required to scan (deleted) after sync (below)
-
-            Log.i(TAG, "Updating library:" + scanLibrary);
-            if (scanLibrary) {
-                scanAndDeleteUnwanted(getAppDataPath);
-
-                //TODO: Scan only "internal" folder (scan deleted only), not the user folder
-                sendMessage("checkPermissionsThenScanLibrary");
-            }
-        } else {
-            Log.i(TAG, "No files to download.");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    helperToast.toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
-                            "export a list of files to retrieve, based on playlists.");
-                }
-            });
-            stopSync(false, "No files to download.", 5000);
         }
     }
 
-    private void scanAndDeleteUnwanted(final File path) {
-        ProcessAbstract processAbstract = new ProcessAbstract("Thread.MainActivity.ScanUnWantedRepoSync") {
+    private void scanAndDeleteUnwantedInThread(final File path) {
+        ProcessAbstract processAbstract = new ProcessAbstract(
+                "Thread.MainActivity.ScanUnWantedRepoSync") {
             public void run() {
                 try {
                     if(!path.getAbsolutePath().equals("/")) {
@@ -439,7 +441,9 @@ public class ServiceSync extends ServiceBase {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                helperNotification.notifyBar(notificationSyncScan, "Deleted "+nbDeleted+" unrequested files.", 10000);
+                                helperNotification.notifyBar(notificationSyncScan,
+                                        "Deleted "+nbDeleted+" unrequested files.",
+                                        10000);
                             }
                         });
                     }
@@ -461,13 +465,16 @@ public class ServiceSync extends ServiceBase {
                                 }
                                 else {
                                     String absolutePath=file.getAbsolutePath();
-                                    String relativeFullPath = absolutePath.substring(getAppDataPath.getAbsolutePath().length()+1);
+                                    String relativeFullPath = absolutePath.substring(
+                                            getAppDataPath.getAbsolutePath().length()+1);
                                     if(!RepoSync.checkFile(getAppDataPath, relativeFullPath)) {
                                         //RepoSync.checkFile deletes file. Not couting deleted
                                         //to match RepoSync.getTotalSize() at the end (hopefully)
                                         nbFiles++;
                                     } else { nbDeleted++; }
-                                    helperNotification.notifyBar(notificationSyncScan, "Deleting unrequested: "+nbDeleted+" so far.", 50,
+                                    helperNotification.notifyBar(notificationSyncScan,
+                                            "Deleting unrequested: "+nbDeleted+" so far.",
+                                            50,
                                             nbFiles, RepoSync.getTotalSize());
                                 }
                             }

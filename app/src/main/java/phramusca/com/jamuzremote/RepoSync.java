@@ -1,9 +1,5 @@
 package phramusca.com.jamuzremote;
 
-/**
- * Created by raph on 10/06/17.
- */
-
 import android.util.Log;
 
 import com.google.common.collect.HashBasedTable;
@@ -18,6 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ *
+ * @author phramusca
+ */
 public final class RepoSync {
 
     private static final String TAG = RepoSync.class.getSimpleName();
@@ -89,7 +89,7 @@ public final class RepoSync {
      * @return modified fileInfoReception with status to LOCAL if it exists and status was NEW
      *
      */
-    public synchronized static FileInfoReception checkFile(File getAppDataPath, FileInfoReception fileInfoReception) {
+    private synchronized static FileInfoReception checkFile(File getAppDataPath, FileInfoReception fileInfoReception) {
         File file = new File(getAppDataPath, fileInfoReception.relativeFullPath);
         if(checkFile(fileInfoReception, file)) {
             if (fileInfoReception.status.equals(FileInfoReception.Status.NEW)) {
@@ -101,14 +101,17 @@ public final class RepoSync {
         return fileInfoReception;
     }
 
-    public synchronized static void receivedAck(File getAppDataPath, FileInfoReception fileInfoReception) {
-        if(checkFile(getAppDataPath, fileInfoReception,  FileInfoReception.Status.ACK)) {
-            //Save in case of crash or android kill or reboot or whatever issue can occur
-            //but not too often not to destroy storage
-            //Is every 10 ack. enough or too much ?
-            if(((RepoSync.getRemainingSize()-1) % 10) == 0) {
-                save();
-            }
+    public synchronized static void receivedAck(FileInfoReception fileInfoReception) {
+        if(files.containsRow(fileInfoReception.idFile)) {
+            fileInfoReception.status = FileInfoReception.Status.ACK;
+            updateFiles(fileInfoReception);
+        }
+    }
+
+    public synchronized static void receivedInDb(FileInfoReception fileInfoReception) {
+        if(files.containsRow(fileInfoReception.idFile)) {
+            fileInfoReception.status = FileInfoReception.Status.IN_DB;
+            updateFiles(fileInfoReception);
         }
     }
 
@@ -124,12 +127,8 @@ public final class RepoSync {
 
     public synchronized static void save() {
         if(files!=null) {
-            List<FileInfoReception> filesList = new ArrayList<>();
-            for(FileInfoReception file : files.values()) {
-                filesList.add(file);
-            }
             Gson gson = new Gson();
-            HelperFile.write("Sync", "Files.txt", gson.toJson(filesList));
+            HelperFile.write("Sync", "Files.txt", gson.toJson(files.values()));
         }
     }
 
@@ -160,33 +159,27 @@ public final class RepoSync {
 
     public synchronized static int getRemainingSize() {
         return files==null?0:(files.column(FileInfoReception.Status.NEW).size()
-                +files.column(FileInfoReception.Status.LOCAL).size()
-                +files.column(FileInfoReception.Status.IN_DB).size());
+                +files.column(FileInfoReception.Status.LOCAL).size());
     }
 
     public synchronized static int getTotalSize() {
         return files==null?0:files.size();
     }
 
-    public synchronized static FileInfoReception take(File getAppDataPath) {
-        if (files != null && files.column(FileInfoReception.Status.LOCAL).size() > 0) {
-            FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.LOCAL)
+    public synchronized static FileInfoReception takeNew() {
+        if (files != null && files.column(FileInfoReception.Status.NEW).size() > 0) {
+            return files.column(FileInfoReception.Status.NEW)
                     .entrySet().iterator().next().getValue();
-            return checkFile(getAppDataPath, fileInfoReception);
-        } else if (files != null && files.column(FileInfoReception.Status.IN_DB).size() > 0) {
-            FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.IN_DB)
-                    .entrySet().iterator().next().getValue();
-            return checkFile(getAppDataPath, fileInfoReception);
-        } else if (files != null && files.column(FileInfoReception.Status.NEW).size() > 0) {
-            FileInfoReception fileInfoReception = files.column(FileInfoReception.Status.NEW)
-                    .entrySet().iterator().next().getValue();
-            return checkFile(getAppDataPath, fileInfoReception);
         }
         return null;
     }
 
-    public synchronized static Map<Integer, FileInfoReception> getLocal() {
-        return files.column(FileInfoReception.Status.LOCAL);
+    public synchronized static ArrayList<FileInfoReception> getInDb() {
+        return new ArrayList<>(files.column(FileInfoReception.Status.IN_DB).values());
+    }
+
+    public synchronized static List<FileInfoReception> getLocal() {
+        return new ArrayList<>(files.column(FileInfoReception.Status.LOCAL).values());
     }
 
     /**

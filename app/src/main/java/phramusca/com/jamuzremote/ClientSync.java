@@ -218,16 +218,19 @@ public class ClientSync extends Client {
     // => Then, use this and FileInfoReception to merge statistics instead of current merge
     // => Then, preserve current merge for user chosen folder only
 
-    public void ackFileReception(int idFile, boolean requestNextFile) {
+
+    public void ackFilesReception(List<FileInfoReception> files) {
         synchronized (syncStatus) {
-            logStatus("ackFileReception()");
+            logStatus("ackFilesReception()");
             if(checkStatus()) {
                 JSONObject obj = new JSONObject();
                 try {
-                    obj.put("type", "ackFileReception");
-                    obj.put("idFile", idFile);
-                    //TODO: Remove requestNextFile as (apparently) no more used
-                    obj.put("requestNextFile", requestNextFile);
+                    obj.put("type", "ackFileSReception");
+                    JSONArray idFiles = new JSONArray();
+                    for (FileInfoReception file : files) {
+                        idFiles.put(file.idFile);
+                    }
+                    obj.put("idFiles", idFiles);
                     send("JSON_" + obj.toString());
                 } catch (JSONException e) {
                 }
