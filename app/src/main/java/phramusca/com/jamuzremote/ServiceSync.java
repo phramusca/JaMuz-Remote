@@ -395,6 +395,8 @@ public class ServiceSync extends ServiceBase {
                         helperNotification.notifyBar(notificationSync,"Getting list of files for stats merge.");
                     }
                 });
+                //FIXME: Include ratingmodifDate, tagsMod.. and genreModifDaate
+                //=> need to merge Track and FileInfoReception probably
                 List<Track> tracks = new Playlist("FilesToMerge", false).getTracks();
                 runOnUiThread(new Runnable() {
                     @Override

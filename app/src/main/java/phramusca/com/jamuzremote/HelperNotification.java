@@ -14,9 +14,9 @@ public class HelperNotification {
     private static final String TAG = HelperNotification.class.getSimpleName();
 
     private NotificationManager notificationManager;
-    PendingIntent pendingIntent;
+    private PendingIntent pendingIntent;
 
-    public HelperNotification(PendingIntent pendingIntent, NotificationManager notificationManager) {
+    HelperNotification(PendingIntent pendingIntent, NotificationManager notificationManager) {
         this.pendingIntent = pendingIntent;
         this.notificationManager = notificationManager;
     }

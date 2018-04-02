@@ -13,7 +13,7 @@ public class HelperToast {
     private static final String TAG = HelperToast.class.getSimpleName();
     private Context context;
 
-    public HelperToast(Context context) {
+    HelperToast(Context context) {
         this.context = context;
     }
 

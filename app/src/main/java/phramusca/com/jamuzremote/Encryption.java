@@ -1,8 +1,5 @@
 package phramusca.com.jamuzremote;
 
-/**
- * Created by raph on 06/11/16.
- */
 import android.util.Base64;
 
 import java.io.UnsupportedEncodingException;

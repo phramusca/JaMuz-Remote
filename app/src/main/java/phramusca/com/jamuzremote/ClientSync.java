@@ -57,7 +57,7 @@ public class ClientSync extends Client {
         }
     }
 
-	public ClientSync(ClientInfo clientInfo, ICallBackSync callback){
+	ClientSync(ClientInfo clientInfo, ICallBackSync callback){
 		super(clientInfo);
 		this.callback = callback;
 		super.setCallback(new CallBackReception());
