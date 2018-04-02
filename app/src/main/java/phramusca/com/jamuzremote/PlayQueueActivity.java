@@ -20,7 +20,10 @@ public class PlayQueueActivity extends AppCompatActivity implements TrackAdapter
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_queue);
         Intent intent = getIntent();
+
+        @SuppressWarnings("unchecked")
         final ArrayList<Track> queue = (ArrayList<Track>) intent.getSerializableExtra("queueArrayList");
+
         if(queue!=null) {
             //Display tracks
             ListView listView = (ListView) findViewById(R.id.list_queue);

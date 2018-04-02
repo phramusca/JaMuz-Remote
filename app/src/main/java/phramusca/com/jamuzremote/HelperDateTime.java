@@ -10,9 +10,7 @@ import java.util.TimeZone;
  * @author phramusca ( https://github.com/phramusca/JaMuz/ )
  */
 public class HelperDateTime {
-    /**
-     * Supported dateTime formats
-     */
+
     public enum DateTimeFormat {
         /**
          * SQL dateTime format ("yyyy-MM-dd HH:mm:ss")
@@ -28,13 +26,12 @@ public class HelperDateTime {
         FILE("yyyy-MM-dd--HH-mm-ss") ;
 
         private final String pattern;
-        private DateTimeFormat(String display) {
+        DateTimeFormat(String display) {
             this.pattern = display;
         }
 
         /**
-         *
-         * @return
+         * @return pattern
          */
         public String getPattern() {
             return pattern;
@@ -42,13 +39,12 @@ public class HelperDateTime {
     }
 
     /**
-     * Format UTC dateTime to custom format
-     * @param date
-     * @param format
-     * @param toLocal
-     * @return
+     * @param date given date
+     * @param format custom format
+     * @param toLocal convert to local ?
+     * @return UTC dateTime to custom format
      */
-    public static String formatUTC(Date date, String format, boolean toLocal) {
+    private static String formatUTC(Date date, String format, boolean toLocal) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
         if(!toLocal) {
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -57,56 +53,50 @@ public class HelperDateTime {
     }
 
     /**
-     * Format UTC dateTime to desired format
-     * @param date
-     * @param format
-     * @param toLocal
-     * @return
+     * @param date UTC dateTime
+     * @param format given format
+     * @param toLocal convert to local ?
+     * @return  to desired format
      */
-    public static String formatUTC(Date date, DateTimeFormat format, boolean toLocal) {
+    private static String formatUTC(Date date, DateTimeFormat format, boolean toLocal) {
         return formatUTC(date, format.getPattern(), toLocal);
     }
 
     /**
-     * Format UTC dateTime to UTC dateTime in SQL format
-     * @param date
-     * @return
+     * @param date  UTC dateTime
+     * @return  to SQL format
      */
     public static String formatUTCtoSqlUTC(Date date) {
         return formatUTC(date, DateTimeFormat.SQL, false);
     }
 
     /**
-     * Format UTC dateTime to local dateTime in SQL format
-     * @param date
-     * @return
+     * @param date UTC dateTime
+     * @return to local dateTime in SQL format
      */
     public static String formatUTCtoSqlLocal(Date date) {
         return formatUTC(date, DateTimeFormat.SQL, true);
     }
 
     /**
-     * Get current local dateTime in desired format
-     * @param format
-     * @return
+     * @param format desired format
+     * @return current local dateTime
      */
     public static String getCurrentLocal(DateTimeFormat format) {
         return formatUTC(new Date(), format, true);
     }
 
     /**
-     * Get current UTC dateTime in SQL format.
-     * @return
+     * @return current UTC dateTime in SQL format.
      */
     public static String getCurrentUtcSql() {
         return formatUTC(new Date(), DateTimeFormat.SQL, false);
     }
 
     /**
-     * Parse date given as string according to desired format
-     * @param date
-     * @param format
-     * @return
+     * @param date UTC dateTime as string
+     * @param format above UTC date as string format
+     * @return UTC dateTime
      */
     private static Date parseUTC(String date, DateTimeFormat format) {
         if(date.equals("")) {
@@ -123,9 +113,8 @@ public class HelperDateTime {
     }
 
     /**
-     * Parse SQL formatted UTC dateTime
-     * @param date
-     * @return
+     * @param date SQL formatted UTC dateTime as string
+     * @return UTC dateTime
      */
     public static Date parseSqlUtc(String date) {
         return parseUTC(date, DateTimeFormat.SQL);

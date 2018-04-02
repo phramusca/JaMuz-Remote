@@ -23,7 +23,7 @@ package phramusca.com.jamuzremote;
  */
 public abstract class ProcessAbstract extends Thread {
 
-    public ProcessAbstract(String name) {
+    ProcessAbstract(String name) {
         super(name);
     }
     
@@ -46,10 +46,9 @@ public abstract class ProcessAbstract extends Thread {
 	
 	/**
 	 * Checks if user asked abortion
-	 * If so throws an InterruptedException to be caught in process main function
-	 * @throws InterruptedException
+	 * @throws InterruptedException to be caught in process main function
 	 */
-	public synchronized void checkAbort() throws InterruptedException {
+	synchronized void checkAbort() throws InterruptedException {
 		if( this.abort ) {
 			throw new InterruptedException();
 		} 

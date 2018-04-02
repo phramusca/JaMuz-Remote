@@ -32,17 +32,8 @@ public class Track implements Serializable {
     private ArrayList<String> tags = null;
     private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
     public String source="";
-    private static final String TAG = Track.class.getSimpleName();
-
     private boolean isHistory=false;
-
-    public boolean isHistory() {
-        return isHistory;
-    }
-
-    public void setHistory(boolean history) {
-        isHistory = history;
-    }
+    private static final String TAG = Track.class.getSimpleName();
 
     //TODO: Store replaygain, no to read too often AND as a workaround for flac
     // replaygain that cannot be read
@@ -82,6 +73,14 @@ public class Track implements Serializable {
         return  title + "<BR/>" +
                 artist + "<BR/>"+
                 album + "<BR/>";
+    }
+
+    public boolean isHistory() {
+        return isHistory;
+    }
+
+    public void setHistory(boolean history) {
+        isHistory = history;
     }
 
     public int getId() {

@@ -25,7 +25,7 @@ public class Playlist implements Comparable {
     private String album;
     private Order order=Order.PLAYCOUNTER_LASTPLAYED;
 
-    public Playlist(String name, boolean isLocal) {
+    Playlist(String name, boolean isLocal) {
         this.name = name;
         this.isLocal = isLocal;
     }
@@ -82,20 +82,21 @@ public class Playlist implements Comparable {
         return in+"\n"+out;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private String getString(ArrayList<String> strings, int max) {
-        String out = "";
+        StringBuilder out = new StringBuilder();
         if(strings.size()>0) {
             for(int i=0; i<max; i++) {
                 if(strings.size()>i) {
-                    out+=strings.get(i)+", ";
+                    out.append(strings.get(i)).append(", ");
                 }
             }
-            out = out.substring(0, out.length()-2);
+            out = new StringBuilder(out.substring(0, out.length()-2));
             if(strings.size()>max) {
-                out+=" (+"+(strings.size()-max)+")";
+                out.append(" (+").append(strings.size()-max).append(")");
             }
         }
-        return out;
+        return out.toString();
     }
 
     public TriStateButton.STATE getUnTaggedState() {
@@ -229,27 +230,26 @@ public class Playlist implements Comparable {
     }
 
     private String getInClause(ArrayList<String> include) {
-        String in="";
+        StringBuilder in = new StringBuilder();
         for(String entry : include) {
-            in+="\""+entry+"\",";
+            in.append("\"").append(entry).append("\",");
         }
-        in = in.substring(0, in.length()-1);
-        return in;
+        return in.toString().substring(0, in.length()-1);
     }
 
     private String getInClause(ArrayList<String> include, int length) {
-        String in;
+        StringBuilder in = new StringBuilder();
         if(include.size()>0) {
-            in = " sum(case when tag.value IN (";
+            in.append(" sum(case when tag.value IN (");
             for(String entry : include) {
-                in+="\""+entry+"\",";
+                in.append("\"").append(entry).append("\",");
             }
-            in = in.substring(0, in.length()-1);
-            in += " ) then 1 else 0 end) = "+length;
+            in = new StringBuilder(in.toString().substring(0, in.length()-1));
+            in.append(" ) then 1 else 0 end) = ").append(length);
         }  else {
-            in = " 1 ";
+            in.append(" 1 ");
         }
-        return in;
+        return in.toString();
     }
 
     public String getName() {

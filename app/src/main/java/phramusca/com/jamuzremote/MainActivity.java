@@ -2162,7 +2162,7 @@ public class MainActivity extends AppCompatActivity {
         if( art != null ){
             displayImage( BitmapFactory.decodeByteArray(art, 0, art.length));
         } else {
-            displayImage(BitMapHelper.getEmptyCover());
+            displayImage(HelperBitmap.getEmptyCover());
         }
     }
 

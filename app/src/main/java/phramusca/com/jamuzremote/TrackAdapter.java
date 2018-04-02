@@ -68,7 +68,7 @@ public class TrackAdapter extends BaseAdapter {
         //TODO: Add a limit (FIFO) to those repos not to overload android memory
         Bitmap bitmap = tracks.get(position).getTumb(false);
         if (bitmap == null) {
-            bitmap = BitMapHelper.getEmptyThumb();
+            bitmap = HelperBitmap.getEmptyThumb();
         }
         ImageView imageViewCover = layoutItem.findViewById(R.id.imageView);
         imageViewCover.setImageBitmap(bitmap);

@@ -75,12 +75,12 @@ public class ReplayGain {
 		private float albumGain=Float.NaN;
 		private float trackGain=Float.NaN;
 		
-		public float trackPeak; //Not used
-		public float albumPeak; //Not used
-		public String MP3GAIN_MINMAX; //mp3gain only, Not used
-		public String MP3GAIN_ALBUM_MINMAX; //mp3gain only, Not used
-		public String MP3GAIN_UNDO; //mp3gain only, Not used
-		public String REPLAYGAIN_REFERENCE_LOUDNESS; //Flac only, Not used
+		float trackPeak; //Not used
+		float albumPeak; //Not used
+		String MP3GAIN_MINMAX; //mp3gain only, Not used
+		String MP3GAIN_ALBUM_MINMAX; //mp3gain only, Not used
+		String MP3GAIN_UNDO; //mp3gain only, Not used
+		String REPLAYGAIN_REFERENCE_LOUDNESS; //Flac only, Not used
 
 		@Override
 		public String toString() {

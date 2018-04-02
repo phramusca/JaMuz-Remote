@@ -9,7 +9,7 @@ import android.graphics.Paint;
  * Created by raph on 04/03/18.
  */
 
-class BitMapHelper {
+class HelperBitmap {
 
     public static Bitmap getEmptyCover() {
         return textAsBitmap("No cover", 500, 35, 180, 250);
@@ -19,7 +19,7 @@ class BitMapHelper {
         return textAsBitmap("No cover", 120, 25, 10, 70);
     }
 
-    public static Bitmap textAsBitmap(String text, int size, float textSize, int posX, int posY) {
+    private static Bitmap textAsBitmap(String text, int size, float textSize, int posX, int posY) {
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setTextSize(textSize);
         paint.setColor(Color.rgb(192, 192, 192));

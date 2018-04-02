@@ -29,6 +29,19 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TITLE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.TABLE_TRACKS;
 
+
+//FIXME:  !!!!!!!! Make some merge/sync testing !!!!!!!!
+//=> Can simply be due to the manual update to "BO", missing some xxxModifDate changes
+//=> But something got wrong in the previous sync/merge processes
+// Affected are: playcounter (understood, to be fixed on remote), rating genre and tags (why ?)
+// when or after a sync + merge
+
+//=> seems to occur only when files are updated on some side between sync and merge
+//=> seems that merged values are not displayed, can this be a cause ? or a consequence ?
+
+//FIXME !!!!!!!!!! Some tags are empty these days on some tracks
+// => To be investigated
+
 /**
  * Created by raph on 12/06/17.
  */

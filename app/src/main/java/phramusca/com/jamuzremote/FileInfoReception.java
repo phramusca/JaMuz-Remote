@@ -87,11 +87,8 @@ public class FileInfoReception {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         FileInfoReception that = (FileInfoReception) o;
-
         return relativeFullPath != null ? relativeFullPath.equals(that.relativeFullPath) : that.relativeFullPath == null;
-
     }
 
     @Override
