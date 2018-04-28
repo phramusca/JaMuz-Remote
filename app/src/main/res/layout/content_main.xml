@@ -377,21 +377,53 @@
                 android:paddingTop="5dp"/>
         </LinearLayout>
 
-        <RadioGroup android:id="@+id/panel_order_playlist_layout"
-            android:layout_width="fill_parent"
+        <LinearLayout
+            android:id="@+id/panel_order_playlist_layout"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <RadioButton android:id="@+id/order_random"
-                android:layout_width="wrap_content"
+            android:background="@color/colorPrimary">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Random"
-                android:onClick="onRadioButtonClicked"/>
-            <RadioButton android:id="@+id/order_playCounter_lastPlayed"
-                android:layout_width="wrap_content"
+                android:background="@color/colorPrimary">
+
+                <TextView
+                    android:textColor="@color/textColor"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Exclude the last "/>
+
+                <Spinner android:id="@+id/spinner_playlist_limit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                </Spinner>
+
+            </LinearLayout>
+            <TextView
+                android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
-                android:text="Play counter, Last played"
-                android:onClick="onRadioButtonClicked"/>
-        </RadioGroup>
+                android:layout_width="wrap_content"
+                android:text="Order by: "/>
+            <RadioGroup
+                android:id="@+id/playlist_order_radio"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <RadioButton android:id="@+id/order_random"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Random"
+                    android:onClick="onRadioButtonClicked"/>
+                <RadioButton android:id="@+id/order_playCounter_lastPlayed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Play counter, Last played"
+                    android:onClick="onRadioButtonClicked"/>
+            </RadioGroup>
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/panel_tags_playlist_layout"

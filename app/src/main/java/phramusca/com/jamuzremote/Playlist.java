@@ -24,6 +24,7 @@ public class Playlist implements Comparable {
     private String artist;
     private String album;
     private Order order=Order.PLAYCOUNTER_LASTPLAYED;
+    private String limitation="0";
 
     Playlist(String name, boolean isLocal) {
         this.name = name;
@@ -104,6 +105,14 @@ public class Playlist implements Comparable {
 
     public Set<Map.Entry<String, TriStateButton.STATE>> getGenres() {
         return genres.entrySet();
+    }
+
+    public void setLimitation(String limitation) {
+        this.limitation = limitation;
+    }
+
+    public String getLimitation() {
+        return limitation;
     }
 
     private class Lists {
@@ -206,8 +215,11 @@ public class Playlist implements Comparable {
     private String getWhere() {
 
         //FILTER by RATING
-        String in = " WHERE lastPlayed < datetime(datetime('now'), '-6 hours')" + //FIXME: !! Make this an option
-                "AND rating "+getRatingString()+" ";
+        String in = " WHERE rating "+getRatingString()+" ";
+
+        if(limitation != null && !limitation.startsWith("0")) {
+            in += " AND lastPlayed < datetime(datetime('now'), '-" + limitation + "')";
+        }
 
         //FILTER by GENRE
         ArrayList<String> include = new ArrayList<>();
