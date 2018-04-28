@@ -648,7 +648,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), PlayQueueActivity.class);
                 ArrayList<Track> list = new ArrayList<Track>();
-                //FIXME: Implement pagination
+                //TODO: Implement pagination
                 // https://stackoverflow.com/questions/16661662/how-to-implement-pagination-in-android-listview
                 if(queueHistory!=null) {
                     list.addAll(queueHistory.size()> MAX_QUEUE ?

@@ -352,7 +352,7 @@ public class ServiceSync extends ServiceBase {
         List<FileInfoReception> inDbFiles = RepoSync.getInDb();
         if(inDbFiles.size()>0) {
             if(inDbFiles.size()==1) {
-                notifyBar("Ack+", localFiles.get(0));
+                notifyBar("Ack+", inDbFiles.get(0));
             } else {
                 notifyBar("Sending ack to server and waiting ack from server ... ");
             }
@@ -396,8 +396,6 @@ public class ServiceSync extends ServiceBase {
                         helperNotification.notifyBar(notificationSync,"Getting list of files for stats merge.");
                     }
                 });
-                //FIXME: Include ratingmodifDate, tagsMod.. and genreModifDaate
-                //=> need to merge Track and FileInfoReception probably
                 List<Track> tracks = new Playlist("FilesToMerge", false).getTracks();
                 runOnUiThread(new Runnable() {
                     @Override

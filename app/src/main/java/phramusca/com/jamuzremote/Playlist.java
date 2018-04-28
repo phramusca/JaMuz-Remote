@@ -41,7 +41,7 @@ public class Playlist implements Comparable {
 
     public List<Track> getTracks(int limit, List<Integer> IDs) {
         if(HelperLibrary.musicLibrary!=null) {
-            return HelperLibrary.musicLibrary.getTracks(getWhere(IDs), getHaving(), order.display, limit);
+            return HelperLibrary.musicLibrary.getTracks(getWhere(IDs), getHaving(), order.value, limit);
         }
         return new ArrayList<>();
     }
@@ -69,7 +69,7 @@ public class Playlist implements Comparable {
 
     public String getSummary() {
         String in="";
-        in +=getRatingString()+" | ";
+        in +=getRatingString();
         Lists tagsLists = new Lists();
         Lists genresLists = new Lists(genres);
 
@@ -88,7 +88,7 @@ public class Playlist implements Comparable {
                 break;
         }
 
-        in+=nullStatus;
+        in+=" | "+nullStatus;
         int max=20;
         if (tagsLists.isIncluded() || genresLists.isIncluded()) {
             ArrayList<String> included = new ArrayList<>();
@@ -107,6 +107,9 @@ public class Playlist implements Comparable {
             excluded.addAll(genresLists.getExcluded());
             in+=" | Excl.: "+getString(excluded, max);
         }
+
+        in+=" | "+order.toString();
+        in+=" | "+limitation;
 
         return in;
     }
@@ -344,7 +347,7 @@ public class Playlist implements Comparable {
 
     public void getNbFiles() {
         if(HelperLibrary.musicLibrary!=null) {
-            nbFiles=HelperLibrary.musicLibrary.getNb(getWhere(new ArrayList<Integer>()), getHaving());
+            nbFiles=HelperLibrary.musicLibrary.getNb(getWhere(new ArrayList<>()), getHaving());
         }
     }
 
@@ -407,11 +410,13 @@ public class Playlist implements Comparable {
     }
 
     public enum Order {
-        RANDOM("ORDER BY RANDOM()"), //NOI18N
-        PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed"); //NOI18N
+        RANDOM("ORDER BY RANDOM()", "Random"), //NOI18N
+        PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed", "Least played first"); //NOI18N
 
+        private final String value;
         private final String display;
-        Order(String display) {
+        Order(String value, String display) {
+            this.value = value;
             this.display = display;
         }
         @Override
