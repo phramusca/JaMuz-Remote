@@ -31,9 +31,17 @@ public class Playlist implements Comparable {
         this.isLocal = isLocal;
     }
 
+    public List<Track> getTracks() {
+        return getTracks(-1);
+    }
+
     public List<Track> getTracks(int limit) {
+        return getTracks(limit, new ArrayList<>());
+    }
+
+    public List<Track> getTracks(int limit, List<Integer> IDs) {
         if(HelperLibrary.musicLibrary!=null) {
-            return HelperLibrary.musicLibrary.getTracks(getWhere(), getHaving(), order.display, limit);
+            return HelperLibrary.musicLibrary.getTracks(getWhere(IDs), getHaving(), order.display, limit);
         }
         return new ArrayList<>();
     }
@@ -42,7 +50,7 @@ public class Playlist implements Comparable {
         return tags.entrySet();
     }
 
-    public String getRatingString() {
+    private String getRatingString() {
         String in="";
         switch (ratingOperator) {
             case GREATERTHAN:
@@ -56,7 +64,7 @@ public class Playlist implements Comparable {
                 break;
         }
         in +=rating;
-        return in.toString();
+        return in;
     }
 
     public String getSummary() {
@@ -119,10 +127,10 @@ public class Playlist implements Comparable {
         ArrayList<String> include = new ArrayList<>();
         ArrayList<String> exclude = new ArrayList<>();
 
-        public Lists () {
+        Lists() {
         }
 
-        public Lists (Map<String, TriStateButton.STATE> stateMap) {
+        Lists(Map<String, TriStateButton.STATE> stateMap) {
             if(stateMap.size()>0) {
                 for (Map.Entry<String, TriStateButton.STATE> entry : stateMap.entrySet()) {
                     switch (entry.getValue()) {
@@ -135,19 +143,19 @@ public class Playlist implements Comparable {
             }
         }
 
-        public ArrayList<String> getIncluded() {
+        ArrayList<String> getIncluded() {
             return include;
         }
 
-        public ArrayList<String> getExcluded() {
+        ArrayList<String> getExcluded() {
             return exclude;
         }
 
-        public boolean isIncluded() {
+        boolean isIncluded() {
             return include.size()>0;
         }
 
-        public boolean isExcluded() {
+        boolean isExcluded() {
             return exclude.size()>0;
         }
     }
@@ -212,16 +220,14 @@ public class Playlist implements Comparable {
         this.rating = rating;
     }
 
-    private String getWhere() {
+    private String getWhere(List<Integer> IDs) {
 
-        //FILTER by RATING
-        String in = " WHERE rating "+getRatingString()+" ";
+        String in = "WHERE rating "+getRatingString()+" ";
 
         if(limitation != null && !limitation.startsWith("0")) {
-            in += " AND lastPlayed < datetime(datetime('now'), '-" + limitation + "')";
+            in += "\n AND lastPlayed < datetime(datetime('now'), '-" + limitation + "')";
         }
 
-        //FILTER by GENRE
         ArrayList<String> include = new ArrayList<>();
         ArrayList<String> exclude = new ArrayList<>();
         for (Map.Entry<String, TriStateButton.STATE> entry : genres.entrySet()) {
@@ -248,10 +254,22 @@ public class Playlist implements Comparable {
             in += "\n AND album LIKE \"%"+album+"%\" ";
         }
 
+        in+=getCSVlist(IDs);
+
         return in;
     }
 
-
+    private static String getCSVlist(List<Integer> IDs) {
+        StringBuilder builder = new StringBuilder();
+        if(IDs.size()>0) {
+            builder.append("\n AND tracks.ID NOT IN (");
+            for (int integer : IDs) {
+                builder.append(integer).append(",");
+            }
+            builder.deleteCharAt(builder.length() - 1).append(") ");
+        }
+        return builder.toString();
+    }
 
     private String getHaving() {
         //FILTER by TAGS
@@ -326,7 +344,7 @@ public class Playlist implements Comparable {
 
     public void getNbFiles() {
         if(HelperLibrary.musicLibrary!=null) {
-            nbFiles=HelperLibrary.musicLibrary.getNb(getWhere(), getHaving());
+            nbFiles=HelperLibrary.musicLibrary.getNb(getWhere(new ArrayList<Integer>()), getHaving());
         }
     }
 

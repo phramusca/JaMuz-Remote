@@ -398,7 +398,7 @@ public class ServiceSync extends ServiceBase {
                 });
                 //FIXME: Include ratingmodifDate, tagsMod.. and genreModifDaate
                 //=> need to merge Track and FileInfoReception probably
-                List<Track> tracks = new Playlist("FilesToMerge", false).getTracks(-1);
+                List<Track> tracks = new Playlist("FilesToMerge", false).getTracks();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
