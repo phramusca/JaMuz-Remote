@@ -185,7 +185,7 @@ public class ServiceSync extends ServiceBase {
                     case "mergeListDbSelected":
                         helperNotification.notifyBar(notificationSync, "Updating database with merge changes ... ");
                         JSONArray filesToUpdate = (JSONArray) jObject.get("files");
-                        //FIXME: Display merge progress
+                        //TODO: Display merge progress
                         for(int i=0; i<filesToUpdate.length(); i++) {
                             FileInfoReception fileReceived = new FileInfoReception((JSONObject) filesToUpdate.get(i));
                             HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath,
@@ -347,10 +347,11 @@ public class ServiceSync extends ServiceBase {
                 }
             }
         }
-        //Second, ack reception of the files IN_DB (server will insert in deviceFile table) and ack back
+        //Second, ack reception of the files IN_DB
+        // (server will insert in deviceFile and statsource tables and ack back)
         List<FileInfoReception> inDbFiles = RepoSync.getInDb();
         if(inDbFiles.size()>0) {
-            if(localFiles.size()==1) {
+            if(inDbFiles.size()==1) {
                 notifyBar("Ack+", localFiles.get(0));
             } else {
                 notifyBar("Sending ack to server and waiting ack from server ... ");
@@ -397,7 +398,7 @@ public class ServiceSync extends ServiceBase {
                 });
                 //FIXME: Include ratingmodifDate, tagsMod.. and genreModifDaate
                 //=> need to merge Track and FileInfoReception probably
-                List<Track> tracks = new Playlist("FilesToMerge", false).getTracks();
+                List<Track> tracks = new Playlist("FilesToMerge", false).getTracks(-1);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

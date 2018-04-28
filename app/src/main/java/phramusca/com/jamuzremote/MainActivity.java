@@ -284,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
                         clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
                     } else {
                         displayedTrack.update();
-                        refreshSpinner(true);
+                        refreshQueueAndSpinner(true);
                     }
                     ratingBar.setEnabled(true);
                 }
@@ -300,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
                     ratingBarPlaylist.setEnabled(false);
                     if(localSelectedPlaylist!=null) {
                         localSelectedPlaylist.setRating(Math.round(rating));
-                        clearQueueAndRefreshSpinner();
+                        refreshQueueAndSpinner();
                         textViewRating.setText(localSelectedPlaylist.getRatingString());
                     }
                     ratingBarPlaylist.setEnabled(true);
@@ -315,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
                 ratingBarPlaylist.setRating(0F);
                 if(localSelectedPlaylist!=null) {
                     localSelectedPlaylist.setRating(0);
-                    clearQueueAndRefreshSpinner();
+                    refreshQueueAndSpinner();
                     textViewRating.setText(localSelectedPlaylist.getRatingString());
                 }
             }
@@ -327,7 +327,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(localSelectedPlaylist!=null) {
                     buttonRatingOperator.setText(localSelectedPlaylist.setRatingOperator());
-                    clearQueueAndRefreshSpinner();
+                    refreshQueueAndSpinner();
                     textViewRating.setText(localSelectedPlaylist.getRatingString());
                 }
             }
@@ -876,7 +876,7 @@ public class MainActivity extends AppCompatActivity {
                 String buttonText = button.getText().toString();
                 if(!isRemoteConnected()) {
                     displayedTrack.toggleTag(buttonText);
-                    refreshSpinner(true);
+                    refreshQueueAndSpinner(true);
                 } else {
                     //displayedTrack.toggleTag(buttonText); //TODO: Manage this too
                     //clientRemote.send("setTag".concat(String.valueOf(Math.round(rating)))); //TODO
@@ -909,7 +909,7 @@ public class MainActivity extends AppCompatActivity {
                 if(localSelectedPlaylist!=null) {
                     String buttonText = button.getText().toString();
                     localSelectedPlaylist.toggleTag(buttonText, state);
-                    clearQueueAndRefreshSpinner();
+                    refreshQueueAndSpinner();
                     textViewTag.setText(localSelectedPlaylist.getTagsString());
                 }
             }
@@ -940,7 +940,7 @@ public class MainActivity extends AppCompatActivity {
                 String buttonText = button.getText().toString();
                 if(localSelectedPlaylist!=null) {
                     localSelectedPlaylist.toggleGenre(buttonText, state);
-                    clearQueueAndRefreshSpinner();
+                    refreshQueueAndSpinner();
                     textViewGenre.setText(localSelectedPlaylist.getGenresString());
                 }
             }
@@ -950,9 +950,14 @@ public class MainActivity extends AppCompatActivity {
         layoutGenrePlaylist.addView(button, lp);
     }
 
-    private void clearQueueAndRefreshSpinner() {
+    private void refreshQueueAndSpinner() {
+        refreshQueueAndSpinner(false);
+    }
+
+    private void refreshQueueAndSpinner(final boolean refreshAll) {
         queue.clear();
-        refreshSpinner(false);
+        refreshSpinner(refreshAll);
+        fillQueue();
     }
 
     private void refreshSpinner(final boolean refreshAll) {
@@ -1013,10 +1018,10 @@ public class MainActivity extends AppCompatActivity {
             displayPlaylist(playlist);
             localSelectedPlaylist = playlist;
             if(playNext) {
-                queue = playlist.getTracks();
+                queue = playlist.getTracks(10);
                 playNext();
             } else {
-                clearQueueAndRefreshSpinner();
+                refreshQueueAndSpinner();
             }
         }
     }
@@ -1047,6 +1052,7 @@ public class MainActivity extends AppCompatActivity {
                 String genre = (String) parent.getItemAtPosition(pos);
                 if(!isRemoteConnected()) {
                     displayedTrack.updateGenre(genre);
+                    refreshQueueAndSpinner(true);
                 }
             }
             spinnerGenreSend=true;
@@ -1412,6 +1418,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void fillQueue() {
+        //Fill the queue
+        if(queue.size()<5 && localSelectedPlaylist!=null) {
+            List<Track> addToQueue = localSelectedPlaylist.getTracks(10);
+            queue.addAll(addToQueue);
+        }
+    }
+
     private void playNext() {
         if(queueHistoryIndex>=0 && (queueHistoryIndex+1)<queueHistory.size()) {
             queueHistoryIndex++;
@@ -1422,11 +1436,7 @@ public class MainActivity extends AppCompatActivity {
             displayedTrack.setPlayCounter(displayedTrack.getPlayCounter()+1);
             displayedTrack.setLastPlayed(new Date());
             displayedTrack.update();
-            //Fill the queue
-            if(queue.size()<5 && localSelectedPlaylist!=null) {
-                List<Track> addToQueue = localSelectedPlaylist.getTracks();
-                queue.addAll(addToQueue);
-            }
+            fillQueue();
             //Play first track in queue
             if(queue.size()>0) {
                 displayedTrack = queue.get(0);
@@ -1703,7 +1713,7 @@ public class MainActivity extends AppCompatActivity {
     public void checkPermissionsThenScanLibrary() {
         if (!hasPermissions(this, PERMISSIONS)) {
 
-            //TODO: Translate
+            //TODO: JaMuz Translation system
             String msgStr = "<html><b>For a full JaMuz experience</b>, please consider " +
                     "allowing permissions that you will be asked for: <BR/><BR/>" +
                     "<i>- <u>Multimedia files</u></i> : Allows application to:<BR/> " +
@@ -1977,7 +1987,7 @@ public class MainActivity extends AppCompatActivity {
                     localSelectedPlaylist.setOrder(PLAYCOUNTER_LASTPLAYED);
                     break;
             }
-            clearQueueAndRefreshSpinner();
+            refreshQueueAndSpinner();
             /*textViewRating.setText(localSelectedPlaylist.getRatingString());*/
         }
         layoutOrderPlaylistLayout.setEnabled(true);
