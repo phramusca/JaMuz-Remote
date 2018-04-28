@@ -30,9 +30,9 @@ public class Playlist implements Comparable {
         this.isLocal = isLocal;
     }
 
-    public List<Track> getTracks() {
+    public List<Track> getTracks(int limit) {
         if(HelperLibrary.musicLibrary!=null) {
-            return HelperLibrary.musicLibrary.getTracks(getWhere(), getHaving(), order.display);
+            return HelperLibrary.musicLibrary.getTracks(getWhere(), getHaving(), order.display, limit);
         }
         return new ArrayList<>();
     }
@@ -145,7 +145,8 @@ public class Playlist implements Comparable {
     private String getWhere() {
 
         //FILTER by RATING
-        String in = " WHERE rating "+getRatingString()+" ";
+        String in = " WHERE lastPlayed < datetime(datetime('now'), '-6 hours')" + //FIXME: !! Make this an option
+                "AND rating "+getRatingString()+" ";
 
         //FILTER by GENRE
         ArrayList<String> include = new ArrayList<>();

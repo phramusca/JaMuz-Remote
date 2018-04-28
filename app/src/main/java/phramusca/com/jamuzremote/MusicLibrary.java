@@ -11,6 +11,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -82,7 +83,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    synchronized List<Track> getTracks(String where, String having, String order) {
+    synchronized List<Track> getTracks(String where, String having, String order, int limit) {
         List<Track> tracks = new ArrayList<>();
         try {
             String query = "SELECT GROUP_CONCAT(tag.value) AS tags, tracks.* \n" +
@@ -92,10 +93,14 @@ public class MusicLibrary {
                     " " + where + " \n" +
                     " GROUP BY tracks.ID \n" +
                     " " + having + " \n" +
-                    " " + order;
+                    " " + order + " \n" +
+                    " " + (limit>0?"LIMIT "+limit:"");
             Log.i(TAG, query);
             Cursor cursor = db.rawQuery(query, new String[] { });
             tracks = getTracks(cursor);
+            if(limit>0) {
+                Collections.shuffle(tracks);
+            }
             Log.i(TAG, "getTracks("+where+","+having+","+order+"): "+tracks.size()+"//"+cursor.getCount());
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "getTracks("+where+","+having+","+order+")", ex);
