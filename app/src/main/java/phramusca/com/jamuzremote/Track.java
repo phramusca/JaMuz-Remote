@@ -260,6 +260,7 @@ public class Track implements Serializable {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("path", path.substring(getAppDataPath.getAbsolutePath().length()+1));
+            //FIXME !!!!!!!!!!!! idFileRemote
             jsonObject.put("idFileRemote", id);
             jsonObject.put("rating", rating);
             jsonObject.put("addedDate", getFormattedAddedDate());
