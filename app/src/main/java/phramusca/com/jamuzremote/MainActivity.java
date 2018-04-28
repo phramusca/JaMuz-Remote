@@ -126,9 +126,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewFileInfo;
     private EditText editTextConnectInfo;
     private TextView textViewPath;
-    private TextView textViewRating;
-    private TextView textViewTag;
-    private TextView textViewGenre;
+    private TextView textViewPlaylist;
     private Button buttonConfigConnection;
     private Button buttonRemote;
     private Button buttonSync;
@@ -176,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout layoutAttributes;
     private LinearLayout layoutPlaylist;
     private LinearLayout layoutPlaylistEditBar;
-    private LinearLayout layoutPlaylistToolBar;
+    private GridLayout layoutPlaylistToolBar;
     private GridLayout layoutOptions;
     private SeekBar seekBarReplayGain;
 
@@ -205,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
         layoutAttributes = (LinearLayout) findViewById(R.id.panel_attributes);
         layoutPlaylist = (LinearLayout) findViewById(R.id.panel_playlist);
 
-        layoutPlaylistToolBar = (LinearLayout) findViewById(R.id.panel_playlist_toolbar);
+        layoutPlaylistToolBar = (GridLayout) findViewById(R.id.panel_playlist_toolbar);
         layoutPlaylistEditBar = (LinearLayout) findViewById(R.id.panel_playlist_editbar);
 
         layoutControls = (LinearLayout) findViewById(R.id.panel_controls);
@@ -227,9 +225,7 @@ public class MainActivity extends AppCompatActivity {
 
         textViewPath = (TextView) findViewById(R.id.textViewPath);
 
-        textViewRating = (TextView) findViewById(R.id.textViewRating);
-        textViewTag = (TextView) findViewById(R.id.textViewTag);
-        textViewGenre = (TextView) findViewById(R.id.textViewGenre);
+        textViewPlaylist = (TextView) findViewById(R.id.textViewPlaylist);
 
         buttonConfigConnection = (Button) findViewById(R.id.button_config_connection);
         buttonConfigConnection.setOnClickListener(new View.OnClickListener() {
@@ -301,7 +297,6 @@ public class MainActivity extends AppCompatActivity {
                     if(localSelectedPlaylist!=null) {
                         localSelectedPlaylist.setRating(Math.round(rating));
                         refreshQueueAndSpinner();
-                        textViewRating.setText(localSelectedPlaylist.getRatingString());
                     }
                     ratingBarPlaylist.setEnabled(true);
                 }
@@ -316,7 +311,6 @@ public class MainActivity extends AppCompatActivity {
                 if(localSelectedPlaylist!=null) {
                     localSelectedPlaylist.setRating(0);
                     refreshQueueAndSpinner();
-                    textViewRating.setText(localSelectedPlaylist.getRatingString());
                 }
             }
         });
@@ -328,7 +322,6 @@ public class MainActivity extends AppCompatActivity {
                 if(localSelectedPlaylist!=null) {
                     buttonRatingOperator.setText(localSelectedPlaylist.setRatingOperator());
                     refreshQueueAndSpinner();
-                    textViewRating.setText(localSelectedPlaylist.getRatingString());
                 }
             }
         });
@@ -910,7 +903,6 @@ public class MainActivity extends AppCompatActivity {
                     String buttonText = button.getText().toString();
                     localSelectedPlaylist.toggleTag(buttonText, state);
                     refreshQueueAndSpinner();
-                    textViewTag.setText(localSelectedPlaylist.getTagsString());
                 }
             }
         });
@@ -941,7 +933,7 @@ public class MainActivity extends AppCompatActivity {
                 if(localSelectedPlaylist!=null) {
                     localSelectedPlaylist.toggleGenre(buttonText, state);
                     refreshQueueAndSpinner();
-                    textViewGenre.setText(localSelectedPlaylist.getGenresString());
+
                 }
             }
         });
@@ -952,12 +944,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshQueueAndSpinner() {
         refreshQueueAndSpinner(false);
+        textViewPlaylist.setText(localSelectedPlaylist.getSummary());
     }
 
     private void refreshQueueAndSpinner(final boolean refreshAll) {
         queue.clear();
         refreshSpinner(refreshAll);
-        fillQueue();
+        fillQueue(10);
     }
 
     private void refreshSpinner(final boolean refreshAll) {
@@ -1418,10 +1411,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void fillQueue() {
-        //Fill the queue
-        if(queue.size()<5 && localSelectedPlaylist!=null) {
-            List<Track> addToQueue = localSelectedPlaylist.getTracks(10);
+    private void fillQueue(int number) {
+        if(queue.size()<number && localSelectedPlaylist!=null) {
+            List<Track> addToQueue = localSelectedPlaylist.getTracks(number-queue.size());
             queue.addAll(addToQueue);
         }
     }
@@ -1436,7 +1428,7 @@ public class MainActivity extends AppCompatActivity {
             displayedTrack.setPlayCounter(displayedTrack.getPlayCounter()+1);
             displayedTrack.setLastPlayed(new Date());
             displayedTrack.update();
-            fillQueue();
+            fillQueue(11); // So it remains 10 after
             //Play first track in queue
             if(queue.size()>0) {
                 displayedTrack = queue.get(0);
@@ -1968,9 +1960,7 @@ public class MainActivity extends AppCompatActivity {
                     layoutOrderPlaylistLayout.check(R.id.order_playCounter_lastPlayed);
                     break;
             }
-            textViewRating.setText(playlist.getRatingString());
-            textViewTag.setText(playlist.getTagsString());
-            textViewGenre.setText(playlist.getGenresString());
+            textViewPlaylist.setText(playlist.getSummary());
         }
     }
 
@@ -1988,7 +1978,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
             refreshQueueAndSpinner();
-            /*textViewRating.setText(localSelectedPlaylist.getRatingString());*/
         }
         layoutOrderPlaylistLayout.setEnabled(true);
     }

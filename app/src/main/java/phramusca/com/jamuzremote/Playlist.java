@@ -41,45 +41,106 @@ public class Playlist implements Comparable {
         return tags.entrySet();
     }
 
-    public String getTagsString() {
+    public String getRatingString() {
+        String in="";
+        switch (ratingOperator) {
+            case GREATERTHAN:
+                in += ">=";
+                break;
+            case IS:
+                in += "=";
+                break;
+            case LESSTHAN:
+                in += "<=";
+                break;
+        }
+        in +=rating;
+        return in.toString();
+    }
+
+    public String getSummary() {
+        String in="";
+        in +=getRatingString()+" | ";
+        Lists tagsLists = new Lists();
+        Lists genresLists = new Lists(genres);
+
         String nullStatus="";
         switch (unTaggedState) {
             case TRUE:
-                return "null\nonly";
+                nullStatus= "null only";
+                break;
             case FALSE:
-                nullStatus= "Not null"; break;
+                nullStatus= "Not null";
+                tagsLists = new Lists(tags);
+                break;
             case ANY:
-                nullStatus="null incl."; break;
+                nullStatus="null incl.";
+                tagsLists = new Lists(tags);
+                break;
         }
-        return getString(tags)+"\n"+nullStatus;
+
+        in+=nullStatus;
+        int max=20;
+        if (tagsLists.isIncluded() || genresLists.isIncluded()) {
+            ArrayList<String> included = new ArrayList<>();
+            if(tagsLists.isIncluded()){
+                included.addAll(tagsLists.getIncluded());
+            }
+            included.addAll(genresLists.getIncluded());
+            in+=" | Incl.: "+getString(included, max);
+        }
+
+        if (tagsLists.isExcluded() || genresLists.isExcluded()) {
+            ArrayList<String> excluded = new ArrayList<>();
+            if(tagsLists.isIncluded()){
+                excluded.addAll(tagsLists.getExcluded());
+            }
+            excluded.addAll(genresLists.getExcluded());
+            in+=" | Excl.: "+getString(excluded, max);
+        }
+
+        return in;
     }
 
     public Set<Map.Entry<String, TriStateButton.STATE>> getGenres() {
         return genres.entrySet();
     }
 
-    public String getGenresString() {
-        return getString(genres);
-    }
+    private class Lists {
+        ArrayList<String> include = new ArrayList<>();
+        ArrayList<String> exclude = new ArrayList<>();
 
-    private String getString(Map<String, TriStateButton.STATE> stateMap) {
-        String in = "In: ";
-        String out = "Out: ";
-        if(stateMap.size()>0) {
-            ArrayList<String> include = new ArrayList<>();
-            ArrayList<String> exclude = new ArrayList<>();
-            for (Map.Entry<String, TriStateButton.STATE> entry : stateMap.entrySet()) {
-                switch (entry.getValue()) {
-                    case FALSE:
-                        exclude.add(entry.getKey()); break;
-                    case TRUE:
-                        include.add(entry.getKey()); break;
+        public Lists () {
+        }
+
+        public Lists (Map<String, TriStateButton.STATE> stateMap) {
+            if(stateMap.size()>0) {
+                for (Map.Entry<String, TriStateButton.STATE> entry : stateMap.entrySet()) {
+                    switch (entry.getValue()) {
+                        case FALSE:
+                            exclude.add(entry.getKey()); break;
+                        case TRUE:
+                            include.add(entry.getKey()); break;
+                    }
                 }
             }
-            in+=getString(include, 1);
-            out+=getString(exclude, 1);
         }
-        return in+"\n"+out;
+
+        public ArrayList<String> getIncluded() {
+            return include;
+        }
+
+        public ArrayList<String> getExcluded() {
+            return exclude;
+        }
+
+        public boolean isIncluded() {
+            return include.size()>0;
+        }
+
+        public boolean isExcluded() {
+            return exclude.size()>0;
+        }
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -178,22 +239,7 @@ public class Playlist implements Comparable {
         return in;
     }
 
-    public String getRatingString() {
-        String in="";
-        switch (ratingOperator) {
-            case GREATERTHAN:
-                in += ">=";
-                break;
-            case IS:
-                in += "=";
-                break;
-            case LESSTHAN:
-                in += "<=";
-                break;
-        }
-        in +=rating;
-        return in;
-    }
+
 
     private String getHaving() {
         //FILTER by TAGS
