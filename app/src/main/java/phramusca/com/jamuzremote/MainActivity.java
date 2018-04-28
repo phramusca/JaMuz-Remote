@@ -84,8 +84,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
-import static phramusca.com.jamuzremote.Playlist.Order.*;
+import static phramusca.com.jamuzremote.Playlist.Order.PLAYCOUNTER_LASTPLAYED;
+import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
 
 //FIXME: Submit to f-droid.org
 //https://gitlab.com/fdroid/fdroiddata/blob/master/CONTRIBUTING.md
@@ -974,7 +976,7 @@ public class MainActivity extends AppCompatActivity {
     private void refreshQueueAndSpinner(final boolean refreshAll) {
         queue.clear();
         refreshSpinner(refreshAll);
-        fillQueue(10);
+        fillQueue(10, new ArrayList<Integer>());
     }
 
     private void refreshSpinner(final boolean refreshAll) {
@@ -1456,9 +1458,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void fillQueue(int number) {
+    private void fillQueue(int number, List<Integer> IDs) {
         if(queue.size()<number && localSelectedPlaylist!=null) {
-            List<Track> addToQueue = localSelectedPlaylist.getTracks(number-queue.size());
+            List<Track> addToQueue = localSelectedPlaylist.getTracks(number-queue.size(), IDs);
             queue.addAll(addToQueue);
         }
     }
@@ -1473,7 +1475,7 @@ public class MainActivity extends AppCompatActivity {
             displayedTrack.setPlayCounter(displayedTrack.getPlayCounter()+1);
             displayedTrack.setLastPlayed(new Date());
             displayedTrack.update();
-            fillQueue(11); // So it remains 10 after
+            fillQueue(11, queue.stream().map(Track::getId).collect(Collectors.toList())); // So it remains 10 after
             //Play first track in queue
             if(queue.size()>0) {
                 displayedTrack = queue.get(0);
