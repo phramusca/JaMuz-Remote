@@ -156,11 +156,15 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBarPosition;
     private Spinner spinnerPlaylist;
     private Spinner spinnerGenre;
+    private Spinner spinnerPlaylistLimit;
     private static boolean spinnerPlaylistSend=false;
     private static boolean spinnerGenreSend=false;
+    private static boolean spinnerLimitSend=false;
+    private ArrayAdapter<CharSequence> playListLimitArrayAdapter;
     private RatingBar ratingBar;
     private RatingBar ratingBarPlaylist;
-    private RadioGroup layoutOrderPlaylistLayout;
+    private LinearLayout layoutOrderPlaylistLayout;
+    private RadioGroup playListOrderRadio;
     private ImageView imageViewCover;
     private LinearLayout layoutTrackInfo;
     private LinearLayout layoutMain;
@@ -198,7 +202,10 @@ public class MainActivity extends AppCompatActivity {
         layoutGenrePlaylist = (FlexboxLayout) findViewById(R.id.panel_genre_playlist);
         layoutTagsPlaylistLayout = (LinearLayout) findViewById(R.id.panel_tags_playlist_layout);
         layoutRatingPlaylistLayout = (LinearLayout) findViewById(R.id.panel_rating_playlist_layout);
-        layoutOrderPlaylistLayout = (RadioGroup) findViewById(R.id.panel_order_playlist_layout);
+        layoutOrderPlaylistLayout = (LinearLayout) findViewById(R.id.panel_order_playlist_layout);
+
+        playListOrderRadio = (RadioGroup) findViewById(R.id.playlist_order_radio);
+
         layoutGenrePlaylistLayout = (LinearLayout) findViewById(R.id.panel_genre_playlist_layout);
         layoutAttributes = (LinearLayout) findViewById(R.id.panel_attributes);
         layoutPlaylist = (LinearLayout) findViewById(R.id.panel_playlist);
@@ -325,6 +332,23 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        spinnerPlaylistLimit = (Spinner) findViewById(R.id.spinner_playlist_limit);
+
+        playListLimitArrayAdapter = ArrayAdapter.createFromResource(this,
+                R.array.limitations, android.R.layout.simple_spinner_item);
+        playListLimitArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPlaylistLimit.setAdapter(playListLimitArrayAdapter);
+
+        spinnerPlaylistLimit.setOnItemSelectedListener(spinnerLimitListener);
+        spinnerPlaylistLimit.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                dimOn();
+                return false;
+            }
+        });
+
 
         seekBarPosition = (SeekBar) findViewById(R.id.seekBar);
         seekBarPosition.setEnabled(false);
@@ -1049,6 +1073,27 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             spinnerGenreSend=true;
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> adapterView) {
+            dimOn();
+        }
+    };
+
+    Spinner.OnItemSelectedListener spinnerLimitListener = new Spinner.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view,
+                                   int pos, long id) {
+            if(spinnerLimitSend) {
+                dimOn();
+                String value = (String) parent.getItemAtPosition(pos);
+                if(!isRemoteConnected() && localSelectedPlaylist!=null) {
+                    localSelectedPlaylist.setLimitation(value);
+                    refreshQueueAndSpinner();
+                }
+            }
+            spinnerLimitSend=true;
         }
 
         @Override
@@ -1954,12 +1999,17 @@ public class MainActivity extends AppCompatActivity {
             ratingBarPlaylist.setRating(playlist.getRating());
             switch(playlist.getOrder()) {
                 case RANDOM:
-                    layoutOrderPlaylistLayout.check(R.id.order_random);
+                    playListOrderRadio.check(R.id.order_random);
                     break;
                 case PLAYCOUNTER_LASTPLAYED:
-                    layoutOrderPlaylistLayout.check(R.id.order_playCounter_lastPlayed);
+                    playListOrderRadio.check(R.id.order_playCounter_lastPlayed);
                     break;
             }
+
+            spinnerLimitSend =false;
+            spinnerPlaylistLimit.setAdapter(playListLimitArrayAdapter);
+            spinnerPlaylistLimit.setSelection(playListLimitArrayAdapter.getPosition(playlist.getLimitation()));
+
             textViewPlaylist.setText(playlist.getSummary());
         }
     }
