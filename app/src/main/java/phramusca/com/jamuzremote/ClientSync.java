@@ -191,7 +191,7 @@ public class ClientSync extends Client {
                         filesToMerge.put(track.toJSONObject(getAppDataPath));
                     }
                     obj.put("files", filesToMerge);
-                    watchTimeOut(tracks.size());
+                    watchTimeOut(4+tracks.size());
                     send("JSON_" + obj.toString());
                 } catch (JSONException e) {
                 }
@@ -220,7 +220,7 @@ public class ClientSync extends Client {
                         idFiles.put(file.idFile);
                     }
                     obj.put("idFiles", idFiles);
-                    watchTimeOut(files.size());
+                    watchTimeOut(4+files.size());
                     send("JSON_" + obj.toString());
                 } catch (JSONException e) {
                 }
@@ -255,7 +255,8 @@ public class ClientSync extends Client {
                     timerWatchTimeout = new CountDownTimer(timeout*1000, timeout *1000 / 10) {
                         @Override
                         public void onTick(long millisUntilFinished) {
-                            Log.i(TAG, "Seconds Remaining: " + (millisUntilFinished / 1000));
+                            long seconds = (millisUntilFinished / 1000);
+                            Log.i(TAG, "timerWatchTimeout Remaining: " + (seconds>0?seconds+"s":millisUntilFinished+"ms"));
                         }
 
                         @Override
