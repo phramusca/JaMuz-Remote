@@ -175,11 +175,11 @@ public final class RepoSync {
     }
 
     public synchronized static ArrayList<FileInfoReception> getInDb() {
-        return new ArrayList<>(files.column(FileInfoReception.Status.IN_DB).values());
+        return files==null?new ArrayList<>():new ArrayList<>(files.column(FileInfoReception.Status.IN_DB).values());
     }
 
     public synchronized static List<FileInfoReception> getLocal() {
-        return new ArrayList<>(files.column(FileInfoReception.Status.LOCAL).values());
+        return files==null?new ArrayList<>():new ArrayList<>(files.column(FileInfoReception.Status.LOCAL).values());
     }
 
     /**
