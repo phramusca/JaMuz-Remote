@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.CountDownTimer;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -27,16 +26,6 @@ public class ServiceSync extends ServiceBase {
     public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE";
 
     private ClientSync clientSync;
-    private static final Object timerLock = new Object();
-    private CountDownTimer timerWatchTimeout= new CountDownTimer(0, 0) {
-        @Override
-        public void onTick(long l) {
-        }
-
-        @Override
-        public void onFinish() {
-        }
-    };
     private Benchmark bench;
     private Notification notificationSync;
     private Notification notificationSyncScan;
@@ -63,7 +52,7 @@ public class ServiceSync extends ServiceBase {
                 RepoSync.read(getAppDataPath);
                 bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                 helperNotification.notifyBar(notificationSync, "Connecting ... ");
-                clientSync =  new ClientSync(clientInfo, new CallBackSync());
+                clientSync = new ClientSync(clientInfo, new CallBackSync());
                 clientSync.connect();
             }
         }.start();
@@ -86,54 +75,8 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    private void cancelWatchTimeOut() {
-        Log.i(TAG, "timerWatchTimeout.cancel()");
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                synchronized(timerLock) {
-                    if(timerWatchTimeout!=null) {
-                        timerWatchTimeout.cancel(); //Cancel previous if any
-                    }
-                }
-            }
-        });
-    }
-
-    private void watchTimeOut(final long size) {
-        cancelWatchTimeOut();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                synchronized(timerLock) {
-
-                    //TODO: Make sync timeouts configurable (use bench, to be based on size not nb)
-                    long minTimeout =  15 * 1000;  //Min timeout 15s (or 15s by 4Mo)
-                    long maxTimeout =  120 * 1000; //Max timeout 2 min
-
-                    long timeout = size<4000000?minTimeout:((size / 4000000) * minTimeout);
-                    timeout = timeout>maxTimeout?maxTimeout:timeout;
-                    timerWatchTimeout = new CountDownTimer(timeout, timeout/10) {
-                        @Override
-                        public void onTick(long millisUntilFinished) {
-                            Log.i(TAG, "Seconds Remaining: "+ (millisUntilFinished/1000));
-                        }
-
-                        @Override
-                        public void onFinish() {
-                            stopSync(true, "Timed out waiting on file.", -1);
-                        }
-                    };
-                    Log.i(TAG, "timerWatchTimeout.start()");
-                    timerWatchTimeout.start();
-                }
-            }
-        });
-    }
-
     private void stopSync(boolean reconnect, String msg, long millisInFuture) {
-        cancelWatchTimeOut();
-        if(clientSync!=null) {
+        if (clientSync != null) {
             clientSync.close(reconnect, msg, millisInFuture);
         }
     }
@@ -153,15 +96,14 @@ public class ServiceSync extends ServiceBase {
                         break;
                     case "insertDeviceFileSAck":
                         JSONArray jsonArray = (JSONArray) jObject.get("filesAcked");
-                        if(jsonArray.length()==1) {
-                            cancelWatchTimeOut();
+                        if (jsonArray.length() == 1) {
                             FileInfoReception fileReceived = new FileInfoReception((JSONObject) jsonArray.get(0));
                             notifyBar("Ack.", fileReceived);
                             RepoSync.receivedAck(fileReceived);
                             bench.get();
                         } else {
                             notifyBar("Received ack from server");
-                            for(int i=0; i<jsonArray.length(); i++) {
+                            for (int i = 0; i < jsonArray.length(); i++) {
                                 FileInfoReception fileReceived = new FileInfoReception((JSONObject) jsonArray.get(i));
                                 RepoSync.receivedAck(fileReceived);
                             }
@@ -173,11 +115,11 @@ public class ServiceSync extends ServiceBase {
                         helperNotification.notifyBar(notificationSync, "Received new list of files to get");
                         Map<Integer, FileInfoReception> newTracks = new HashMap<>();
                         JSONArray files = (JSONArray) jObject.get("files");
-                        for(int i=0; i<files.length(); i++) {
+                        for (int i = 0; i < files.length(); i++) {
                             FileInfoReception fileReceived = new FileInfoReception((JSONObject) files.get(i));
                             newTracks.put(fileReceived.idFile, fileReceived);
                         }
-                        helperNotification.notifyBar(notificationSync,"Checking if files are already on disk ... ");
+                        helperNotification.notifyBar(notificationSync, "Checking if files are already on disk ... ");
                         RepoSync.set(getAppDataPath, newTracks);
                         scanAndDeleteUnwantedInThread(getAppDataPath);
                         requestNextFile();
@@ -186,7 +128,7 @@ public class ServiceSync extends ServiceBase {
                         helperNotification.notifyBar(notificationSync, "Updating database with merge changes ... ");
                         JSONArray filesToUpdate = (JSONArray) jObject.get("files");
                         //TODO: Display merge progress
-                        for(int i=0; i<filesToUpdate.length(); i++) {
+                        for (int i = 0; i < filesToUpdate.length(); i++) {
                             FileInfoReception fileReceived = new FileInfoReception((JSONObject) filesToUpdate.get(i));
                             HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath,
                                     fileReceived.relativeFullPath).getAbsolutePath(), fileReceived, true);
@@ -201,7 +143,7 @@ public class ServiceSync extends ServiceBase {
                                 try {
                                     final JSONArray jsonTags = (JSONArray) jObject.get("tags");
                                     final List<String> newTags = new ArrayList<>();
-                                    for(int i = 0; i < jsonTags.length(); i++){
+                                    for (int i = 0; i < jsonTags.length(); i++) {
                                         newTags.add((String) jsonTags.get(i));
                                     }
                                     RepoTags.set(newTags);
@@ -220,7 +162,7 @@ public class ServiceSync extends ServiceBase {
                                 try {
                                     final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
                                     final List<String> newGenres = new ArrayList<>();
-                                    for(int i=0; i<jsonGenres.length(); i++) {
+                                    for (int i = 0; i < jsonGenres.length(); i++) {
                                         final String genre = (String) jsonGenres.get(i);
                                         newGenres.add(genre);
                                     }
@@ -262,16 +204,10 @@ public class ServiceSync extends ServiceBase {
 
         @Override
         public void disconnected(boolean reconnect, final String msg, final long millisInFuture) {
-            cancelWatchTimeOut();
-            if(!msg.equals("")) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        helperNotification.notifyBar(notificationSync, msg, millisInFuture);
-                    }
-                });
+            if (!msg.equals("")) {
+                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, msg, millisInFuture));
             }
-            if(!reconnect) {
+            if (!reconnect) {
                 sendMessage("enableSync");
                 stopSelf();
             }
@@ -351,11 +287,13 @@ public class ServiceSync extends ServiceBase {
         // (server will insert in deviceFile and statsource tables and ack back)
         List<FileInfoReception> inDbFiles = RepoSync.getInDb();
         if(inDbFiles.size()>0) {
-            if(inDbFiles.size()==1) {
+            if (inDbFiles.size() == 1) {
                 notifyBar("Ack+", inDbFiles.get(0));
             } else {
                 notifyBar("Sending ack to server and waiting ack from server ... ");
             }
+            sendMessage("refreshSpinner(true)");
+
             clientSync.ackFilesReception(inDbFiles);
         } else {
             //Finally request a NEW
@@ -371,17 +309,8 @@ public class ServiceSync extends ServiceBase {
                         if(((RepoSync.getRemainingSize()-1) % 10) == 0) {
                             RepoSync.save();
                         }
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyBar("Req.", fileInfoReception);
-                                watchTimeOut(fileInfoReception.size);
-                            }
-                        });
-                        synchronized (timerLock) {
-                            clientSync.requestFile(fileInfoReception.idFile);
-                        }
+                        runOnUiThread(() -> notifyBar("Req.", fileInfoReception));
+                        clientSync.requestFile(fileInfoReception);
                     }
                 }.start();
             } else if(RepoSync.getTotalSize()>0) {
@@ -389,20 +318,13 @@ public class ServiceSync extends ServiceBase {
                 final String msg2 = "All " + RepoSync.getTotalSize() + " files" +
                         " have been retrieved successfully.";
                 Log.i(TAG, msg);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        helperToast.toastLong(msg + "\n\n" + msg2);
-                        helperNotification.notifyBar(notificationSync,"Getting list of files for stats merge.");
-                    }
+                runOnUiThread(() -> {
+                    helperToast.toastLong(msg + "\n\n" + msg2);
+                    helperNotification.notifyBar(notificationSync, "Getting list of files for stats merge.");
                 });
                 List<Track> tracks = new Playlist("FilesToMerge", false).getTracks();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        helperNotification.notifyBar(notificationSync,"Requesting statistics merge.");
-                    }
-                });
+                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Requesting statistics merge."));
+
                 clientSync.requestMerge(tracks, getAppDataPath);
 
                 //FIXME: Delete from db whenever deleting a file in "internal" folder
@@ -418,13 +340,8 @@ public class ServiceSync extends ServiceBase {
                 }
             } else {
                 Log.i(TAG, "No files to download.");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        helperToast.toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
-                                "export a list of files to retrieve, based on playlists.");
-                    }
-                });
+                runOnUiThread(() -> helperToast.toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
+                        "export a list of files to retrieve, based on playlists."));
                 stopSync(false, "No files to download.", 5000);
             }
         }
@@ -439,14 +356,9 @@ public class ServiceSync extends ServiceBase {
                         nbFiles = 0;
                         nbDeleted = 0;
                         browseFS(path);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                helperNotification.notifyBar(notificationSyncScan,
-                                        "Deleted "+nbDeleted+" unrequested files.",
-                                        10000);
-                            }
-                        });
+                        runOnUiThread(() -> helperNotification.notifyBar(notificationSyncScan,
+                                "Deleted "+nbDeleted+" unrequested files.",
+                                10000));
                     }
                 } catch (InterruptedException e) {
                     Log.w(TAG, "Thread.MainActivity.ScanUnWantedRepoSync InterruptedException");

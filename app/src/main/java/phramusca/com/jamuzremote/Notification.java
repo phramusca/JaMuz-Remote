@@ -1,9 +1,5 @@
 package phramusca.com.jamuzremote;
 
-/**
- * Created by raph on 06/11/16.
- */
-
 import android.content.Context;
 import android.support.v4.app.NotificationCompat;
 
@@ -16,7 +12,7 @@ public class Notification {
     protected NotificationCompat.Builder builder;
     protected int id;
 
-    public Notification(Context context, int id, String title) {
+    Notification(Context context, int id, String title) {
         builder = new NotificationCompat.Builder(context);
         builder.setContentTitle(title)
                 .setContentText("Download in progress")

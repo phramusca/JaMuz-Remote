@@ -242,8 +242,6 @@
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:paddingBottom="5dp"
-        android:layout_row="0"
-        android:layout_column="0"
         android:layout_gravity="center_horizontal">
 
         <GridLayout
@@ -252,6 +250,7 @@
             android:alpha="0.8"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
+            android:paddingStart="40dp"
             android:background="@color/colorPrimaryDark">
 
             <Spinner android:id="@+id/spinner_playlist"
@@ -263,31 +262,35 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="10dp"
                 android:layout_row="0"
-                android:layout_column="1"/>
+                android:layout_column="0"/>
+
+            <GridLayout android:id="@+id/panel_playlist_toolbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_row="0"
+                android:layout_column="1">
+
+                <Button android:id="@+id/button_delete"
+                    android:layout_row="0"
+                    android:layout_column="0"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_button_delete"/>
+
+                <Button android:id="@+id/button_new"
+                    android:layout_row="0"
+                    android:layout_column="1"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_button_new"/>
+            </GridLayout>
+
         </GridLayout>
 
         <LinearLayout android:id="@+id/panel_playlist_editbar"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" >
-
-            <GridLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-            <TextView android:id="@+id/textViewPlaylist"
-                android:layout_row="0"
-                android:layout_column="2"
-                android:textColor="@color/textColor"
-                android:inputType="textCapSentences|textMultiLine"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center_horizontal"/>
-            </GridLayout>
-
-            <GridLayout android:id="@+id/panel_playlist_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+            android:layout_height="match_parent" >
 
                 <ToggleButton
                     android:id="@+id/button_order_panel_toggle"
@@ -296,7 +299,8 @@
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     style="@style/ToggleButton"
-                    android:background="@drawable/ic_toggle_order_playlist"/>
+                    android:background="@drawable/ic_toggle_order_playlist"
+                    android:layout_gravity="center_vertical" />
 
                 <ToggleButton
                     android:id="@+id/button_rating_layout"
@@ -305,7 +309,8 @@
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     style="@style/ToggleButton"
-                    android:background="@drawable/ic_toggle_rating_playlist" />
+                    android:background="@drawable/ic_toggle_rating_playlist"
+                    android:layout_gravity="center_vertical"/>
 
                 <ToggleButton
                     android:id="@+id/button_tags_panel_toggle"
@@ -314,7 +319,8 @@
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     style="@style/ToggleButton"
-                    android:background="@drawable/ic_toggle_tags_playlist" />
+                    android:background="@drawable/ic_toggle_tags_playlist"
+                    android:layout_gravity="center_vertical"/>
 
                 <ToggleButton
                     android:id="@+id/button_genres_panel_toggle"
@@ -323,23 +329,18 @@
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     style="@style/ToggleButton"
-                    android:background="@drawable/ic_toggle_genres_playlist"/>
+                    android:background="@drawable/ic_toggle_genres_playlist"
+                    android:layout_gravity="center_vertical"/>
 
-                <Button android:id="@+id/button_delete"
-                    android:layout_row="0"
-                    android:layout_column="5"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/ic_button_delete"/>
+            <TextView android:id="@+id/textViewPlaylist"
+                android:layout_row="0"
+                android:layout_column="4"
+                android:textColor="@color/textColor"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
-                <Button android:id="@+id/button_new"
-                    android:layout_row="0"
-                    android:layout_column="6"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/ic_button_new"/>
-
-            </GridLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -400,11 +401,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                 </Spinner>
+
                 <TextView
                     android:textColor="@color/textColor"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text=" played."/>
+                    android:text=" played"/>
 
             </LinearLayout>
             <TextView
@@ -458,9 +460,7 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimary"
-                android:layout_row="0"
-                android:layout_column="0">
+                android:background="@color/colorPrimary">
 
                 <com.google.android.flexbox.FlexboxLayout
                     android:id="@+id/panel_genre_playlist"
