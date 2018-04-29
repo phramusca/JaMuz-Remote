@@ -1475,7 +1475,17 @@ public class MainActivity extends AppCompatActivity {
             displayedTrack.setPlayCounter(displayedTrack.getPlayCounter()+1);
             displayedTrack.setLastPlayed(new Date());
             displayedTrack.update();
-            fillQueue(11, queue.stream().map(Track::getId).collect(Collectors.toList())); // So it remains 10 after
+            //FIXME: On tablet : java.lang.NoSuchMethodError: No interface method stream()Ljava/util/stream/Stream;
+            // in class Ljava/util/List; or its super classes
+            // (declaration of 'java.util.List' appears in /system/framework/core-libart.jar)
+            /*List<Integer> queueIds = queue.stream().map(Track::getId).collect(Collectors.toList());*/
+
+            List<Integer> queueIds = new ArrayList<>();
+            for(Track track : queue) {
+                queueIds.add(track.getId());
+            }
+
+            fillQueue(11, queueIds); // So it remains 10 after
             //Play first track in queue
             if(queue.size()>0) {
                 displayedTrack = queue.get(0);
@@ -1786,13 +1796,15 @@ public class MainActivity extends AppCompatActivity {
                 layoutTags.removeAllViews();
                 layoutTagsPlaylist.removeAllViews();
                 makeButtonTagPlaylist(Integer.MAX_VALUE, "null");
-                for(Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
-                    makeButtonTag(tag.getKey(), tag.getValue());
-                    makeButtonTagPlaylist(tag.getKey(), tag.getValue());
+                if(RepoTags.get()!=null) {
+                    for(Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
+                        makeButtonTag(tag.getKey(), tag.getValue());
+                        makeButtonTagPlaylist(tag.getKey(), tag.getValue());
+                    }
+                    //Re-display track and playlist
+                    displayTrack(false);
+                    displayPlaylist(localSelectedPlaylist);
                 }
-                //Re-display track and playlist
-                displayTrack(false);
-                displayPlaylist(localSelectedPlaylist);
             }
         });
     }
