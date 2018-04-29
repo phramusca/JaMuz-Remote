@@ -50,6 +50,7 @@ public class HelperNotification {
         notification.builder.setProgress(max, progress, indeterminate);
         notification.builder.setContentIntent(pendingIntent);
         notificationManager.notify(notification.id, notification.builder.build());
+        Log.i(TAG, "NOTIFICATION " + notification.id + ": " + msg);
     }
 
     private void disableNotificationIn(final long millisInFuture, final int id) {

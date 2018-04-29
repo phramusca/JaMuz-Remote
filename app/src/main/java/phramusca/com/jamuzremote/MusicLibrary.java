@@ -13,7 +13,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -327,9 +327,8 @@ public class MusicLibrary {
         return genres;
     }
 
-    //FIXME: Order does not work for tags. Why ?
     public synchronized Map<Integer, String> getTags() {
-        Map<Integer, String> tags = new HashMap<>();
+        Map<Integer, String> tags = new LinkedHashMap<>();
         Cursor cursor = db.rawQuery("SELECT id, value FROM tag ORDER BY value", new String [] {});
         if(cursor != null && cursor.moveToFirst())
         {
