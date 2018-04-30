@@ -162,6 +162,24 @@ public final class RepoSync {
                 +files.column(FileInfoReception.Status.LOCAL).size());
     }
 
+    public synchronized static long getRemainingFileSize() {
+        if(files==null) {
+            return 0;
+        }
+        long nbRemaining=0;
+        nbRemaining+=getRemainingFileSize(FileInfoReception.Status.NEW);
+        nbRemaining+=getRemainingFileSize(FileInfoReception.Status.LOCAL);
+        return nbRemaining;
+    }
+
+    private synchronized static long getRemainingFileSize(FileInfoReception.Status status) {
+        long nbRemaining=0;
+        for(FileInfoReception fileInfoReception : files.column(status).values()) {
+            nbRemaining+=fileInfoReception.size;
+        }
+        return nbRemaining;
+    }
+
     public synchronized static int getTotalSize() {
         return files==null?0:files.size();
     }
