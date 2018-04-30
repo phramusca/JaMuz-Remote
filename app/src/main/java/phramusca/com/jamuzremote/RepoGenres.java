@@ -34,27 +34,19 @@ public final class RepoGenres {
         {
             final String genre = it.next();
             if(HelperLibrary.musicLibrary!=null && !newGenres.contains(genre)) {
-                new Thread() {
-                    public void run() {
-                        int deleted = HelperLibrary.musicLibrary.deleteGenre(genre);
-                        if(deleted>0) {
-                            it.remove();
-                        }
-                    }
-                }.start();
+                int deleted = HelperLibrary.musicLibrary.deleteGenre(genre);
+                if(deleted>0) {
+                    it.remove();
+                }
             }
         }
     }
 
     private synchronized static void add(final String genre) {
         if(HelperLibrary.musicLibrary!=null && !get().contains(genre)) {
-            new Thread() {
-                public void run() {
-                    if (HelperLibrary.musicLibrary.addGenre(genre)) {
-                        genres.add(genre);
-                    }
-                }
-            }.start();
+            if (HelperLibrary.musicLibrary.addGenre(genre)) {
+                genres.add(genre);
+            }
         }
     }
 }

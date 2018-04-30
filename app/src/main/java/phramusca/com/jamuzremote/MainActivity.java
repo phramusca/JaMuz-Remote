@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         preferences = getPreferences(MODE_PRIVATE);
-        editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.10:2013"));
+        editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.11:2013"));
 
         textViewPath = (TextView) findViewById(R.id.textViewPath);
 
@@ -846,7 +846,7 @@ public class MainActivity extends AppCompatActivity {
         if(split.length<2) {
             helperToast.toastLong("Bad format:\t"+infoConnect+"" +
                     "\nExpected:\t\t<IP>:<Port>" +
-                    "\nEx:\t\t\t\t\t\t\t192.168.0.12:2013");
+                    "\nEx:\t\t\t\t\t\t\t192.168.0.11:2013");
             return null;
         }
         String address = split[0];
@@ -1475,7 +1475,7 @@ public class MainActivity extends AppCompatActivity {
             displayedTrack.setPlayCounter(displayedTrack.getPlayCounter()+1);
             displayedTrack.setLastPlayed(new Date());
             displayedTrack.update();
-            //FIXME: On tablet : java.lang.NoSuchMethodError: No interface method stream()Ljava/util/stream/Stream;
+            //TODO: On tablet : java.lang.NoSuchMethodError: No interface method stream()Ljava/util/stream/Stream;
             // in class Ljava/util/List; or its super classes
             // (declaration of 'java.util.List' appears in /system/framework/core-libart.jar)
             /*List<Integer> queueIds = queue.stream().map(Track::getId).collect(Collectors.toList());*/

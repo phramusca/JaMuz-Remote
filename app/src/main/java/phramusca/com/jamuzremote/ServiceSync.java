@@ -71,13 +71,13 @@ public class ServiceSync extends ServiceBase {
         public void onReceive(Context context, Intent intent)
         {
             Log.i(TAG, "UserStopServiceReceiver.onReceive()");
-            stopSync(false, "User stopped.", 5000);
+            stopSync("User stopped.", 5000);
         }
     }
 
-    private void stopSync(boolean reconnect, String msg, long millisInFuture) {
+    private void stopSync(String msg, long millisInFuture) {
         if (clientSync != null) {
-            clientSync.close(reconnect, msg, millisInFuture);
+            clientSync.close(false, msg, millisInFuture);
         }
     }
 
@@ -133,7 +133,7 @@ public class ServiceSync extends ServiceBase {
                             HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath,
                                     fileReceived.relativeFullPath).getAbsolutePath(), fileReceived, true);
                         }
-                        stopSync(false, "Sync complete.", 20000);
+                        stopSync("Sync complete.", 20000);
                         stopSelf();
                         break;
                     case "tags":
@@ -324,7 +324,9 @@ public class ServiceSync extends ServiceBase {
                 });
                 List<Track> tracks = new Playlist("FilesToMerge", false).getTracks();
                 runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Requesting statistics merge."));
-
+                for(Track track : tracks) {
+                    track.getTags(true);
+                }
                 clientSync.requestMerge(tracks, getAppDataPath);
 
                 //FIXME: Delete from db whenever deleting a file in "internal" folder
@@ -342,7 +344,7 @@ public class ServiceSync extends ServiceBase {
                 Log.i(TAG, "No files to download.");
                 runOnUiThread(() -> helperToast.toastLong("No files to download.\n\nYou can use JaMuz (Linux/Windows) to " +
                         "export a list of files to retrieve, based on playlists."));
-                stopSync(false, "No files to download.", 5000);
+                stopSync("No files to download.", 5000);
             }
         }
     }

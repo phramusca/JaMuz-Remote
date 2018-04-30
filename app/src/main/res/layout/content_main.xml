@@ -120,7 +120,7 @@
 
             <EditText android:id="@+id/editText_info"
 
-                android:text="192.168.0.0:2013"
+                android:text="192.168.0.11:2013"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:enabled="true"
