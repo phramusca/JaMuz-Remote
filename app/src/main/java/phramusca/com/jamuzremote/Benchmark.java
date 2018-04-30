@@ -16,36 +16,41 @@ public class Benchmark {
     private final long startTime;
     private long partialTime;
     private Collection<Long> partialTimes;
+    private Collection<Long> partialSizes;
 
-    public Benchmark(int size) {
+    private Benchmark(int size) {
         this.size=size;
         index=0;
+        startTime = System.currentTimeMillis();
+        partialTime = startTime;
         partialTimes = new ArrayList<>();
-        startTime = System.currentTimeMillis();
-        partialTime = startTime;
+        partialSizes = new ArrayList<>();
     }
 
-    public Benchmark(int size, int max) {
+    Benchmark(int size, int max) {
         this.size=size;
         index=0;
-        partialTimes = EvictingQueue.create(max);
         startTime = System.currentTimeMillis();
         partialTime = startTime;
+        partialTimes = EvictingQueue.create(max);
+        partialSizes = EvictingQueue.create(max);
     }
 
-    public String get() {
+    public String get(long fileSize) {
         long currentTime=System.currentTimeMillis();
         long elapsedTime=currentTime-startTime;
         long actionTime=currentTime-partialTime;
         partialTime=currentTime;
         partialTimes.add(actionTime);
-        long remainingTime = mean(partialTimes)*(size-index);
+        partialSizes.add(fileSize);
+        long elapseSum=sum(partialTimes);
+        long remainingTime = mean(partialTimes, elapseSum)*(size-index);
         index++;
-
         String elapsed = StringManager.humanReadableSeconds(elapsedTime/1000, "+");
         String remaining = StringManager.humanReadableSeconds(remainingTime/1000, "-");
-
-        lastMsg=MessageFormat.format("| {0}/{1} |", elapsed, remaining); //NOI18N
+        /*String speed = StringManager.humanReadableByteCount(sum(partialSizes)/elapseSum/1000, false);*/
+        String speed = StringManager.humanReadableBitCount((sum(partialSizes)*8)/(elapseSum/1000), true);
+        lastMsg=MessageFormat.format("{0}/{1}@{2}ps |", elapsed, remaining, speed); //NOI18N
         return lastMsg;
     }
 
@@ -59,11 +64,15 @@ public class Benchmark {
         this.size = size;
     }
 
-    public static long mean(Collection<Long> numbers) {
+    private static long mean(Collection<Long> numbers) {
         return sum(numbers)/numbers.size();
     }
 
-    public static long sum(Collection<Long> numbers) {
+    private static long mean(Collection<Long> numbers, long sum) {
+        return sum/numbers.size();
+    }
+
+    private static long sum(Collection<Long> numbers) {
         long sum=0;
         for(long number : numbers) {
             sum+=number;

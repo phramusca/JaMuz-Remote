@@ -88,22 +88,40 @@ public class StringManager {
 
     /**
      * Convert number of bytes into human readable formatDisplay (Kio, Ko, ...)
+     * <p>Système international (SI) | ex: 1 mégabit (Mb) 	= 106 bits 	= 1 000 kb 	= 1 000 000 bits
+     * <p>Préfixes binaires | ex: 1 mébibit (Mib) 	= 220 bits 	= 1 024 kib 	= 1 048 576 bits
+     * @param bits number of bits
+     * @param si Use SI (International System of Units) or not
+     * @return Human readable file size
+     */
+    public static String humanReadableBitCount(long bits, boolean si) {
+        return humanReadableByteCount(bits, si, "b");
+    }
+
+    /**
+     * Convert number of bytes into human readable formatDisplay (Kio, Ko, ...)
+     * <p>Système international (SI) | ex: 1 mégaoctet (Mo) 	= 106 octets 	= 1 000 ko 	= 1 000 000 octets
+     * <p>Préfixes binaires | ex: 1 mébioctet (Mio) 	= 220 octets 	= 1 024 kio 	= 1 048 576 octets
      * @param bytes number of bytes
-     * @param si Use SI (International System of Units) or not.
+     * @param si Use SI (International System of Units) or not
      * @return Human readable file size
      */
     public static String humanReadableByteCount(long bytes, boolean si) {
+        return humanReadableByteCount(bytes, si, "o");
+    }
+
+    private static String humanReadableByteCount(long bytes, boolean si, String unitChar) {
         if (bytes < 0) {
             bytes = Math.abs(bytes);
         }
 
         int unit = si ? 1000 : 1024;
         if (bytes < unit) {
-            return bytes + " o"; //NOI18N
+            return bytes + " "+unitChar; //NOI18N
         }
         int exp = (int) (Math.log(bytes) / Math.log(unit));
         String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i"); //NOI18N
-        return String.format("%.1f %so", bytes / Math.pow(unit, exp), pre); //NOI18N
+        return String.format("%.1f %s"+unitChar, bytes / Math.pow(unit, exp), pre); //NOI18N
     }
 
     /**

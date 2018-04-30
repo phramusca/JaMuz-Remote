@@ -100,7 +100,7 @@ public class ServiceSync extends ServiceBase {
                             FileInfoReception fileReceived = new FileInfoReception((JSONObject) jsonArray.get(0));
                             notifyBar("Ack.", fileReceived);
                             RepoSync.receivedAck(fileReceived);
-                            bench.get();
+                            bench.get(fileReceived.size);
                         } else {
                             notifyBar("Received ack from server");
                             for (int i = 0; i < jsonArray.length(); i++) {
@@ -223,11 +223,14 @@ public class ServiceSync extends ServiceBase {
         int remaining = RepoSync.getRemainingSize();
         int progress = max- remaining;
 
-        String msg = "- "+ remaining + "/" + max
+        /*String msg = "- "+ remaining + "/" + max
                 + " "+bench.getLast()+" "+text+(fileInfoReception==null?"":
                 (" "+StringManager.humanReadableByteCount(
                 fileInfoReception.size, false)
-                +" ("+fileInfoReception.relativeFullPath+")"));
+                +" ("+fileInfoReception.relativeFullPath+")"));*/
+        String msg = bench.getLast()+" "+text+(fileInfoReception==null?"":
+                (" "+StringManager.humanReadableByteCount(fileInfoReception.size, false)
+                        +" ("+fileInfoReception.relativeFullPath+")"));
         helperNotification.notifyBar(notificationSync, msg, max, progress, false,
                 true, true);
     }
