@@ -35,28 +35,20 @@ public final class RepoTags {
         {
             final Map.Entry<Integer, String> tag = it.next();
             if(HelperLibrary.musicLibrary!=null && !newTags.contains(tag.getValue())) {
-                new Thread() {
-                    public void run() {
-                        int deleted = HelperLibrary.musicLibrary.deleteTag(tag.getKey());
-                        if(deleted>0) {
-                            it.remove();
-                        }
-                    }
-                }.start();
+                int deleted = HelperLibrary.musicLibrary.deleteTag(tag.getKey());
+                if(deleted>0) {
+                    it.remove();
+                }
             }
         }
     }
 
     private synchronized static void add(final String tag) {
         if(HelperLibrary.musicLibrary!=null && !get().values().contains(tag)) {
-            new Thread() {
-                public void run() {
-                    int idTag = HelperLibrary.musicLibrary.addTag(tag);
-                    if(idTag>0) {
-                        tags.put(idTag, tag);
-                    }
-                }
-            }.start();
+            int idTag = HelperLibrary.musicLibrary.addTag(tag);
+            if(idTag>0) {
+                tags.put(idTag, tag);
+            }
         }
     }
 }

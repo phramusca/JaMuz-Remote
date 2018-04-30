@@ -54,6 +54,8 @@ public class FileInfoReception {
             playCounter = file.getInt("playCounter");
             genre = file.getString("genre");
 
+            JSONArray files = (JSONArray) file.get("tags");
+
             JSONArray jsonTags = (JSONArray) file.get("tags");
             tags = new ArrayList<>();
             for(int i=0; i<jsonTags.length(); i++) {

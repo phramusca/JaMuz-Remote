@@ -194,13 +194,13 @@ public class MusicLibrary {
                 stmtTracks.bindString(8, track.getFormattedAddedDate());
                 stmtTracks.bindString(9, track.getFormattedLastPlayed());
                 stmtTracks.bindLong(10, track.getPlayCounter());
-                stmtTracks.execute();
+                int idFile = (int) stmtTracks.executeInsert();
                 stmtTracks.clearBindings();
-                stmtTagsDelete.bindLong(1, track.getId());
+                stmtTagsDelete.bindLong(1, idFile);
                 stmtTagsDelete.execute();
                 stmtTagsDelete.clearBindings();
                 for(String tag : track.getTags(false)) {
-                    stmtTags.bindLong(1, track.getId());
+                    stmtTags.bindLong(1, idFile);
                     stmtTags.bindString(2, tag);
                     stmtTags.execute();
                     stmtTags.clearBindings();
