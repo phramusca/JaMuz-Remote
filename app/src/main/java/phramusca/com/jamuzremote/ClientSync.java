@@ -199,14 +199,14 @@ public class ClientSync extends Client {
         }
     }
 
-    //FIXME: improve sync and merge
+    //FIXME !!!!!! improve sync and merge
     // => do NOT request genres and tags at every connection but only if required or on demand
     // => Then, avoid double acknowledgement:
     //          - Insert files in deviceFiles directly at export
     //          - Use a status as in JaMuzRemote
-    // => Then, use this and FileInfoReception to merge statistics instead of current merge
-    // => Then, preserve current merge for user chosen folder only
-
+    //FIXME !!!!!! Sync (download phase) can freeze the app
+    //due to: many watchers ? too short timeouts ? duplicate connections ??
+    // duplicate watch loop more likely ? ... ?
 
     public void ackFilesReception(List<FileInfoReception> files) {
         synchronized (syncStatus) {

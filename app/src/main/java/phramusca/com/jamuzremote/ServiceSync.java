@@ -223,16 +223,17 @@ public class ServiceSync extends ServiceBase {
         int remaining = RepoSync.getRemainingSize();
         int progress = max- remaining;
 
-        /*String msg = "- "+ remaining + "/" + max
-                + " "+bench.getLast()+" "+text+(fileInfoReception==null?"":
-                (" "+StringManager.humanReadableByteCount(
-                fileInfoReception.size, false)
-                +" ("+fileInfoReception.relativeFullPath+")"));*/
-        String msg = bench.getLast()+" "+text+(fileInfoReception==null?"":
-                (" "+StringManager.humanReadableByteCount(fileInfoReception.size, false)
-                        +" ("+fileInfoReception.relativeFullPath+")"));
+        String bigText = "-"+ remaining + "/" + max
+                + "\n-" + StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), true)
+                +"\n"+fileInfoReception.relativeFullPath+"";
+
+        String msg = text+(fileInfoReception==null?"":
+                (" "+StringManager.humanReadableByteCount(fileInfoReception.size, false)))
+                +" | "+bench.getLast();
+
         helperNotification.notifyBar(notificationSync, msg, max, progress, false,
-                true, true);
+                true, true,
+                msg+"\n"+bigText);
     }
 
     private void requestNextFile() {
