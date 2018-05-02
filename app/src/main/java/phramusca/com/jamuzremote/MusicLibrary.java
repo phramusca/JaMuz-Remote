@@ -30,9 +30,6 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TITLE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.TABLE_TRACKS;
 
-//FIXME !!!!!!!!!! Some tags are empty these days on some tracks
-// => To be investigated
-
 /**
  * Created by raph on 12/06/17.
  */

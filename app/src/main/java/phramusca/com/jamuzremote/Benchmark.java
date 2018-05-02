@@ -48,9 +48,8 @@ public class Benchmark {
         index++;
         String elapsed = StringManager.humanReadableSeconds(elapsedTime/1000, "+");
         String remaining = StringManager.humanReadableSeconds(remainingTime/1000, "-");
-        /*String speed = StringManager.humanReadableByteCount(sum(partialSizes)/elapseSum/1000, false);*/
         String speed = StringManager.humanReadableBitCount((sum(partialSizes)*8)/(elapseSum/1000), true);
-        lastMsg=MessageFormat.format("{0}/{1}@{2}ps |", elapsed, remaining, speed); //NOI18N
+        lastMsg=MessageFormat.format("{1}@{2}ps ({0})", elapsed, remaining, speed); //NOI18N
         return lastMsg;
     }
 

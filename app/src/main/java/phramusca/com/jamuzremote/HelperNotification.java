@@ -3,6 +3,7 @@ package phramusca.com.jamuzremote;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.os.CountDownTimer;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 /**
@@ -31,18 +32,25 @@ public class HelperNotification {
                           int nbFiles, int nbFilesTotal) {
         if(((nbFiles-1) % every) == 0) { //To prevent UI from freezing
             String msg = nbFiles + "/" + nbFilesTotal + " " + action;
-            notifyBar(notification, msg, nbFilesTotal, nbFiles, false, false, false);
+            notifyBar(notification, msg, nbFilesTotal, nbFiles, false,
+                    false, false, "");
         }
     }
 
     public void notifyBar(Notification notification, String msg) {
-        notifyBar(notification, msg, 0, 0, false, true, false);
+        notifyBar(notification, msg, 0, 0, false,
+                true, false, "");
     }
 
     public void notifyBar(Notification notification, String msg,
                           int max, int progress, boolean indeterminate, boolean setWhen,
-                          boolean usesChronometer) {
+                          boolean usesChronometer, String bigText) {
         notification.builder.setContentText(msg);
+        if(!bigText.equals("")) {
+            notification.builder.setStyle(new NotificationCompat.BigTextStyle().bigText(bigText));
+        } else {
+            notification.builder.setStyle(null);
+        }
         if(setWhen) {
             notification.builder.setWhen(System.currentTimeMillis());
         }
