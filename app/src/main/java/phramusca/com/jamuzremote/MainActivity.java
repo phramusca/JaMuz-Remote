@@ -570,13 +570,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         String text = input.getText().toString().trim();
                         if(!localPlaylists.contains(text)) {
-                            //FIXME: Duplicate current playlist (clone) instead of new
-                            /*Playlist newPlaylist;
-                            if(localSelectedPlaylist!=null) {
-                                newPlaylist = localSelectedPlaylist.clone();
-                            } else {
-                                newPlaylist = new Playlist(text, true);
-                            }*/
+                            //TODO: Duplicate current playlist (clone) instead of new (stashed)
                             Playlist newPlaylist = new Playlist(text, true);
                             localPlaylists.add(newPlaylist);
                             localSelectedPlaylist=newPlaylist;
