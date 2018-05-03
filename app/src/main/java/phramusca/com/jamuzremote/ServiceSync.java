@@ -225,11 +225,14 @@ public class ServiceSync extends ServiceBase {
 
         String bigText = "-"+ remaining + "/" + max
                 + "\n-" + StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), true)
-                +"\n"+fileInfoReception.relativeFullPath+"";
+                + "\n" + (fileInfoReception==null?"":fileInfoReception.relativeFullPath);
 
-        String msg = text+(fileInfoReception==null?"":
-                (" "+StringManager.humanReadableByteCount(fileInfoReception.size, false)))
-                +" | "+bench.getLast();
+        String msg = text
+                +(fileInfoReception==null
+                    ?"":
+                    (" "+StringManager.humanReadableByteCount(fileInfoReception.size, false))
+                )
+                +bench.getLast();
 
         helperNotification.notifyBar(notificationSync, msg, max, progress, false,
                 true, true,

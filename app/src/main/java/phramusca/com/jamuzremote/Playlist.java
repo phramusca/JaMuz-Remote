@@ -24,7 +24,8 @@ public class Playlist implements Comparable {
     private String artist;
     private String album;
     private Order order=Order.PLAYCOUNTER_LASTPLAYED;
-    private String limitation="0";
+    private int limitValue=0;
+    private String limitUnit ="minutes";
 
     Playlist(String name, boolean isLocal) {
         this.name = name;
@@ -68,7 +69,7 @@ public class Playlist implements Comparable {
     }
 
     public String getSummary() {
-        String in="";
+        String in=" ";
         in +=getRatingString();
         Lists tagsLists = new Lists();
         Lists genresLists = new Lists(genres);
@@ -109,7 +110,7 @@ public class Playlist implements Comparable {
         }
 
         in+=" | "+order.toString();
-        in+=" | "+limitation;
+        in+=" | "+ (limitValue<0?"":limitValue+" "+limitUnit);
 
         return in;
     }
@@ -118,12 +119,20 @@ public class Playlist implements Comparable {
         return genres.entrySet();
     }
 
-    public void setLimitation(String limitation) {
-        this.limitation = limitation;
+    public void setLimitUnit(String limitUnit) {
+        this.limitUnit = limitUnit;
     }
 
-    public String getLimitation() {
-        return limitation;
+    public String getLimitUnit() {
+        return limitUnit;
+    }
+
+    public int getLimitValue() {
+        return limitValue;
+    }
+
+    public void setLimitValue(int limitValue) {
+        this.limitValue = limitValue;
     }
 
     private class Lists {
@@ -227,8 +236,8 @@ public class Playlist implements Comparable {
 
         String in = "WHERE rating "+getRatingString()+" ";
 
-        if(limitation != null && !limitation.startsWith("0")) {
-            in += "\n AND lastPlayed < datetime(datetime('now'), '-" + limitation + "')";
+        if(limitValue>0) {
+            in += "\n AND lastPlayed < datetime(datetime('now'), '-" + limitValue + " " + limitUnit + "')";
         }
 
         ArrayList<String> include = new ArrayList<>();
@@ -424,4 +433,5 @@ public class Playlist implements Comparable {
             return display;
         }
     }
+
 }

@@ -204,9 +204,6 @@ public class ClientSync extends Client {
     // => Then, avoid double acknowledgement:
     //          - Insert files in deviceFiles directly at export
     //          - Use a status as in JaMuzRemote
-    //FIXME !!!!!! Sync (download phase) can freeze the app
-    //due to: many watchers ? too short timeouts ? duplicate connections ??
-    // duplicate watch loop more likely ? ... ?
 
     public void ackFilesReception(List<FileInfoReception> files) {
         synchronized (syncStatus) {
