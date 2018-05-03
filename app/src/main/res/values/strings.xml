@@ -1,51 +1,12 @@
 <resources>
-    <string name="app_name">JaMuz</string>
+    <string name="app_name" translatable="false">JaMuz</string>
     <string name="action_settings">Settings</string>
 
-    <string-array name="limitations">
-        <item>0 => none excluded</item>
-        <item>5 minutes</item>
-        <item>10 minutes</item>
-        <item>15 minutes</item>
-        <item>30 minutes</item>
-        <item>45 minutes</item>
-        <item>1 hour</item>
-        <item>2 hours</item>
-        <item>4 hours</item>
-        <item>6 hours</item>
-        <item>8 hours</item>
-        <item>10 hours</item>
-        <item>12 hours</item>
-        <item>1 day</item>
-        <item>2 days</item>
-        <item>4 days</item>
-        <item>6 days</item>
-        <item>1 week</item>
-        <item>2 weeks</item>
-        <item>3 weeks</item>
-        <item>1 month</item>
-        <item>2 months</item>
-        <item>4 months</item>
-        <item>6 months</item>
-        <item>8 months</item>
-        <item>10 months</item>
-        <item>1 year</item>
-        <item>2 years</item>
-        <item>4 years</item>
-        <item>5 years</item>
-        <item>6 years</item>
-        <item>7 years</item>
-        <item>8 years</item>
-        <item>9 years</item>
-        <item>10 years</item>
-        <item>20 years</item>
-        <item>30 years</item>
-        <item>40 years</item>
-        <item>50 years</item>
-        <item>60 years</item>
-        <item>70 years</item>
-        <item>80 years</item>
-        <item>90 years</item>
-        <item>100 years</item>
+    <string-array name="limitUnits">
+        <item>minutes</item>
+        <item>hours</item>
+        <item>days</item>
+        <item>months</item>
+        <item>years</item>
     </string-array>
 </resources>

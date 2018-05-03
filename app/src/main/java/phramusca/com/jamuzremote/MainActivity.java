@@ -84,7 +84,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.stream.Collectors;
 
 import static phramusca.com.jamuzremote.Playlist.Order.PLAYCOUNTER_LASTPLAYED;
 import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
@@ -158,11 +157,14 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBarPosition;
     private Spinner spinnerPlaylist;
     private Spinner spinnerGenre;
-    private Spinner spinnerPlaylistLimit;
+    private Spinner spinnerPlaylistLimitUnit;
+    private Spinner spinnerPlaylistLimitValue;
     private static boolean spinnerPlaylistSend=false;
     private static boolean spinnerGenreSend=false;
-    private static boolean spinnerLimitSend=false;
-    private ArrayAdapter<CharSequence> playListLimitArrayAdapter;
+    private static boolean spinnerLimitUnitSend =false;
+    private static boolean spinnerLimitValueSend=false;
+    private ArrayAdapter<CharSequence> playListLimitUnitArrayAdapter;
+    private ArrayAdapter<Integer> playListLimitValueArrayAdapter;
     private RatingBar ratingBar;
     private RatingBar ratingBarPlaylist;
     private LinearLayout layoutOrderPlaylistLayout;
@@ -221,13 +223,7 @@ public class MainActivity extends AppCompatActivity {
         textViewFileInfo = (TextView) findViewById(R.id.textFileInfo);
 
         editTextConnectInfo = (EditText) findViewById(R.id.editText_info);
-        editTextConnectInfo.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                dimOn();
-                return false;
-            }
-        });
+        editTextConnectInfo.setOnTouchListener(dimOnTouchListener);
 
         preferences = getPreferences(MODE_PRIVATE);
         editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.11:2013"));
@@ -335,22 +331,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        spinnerPlaylistLimit = (Spinner) findViewById(R.id.spinner_playlist_limit);
+        playListLimitUnitArrayAdapter = ArrayAdapter.createFromResource(this,
+                R.array.limitUnits, android.R.layout.simple_spinner_item);
+        playListLimitUnitArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPlaylistLimitUnit = (Spinner) findViewById(R.id.spinner_playlist_limit_unit);
+        spinnerPlaylistLimitUnit.setAdapter(playListLimitUnitArrayAdapter);
+        spinnerPlaylistLimitUnit.setOnItemSelectedListener(spinnerLimitUnitListener);
+        spinnerPlaylistLimitUnit.setOnTouchListener(dimOnTouchListener);
 
-        playListLimitArrayAdapter = ArrayAdapter.createFromResource(this,
-                R.array.limitations, android.R.layout.simple_spinner_item);
-        playListLimitArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerPlaylistLimit.setAdapter(playListLimitArrayAdapter);
-
-        spinnerPlaylistLimit.setOnItemSelectedListener(spinnerLimitListener);
-        spinnerPlaylistLimit.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                dimOn();
-                return false;
-            }
-        });
-
+        Integer[] limitValues = new Integer[100];
+        for (int i=0; i<100; i++) {
+            limitValues[i] = i;
+        }
+        playListLimitValueArrayAdapter = new ArrayAdapter<Integer>(
+                this,android.R.layout.simple_spinner_item, limitValues);
+        playListLimitValueArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPlaylistLimitValue = (Spinner) findViewById(R.id.numberPicker_playlist_limit_value);
+        spinnerPlaylistLimitValue.setAdapter(playListLimitValueArrayAdapter);
+        spinnerPlaylistLimitValue.setOnItemSelectedListener(spinnerLimitValueListener);
+        spinnerPlaylistLimitValue.setOnTouchListener(dimOnTouchListener);
 
         seekBarPosition = (SeekBar) findViewById(R.id.seekBar);
         seekBarPosition.setEnabled(false);
@@ -377,23 +376,11 @@ public class MainActivity extends AppCompatActivity {
 
         spinnerPlaylist = (Spinner) findViewById(R.id.spinner_playlist);
         spinnerPlaylist.setOnItemSelectedListener(spinnerListener);
-        spinnerPlaylist.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                dimOn();
-                return false;
-            }
-        });
+        spinnerPlaylist.setOnTouchListener(dimOnTouchListener);
 
         spinnerGenre = (Spinner) findViewById(R.id.spinner_genre);
         spinnerGenre.setOnItemSelectedListener(spinnerGenreListener);
-        spinnerGenre.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                dimOn();
-                return false;
-            }
-        });
+        spinnerGenre.setOnTouchListener(dimOnTouchListener);
 
         buttonPrevious = setupButton(buttonPrevious, R.id.button_previous, "previousTrack");
         buttonPlay = setupButton(buttonPlay, R.id.button_play, "playTrack");
@@ -1083,24 +1070,51 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    Spinner.OnItemSelectedListener spinnerLimitListener = new Spinner.OnItemSelectedListener() {
+    Spinner.OnItemSelectedListener spinnerLimitUnitListener = new Spinner.OnItemSelectedListener() {
         @Override
-        public void onItemSelected(AdapterView<?> parent, View view,
-                                   int pos, long id) {
-            if(spinnerLimitSend) {
+        public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+            if(spinnerLimitUnitSend) {
                 dimOn();
                 String value = (String) parent.getItemAtPosition(pos);
                 if(!isRemoteConnected() && localSelectedPlaylist!=null) {
-                    localSelectedPlaylist.setLimitation(value);
+                    localSelectedPlaylist.setLimitUnit(value);
                     refreshQueueAndSpinner();
                 }
             }
-            spinnerLimitSend=true;
+            spinnerLimitUnitSend =true;
         }
 
         @Override
         public void onNothingSelected(AdapterView<?> adapterView) {
             dimOn();
+        }
+    };
+
+    Spinner.OnItemSelectedListener spinnerLimitValueListener = new Spinner.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+            if(spinnerLimitValueSend) {
+                dimOn();
+                Integer value = (Integer) parent.getItemAtPosition(pos);
+                if(!isRemoteConnected() && localSelectedPlaylist!=null) {
+                    localSelectedPlaylist.setLimitValue(value);
+                    refreshQueueAndSpinner();
+                }
+            }
+            spinnerLimitValueSend =true;
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> adapterView) {
+            dimOn();
+        }
+    };
+
+    View.OnTouchListener dimOnTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            dimOn();
+            return false;
         }
     };
 
@@ -2020,10 +2034,13 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
 
-            spinnerLimitSend =false;
-            spinnerPlaylistLimit.setAdapter(playListLimitArrayAdapter);
-            spinnerPlaylistLimit.setSelection(playListLimitArrayAdapter.getPosition(playlist.getLimitation()));
+            spinnerLimitUnitSend = false;
+            spinnerPlaylistLimitUnit.setAdapter(playListLimitUnitArrayAdapter);
+            spinnerPlaylistLimitUnit.setSelection(playListLimitUnitArrayAdapter.getPosition(playlist.getLimitUnit()));
 
+            spinnerLimitValueSend = false;
+            spinnerPlaylistLimitValue.setAdapter(playListLimitValueArrayAdapter);
+            spinnerPlaylistLimitValue.setSelection(playlist.getLimitValue());
             textViewPlaylist.setText(playlist.getSummary());
         }
     }
