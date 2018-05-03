@@ -199,9 +199,9 @@ public class ClientSync extends Client {
         }
     }
 
-    //FIXME !!!!!! improve sync and merge
-    // => do NOT request genres and tags at every connection but only if required or on demand
-    // => Then, avoid double acknowledgement:
+    // TODO improve sync and merge
+    // TODO do NOT request genres and tags at every connection but only if required or on demand
+    // TODO avoid double acknowledgement:
     //          - Insert files in deviceFiles directly at export
     //          - Use a status as in JaMuzRemote
 

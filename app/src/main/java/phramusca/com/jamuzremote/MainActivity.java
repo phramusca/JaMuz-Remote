@@ -570,16 +570,13 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         String text = input.getText().toString().trim();
                         if(!localPlaylists.contains(text)) {
-
-                            //FIXME: "All" Playlist:
-                            // EASY WAY: Make it a default normal playlist, added when there are none
-                            // - localPlaylists is empty at startup (before first connected to db) !!
-                            // - Use an editable /"savable" bool(s)
-                            // - Search \"All\"" in whole project to make sure all occurences are managed
-                            // - *** Replace with a "Default" playlist selected by default as at 0
-
-                            localPlaylists = localPlaylists.subList(0, localPlaylists.size()-1);
                             //FIXME: Duplicate current playlist (clone) instead of new
+                            /*Playlist newPlaylist;
+                            if(localSelectedPlaylist!=null) {
+                                newPlaylist = localSelectedPlaylist.clone();
+                            } else {
+                                newPlaylist = new Playlist(text, true);
+                            }*/
                             Playlist newPlaylist = new Playlist(text, true);
                             localPlaylists.add(newPlaylist);
                             localSelectedPlaylist=newPlaylist;
@@ -608,23 +605,27 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(localSelectedPlaylist!=null) {
                     new AlertDialog.Builder(MainActivity.this)
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .setTitle("Delete playlist ?")
-                            .setMessage("Are you sure you want to delete " +
-                                    "\""+localSelectedPlaylist.getName()+"\" playlist ?")
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener()
-                            {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    HelperFile.delete("Playlists", localSelectedPlaylist.getName()+".plli");
-                                    localPlaylists.remove(localSelectedPlaylist);
-                                    localSelectedPlaylist=localPlaylists.get(0);
-                                    displayPlaylist(localSelectedPlaylist);
-                                    setupSpinner();
-                                }
-                            })
-                            .setNegativeButton("No", null)
-                            .show();
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Delete playlist ?")
+                    .setMessage("Are you sure you want to delete " +
+                            "\""+localSelectedPlaylist.getName()+"\" playlist ?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if(localPlaylists.size()>1) {
+                                HelperFile.delete("Playlists", localSelectedPlaylist.getName() + ".plli");
+                                localPlaylists.remove(localSelectedPlaylist);
+                                localSelectedPlaylist = localPlaylists.get(0);
+                                displayPlaylist(localSelectedPlaylist);
+                                setupSpinner();
+                            } else {
+                                helperToast.toastShort("You cannot delete last playlist.");
+                            }
+                        }
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
                 }
             }
         });
@@ -1398,6 +1399,8 @@ public class MainActivity extends AppCompatActivity {
             textToSpeech.shutdown();
         }
 
+        //FIXME: Save more often playlists to file
+        // and/or on demand (with a button "Save" - and maybe a "Restore" button)
         for(Playlist playlist : localPlaylists) {
             savePlaylist(playlist);
         }
@@ -1940,7 +1943,7 @@ public class MainActivity extends AppCompatActivity {
         for(String file : playlistFolder.list()) {
             if(file.endsWith(".plli")) {
                 Playlist playlist = readPlaylist(file);
-                if(playlist !=null && !playlist.getName().equals("All")) {
+                if(playlist !=null) {
                     playlist.getNbFiles();
                     localPlaylists.add(playlist);
                 }
@@ -1958,15 +1961,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupLocalPlaylistAll() {
-        Collections.sort(localPlaylists);
-        Playlist playlist = new Playlist("All", true);
-        playlist.getNbFiles();
-        localPlaylists.add(playlist);
+        if (localPlaylists.size() > 0) {
+            Collections.sort(localPlaylists);
+        } else {
+            Playlist playlist = new Playlist("All", true);
+            playlist.getNbFiles();
+            localPlaylists.add(playlist);
+        }
         playListArrayAdapter = new ArrayAdapter<Playlist>(this, R.layout.spinner_item, localPlaylists);
     }
 
     private void savePlaylist(Playlist playlist) {
-        if(playlist !=null && !playlist.getName().equals("All")) {
+        if(playlist !=null) {
             Gson gson = new Gson();
             HelperFile.write("Playlists", playlist.getName()+".plli",gson.toJson(playlist));
         }
