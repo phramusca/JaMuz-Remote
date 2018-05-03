@@ -152,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
     private Button buttonVolDown;
     private Button button_speech;
     private Button button_new;
+    private Button button_save;
     private Button button_delete;
     private Button button_queue;
     private SeekBar seekBarPosition;
@@ -590,6 +591,23 @@ public class MainActivity extends AppCompatActivity {
                 });
 
                 builder.show();
+            }
+        });
+
+        // TODO make a "Restore" button (to enable temporary modification of a playlist with genres for ex)
+        button_save = (Button) findViewById(R.id.button_save);
+        button_save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(localSelectedPlaylist!=null) {
+                    String msg="Playlist \""+localSelectedPlaylist.getName()+"\" saved";
+                    if(savePlaylist(localSelectedPlaylist)) {
+                        msg+=" successfully.";
+                    } else {
+                        msg+=" with errors !";
+                    }
+                    helperToast.toastShort(msg);
+                }
             }
         });
 
@@ -1393,8 +1411,6 @@ public class MainActivity extends AppCompatActivity {
             textToSpeech.shutdown();
         }
 
-        //FIXME: Save more often playlists to file
-        // and/or on demand (with a button "Save" - and maybe a "Restore" button)
         for(Playlist playlist : localPlaylists) {
             savePlaylist(playlist);
         }
@@ -1965,11 +1981,12 @@ public class MainActivity extends AppCompatActivity {
         playListArrayAdapter = new ArrayAdapter<Playlist>(this, R.layout.spinner_item, localPlaylists);
     }
 
-    private void savePlaylist(Playlist playlist) {
+    private boolean savePlaylist(Playlist playlist) {
         if(playlist !=null) {
             Gson gson = new Gson();
-            HelperFile.write("Playlists", playlist.getName()+".plli",gson.toJson(playlist));
+            return HelperFile.write("Playlists", playlist.getName()+".plli",gson.toJson(playlist));
         }
+        return false;
     }
 
     private Playlist readPlaylist(String filename) {

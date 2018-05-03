@@ -62,7 +62,7 @@ public final class HelperFile {
         return text.toString();
     }
 
-    public static void write(String folder, String filename, String text) {
+    public static boolean write(String folder, String filename, String text) {
         File file = getFile(folder, filename);
         createFolder(folder);
         try {
@@ -70,8 +70,10 @@ public final class HelperFile {
             out.write(text);
             out.flush();
             out.close();
+            return true;
         } catch (IOException e) {
             Log.e(TAG, "Error saving file : "+file.getAbsolutePath(), e);
+            return false;
         }
     }
 

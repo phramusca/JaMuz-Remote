@@ -281,6 +281,13 @@
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     android:background="@drawable/ic_button_new"/>
+
+                <Button android:id="@+id/button_save"
+                    android:layout_row="0"
+                    android:layout_column="2"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_button_save"/>
             </GridLayout>
 
         </GridLayout>
