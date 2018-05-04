@@ -29,23 +29,9 @@ public class AudioPlayer {
             mediaPlayer.prepare();
             mediaPlayer.start();
             startTimer();
-
             msg = applyReplayGain(mediaPlayer, track);
-
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mediaPlayer) {
-                    callback.onPlayBackEnd();
-                }
-            });
-
-            mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
-                @Override
-                public void onSeekComplete(MediaPlayer mediaPlayer) {
-                    startTimer();
-                }
-            });
-
+            mediaPlayer.setOnCompletionListener(mediaPlayer -> callback.onPlayBackEnd());
+            mediaPlayer.setOnSeekCompleteListener(mediaPlayer -> startTimer());
         } catch (IOException e) {
             Log.e(TAG, "Error playing (\""+track+"\") => DELETING IT !!!!!!", e);
             //TODO: Put back in RepoSync (take info from there)

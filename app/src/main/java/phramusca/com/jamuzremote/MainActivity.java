@@ -571,11 +571,26 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         String text = input.getText().toString().trim();
                         if(!localPlaylists.contains(text)) {
-                            //TODO: Duplicate current playlist (clone) instead of new (stashed)
-                            Playlist newPlaylist = new Playlist(text, true);
+                            /*Playlist newPlaylist=null;
+                            if(localSelectedPlaylist!=null) {
+                                try {
+                                    newPlaylist = (Playlist) localSelectedPlaylist.clone();
+                                    newPlaylist.setName(text);
+                                } catch (CloneNotSupportedException e) {
+                                    e.printStackTrace();
+                                }
+                            }*/
+                            Playlist newPlaylist=null;
+                            if(localSelectedPlaylist!=null) {
+                                newPlaylist = clonePlaylist(localSelectedPlaylist);
+                                newPlaylist.setName(text);
+                            }
+                            if(newPlaylist==null) {
+                                newPlaylist = new Playlist(text, true);
+                            }
                             localPlaylists.add(newPlaylist);
                             localSelectedPlaylist=newPlaylist;
-                            setupLocalPlaylistAll();
+                            setupLocalPlaylistAdapter();
                             displayPlaylist(localSelectedPlaylist);
                             setupSpinner();
                         } else {
@@ -1959,7 +1974,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        setupLocalPlaylistAll();
+        setupLocalPlaylistAdapter();
         localSelectedPlaylist = localPlaylists.get(0);
         runOnUiThread(new Runnable() {
             @Override
@@ -1970,7 +1985,7 @@ public class MainActivity extends AppCompatActivity {
         setupSpinner();
     }
 
-    private void setupLocalPlaylistAll() {
+    private void setupLocalPlaylistAdapter() {
         if (localPlaylists.size() > 0) {
             Collections.sort(localPlaylists);
         } else {
@@ -2493,4 +2508,20 @@ public class MainActivity extends AppCompatActivity {
             }*/
         }
     };
+
+    @SuppressWarnings("unchecked")
+    public static Playlist clonePlaylist(Playlist playlist) {
+        //Save to Json
+        Gson gson = new Gson();
+        String json = gson.toJson(playlist);
+        //Create a new from json
+        Type mapType = new TypeToken<Playlist>(){}.getType();
+        Playlist newPlaylist=null;
+        try {
+            newPlaylist = gson.fromJson(json, mapType);
+        } catch (JsonSyntaxException ex) {
+            Log.e(TAG, "", ex);
+        }
+        return newPlaylist;
+    }
 }
