@@ -135,6 +135,10 @@ public class Playlist implements Comparable {
         this.limitValue = limitValue;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     private class Lists {
         ArrayList<String> include = new ArrayList<>();
         ArrayList<String> exclude = new ArrayList<>();
