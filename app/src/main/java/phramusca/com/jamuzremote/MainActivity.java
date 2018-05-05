@@ -153,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
     private Button button_speech;
     private Button button_new;
     private Button button_save;
+    private Button button_restore;
     private Button button_delete;
     private Button button_queue;
     private SeekBar seekBarPosition;
@@ -519,7 +520,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //FIXME: Remote and Sync modes interfere:
+        //FIXME !!!!!!!!!!!  Remote and Sync modes interfere:
         // - one can close the other on closure. why ?
         // - remote<->local move can be difficult :(
         buttonRemote = (Button) findViewById(R.id.button_connect);
@@ -609,12 +610,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //FIXME Make button_save red when playlist is being modified ONLY and not saved
-        // >>>>>>>> Store modified info in playlist as now:
-        // info is lost when changing from one playlist to another
-        // ALSO move savePlaylist to Playlist (if possible, doc why otherwise)
-        // BTW: is readPlaylist in Playlist already or not yet ?
-        //FIXME add a "Reload" or "Restore" button (re-read from disc)
         button_save = (Button) findViewById(R.id.button_save);
         button_save.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -625,6 +620,26 @@ public class MainActivity extends AppCompatActivity {
                         button_save.setBackgroundResource(localSelectedPlaylist.isModified()?
                                 R.drawable.ic_button_save_red:R.drawable.ic_button_save);
                         msg+=" successfully.";
+                    } else {
+                        msg+=" with errors !";
+                    }
+                    helperToast.toastShort(msg);
+                }
+            }
+        });
+
+        button_restore = (Button) findViewById(R.id.button_restore);
+        button_restore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(localSelectedPlaylist!=null) {
+                    String msg="Playlist \""+localSelectedPlaylist.getName()+"\" restored";
+                    File playlistFolder = HelperFile.createFolder("Playlists");
+                    Playlist playlist = readPlaylist(localSelectedPlaylist.getName()+".plli");
+                    if(playlist!=null) {
+                        msg+=" successfully.";
+                        localSelectedPlaylist=playlist;
+                        displayPlaylist(localSelectedPlaylist);
                     } else {
                         msg+=" with errors !";
                     }
@@ -1434,10 +1449,6 @@ public class MainActivity extends AppCompatActivity {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
-
-        for(Playlist playlist : localPlaylists) {
-            playlist.save();
-        }
     }
 
     private static File[] externalFilesDir;
@@ -1977,7 +1988,7 @@ public class MainActivity extends AppCompatActivity {
         for(String file : playlistFolder.list()) {
             if(file.endsWith(".plli")) {
                 Playlist playlist = readPlaylist(file);
-                if(playlist !=null) {
+                if(playlist != null) {
                     playlist.getNbFiles();
                     localPlaylists.add(playlist);
                 }
