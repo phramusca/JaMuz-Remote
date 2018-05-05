@@ -429,13 +429,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Random"
-                    android:onClick="onRadioButtonClicked"
+                    android:onClick="onPlaylistOrderRadioButtonClicked"
                     android:textColor="@color/textColor"/>
                 <RadioButton android:id="@+id/order_playCounter_lastPlayed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Play counter, Last played"
-                    android:onClick="onRadioButtonClicked"
+                    android:onClick="onPlaylistOrderRadioButtonClicked"
                     android:textColor="@color/textColor"/>
             </RadioGroup>
         </LinearLayout>

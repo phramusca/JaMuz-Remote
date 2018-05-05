@@ -376,7 +376,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         spinnerPlaylist = (Spinner) findViewById(R.id.spinner_playlist);
-        spinnerPlaylist.setOnItemSelectedListener(spinnerListener);
+        spinnerPlaylist.setOnItemSelectedListener(spinnerPlaylistListener);
         spinnerPlaylist.setOnTouchListener(dimOnTouchListener);
 
         spinnerGenre = (Spinner) findViewById(R.id.spinner_genre);
@@ -592,7 +592,7 @@ public class MainActivity extends AppCompatActivity {
                             localSelectedPlaylist=newPlaylist;
                             setupLocalPlaylistAdapter();
                             displayPlaylist(localSelectedPlaylist);
-                            setupSpinner();
+                            setupLocalPlaylistsSpinner();
                         } else {
                             helperToast.toastLong("Playlist \""+text+"\" already exist.");
                         }
@@ -609,15 +609,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //FIXME Make button_save red when playlist is being modified and not saved
-        //TODO add a "Reload" or "Restore" button (re-read from disc)
+        //FIXME Make button_save red when playlist is being modified ONLY and not saved
+        // >>>>>>>> Store modified info in playlist as now:
+        // info is lost when changing from one playlist to another
+        // ALSO move savePlaylist to Playlist (if possible, doc why otherwise)
+        // BTW: is readPlaylist in Playlist already or not yet ?
+        //FIXME add a "Reload" or "Restore" button (re-read from disc)
         button_save = (Button) findViewById(R.id.button_save);
         button_save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(localSelectedPlaylist!=null) {
                     String msg="Playlist \""+localSelectedPlaylist.getName()+"\" saved";
-                    if(savePlaylist(localSelectedPlaylist)) {
+                    if(localSelectedPlaylist.save()) {
+                        button_save.setBackgroundResource(localSelectedPlaylist.isModified()?
+                                R.drawable.ic_button_save_red:R.drawable.ic_button_save);
                         msg+=" successfully.";
                     } else {
                         msg+=" with errors !";
@@ -646,7 +652,7 @@ public class MainActivity extends AppCompatActivity {
                                 localPlaylists.remove(localSelectedPlaylist);
                                 localSelectedPlaylist = localPlaylists.get(0);
                                 displayPlaylist(localSelectedPlaylist);
-                                setupSpinner();
+                                setupLocalPlaylistsSpinner();
                             } else {
                                 helperToast.toastShort("You cannot delete last playlist.");
                             }
@@ -993,6 +999,8 @@ public class MainActivity extends AppCompatActivity {
         queue.clear();
         refreshSpinner(refreshAll);
         fillQueue(10, new ArrayList<Integer>());
+        button_save.setBackgroundResource(localSelectedPlaylist.isModified()?
+                R.drawable.ic_button_save_red:R.drawable.ic_button_save);
     }
 
     private void refreshSpinner(final boolean refreshAll) {
@@ -1056,12 +1064,12 @@ public class MainActivity extends AppCompatActivity {
                 queue = playlist.getTracks(10);
                 playNext();
             } else {
-                refreshQueueAndSpinner();
+                refreshQueueAndSpinner(false);
             }
         }
     }
 
-    Spinner.OnItemSelectedListener spinnerListener = new Spinner.OnItemSelectedListener() {
+    Spinner.OnItemSelectedListener spinnerPlaylistListener = new Spinner.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view,
         int pos, long id) {
@@ -1316,7 +1324,7 @@ public class MainActivity extends AppCompatActivity {
                         if(playlist.getName().equalsIgnoreCase(searchValue)) {
                             applyPlaylist(playlist, true);
                             localSelectedPlaylist.getNbFiles();
-                            setupSpinner();
+                            setupLocalPlaylistsSpinner();
                             msg = "";
                             break;
                         }
@@ -1333,7 +1341,7 @@ public class MainActivity extends AppCompatActivity {
                     else if(HelperLibrary.musicLibrary.getArtist(searchValue)) {
                         Playlist playlist =new Playlist(searchValue, true);
                         playlist.setArtist(searchValue);
-                        setupSpinner(playlist);
+                        setupLocalPlaylistsSpinner(playlist);
                         msg = "";
                     }
                     break;
@@ -1348,7 +1356,7 @@ public class MainActivity extends AppCompatActivity {
                     else if(HelperLibrary.musicLibrary.getAlbum(searchValue)) {
                         Playlist playlist =new Playlist(searchValue, true);
                         playlist.setAlbum(searchValue);
-                        setupSpinner(playlist);
+                        setupLocalPlaylistsSpinner(playlist);
                         msg = "";
                     }
                     break;
@@ -1428,7 +1436,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         for(Playlist playlist : localPlaylists) {
-            savePlaylist(playlist);
+            playlist.save();
         }
     }
 
@@ -1719,7 +1727,7 @@ public class MainActivity extends AppCompatActivity {
                 if (enable) {
                     buttonRemote.setBackgroundResource(R.drawable.remote_off);
                     enablePlaylistEdit(true);
-                    setupSpinner();
+                    setupLocalPlaylistsSpinner();
                 } else {
                     buttonRemote.setText("Close");
                     buttonRemote.setBackgroundResource(R.drawable.remote_on);
@@ -1983,29 +1991,10 @@ public class MainActivity extends AppCompatActivity {
                 displayPlaylist(localSelectedPlaylist);
             }
         });
-        setupSpinner();
+        setupLocalPlaylistsSpinner();
     }
 
-    private void setupLocalPlaylistAdapter() {
-        if (localPlaylists.size() > 0) {
-            Collections.sort(localPlaylists);
-        } else {
-            Playlist playlist = new Playlist("All", true);
-            playlist.getNbFiles();
-            localPlaylists.add(playlist);
-        }
-        playListArrayAdapter = new ArrayAdapter<Playlist>(this, R.layout.spinner_item, localPlaylists);
-    }
-
-    private boolean savePlaylist(Playlist playlist) {
-        if(playlist !=null) {
-            Gson gson = new Gson();
-            return HelperFile.write("Playlists", playlist.getName()+".plli",gson.toJson(playlist));
-        }
-        return false;
-    }
-
-    private Playlist readPlaylist(String filename) {
+    public Playlist readPlaylist(String filename) {
         String readJson = HelperFile.read("Playlists", filename);
         if(!readJson.equals("")) {
             Playlist playlist = new Playlist(filename.replaceFirst("[.][^.]+$", ""), true);
@@ -2019,6 +2008,17 @@ public class MainActivity extends AppCompatActivity {
             return playlist;
         }
         return null;
+    }
+
+    private void setupLocalPlaylistAdapter() {
+        if (localPlaylists.size() > 0) {
+            Collections.sort(localPlaylists);
+        } else {
+            Playlist playlist = new Playlist("All", true);
+            playlist.getNbFiles();
+            localPlaylists.add(playlist);
+        }
+        playListArrayAdapter = new ArrayAdapter<Playlist>(this, R.layout.spinner_item, localPlaylists);
     }
 
     private void displayPlaylist(Playlist playlist) {
@@ -2075,10 +2075,12 @@ public class MainActivity extends AppCompatActivity {
             spinnerPlaylistLimitValue.setAdapter(playListLimitValueArrayAdapter);
             spinnerPlaylistLimitValue.setSelection(playlist.getLimitValue());
             textViewPlaylist.setText(playlist.getSummary());
+            button_save.setBackgroundResource(playlist.isModified()?
+                    R.drawable.ic_button_save_red:R.drawable.ic_button_save);
         }
     }
 
-    public void onRadioButtonClicked(View view) {
+    public void onPlaylistOrderRadioButtonClicked(View view) {
         dimOn();
         layoutOrderPlaylistLayout.setEnabled(false);
         boolean checked = ((RadioButton) view).isChecked();
@@ -2104,23 +2106,23 @@ public class MainActivity extends AppCompatActivity {
         return mWifi.isConnected();
     }
 
-    private void setupSpinner(Playlist playlist) {
+    private void setupLocalPlaylistsSpinner(Playlist playlist) {
         applyPlaylist(playlist, true);
         localSelectedPlaylist.getNbFiles();
         localPlaylists.add(playlist);
         playListArrayAdapter = new ArrayAdapter<Playlist>(this, R.layout.spinner_item, localPlaylists);
-        setupSpinner();
+        setupLocalPlaylistsSpinner();
     }
 
-    private void setupSpinner() {
+    private void setupLocalPlaylistsSpinner() {
         if(localSelectedPlaylist!=null) {
             localSelectedPlaylist.getNbFiles();
-            setupSpinner(playListArrayAdapter, localSelectedPlaylist);
+            setupLocalPlaylistsSpinner(playListArrayAdapter, localSelectedPlaylist);
         }
     }
 
-    private void setupSpinner(final ArrayAdapter<Playlist> arrayAdapter,
-                              final Playlist selectedPlaylist) {
+    private void setupLocalPlaylistsSpinner(final ArrayAdapter<Playlist> arrayAdapter,
+                                            final Playlist selectedPlaylist) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -2305,7 +2307,7 @@ public class MainActivity extends AppCompatActivity {
                         ArrayAdapter<Playlist> arrayAdapter =
                                 new ArrayAdapter<Playlist>(MainActivity.this,
                                         R.layout.spinner_item, playlists);
-                        setupSpinner(arrayAdapter, temp);
+                        setupLocalPlaylistsSpinner(arrayAdapter, temp);
                         enablePlaylistEdit(false);
                         break;
                     case "currentPosition":
@@ -2359,7 +2361,7 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
             stopRemote();
-            setupSpinner();
+            setupLocalPlaylistsSpinner();
             displayedTrack = localTrack;
             displayTrack(false);
         }
@@ -2371,7 +2373,7 @@ public class MainActivity extends AppCompatActivity {
             clientRemote=null;
         }
         enableClient(buttonRemote, R.drawable.remote_off);
-        setupSpinner();
+        setupLocalPlaylistsSpinner();
         displayedTrack = localTrack;
         displayTrack(false);
     }
