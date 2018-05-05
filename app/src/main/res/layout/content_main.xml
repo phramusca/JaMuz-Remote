@@ -341,6 +341,13 @@
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     android:background="@drawable/ic_button_save"/>
+
+                <Button android:id="@+id/button_restore"
+                    android:layout_row="0"
+                    android:layout_column="8"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_button_restore"/>
             </GridLayout>
         </LinearLayout>
 
