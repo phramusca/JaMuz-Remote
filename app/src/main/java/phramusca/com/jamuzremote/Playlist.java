@@ -90,7 +90,7 @@ public class Playlist implements Comparable {
         }
 
         in+=" | "+nullStatus;
-        int max=20;
+        int max=5; //TODO: Makde it an option
         if (tagsLists.isIncluded() || genresLists.isIncluded()) {
             ArrayList<String> included = new ArrayList<>();
             if(tagsLists.isIncluded()){

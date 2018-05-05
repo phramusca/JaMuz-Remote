@@ -609,7 +609,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // TODO make a "Restore" button (to enable temporary modification of a playlist with genres for ex)
+        //FIXME Make button_save red when playlist is being modified and not saved
+        //TODO add a "Reload" or "Restore" button (re-read from disc)
         button_save = (Button) findViewById(R.id.button_save);
         button_save.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1781,7 +1782,7 @@ public class MainActivity extends AppCompatActivity {
 
     //FIXME: getFromQRcode with sync too (as for remote)
     // And manage settings panel enabling better than now !! (remember there are 2 services sharing it)
-    // => Why not let it enabled ll time and use latest change at every connection ?
+    // => Why not let it enabled at all times and use latest change at every connection ?
     private void getFromQRcode(String content) {
         if(content!=null) {
             if(!content.equals("")) {
