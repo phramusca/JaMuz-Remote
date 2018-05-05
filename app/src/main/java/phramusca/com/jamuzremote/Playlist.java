@@ -2,6 +2,8 @@ package phramusca.com.jamuzremote;
 
 import android.support.annotation.NonNull;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.Set;
  */
 public class Playlist implements Comparable {
 
+    private static final String TAG = Playlist.class.getSimpleName();
     private String name;
     private Map<String, TriStateButton.STATE> tags = new HashMap<>();
     private Map<String, TriStateButton.STATE> genres = new HashMap<>();
@@ -26,6 +29,8 @@ public class Playlist implements Comparable {
     private Order order=Order.PLAYCOUNTER_LASTPLAYED;
     private int limitValue=0;
     private String limitUnit ="minutes";
+    private boolean modified=false;
+    private int nbFiles=-1;
 
     Playlist(String name, boolean isLocal) {
         this.name = name;
@@ -121,6 +126,7 @@ public class Playlist implements Comparable {
 
     public void setLimitUnit(String limitUnit) {
         this.limitUnit = limitUnit;
+        modified=true;
     }
 
     public String getLimitUnit() {
@@ -133,10 +139,15 @@ public class Playlist implements Comparable {
 
     public void setLimitValue(int limitValue) {
         this.limitValue = limitValue;
+        modified=true;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isModified() {
+        return modified;
     }
 
     private class Lists {
@@ -211,12 +222,19 @@ public class Playlist implements Comparable {
         } else {
             tags.put(value, state);
         }
+        modified=true;
     }
 
     public void toggleGenre(String value, TriStateButton.STATE state) {
         genres.put(value, state);
+        modified=true;
     }
 
+    /**
+     * Rotates rating operator
+     * : ">" to "=" to "<" to ">" and so on
+     * @return new rating operator
+     */
     public String setRatingOperator() {
         switch (ratingOperator) {
             case GREATERTHAN:
@@ -229,11 +247,13 @@ public class Playlist implements Comparable {
                 ratingOperator=Operator.GREATERTHAN;
                 break;
         }
+        modified=true;
         return ratingOperator.toString();
     }
 
     public void setRating(int rating) {
         this.rating = rating;
+        modified=true;
     }
 
     private String getWhere(List<Integer> IDs) {
@@ -349,8 +369,6 @@ public class Playlist implements Comparable {
         return name;
     }
 
-    private int nbFiles=-1;
-
     @Override
     public String toString() {
         return isLocal?
@@ -420,6 +438,7 @@ public class Playlist implements Comparable {
 
     public void setOrder(Order order) {
         this.order = order;
+        modified=true;
     }
 
     public enum Order {
@@ -438,4 +457,15 @@ public class Playlist implements Comparable {
         }
     }
 
+    public boolean save() {
+        Gson gson = new Gson();
+        boolean previousModified=modified;
+        modified=false; //otherwise saved as modified => non-sense
+        if(HelperFile.write("Playlists", getName()+".plli",gson.toJson(this))) {
+            return true;
+        } else {
+            modified=previousModified;
+        }
+        return false;
+    }
 }
