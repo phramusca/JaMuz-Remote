@@ -37,7 +37,7 @@ public class MusicLibrary {
 
     SQLiteDatabase db;
     private MusicLibraryDb musicLibraryDb;
-    private static final String TAG = MusicLibrary.class.getSimpleName();
+    private static final String TAG = MusicLibrary.class.getName();
 
     MusicLibrary(Context context){
         musicLibraryDb = new MusicLibraryDb(context);

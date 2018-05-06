@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public class ReceiverPhoneCall extends PhonecallReceiver {
 
-    private static final String TAG = ReceiverPhoneCall.class.getSimpleName();
+    private static final String TAG = ReceiverPhoneCall.class.getName();
     private static boolean wasPlaying = false;
 
     private void pause() {

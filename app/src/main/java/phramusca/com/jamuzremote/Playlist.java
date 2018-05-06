@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class Playlist implements Comparable {
 
-    private static final String TAG = Playlist.class.getSimpleName();
+    private static final String TAG = Playlist.class.getName();
     private String name;
     private Map<String, TriStateButton.STATE> tags = new HashMap<>();
     private Map<String, TriStateButton.STATE> genres = new HashMap<>();
@@ -115,7 +115,7 @@ public class Playlist implements Comparable {
         }
 
         in+=" | "+order.toString();
-        in+=" | "+ (limitValue<0?"":limitValue+" "+limitUnit);
+        in+=" | "+ (limitValue > 0 ? limitValue + " " + limitUnit : "");
 
         return in;
     }
@@ -148,6 +148,10 @@ public class Playlist implements Comparable {
 
     public boolean isModified() {
         return modified;
+    }
+
+    public void setModified(boolean modified) {
+        this.modified = modified;
     }
 
     private class Lists {
@@ -465,7 +469,7 @@ public class Playlist implements Comparable {
             return true;
         } else {
             modified=previousModified;
+            return false;
         }
-        return false;
     }
 }

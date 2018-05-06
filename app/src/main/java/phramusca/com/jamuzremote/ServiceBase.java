@@ -19,7 +19,7 @@ import java.io.File;
 
 public class ServiceBase extends Service {
 
-    private static final String TAG = ServiceBase.class.getSimpleName();
+    private static final String TAG = ServiceBase.class.getName();
     protected File getAppDataPath;
     private Handler mHandler = new Handler(Looper.getMainLooper());
     protected HelperNotification helperNotification;

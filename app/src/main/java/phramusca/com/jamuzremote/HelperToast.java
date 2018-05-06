@@ -10,7 +10,7 @@ import android.widget.Toast;
 
 public class HelperToast {
 
-    private static final String TAG = HelperToast.class.getSimpleName();
+    private static final String TAG = HelperToast.class.getName();
     private Context context;
 
     HelperToast(Context context) {

@@ -23,7 +23,7 @@ import java.util.List;
  * @author phramusca
  */
 public class ClientSync extends Client {
-	private static final String TAG = ClientSync.class.getSimpleName();
+	private static final String TAG = ClientSync.class.getName();
 	private final ICallBackSync callback;
     private final SyncStatus syncStatus = new SyncStatus(Status.NOT_CONNECTED, 0);
     private CountDownTimer timerWatchTimeout;

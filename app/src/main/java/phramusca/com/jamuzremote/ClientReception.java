@@ -28,7 +28,7 @@ import static phramusca.com.jamuzremote.MainActivity.getAppDataPath;
 
 public class ClientReception extends ProcessAbstract {
 
-    private static final String TAG = ClientReception.class.getSimpleName();
+    private static final String TAG = ClientReception.class.getName();
 	private final BufferedReader bufferedReader;
 	private InputStream inputStream;
 	private final ICallBackReception callback;

@@ -12,7 +12,7 @@ import android.util.Log;
 
 public class HelperNotification {
 
-    private static final String TAG = HelperNotification.class.getSimpleName();
+    private static final String TAG = HelperNotification.class.getName();
 
     private NotificationManager notificationManager;
     private PendingIntent pendingIntent;
