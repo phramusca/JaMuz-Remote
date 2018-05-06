@@ -25,7 +25,7 @@ import java.net.Socket;
  * @author phramusca
  */
 public class Client {
-	private static final String TAG = Client.class.getSimpleName();
+	private static final String TAG = Client.class.getName();
 	
 	private Socket socket = null;
 	private ClientEmission emission;

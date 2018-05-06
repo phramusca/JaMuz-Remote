@@ -13,7 +13,7 @@ import java.io.IOException;
 public class AudioPlayer {
 
     private final ICallBackPlayer callback;
-    private static final String TAG = AudioPlayer.class.getSimpleName();
+    private static final String TAG = AudioPlayer.class.getName();
     private static MediaPlayer mediaPlayer;
     private static CountDownTimer timer;
 

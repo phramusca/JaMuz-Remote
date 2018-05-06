@@ -94,7 +94,7 @@ import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = MainActivity.class.getName();
     private SharedPreferences preferences;
     private HelperToast helperToast = new HelperToast(this);
     private ClientRemote clientRemote;
@@ -639,6 +639,7 @@ public class MainActivity extends AppCompatActivity {
                     if(playlist!=null) {
                         msg+=" successfully.";
                         localSelectedPlaylist=playlist;
+                        localSelectedPlaylist.setModified(false);
                         displayPlaylist(localSelectedPlaylist);
                     } else {
                         msg+=" with errors !";
@@ -2294,7 +2295,7 @@ public class MainActivity extends AppCompatActivity {
 
     class CallBackRemote implements ICallBackRemote {
 
-        private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackRemote.class.getSimpleName();
+        private final String TAG = CallBackRemote.class.getName();
 
         @Override
         public void receivedJson(final String json) {

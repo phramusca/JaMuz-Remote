@@ -33,7 +33,7 @@ public class Track implements Serializable {
     private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
     public String source="";
     private boolean isHistory=false;
-    private static final String TAG = Track.class.getSimpleName();
+    private static final String TAG = Track.class.getName();
 
     //TODO: Store replaygain, no to read too often AND as a workaround for flac
     // replaygain that cannot be read

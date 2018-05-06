@@ -9,7 +9,7 @@ import android.util.Log;
 
 public final class HelperLibrary {
 
-    private static final String TAG = HelperLibrary.class.getSimpleName();
+    private static final String TAG = HelperLibrary.class.getName();
     public static MusicLibrary musicLibrary;
 
     private HelperLibrary () {

@@ -13,7 +13,7 @@ import java.util.List;
 
 public class ServiceScan extends ServiceBase {
 
-    private static final String TAG = ServiceScan.class.getSimpleName();
+    private static final String TAG = ServiceScan.class.getName();
     private Notification notificationScan;
     private int nbFiles=0;
     private int nbFilesTotal = 0;

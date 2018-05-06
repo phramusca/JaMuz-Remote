@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public final class RepoSync {
 
-    private static final String TAG = RepoSync.class.getSimpleName();
+    private static final String TAG = RepoSync.class.getName();
 
     private static Table<Integer, FileInfoReception.Status, FileInfoReception> files = null;
 

@@ -22,7 +22,7 @@ import java.util.Map;
  */
 public class ServiceSync extends ServiceBase {
 
-    private static final String TAG = ServiceSync.class.getSimpleName();
+    private static final String TAG = ServiceSync.class.getName();
     public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE";
 
     private ClientSync clientSync;
@@ -83,7 +83,7 @@ public class ServiceSync extends ServiceBase {
 
     class CallBackSync implements ICallBackSync {
 
-        private final String TAG = MainActivity.class.getSimpleName()+"."+CallBackSync.class.getSimpleName();
+        private final String TAG = CallBackSync.class.getName();
 
         @Override
         public void receivedJson(final String json) {
