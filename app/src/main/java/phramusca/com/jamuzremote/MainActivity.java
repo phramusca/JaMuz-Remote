@@ -92,6 +92,8 @@ import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
 //https://gitlab.com/fdroid/fdroiddata/blob/master/CONTRIBUTING.md
 //https://f-droid.org/
 
+//TODO: This class is far too big: move some out: audio in a service for instance
+//Why not using the standard anroid player by the way ? (less control for replaygain ?)
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getName();
@@ -105,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
     public static AudioPlayer audioPlayer;
 
     //In internal SD emulated storage:
-    //TODO: Eventually, change database location to external SD as we now have rights
+    //TODO: Possibly, change database location to external SD as we now have rights
     //In external SD. Does not seem to work !
     //private static final String DB_PATH =
     //      "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;
@@ -128,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText editTextConnectInfo;
     private TextView textViewPath;
     private TextView textViewPlaylist;
-    private Button buttonConfigConnection;
+    private Button buttonSaveConnectionString;
     private Button buttonRemote;
     private Button buttonSync;
     private ToggleButton toggleButtonDimMode;
@@ -234,8 +236,8 @@ public class MainActivity extends AppCompatActivity {
 
         textViewPlaylist = (TextView) findViewById(R.id.textViewPlaylist);
 
-        buttonConfigConnection = (Button) findViewById(R.id.button_config_connection);
-        buttonConfigConnection.setOnClickListener(new View.OnClickListener() {
+        buttonSaveConnectionString = (Button) findViewById(R.id.button_save_connectionString);
+        buttonSaveConnectionString.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 setConfig("connectionString", editTextConnectInfo.getText().toString());
@@ -535,7 +537,7 @@ public class MainActivity extends AppCompatActivity {
                     if(clientInfo!=null) {
                         clientRemote =  new ClientRemote(clientInfo, new CallBackRemote());;
                     } else {
-                        enableConnect(true);
+                        enableRemote(true);
                         return;
                     }
                     new Thread() {
@@ -543,16 +545,16 @@ public class MainActivity extends AppCompatActivity {
                             if(clientRemote.connect()) {
                                 setConfig("connectionString", editTextConnectInfo.getText().toString());
                                 enableClient(buttonRemote, true);
-                                enableConnect(false);
+                                enableRemote(false);
                             }
                             else {
-                                enableConnect(true);
+                                enableRemote(true);
                             }
                         }
                     }.start();
                 }
                 else {
-                    enableConnect(true);
+                    enableRemote(true);
                     stopRemote();
                 }
             }
@@ -821,7 +823,9 @@ public class MainActivity extends AppCompatActivity {
         displayTrack(false);
 
         enableClient(buttonRemote, false);
+        enableClient(buttonSync, false);
         getFromQRcode(getIntent().getDataString());
+        enableClient(buttonSync, true);
         enableClient(buttonRemote, true);
 
         //TODO: MAke this an option somehow
@@ -1732,7 +1736,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void enableConnect(final boolean enable) {
+    private void enableRemote(final boolean enable) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -1768,7 +1772,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void enableClient(final Button button, final int resId) {
+    private void enableClientRemote(final Button button, final int resId) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -2384,7 +2388,7 @@ public class MainActivity extends AppCompatActivity {
             clientRemote.close();
             clientRemote=null;
         }
-        enableClient(buttonRemote, R.drawable.remote_off);
+        enableClientRemote(buttonRemote, R.drawable.remote_off);
         setupLocalPlaylistsSpinner();
         displayedTrack = localTrack;
         displayTrack(false);
