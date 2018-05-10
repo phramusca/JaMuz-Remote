@@ -2,6 +2,9 @@ package phramusca.com.jamuzremote;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
@@ -24,11 +27,13 @@ public class TrackAdapter extends BaseAdapter {
     private Context mContext;
     private List<Track> tracks;
     private LayoutInflater mInflater;
+    private final int positionPlaying;
 
-    TrackAdapter(Context context, List<Track> tracks) {
+    TrackAdapter(Context context, List<Track> tracks, int positionPlaying) {
         mContext = context;
         this.tracks = tracks;
         mInflater = LayoutInflater.from(context);
+        this.positionPlaying = positionPlaying;
     }
 
     @Override
@@ -70,6 +75,10 @@ public class TrackAdapter extends BaseAdapter {
         if (bitmap == null) {
             bitmap = HelperBitmap.getEmptyThumb();
         }
+        if(position==positionPlaying) {
+            bitmap = overlayPlayingIcon(bitmap, 15);
+        }
+
         ImageView imageViewCover = layoutItem.findViewById(R.id.imageView);
         imageViewCover.setImageBitmap(bitmap);
         BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);
@@ -82,15 +91,30 @@ public class TrackAdapter extends BaseAdapter {
         }
 
         layoutItem.setTag(position);
-        layoutItem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Integer position = (Integer)view.getTag();
-                sendListener(tracks.get(position), position);
-            }
+        layoutItem.setOnClickListener(view -> {
+            Integer position1 = (Integer)view.getTag();
+            sendListener(tracks.get(position1), position1);
         });
 
         return layoutItem;
+    }
+
+    private Bitmap overlayPlayingIcon(Bitmap bitmap, int margin) {
+        Bitmap bmOverlay = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
+        Canvas canvas = new Canvas(bmOverlay);
+        canvas.drawBitmap(bitmap, new Matrix(), null);
+        Bitmap playingBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_playing);
+        int newWidth = bmOverlay.getWidth()-(margin*2);
+        int newHeight = bmOverlay.getHeight()-(margin*2);
+        int width = playingBitmap.getWidth();
+        int height = playingBitmap.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+        matrix.postTranslate(margin, margin);
+        canvas.drawBitmap(playingBitmap, matrix, null);
+        return bmOverlay;
     }
 
     public interface TrackAdapterListener {

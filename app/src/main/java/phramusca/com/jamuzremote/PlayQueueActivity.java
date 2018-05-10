@@ -25,15 +25,13 @@ public class PlayQueueActivity extends AppCompatActivity implements TrackAdapter
         final ArrayList<Track> queue = (ArrayList<Track>) intent.getSerializableExtra("queueArrayList");
 
         if(queue!=null) {
-            //Display tracks
-            ListView listView = (ListView) findViewById(R.id.list_queue);
-            adapter = new TrackAdapter(this, queue);
-            adapter.addListener(this);
-            listView.setAdapter(adapter);
-            //Set "selected"
             int histIndex = intent.getIntExtra("histIndex", 0);
             histSize = intent.getIntExtra("histSize", 0);
             int position = histIndex<=0?0:histIndex;
+            ListView listView = (ListView) findViewById(R.id.list_queue);
+            adapter = new TrackAdapter(this, queue, position);
+            adapter.addListener(this);
+            listView.setAdapter(adapter);
             listView.setSelection(position);
 
             //Reads thumbnails in background
