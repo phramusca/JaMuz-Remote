@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
     //private static final String DB_PATH =
     //      "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;
     public static File musicLibraryDbFile = new File(
-            Environment.getExternalStorageDirectory()+"/JaMuz/JaMuzRemote.db");
+            Environment.getExternalStorageDirectory()+"/JaMuzKids/JaMuzKids.db");
 
     private List<Track> queue = new ArrayList<>();
     private ArrayList<Track> queueHistory = new ArrayList<>();
@@ -794,6 +794,7 @@ public class MainActivity extends AppCompatActivity {
                 Settings.Secure.getString(MainActivity.this.getContentResolver(), Settings.Secure.ANDROID_ID),
                 "tata", isRemote,
                 "jamuz", getAppDataPath().getAbsolutePath());
+                "jamuzkids");
     }
 
     private void toggleOff(ToggleButton button, View layout) {
@@ -2279,7 +2280,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "MainActivity onBackPressed");
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle("Closing JaMuz")
+                .setTitle("Closing JaMuz Kids")
                 .setMessage("Are you sure you want to exit and stop playback ?")
                 .setPositiveButton("Yes", (dialog, which) -> finish())
                 .setNegativeButton("No", null)
