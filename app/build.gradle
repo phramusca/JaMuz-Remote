@@ -5,7 +5,7 @@ android {
     buildToolsVersion "27.0.3"
 
     defaultConfig {
-        applicationId "org.phramusca.jamuz"
+        applicationId "org.phramusca.jamuzkids"
         minSdkVersion 21
         // https://developer.android.com/about/dashboards/index.html
         // http://chalup.github.io/blog/2014/06/15/minsdkversion-equals-15/

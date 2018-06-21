@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">JaMuz</string>
+    <string name="app_name" translatable="false">JaMuz Kids</string>
     <string name="lt_ip_gt_lt_port_gt" translatable="false"><![CDATA[<IP>:<Port> :]]></string>
     <string name="_192_168_0_11_2013" translatable="false">192.168.0.11:2013</string>
     <string name="welcomeYear" translatable="false">2018</string>

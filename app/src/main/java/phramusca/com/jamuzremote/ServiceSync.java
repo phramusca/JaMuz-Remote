@@ -23,7 +23,7 @@ import java.util.Map;
 public class ServiceSync extends ServiceBase {
 
     private static final String TAG = ServiceSync.class.getName();
-    public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE_SCAN_REMOTE";
+    public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE_SCAN_KIDS";
 
     private ClientSync clientSync;
     private Benchmark bench;
