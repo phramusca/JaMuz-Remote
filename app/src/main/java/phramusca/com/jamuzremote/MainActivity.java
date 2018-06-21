@@ -1456,6 +1456,8 @@ public class MainActivity extends AppCompatActivity {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
+
+        HelperLibrary.close();
     }
 
     private static File[] externalFilesDir;
