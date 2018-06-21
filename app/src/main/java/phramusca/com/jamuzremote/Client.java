@@ -60,15 +60,12 @@ public class Client {
             emission.start();
 
             //Authenticating
-            if(waitPrompt("MSG_ENTER_LOGIN")) {
-                send(clientInfo.getLogin());
-                if(waitPrompt("MSG_ENTER_PWD")) {
-                    send(clientInfo.getPassword());
-                    if(waitPrompt("MSG_CONNECTED")) {
-                        reception = new ClientReception(inputStream, callback);
-                        reception.start();
-                        return true;
-                    }
+            if(waitPrompt("MSG_AUTHENTICATE")) {
+                send(clientInfo.toJSONObject().toString());
+                if(waitPrompt("MSG_CONNECTED")) {
+                    reception = new ClientReception(inputStream, callback);
+                    reception.start();
+                    return true;
                 }
             }
             callback.disconnected("Authentication failed.");
@@ -113,7 +110,7 @@ public class Client {
 					return false;
 				}
 			}
-		} catch (IOException ex) {
+		} catch (NullPointerException | IOException ex) {
             //Includes SocketException
             Log.w(TAG, "", ex);
 			return false;
