@@ -533,7 +533,7 @@ public class MainActivity extends AppCompatActivity {
                 enableClient(buttonRemote, false);
                 buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
                 if(buttonRemote.getText().equals("Connect")) {
-                    ClientInfo clientInfo = getClientInfo("");
+                    ClientInfo clientInfo = getClientInfo(true);
                     if(clientInfo!=null) {
                         clientRemote =  new ClientRemote(clientInfo, new CallBackRemote());;
                     } else {
@@ -723,7 +723,7 @@ public class MainActivity extends AppCompatActivity {
                 buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
                 if(buttonSync.getText().equals("Connect")) {
                     enableSync(false);
-                    ClientInfo clientInfo = getClientInfo("-data");
+                    ClientInfo clientInfo = getClientInfo(false);
                     if(clientInfo!=null) {
                         if(!isMyServiceRunning(ServiceSync.class)) {
                             Intent service = new Intent(getApplicationContext(), ServiceSync.class);
@@ -878,7 +878,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private ClientInfo getClientInfo(String suffix) {
+    private ClientInfo getClientInfo(boolean isRemote) {
         if(!checkConnectedViaWifi())  {
             helperToast.toastLong("You must connect to WiFi network.");
             return null;
@@ -898,8 +898,10 @@ public class MainActivity extends AppCompatActivity {
         } catch(NumberFormatException ex) {
             port=2013;
         }
-        return new ClientInfo(address, port, Settings.Secure.getString(MainActivity.this.getContentResolver(),
-                        Settings.Secure.ANDROID_ID)+(suffix.equals("")?"":suffix), "tata");
+        return new ClientInfo(address, port,
+                Settings.Secure.getString(MainActivity.this.getContentResolver(), Settings.Secure.ANDROID_ID),
+                "tata", isRemote,
+                "jamuz");
     }
 
     private void toggleOff(ToggleButton button, View layout) {

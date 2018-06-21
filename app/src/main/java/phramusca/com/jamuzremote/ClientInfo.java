@@ -5,6 +5,9 @@
  */
 package phramusca.com.jamuzremote;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 
 /**
@@ -14,16 +17,20 @@ import java.io.Serializable;
 public class ClientInfo implements Serializable {
 
 	private final String address;
-	private final int port;
+    private final boolean isRemote;
+    private final String appId;
+    private final int port;
 	private final String login;
 	private final String password;
 
-	public ClientInfo(String address, int port, String login, String password){
+	public ClientInfo(String address, int port, String login, String password, boolean isRemote, String appId){
 		this.port = port;
 		this.login = login;
 		this.password = password;
 		this.address = address;
-	}
+        this.isRemote = isRemote;
+        this.appId = appId;
+    }
 
     public String getAddress() {
         return address;
@@ -33,11 +40,15 @@ public class ClientInfo implements Serializable {
         return port;
     }
 
-    public String getLogin() {
-        return login;
-    }
-
-    public String getPassword() {
-        return password;
+    public JSONObject toJSONObject() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("login", login);
+            jsonObject.put("password", password);
+            jsonObject.put("isRemote", isRemote);
+            jsonObject.put("appId", appId);
+        } catch (JSONException e) {
+        }
+        return jsonObject;
     }
 }
