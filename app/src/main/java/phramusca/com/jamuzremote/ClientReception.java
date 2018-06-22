@@ -106,6 +106,15 @@ public class ClientReception extends ProcessAbstract {
             if (ex.getCause() instanceof ErrnoException) {
                 int errno = ((ErrnoException)ex.getCause()).errno;
                 isENOSPC = errno == OsConstants.ENOSPC;
+                //FIXME: Manage errors like ENOENT (No such file or directory)") : SyncStatus{status=CONNECTED, nbRetries=0}
+                // 5-13 21:28:32.452 I/phramusca.com.jamuzremote.ClientSync:
+                // disconnected("/storage/extSdCard/Android/data/org.phramusca.jamuz/files/Autres/DJ Little Tune/
+                // New Remix Maquette 2007 /02 track2 .mp3:
+                // open failed: ENOENT (No such file or directory)") : SyncStatus{status=CONNECTED, nbRetries=0}
+                //OsConstants.ENOENT
+
+                //NOTE the SPACE in the path !! "New Remix Maquette 2007 /02 track2 .mp3"
+                //(it has been fixed by removing space in path only => "New Remix Maquette 2007/02 track2 .mp3" and in db)
             }
             if (isENOSPC) {
                 //Ex: java.io.IOException: write failed: ENOSPC (No space left on device)

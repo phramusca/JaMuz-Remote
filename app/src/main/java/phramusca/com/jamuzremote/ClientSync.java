@@ -61,7 +61,8 @@ public class ClientSync extends Client {
         synchronized (syncStatus) {
             logStatus("close()");
             cancelWatchTimeOut();
-            if(!syncStatus.status.equals(Status.NOT_CONNECTED)) {
+            if(!syncStatus.status.equals(Status.NOT_CONNECTED)
+                    &&!syncStatus.status.equals(Status.STOPPING)) {
                 close();
                 syncStatus.status=Status.NOT_CONNECTED;
                 syncStatus.nbRetries++;
@@ -81,7 +82,6 @@ public class ClientSync extends Client {
                     logStatus("Re-connecting now");
                     new Thread() {
                         public void run() {
-                            watchTimeOut(5);
                             connect();
                         }
                     }.start();
@@ -103,9 +103,11 @@ public class ClientSync extends Client {
 
 		@Override
 		public void receivedJson(String json) {
-            logStatus("receivedJson("+json+")");
-            cancelWatchTimeOut();
-            callback.receivedJson(json);
+		    synchronized (syncStatus) {
+                logStatus("receivedJson(" + json + ")");
+                cancelWatchTimeOut();
+                callback.receivedJson(json);
+            }
 		}
 
         @Override
@@ -113,15 +115,16 @@ public class ClientSync extends Client {
 
         @Override
         public void receivingFile(FileInfoReception fileInfoReception) {
-            /*cancelWatchTimeOut();*/
             callback.receivingFile(fileInfoReception);
         }
 
         @Override
         public void receivedFile(FileInfoReception fileInfoReception) {
-            logStatus("receivedFile("+fileInfoReception+")");
-            cancelWatchTimeOut();
-            callback.receivedFile(fileInfoReception);
+            synchronized (syncStatus) {
+                logStatus("receivedFile(" + fileInfoReception + ")");
+                cancelWatchTimeOut();
+                callback.receivedFile(fileInfoReception);
+            }
         }
 
         @Override
@@ -140,16 +143,16 @@ public class ClientSync extends Client {
 	}
 
     public void requestFile(FileInfoReception fileInfoReception) {
-        //TODO: Make sync timeouts configurable (use bench, to be based on size not nb)
-        long minTimeout = 15;  //Min timeout 15s (or 15s by 4Mo)
-        long maxTimeout = 120; //Max timeout 2 min
-
-        long timeoutFile = fileInfoReception.size < 4000000
-                ? minTimeout
-                : ((fileInfoReception.size / 4000000) * minTimeout);
-        timeoutFile = timeoutFile > maxTimeout ? maxTimeout : timeoutFile;
-        watchTimeOut(timeoutFile);
         synchronized (syncStatus) {
+            //TODO: Make sync timeouts configurable (use bench, to be based on size not nb)
+            long minTimeout = 15;  //Min timeout 15s (or 15s by 4Mo)
+            long maxTimeout = 120; //Max timeout 2 min
+
+            long timeoutFile = fileInfoReception.size < 4000000
+                    ? minTimeout
+                    : ((fileInfoReception.size / 4000000) * minTimeout);
+            timeoutFile = timeoutFile > maxTimeout ? maxTimeout : timeoutFile;
+            watchTimeOut(timeoutFile);
             logStatus("requestFile()");
             if(checkStatus()) {
                 JSONObject obj = new JSONObject();
