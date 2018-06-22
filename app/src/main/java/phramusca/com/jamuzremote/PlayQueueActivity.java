@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.widget.Button;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -14,13 +15,19 @@ public class PlayQueueActivity extends AppCompatActivity implements TrackAdapter
 
     TrackAdapter adapter;
     int histSize;
+    private Button button_exit_queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_queue);
-        Intent intent = getIntent();
 
+        button_exit_queue = (Button) findViewById(R.id.button_exit_queue);
+        button_exit_queue.setOnClickListener(v -> {
+            onBackPressed();
+        });
+
+        Intent intent = getIntent();
         @SuppressWarnings("unchecked")
         final ArrayList<Track> queue = (ArrayList<Track>) intent.getSerializableExtra("queueArrayList");
 
