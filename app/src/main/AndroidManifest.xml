@@ -57,10 +57,12 @@
 
         <service
             android:name=".ServiceSync"
-            android:exported="false" />
+            android:exported="false"
+            android:singleUser="false" />
         <service
             android:name=".ServiceScan"
-            android:exported="false" />
+            android:exported="false"
+            android:singleUser="false" />
 
         <activity android:name="phramusca.com.jamuzremote.PlayQueueActivity"
             android:parentActivityName=".MainActivity">
