@@ -16,8 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-//FIXME: !!! Isolate ServiceSync by appId !!! Same for ServiceScan
 /**
  *
  * @author phramusca
@@ -25,7 +23,7 @@ import java.util.Map;
 public class ServiceSync extends ServiceBase {
 
     private static final String TAG = ServiceSync.class.getName();
-    public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE";
+    public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE_SCAN_REMOTE";
 
     private ClientSync clientSync;
     private Benchmark bench;
