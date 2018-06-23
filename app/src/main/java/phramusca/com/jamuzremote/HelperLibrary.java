@@ -5,10 +5,8 @@ import android.content.Context;
 /**
  * Created by raph on 10/06/17.
  */
-
 public final class HelperLibrary {
 
-    private static final String TAG = HelperLibrary.class.getName();
     public static MusicLibrary musicLibrary;
 
     private HelperLibrary () {

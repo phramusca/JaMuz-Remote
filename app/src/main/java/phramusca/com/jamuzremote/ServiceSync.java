@@ -48,10 +48,10 @@ public class ServiceSync extends ServiceBase {
         final ClientInfo clientInfo = (ClientInfo)intent.getSerializableExtra("clientInfo");
         new Thread() {
             public void run() {
-                helperNotification.notifyBar(notificationSync, "Reading list ... ");
+                helperNotification.notifyBar(notificationSync, getString(R.string.readingList));
                 RepoSync.read(getAppDataPath);
                 bench = new Benchmark(RepoSync.getRemainingSize(), 10);
-                helperNotification.notifyBar(notificationSync, "Connecting ... ");
+                helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
                 clientSync = new ClientSync(clientInfo, new CallBackSync());
                 clientSync.connect();
             }

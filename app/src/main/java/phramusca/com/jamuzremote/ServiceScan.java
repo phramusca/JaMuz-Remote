@@ -1,9 +1,5 @@
 package phramusca.com.jamuzremote;
 
-/**
- * Created by raph on 10/06/17.
- */
-
 import android.content.Intent;
 import android.util.Log;
 
@@ -11,6 +7,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Created by raph on 10/06/17.
+ */
 public class ServiceScan extends ServiceBase {
 
     private static final String TAG = ServiceScan.class.getName();
@@ -45,12 +44,7 @@ public class ServiceScan extends ServiceBase {
     private void scanLibrayInThread() {
         new Thread() {
             public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        helperNotification.notifyBar(notificationScan, "Deleting tracks outside user folder.");
-                    }
-                });
+                runOnUiThread(() -> helperNotification.notifyBar(notificationScan, "Deleting tracks outside user folder."));
                 HelperLibrary.musicLibrary.deleteTrack(getAppDataPath, userPath);
                 //Scan user folder and cleanup library
                 File folder = new File(userPath);
@@ -59,12 +53,9 @@ public class ServiceScan extends ServiceBase {
 
                 //Scan complete, warn user
                 final String msg = "Database updated.";
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        helperToast.toastLong(msg);
-                        helperNotification.notifyBar(notificationScan, msg, 5000);
-                    }
+                runOnUiThread(() -> {
+                    helperToast.toastLong(msg);
+                    helperNotification.notifyBar(notificationScan, msg, 5000);
                 });
                 stopSelf();
             }
