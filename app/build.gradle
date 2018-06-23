@@ -18,6 +18,16 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debugRegular {
+            initWith debug
+            applicationIdSuffix ".debugRegular"
+            versionNameSuffix "-debugRegular"
+        }
+        debugKids {
+            initWith debug
+            applicationIdSuffix ".debugKids"
+            versionNameSuffix "-debugKids"
+        }
     }
     compileOptions {
         targetCompatibility 1.8
