@@ -1887,7 +1887,8 @@ public class MainActivity extends AppCompatActivity {
             playlist.getNbFiles();
             localPlaylists.put(playlist.getName(), playlist);
         }
-        playListArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, new ArrayList<>(localPlaylists.values()));
+        playListArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item,
+                new ArrayList<>(localPlaylists.values()));
     }
 
     public LinkedHashMap<String, Playlist> sortHashMapByValues(

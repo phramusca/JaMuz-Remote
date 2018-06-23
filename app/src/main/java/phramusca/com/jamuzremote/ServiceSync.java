@@ -97,14 +97,16 @@ public class ServiceSync extends ServiceBase {
                     case "insertDeviceFileSAck":
                         JSONArray jsonArray = (JSONArray) jObject.get("filesAcked");
                         if (jsonArray.length() == 1) {
-                            FileInfoReception fileReceived = new FileInfoReception((JSONObject) jsonArray.get(0));
+                            FileInfoReception fileReceived = new FileInfoReception(
+                                    (JSONObject) jsonArray.get(0));
                             notifyBar("Ack.", fileReceived);
                             RepoSync.receivedAck(fileReceived);
                             bench.get(fileReceived.size);
                         } else {
                             notifyBar("Received ack from server");
                             for (int i = 0; i < jsonArray.length(); i++) {
-                                FileInfoReception fileReceived = new FileInfoReception((JSONObject) jsonArray.get(i));
+                                FileInfoReception fileReceived = new FileInfoReception(
+                                        (JSONObject) jsonArray.get(i));
                                 RepoSync.receivedAck(fileReceived);
                             }
                             bench = new Benchmark(RepoSync.getRemainingSize(), 10);
@@ -112,26 +114,32 @@ public class ServiceSync extends ServiceBase {
                         requestNextFile();
                         break;
                     case "FilesToGet":
-                        helperNotification.notifyBar(notificationSync, "Received new list of files to get");
+                        helperNotification.notifyBar(notificationSync, "" +
+                                "Received new list of files to get");
                         Map<Integer, FileInfoReception> newTracks = new HashMap<>();
                         JSONArray files = (JSONArray) jObject.get("files");
                         for (int i = 0; i < files.length(); i++) {
-                            FileInfoReception fileReceived = new FileInfoReception((JSONObject) files.get(i));
+                            FileInfoReception fileReceived = new FileInfoReception(
+                                    (JSONObject) files.get(i));
                             newTracks.put(fileReceived.idFile, fileReceived);
                         }
-                        helperNotification.notifyBar(notificationSync, "Checking if files are already on disk ... ");
+                        helperNotification.notifyBar(notificationSync,
+                                "Checking if files are already on disk ... ");
                         RepoSync.set(getAppDataPath, newTracks);
                         scanAndDeleteUnwantedInThread(getAppDataPath);
                         requestNextFile();
                         break;
                     case "mergeListDbSelected":
-                        helperNotification.notifyBar(notificationSync, "Updating database with merge changes ... ");
+                        helperNotification.notifyBar(notificationSync,
+                                "Updating database with merge changes ... ");
                         JSONArray filesToUpdate = (JSONArray) jObject.get("files");
                         //TODO: Display merge progress
                         for (int i = 0; i < filesToUpdate.length(); i++) {
-                            FileInfoReception fileReceived = new FileInfoReception((JSONObject) filesToUpdate.get(i));
-                            HelperLibrary.insertOrUpdateTrackInDatabase(new File(getAppDataPath,
-                                    fileReceived.relativeFullPath).getAbsolutePath(), fileReceived, true);
+                            FileInfoReception fileReceived = new FileInfoReception(
+                                    (JSONObject) filesToUpdate.get(i));
+                            HelperLibrary.musicLibrary.insertOrUpdateTrackInDatabase(
+                                    new File(getAppDataPath, fileReceived.relativeFullPath)
+                                            .getAbsolutePath(), fileReceived);
                         }
                         stopSync("Sync complete.", 20000);
                         stopSelf();
@@ -269,7 +277,7 @@ public class ServiceSync extends ServiceBase {
                 for (FileInfoReception fileInfoReception : localFiles) {
                     String fullPath = new File(getAppDataPath, fileInfoReception.relativeFullPath).getAbsolutePath();
                     if (!tracksInDbMap.containsKey(fullPath)) {
-                        tracksNotYetInDb.add(HelperLibrary.getTrack(fullPath, fileInfoReception));
+                        tracksNotYetInDb.add(HelperLibrary.musicLibrary.getTrack(fullPath, fileInfoReception));
                         localFilesInserted.add(fileInfoReception);
                     }
                 }

@@ -51,7 +51,7 @@ public class MusicLibrary {
         db.close();
     }
 
-    synchronized int getTrack(String path){
+    private synchronized int getTrackId(String path){
         try {
             Cursor cursor = db.query(TABLE_TRACKS,
                     new String[] {COL_ID},
@@ -65,9 +65,22 @@ public class MusicLibrary {
             cursor.close();
             return id;
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getTrack("+path+")", ex);
+            Log.e(TAG, "getTrackId("+path+")", ex);
         }
         return -1;
+    }
+
+    synchronized Track getTrack(String absolutePath, FileInfoReception fileInfoReception) {
+        Track track = new Track(absolutePath);
+        if(fileInfoReception!=null) {
+            track.setRating(fileInfoReception.rating);
+            track.setAddedDate(fileInfoReception.addedDate);
+            track.setLastPlayed(fileInfoReception.lastPlayed);
+            track.setPlayCounter(fileInfoReception.playCounter);
+            track.setTags(fileInfoReception.tags);
+            track.setGenre(fileInfoReception.genre);
+        }
+        return track;
     }
 
     synchronized List<Track> getTracks(String where, String having, String order, int limit) {
@@ -147,7 +160,45 @@ public class MusicLibrary {
         return -1;
     }
 
-    synchronized boolean insertTrack(Track track){
+    //FIXME !!!!!!!! tags (artist, album, title) can be empty in database
+    //Ex: /storage/3515-1C15/Android/data/org.phramusca.jamuz/files/Nosfell/Pomaïe Klokochazia Balek/04 Sladinji the Grinning Tree.mp3
+    //ID=3072
+    /*{
+        "addedDate":"Mar 12, 2011 19:11:30",
+            "genre":"Chanson",
+            "idFile":13098,
+            "lastPlayed":"May 11, 2018 19:34:51",
+            "playCounter":16,
+            "rating":5,
+            "relativeFullPath":"Nosfell/Pomaïe Klokochazia Balek/01 Children of Windaklo.mp3",
+            "size":4751525,
+            "status":"ACK",
+            "tags":["Normal"]
+    }*/
+    //THOUGH file includes proper tags, from which those 3 tags are read from
+    //(these tags are NOT included in sync Files.txt)
+    //= > Was there an error reading tags from file ? file not completely downloaded due to some cache ?
+    //=> Or, is it simply overwritten here with info from Files.txt that does not include those 3 tags ?
+
+    synchronized boolean insertOrUpdateTrackInDatabase(String absolutePath,
+                                                    FileInfoReception fileInfoReception) {
+        Track track = getTrack(absolutePath, fileInfoReception);
+        int id = getTrackId(absolutePath);
+        boolean result;
+        if(id>=0) {
+            track.setId(id);
+            //TODO, for user path only: update only if file is modified:
+            //based on lastModificationDate and/or size (not on content as longer than updateTrack)
+            Log.d(TAG, "browseFS updateTrack " + absolutePath);
+            result=updateTrack(track);
+        } else {
+            Log.d(TAG, "browseFS insertTrack " + absolutePath);
+            result=insertTrack(track);
+        }
+        return result;
+    }
+
+    private synchronized boolean insertTrack(Track track){
         try {
             int id = (int) db.insert(TABLE_TRACKS, null, TrackToValues(track));
             if(id>0) {
@@ -229,7 +280,6 @@ public class MusicLibrary {
         }
         return false;
     }
-
 
     synchronized boolean updateTrack(Track track){
         try {
