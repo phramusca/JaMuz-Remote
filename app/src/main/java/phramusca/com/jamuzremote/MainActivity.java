@@ -80,7 +80,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
@@ -183,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
 
         textToSpeech =new TextToSpeech(getApplicationContext(), status -> {
             if(status != TextToSpeech.ERROR) {
-                textToSpeech.setLanguage(Locale.FRENCH);
+                textToSpeech.setLanguage(textToSpeech.getDefaultVoice().getLocale());
             }
         });
 
@@ -223,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
 
         String userPath = preferences.getString("userPath", "/");
         String display = userPath.equals("/")?
-                "Choose an additional local path for music. Note that it is recommended to use JaMuz though."
+                getString(R.string.pathInfo)
                 :userPath;
         textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
                 .concat(display)
@@ -491,11 +490,11 @@ public class MainActivity extends AppCompatActivity {
         Button button_new = (Button) findViewById(R.id.button_new);
         button_new.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setTitle("Playlist name");
+            builder.setTitle(R.string.playlistName);
             final EditText input = new EditText(MainActivity.this);
             input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
             builder.setView(input);
-            builder.setPositiveButton("OK", (dialog, which) -> {
+            builder.setPositiveButton(R.string.ok, (dialog, which) -> {
                 String text = input.getText().toString().trim();
                 if(!localPlaylists.containsKey(text)) {
                     /*Playlist newPlaylist=null;
@@ -521,10 +520,10 @@ public class MainActivity extends AppCompatActivity {
                     displayPlaylist(localSelectedPlaylist);
                     setupLocalPlaylistsSpinner();
                 } else {
-                    helperToast.toastLong("Playlist \""+text+"\" already exist.");
+                    helperToast.toastLong(getString(R.string.playlist)+" \""+text+"\" "+getString(R.string.alreadyExists));
                 }
             });
-            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+            builder.setNegativeButton(R.string.cancel, (dialog, which) -> dialog.cancel());
 
             builder.show();
         });
@@ -532,33 +531,41 @@ public class MainActivity extends AppCompatActivity {
         button_save = (Button) findViewById(R.id.button_save);
         button_save.setOnClickListener(v -> {
             if(localSelectedPlaylist!=null) {
-                String msg="Playlist \""+localSelectedPlaylist.getName()+"\" saved";
+                StringBuilder msg= new StringBuilder().append(getString(R.string.playlist))
+                        .append(" \"")
+                        .append(localSelectedPlaylist.getName())
+                        .append("\" ")
+                        .append(getString(R.string.saved));
                 if(localSelectedPlaylist.save()) {
                     button_save.setBackgroundResource(localSelectedPlaylist.isModified()?
                             R.drawable.ic_button_save_red:R.drawable.ic_button_save);
-                    msg+=" successfully.";
+                    msg.append(" ").append(getString(R.string.successfully));
                 } else {
-                    msg+=" with errors !";
+                    msg.append(" ").append(getString(R.string.withErrors));
                 }
-                helperToast.toastShort(msg);
+                helperToast.toastShort(msg.toString());
             }
         });
 
         Button button_restore = (Button) findViewById(R.id.button_restore);
         button_restore.setOnClickListener(v -> {
             if(localSelectedPlaylist!=null) {
-                String msg="Playlist \""+localSelectedPlaylist.getName()+"\" restored";
-                HelperFile.createFolder("Playlists");
+                StringBuilder msg= new StringBuilder().append(getString(R.string.playlist))
+                        .append(" \"")
+                        .append(localSelectedPlaylist.getName())
+                        .append("\" ")
+                        .append(getString(R.string.restored));
+                HelperFile.createFolder(getString(R.string.playlistsFolder));
                 Playlist playlist = readPlaylist(localSelectedPlaylist.getName()+".plli");
                 if(playlist!=null) {
-                    msg+=" successfully.";
+                    msg.append(" ").append(getString(R.string.successfully));
                     localSelectedPlaylist=playlist;
                     localSelectedPlaylist.setModified(false);
                     displayPlaylist(localSelectedPlaylist);
                 } else {
-                    msg+=" with errors !";
+                    msg.append(" ").append(getString(R.string.withErrors));
                 }
-                helperToast.toastShort(msg);
+                helperToast.toastShort(msg.toString());
             }
         });
 
@@ -567,10 +574,10 @@ public class MainActivity extends AppCompatActivity {
             if(localSelectedPlaylist!=null) {
                 new AlertDialog.Builder(MainActivity.this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle("Delete playlist ?")
-                .setMessage("Are you sure you want to delete " +
-                        "\""+localSelectedPlaylist.getName()+"\" playlist ?")
-                .setPositiveButton("Yes", (dialog, which) -> {
+                .setTitle(R.string.deletePlaylist)
+                .setMessage(getString(R.string.sureDelete) +
+                        " \""+localSelectedPlaylist.getName()+"\" "+getString(R.string.playlistQuestion))
+                .setPositiveButton(R.string.yes, (dialog, which) -> {
                     if(localPlaylists.size()>1) {
                         HelperFile.delete("Playlists", localSelectedPlaylist.getName() + ".plli");
                         localPlaylists.remove(localSelectedPlaylist.getName());
@@ -578,10 +585,10 @@ public class MainActivity extends AppCompatActivity {
                         displayPlaylist(localSelectedPlaylist);
                         setupLocalPlaylistsSpinner();
                     } else {
-                        helperToast.toastShort("You cannot delete last playlist.");
+                        helperToast.toastShort(getString(R.string.cannotDeleteLastPlaylist));
                     }
                 })
-                .setNegativeButton("No", null)
+                .setNegativeButton(R.string.no, null)
                 .show();
             }
         });
@@ -711,12 +718,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        localTrack = new Track(-1, 0, "Welcome to", "2017", "JaMuz", "coverHash",
+        localTrack = new Track(-1, 0, getString(R.string.welcomeTitle),
+                getString(R.string.welcomeYear), getString(R.string.app_name), "coverHash",
                 "relativeFullPath", "---", new Date(0), new Date(0), 0);
         displayedTrack = localTrack;
-        /*setTextView(textViewFileInfo, Html.fromHtml("<html><h1>"
-                .concat(displayedTrack.toString())
-                .concat("<BR/></h1></html>")), false);*/
         displayTrack(false);
 
         enableClient(buttonRemote, false);
@@ -1199,9 +1204,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //https://developer.android.com/training/wearables/apps/voice.html
-
     public void displaySpeechRecognizer() {
-        textToSpeech.speak("Je vous écoute.", TextToSpeech.QUEUE_FLUSH, null);
+        textToSpeech.speak(getString(R.string.TTSlistening), TextToSpeech.QUEUE_FLUSH, null,
+                this.hashCode() + "listening");
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -1219,10 +1224,10 @@ public class MainActivity extends AppCompatActivity {
             String spokenText = results.get(0);
             Search.SearchKeyWord searchKeyWord = Search.get(spokenText);
             String searchValue = searchKeyWord.getKeyword();
-            String msg="Commande incomprise:\n\""+searchValue+"\".";
+            String msg= getString(R.string.unknownCommand) + " \"" + searchValue + "\".";
             switch (searchKeyWord.getType()) {
                 case PLAYLIST:
-                    msg = "Playlist \"" + searchValue + "\" introuvable.";
+                    msg = getString(R.string.playlist)+" \"" + searchValue + "\" "+getString(R.string.notfound);
                     for(Playlist playlist : localPlaylists.values()) {
                         if(playlist.getName().equalsIgnoreCase(searchValue)) {
                             applyPlaylist(playlist, true);
@@ -1236,10 +1241,10 @@ public class MainActivity extends AppCompatActivity {
                 case ARTIST_ONGOING:
                     searchValue = displayedTrack.getArtist();
                 case ARTIST:
-                    msg = "Artiste \"" + searchValue + "\" introuvable.";
+                    msg = getString(R.string.artist)+" \"" + searchValue + "\" "+getString(R.string.notfound);
                     if(searchValue.equals("")) {
                         //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
-                        msg = "Spécifiez un artiste.";
+                        msg = getString(R.string.specifyArtist);
                     }
                     else if(HelperLibrary.musicLibrary.getArtist(searchValue)) {
                         Playlist playlist =new Playlist(searchValue, true);
@@ -1251,10 +1256,10 @@ public class MainActivity extends AppCompatActivity {
                 case ALBUM_ONGOING:
                     searchValue = displayedTrack.getAlbum();
                 case ALBUM:
-                    msg = "Album \"" + searchValue + "\" introuvable.";
+                    msg = getString(R.string.album)+" \"" + searchValue + "\" "+getString(R.string.notfound);
                     if(searchValue.equals("")) {
                         //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
-                        msg = "Spécifiez un album.";
+                        msg = getString(R.string.specifyAlbum);
                     }
                     else if(HelperLibrary.musicLibrary.getAlbum(searchValue)) {
                         Playlist playlist =new Playlist(searchValue, true);
@@ -1267,7 +1272,8 @@ public class MainActivity extends AppCompatActivity {
 
             if(!msg.equals("")) {
                 helperToast.toastLong(msg);
-                textToSpeech.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
+                textToSpeech.speak(msg, TextToSpeech.QUEUE_FLUSH, null,
+                        this.hashCode() + "commandResult");
             }
 
         } else if (requestCode == QUEUE_REQUEST_CODE && resultCode == RESULT_OK) {
@@ -1398,7 +1404,7 @@ public class MainActivity extends AppCompatActivity {
     private void playHistory() {
         displayedTrack = queueHistory.get(queueHistoryIndex);
         Log.i(TAG, "playHistory("+(queueHistoryIndex+1)+"/"+queueHistory.size()+")");
-        playAudio("History "+(queueHistoryIndex+1)+"/"+queueHistory.size()+"");
+        playAudio(getString(R.string.history)+" "+(queueHistoryIndex+1)+"/"+queueHistory.size()+"");
     }
 
     private int queueHistoryIndex =-1;

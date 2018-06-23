@@ -3,9 +3,8 @@ package phramusca.com.jamuzremote;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import android.content.DialogInterface.OnKeyListener;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -22,7 +21,6 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 
@@ -31,20 +29,20 @@ import java.util.List;
 public class DirectoryChooserDialog
 {
     private boolean m_isNewFolderEnabled = true;
-    private String m_sdcardDirectory = "";
+    private String m_sdcardDirectory;
     private Context m_context;
     private TextView m_titleView;
 
     private String m_dir = "";
     private List<String> m_subdirs = null;
-    private ChosenDirectoryListener m_chosenDirectoryListener = null;
+    private ChosenDirectoryListener m_chosenDirectoryListener;
     private ArrayAdapter<String> m_listAdapter = null;
 
     public interface ChosenDirectoryListener {
         void onChosenDir(String chosenDir);
     }
 
-    public DirectoryChooserDialog(Context context, ChosenDirectoryListener chosenDirectoryListener) {
+    DirectoryChooserDialog(Context context, ChosenDirectoryListener chosenDirectoryListener) {
         m_context = context;
         m_sdcardDirectory = Environment.getExternalStorageDirectory().getAbsolutePath();
         m_chosenDirectoryListener = chosenDirectoryListener;
@@ -86,41 +84,31 @@ public class DirectoryChooserDialog
         AlertDialog.Builder dialogBuilder =
                 createDirectoryChooserDialog(dir, m_subdirs, new DirectoryOnClickListener());
 
-        dialogBuilder.setPositiveButton("OK", new OnClickListener()
-        {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
-                if (m_chosenDirectoryListener != null) {
-                    m_chosenDirectoryListener.onChosenDir(m_dir);
-                }
+        dialogBuilder.setPositiveButton(R.string.ok, (dialog, which) -> {
+            if (m_chosenDirectoryListener != null) {
+                m_chosenDirectoryListener.onChosenDir(m_dir);
             }
-        }).setNegativeButton("Cancel", null);
+        }).setNegativeButton(R.string.cancel, null);
 
         final AlertDialog dirsDialog = dialogBuilder.create();
 
-        dirsDialog.setOnKeyListener(new OnKeyListener()
-        {
-            @Override
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event)
-            {
-                if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    // Back button pressed
-                    if ( m_dir.equals(m_sdcardDirectory) )
-                    {  // The very top level directory, do nothing
-                        return false;
-                    }
-                    else
-                    {  // Navigate back to an upper directory
-                        m_dir = new File(m_dir).getParent();
-                        updateDirectory();
-                    }
-                    return true;
-                }
-                else
-                {
+        dirsDialog.setOnKeyListener((dialog, keyCode, event) -> {
+            if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+                // Back button pressed
+                if ( m_dir.equals(m_sdcardDirectory) )
+                {  // The very top level directory, do nothing
                     return false;
                 }
+                else
+                {  // Navigate back to an upper directory
+                    m_dir = new File(m_dir).getParent();
+                    updateDirectory();
+                }
+                return true;
+            }
+            else
+            {
+                return false;
             }
         });
         dirsDialog.show();
@@ -147,13 +135,7 @@ public class DirectoryChooserDialog
         }
         catch (Exception ignored) {
         }
-        Collections.sort(dirs, new Comparator<String>()
-        {
-            public int compare(String o1, String o2)
-            {
-                return o1.compareTo(o2);
-            }
-        });
+        Collections.sort(dirs, String::compareTo);
         return dirs;
     }
 
@@ -172,19 +154,12 @@ public class DirectoryChooserDialog
 
         Button newDirButton = new Button(m_context);
         newDirButton.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        newDirButton.setText("New folder");
-        newDirButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                final EditText input = new EditText(m_context);
-                new AlertDialog.Builder(m_context).
-                        setTitle("New folder name").
-                        setView(input).setPositiveButton("OK", new DialogInterface.OnClickListener()
-                {
-                    public void onClick(DialogInterface dialog, int whichButton)
-                    {
+        newDirButton.setText(R.string.newFolder);
+        newDirButton.setOnClickListener(v -> {
+            final EditText input = new EditText(m_context);
+            new AlertDialog.Builder(m_context).
+                    setTitle(R.string.newFolderName).
+                    setView(input).setPositiveButton(R.string.ok, (dialog, whichButton) -> {
                         Editable newDir = input.getText();
                         String newDirName = newDir.toString();
                         // Create new directory
@@ -198,9 +173,7 @@ public class DirectoryChooserDialog
                                     m_context, "Failed to create '" + newDirName +
                                             "' folder", Toast.LENGTH_SHORT).show();
                         }
-                    }
-                }).setNegativeButton("Cancel", null).show();
-            }
+                    }).setNegativeButton(R.string.cancel, null).show();
         });
         if (! m_isNewFolderEnabled) {
             newDirButton.setVisibility(View.GONE);
@@ -226,9 +199,10 @@ public class DirectoryChooserDialog
     {
         return new ArrayAdapter<String>(m_context,
                 android.R.layout.select_dialog_item, android.R.id.text1, items) {
+            @NonNull
             @Override
             public View getView(int position, View convertView,
-                                ViewGroup parent) {
+                                @NonNull ViewGroup parent) {
                 View v = super.getView(position, convertView, parent);
 
                 if (v instanceof TextView) {

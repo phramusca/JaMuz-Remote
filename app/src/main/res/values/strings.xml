@@ -1,7 +1,53 @@
 <resources>
     <string name="app_name" translatable="false">JaMuz</string>
-    <string name="action_settings">Settings</string>
+    <string name="lt_ip_gt_lt_port_gt" translatable="false"><![CDATA[<IP>:<Port> :]]></string>
+    <string name="_192_168_0_11_2013" translatable="false">192.168.0.11:2013</string>
+    <string name="welcomeYear" translatable="false">2018</string>
+    <string name="playlistsFolder" translatable="false">Playlists</string>
 
+    <string name="action_settings">Settings</string>
+    <string name="save">Save</string>
+    <string name="path">Path :</string>
+    <string name="choose">Choose</string>
+    <string name="exclude_the_last">Exclude the last</string>
+    <string name="played">played</string>
+    <string name="order_by">Order by:</string>
+    <string name="random">Random</string>
+    <string name="play_counter_last_played">Play counter, Last played</string>
+    <string name="replaygain_base_volume">ReplayGain base volume :</string>
+    <string name="welcomeTitle">Welcome to</string>
+    <string name="pathInfo">Choose an additional local path as a music source. Note that it is recommended to use JaMuz though.</string>
+    <string name="history">History</string>
+    <string name="TTSlistening">I am listening.</string>
+    <string name="unknownCommand">Unknown Command:</string>
+    <string name="playlist">Playlist</string>
+    <string name="restored">restored</string>
+    <string name="successfully">successfully.</string>
+    <string name="withErrors">with errors !</string>
+    <string name="saved">saved</string>
+    <string name="notfound">not found.</string>
+    <string name="artist">Artist</string>
+    <string name="album">Album</string>
+    <string name="specifyAlbum">Specify an album.</string>
+    <string name="specifyArtist">Specify an artist.</string>
+    <string name="readingList">Reading list …</string>
+    <string name="connecting">Connecting …</string>
+    <string name="playlistName">New playlist name</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="cannotDeleteLastPlaylist">You cannot delete last playlist.</string>
+    <string name="playlistQuestion">playlist ?</string>
+    <string name="sureDelete">Are you sure you want to delete</string>
+    <string name="deletePlaylist">Delete playlist ?</string>
+    <string name="alreadyExists">already exist.</string>
+    <string name="newFolder">New folder</string>
+    <string name="newFolderName">New folder name</string>
+    <string name="title">Title</string>
+    <string name="cover">Cover</string>
+
+    <!--TODO: Translate, knowing that it is also a keyword so need to split key and value-->
     <string-array name="limitUnits">
         <item>minutes</item>
         <item>hours</item>

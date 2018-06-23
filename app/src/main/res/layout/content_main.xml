@@ -58,7 +58,8 @@
             android:textColor="@android:color/transparent"
             android:textSize="10sp"
             android:textAllCaps="false"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            tools:ignore="HardcodedText,SmallSp" />
 
         <Button android:id="@+id/button_sync"
             android:background="@drawable/connect_off_new"
@@ -69,7 +70,8 @@
             android:layout_column="5"
             android:textColor="@android:color/transparent"
             android:textSize="10sp"
-            android:textAllCaps="false"/>
+            android:textAllCaps="false"
+            tools:ignore="HardcodedText,SmallSp" />
 
         <ToggleButton android:id="@+id/button_dim_mode"
             android:layout_row="0"
@@ -112,17 +114,17 @@
                 android:layout_column="0"
                 android:orientation="horizontal" />
 
-            <TextView android:text="&lt;IP&gt;:&lt;Port&gt; : "
+            <TextView android:text="@string/lt_ip_gt_lt_port_gt"
                 android:layout_row="0"
                 android:layout_column="1"
                 android:textColor="@color/textColor"/>
 
             <EditText android:id="@+id/editText_info"
-                android:text="192.168.0.11:2013"
+                android:text="@string/_192_168_0_11_2013"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:enabled="true"
-                android:layout_gravity="left|right"
+                android:layout_gravity="start|end"
                 android:gravity="center_horizontal"
                 android:inputType="text"
                 android:layout_row="0"
@@ -137,7 +139,7 @@
                 android:textColor="@color/textColor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Save"
+                android:text="@string/save"
                 android:id="@+id/button_save_connectionString"
                 android:layout_row="0"
                 android:layout_column="3"
@@ -159,20 +161,20 @@
                 android:layout_height="0px"
                 android:layout_row="0"
                 android:layout_column="0"
-                android:orientation="horizontal" />
+                android:orientation="horizontal"
+                tools:ignore="UselessLeaf" />
 
             <TextView
-                android:text="Path : "
+                android:text="@string/path"
                 android:layout_row="0"
                 android:layout_column="1"
-                android:paddingEnd="5dp"
                 android:textColor="@color/textColor"/>
 
             <TextView
                 android:id="@+id/textViewPath"
                 android:textColor="@color/textColor"
                 android:enabled="false"
-                android:layout_gravity="left|right|center_vertical"
+                android:layout_gravity="start|end|center_vertical"
                 android:gravity="center_horizontal"
                 android:layout_row="0"
                 android:layout_column="2"
@@ -190,7 +192,7 @@
                 android:textColor="@color/textColor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Browse"
+                android:text="@string/choose"
                 android:id="@+id/button_browse"
                 android:layout_row="0"
                 android:layout_column="3"
@@ -213,13 +215,12 @@
                 android:layout_height="0px"
                 android:layout_row="0"
                 android:layout_column="0"
-                android:orientation="horizontal" />
-
+                android:orientation="horizontal"
+                tools:ignore="UselessLeaf" />
             <TextView
-                android:text="ReplayGain base volume : "
+                android:text="@string/replaygain_base_volume"
                 android:layout_row="0"
                 android:layout_column="1"
-                android:paddingEnd="5dp"
                 android:textColor="@color/textColor"/>
 
             <SeekBar
@@ -257,7 +258,7 @@
                 android:layout_height="wrap_content"
                 android:popupBackground="#DDFFFFFF"
                 android:background="@drawable/ic_gradient_spinner"
-                android:layout_gravity="center_vertical|left|right"
+                android:layout_gravity="center_vertical|start|end"
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="10dp"
                 android:layout_row="0"
@@ -363,7 +364,8 @@
                 android:text=">="
                 android:background="@drawable/ic_button"
                 android:layout_gravity="center_vertical"
-                android:alpha="0.7"/>
+                android:alpha="0.7"
+                tools:ignore="HardcodedText" />
 
             <Button
                 android:layout_width="50dp"
@@ -380,7 +382,7 @@
                 android:numStars="5"
                 android:stepSize="1"
                 android:rating="0"
-                android:layout_gravity="left"
+                android:layout_gravity="start"
                 android:theme="@style/RatingBar"
                 android:paddingTop="5dp"/>
         </LinearLayout>
@@ -402,7 +404,7 @@
                     android:textColor="@color/textColor"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="Exclude the last "/>
+                    android:text="@string/exclude_the_last"/>
 
                 <Spinner android:id="@+id/numberPicker_playlist_limit_value"
                     android:layout_width="wrap_content"
@@ -419,14 +421,14 @@
                     android:textColor="@color/textColor"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text=" played"/>
+                    android:text="@string/played"/>
 
             </LinearLayout>
             <TextView
                 android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:text="Order by: "/>
+                android:text="@string/order_by"/>
             <RadioGroup
                 android:id="@+id/playlist_order_radio"
                 android:layout_width="fill_parent"
@@ -435,13 +437,13 @@
                 <RadioButton android:id="@+id/order_random"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Random"
+                    android:text="@string/random"
                     android:onClick="onPlaylistOrderRadioButtonClicked"
                     android:textColor="@color/textColor"/>
                 <RadioButton android:id="@+id/order_playCounter_lastPlayed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Play counter, Last played"
+                    android:text="@string/play_counter_last_played"
                     android:onClick="onPlaylistOrderRadioButtonClicked"
                     android:textColor="@color/textColor"/>
             </RadioGroup>
@@ -451,9 +453,7 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
-            android:layout_row="0"
-            android:layout_column="0">
+            android:background="@color/colorPrimary">
 
             <com.google.android.flexbox.FlexboxLayout
                 android:id="@+id/panel_tags_playlist"
@@ -551,7 +551,8 @@
             android:columnCount="5"
             android:rowCount="2"
             android:layout_gravity="center"
-            android:alpha="0.7">
+            android:alpha="0.7"
+            tools:ignore="UselessParent">
 
             <Button android:id="@+id/button_speech"
                 android:background="@drawable/ic_button_speech"
@@ -655,7 +656,8 @@
             android:alpha="0.8"
             android:textColor="@color/textColor"
             android:paddingStart="10dp"
-            android:paddingEnd="10dp" />
+            android:paddingEnd="10dp"
+            tools:ignore="HardcodedText" />
 
         <SeekBar
             android:layout_width="match_parent"
@@ -673,7 +675,8 @@
             android:layout_height="fill_parent"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
-            android:paddingTop="5dp"/>
+            android:paddingTop="5dp"
+            tools:ignore="HardcodedText" />
     </LinearLayout>
 
 </LinearLayout>
