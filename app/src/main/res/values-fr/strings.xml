@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">JaMuz</string>
+    <string name="action_settings">Parametres</string>
+    <string name="save">Sauver</string>
+    <string name="path">Chemin :</string>
+    <string name="choose">Choisir</string>
+    <string name="exclude_the_last">Exclure les </string>
+    <string name="played"> derniers</string>
+    <string name="order_by">Trier par:</string>
+    <string name="random">Aléatoire</string>
+    <string name="play_counter_last_played">Nombre de lectures, Dernière lecture</string>
+    <string name="replaygain_base_volume">Volume de base ReplayGain :</string>
+    <string name="welcomeTitle">Bienvenue dans</string>
+    <string name="pathInfo">Choisissez un chemin additionnel comme source locale de musique. A noter qu\'il est recommandé d\'utiliser JaMuz cependant.</string>
+    <string name="history">Historique</string>
+    <string name="TTSlistening">Je vous écoute.</string>
+    <string name="unknownCommand">Commande incomprise:</string>
+    <string name="playlist">Liste de lecture</string>
+    <string name="restored">restaurée</string>
+    <string name="successfully">avec succès.</string>
+    <string name="withErrors">avec erreurs !</string>
+    <string name="saved">sauvée</string>
+    <string name="notfound">introuvable.</string>
+    <string name="artist">Artiste</string>
+    <string name="album">Album</string>
+    <string name="specifyAlbum">Spécifiez un album.</string>
+    <string name="specifyArtist">Spécifiez un artiste.</string>
+    <string name="readingList">Lecture de la liste …</string>
+    <string name="connecting">Connexion …</string>
+    <string name="playlistName">Nom de la nouvelle liste</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Annuler</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+    <string name="cannotDeleteLastPlaylist">Vous ne pouvez pas supprimer la dernière liste de lecture.</string>
+    <string name="playlistQuestion"> \?</string>
+    <string name="sureDelete">Etes vous sur de vouloir supprimer la liste de lecture</string>
+    <string name="deletePlaylist">Effacer la liste de lecture ?</string>
+    <string name="alreadyExists">existe déjà.</string>
+    <string name="newFolder">Nouveau dossier</string>
+    <string name="newFolderName">Nom du nouveau dossier</string>
+</resources>
