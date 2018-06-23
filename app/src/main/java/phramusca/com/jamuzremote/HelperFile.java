@@ -2,6 +2,7 @@ package phramusca.com.jamuzremote;
 
 import android.content.Context;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -36,14 +37,17 @@ public final class HelperFile {
         return file;
     }
 
-    public static File getFolder(String folder) {
+    @NonNull
+    private static File getFolder(String folder) {
         return new File(path+folder+"/");
     }
 
-    public static File getFile(String folder, String filename) {
+    @NonNull
+    private static File getFile(String folder, String filename) {
         return new File(path+folder+"/"+filename);
     }
 
+    @NonNull
     public static String read(String folder, String filename) {
         File file = getFile(folder, filename);
         StringBuilder text = new StringBuilder();
