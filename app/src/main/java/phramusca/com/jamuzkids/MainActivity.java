@@ -177,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout layoutPlaylistEditBar;
     private GridLayout layoutPlaylistToolBar;
     private GridLayout layoutOptions;
+    private ArrayList<ButtonRating> buttonsRating;
 
     private IntentIntegrator qrScan;
 
@@ -321,18 +322,32 @@ public class MainActivity extends AppCompatActivity {
         ratingBar = (RatingBar) findViewById(R.id.ratingBar);
         ratingBar.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
             if(fromUser) { //as it is also set when server sends file info (and it can be 0)
-                dimOn();
-                ratingBar.setEnabled(false);
-                displayedTrack.setRating(Math.round(rating));
-                if (isRemoteConnected()) {
-                    clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
-                } else {
-                    displayedTrack.update();
-                    refreshQueueAndPlaylistSpinner(true);
-                }
-                ratingBar.setEnabled(true);
+                setRating(Math.round(rating));
             }
+            ratingBar.setEnabled(true);
         });
+
+        spinnerGenre = (Spinner) findViewById(R.id.spinner_genre);
+        spinnerGenre.setOnItemSelectedListener(spinnerGenreListener);
+        spinnerGenre.setOnTouchListener(dimOnTouchListener);
+
+        ratingBar.setVisibility(View.GONE);
+        spinnerGenre.setVisibility(View.GONE);
+        layoutTags.setVisibility(View.GONE);
+        Button buttonRating2 = (Button) findViewById(R.id.button_rating_2);
+        Button buttonRating3 = (Button) findViewById(R.id.button_rating_3);
+        Button buttonRating4 = (Button) findViewById(R.id.button_rating_4);
+        Button buttonRating5 = (Button) findViewById(R.id.button_rating_5);
+        setupButtonRating(buttonRating2, 2);
+        setupButtonRating(buttonRating3, 3);
+        setupButtonRating(buttonRating4, 4);
+        setupButtonRating(buttonRating5, 5);
+
+        buttonsRating = new ArrayList<>();
+        buttonsRating.add(new ButtonRating(buttonRating2, 2, R.drawable.ic_button_rating_2, R.drawable.ic_button_rating_2_selected));
+        buttonsRating.add(new ButtonRating(buttonRating3, 3, R.drawable.ic_button_rating_3, R.drawable.ic_button_rating_3_selected));
+        buttonsRating.add(new ButtonRating(buttonRating4, 4, R.drawable.ic_button_rating_4, R.drawable.ic_button_rating_4_selected));
+        buttonsRating.add(new ButtonRating(buttonRating5, 5, R.drawable.ic_button_rating_5, R.drawable.ic_button_rating_5_selected));
 
         ratingBarPlaylist = (RatingBar) findViewById(R.id.ratingBarPlaylist);
         ratingBarPlaylist.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
@@ -345,6 +360,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 ratingBarPlaylist.setEnabled(true);
             }
+            ratingBarPlaylist.setEnabled(true);
         });
 
         Button buttonClearRating = (Button) findViewById(R.id.button_clear_rating);
@@ -411,9 +427,6 @@ public class MainActivity extends AppCompatActivity {
         spinnerPlaylist.setOnItemSelectedListener(spinnerPlaylistListener);
         spinnerPlaylist.setOnTouchListener(dimOnTouchListener);
 
-        spinnerGenre = (Spinner) findViewById(R.id.spinner_genre);
-        spinnerGenre.setOnItemSelectedListener(spinnerGenreListener);
-        spinnerGenre.setOnTouchListener(dimOnTouchListener);
 
         setupButton(R.id.button_previous, "previousTrack");
         setupButton(R.id.button_play, "playTrack");
@@ -769,6 +782,35 @@ public class MainActivity extends AppCompatActivity {
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
+    private void setupButtonRating(Button button, int rating) {
+        button.setOnClickListener(view -> {
+            setRating(rating);
+            setButtonRating();
+        });
+    }
+
+    private void setButtonRating() {
+        if(displayedTrack!=null) {
+            for(ButtonRating buttonRating : buttonsRating) {
+                buttonRating.getButton().setBackground(ContextCompat.getDrawable(getBaseContext(),
+                        buttonRating.getRating()==displayedTrack.getRating()
+                                ?buttonRating.getResIdSelected():buttonRating.getResId()));
+            }
+        }
+    }
+
+    private void setRating(int rating) {
+        dimOn();
+        ratingBar.setEnabled(false);
+        displayedTrack.setRating(rating);
+        if (isRemoteConnected()) {
+            clientRemote.send("setRating".concat(String.valueOf(rating)));
+        } else {
+            displayedTrack.update();
+            refreshQueueAndSpinner(true);
+        }
+        ratingBar.setEnabled(true);
+    }
 
     private ClientInfo getClientInfo(boolean isRemote) {
         if(!checkConnectedViaWifi())  {
@@ -2055,21 +2097,25 @@ public class MainActivity extends AppCompatActivity {
                         .concat("<h1>")
                         .concat(displayedTrack.toString())
                         .concat("</h1></html>"))));
+
                 ratingBar.setEnabled(false);
                 ratingBar.setRating(displayedTrack.getRating());
                 ratingBar.setEnabled(true);
+
+                setButtonRating();
+
                 setupSpinnerGenre(RepoGenres.get(), displayedTrack.getGenre());
 
-                //Display file tags
-                ArrayList<String> fileTags = displayedTrack.getTags(false);
-                for(Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
-                    ToggleButton button = layoutTags.findViewById(tag.getKey());
-                    if(button!=null && button.isChecked()!=fileTags.contains(tag.getValue())) {
-                        button.setChecked(fileTags.contains(tag.getValue()));
-                        setTagButtonTextColor(button);
-                    }
+            //Display file tags
+            ArrayList<String> fileTags = displayedTrack.getTags(false);
+            for(Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
+                ToggleButton button = layoutTags.findViewById(tag.getKey());
+                if(button!=null && button.isChecked()!=fileTags.contains(tag.getValue())) {
+                    button.setChecked(fileTags.contains(tag.getValue()));
+                    setTagButtonTextColor(button);
                 }
-            });
+            }
+        });
 
             if(displayedTrack.getIdFileRemote()>=0) {
                 displayImage(displayedTrack.getArt());

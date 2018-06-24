@@ -382,9 +382,9 @@
                 tools:ignore="HardcodedText" />
 
             <Button
+                android:id="@+id/button_clear_rating"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
-                android:id="@+id/button_clear_rating"
                 android:background="@drawable/ic_button_clear_rating"
                 android:layout_gravity="center_vertical"
                 android:alpha="0.7"/>
@@ -526,7 +526,56 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:paddingTop="5dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <Button android:id="@+id/button_rating_2"
+                    android:background="@drawable/ic_button_rating_2"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:textColor="@android:color/transparent"
+                    android:textAllCaps="false"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:alpha="0.7"/>
+
+                <Button android:id="@+id/button_rating_3"
+                    android:background="@drawable/ic_button_rating_3"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:textColor="@android:color/transparent"
+                    android:textAllCaps="false"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:alpha="0.7"/>
+
+                <Button android:id="@+id/button_rating_4"
+                    android:background="@drawable/ic_button_rating_4"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:textColor="@android:color/transparent"
+                    android:textAllCaps="false"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:alpha="0.7"/>
+
+                <Button android:id="@+id/button_rating_5"
+                    android:background="@drawable/ic_button_rating_5"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:textColor="@android:color/transparent"
+                    android:textAllCaps="false"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:alpha="0.7"/>
+
+            </LinearLayout>
 
             <RatingBar android:id="@+id/ratingBar"
                 android:layout_width="wrap_content"
@@ -536,7 +585,7 @@
                 android:rating="0"
                 android:layout_gravity="start"
                 android:theme="@style/RatingBar"
-                android:paddingTop="5dp"/>
+                android:alpha="0.7"/>
 
             <Spinner android:id="@+id/spinner_genre"
                 android:layout_width="match_parent"
@@ -546,9 +595,9 @@
                 android:layout_gravity="center"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
-                android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:alpha="0.7"/>
+
         </LinearLayout>
     </LinearLayout>
 
