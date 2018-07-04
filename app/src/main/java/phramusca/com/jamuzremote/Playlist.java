@@ -1,9 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import android.support.annotation.NonNull;
-
 import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -85,7 +83,7 @@ public class Playlist implements Comparable {
                 nullStatus= "null only";
                 break;
             case FALSE:
-                nullStatus= "Not null";
+                nullStatus= "null excl.";
                 tagsLists = new Lists(tags);
                 break;
             case ANY:
@@ -95,19 +93,19 @@ public class Playlist implements Comparable {
         }
 
         in+=" | "+nullStatus;
-        int max=5; //TODO: Makde it an option
-        if (tagsLists.isIncluded() || genresLists.isIncluded()) {
+        int max=5; //TODO: Make it an option
+        if (tagsLists.hasIncluded() || genresLists.hasIncluded()) {
             ArrayList<String> included = new ArrayList<>();
-            if(tagsLists.isIncluded()){
+            if(tagsLists.hasIncluded()){
                 included.addAll(tagsLists.getIncluded());
             }
             included.addAll(genresLists.getIncluded());
             in+=" | Incl.: "+getString(included, max);
         }
 
-        if (tagsLists.isExcluded() || genresLists.isExcluded()) {
+        if (tagsLists.hasExcluded() || genresLists.hasExcluded()) {
             ArrayList<String> excluded = new ArrayList<>();
-            if(tagsLists.isIncluded()){
+            if(tagsLists.hasIncluded()){
                 excluded.addAll(tagsLists.getExcluded());
             }
             excluded.addAll(genresLists.getExcluded());
@@ -182,11 +180,11 @@ public class Playlist implements Comparable {
             return exclude;
         }
 
-        boolean isIncluded() {
+        boolean hasIncluded() {
             return include.size()>0;
         }
 
-        boolean isExcluded() {
+        boolean hasExcluded() {
             return exclude.size()>0;
         }
     }

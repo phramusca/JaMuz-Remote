@@ -258,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
                     clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
                 } else {
                     displayedTrack.update();
-                    refreshQueueAndSpinner(true);
+                    refreshQueueAndPlaylistSpinner(true);
                 }
                 ratingBar.setEnabled(true);
             }
@@ -271,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
                 ratingBarPlaylist.setEnabled(false);
                 if(localSelectedPlaylist!=null) {
                     localSelectedPlaylist.setRating(Math.round(rating));
-                    refreshQueueAndSpinner();
+                    refreshQueueAndPlaylistSpinner();
                 }
                 ratingBarPlaylist.setEnabled(true);
             }
@@ -282,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
             ratingBarPlaylist.setRating(0F);
             if(localSelectedPlaylist!=null) {
                 localSelectedPlaylist.setRating(0);
-                refreshQueueAndSpinner();
+                refreshQueueAndPlaylistSpinner();
             }
         });
 
@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
         buttonRatingOperator.setOnClickListener(v -> {
             if(localSelectedPlaylist!=null) {
                 buttonRatingOperator.setText(localSelectedPlaylist.setRatingOperator());
-                refreshQueueAndSpinner();
+                refreshQueueAndPlaylistSpinner();
             }
         });
 
@@ -497,15 +497,6 @@ public class MainActivity extends AppCompatActivity {
             builder.setPositiveButton(R.string.ok, (dialog, which) -> {
                 String text = input.getText().toString().trim();
                 if(!localPlaylists.containsKey(text)) {
-                    /*Playlist newPlaylist=null;
-                    if(localSelectedPlaylist!=null) {
-                        try {
-                            newPlaylist = (Playlist) localSelectedPlaylist.clone();
-                            newPlaylist.setName(text);
-                        } catch (CloneNotSupportedException e) {
-                            e.printStackTrace();
-                        }
-                    }*/
                     Playlist newPlaylist=null;
                     if(localSelectedPlaylist!=null) {
                         newPlaylist = clonePlaylist(localSelectedPlaylist);
@@ -516,9 +507,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     localPlaylists.put(newPlaylist.getName(), newPlaylist);
                     localSelectedPlaylist=newPlaylist;
-                    setupLocalPlaylistAdapter();
-                    displayPlaylist(localSelectedPlaylist);
-                    setupLocalPlaylistsSpinner();
+                    refreshPlaylists();
                 } else {
                     helperToast.toastLong(getString(R.string.playlist)+" \""+text+"\" "+getString(R.string.alreadyExists));
                 }
@@ -559,9 +548,8 @@ public class MainActivity extends AppCompatActivity {
                 Playlist playlist = readPlaylist(localSelectedPlaylist.getName()+".plli");
                 if(playlist!=null) {
                     msg.append(" ").append(getString(R.string.successfully));
-                    localSelectedPlaylist=playlist;
-                    localSelectedPlaylist.setModified(false);
-                    displayPlaylist(localSelectedPlaylist);
+                    playlist.setModified(false);
+                    setupLocalPlaylistsSpinner(playlist, false);
                 } else {
                     msg.append(" ").append(getString(R.string.withErrors));
                 }
@@ -582,8 +570,7 @@ public class MainActivity extends AppCompatActivity {
                         HelperFile.delete("Playlists", localSelectedPlaylist.getName() + ".plli");
                         localPlaylists.remove(localSelectedPlaylist.getName());
                         localSelectedPlaylist = localPlaylists.values().iterator().next();
-                        displayPlaylist(localSelectedPlaylist);
-                        setupLocalPlaylistsSpinner();
+                        refreshPlaylists();
                     } else {
                         helperToast.toastShort(getString(R.string.cannotDeleteLastPlaylist));
                     }
@@ -839,7 +826,7 @@ public class MainActivity extends AppCompatActivity {
             String buttonText = button1.getText().toString();
             if(!isRemoteConnected()) {
                 displayedTrack.toggleTag(buttonText);
-                refreshQueueAndSpinner(true);
+                refreshQueueAndPlaylistSpinner(true);
             } else {
                 //displayedTrack.toggleTag(buttonText); //TODO: Manage this too
                 //clientRemote.send("setTag".concat(String.valueOf(Math.round(rating)))); //TODO
@@ -869,7 +856,7 @@ public class MainActivity extends AppCompatActivity {
             if(localSelectedPlaylist!=null) {
                 String buttonText = button1.getText().toString();
                 localSelectedPlaylist.toggleTag(buttonText, state);
-                refreshQueueAndSpinner();
+                refreshQueueAndPlaylistSpinner();
             }
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
@@ -896,7 +883,7 @@ public class MainActivity extends AppCompatActivity {
             String buttonText = button1.getText().toString();
             if(localSelectedPlaylist!=null) {
                 localSelectedPlaylist.toggleGenre(buttonText, state);
-                refreshQueueAndSpinner();
+                refreshQueueAndPlaylistSpinner();
 
             }
         });
@@ -905,37 +892,20 @@ public class MainActivity extends AppCompatActivity {
         layoutGenrePlaylist.addView(button, lp);
     }
 
-    private void refreshQueueAndSpinner() {
-        refreshQueueAndSpinner(false);
+    private void refreshQueueAndPlaylistSpinner() {
+        refreshQueueAndPlaylistSpinner(false);
         textViewPlaylist.setText(localSelectedPlaylist.getSummary());
     }
 
-    private void refreshQueueAndSpinner(final boolean refreshAll) {
+    private void refreshQueueAndPlaylistSpinner(final boolean refreshAll) {
         queue.clear();
-        refreshSpinner(refreshAll);
+        refreshPlaylistSpinner(refreshAll);
         fillQueue(10, new ArrayList<>());
         button_save.setBackgroundResource(localSelectedPlaylist.isModified()?
                 R.drawable.ic_button_save_red:R.drawable.ic_button_save);
     }
 
-    private void refreshSpinner(final boolean refreshAll) {
-        if(localSelectedPlaylist!=null) {
-            new Thread() {
-                public void run() {
-                    if(refreshAll) {
-                        for(Playlist playlist : localPlaylists.values()) {
-                            playlist.getNbFiles();
-                        }
-                    } else {
-                        localSelectedPlaylist.getNbFiles();
-                    }
-                    runOnUiThread(() -> playListArrayAdapter.notifyDataSetChanged());
-                }
-            }.start();
-        }
-    }
-
-    //This is a trick since the following (not in listner) is not working:
+    //This is a trick since the following (not in listener) is not working:
     //button.setTextColor(ContextCompat.getColor(this, R.color.toggle_text));
     private void setTagButtonTextColor(ToggleButton b) {
         if(b!=null) {
@@ -974,7 +944,7 @@ public class MainActivity extends AppCompatActivity {
                 queue = playlist.getTracks(10);
                 playNext();
             } else {
-                refreshQueueAndSpinner(false);
+                refreshQueueAndPlaylistSpinner(false);
             }
         }
     }
@@ -1005,7 +975,7 @@ public class MainActivity extends AppCompatActivity {
                 String genre = (String) parent.getItemAtPosition(pos);
                 if(!isRemoteConnected()) {
                     displayedTrack.updateGenre(genre);
-                    refreshQueueAndSpinner(true);
+                    refreshQueueAndPlaylistSpinner(true);
                 }
             }
             spinnerGenreSend=true;
@@ -1025,7 +995,7 @@ public class MainActivity extends AppCompatActivity {
                 String value = (String) parent.getItemAtPosition(pos);
                 if(!isRemoteConnected() && localSelectedPlaylist!=null) {
                     localSelectedPlaylist.setLimitUnit(value);
-                    refreshQueueAndSpinner();
+                    refreshQueueAndPlaylistSpinner();
                 }
             }
             spinnerLimitUnitSend =true;
@@ -1045,7 +1015,7 @@ public class MainActivity extends AppCompatActivity {
                 Integer value = (Integer) parent.getItemAtPosition(pos);
                 if(!isRemoteConnected() && localSelectedPlaylist!=null) {
                     localSelectedPlaylist.setLimitValue(value);
-                    refreshQueueAndSpinner();
+                    refreshQueueAndPlaylistSpinner();
                 }
             }
             spinnerLimitValueSend =true;
@@ -1231,7 +1201,6 @@ public class MainActivity extends AppCompatActivity {
                     for(Playlist playlist : localPlaylists.values()) {
                         if(playlist.getName().equalsIgnoreCase(searchValue)) {
                             applyPlaylist(playlist, true);
-                            localSelectedPlaylist.getNbFiles();
                             setupLocalPlaylistsSpinner();
                             msg = "";
                             break;
@@ -1249,7 +1218,7 @@ public class MainActivity extends AppCompatActivity {
                     else if(HelperLibrary.musicLibrary.getArtist(searchValue)) {
                         Playlist playlist =new Playlist(searchValue, true);
                         playlist.setArtist(searchValue);
-                        setupLocalPlaylistsSpinner(playlist);
+                        setupLocalPlaylistsSpinner(playlist, true);
                         msg = "";
                     }
                     break;
@@ -1264,7 +1233,7 @@ public class MainActivity extends AppCompatActivity {
                     else if(HelperLibrary.musicLibrary.getAlbum(searchValue)) {
                         Playlist playlist =new Playlist(searchValue, true);
                         playlist.setAlbum(searchValue);
-                        setupLocalPlaylistsSpinner(playlist);
+                        setupLocalPlaylistsSpinner(playlist, true);
                         msg = "";
                     }
                     break;
@@ -1391,8 +1360,7 @@ public class MainActivity extends AppCompatActivity {
     public void playAudio(String source){
         dimOn();
         localTrack = displayedTrack;
-        localSelectedPlaylist.getNbFiles();
-        playListArrayAdapter.notifyDataSetChanged();
+        refreshPlaylistSpinner(false);
         audioPlayer.stop(false);
         displayedTrack.source=source.equals("")?localSelectedPlaylist.toString():source;
         String msg = audioPlayer.play(displayedTrack);
@@ -1463,10 +1431,7 @@ public class MainActivity extends AppCompatActivity {
                     playNext();
                 }
             } else {
-                if(localSelectedPlaylist!=null) {
-                    localSelectedPlaylist.getNbFiles();
-                    playListArrayAdapter.notifyDataSetChanged();
-                }
+                refreshPlaylistSpinner(false);
                 helperToast.toastLong("Empty Playlist.");
             }
         }
@@ -1553,7 +1518,7 @@ public class MainActivity extends AppCompatActivity {
                     enableSync(true);
                     break;
                 case "refreshSpinner(true)":
-                    refreshSpinner(true);
+                    refreshPlaylistSpinner(true);
                     break;
                 case "connectedSync":
                     setConfig("connectionString", editTextConnectInfo.getText().toString());
@@ -1862,10 +1827,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        setupLocalPlaylistAdapter();
         localSelectedPlaylist = localPlaylists.values().iterator().next();
-        runOnUiThread(() -> displayPlaylist(localSelectedPlaylist));
-        setupLocalPlaylistsSpinner();
+        refreshPlaylists();
     }
 
     public Playlist readPlaylist(String filename) {
@@ -1885,7 +1848,7 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-    private void setupLocalPlaylistAdapter() {
+    private void refreshPlaylists() {
         if (localPlaylists.size() > 0) {
             localPlaylists = sortHashMapByValues(localPlaylists);
         } else {
@@ -1895,6 +1858,8 @@ public class MainActivity extends AppCompatActivity {
         }
         playListArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item,
                 new ArrayList<>(localPlaylists.values()));
+        setupLocalPlaylistsSpinner();
+        runOnUiThread(() -> displayPlaylist(localSelectedPlaylist));
     }
 
     public LinkedHashMap<String, Playlist> sortHashMapByValues(
@@ -1996,7 +1961,7 @@ public class MainActivity extends AppCompatActivity {
                     localSelectedPlaylist.setOrder(PLAYCOUNTER_LASTPLAYED);
                     break;
             }
-            refreshQueueAndSpinner();
+            refreshQueueAndPlaylistSpinner();
         }
         layoutOrderPlaylistLayout.setEnabled(true);
     }
@@ -2013,8 +1978,8 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    private void setupLocalPlaylistsSpinner(Playlist playlist) {
-        applyPlaylist(playlist, true);
+    private void setupLocalPlaylistsSpinner(Playlist playlist, boolean playNext) {
+        applyPlaylist(playlist, playNext);
         localSelectedPlaylist.getNbFiles();
         localPlaylists.put(playlist.getName(), playlist);
         playListArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item,
@@ -2023,19 +1988,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupLocalPlaylistsSpinner() {
-        if(localSelectedPlaylist!=null) {
-            localSelectedPlaylist.getNbFiles();
-            setupLocalPlaylistsSpinner(playListArrayAdapter, localSelectedPlaylist);
-        }
+        setupLocalPlaylistsSpinner(playListArrayAdapter, localSelectedPlaylist);
+        refreshPlaylistSpinner(false);
     }
 
     private void setupLocalPlaylistsSpinner(final ArrayAdapter<Playlist> arrayAdapter,
                                             final Playlist selectedPlaylist) {
         runOnUiThread(() -> {
-            spinnerPlaylistSend =false;
+            spinnerPlaylistSend = false;
             spinnerPlaylist.setAdapter(arrayAdapter);
-            spinnerPlaylist.setSelection(arrayAdapter.getPosition(selectedPlaylist));
+            if(selectedPlaylist!=null) {
+                spinnerPlaylist.setSelection(arrayAdapter.getPosition(selectedPlaylist));
+            }
         });
+    }
+
+    private void refreshPlaylistSpinner(final boolean refreshAll) {
+        if(localSelectedPlaylist!=null) {
+            new Thread() {
+                public void run() {
+                    if(refreshAll) {
+                        for(Playlist playlist : localPlaylists.values()) {
+                            playlist.getNbFiles();
+                        }
+                    } else {
+                        localSelectedPlaylist.getNbFiles();
+                    }
+                    runOnUiThread(() -> playListArrayAdapter.notifyDataSetChanged());
+                }
+            }.start();
+        }
     }
 
     private void setTextView(final TextView textview, final Spanned msg) {
