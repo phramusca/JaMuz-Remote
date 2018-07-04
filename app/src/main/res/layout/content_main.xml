@@ -326,8 +326,7 @@
                     android:layout_column="5"
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/ic_button_delete"
-                    />
+                    android:background="@drawable/ic_button_delete" />
 
                 <Button android:id="@+id/button_new"
                     android:layout_row="0"
