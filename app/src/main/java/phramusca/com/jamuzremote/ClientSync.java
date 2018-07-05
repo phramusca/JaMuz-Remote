@@ -74,14 +74,14 @@ public class ClientSync extends Client {
                         RepoSync.save();
                     } else {
                         logStatus("Re-connecting in 5s");
-                        try {
-                            Thread.sleep(5000);
-                        } catch (InterruptedException ignored) {
-                        }
                     }
-                    logStatus("Re-connecting now");
                     new Thread() {
                         public void run() {
+                            try {
+                                Thread.sleep(5000);
+                            } catch (InterruptedException ignored) {
+                            }
+                            logStatus("Re-connecting now");
                             connect();
                         }
                     }.start();
@@ -202,11 +202,11 @@ public class ClientSync extends Client {
         }
     }
 
-    // TODO improve sync and merge
-    // TODO do NOT request genres and tags at every connection but only if required or on demand
-    // TODO avoid double acknowledgement:
-    //          - Insert files in deviceFiles directly at export
-    //          - Use a status as in JaMuzRemote
+    // FIXME sync and merge: do NOT request genres and tags at every connection but only if required or on demand
+    // FIXME sync and merge: avoid double acknowledgement:
+    //          - Insert files in JaMuz deviceFiles directly at export
+    //          - Use a status in JaMuz as in JaMuzRemote
+    // FIXME sync and merge: remove json file lists and insert in db directly
 
     public void ackFilesReception(List<FileInfoReception> files) {
         synchronized (syncStatus) {
