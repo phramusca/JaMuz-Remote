@@ -213,6 +213,65 @@ public class MainActivity extends AppCompatActivity {
         preferences = getPreferences(MODE_PRIVATE);
         editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.11:2013"));
 
+        //FIXME Remote and Sync modes interfere:
+        // - one can close the other on closure. why ?
+        // - remote<->local move can be difficult :(
+        //Note that it remote works quite well when sync is not running
+        buttonRemote = (Button) findViewById(R.id.button_connect);
+        buttonRemote.setOnClickListener(v -> {
+            dimOn();
+            buttonRemote.setEnabled(false);
+            buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
+            if(buttonRemote.getText().equals("Connect")) {
+                ClientInfo clientInfo = getClientInfo(true);
+                if(clientInfo!=null) {
+                    clientRemote =  new ClientRemote(clientInfo, new CallBackRemote());
+                } else {
+                    enableRemote(true);
+                    return;
+                }
+                new Thread() {
+                    public void run() {
+                        if(clientRemote.connect()) {
+                            enableRemote(false);
+                        }
+                        else {
+                            enableRemote(true);
+                        }
+                    }
+                }.start();
+            }
+            else {
+                enableRemote(true);
+                stopRemote();
+            }
+        });
+
+        buttonSync = (Button) findViewById(R.id.button_sync);
+        buttonSync.setOnClickListener(v -> {
+            dimOn();
+            buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
+            if(buttonSync.getText().equals("Connect")) {
+                enableSync(false);
+                ClientInfo clientInfo = getClientInfo(false);
+                if(clientInfo!=null) {
+                    if(!isMyServiceRunning(ServiceSync.class)) {
+                        Intent service = new Intent(getApplicationContext(), ServiceSync.class);
+                        service.putExtra("clientInfo", clientInfo);
+                        service.putExtra("getAppDataPath", getAppDataPath());
+                        startService(service);
+                    }
+                }
+            }
+            else {
+                Log.i(TAG, "Broadcast("+ServiceSync.USER_STOP_SERVICE_REQUEST+")");
+                sendBroadcast(new Intent(ServiceSync.USER_STOP_SERVICE_REQUEST));
+                enableSync(true);
+            }
+        });
+
+        getFromQRcode(getIntent().getDataString());
+
         textViewPath = (TextView) findViewById(R.id.textViewPath);
 
         textViewPlaylist = (TextView) findViewById(R.id.textViewPlaylist);
@@ -452,41 +511,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //FIXME !!!!!!!!!!!  Remote and Sync modes interfere:
-        // - one can close the other on closure. why ?
-        // - remote<->local move can be difficult :(
-        buttonRemote = (Button) findViewById(R.id.button_connect);
-        buttonRemote.setOnClickListener(v -> {
-            dimOn();
-            enableClient(buttonRemote, false);
-            buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
-            if(buttonRemote.getText().equals("Connect")) {
-                ClientInfo clientInfo = getClientInfo(true);
-                if(clientInfo!=null) {
-                    clientRemote =  new ClientRemote(clientInfo, new CallBackRemote());
-                } else {
-                    enableRemote(true);
-                    return;
-                }
-                new Thread() {
-                    public void run() {
-                        if(clientRemote.connect()) {
-                            setConfig("connectionString", editTextConnectInfo.getText().toString());
-                            enableClient(buttonRemote, true);
-                            enableRemote(false);
-                        }
-                        else {
-                            enableRemote(true);
-                        }
-                    }
-                }.start();
-            }
-            else {
-                enableRemote(true);
-                stopRemote();
-            }
-        });
-
         Button button_new = (Button) findViewById(R.id.button_new);
         button_new.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -607,29 +631,6 @@ public class MainActivity extends AppCompatActivity {
         Button button_speech = (Button) findViewById(R.id.button_speech);
         button_speech.setOnClickListener(v -> displaySpeechRecognizer());
 
-        buttonSync = (Button) findViewById(R.id.button_sync);
-        buttonSync.setOnClickListener(v -> {
-            dimOn();
-            buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
-            if(buttonSync.getText().equals("Connect")) {
-                enableSync(false);
-                ClientInfo clientInfo = getClientInfo(false);
-                if(clientInfo!=null) {
-                    if(!isMyServiceRunning(ServiceSync.class)) {
-                        Intent service = new Intent(getApplicationContext(), ServiceSync.class);
-                        service.putExtra("clientInfo", clientInfo);
-                        service.putExtra("getAppDataPath", getAppDataPath());
-                        startService(service);
-                    }
-                }
-            }
-            else {
-                Log.i(TAG, "Broadcast("+ServiceSync.USER_STOP_SERVICE_REQUEST+")");
-                sendBroadcast(new Intent(ServiceSync.USER_STOP_SERVICE_REQUEST));
-                enableSync(true);
-            }
-        });
-
         imageViewCover = (ImageView) findViewById(R.id.imageView);
         layoutMain = (LinearLayout) findViewById(R.id.panel_main);
 
@@ -708,12 +709,6 @@ public class MainActivity extends AppCompatActivity {
                 "relativeFullPath", "---", new Date(0), new Date(0), 0);
         displayedTrack = localTrack;
         displayTrack(false);
-
-        enableClient(buttonRemote, false);
-        enableClient(buttonSync, false);
-        getFromQRcode(getIntent().getDataString());
-        enableClient(buttonSync, true);
-        enableClient(buttonRemote, true);
 
         //TODO: MAke this an option somehow
 
@@ -1151,12 +1146,14 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                         new IntentFilter("ServiceBase"));
 
+        getFromQRcode(getIntent().getDataString());
+
         if(toggleButtonDimMode.isChecked()) {
             dimOn();
         }
-        else if(wasRemoteConnected && !audioPlayer.isPlaying()) {
-            enableClient(buttonRemote, false);
-            getFromQRcode(getIntent().getDataString());
+
+        if(wasRemoteConnected && !audioPlayer.isPlaying()) {
+            buttonRemote.setEnabled(false);
             buttonRemote.performClick();
         }
 
@@ -1519,7 +1516,7 @@ public class MainActivity extends AppCompatActivity {
                     refreshLocalPlaylistSpinner(true);
                     break;
                 case "connectedSync":
-                    setConfig("connectionString", editTextConnectInfo.getText().toString());
+                    //setConfig("connectionString", editTextConnectInfo.getText().toString());
                     break;
                 case "checkPermissionsThenScanLibrary":
                     checkPermissionsThenScanLibrary();
@@ -1600,15 +1597,14 @@ public class MainActivity extends AppCompatActivity {
                 buttonRemote.setText("Close");
                 buttonRemote.setBackgroundResource(R.drawable.remote_on);
             }
-            editTextConnectInfo.setEnabled(enable);
-            buttonRemote.setEnabled(true);
+            buttonRemote.setEnabled(enable);
         });
     }
 
     @SuppressLint("SetTextI18n")
     private void enableSync(final boolean enable) {
         runOnUiThread(() -> {
-            enableClient(buttonSync, false);
+            buttonSync.setEnabled(false);
             if (enable) {
                 buttonSync.setText("Connect");
                 buttonSync.setBackgroundResource(R.drawable.connect_off_new);
@@ -1616,25 +1612,17 @@ public class MainActivity extends AppCompatActivity {
                 buttonSync.setText("Close");
                 buttonSync.setBackgroundResource(R.drawable.connect_on);
             }
-            enableClient(buttonSync, true);
-            editTextConnectInfo.setEnabled(enable);
+            buttonSync.setEnabled(true);
         });
     }
 
     @SuppressLint("SetTextI18n")
     private void enableClientRemote(final Button button, final int resId) {
         runOnUiThread(() -> {
-            enableClient(button, false);
+            button.setEnabled(false);
             button.setText("Connect");
             button.setBackgroundResource(resId);
-            enableClient(button, true);
-        });
-    }
-
-    private void enableClient(final Button button, final boolean enable) {
-        runOnUiThread(() -> {
-            editTextConnectInfo.setEnabled(enable);
-            button.setEnabled(enable);
+            button.setEnabled(true);
         });
     }
 
@@ -1645,15 +1633,18 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    //FIXME: getFromQRcode with sync too (as for remote)
-    // And manage settings panel enabling better than now !! (remember there are 2 services sharing it)
-    // => Why not let it enabled at all times and use latest change at every connection ?
     private void getFromQRcode(String content) {
         if(content!=null) {
             if(!content.equals("")) {
-                content=content.substring("JaMuzRemote://".length());
+                content=content.substring("jamuzremote://".length());
                 content=Encryption.decrypt(content, "NOTeBrrhzrtestSecretK");
+
+                buttonRemote.setEnabled(false);
+                buttonSync.setEnabled(false);
                 editTextConnectInfo.setText(content);
+                setConfig("connectionString", editTextConnectInfo.getText().toString());
+                buttonRemote.setEnabled(true);
+                buttonSync.setEnabled(true);
             }
         }
     }
@@ -1878,10 +1869,10 @@ public class MainActivity extends AppCompatActivity {
                     if(refreshAll) {
                         for(Playlist playlist : localPlaylists.values()) {
                             playlist.getNbFiles();
-                }
+                        }
                     } else {
                         localSelectedPlaylist.getNbFiles();
-            }
+                    }
                     runOnUiThread(() -> playListArrayAdapter.notifyDataSetChanged());
                 }
             }.start();
