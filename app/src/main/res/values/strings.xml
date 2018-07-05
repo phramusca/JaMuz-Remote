@@ -47,7 +47,7 @@
     <string name="title">Title</string>
     <string name="cover">Cover</string>
 
-    <!--TODO: Translate, knowing that it is also a keyword so need to split key and value-->
+    <!--FIXME: Translate, knowing that it is also a keyword so need to split key and value-->
     <string-array name="limitUnits">
         <item>minutes</item>
         <item>hours</item>

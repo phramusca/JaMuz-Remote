@@ -506,8 +506,7 @@ public class MainActivity extends AppCompatActivity {
                         newPlaylist = new Playlist(text, true);
                     }
                     localPlaylists.put(newPlaylist.getName(), newPlaylist);
-                    localSelectedPlaylist=newPlaylist;
-                    refreshPlaylists();
+                    setupLocalPlaylistSpinner(newPlaylist);
                 } else {
                     helperToast.toastLong(getString(R.string.playlist)+" \""+text+"\" "+getString(R.string.alreadyExists));
                 }
@@ -549,7 +548,7 @@ public class MainActivity extends AppCompatActivity {
                 if(playlist!=null) {
                     msg.append(" ").append(getString(R.string.successfully));
                     playlist.setModified(false);
-                    setupLocalPlaylistsSpinner(playlist, false);
+                    setupLocalPlaylistSpinner(playlist, false);
                 } else {
                     msg.append(" ").append(getString(R.string.withErrors));
                 }
@@ -569,8 +568,7 @@ public class MainActivity extends AppCompatActivity {
                     if(localPlaylists.size()>1) {
                         HelperFile.delete("Playlists", localSelectedPlaylist.getName() + ".plli");
                         localPlaylists.remove(localSelectedPlaylist.getName());
-                        localSelectedPlaylist = localPlaylists.values().iterator().next();
-                        refreshPlaylists();
+                        setupLocalPlaylistSpinner(null);
                     } else {
                         helperToast.toastShort(getString(R.string.cannotDeleteLastPlaylist));
                     }
@@ -899,7 +897,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshQueueAndPlaylistSpinner(final boolean refreshAll) {
         queue.clear();
-        refreshPlaylistSpinner(refreshAll);
+        refreshLocalPlaylistSpinner(refreshAll);
         fillQueue(10, new ArrayList<>());
         button_save.setBackgroundResource(localSelectedPlaylist.isModified()?
                 R.drawable.ic_button_save_red:R.drawable.ic_button_save);
@@ -1201,7 +1199,7 @@ public class MainActivity extends AppCompatActivity {
                     for(Playlist playlist : localPlaylists.values()) {
                         if(playlist.getName().equalsIgnoreCase(searchValue)) {
                             applyPlaylist(playlist, true);
-                            setupLocalPlaylistsSpinner();
+                            setupLocalPlaylistSpinner();
                             msg = "";
                             break;
                         }
@@ -1218,7 +1216,7 @@ public class MainActivity extends AppCompatActivity {
                     else if(HelperLibrary.musicLibrary.getArtist(searchValue)) {
                         Playlist playlist =new Playlist(searchValue, true);
                         playlist.setArtist(searchValue);
-                        setupLocalPlaylistsSpinner(playlist, true);
+                        setupLocalPlaylistSpinner(playlist, true);
                         msg = "";
                     }
                     break;
@@ -1233,7 +1231,7 @@ public class MainActivity extends AppCompatActivity {
                     else if(HelperLibrary.musicLibrary.getAlbum(searchValue)) {
                         Playlist playlist =new Playlist(searchValue, true);
                         playlist.setAlbum(searchValue);
-                        setupLocalPlaylistsSpinner(playlist, true);
+                        setupLocalPlaylistSpinner(playlist, true);
                         msg = "";
                     }
                     break;
@@ -1360,7 +1358,7 @@ public class MainActivity extends AppCompatActivity {
     public void playAudio(String source){
         dimOn();
         localTrack = displayedTrack;
-        refreshPlaylistSpinner(false);
+        refreshLocalPlaylistSpinner(false);
         audioPlayer.stop(false);
         displayedTrack.source=source.equals("")?localSelectedPlaylist.toString():source;
         String msg = audioPlayer.play(displayedTrack);
@@ -1431,7 +1429,7 @@ public class MainActivity extends AppCompatActivity {
                     playNext();
                 }
             } else {
-                refreshPlaylistSpinner(false);
+                refreshLocalPlaylistSpinner(false);
                 helperToast.toastLong("Empty Playlist.");
             }
         }
@@ -1518,7 +1516,7 @@ public class MainActivity extends AppCompatActivity {
                     enableSync(true);
                     break;
                 case "refreshSpinner(true)":
-                    refreshPlaylistSpinner(true);
+                    refreshLocalPlaylistSpinner(true);
                     break;
                 case "connectedSync":
                     setConfig("connectionString", editTextConnectInfo.getText().toString());
@@ -1597,7 +1595,7 @@ public class MainActivity extends AppCompatActivity {
             if (enable) {
                 buttonRemote.setBackgroundResource(R.drawable.remote_off);
                 enablePlaylistEdit(true);
-                setupLocalPlaylistsSpinner();
+                setupLocalPlaylistSpinner();
             } else {
                 buttonRemote.setText("Close");
                 buttonRemote.setBackgroundResource(R.drawable.remote_on);
@@ -1672,7 +1670,7 @@ public class MainActivity extends AppCompatActivity {
     public void checkPermissionsThenScanLibrary() {
         if (!hasPermissions(this, PERMISSIONS)) {
 
-            //TODO: JaMuz Translation system
+            //FIXME: JaMuz Translation
             String msgStr = "<html><b>For a full JaMuz experience</b>, please consider " +
                     "allowing permissions that you will be asked for: <BR/><BR/>" +
                     "<i>- <u>Multimedia files</u></i> : Allows application to:<BR/> " +
@@ -1727,11 +1725,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupSpinnerGenre(final List<String> genres, final String genre) {
-
         final ArrayAdapter<String> arrayAdapter =
                 new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, genres);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
         runOnUiThread(() -> {
             spinnerGenreSend=false;
             spinnerGenre.setAdapter(arrayAdapter);
@@ -1827,66 +1823,69 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        localSelectedPlaylist = localPlaylists.values().iterator().next();
-        refreshPlaylists();
+        setupLocalPlaylistSpinner(null);
     }
 
-    public Playlist readPlaylist(String filename) {
-        String readJson = HelperFile.read("Playlists", filename);
-        if(!readJson.equals("")) {
-            Playlist playlist = new Playlist(
-                    filename.replaceFirst("[.][^.]+$", ""), true);
-            Gson gson = new Gson();
-            Type mapType = new TypeToken<Playlist>(){}.getType();
-            try {
-                playlist = gson.fromJson(readJson, mapType);
-            } catch (JsonSyntaxException ex) {
-                Log.e(TAG, "", ex);
-            }
-            return playlist;
-        }
-        return null;
-    }
-
-    private void refreshPlaylists() {
+    private void setupLocalPlaylistSpinner(Playlist playlist) {
         if (localPlaylists.size() > 0) {
             localPlaylists = sortHashMapByValues(localPlaylists);
         } else {
-            Playlist playlist = new Playlist("All", true);
-            playlist.getNbFiles();
-            localPlaylists.put(playlist.getName(), playlist);
+            Playlist playlistAll = new Playlist("All", true);
+            localPlaylists.put(playlistAll.getName(), playlistAll);
+            playlist=playlistAll;
         }
+
+        if(playlist!=null && localPlaylists.containsKey(playlist.getName())) {
+            localSelectedPlaylist=playlist;
+        } else {
+            localSelectedPlaylist = localPlaylists.values().iterator().next();
+        }
+
         playListArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item,
                 new ArrayList<>(localPlaylists.values()));
-        setupLocalPlaylistsSpinner();
+        setupLocalPlaylistSpinner();
         runOnUiThread(() -> displayPlaylist(localSelectedPlaylist));
     }
 
-    public LinkedHashMap<String, Playlist> sortHashMapByValues(
-            Map<String, Playlist> passedMap) {
-        List<String> mapKeys = new ArrayList<>(passedMap.keySet());
-        List<Playlist> mapValues = new ArrayList<>(passedMap.values());
-        Collections.sort(mapValues);
-        Collections.sort(mapKeys);
+    private void setupLocalPlaylistSpinner(Playlist playlist, boolean playNext) {
+        applyPlaylist(playlist, playNext);
+        localPlaylists.put(playlist.getName(), playlist);
+        playListArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item,
+                new ArrayList<>(localPlaylists.values()));
+        setupLocalPlaylistSpinner();
+    }
 
-        LinkedHashMap<String, Playlist> sortedMap =
-                new LinkedHashMap<>();
+    private void setupLocalPlaylistSpinner() {
+        setupPlaylistSpinner(playListArrayAdapter, localSelectedPlaylist);
+        refreshLocalPlaylistSpinner(false);
+    }
 
-        for (Playlist val : mapValues) {
-            Iterator<String> keyIt = mapKeys.iterator();
-
-            while (keyIt.hasNext()) {
-                String key = keyIt.next();
-                Playlist comp1 = passedMap.get(key);
-
-                if (comp1.equals(val)) {
-                    keyIt.remove();
-                    sortedMap.put(key, val);
-                    break;
-                }
+    private void setupPlaylistSpinner(final ArrayAdapter<Playlist> arrayAdapter,
+                                      final Playlist selectedPlaylist) {
+        runOnUiThread(() -> {
+            spinnerPlaylistSend = false;
+            spinnerPlaylist.setAdapter(arrayAdapter);
+            if(selectedPlaylist!=null) {
+                spinnerPlaylist.setSelection(arrayAdapter.getPosition(selectedPlaylist));
             }
+        });
+    }
+
+    private void refreshLocalPlaylistSpinner(final boolean refreshAll) {
+        if(localSelectedPlaylist!=null) {
+            new Thread() {
+                public void run() {
+                    if(refreshAll) {
+                        for(Playlist playlist : localPlaylists.values()) {
+                            playlist.getNbFiles();
+                }
+                    } else {
+                        localSelectedPlaylist.getNbFiles();
+            }
+                    runOnUiThread(() -> playListArrayAdapter.notifyDataSetChanged());
+                }
+            }.start();
         }
-        return sortedMap;
     }
 
     private void displayPlaylist(Playlist playlist) {
@@ -1948,6 +1947,50 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public Playlist readPlaylist(String filename) {
+        String readJson = HelperFile.read("Playlists", filename);
+        if(!readJson.equals("")) {
+            Playlist playlist = new Playlist(
+                    filename.replaceFirst("[.][^.]+$", ""), true);
+            Gson gson = new Gson();
+            Type mapType = new TypeToken<Playlist>(){}.getType();
+            try {
+                playlist = gson.fromJson(readJson, mapType);
+            } catch (JsonSyntaxException ex) {
+                Log.e(TAG, "", ex);
+            }
+            return playlist;
+        }
+        return null;
+    }
+
+    public LinkedHashMap<String, Playlist> sortHashMapByValues(
+            Map<String, Playlist> passedMap) {
+        List<String> mapKeys = new ArrayList<>(passedMap.keySet());
+        List<Playlist> mapValues = new ArrayList<>(passedMap.values());
+        Collections.sort(mapValues);
+        Collections.sort(mapKeys);
+
+        LinkedHashMap<String, Playlist> sortedMap =
+                new LinkedHashMap<>();
+
+        for (Playlist val : mapValues) {
+            Iterator<String> keyIt = mapKeys.iterator();
+
+            while (keyIt.hasNext()) {
+                String key = keyIt.next();
+                Playlist comp1 = passedMap.get(key);
+
+                if (comp1.equals(val)) {
+                    keyIt.remove();
+                    sortedMap.put(key, val);
+                    break;
+                }
+            }
+        }
+        return sortedMap;
+    }
+
     public void onPlaylistOrderRadioButtonClicked(View view) {
         dimOn();
         layoutOrderPlaylistLayout.setEnabled(false);
@@ -1976,48 +2019,6 @@ public class MainActivity extends AppCompatActivity {
             return mWifi.isConnected();
         }
         return false;
-    }
-
-    private void setupLocalPlaylistsSpinner(Playlist playlist, boolean playNext) {
-        applyPlaylist(playlist, playNext);
-        localSelectedPlaylist.getNbFiles();
-        localPlaylists.put(playlist.getName(), playlist);
-        playListArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item,
-                new ArrayList<>(localPlaylists.values()));
-        setupLocalPlaylistsSpinner();
-    }
-
-    private void setupLocalPlaylistsSpinner() {
-        setupLocalPlaylistsSpinner(playListArrayAdapter, localSelectedPlaylist);
-        refreshPlaylistSpinner(false);
-    }
-
-    private void setupLocalPlaylistsSpinner(final ArrayAdapter<Playlist> arrayAdapter,
-                                            final Playlist selectedPlaylist) {
-        runOnUiThread(() -> {
-            spinnerPlaylistSend = false;
-            spinnerPlaylist.setAdapter(arrayAdapter);
-            if(selectedPlaylist!=null) {
-                spinnerPlaylist.setSelection(arrayAdapter.getPosition(selectedPlaylist));
-            }
-        });
-    }
-
-    private void refreshPlaylistSpinner(final boolean refreshAll) {
-        if(localSelectedPlaylist!=null) {
-            new Thread() {
-                public void run() {
-                    if(refreshAll) {
-                        for(Playlist playlist : localPlaylists.values()) {
-                            playlist.getNbFiles();
-                        }
-                    } else {
-                        localSelectedPlaylist.getNbFiles();
-                    }
-                    runOnUiThread(() -> playListArrayAdapter.notifyDataSetChanged());
-                }
-            }.start();
-        }
     }
 
     private void setTextView(final TextView textview, final Spanned msg) {
@@ -2177,7 +2178,7 @@ public class MainActivity extends AppCompatActivity {
                         ArrayAdapter<Playlist> arrayAdapter =
                                 new ArrayAdapter<>(MainActivity.this,
                                         R.layout.spinner_item, playlists);
-                        setupLocalPlaylistsSpinner(arrayAdapter, temp);
+                        setupPlaylistSpinner(arrayAdapter, temp);
                         enablePlaylistEdit(false);
                         break;
                     case "currentPosition":
@@ -2226,7 +2227,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(() -> helperToast.toastShort(msg));
             }
             stopRemote();
-            setupLocalPlaylistsSpinner();
+            setupLocalPlaylistSpinner();
             displayedTrack = localTrack;
             displayTrack(false);
         }
@@ -2238,7 +2239,7 @@ public class MainActivity extends AppCompatActivity {
             clientRemote=null;
         }
         enableClientRemote(buttonRemote, R.drawable.remote_off);
-        setupLocalPlaylistsSpinner();
+        setupLocalPlaylistSpinner();
         displayedTrack = localTrack;
         displayTrack(false);
     }

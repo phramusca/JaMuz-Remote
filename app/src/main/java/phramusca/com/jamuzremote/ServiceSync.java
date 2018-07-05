@@ -133,7 +133,7 @@ public class ServiceSync extends ServiceBase {
                         helperNotification.notifyBar(notificationSync,
                                 "Updating database with merge changes ... ");
                         JSONArray filesToUpdate = (JSONArray) jObject.get("files");
-                        //TODO: Display merge progress
+                        //FIXME: Display merge progress
                         for (int i = 0; i < filesToUpdate.length(); i++) {
                             FileInfoReception fileReceived = new FileInfoReception(
                                     (JSONObject) filesToUpdate.get(i));
@@ -344,7 +344,7 @@ public class ServiceSync extends ServiceBase {
                 }
                 clientSync.requestMerge(tracks, getAppDataPath);
 
-                //FIXME: Delete from db whenever deleting a file in "internal" folder
+                //FIXME: !!! Delete from db whenever deleting a file in "internal" folder
                 //          (may already be done, check that FIRST)
                 //So that it is not required to scan (deleted) after sync (below)
 

@@ -34,7 +34,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="jamuzremote" />
+                <data android:scheme="jamuzremote" /> <!--FIXME: Make sure it differs in JaMuz Kids ! and test-->
             </intent-filter>
         </activity>
 
