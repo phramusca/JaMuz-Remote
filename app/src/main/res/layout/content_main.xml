@@ -144,6 +144,19 @@
                 android:layout_row="0"
                 android:layout_column="3"
                 android:textAllCaps="false"/>
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:padding="5dp"
+                android:background="@drawable/ic_button"
+                android:textColor="@color/textColor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/scan_qr"
+                android:id="@+id/button_scan_QR"
+                android:layout_row="0"
+                android:layout_column="4"
+                android:textAllCaps="false"/>
         </GridLayout>
 
         <GridLayout

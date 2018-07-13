@@ -60,12 +60,15 @@ import android.widget.RatingBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -122,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int SPEECH_REQUEST_CODE = 0;
     private static final int QUEUE_REQUEST_CODE = 1;
+    private static final int QR_REQUEST_CODE = 49374;
 
     private static final int MAX_QUEUE = 10;
 
@@ -172,6 +176,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout layoutPlaylistEditBar;
     private GridLayout layoutPlaylistToolBar;
     private GridLayout layoutOptions;
+
+    private IntentIntegrator qrScan;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -277,7 +283,15 @@ public class MainActivity extends AppCompatActivity {
         textViewPlaylist = (TextView) findViewById(R.id.textViewPlaylist);
 
         Button buttonSaveConnectionString = (Button) findViewById(R.id.button_save_connectionString);
-        buttonSaveConnectionString.setOnClickListener(view -> setConfig("connectionString", editTextConnectInfo.getText().toString()));
+        buttonSaveConnectionString.setOnClickListener(view ->
+                setConfig("connectionString", editTextConnectInfo.getText().toString())
+        );
+
+        qrScan = new IntentIntegrator(this);
+        Button button_scan_QR = (Button) findViewById(R.id.button_scan_QR);
+        button_scan_QR.setOnClickListener(view ->
+                qrScan.initiateScan()
+        );
 
         String userPath = preferences.getString("userPath", "/");
         String display = userPath.equals("/")?
@@ -1275,6 +1289,14 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }
+            }
+        } else if (requestCode == QR_REQUEST_CODE && resultCode == RESULT_OK) {
+            //https://www.simplifiedcoding.net/android-qr-code-scanner-tutorial/
+            IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if (result == null || result.getContents() == null) {
+                Toast.makeText(this, "Problem reading QR code", Toast.LENGTH_LONG).show();
+            } else {
+                getFromQRcode(result.getContents());
             }
         }
         super.onActivityResult(requestCode, resultCode, data);

@@ -46,6 +46,7 @@
     <string name="newFolderName">New folder name</string>
     <string name="title">Title</string>
     <string name="cover">Cover</string>
+    <string name="scan_qr">Scan QR</string>
 
     <!--FIXME: Translate, knowing that it is also a keyword so need to split key and value-->
     <string-array name="limitUnits">
