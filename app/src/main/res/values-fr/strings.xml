@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_settings">Parametres</string>
+    <string name="action_settings">Paramètres</string>
     <string name="save">Sauver</string>
     <string name="path">Chemin :</string>
     <string name="choose">Choisir</string>
@@ -42,4 +42,14 @@
     <string name="title">Titre</string>
     <string name="cover">Pochette</string>
     <string name="scan_qr">Scan QR</string>
+    <string name="permissionMsg_1">Pour une expérience optimale de JaMuz</string>
+    <string name="permissionMsg_2">, merci de bien vouloir autoriser:</string>
+    <string name="permissionMsg_3">Contenus multimédias</string>
+    <string name="permissionMsg_4">: Permet à l\'application de:</string>
+    <string name="permissionMsg_5">- Enregistrer les fichiers reçus depuis JaMuz vers la carte SD externe</string>
+    <string name="permissionMsg_6">- Lecture seule du répertoire local choisi sur la carte SD externe.</string>
+    <string name="permissionMsg_7">- Enregistrer la base de données dans le répertoire JaMuz sur la carte SD interne</string>
+    <string name="permissionMsg_8">Gestion des appels</string>
+    <string name="permissionMsg_9">: Simplement pour mettre pause et reprendre la lecture lors des appels.</string>
+    <string name="warning">Attention !</string>
 </resources>
