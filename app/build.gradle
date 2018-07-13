@@ -37,3 +37,12 @@ dependencies {
     implementation files('libs/beaglebuddy_mp3.jar')
     implementation files('libs/jaudiotagger-2.2.4-SNAPSHOT.jar')
 }
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
+    implementation 'com.android.support:appcompat-v7:25.3.1'   // Minimum 23+ is required
+}
