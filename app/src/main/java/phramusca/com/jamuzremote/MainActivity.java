@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
         preferences = getPreferences(MODE_PRIVATE);
         editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.11:2013"));
 
-        //FIXME Remote and Sync modes interfere:
+        // !!! FIXME Remote and Sync modes interfere: !!!
         // - one can close the other on closure. why ?
         // - remote<->local move can be difficult :(
         //Note that it remote works quite well when sync is not running
@@ -1683,19 +1683,21 @@ public class MainActivity extends AppCompatActivity {
     public void checkPermissionsThenScanLibrary() {
         if (!hasPermissions(this, PERMISSIONS)) {
 
-            //FIXME: JaMuz Translation
-            String msgStr = "<html><b>For a full JaMuz experience</b>, please consider " +
-                    "allowing permissions that you will be asked for: <BR/><BR/>" +
-                    "<i>- <u>Multimedia files</u></i> : Allows application to:<BR/> " +
-                    "- Write files received from JaMuz to application folder on external SD card " +
-                        "(\"" + getAppDataPath() +"\") <BR/> " +
-                    "- Read-only user selected folder on external SD card <BR/>" +
-                    "- Store database in JaMuz folder on internal SD card " +
-                        "(\""+musicLibraryDbFile.getAbsolutePath()+"\").<BR/><BR/>" +
-                    "<i>- <u>Phone calls</u></i> : Simply to be able to pause and resume audio on phone calls.";
+            String msgStr = "<html><b>"+getString(R.string.permissionMsg_1)+"</b>"+getString(R.string.permissionMsg_2)
+                    +"<BR/><BR/>" +
+                    "<i>- <u>"+getString(R.string.permissionMsg_3)+"</u></i> "+getString(R.string.permissionMsg_4)
+                    +"<BR/> " +
+                    getString(R.string.permissionMsg_5) + " (\"" + getAppDataPath() +"\")."
+                    +"<BR/>" +
+                    getString(R.string.permissionMsg_6)
+                    +"<BR/>" +
+                    getString(R.string.permissionMsg_7) + " (\""+musicLibraryDbFile.getAbsolutePath()+"\")."
+                    +"<BR/><BR/>" +
+                    "<i>- <u>"+getString(R.string.permissionMsg_8)+"</u></i> "+getString(R.string.permissionMsg_9)
+                    +"</html>";
 
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-            alertDialog.setTitle("Warning !");
+            alertDialog.setTitle(getString(R.string.warning));
             alertDialog.setMessage(Html.fromHtml(msgStr));
             alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                     (dialog, which) -> {

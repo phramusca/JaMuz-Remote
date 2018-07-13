@@ -344,7 +344,7 @@ public class ServiceSync extends ServiceBase {
                 }
                 clientSync.requestMerge(tracks, getAppDataPath);
 
-                //FIXME: !!! Delete from db whenever deleting a file in "internal" folder
+                //FIXME: Delete from db whenever deleting a file in "internal" folder
                 //          (may already be done, check that FIRST)
                 //So that it is not required to scan (deleted) after sync (below)
 

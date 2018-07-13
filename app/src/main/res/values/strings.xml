@@ -47,6 +47,16 @@
     <string name="title">Title</string>
     <string name="cover">Cover</string>
     <string name="scan_qr">Scan QR</string>
+    <string name="permissionMsg_1">For a full JaMuz experience</string>
+    <string name="permissionMsg_2">, please consider allowing permissions that you will be asked for:</string>
+    <string name="permissionMsg_3">Multimedia files</string>
+    <string name="permissionMsg_4">: Allows application to:</string>
+    <string name="permissionMsg_5">- Write files received from JaMuz to application folder on external SD card</string>
+    <string name="permissionMsg_6">- Read-only user selected folder on external SD card.</string>
+    <string name="permissionMsg_7">- Store database in JaMuz folder on internal SD card</string>
+    <string name="permissionMsg_8">Phone calls</string>
+    <string name="permissionMsg_9">: Simply to be able to pause and resume audio on phone calls.</string>
+    <string name="warning">Warning!</string>
 
     <!--FIXME: Translate, knowing that it is also a keyword so need to split key and value-->
     <string-array name="limitUnits">
