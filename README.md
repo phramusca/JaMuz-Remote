@@ -1,4 +1,4 @@
-**JaMuz Remote** is an Android **Audio Player and Remote** for [JaMuz](https://github.com/phramusca/JaMuz) application.
+**JaMuz Remote** is an Android **Audio Player** and also a **Remote** for [JaMuz](https://github.com/phramusca/JaMuz) application.
 _________________________________________________________________________________
 * **Features**:
   * ***Audio Player:***
