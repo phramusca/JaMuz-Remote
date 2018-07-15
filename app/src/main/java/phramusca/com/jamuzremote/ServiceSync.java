@@ -289,8 +289,6 @@ public class ServiceSync extends ServiceBase {
                 runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
                         "Requesting statistics merge."));
                 for(Track track : tracks) {
-                    track.setRelativeFullPath(track.getPath().substring(
-                            getAppDataPath.getAbsolutePath().length()+1));
                     track.getTags(true);
                 }
                 clientSync.requestMerge(tracks);

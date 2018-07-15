@@ -32,7 +32,7 @@ public class Track implements Serializable {
     private String path = "";
     private String relativeFullPath = "";
     private ArrayList<String> tags = null;
-
+    //TODO: Store replaygain, no to read too often AND as a workaround for flac
     private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
     private String source="";
     private long size;
@@ -40,14 +40,9 @@ public class Track implements Serializable {
     private boolean isHistory=false;
     private static final String TAG = Track.class.getName();
 
-    //TODO: Store replaygain, no to read too often AND as a workaround for flac
-    // replaygain that cannot be read
-
-    public Track() {    }
-
-    public Track(int idFileRemote, int idFileServer, int rating, String title, String album,
-                 String artist, String coverHash, String path, String genre,
-                 Date addedDate, Date lastPlayed, int playCounter, String status) {
+    public Track(File getAppDataPath, int idFileRemote, int idFileServer, int rating, String title,
+                 String album, String artist, String coverHash, String path, String genre,
+                 Date addedDate, Date lastPlayed, int playCounter, String status, long size) {
         this.idFileRemote = idFileRemote;
         this.idFileServer = idFileServer;
         this.rating = rating;
@@ -57,17 +52,28 @@ public class Track implements Serializable {
         this.coverHash = coverHash;
         this.genre=genre;
         this.path = path;
+        this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length()+1);
         this.addedDate = addedDate;
         this.lastPlayed = lastPlayed;
         this.playCounter = playCounter;
         this.status = Status.valueOf(status);
-        // FIXME ***** Save size to Db :
-        // to get size on "Ack.", "Ack." and "Req." (search notifyBar() )
-        // also to get playlist sizes (refer to some old branch)
+        this.size = size;
     }
 
-    public Track(String absolutePath) {
+    public Track(int rating, String title, String album,
+                 String artist, String coverHash, String genre) {
+        this.rating = rating;
+        this.title = title;
+        this.album = album;
+        this.artist = artist;
+        this.coverHash = coverHash;
+        this.genre=genre;
+        source="Remote";
+    }
+
+    public Track(File getAppDataPath, String absolutePath) {
         this.path = absolutePath;
+        this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length()+1);
         readTags();
     }
 

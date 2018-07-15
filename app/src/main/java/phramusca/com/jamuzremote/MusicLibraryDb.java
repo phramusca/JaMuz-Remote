@@ -24,6 +24,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     static final String COL_LAST_PLAYED = "lastPlayed";
     static final String COL_PLAY_COUNTER = "playCounter";
     static final String COL_STATUS = "status";
+    static final String COL_SIZE = "size";
 
     private static final String CREATE_BDD = "CREATE TABLE " + TABLE_TRACKS + " ("
             + COL_ID_REMOTE + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -37,6 +38,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
             + COL_PLAY_COUNTER + " INTEGER NOT NULL, "
             + COL_LAST_PLAYED + " TEXT NOT NULL, "
             + COL_STATUS + " TEXT NOT NULL, "
+            + COL_SIZE + " LONG NOT NULL, "
             + COL_PATH + " TEXT NOT NULL); ";
 
     //By default store in user internal folder
@@ -44,7 +46,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     //    super(context, DB_NAME, null, DB_VERSION);
     //}
 
-    public MusicLibraryDb(final Context context) {
+    MusicLibraryDb(final Context context) {
         super(context, MainActivity.musicLibraryDbFile.getAbsolutePath(), null, DB_VERSION);
     }
 
