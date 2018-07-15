@@ -1,5 +1,7 @@
 package phramusca.com.jamuzremote;
 
+import android.util.Pair;
+
 import android.support.annotation.NonNull;
 import com.google.gson.Gson;
 import java.util.ArrayList;
@@ -372,16 +374,22 @@ public class Playlist implements Comparable {
         return name;
     }
 
+    private String lengthOrSize;
+
     @Override
     public String toString() {
         return isLocal?
-                name+" ("+nbFiles+")"
+                name+" ("+ lengthOrSize +" | "+nbFiles+")"
                 :name;
     }
 
     public void getNbFiles() {
+
         if(HelperLibrary.musicLibrary!=null) {
-            nbFiles=HelperLibrary.musicLibrary.getNb(getWhere(new ArrayList<>()), getHaving());
+            Pair<Integer, Long> entry=HelperLibrary.musicLibrary.getNb(getWhere(new ArrayList<>()), getHaving());
+            nbFiles=entry.first;
+            lengthOrSize = StringManager.humanReadableByteCount(entry.second, false);
+            /*lengthOrSize =StringManager.humanReadableSeconds(entry.second);*/
         }
     }
 
