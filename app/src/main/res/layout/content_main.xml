@@ -122,7 +122,7 @@
             <EditText android:id="@+id/editText_info"
                 android:inputType="text"
                 android:imeOptions="actionDone"
-                android:text="@string/_192_168_0_11_2013"
+                android:text="@string/defaultConnectionString"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:enabled="true"

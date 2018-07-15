@@ -28,6 +28,7 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LAST_PLAYED;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PATH;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PLAY_COUNTER;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_SIZE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_STATUS;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TITLE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.TABLE_TRACKS;
@@ -38,10 +39,12 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.TABLE_TRACKS;
 public class MusicLibrary {
 
     SQLiteDatabase db;
+    private final File getAppDataPath;
     private MusicLibraryDb musicLibraryDb;
     private static final String TAG = MusicLibrary.class.getName();
 
-    MusicLibrary(Context context){
+    MusicLibrary(File getAppDataPath, Context context){
+        this.getAppDataPath = getAppDataPath;
         musicLibraryDb = new MusicLibraryDb(context);
     }
 
@@ -162,7 +165,7 @@ public class MusicLibrary {
     }
 
     synchronized boolean insertOrUpdateTrackInDatabase(String absolutePath) {
-        return insertOrUpdateTrackInDatabase(new Track(absolutePath));
+        return insertOrUpdateTrackInDatabase(new Track(getAppDataPath, absolutePath));
     }
 
     synchronized boolean insertOrUpdateTrackInDatabase(Track track) {
@@ -207,8 +210,9 @@ public class MusicLibrary {
                     +COL_ARTIST+", "+COL_STATUS+", "
                     +COL_GENRE+", "+COL_PATH+", "
                     +COL_RATING+", "+COL_ADDED_DATE+", "
-                    +COL_LAST_PLAYED+", "+COL_PLAY_COUNTER+", "+COL_ID_SERVER+") " +
-                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    +COL_LAST_PLAYED+", "+COL_PLAY_COUNTER+", "
+                    +COL_ID_SERVER+", "+COL_SIZE+") " +
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             String sqlUpdateStatus = "UPDATE "+TABLE_TRACKS+" SET "+COL_STATUS+"=? WHERE "+COL_ID_SERVER+"=?";
             String sqlTagsDelete = "DELETE FROM tagFile WHERE idFile=?";
             String sqlTags = "INSERT OR REPLACE INTO tagfile (idFile, idTag) VALUES (?, (SELECT id FROM tag WHERE value=?))";
@@ -236,6 +240,7 @@ public class MusicLibrary {
                     stmtTracks.bindString(9, track.getFormattedLastPlayed());
                     stmtTracks.bindLong(10, track.getPlayCounter());
                     stmtTracks.bindLong(11, track.getIdFileServer());
+                    stmtTracks.bindLong(12, track.getSize());
                     idFile = (int) stmtTracks.executeInsert();
                     stmtTracks.clearBindings();
                 }
@@ -323,6 +328,7 @@ public class MusicLibrary {
         values.put(COL_TITLE, track.getTitle());
         values.put(COL_ALBUM, track.getAlbum());
         values.put(COL_ARTIST, track.getArtist());
+        values.put(COL_SIZE, track.getSize());
         values.put(COL_STATUS, track.getStatus().name());
         values.put(COL_GENRE, track.getGenre());
         values.put(COL_PATH, track.getPath());
@@ -342,6 +348,7 @@ public class MusicLibrary {
         String album=c.getString(c.getColumnIndex(COL_ALBUM));
         String artist=c.getString(c.getColumnIndex(COL_ARTIST));
         String status=c.getString(c.getColumnIndex(COL_STATUS));
+        long size=c.getLong(c.getColumnIndex(COL_SIZE));
         String path=c.getString(c.getColumnIndex(COL_PATH));
         String genre=c.getString(c.getColumnIndex(COL_GENRE));
 
@@ -350,9 +357,9 @@ public class MusicLibrary {
         Date lastPlayed=HelperDateTime.parseSqlUtc(
                 c.getString(c.getColumnIndex(COL_LAST_PLAYED)));
         int playCounter=c.getInt(c.getColumnIndex(COL_PLAY_COUNTER));
-        return new Track(idFileRemote, idFileServer, rating, title, album, artist,
+        return new Track(getAppDataPath, idFileRemote, idFileServer, rating, title, album, artist,
                 "coverHash", path, genre,
-                addedDate, lastPlayed, playCounter, status);
+                addedDate, lastPlayed, playCounter, status, size);
     }
 
     synchronized List<String> getGenres() {

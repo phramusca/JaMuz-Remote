@@ -718,9 +718,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        localTrack = new Track(-1, -1, 0, getString(R.string.welcomeTitle),
-                getString(R.string.welcomeYear), getString(R.string.app_name), "coverHash",
-                "relativeFullPath", "---", new Date(0), new Date(0), 0, "NULL");
+        localTrack = new Track(0, getString(R.string.welcomeTitle),
+                getString(R.string.welcomeYear), getString(R.string.app_name), "coverHash", "---");
         displayedTrack = localTrack;
         displayTrack(false);
 
@@ -1343,7 +1342,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void connectDatabase() {
-        HelperLibrary.open(this);
+        HelperLibrary.open(getAppDataPath(), this);
 
         new Thread() {
             public void run() {
@@ -2201,17 +2200,14 @@ public class MainActivity extends AppCompatActivity {
                         }
                         break;
                     case "fileInfoInt":
-                        displayedTrack = new Track(-1, -1,
+                        displayedTrack = new Track(
                                 jObject.getInt("rating"),
                                 jObject.getString("title"),
                                 jObject.getString("album"),
                                 jObject.getString("artist"),
-                                jObject.getString("coverHash"), "",
-                                jObject.getString("genre"),
-                                new Date(),
-                                new Date(0),0, "NULL");
+                                jObject.getString("coverHash"),
+                                jObject.getString("genre"));
                         //TODO: Add Playlist name and nbFiles
-                        displayedTrack.setSource("Remote");
                         displayTrack(false);
                         break;
                 }

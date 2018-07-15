@@ -52,8 +52,6 @@ public final class RepoSync {
      * @param relativeFullPath relative full path
      */
     public synchronized static boolean checkFile(File getAppDataPath, String relativeFullPath) {
-        Track fileInfoReception = new Track();
-        fileInfoReception.setRelativeFullPath(relativeFullPath);
         File file = new File(getAppDataPath, relativeFullPath);
         int idFileRemote = HelperLibrary.musicLibrary.getTrackId(file.getAbsolutePath());
         if(idFileRemote<0) {
