@@ -30,7 +30,8 @@ public class HelperNotification {
 
     public void notifyBar(Notification notification, final String action, int every,
                           int nbFiles, int nbFilesTotal) {
-        if(((nbFiles-1) % every) == 0) { //To prevent UI from freezing
+        every=nbFilesTotal<every?nbFilesTotal/10:every;
+        if(((nbFiles-1) % (every>0?every:1)) == 0) { //To prevent UI from freezing
             String msg = nbFiles + "/" + nbFilesTotal + " " + action;
             notifyBar(notification, msg, nbFilesTotal, nbFiles, false,
                     false, false, "");

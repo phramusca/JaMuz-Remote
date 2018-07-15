@@ -718,9 +718,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        localTrack = new Track(-1, 0, getString(R.string.welcomeTitle),
+        localTrack = new Track(-1, -1, 0, getString(R.string.welcomeTitle),
                 getString(R.string.welcomeYear), getString(R.string.app_name), "coverHash",
-                "relativeFullPath", "---", new Date(0), new Date(0), 0);
+                "relativeFullPath", "---", new Date(0), new Date(0), 0, "NULL");
         displayedTrack = localTrack;
         displayTrack(false);
 
@@ -1423,11 +1423,11 @@ public class MainActivity extends AppCompatActivity {
             //TODO: On tablet : java.lang.NoSuchMethodError: No interface method stream()Ljava/util/stream/Stream;
             // in class Ljava/util/List; or its super classes
             // (declaration of 'java.util.List' appears in /system/framework/core-libart.jar)
-            /*List<Integer> queueIds = queue.stream().map(Track::getId).collect(Collectors.toList());*/
+            /*List<Integer> queueIds = queue.stream().map(Track::getIdFileRemote).collect(Collectors.toList());*/
 
             List<Integer> queueIds = new ArrayList<>();
             for(Track track : queue) {
-                queueIds.add(track.getId());
+                queueIds.add(track.getIdFileRemote());
             }
 
             fillQueue(11, queueIds); // So it remains 10 after
@@ -1539,9 +1539,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case "connectedSync":
                     //setConfig("connectionString", editTextConnectInfo.getText().toString());
-                    break;
-                case "checkPermissionsThenScanLibrary":
-                    checkPermissionsThenScanLibrary();
                     break;
                 case "setupGenres":
                     setupGenres();
@@ -2077,7 +2074,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            if(displayedTrack.getId()>=0) {
+            if(displayedTrack.getIdFileRemote()>=0) {
                 displayImage(displayedTrack.getArt());
                 bluetoothNotifyChange(AVRCP_META_CHANGED);
 
@@ -2121,7 +2118,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void bluetoothNotifyChange(String what) {
         Intent i = new Intent(what);
-        i.putExtra("id", Long.valueOf(displayedTrack.getId()));
+        i.putExtra("id", Long.valueOf(displayedTrack.getIdFileRemote()));
         i.putExtra("artist", displayedTrack.getArtist());
         i.putExtra("album",displayedTrack.getAlbum());
         i.putExtra("track", displayedTrack.getTitle());
@@ -2204,7 +2201,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         break;
                     case "fileInfoInt":
-                        displayedTrack = new Track(-1,
+                        displayedTrack = new Track(-1, -1,
                                 jObject.getInt("rating"),
                                 jObject.getString("title"),
                                 jObject.getString("album"),
@@ -2212,7 +2209,7 @@ public class MainActivity extends AppCompatActivity {
                                 jObject.getString("coverHash"), "",
                                 jObject.getString("genre"),
                                 new Date(),
-                                new Date(0),0);
+                                new Date(0),0, "NULL");
                         //TODO: Add Playlist name and nbFiles
                         displayedTrack.source="Remote";
                         displayTrack(false);

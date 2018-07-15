@@ -120,17 +120,19 @@
                 android:textColor="@color/textColor"/>
 
             <EditText android:id="@+id/editText_info"
+                android:inputType="text"
+                android:imeOptions="actionDone"
                 android:text="@string/_192_168_0_11_2013"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:enabled="true"
                 android:layout_gravity="start|end"
                 android:gravity="center_horizontal"
-                android:inputType="text"
+
                 android:layout_row="0"
                 android:layout_column="2"
                 android:textColor="@color/textColor"
-                android:theme="@style/EditText" />
+                android:theme="@style/EditText"/>
 
             <Button
                 style="?android:attr/buttonStyleSmall"
