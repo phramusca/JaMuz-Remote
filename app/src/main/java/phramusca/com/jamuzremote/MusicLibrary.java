@@ -472,7 +472,7 @@ public class MusicLibrary {
     synchronized int updateStatus(Track track){
         try {
             ContentValues values = new ContentValues();
-            values.put(COL_STATUS, track.status.name());
+            values.put(COL_STATUS, track.getStatus().name());
             return db.update(TABLE_TRACKS,
                     values,
                     COL_ID_SERVER + " = " +track.getIdFileServer(), null);
@@ -482,6 +482,10 @@ public class MusicLibrary {
         return -1;
     }
 
+    /**
+     * Set Status DEL where Status!="NULL"
+     * @return the number of rows affected
+     */
     synchronized int updateStatus(){
         try {
             ContentValues values = new ContentValues();

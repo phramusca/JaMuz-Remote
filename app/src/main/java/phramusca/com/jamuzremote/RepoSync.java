@@ -28,15 +28,15 @@ public final class RepoSync {
                                                  Track track,
                                                  Track.Status status) {
 
-        File receivedFile = new File(getAppDataPath, track.relativeFullPath);
+        File receivedFile = new File(getAppDataPath, track.getRelativeFullPath());
         int idFileRemote = HelperLibrary.musicLibrary.getTrackId(track.getIdFileServer());
         if(idFileRemote>=0) {
             if(checkFile(track, receivedFile)) {
-                track.status = status;
+                track.setStatus(status);
                 HelperLibrary.musicLibrary.updateStatus(track);
                 return true;
             } else {
-                track.status = Track.Status.NEW;
+                track.setStatus(Track.Status.NEW);
                 HelperLibrary.musicLibrary.updateStatus(track);
             }
         } else {
@@ -53,8 +53,8 @@ public final class RepoSync {
      */
     public synchronized static boolean checkFile(File getAppDataPath, String relativeFullPath) {
         Track fileInfoReception = new Track();
-        fileInfoReception.relativeFullPath=relativeFullPath;
-        File file = new File(getAppDataPath, fileInfoReception.relativeFullPath);
+        fileInfoReception.setRelativeFullPath(relativeFullPath);
+        File file = new File(getAppDataPath, relativeFullPath);
         int idFileRemote = HelperLibrary.musicLibrary.getTrackId(file.getAbsolutePath());
         if(idFileRemote<0) {
             Log.i(TAG, "DELETE UNWANTED: "+relativeFullPath);
@@ -73,7 +73,7 @@ public final class RepoSync {
     private synchronized static boolean checkFile(Track track,
                                                   File receivedFile) {
         if(receivedFile.exists()) {
-            if (receivedFile.length() == track.size) {
+            if (receivedFile.length() == track.getSize()) {
                 Log.i(TAG, "Correct file size: " + receivedFile.length());
                 return true;
             } else {
@@ -95,11 +95,12 @@ public final class RepoSync {
     private synchronized static Track checkFile(Track track) {
         File file = new File(track.getPath());
         if(checkFile(track, file)) {
-            if (track.status.equals(Track.Status.NEW)) {
-                track.status = Track.Status.REC;
+            if (track.getStatus().equals(Track.Status.NEW)) {
+                track.setStatus(Track.Status.REC);
+                track.readTags();
             }
         } else {
-            track.status = Track.Status.NEW;
+            track.setStatus(Track.Status.NEW);
         }
         return track;
     }
@@ -134,7 +135,7 @@ public final class RepoSync {
     private synchronized static long getRemainingFileSize(Track.Status status) {
         long nbRemaining=0;
         for(Track fileInfoReception : HelperLibrary.musicLibrary.getTracks(status)) {
-            nbRemaining+=fileInfoReception.size;
+            nbRemaining+=fileInfoReception.getSize();
         }
         return nbRemaining;
     }

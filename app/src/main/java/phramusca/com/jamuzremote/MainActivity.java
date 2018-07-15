@@ -1379,7 +1379,7 @@ public class MainActivity extends AppCompatActivity {
         localTrack = displayedTrack;
         refreshLocalPlaylistSpinner(false);
         audioPlayer.stop(false);
-        displayedTrack.source=source.equals("")?localSelectedPlaylist.toString():source;
+        displayedTrack.setSource(source.equals("")?localSelectedPlaylist.toString():source);
         String msg = audioPlayer.play(displayedTrack);
         if(!msg.equals("")) {
             helperToast.toastLong(msg);
@@ -2052,8 +2052,8 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 setTextView(textViewFileInfo, trimTrailingWhitespace(Html.fromHtml(
                         "<html>"+
-                        (displayedTrack.source.equals("")?""
-                                :"<u>".concat(displayedTrack.source).concat("</u>:"))
+                        (displayedTrack.getSource().equals("")?""
+                                :"<u>".concat(displayedTrack.getSource()).concat("</u>:"))
                         +""
                         .concat("<h1>")
                         .concat(displayedTrack.toString())
@@ -2211,7 +2211,7 @@ public class MainActivity extends AppCompatActivity {
                                 new Date(),
                                 new Date(0),0, "NULL");
                         //TODO: Add Playlist name and nbFiles
-                        displayedTrack.source="Remote";
+                        displayedTrack.setSource("Remote");
                         displayTrack(false);
                         break;
                 }

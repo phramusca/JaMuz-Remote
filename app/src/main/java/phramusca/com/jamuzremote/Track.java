@@ -19,24 +19,25 @@ import java.util.Date;
  */
 public class Track implements Serializable {
     private int idFileRemote = -1;
-    public int idFileServer = -1;
-    private int rating=0;
-    private String title="";
-    private String album="";
-    private String artist="";
-    private String coverHash="";
-    private String path="";
-    public String relativeFullPath;
-    private String genre="";
-    public Date addedDate = new Date(0);
-    public Date lastPlayed = new Date(0);
-    public int playCounter=0;
+    private int idFileServer = -1;
+    private String artist = "";
+    private String title = "";
+    private String album = "";
+    private String genre = "";
+    private int rating = 0;
+    private Date addedDate = new Date(0);
+    private int playCounter = 0;
+    private Date lastPlayed = new Date(0);
+    private Status status = Status.NULL;
+    private String path = "";
+    private String relativeFullPath = "";
     private ArrayList<String> tags = null;
+
     private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
-    public String source="";
-    public long size;
+    private String source="";
+    private long size;
+    private String coverHash="";
     private boolean isHistory=false;
-    public Status status= Status.NULL;
     private static final String TAG = Track.class.getName();
 
     //TODO: Store replaygain, no to read too often AND as a workaround for flac
@@ -70,7 +71,6 @@ public class Track implements Serializable {
         readTags();
     }
 
-    // FIXME ***** Those tags are often empty. What is overwriting ?
     public void readTags() {
         try {
             MediaMetadataRetriever mmr = new MediaMetadataRetriever();
@@ -129,6 +129,30 @@ public class Track implements Serializable {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public String getRelativeFullPath() {
+        return relativeFullPath;
+    }
+
+    public void setRelativeFullPath(String relativeFullPath) {
+        this.relativeFullPath = relativeFullPath;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 
     public enum Status {
