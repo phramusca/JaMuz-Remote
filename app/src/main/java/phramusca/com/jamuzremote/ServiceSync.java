@@ -234,7 +234,7 @@ public class ServiceSync extends ServiceBase {
         int progress = max- remaining;
 
         String bigText = "-"+ remaining + "/" + max
-                + "\n-" + StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), true)
+                + "\n-" + StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false)
                 + "\n" + (fileInfoReception==null?"":fileInfoReception.getRelativeFullPath());
 
         String msg = text

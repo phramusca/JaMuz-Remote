@@ -44,20 +44,22 @@ public class ServiceScan extends ServiceBase {
     private void scanLibrayInThread() {
         new Thread() {
             public void run() {
-                runOnUiThread(() -> helperNotification.notifyBar(notificationScan, "Deleting tracks outside user folder."));
-                HelperLibrary.musicLibrary.deleteTrack(getAppDataPath, userPath);
-                //Scan user folder and cleanup library
-                File folder = new File(userPath);
-                scanFolder(folder);
-                waitScanFolder();
+                runOnUiThread(() -> helperNotification.notifyBar(notificationScan, "Cleaning database..."));
+                if(HelperLibrary.musicLibrary!=null) {
+                    HelperLibrary.musicLibrary.deleteTrack(getAppDataPath, userPath);
+                    //Scan user folder and cleanup library
+                    File folder = new File(userPath);
+                    scanFolder(folder);
+                    waitScanFolder();
 
-                //Scan complete, warn user
-                final String msg = "Database updated.";
-                runOnUiThread(() -> {
-                    helperToast.toastLong(msg);
-                    helperNotification.notifyBar(notificationScan, msg, 5000);
-                });
-                stopSelf();
+                    //Scan complete, warn user
+                    final String msg = "Database updated.";
+                    runOnUiThread(() -> {
+                        helperToast.toastLong(msg);
+                        helperNotification.notifyBar(notificationScan, msg, 5000);
+                    });
+                    stopSelf();
+                }
             }
         }.start();
     }

@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteStatement;
 import android.provider.BaseColumns;
 import android.util.Log;
+import android.util.Pair;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -142,18 +143,30 @@ public class MusicLibrary {
         return tracks;
     }
 
-    synchronized int getNb(String where, String having){
+    public synchronized Pair<Integer, Long> getNb(String where, String having){
         Cursor cursor=null;
         try {
-            String query = "SELECT * \n" +
-                    " FROM tracks \n" +
+            String query = "SELECT count(*), SUM(size) AS sizeTotal \n" +
+                    " FROM (SELECT size FROM tracks \n" +
                     " LEFT JOIN tagfile ON tracks.idFileRemote=tagfile.idFile \n" +
                     " LEFT JOIN tag ON tag.id=tagfile.idTag \n"+
                     " " + where + " \n" +
                     " GROUP BY tracks.idFileRemote \n" +
-                    " " + having;
+                    " " + having + ")";
             cursor = db.rawQuery(query, new String [] {});
-            return cursor.getCount();
+
+            if(cursor != null && cursor.moveToNext())
+            {
+                int count = cursor.getInt(0); //cursor.getCount()
+                long sizeTotal = cursor.getLong(1); //cursor.getLong(cursor.getColumnIndex("sizeTotal"));
+                //FIXME: Introduce length in tracks table
+                //to be able to:
+                // SELECT SUM(length) AS lengthTotal
+                //long lengthTotal = cursor.getLong(3);
+
+                Pair<Integer, Long> entry = new Pair<>(count, sizeTotal);
+                return entry;
+            }
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "getNb("+where+","+having+")", ex);
         } finally {
@@ -161,7 +174,7 @@ public class MusicLibrary {
                 cursor.close();
             }
         }
-        return -1;
+        return new Pair(-1, Long.valueOf(-1));
     }
 
     synchronized boolean insertOrUpdateTrackInDatabase(String absolutePath) {
