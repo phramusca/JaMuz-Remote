@@ -47,10 +47,10 @@ public class ClientRemote extends Client {
         }
 
         @Override
-        public void receivingFile(FileInfoReception fileInfoReception) {        }
+        public void receivingFile(Track fileInfoReception) {        }
 
         @Override
-        public void receivedFile(FileInfoReception fileInfoReception) {        }
+        public void receivedFile(Track fileInfoReception) {        }
 
         @Override
 		public void disconnected(String msg) {
