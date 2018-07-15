@@ -14,6 +14,7 @@ import android.system.OsConstants;
 import android.util.Log;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -68,19 +69,16 @@ public class ClientReception extends ProcessAbstract {
                     }
                 }
 				else if (msg.startsWith("SENDING_FILE")) {
-                    FileInfoReception fileInfoReception;
+                    Track fileInfoReception;
                     try {
                         String json = msg.substring("SENDING_FILE".length());
-                        fileInfoReception = new FileInfoReception(json);
-                        File path = getAppDataPath();
-                        File destinationPath = new File(path.getAbsolutePath()+File.separator
-                                +new File(fileInfoReception.relativeFullPath).getParent());
+                        fileInfoReception = new Track(new JSONObject(json), getAppDataPath());
+                        File destinationPath = new File(new File(fileInfoReception.getPath()).getParent());
                         destinationPath.mkdirs();
                         Log.i(TAG, "Start file reception: \n"+fileInfoReception);
                         DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
                         double fileSize = fileInfoReception.size;
-                        FileOutputStream fos = new FileOutputStream(path.getAbsolutePath() + File.separator +
-                                fileInfoReception.relativeFullPath);
+                        FileOutputStream fos = new FileOutputStream(fileInfoReception.getPath());
                         callback.receivingFile(fileInfoReception);
                         // TODO: Find best. Make a benchmark (and use it in notification progres bar)
                         //https://stackoverflow.com/questions/8748960/how-do-you-decide-what-byte-size-to-use-for-inputstream-read

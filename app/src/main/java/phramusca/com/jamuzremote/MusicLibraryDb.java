@@ -9,34 +9,35 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class MusicLibraryDb extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 3;
 
-    public static final String TABLE_TRACKS = "tracks";
-    public static final String COL_ID = "ID";
-    public static final String COL_TITLE = "title";
-    public static final String COL_ALBUM = "album";
-    public static final String COL_RATING = "rating";
-    public static final String COL_ARTIST = "artist";
-    public static final String COL_COVER_HASH = "coverHash";
-    public static final String COL_PATH = "path";
-    public static final String COL_GENRE = "genre";
-
-    public static final String COL_ADDED_DATE = "addedDate";
-    public static final String COL_LAST_PLAYED = "lastPlayed";
-    public static final String COL_PLAY_COUNTER = "playCounter";
+    static final String TABLE_TRACKS = "tracks";
+    static final String COL_ID_REMOTE = "idFileRemote";
+    static final String COL_ID_SERVER = "idFileServer";
+    static final String COL_TITLE = "title";
+    static final String COL_ALBUM = "album";
+    static final String COL_RATING = "rating";
+    static final String COL_ARTIST = "artist";
+    static final String COL_PATH = "path";
+    static final String COL_GENRE = "genre";
+    static final String COL_ADDED_DATE = "addedDate";
+    static final String COL_LAST_PLAYED = "lastPlayed";
+    static final String COL_PLAY_COUNTER = "playCounter";
+    static final String COL_STATUS = "status";
 
     private static final String CREATE_BDD = "CREATE TABLE " + TABLE_TRACKS + " ("
-            + COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + COL_TITLE + " TEXT NOT NULL, "
-            + COL_RATING + " INTEGER NOT NULL, "
+            + COL_ID_REMOTE + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + COL_ID_SERVER + " INTEGER, "
             + COL_ARTIST + " TEXT NOT NULL, "
-            + COL_COVER_HASH + " TEXT NOT NULL, "
-            + COL_PATH + " TEXT NOT NULL, "
+            + COL_TITLE + " TEXT NOT NULL, "
+            + COL_ALBUM + " TEXT NOT NULL, "
             + COL_GENRE + " TEXT, "
+            + COL_RATING + " INTEGER NOT NULL, "
             + COL_ADDED_DATE + " TEXT NOT NULL, "
             + COL_PLAY_COUNTER + " INTEGER NOT NULL, "
             + COL_LAST_PLAYED + " TEXT NOT NULL, "
-            + COL_ALBUM + " TEXT NOT NULL);";
+            + COL_STATUS + " TEXT NOT NULL, "
+            + COL_PATH + " TEXT NOT NULL); ";
 
     //By default store in user internal folder
     //public MusicLibraryDb(Context context) {
@@ -58,8 +59,8 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE 'tagfile' (\n" +
                 "    'idFile' INTEGER NOT NULL,\n" +
                 "    'idTag' INTEGER NOT NULL,\n" +
-                "\tPRIMARY KEY ('idFile', 'idTag'),\n" +
-                "\tFOREIGN KEY(idFile) REFERENCES "+TABLE_TRACKS+"("+COL_ID+"),\n" +
+                "\tPRIMARY KEY (idFile, 'idTag'),\n" +
+                "\tFOREIGN KEY(idFile) REFERENCES "+TABLE_TRACKS+"("+ COL_ID_REMOTE +"),\n" +
                 "\tFOREIGN KEY(idTag) REFERENCES tag(id) ON DELETE CASCADE\n" +
                 ");");
         db.execSQL("CREATE TABLE \"genre\" (\n" +
@@ -73,7 +74,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
         //TODO: How to warn user he needs to sync before upgrading version ?
         // in case database change and this is called.
         db.execSQL("DROP TABLE " + TABLE_TRACKS + ";");
-        db.execSQL("DROP TABLE tags");
+        db.execSQL("DROP TABLE tag");
         db.execSQL("DROP TABLE tagfile");
         db.execSQL("DROP TABLE genre");
         onCreate(db);

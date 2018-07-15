@@ -260,7 +260,8 @@ public class Playlist implements Comparable {
 
     private String getWhere(List<Integer> IDs) {
 
-        String in = "WHERE rating "+getRatingString()+" ";
+        String in = "WHERE status IN (\""+ Track.Status.ACK.name() + "\",\"" + Track.Status.NULL.name() + "\") " +
+                " AND rating "+getRatingString()+" ";
 
         if(limitValue>0) {
             in += "\n AND lastPlayed < datetime(datetime('now'), '-" + limitValue + " " + limitUnit + "')";
@@ -300,7 +301,7 @@ public class Playlist implements Comparable {
     private static String getCSVlist(List<Integer> IDs) {
         StringBuilder builder = new StringBuilder();
         if(IDs.size()>0) {
-            builder.append("\n AND tracks.ID NOT IN (");
+            builder.append("\n AND tracks.idFileRemote NOT IN (");
             for (int integer : IDs) {
                 builder.append(integer).append(",");
             }
