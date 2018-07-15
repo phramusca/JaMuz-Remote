@@ -77,7 +77,7 @@ public class ClientReception extends ProcessAbstract {
                         destinationPath.mkdirs();
                         Log.i(TAG, "Start file reception: \n"+fileInfoReception);
                         DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
-                        double fileSize = fileInfoReception.size;
+                        double fileSize = fileInfoReception.getSize();
                         FileOutputStream fos = new FileOutputStream(fileInfoReception.getPath());
                         callback.receivingFile(fileInfoReception);
                         // TODO: Find best. Make a benchmark (and use it in notification progres bar)

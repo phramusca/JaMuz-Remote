@@ -100,7 +100,7 @@ public class ServiceSync extends ServiceBase {
                                     getAppDataPath);
                             notifyBar("Ack+", fileReceived);
                             RepoSync.receivedAck(fileReceived);
-                            bench.get(fileReceived.size);
+                            bench.get(fileReceived.getSize());
                         } else {
                             notifyBar("Received ack from server");
                             for (int i = 0; i < jsonArray.length(); i++) {
@@ -122,8 +122,8 @@ public class ServiceSync extends ServiceBase {
                             Track fileReceived = new Track(
                                     (JSONObject) files.get(i),
                                     getAppDataPath);
-                            fileReceived.status= Track.Status.NEW;
-                            newTracks.put(fileReceived.idFileServer, fileReceived);
+                            fileReceived.setStatus(Track.Status.NEW);
+                            newTracks.put(fileReceived.getIdFileServer(), fileReceived);
                         }
                         helperNotification.notifyBar(notificationSync,
                                 "Checking if files are already on disk ... ");
@@ -235,12 +235,12 @@ public class ServiceSync extends ServiceBase {
 
         String bigText = "-"+ remaining + "/" + max
                 + "\n-" + StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), true)
-                + "\n" + (fileInfoReception==null?"":fileInfoReception.relativeFullPath);
+                + "\n" + (fileInfoReception==null?"":fileInfoReception.getRelativeFullPath());
 
         String msg = text
                 +(fileInfoReception==null
                     ?"":
-                    (" "+StringManager.humanReadableByteCount(fileInfoReception.size, false))
+                    (" "+StringManager.humanReadableByteCount(fileInfoReception.getSize(), false))
                 )
                 +bench.getLast();
 
@@ -289,10 +289,9 @@ public class ServiceSync extends ServiceBase {
                 runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
                         "Requesting statistics merge."));
                 for(Track track : tracks) {
-                    track.relativeFullPath=track.getPath().substring(
-                            getAppDataPath.getAbsolutePath().length()+1);
+                    track.setRelativeFullPath(track.getPath().substring(
+                            getAppDataPath.getAbsolutePath().length()+1));
                     track.getTags(true);
-
                 }
                 clientSync.requestMerge(tracks);
             } else {

@@ -140,9 +140,9 @@ public class ClientSync extends Client {
             long minTimeout = 15;  //Min timeout 15s (or 15s by 4Mo)
             long maxTimeout = 120; //Max timeout 2 min
 
-            long timeoutFile = track.size < 4000000
+            long timeoutFile = track.getSize() < 4000000
                     ? minTimeout
-                    : ((track.size / 4000000) * minTimeout);
+                    : ((track.getSize() / 4000000) * minTimeout);
             timeoutFile = timeoutFile > maxTimeout ? maxTimeout : timeoutFile;
             watchTimeOut(timeoutFile);
             logStatus("requestFile()");
@@ -150,7 +150,7 @@ public class ClientSync extends Client {
                 JSONObject obj = new JSONObject();
                 try {
                     obj.put("type", "requestFile");
-                    obj.put("idFile", track.idFileServer);
+                    obj.put("idFile", track.getIdFileServer());
                     send("JSON_" + obj.toString());
                 } catch (JSONException e) {
                 }
@@ -209,7 +209,7 @@ public class ClientSync extends Client {
                     obj.put("type", "ackFileSReception");
                     JSONArray idFiles = new JSONArray();
                     for (Track file : files) {
-                        idFiles.put(file.idFileServer);
+                        idFiles.put(file.getIdFileServer());
                     }
                     obj.put("idFiles", idFiles);
                     watchTimeOut(4+files.size());
