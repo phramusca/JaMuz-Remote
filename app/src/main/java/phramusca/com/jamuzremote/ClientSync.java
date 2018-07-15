@@ -15,7 +15,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -48,7 +47,6 @@ public class ClientSync extends Client {
                     syncStatus.nbRetries=0;
                     logStatus("Connected");
                     callback.connected();
-                    RepoSync.save();
                     request("requestTags");
                     return true;
                 }
@@ -70,11 +68,7 @@ public class ClientSync extends Client {
             if (reconnect) {
                 if(syncStatus.nbRetries < 100 //TODO: Make max nbRetries configurable
                         && syncStatus.status.equals(Status.NOT_CONNECTED)) {
-                    if (syncStatus.nbRetries < 2) {
-                        RepoSync.save();
-                    } else {
-                        logStatus("Re-connecting in 5s");
-                    }
+                    logStatus("Re-connecting in 5s");
                     new Thread() {
                         public void run() {
                             try {
@@ -86,13 +80,11 @@ public class ClientSync extends Client {
                         }
                     }.start();
                 } else {
-                    RepoSync.save();
                     msg="Too many retries ("+syncStatus.nbRetries+").";
                     reconnect=false;
                     syncStatus.status=Status.STOPPING;
                 }
             } else {
-                RepoSync.save();
                 syncStatus.status=Status.STOPPING;
             }
             callback.disconnected(reconnect, msg, millisInFuture);
@@ -114,12 +106,12 @@ public class ClientSync extends Client {
         public void receivedBitmap(Bitmap bitmap) {        }
 
         @Override
-        public void receivingFile(FileInfoReception fileInfoReception) {
+        public void receivingFile(Track fileInfoReception) {
             callback.receivingFile(fileInfoReception);
         }
 
         @Override
-        public void receivedFile(FileInfoReception fileInfoReception) {
+        public void receivedFile(Track fileInfoReception) {
             synchronized (syncStatus) {
                 logStatus("receivedFile(" + fileInfoReception + ")");
                 cancelWatchTimeOut();
@@ -142,15 +134,15 @@ public class ClientSync extends Client {
 		}
 	}
 
-    public void requestFile(FileInfoReception fileInfoReception) {
+    public void requestFile(Track track) {
         synchronized (syncStatus) {
             //TODO: Make sync timeouts configurable (use bench, to be based on size not nb)
             long minTimeout = 15;  //Min timeout 15s (or 15s by 4Mo)
             long maxTimeout = 120; //Max timeout 2 min
 
-            long timeoutFile = fileInfoReception.size < 4000000
+            long timeoutFile = track.getSize() < 4000000
                     ? minTimeout
-                    : ((fileInfoReception.size / 4000000) * minTimeout);
+                    : ((track.getSize() / 4000000) * minTimeout);
             timeoutFile = timeoutFile > maxTimeout ? maxTimeout : timeoutFile;
             watchTimeOut(timeoutFile);
             logStatus("requestFile()");
@@ -158,7 +150,7 @@ public class ClientSync extends Client {
                 JSONObject obj = new JSONObject();
                 try {
                     obj.put("type", "requestFile");
-                    obj.put("idFile", fileInfoReception.idFile);
+                    obj.put("idFile", track.getIdFileServer());
                     send("JSON_" + obj.toString());
                 } catch (JSONException e) {
                 }
@@ -181,7 +173,7 @@ public class ClientSync extends Client {
         }
     }
 
-    public void requestMerge(List<Track> tracks, File getAppDataPath) {
+    public void requestMerge(List<Track> tracks) {
         synchronized (syncStatus) {
             logStatus("requestFile()");
             if(checkStatus()) {
@@ -191,7 +183,7 @@ public class ClientSync extends Client {
                     //JSONObject jsonAsMap = new JSONObject();
                     JSONArray filesToMerge = new JSONArray();
                     for (Track track : tracks) {
-                        filesToMerge.put(track.toJSONObject(getAppDataPath));
+                        filesToMerge.put(track.toJSONObject());
                     }
                     obj.put("files", filesToMerge);
                     watchTimeOut(4+tracks.size());
@@ -203,12 +195,12 @@ public class ClientSync extends Client {
     }
 
     // FIXME sync and merge: do NOT request genres and tags at every connection but only if required or on demand
-    // FIXME sync and merge: avoid double acknowledgement:
+    // TODO => sync and merge: would even be better to merge genres and tags instead of getting, especially for tags
+    // TODO sync and merge: avoid double acknowledgement:
     //          - Insert files in JaMuz deviceFiles directly at export
     //          - Use a status in JaMuz as in JaMuzRemote
-    // FIXME sync and merge: remove json file lists and insert in db directly
 
-    public void ackFilesReception(List<FileInfoReception> files) {
+    public void ackFilesReception(List<Track> files) {
         synchronized (syncStatus) {
             logStatus("ackFilesReception()");
             if(checkStatus()) {
@@ -216,8 +208,8 @@ public class ClientSync extends Client {
                 try {
                     obj.put("type", "ackFileSReception");
                     JSONArray idFiles = new JSONArray();
-                    for (FileInfoReception file : files) {
-                        idFiles.put(file.idFile);
+                    for (Track file : files) {
+                        idFiles.put(file.getIdFileServer());
                     }
                     obj.put("idFiles", idFiles);
                     watchTimeOut(4+files.size());

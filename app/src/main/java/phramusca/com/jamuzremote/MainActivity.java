@@ -718,9 +718,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        localTrack = new Track(-1, 0, getString(R.string.welcomeTitle),
-                getString(R.string.welcomeYear), getString(R.string.app_name), "coverHash",
-                "relativeFullPath", "---", new Date(0), new Date(0), 0);
+        localTrack = new Track(0, getString(R.string.welcomeTitle),
+                getString(R.string.welcomeYear), getString(R.string.app_name), "coverHash", "---");
         displayedTrack = localTrack;
         displayTrack(false);
 
@@ -1343,7 +1342,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void connectDatabase() {
-        HelperLibrary.open(this);
+        HelperLibrary.open(getAppDataPath(), this);
 
         new Thread() {
             public void run() {
@@ -1379,7 +1378,7 @@ public class MainActivity extends AppCompatActivity {
         localTrack = displayedTrack;
         refreshLocalPlaylistSpinner(false);
         audioPlayer.stop(false);
-        displayedTrack.source=source.equals("")?localSelectedPlaylist.toString():source;
+        displayedTrack.setSource(source.equals("")?localSelectedPlaylist.toString():source);
         String msg = audioPlayer.play(displayedTrack);
         if(!msg.equals("")) {
             helperToast.toastLong(msg);
@@ -1423,11 +1422,11 @@ public class MainActivity extends AppCompatActivity {
             //TODO: On tablet : java.lang.NoSuchMethodError: No interface method stream()Ljava/util/stream/Stream;
             // in class Ljava/util/List; or its super classes
             // (declaration of 'java.util.List' appears in /system/framework/core-libart.jar)
-            /*List<Integer> queueIds = queue.stream().map(Track::getId).collect(Collectors.toList());*/
+            /*List<Integer> queueIds = queue.stream().map(Track::getIdFileRemote).collect(Collectors.toList());*/
 
             List<Integer> queueIds = new ArrayList<>();
             for(Track track : queue) {
-                queueIds.add(track.getId());
+                queueIds.add(track.getIdFileRemote());
             }
 
             fillQueue(11, queueIds); // So it remains 10 after
@@ -1539,9 +1538,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case "connectedSync":
                     //setConfig("connectionString", editTextConnectInfo.getText().toString());
-                    break;
-                case "checkPermissionsThenScanLibrary":
-                    checkPermissionsThenScanLibrary();
                     break;
                 case "setupGenres":
                     setupGenres();
@@ -2055,8 +2051,8 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 setTextView(textViewFileInfo, trimTrailingWhitespace(Html.fromHtml(
                         "<html>"+
-                        (displayedTrack.source.equals("")?""
-                                :"<u>".concat(displayedTrack.source).concat("</u>:"))
+                        (displayedTrack.getSource().equals("")?""
+                                :"<u>".concat(displayedTrack.getSource()).concat("</u>:"))
                         +""
                         .concat("<h1>")
                         .concat(displayedTrack.toString())
@@ -2077,7 +2073,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            if(displayedTrack.getId()>=0) {
+            if(displayedTrack.getIdFileRemote()>=0) {
                 displayImage(displayedTrack.getArt());
                 bluetoothNotifyChange(AVRCP_META_CHANGED);
 
@@ -2121,7 +2117,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void bluetoothNotifyChange(String what) {
         Intent i = new Intent(what);
-        i.putExtra("id", Long.valueOf(displayedTrack.getId()));
+        i.putExtra("id", Long.valueOf(displayedTrack.getIdFileRemote()));
         i.putExtra("artist", displayedTrack.getArtist());
         i.putExtra("album",displayedTrack.getAlbum());
         i.putExtra("track", displayedTrack.getTitle());
@@ -2204,17 +2200,14 @@ public class MainActivity extends AppCompatActivity {
                         }
                         break;
                     case "fileInfoInt":
-                        displayedTrack = new Track(-1,
+                        displayedTrack = new Track(
                                 jObject.getInt("rating"),
                                 jObject.getString("title"),
                                 jObject.getString("album"),
                                 jObject.getString("artist"),
-                                jObject.getString("coverHash"), "",
-                                jObject.getString("genre"),
-                                new Date(),
-                                new Date(0),0);
+                                jObject.getString("coverHash"),
+                                jObject.getString("genre"));
                         //TODO: Add Playlist name and nbFiles
-                        displayedTrack.source="Remote";
                         displayTrack(false);
                         break;
                 }
