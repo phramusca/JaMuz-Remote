@@ -105,18 +105,16 @@ public final class RepoSync {
     }
 
     public synchronized static void receivedAck(Track track) {
-        track.status = Track.Status.ACK;
-        HelperLibrary.musicLibrary.updateStatus(track);
+        track.setStatus(Track.Status.ACK);
+        track.readTags();
+        HelperLibrary.musicLibrary.insertOrUpdateTrackInDatabase(track);
     }
 
     public synchronized static void set(Map<Integer, Track> newTracks) {
         HelperLibrary.musicLibrary.updateStatus();
         for(Map.Entry<Integer, Track> entry : newTracks.entrySet()) {
             Track track = entry.getValue();
-            track=RepoSync.checkFile(track);
-            if(track.getStatus().equals(Track.Status.REC)) {
-                track.readTags();
-            }
+            RepoSync.checkFile(track);
         }
         HelperLibrary.musicLibrary.insertTracks(newTracks.values());
     }
