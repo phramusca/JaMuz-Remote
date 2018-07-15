@@ -796,7 +796,7 @@ public class MainActivity extends AppCompatActivity {
         return new ClientInfo(address, port,
                 Settings.Secure.getString(MainActivity.this.getContentResolver(), Settings.Secure.ANDROID_ID),
                 "tata", isRemote,
-                "jamuz");
+                "jamuz", getAppDataPath().getAbsolutePath());
     }
 
     private void toggleOff(ToggleButton button, View layout) {

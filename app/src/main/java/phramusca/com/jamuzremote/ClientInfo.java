@@ -22,14 +22,17 @@ public class ClientInfo implements Serializable {
     private final int port;
 	private final String login;
 	private final String password;
+    private String rootPath;
 
-	public ClientInfo(String address, int port, String login, String password, boolean isRemote, String appId){
+    public ClientInfo(String address, int port, String login, String password,
+                      boolean isRemote, String appId, String rootPath){
 		this.port = port;
 		this.login = login;
 		this.password = password;
 		this.address = address;
         this.isRemote = isRemote;
         this.appId = appId;
+        this.rootPath = rootPath;
     }
 
     public String getAddress() {
@@ -47,6 +50,7 @@ public class ClientInfo implements Serializable {
             jsonObject.put("password", password);
             jsonObject.put("isRemote", isRemote);
             jsonObject.put("appId", appId);
+            jsonObject.put("rootPath", rootPath);
         } catch (JSONException e) {
         }
         return jsonObject;
