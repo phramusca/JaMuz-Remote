@@ -74,7 +74,6 @@ public class Track implements Serializable {
     public Track(File getAppDataPath, String absolutePath) {
         this.path = absolutePath;
         this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length()+1);
-        readTags();
     }
 
     public void readTags() {

@@ -2,8 +2,11 @@ package phramusca.com.jamuzremote;
 
 import android.util.Log;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+
 import java.io.File;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -15,10 +18,29 @@ public final class RepoSync {
 
     private static final String TAG = RepoSync.class.getName();
 
+    private static Table<Integer, Track.Status, Track> tracks = null;
+
+    private synchronized static void updateTracks(Track track) {
+        tracks.row(track.getIdFileServer()).clear();
+        tracks.put(track.getIdFileServer(), track.getStatus(), track);
+    }
+    protected synchronized static void read() {
+        tracks = HashBasedTable.create();
+        read(Track.Status.NEW);
+        read(Track.Status.REC);
+    }
+
+    private synchronized static void read(Track.Status status) {
+        List<Track> newTracks = HelperLibrary.musicLibrary.getTracks(status);
+        for(Track track : newTracks) {
+            tracks.put(track.getIdFileServer(), track.getStatus(), track);
+        }
+    }
+
     /**
      * Sets status to NEW if track does not exists
      * or to given status if track exists and has correct size.
-     * File is deleted if not requested (not in files).
+     * File is deleted if not requested (not in tracks).
      * @param getAppDataPath application path
      * @param track the one to check
      * @param status status to set if returns true
@@ -29,18 +51,17 @@ public final class RepoSync {
                                                  Track.Status status) {
 
         File receivedFile = new File(getAppDataPath, track.getRelativeFullPath());
-        int idFileRemote = HelperLibrary.musicLibrary.getTrackId(track.getIdFileServer());
-        if(idFileRemote>=0) {
+        if(tracks.containsRow(track.getIdFileServer())) {
             if(checkFile(track, receivedFile)) {
                 track.setStatus(status);
-                HelperLibrary.musicLibrary.updateStatus(track);
+                updateTracks(track);
                 return true;
             } else {
                 track.setStatus(Track.Status.NEW);
-                HelperLibrary.musicLibrary.updateStatus(track);
+                updateTracks(track);
             }
         } else {
-            Log.w(TAG, "files does not contain file. Deleting " + receivedFile.getAbsolutePath());
+            Log.w(TAG, "tracks does not contain file. Deleting " + receivedFile.getAbsolutePath());
             //noinspection ResultOfMethodCallIgnored
             receivedFile.delete();
         }
@@ -48,14 +69,14 @@ public final class RepoSync {
     }
 
     /**
-     * Checks if relativeFullPath is in database. Delete file if not.
+     * Checks if relativeFullPath is in tracks. Delete file if not.
      * @param relativeFullPath relative full path
      */
     public synchronized static boolean checkFile(File getAppDataPath, String relativeFullPath) {
-        File file = new File(getAppDataPath, relativeFullPath);
-        int idFileRemote = HelperLibrary.musicLibrary.getTrackId(file.getAbsolutePath());
-        if(idFileRemote<0) {
+        Track track = new Track(getAppDataPath, relativeFullPath);
+        if(tracks != null && !tracks.containsValue(track)) {
             Log.i(TAG, "DELETE UNWANTED: "+relativeFullPath);
+            File file = new File(getAppDataPath, track.getRelativeFullPath());
             //noinspection ResultOfMethodCallIgnored
             file.delete();
             return true;
@@ -87,7 +108,7 @@ public final class RepoSync {
 
     /**
      * @param track the one to check
-     * @return modified track with status to REC if it exists and status was NEW
+     * @return modified track with status to LOCAL if it exists and status was NEW
      *
      */
     private synchronized static Track checkFile(Track track) {
@@ -104,26 +125,42 @@ public final class RepoSync {
     }
 
     public synchronized static void receivedAck(Track track) {
-        track.setStatus(Track.Status.ACK);
-        track.readTags();
-        HelperLibrary.musicLibrary.insertOrUpdateTrackInDatabase(track);
+        if(tracks.containsRow(track.getIdFileServer())) {
+            track.setStatus(Track.Status.ACK);
+            updateTracks(track);
+            new Thread() {
+                public void run() {
+                    track.readTags();
+                    HelperLibrary.musicLibrary.insertOrUpdateTrackInDatabase(track);
+                }
+            }.start();
+        }
     }
 
     public synchronized static void set(Map<Integer, Track> newTracks) {
         HelperLibrary.musicLibrary.updateStatus();
+        tracks = HashBasedTable.create();
         for(Map.Entry<Integer, Track> entry : newTracks.entrySet()) {
             Track track = entry.getValue();
             RepoSync.checkFile(track);
+            tracks.put(track.getIdFileServer(), track.getStatus(), track);
         }
         HelperLibrary.musicLibrary.insertTracks(newTracks.values());
     }
 
     public synchronized static int getRemainingSize() {
-        return (HelperLibrary.musicLibrary.getTracks(Track.Status.NEW).size()
-                +HelperLibrary.musicLibrary.getTracks(Track.Status.REC).size());
+        return tracks ==null?0:(tracks.column(Track.Status.NEW).size()
+                + tracks.column(Track.Status.REC).size());
+    }
+
+    public synchronized static int getTotalSize() {
+        return tracks==null?0:tracks.size();
     }
 
     public synchronized static long getRemainingFileSize() {
+        if(tracks ==null) {
+            return 0;
+        }
         long nbRemaining=0;
         nbRemaining+=getRemainingFileSize(Track.Status.NEW);
         nbRemaining+=getRemainingFileSize(Track.Status.REC);
@@ -132,25 +169,21 @@ public final class RepoSync {
 
     private synchronized static long getRemainingFileSize(Track.Status status) {
         long nbRemaining=0;
-        for(Track fileInfoReception : HelperLibrary.musicLibrary.getTracks(status)) {
-            nbRemaining+=fileInfoReception.getSize();
+        for(Track track : tracks.column(status).values()) {
+            nbRemaining+=track.getSize();
         }
         return nbRemaining;
     }
 
-    public synchronized static int getTotalSize() {
-        return HelperLibrary.musicLibrary.getTracks(Track.Status.NULL, true).size();
-    }
-
     public synchronized static Track takeNew() {
-        Iterator<Track> iterator = HelperLibrary.musicLibrary.getTracks(Track.Status.NEW).iterator();
-        if(iterator.hasNext()) {
-            return iterator.next();
+        if (tracks != null && tracks.column(Track.Status.NEW).size() > 0) {
+            return tracks.column(Track.Status.NEW)
+                    .entrySet().iterator().next().getValue();
         }
         return null;
     }
 
     public synchronized static List<Track> getReceived() {
-        return HelperLibrary.musicLibrary.getTracks(Track.Status.REC);
+        return tracks ==null?new ArrayList<>():new ArrayList<>(tracks.column(Track.Status.REC).values());
     }
 }

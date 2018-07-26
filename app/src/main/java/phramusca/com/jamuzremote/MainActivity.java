@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
         preferences = getPreferences(MODE_PRIVATE);
         editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.11:2013"));
 
-        // !!! FIXME Remote and Sync modes interfere: !!!
+        // !!!!!!!!!!!!!!!! FIXME Remote and Sync modes interfere: !!!
         // - one can close the other on closure. why ?
         // - remote<->local move can be difficult :(
         //Note that it remote works quite well when sync is not running

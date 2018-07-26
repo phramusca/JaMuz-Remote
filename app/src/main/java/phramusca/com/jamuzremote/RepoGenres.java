@@ -24,11 +24,9 @@ public final class RepoGenres {
     }
 
     public synchronized static void set(final List<String> newGenres) {
-        //Adding missing tags
         for(String tag : newGenres) {
             add(tag);
         }
-        //Removing tags not in input list
         final Iterator<String> it = get().iterator();
         while (it.hasNext())
         {
