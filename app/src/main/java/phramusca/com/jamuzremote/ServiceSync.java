@@ -49,24 +49,27 @@ public class ServiceSync extends ServiceBase {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         super.onStartCommand(intent, flags, startId);
+
         final ClientInfo clientInfo = (ClientInfo)intent.getSerializableExtra("clientInfo");
 
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "MyPowerWakelockTag");
-        wakeLock.acquire();
-
-        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-        wifiLock= wm.createWifiLock(WifiManager.WIFI_MODE_FULL,
-                "MyWifiWakelockTag");
-        wifiLock.acquire();
+        if (powerManager != null) {
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyPowerWakelockTag");
+            wakeLock.acquire(24*60*60*1000); //24 hours, enough to download a lot !
+        }
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        if (wifiManager != null) {
+            wifiLock= wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL,"MyWifiWakelockTag");
+            wifiLock.acquire();
+        }
 
         new Thread() {
             public void run() {
                 helperNotification.notifyBar(notificationSync, getString(R.string.readingList));
                 RepoSync.read();
-                bench = new Benchmark(RepoSync.getRemainingSize(), 10);
+
                 helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
+                bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                 clientSync = new ClientSync(clientInfo, new CallBackSync());
                 clientSync.connect();
             }

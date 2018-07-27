@@ -219,10 +219,6 @@ public class MainActivity extends AppCompatActivity {
         preferences = getPreferences(MODE_PRIVATE);
         editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.11:2013"));
 
-        // !!!!!!!!!!!!!!!! FIXME Remote and Sync modes interfere: !!!
-        // - one can close the other on closure. why ?
-        // - remote<->local move can be difficult :(
-        //Note that it remote works quite well when sync is not running
         buttonRemote = (Button) findViewById(R.id.button_connect);
         buttonRemote.setOnClickListener(v -> {
             dimOn();
@@ -1615,7 +1611,7 @@ public class MainActivity extends AppCompatActivity {
                 buttonRemote.setText("Close");
                 buttonRemote.setBackgroundResource(R.drawable.remote_on);
             }
-            buttonRemote.setEnabled(enable);
+            buttonRemote.setEnabled(true);
         });
     }
 
@@ -2207,6 +2203,7 @@ public class MainActivity extends AppCompatActivity {
                                 jObject.getString("artist"),
                                 jObject.getString("coverHash"),
                                 jObject.getString("genre"));
+                        //FIXME: Add user tags fom remote file !!
                         //TODO: Add Playlist name and nbFiles
                         displayTrack(false);
                         break;
