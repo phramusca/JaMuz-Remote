@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
+import android.os.PowerManager;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -32,6 +34,8 @@ public class ServiceSync extends ServiceBase {
     private BroadcastReceiver userStopReceiver;
     private int nbFiles;
     private int nbDeleted;
+    private PowerManager.WakeLock wakeLock;
+    private WifiManager.WifiLock wifiLock;
 
     @Override
     public void onCreate(){
@@ -46,6 +50,17 @@ public class ServiceSync extends ServiceBase {
     public int onStartCommand(Intent intent, int flags, int startId){
         super.onStartCommand(intent, flags, startId);
         final ClientInfo clientInfo = (ClientInfo)intent.getSerializableExtra("clientInfo");
+
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyPowerWakelockTag");
+        wakeLock.acquire();
+
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        wifiLock= wm.createWifiLock(WifiManager.WIFI_MODE_FULL,
+                "MyWifiWakelockTag");
+        wifiLock.acquire();
+
         new Thread() {
             public void run() {
                 helperNotification.notifyBar(notificationSync, getString(R.string.readingList));
@@ -62,6 +77,8 @@ public class ServiceSync extends ServiceBase {
     @Override
     public void onDestroy(){
         unregisterReceiver(userStopReceiver);
+        wakeLock.release();
+        wifiLock.release();
         super.onDestroy();
     }
 
@@ -78,6 +95,9 @@ public class ServiceSync extends ServiceBase {
     private void stopSync(String msg, long millisInFuture) {
         if (clientSync != null) {
             clientSync.close(false, msg, millisInFuture);
+        } else {
+            sendMessage("enableSync");
+            stopSelf();
         }
     }
 
