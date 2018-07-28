@@ -2203,7 +2203,7 @@ public class MainActivity extends AppCompatActivity {
                                 jObject.getString("artist"),
                                 jObject.getString("coverHash"),
                                 jObject.getString("genre"));
-                        //FIXME: Display user tags fom remote file
+                        //FIXME: Display user tags from remote file
                         //TODO: Display Playlist name and nbFiles
                         displayTrack(false);
                         break;

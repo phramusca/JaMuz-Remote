@@ -310,11 +310,8 @@ public class ServiceSync extends ServiceBase {
                     helperNotification.notifyBar(notificationSync,
                             "Getting list of files for stats merge.");
                 });
-                // FIXME: This takes DEL tracks resulting in merge errors, when not yet deleted from db
-                // FIXME: This takes NULL too that we do not want to merge as local only
-                // FIXME: On first merge, always one error: one file missing in JaMuz
-                // (probably as not yet acknowledged on server so not in devicefile)
-                List<Track> tracks = new Playlist("FilesToMerge", false).getTracks();
+                //FIXME: Request merge before getting new list of devices
+                List<Track> tracks = HelperLibrary.musicLibrary.getTracks(Track.Status.ACK);
                 runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
                         "Requesting statistics merge."));
                 for(Track track : tracks) {
