@@ -28,6 +28,7 @@ public final class RepoSync {
         tracks = HashBasedTable.create();
         read(Track.Status.NEW);
         read(Track.Status.REC);
+        read(Track.Status.ACK);
     }
 
     private synchronized static void read(Track.Status status) {
