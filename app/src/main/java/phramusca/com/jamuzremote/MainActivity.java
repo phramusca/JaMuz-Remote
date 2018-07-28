@@ -95,8 +95,9 @@ import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
 //https://gitlab.com/fdroid/fdroiddata/blob/master/CONTRIBUTING.md
 //https://f-droid.org/
 
-//TODO: This class is far too big: move some out: audio in a service for instance
-//Why not using the standard anroid player by the way ? (less control for replaygain ?)
+// TODO: This class is far too big: move some out
+// FIXME: Move audio to a service
+// Why not using the standard android player by the way ? (less control for replaygain ?)
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getName();
