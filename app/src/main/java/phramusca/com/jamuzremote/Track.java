@@ -73,7 +73,11 @@ public class Track implements Serializable {
 
     public Track(File getAppDataPath, String absolutePath) {
         this.path = absolutePath;
-        this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length()+1);
+        try {
+            this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length() + 1);
+        } catch (StringIndexOutOfBoundsException ex) {
+            Log.e(TAG, "Error getting relativeFullPath; path="+path+", getAppDataPath="+getAppDataPath, ex);
+        }
     }
 
     public void readTags() {

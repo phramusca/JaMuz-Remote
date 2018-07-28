@@ -70,13 +70,13 @@ public final class RepoSync {
     }
 
     /**
-     * Checks if relativeFullPath is in tracks. Delete file if not.
-     * @param relativeFullPath relative full path
+     * Checks if absolutePath is in tracks. Delete file if not.
+     * @param absolutePath relative full path
      */
-    public synchronized static boolean checkFile(File getAppDataPath, String relativeFullPath) {
-        Track track = new Track(getAppDataPath, relativeFullPath);
+    public synchronized static boolean checkFile(File getAppDataPath, String absolutePath) {
+        Track track = new Track(getAppDataPath, absolutePath);
         if(tracks != null && !tracks.containsValue(track)) {
-            Log.i(TAG, "DELETE UNWANTED: "+relativeFullPath);
+            Log.i(TAG, "DELETE UNWANTED: "+absolutePath);
             File file = new File(getAppDataPath, track.getRelativeFullPath());
             //noinspection ResultOfMethodCallIgnored
             file.delete();

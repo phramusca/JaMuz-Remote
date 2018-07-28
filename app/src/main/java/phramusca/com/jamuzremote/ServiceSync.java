@@ -310,6 +310,10 @@ public class ServiceSync extends ServiceBase {
                     helperNotification.notifyBar(notificationSync,
                             "Getting list of files for stats merge.");
                 });
+                // FIXME: This takes DEL tracks resulting in merge errors, when not yet deleted from db
+                // FIXME: This takes NULL too that we do not want to merge as local only
+                // FIXME: On first merge, always one error: one file missing in JaMuz
+                // (probably as not yet acknowledged on server so not in devicefile)
                 List<Track> tracks = new Playlist("FilesToMerge", false).getTracks();
                 runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
                         "Requesting statistics merge."));
@@ -375,10 +379,7 @@ public class ServiceSync extends ServiceBase {
                                     browseFS(file);
                                 }
                                 else {
-                                    String absolutePath=file.getAbsolutePath();
-                                    String relativeFullPath = absolutePath.substring(
-                                            getAppDataPath.getAbsolutePath().length()+1);
-                                    if(!RepoSync.checkFile(getAppDataPath, relativeFullPath)) {
+                                    if(!RepoSync.checkFile(getAppDataPath, file.getAbsolutePath())) {
                                         //RepoSync.checkFile deletes file. Not counting deleted
                                         //to match RepoSync.getTotalSize() at the end (hopefully)
                                         nbFiles++;
