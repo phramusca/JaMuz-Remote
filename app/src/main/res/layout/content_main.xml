@@ -105,6 +105,13 @@
 
     </GridLayout>
 
+        <Button
+            android:layout_row="3"
+            android:layout_column="0"
+            android:id="@+id/player_fragment_example"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="YouTube test" />
     <LinearLayout android:id="@+id/panel_playlist"
         android:orientation="vertical"
         android:layout_width="match_parent"

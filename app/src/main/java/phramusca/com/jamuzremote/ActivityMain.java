@@ -134,6 +134,7 @@ public class ActivityMain extends AppCompatActivity {
     private TextView textViewPlaylist;
     private Button buttonRemote;
     private Button buttonSync;
+    private Button buttonYouTube;
     private Button button_settings;
     private ToggleButton toggleButtonDimMode;
     private ToggleButton toggleButtonControls;
@@ -302,6 +303,12 @@ public class ActivityMain extends AppCompatActivity {
                 sendBroadcast(new Intent(ServiceSync.USER_STOP_SERVICE_REQUEST));
                 enableSync(true);
             }
+        });
+
+        buttonYouTube = (Button) findViewById(R.id.player_fragment_example);
+        buttonYouTube.setOnClickListener(v -> {
+            //dimOn();
+            startActivity(new Intent(this, YouTubePlayerFragmentActivity.class));
         });
 
         getFromQRcode(getIntent().getDataString());
