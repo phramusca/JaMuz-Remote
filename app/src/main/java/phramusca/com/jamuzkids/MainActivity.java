@@ -807,7 +807,7 @@ public class MainActivity extends AppCompatActivity {
             clientRemote.send("setRating".concat(String.valueOf(rating)));
         } else {
             displayedTrack.update();
-            refreshQueueAndSpinner(true);
+            refreshQueueAndPlaylistSpinner(true);
         }
         ratingBar.setEnabled(true);
     }
@@ -835,8 +835,7 @@ public class MainActivity extends AppCompatActivity {
         return new ClientInfo(address, port,
                 Settings.Secure.getString(MainActivity.this.getContentResolver(), Settings.Secure.ANDROID_ID),
                 "tata", isRemote,
-                "jamuz", getAppDataPath().getAbsolutePath());
-                "jamuzkids");
+                "jamuzkids", getAppDataPath().getAbsolutePath());
     }
 
     private void toggleOff(ToggleButton button, View layout) {
