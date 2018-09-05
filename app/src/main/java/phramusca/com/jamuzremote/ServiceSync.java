@@ -152,6 +152,7 @@ public class ServiceSync extends ServiceBase {
                         }
                         helperNotification.notifyBar(notificationSync,
                                 "Checking if files are already on disk ... ");
+                        //FIXME: Display a progress bar as process can take some time
                         RepoSync.set(newTracks);
                         scanAndDeleteUnwantedInThread(getAppDataPath);
                         requestNextFile();
