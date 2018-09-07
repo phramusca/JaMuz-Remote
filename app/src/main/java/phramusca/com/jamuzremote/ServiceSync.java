@@ -132,6 +132,7 @@ public class ServiceSync extends ServiceBase {
                                 Track fileReceived = new Track(
                                         (JSONObject) jsonArray.get(i),
                                         getAppDataPath);
+                                //FIXME: Display progress
                                 RepoSync.receivedAck(fileReceived);
                             }
                             bench = new Benchmark(RepoSync.getRemainingSize(), 10);
@@ -223,7 +224,7 @@ public class ServiceSync extends ServiceBase {
                     +"\nRemaining : "+ RepoSync.getRemainingSize()
                     +"/"+ RepoSync.getTotalSize());
             notifyBar("Rec.", fileInfoReception);
-            RepoSync.checkFile(getAppDataPath, fileInfoReception,  Track.Status.REC);
+            RepoSync.receivedFile(getAppDataPath, fileInfoReception);
             requestNextFile();
         }
 
