@@ -40,22 +40,21 @@ public final class RepoSync {
 
     /**
      * Sets status to NEW if track does not exists
-     * or to given status if track exists and has correct size.
+     * or REC if track exists and has correct size.
      * File is deleted if not requested (not in tracks).
      * @param getAppDataPath application path
      * @param track the one to check
-     * @param status status to set if returns true
      * @return true if receivedFile exists and length()==track.size
      */
-    public synchronized static boolean checkFile(File getAppDataPath,
-                                                 Track track,
-                                                 Track.Status status) {
+    public synchronized static boolean receivedFile(File getAppDataPath, Track track) {
 
         File receivedFile = new File(getAppDataPath, track.getRelativeFullPath());
         if(tracks.containsRow(track.getIdFileServer())) {
             if(checkFile(track, receivedFile)) {
-                track.setStatus(status);
+                track.setStatus(Track.Status.REC);
                 updateTracks(track);
+                track.readTags();
+                HelperLibrary.musicLibrary.insertOrUpdateTrackInDatabase(track);
                 return true;
             } else {
                 track.setStatus(Track.Status.NEW);
@@ -108,19 +107,15 @@ public final class RepoSync {
     }
 
     /**
-     * @param track the one to check
-     * @return modified track with status to LOCAL if it exists and status was NEW
+     * @param track the NEW file to check
+     * @return modified track with status set to REC (with tags read) if it exists
      *
      */
-    private synchronized static Track checkFile(Track track) {
+    private synchronized static Track checkNewFile(Track track) {
         File file = new File(track.getPath());
         if(checkFile(track, file)) {
-            if (track.getStatus().equals(Track.Status.NEW)) {
-                track.setStatus(Track.Status.REC);
-                track.readTags();
-            }
-        } else {
-            track.setStatus(Track.Status.NEW);
+            track.setStatus(Track.Status.REC);
+            track.readTags();
         }
         return track;
     }
@@ -129,12 +124,7 @@ public final class RepoSync {
         if(tracks.containsRow(track.getIdFileServer())) {
             track.setStatus(Track.Status.ACK);
             updateTracks(track);
-            new Thread() {
-                public void run() {
-                    track.readTags();
-                    HelperLibrary.musicLibrary.insertOrUpdateTrackInDatabase(track);
-                }
-            }.start();
+            HelperLibrary.musicLibrary.updateStatus(track);
         }
     }
 
@@ -143,7 +133,7 @@ public final class RepoSync {
         tracks = HashBasedTable.create();
         for(Map.Entry<Integer, Track> entry : newTracks.entrySet()) {
             Track track = entry.getValue();
-            RepoSync.checkFile(track);
+            RepoSync.checkNewFile(track);
             tracks.put(track.getIdFileServer(), track.getStatus(), track);
         }
         HelperLibrary.musicLibrary.insertTracks(newTracks.values());
