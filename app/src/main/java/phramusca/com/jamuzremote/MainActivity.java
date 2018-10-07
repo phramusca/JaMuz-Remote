@@ -1218,16 +1218,16 @@ public class MainActivity extends AppCompatActivity {
             List<String> results = data.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS);
 
-            //Search
+            //Commands
             String spokenText = results.get(0);
-            Search.SearchKeyWord searchKeyWord = Search.get(spokenText);
-            String searchValue = searchKeyWord.getKeyword();
+            Commands.KeyWord keyWord = Commands.get(spokenText);
+            String arguments = keyWord.getKeyword();
             String msg= getString(R.string.unknownCommand) + " \"" + spokenText + "\".";
-            switch (searchKeyWord.getType()) {
+            switch (keyWord.getCommand()) {
                 case PLAYLIST:
-                    msg = getString(R.string.playlist)+" \"" + searchValue + "\" "+getString(R.string.notfound);
+                    msg = getString(R.string.playlist)+" \"" + arguments + "\" "+getString(R.string.notfound);
                     for(Playlist playlist : localPlaylists.values()) {
-                        if(playlist.getName().equalsIgnoreCase(searchValue)) {
+                        if(playlist.getName().equalsIgnoreCase(arguments)) {
                             applyPlaylist(playlist, true);
                             setupLocalPlaylistSpinner();
                             msg = "";
@@ -1236,38 +1236,38 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case ARTIST_ONGOING:
-                    searchValue = displayedTrack.getArtist();
+                    arguments = displayedTrack.getArtist();
                 case ARTIST:
-                    msg = getString(R.string.artist)+" \"" + searchValue + "\" "+getString(R.string.notfound);
-                    if(searchValue.equals("")) {
+                    msg = getString(R.string.artist)+" \"" + arguments + "\" "+getString(R.string.notfound);
+                    if(arguments.equals("")) {
                         //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
                         msg = getString(R.string.specifyArtist);
                     }
-                    else if(HelperLibrary.musicLibrary.getArtist(searchValue)) {
-                        Playlist playlist =new Playlist(searchValue, true);
-                        playlist.setArtist(searchValue);
+                    else if(HelperLibrary.musicLibrary.getArtist(arguments)) {
+                        Playlist playlist =new Playlist(arguments, true);
+                        playlist.setArtist(arguments);
                         setupLocalPlaylistSpinner(playlist, true);
                         msg = "";
                     }
                     break;
                 case ALBUM_ONGOING:
-                    searchValue = displayedTrack.getAlbum();
+                    arguments = displayedTrack.getAlbum();
                 case ALBUM:
-                    msg = getString(R.string.album)+" \"" + searchValue + "\" "+getString(R.string.notfound);
-                    if(searchValue.equals("")) {
+                    msg = getString(R.string.album)+" \"" + arguments + "\" "+getString(R.string.notfound);
+                    if(arguments.equals("")) {
                         //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
                         msg = getString(R.string.specifyAlbum);
                     }
-                    else if(HelperLibrary.musicLibrary.getAlbum(searchValue)) {
-                        Playlist playlist =new Playlist(searchValue, true);
-                        playlist.setAlbum(searchValue);
+                    else if(HelperLibrary.musicLibrary.getAlbum(arguments)) {
+                        Playlist playlist =new Playlist(arguments, true);
+                        playlist.setAlbum(arguments);
                         setupLocalPlaylistSpinner(playlist, true);
                         msg = "";
                     }
                     break;
                 case SET_RATING:
                     try {
-                        int rating = Integer.parseInt(searchValue);
+                        int rating = Integer.parseInt(arguments);
                         ratingBar.setRating(rating);
                         setRating(rating);
                     } catch (NumberFormatException ex) {
@@ -1275,7 +1275,7 @@ public class MainActivity extends AppCompatActivity {
                     msg=askEdition();
                     break;
                 case SET_TAGS:
-                    String[] tags = searchValue.split(" ");
+                    String[] tags = arguments.split(" ");
                     for(String tag : tags) {
                         if(tag.length()>1) {
                             String s1 = tag.substring(0, 1).toUpperCase();
