@@ -1526,7 +1526,13 @@ public class MainActivity extends AppCompatActivity {
                 } else if(!isNearTheEnd && (duration - position) < duration/2 && (duration - position) > 4501) {
                     isNearTheEnd=true;
                     //FIXME: Make this an option (not the default)
-                    askEdition();
+                    String msg = askEdition();
+                    if(!msg.equals("") && (displayedTrack.getRating() < 1
+                            || displayedTrack.getTags(false).size() < 1)) {
+                        helperToast.toastLong(msg);
+                        textToSpeech.speak(msg, TextToSpeech.QUEUE_FLUSH, null,
+                                this.hashCode() + "commandResult");
+                    }
                 }
             }
         }
@@ -1553,34 +1559,38 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    //FIXME !!!!!! askEdition cases
     private String askEdition() {
         if(toggleButtonDimMode.isChecked()) {
-            if (displayedTrack.getRating() < 1
-                    || displayedTrack.getTags(false).size() < 1) {
-                displaySpeechRecognizer(getDisplayedTrackStatus());
-                return "";
+            if(!toggleButtonEditTags.isChecked()) {
+                if (displayedTrack.getRating() < 1
+                        || displayedTrack.getTags(false).size() < 1) {
+                    displaySpeechRecognizer(getDisplayedTrackStatus());
+                    return "";
+                }
             }
+            return getDisplayedTrackStatus();
         }
-        return getDisplayedTrackStatus();
+        return "";
     }
 
     private String getDisplayedTrackStatus() {
-        String msg="";
+        StringBuilder msg= new StringBuilder();
         if(displayedTrack.getTags(false).size()>0) {
-            msg+="Tags: ";
+            msg.append("Tags: ");
             for(String tag : displayedTrack.getTags(false)) {
-                msg+=" "+tag+",";
+                msg.append(" ").append(tag).append(",");
             }
         } else {
-            msg+="Pas de tags. ";
+            msg.append("Pas de tags. ");
         }
 
         if(displayedTrack.getRating()>0) {
-            msg+="Note: "+displayedTrack.getRating();
+            msg.append(" note: ").append(displayedTrack.getRating()).append(".");
         } else {
-            msg+="Pas de note.";
+            msg.append(" pas de note.");
         }
-        return msg;
+        return msg.toString();
     }
 
     public static Handler mHandler = new Handler(Looper.getMainLooper()) {
