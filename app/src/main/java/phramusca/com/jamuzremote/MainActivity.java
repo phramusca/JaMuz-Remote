@@ -831,17 +831,21 @@ public class MainActivity extends AppCompatActivity {
             ToggleButton button1 = (ToggleButton)view;
             setTagButtonTextColor(button1);
             String buttonText = button1.getText().toString();
-            if(!isRemoteConnected()) {
-                displayedTrack.toggleTag(buttonText);
-                refreshQueueAndPlaylistSpinner(true);
-            } else {
-                //displayedTrack.toggleTag(buttonText); //TODO: Manage this too
-                //clientRemote.send("setTag".concat(String.valueOf(Math.round(rating)))); //TODO
-            }
+            toggleTag(buttonText);
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
                 ActionBar.LayoutParams.WRAP_CONTENT);
         layoutTags.addView(button, lp);
+    }
+
+    private void toggleTag(String tag) {
+        if(!isRemoteConnected()) {
+            displayedTrack.toggleTag(tag);
+            refreshQueueAndPlaylistSpinner(true);
+        } else {
+            //displayedTrack.toggleTag(buttonText); //TODO: Manage this too
+            //clientRemote.send("setTag".concat(String.valueOf(Math.round(rating)))); //TODO
+        }
     }
 
     private void makeButtonTagPlaylist(int key, String value) {
@@ -1190,10 +1194,20 @@ public class MainActivity extends AppCompatActivity {
     public void displaySpeechRecognizer(String msg) {
         textToSpeech.speak(msg.equals("")?getString(R.string.TTSlistening):msg, TextToSpeech.QUEUE_FLUSH, null,
                 this.hashCode() + "listening");
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        startActivityForResult(intent, SPEECH_REQUEST_CODE);
+        new Thread() {
+            public void run() {
+                try {
+                    Thread.sleep(msg.length()*100);
+                    audioPlayer.pause();
+                    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                    startActivityForResult(intent, SPEECH_REQUEST_CODE);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
     }
 
     @Override
@@ -1250,7 +1264,7 @@ public class MainActivity extends AppCompatActivity {
                         msg = "";
                     }
                     break;
-                case RATING:
+                case SET_RATING:
                     try {
                         int rating = Integer.parseInt(searchValue);
                         ratingBar.setRating(rating);
@@ -1259,7 +1273,26 @@ public class MainActivity extends AppCompatActivity {
                     } catch (NumberFormatException ex) {
                     }
                     break;
+                case SET_TAGS:
+                    String[] tags = searchValue.split(" ");
+                    for(String tag : tags) {
+                        if(tag.length()>1) {
+                            String s1 = tag.substring(0, 1).toUpperCase();
+                            String tagCamel = s1 + tag.substring(1).toLowerCase();
+                            System.out.println(tagCamel);
+                            //FIXME Check if tag is valid
+                            toggleTag(tagCamel);
+                        }
+                    }
+                    displayTrack(false);
+                    msg="Tags : ";
+                    for(String tag : displayedTrack.getTags(false)) {
+                        msg+=" "+tag+",";
+                    }
+                    if(msg.endsWith(",")) { msg = msg.substring(0, msg.length()-1); }
+                    break;
             }
+            audioPlayer.resume();
 
             if(!msg.equals("")) {
                 helperToast.toastLong(msg);
