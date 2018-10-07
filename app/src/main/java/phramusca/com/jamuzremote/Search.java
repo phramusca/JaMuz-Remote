@@ -30,14 +30,20 @@ public class Search {
 
                     new SearchKeyWord("album", SearchType.ALBUM),
 
+                    //It is also the default
                     new SearchKeyWord("liste", SearchType.PLAYLIST),
                     new SearchKeyWord("list", SearchType.PLAYLIST),
-
                     new SearchKeyWord("playliste", SearchType.PLAYLIST),
                     new SearchKeyWord("playlist", SearchType.PLAYLIST),
 
-                    new SearchKeyWord("noter", SearchType.RATING),
-                    new SearchKeyWord("note", SearchType.RATING)
+                    new SearchKeyWord("rate it", SearchType.SET_RATING),
+                    new SearchKeyWord("rate", SearchType.SET_RATING),
+                    new SearchKeyWord("noter", SearchType.SET_RATING),
+                    new SearchKeyWord("note", SearchType.SET_RATING),
+
+                    new SearchKeyWord("tag it", SearchType.SET_TAGS),
+                    new SearchKeyWord("taguer", SearchType.SET_TAGS),
+                    new SearchKeyWord("tag", SearchType.SET_TAGS)
 
             ));
 
@@ -78,6 +84,7 @@ public class Search {
         ARTIST_ONGOING,
         ALBUM,
         ALBUM_ONGOING,
-        RATING
+        SET_RATING,
+        SET_TAGS
     }
 }
