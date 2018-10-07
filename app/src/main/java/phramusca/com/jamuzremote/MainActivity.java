@@ -322,15 +322,7 @@ public class MainActivity extends AppCompatActivity {
         ratingBar.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
             if(fromUser) { //as it is also set when server sends file info (and it can be 0)
                 dimOn();
-                ratingBar.setEnabled(false);
-                displayedTrack.setRating(Math.round(rating));
-                if (isRemoteConnected()) {
-                    clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
-                } else {
-                    displayedTrack.update();
-                    refreshQueueAndPlaylistSpinner(true);
-                }
-                ratingBar.setEnabled(true);
+                setRating((int)rating);
             }
         });
 
@@ -769,6 +761,18 @@ public class MainActivity extends AppCompatActivity {
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
+    private void setRating(int rating) {
+        ratingBar.setEnabled(false);
+        displayedTrack.setRating(Math.round(rating));
+        if (isRemoteConnected()) {
+            clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
+        } else {
+            displayedTrack.update();
+            refreshQueueAndPlaylistSpinner(true);
+        }
+        ratingBar.setEnabled(true);
+    }
+
 
     private ClientInfo getClientInfo(boolean isRemote) {
         if(!checkConnectedViaWifi())  {
@@ -1178,9 +1182,13 @@ public class MainActivity extends AppCompatActivity {
         audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
     }
 
-    //https://developer.android.com/training/wearables/apps/voice.html
     public void displaySpeechRecognizer() {
-        textToSpeech.speak(getString(R.string.TTSlistening), TextToSpeech.QUEUE_FLUSH, null,
+        displaySpeechRecognizer("");
+    }
+
+    //https://developer.android.com/training/wearables/apps/voice.html
+    public void displaySpeechRecognizer(String msg) {
+        textToSpeech.speak(msg.equals("")?getString(R.string.TTSlistening):msg, TextToSpeech.QUEUE_FLUSH, null,
                 this.hashCode() + "listening");
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -1240,6 +1248,15 @@ public class MainActivity extends AppCompatActivity {
                         playlist.setAlbum(searchValue);
                         setupLocalPlaylistSpinner(playlist, true);
                         msg = "";
+                    }
+                    break;
+                case RATING:
+                    try {
+                        int rating = Integer.parseInt(searchValue);
+                        ratingBar.setRating(rating);
+                        setRating(rating);
+                        msg = "Noté "+rating+".";
+                    } catch (NumberFormatException ex) {
                     }
                     break;
             }
@@ -1459,13 +1476,47 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        private boolean isNearTheEnd;
+
+        @Override
+        public void reset() {
+            isNearTheEnd=false;
+        }
+
         @Override
         public void onPositionChanged(int position, int duration) {
             if(!isRemoteConnected()) {
                 setSeekBar(position, duration);
+                Log.d(TAG, "onPositionChanged: "+(duration - position));
                 if ((duration - position) < 5001 && (duration - position) > 4501) {
                     //setBrightness(1);
+                    Log.d(TAG, "onPositionChanged: DIM ON "+(duration - position));
                     dimOn();
+                } else if(!isNearTheEnd && (duration - position) < duration/2 && (duration - position) > 4501) {
+                    //FIXME: Make this an option (not the default)
+
+                    isNearTheEnd=true;
+                    if(displayedTrack.getRating()<1
+                            || displayedTrack.getTags(false).size()<1) {
+                        String msg="";
+                        if(displayedTrack.getTags(false).size()>0) {
+                            msg+="Tags: ";
+                            for(String tag : displayedTrack.getTags(false)) {
+                                msg+=" "+tag+",";
+                            }
+                        } else {
+                            msg+="Pas de tags. ";
+                        }
+
+                        if(displayedTrack.getRating()>0) {
+                            msg+="Note: "+displayedTrack.getRating();
+                        } else {
+                            msg+="Pas de note.";
+                        }
+                        Log.d(TAG, "onPositionChanged: "+msg+"("+(duration - position)+")");
+                        speech(msg);
+                    }
+
                 }
             }
         }
@@ -1481,8 +1532,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void speech() {
-            displaySpeechRecognizer();
+        public void speech(String msg) {
+            displaySpeechRecognizer(msg);
         }
 
         @Override

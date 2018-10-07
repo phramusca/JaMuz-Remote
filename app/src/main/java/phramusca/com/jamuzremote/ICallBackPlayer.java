@@ -9,5 +9,6 @@ public interface ICallBackPlayer {
     void onPlayBackEnd();
     void doPlayPrevious();
     void doPlayNext();
-    void speech();
+    void speech(String msg);
+    void reset();
 }

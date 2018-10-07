@@ -24,6 +24,7 @@ public class AudioPlayer {
     public String play(Track track) {
         String msg ="";
         try {
+            callback.reset();
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(track.getPath());
             mediaPlayer.prepare();
@@ -115,6 +116,7 @@ public class AudioPlayer {
             playNext();
         }
         else if(!mediaPlayer.isPlaying()) {
+            callback.reset();
             mediaPlayer.start();
             startTimer();
         }
@@ -125,7 +127,7 @@ public class AudioPlayer {
     }
 
     public void speech() {
-        callback.speech();
+        callback.speech("");
     }
 
     public void playPrevious() {
@@ -140,6 +142,7 @@ public class AudioPlayer {
             mediaPlayer.pause();
             stopTimer();
         } else {
+            callback.reset();
             mediaPlayer.start();
             startTimer();
         }
@@ -154,6 +157,7 @@ public class AudioPlayer {
 
     public void resume() {
         if(mediaPlayer!=null && !mediaPlayer.isPlaying()) {
+            callback.reset();
             mediaPlayer.start();
             startTimer();
         }
