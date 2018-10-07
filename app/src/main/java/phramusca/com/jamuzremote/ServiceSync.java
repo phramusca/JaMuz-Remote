@@ -288,7 +288,6 @@ public class ServiceSync extends ServiceBase {
                 notifyBar("Sending ack to server and waiting ack from server ... ");
             }
             sendMessage("refreshSpinner(true)");
-
             clientSync.ackFilesReception(received);
         } else {
             //Second, request a NEW

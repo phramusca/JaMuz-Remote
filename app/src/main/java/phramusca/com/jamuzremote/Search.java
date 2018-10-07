@@ -33,8 +33,12 @@ public class Search {
                     new SearchKeyWord("liste", SearchType.PLAYLIST),
                     new SearchKeyWord("list", SearchType.PLAYLIST),
 
+                    new SearchKeyWord("playliste", SearchType.PLAYLIST),
                     new SearchKeyWord("playlist", SearchType.PLAYLIST),
-                    new SearchKeyWord("playliste", SearchType.PLAYLIST)
+
+                    new SearchKeyWord("noter", SearchType.RATING),
+                    new SearchKeyWord("note", SearchType.RATING)
+
             ));
 
     public static SearchKeyWord get(String spokenText) {
@@ -73,6 +77,7 @@ public class Search {
         ARTIST,
         ARTIST_ONGOING,
         ALBUM,
-        ALBUM_ONGOING
+        ALBUM_ONGOING,
+        RATING
     }
 }
