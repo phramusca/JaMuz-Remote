@@ -1192,7 +1192,8 @@ public class MainActivity extends AppCompatActivity {
 
     //https://developer.android.com/training/wearables/apps/voice.html
     public void displaySpeechRecognizer(String msg) {
-        textToSpeech.speak(msg.equals("")?getString(R.string.TTSlistening):msg, TextToSpeech.QUEUE_FLUSH, null,
+        textToSpeech.speak(msg.equals("")?getString(R.string.TTSlistening):msg,
+                TextToSpeech.QUEUE_FLUSH, null,
                 this.hashCode() + "listening");
         new Thread() {
             public void run() {
@@ -1221,7 +1222,7 @@ public class MainActivity extends AppCompatActivity {
             String spokenText = results.get(0);
             Search.SearchKeyWord searchKeyWord = Search.get(spokenText);
             String searchValue = searchKeyWord.getKeyword();
-            String msg= getString(R.string.unknownCommand) + " \"" + searchValue + "\".";
+            String msg= getString(R.string.unknownCommand) + " \"" + spokenText + "\".";
             switch (searchKeyWord.getType()) {
                 case PLAYLIST:
                     msg = getString(R.string.playlist)+" \"" + searchValue + "\" "+getString(R.string.notfound);
@@ -1269,9 +1270,9 @@ public class MainActivity extends AppCompatActivity {
                         int rating = Integer.parseInt(searchValue);
                         ratingBar.setRating(rating);
                         setRating(rating);
-                        msg = "Noté "+rating+".";
                     } catch (NumberFormatException ex) {
                     }
+                    msg=askEdition();
                     break;
                 case SET_TAGS:
                     String[] tags = searchValue.split(" ");
@@ -1280,16 +1281,13 @@ public class MainActivity extends AppCompatActivity {
                             String s1 = tag.substring(0, 1).toUpperCase();
                             String tagCamel = s1 + tag.substring(1).toLowerCase();
                             System.out.println(tagCamel);
-                            //FIXME Check if tag is valid
-                            toggleTag(tagCamel);
+                            if(RepoTags.get().containsValue(tagCamel)) {
+                                toggleTag(tagCamel);
+                            }
                         }
                     }
                     displayTrack(false);
-                    msg="Tags : ";
-                    for(String tag : displayedTrack.getTags(false)) {
-                        msg+=" "+tag+",";
-                    }
-                    if(msg.endsWith(",")) { msg = msg.substring(0, msg.length()-1); }
+                    msg=askEdition();
                     break;
             }
             audioPlayer.resume();
@@ -1526,30 +1524,9 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "onPositionChanged: DIM ON "+(duration - position));
                     dimOn();
                 } else if(!isNearTheEnd && (duration - position) < duration/2 && (duration - position) > 4501) {
-                    //FIXME: Make this an option (not the default)
-
                     isNearTheEnd=true;
-                    if(displayedTrack.getRating()<1
-                            || displayedTrack.getTags(false).size()<1) {
-                        String msg="";
-                        if(displayedTrack.getTags(false).size()>0) {
-                            msg+="Tags: ";
-                            for(String tag : displayedTrack.getTags(false)) {
-                                msg+=" "+tag+",";
-                            }
-                        } else {
-                            msg+="Pas de tags. ";
-                        }
-
-                        if(displayedTrack.getRating()>0) {
-                            msg+="Note: "+displayedTrack.getRating();
-                        } else {
-                            msg+="Pas de note.";
-                        }
-                        Log.d(TAG, "onPositionChanged: "+msg+"("+(duration - position)+")");
-                        speech(msg);
-                    }
-
+                    //FIXME: Make this an option (not the default)
+                    askEdition();
                 }
             }
         }
@@ -1574,6 +1551,36 @@ public class MainActivity extends AppCompatActivity {
             displayTrack(true);
         }
 
+    }
+
+    private String askEdition() {
+        if(toggleButtonDimMode.isChecked()) {
+            if (displayedTrack.getRating() < 1
+                    || displayedTrack.getTags(false).size() < 1) {
+                displaySpeechRecognizer(getDisplayedTrackStatus());
+                return "";
+            }
+        }
+        return getDisplayedTrackStatus();
+    }
+
+    private String getDisplayedTrackStatus() {
+        String msg="";
+        if(displayedTrack.getTags(false).size()>0) {
+            msg+="Tags: ";
+            for(String tag : displayedTrack.getTags(false)) {
+                msg+=" "+tag+",";
+            }
+        } else {
+            msg+="Pas de tags. ";
+        }
+
+        if(displayedTrack.getRating()>0) {
+            msg+="Note: "+displayedTrack.getRating();
+        } else {
+            msg+="Pas de note.";
+        }
+        return msg;
     }
 
     public static Handler mHandler = new Handler(Looper.getMainLooper()) {

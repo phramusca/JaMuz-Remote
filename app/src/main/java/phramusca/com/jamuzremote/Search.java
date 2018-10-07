@@ -45,6 +45,8 @@ public class Search {
                     new SearchKeyWord("taguer", SearchType.SET_TAGS),
                     new SearchKeyWord("tag", SearchType.SET_TAGS)
 
+                    //FIXME: Add a Cancel keywork + rename Search to Commands
+
             ));
 
     public static SearchKeyWord get(String spokenText) {
