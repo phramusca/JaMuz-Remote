@@ -12,29 +12,29 @@ public class VoiceKeyWords {
     //TODO: Document this => help page
     private static final ArrayList<KeyWord> KEY_WORDS = new ArrayList<>(
             Arrays.asList(
-                    new KeyWord("artiste en cours", Command.ARTIST_ONGOING),
-                    new KeyWord("artist en cours", Command.ARTIST_ONGOING),
-                    new KeyWord("artiste courant", Command.ARTIST_ONGOING),
-                    new KeyWord("artist courant", Command.ARTIST_ONGOING),
-                    new KeyWord("ongoing artist", Command.ARTIST_ONGOING),
-                    new KeyWord("current artist", Command.ARTIST_ONGOING),
-                    new KeyWord("on going artist", Command.ARTIST_ONGOING),
+                    new KeyWord("artiste en cours", Command.PLAY_NEW_PLAYLIST_ARTIST_ONGOING),
+                    new KeyWord("artist en cours", Command.PLAY_NEW_PLAYLIST_ARTIST_ONGOING),
+                    new KeyWord("artiste courant", Command.PLAY_NEW_PLAYLIST_ARTIST_ONGOING),
+                    new KeyWord("artist courant", Command.PLAY_NEW_PLAYLIST_ARTIST_ONGOING),
+                    new KeyWord("ongoing artist", Command.PLAY_NEW_PLAYLIST_ARTIST_ONGOING),
+                    new KeyWord("current artist", Command.PLAY_NEW_PLAYLIST_ARTIST_ONGOING),
+                    new KeyWord("on going artist", Command.PLAY_NEW_PLAYLIST_ARTIST_ONGOING),
 
-                    new KeyWord("on going album", Command.ALBUM_ONGOING),
-                    new KeyWord("current album", Command.ALBUM_ONGOING),
-                    new KeyWord("ongoing album", Command.ALBUM_ONGOING),
-                    new KeyWord("album en cours", Command.ALBUM_ONGOING),
+                    new KeyWord("on going album", Command.PLAY_NEW_PLAYLIST_ALBUM_ONGOING),
+                    new KeyWord("current album", Command.PLAY_NEW_PLAYLIST_ALBUM_ONGOING),
+                    new KeyWord("ongoing album", Command.PLAY_NEW_PLAYLIST_ALBUM_ONGOING),
+                    new KeyWord("album en cours", Command.PLAY_NEW_PLAYLIST_ALBUM_ONGOING),
 
-                    new KeyWord("artiste", Command.ARTIST),
-                    new KeyWord("artist", Command.ARTIST),
+                    new KeyWord("artiste", Command.PLAY_NEW_PLAYLIST_ARTIST),
+                    new KeyWord("artist", Command.PLAY_NEW_PLAYLIST_ARTIST),
 
-                    new KeyWord("album", Command.ALBUM),
+                    new KeyWord("album", Command.PLAY_NEW_PLAYLIST_ALBUM),
 
                     //It is also the default
-                    new KeyWord("liste", Command.PLAYLIST),
-                    new KeyWord("list", Command.PLAYLIST),
-                    new KeyWord("playliste", Command.PLAYLIST),
-                    new KeyWord("playlist", Command.PLAYLIST),
+                    new KeyWord("liste", Command.PLAY_PLAYLIST),
+                    new KeyWord("list", Command.PLAY_PLAYLIST),
+                    new KeyWord("playliste", Command.PLAY_PLAYLIST),
+                    new KeyWord("playlist", Command.PLAY_PLAYLIST),
 
                     new KeyWord("rate it", Command.SET_RATING),
                     new KeyWord("rate", Command.SET_RATING),
@@ -81,7 +81,7 @@ public class VoiceKeyWords {
 
     public static KeyWord get(String spokenText) {
         String searchValue=spokenText.toLowerCase().trim();
-        Command command = Command.PLAYLIST;
+        Command command = Command.PLAY_PLAYLIST;
         for(KeyWord word : KEY_WORDS) {
             if(searchValue.startsWith(word.getKeyword())) {
                 command =word.getCommand();
@@ -111,11 +111,11 @@ public class VoiceKeyWords {
     }
 
     enum Command {
-        PLAYLIST,
-        ARTIST,
-        ARTIST_ONGOING,
-        ALBUM,
-        ALBUM_ONGOING,
+        PLAY_PLAYLIST,
+        PLAY_NEW_PLAYLIST_ARTIST,
+        PLAY_NEW_PLAYLIST_ARTIST_ONGOING,
+        PLAY_NEW_PLAYLIST_ALBUM,
+        PLAY_NEW_PLAYLIST_ALBUM_ONGOING,
         SET_RATING,
         SET_TAGS,
         PLAYER_RESUME,

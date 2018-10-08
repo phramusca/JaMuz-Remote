@@ -1258,7 +1258,7 @@ public class MainActivity extends AppCompatActivity {
             String arguments = keyWord.getKeyword();
             String msg= getString(R.string.unknownCommand) + " \"" + spokenText + "\".";
             switch (keyWord.getCommand()) {
-                case PLAYLIST:
+                case PLAY_PLAYLIST:
                     msg = getString(R.string.playlist)+" \"" + arguments + "\" "+getString(R.string.notfound);
                     for(Playlist playlist : localPlaylists.values()) {
                         if(playlist.getName().equalsIgnoreCase(arguments)) {
@@ -1269,9 +1269,9 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     break;
-                case ARTIST_ONGOING:
+                case PLAY_NEW_PLAYLIST_ARTIST_ONGOING:
                     arguments = displayedTrack.getArtist();
-                case ARTIST:
+                case PLAY_NEW_PLAYLIST_ARTIST:
                     msg = getString(R.string.artist)+" \"" + arguments + "\" "+getString(R.string.notfound);
                     if(arguments.equals("")) {
                         //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
@@ -1284,9 +1284,9 @@ public class MainActivity extends AppCompatActivity {
                         msg = "";
                     }
                     break;
-                case ALBUM_ONGOING:
+                case PLAY_NEW_PLAYLIST_ALBUM_ONGOING:
                     arguments = displayedTrack.getAlbum();
-                case ALBUM:
+                case PLAY_NEW_PLAYLIST_ALBUM:
                     msg = getString(R.string.album)+" \"" + arguments + "\" "+getString(R.string.notfound);
                     if(arguments.equals("")) {
                         //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
