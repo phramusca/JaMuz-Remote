@@ -152,10 +152,6 @@ public class Track implements Serializable {
         return relativeFullPath;
     }
 
-    public void setRelativeFullPath(String relativeFullPath) {
-        this.relativeFullPath = relativeFullPath;
-    }
-
     public String getSource() {
         return source;
     }
@@ -173,9 +169,23 @@ public class Track implements Serializable {
 
     @Override
     public String toString() {
-        return  title + "<BR/>" +
+        String tagsString="";
+        if(tags!=null) {
+            StringBuilder msg = new StringBuilder();
+            for (String tag : tags) {
+                msg.append(tag).append(",");
+            }
+            tagsString = msg.toString();
+            if (tagsString.endsWith(",")) {
+                tagsString = tagsString.substring(0, tagsString.length() - 1);
+            }
+        }
+        return  "<BR/>" + tagsString + " " + rating+"/5" + " " + genre + "<BR/>" +
+                "<h1>" +
+                title + "<BR/>" +
                 artist + "<BR/>"+
-                album + "<BR/>";
+                album +
+                "</h1>";
     }
 
     /*@Override
@@ -222,10 +232,6 @@ public class Track implements Serializable {
 
     public void setLastPlayed(Date lastPlayed) {
         this.lastPlayed = lastPlayed;
-    }
-
-    public void setAddedDate(Date addedDate) {
-        this.addedDate = addedDate;
     }
 
     public void setPlayCounter(int playCounter) {
@@ -296,7 +302,7 @@ public class Track implements Serializable {
             mmr.setDataSource(path);
             art = mmr.getEmbeddedPicture();
         } catch (final RuntimeException ex) {
-            Log.e("Track", "Error reading art of "+toString());
+            Log.e("Track", "Error reading art of "+relativeFullPath);
         }
         return art;
     }

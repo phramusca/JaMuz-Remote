@@ -1,6 +1,5 @@
 package phramusca.com.jamuzremote;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -15,17 +14,14 @@ public class PlayQueueActivity extends AppCompatActivity implements TrackAdapter
 
     TrackAdapter adapter;
     int histSize;
-    private Button button_exit_queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_queue);
 
-        button_exit_queue = (Button) findViewById(R.id.button_exit_queue);
-        button_exit_queue.setOnClickListener(v -> {
-            onBackPressed();
-        });
+        Button button_exit_queue = (Button) findViewById(R.id.button_exit_queue);
+        button_exit_queue.setOnClickListener(v -> onBackPressed());
 
         Intent intent = getIntent();
         @SuppressWarnings("unchecked")
@@ -47,12 +43,7 @@ public class PlayQueueActivity extends AppCompatActivity implements TrackAdapter
                 public void run() {
                     for(Track track : queue) {
                         if(track.getTumb(true)!=null) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    adapter.notifyDataSetChanged();
-                                }
-                            });
+                            runOnUiThread(() -> adapter.notifyDataSetChanged());
                         }
                     }
                 }
@@ -66,29 +57,23 @@ public class PlayQueueActivity extends AppCompatActivity implements TrackAdapter
         builder.setTitle("Play ?");
         builder.setMessage(Html.fromHtml(
                 "<html>".concat(item.toString()).concat("</html>")));
-        builder.setPositiveButton("NOW !", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        builder.setPositiveButton("NOW !", (dialog, which) -> {
+            Intent data = new Intent();
+            data.putExtra("queueItem", false);
+            data.putExtra("positionPlay", position);
+            data.putExtra("histSize", histSize);
+            setResult(RESULT_OK, data);
+            finish();
+        });
+
+        if(!item.isHistory()) {
+            builder.setNegativeButton("AFTER CURRENT.", (dialog, which) -> {
                 Intent data = new Intent();
-                data.putExtra("queueItem", false);
+                data.putExtra("queueItem", true);
                 data.putExtra("positionPlay", position);
                 data.putExtra("histSize", histSize);
                 setResult(RESULT_OK, data);
                 finish();
-            }
-        });
-
-        if(!item.isHistory()) {
-            builder.setNegativeButton("AFTER CURRENT.", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent data = new Intent();
-                    data.putExtra("queueItem", true);
-                    data.putExtra("positionPlay", position);
-                    data.putExtra("histSize", histSize);
-                    setResult(RESULT_OK, data);
-                    finish();
-                }
             });
         }
 

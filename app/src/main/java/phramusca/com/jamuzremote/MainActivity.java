@@ -1628,9 +1628,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(displayedTrack.getRating()>0) {
-            msg.append(" note: ").append(displayedTrack.getRating()).append(".");
+            msg.append(" Note: ").append(displayedTrack.getRating()).append(".");
         } else {
-            msg.append(" pas de note.");
+            msg.append(" Pas de note.");
         }
         return msg.toString();
     }
@@ -2192,11 +2192,10 @@ public class MainActivity extends AppCompatActivity {
                 setTextView(textViewFileInfo, trimTrailingWhitespace(Html.fromHtml(
                         "<html>"+
                         (displayedTrack.getSource().equals("")?""
-                                :"<u>".concat(displayedTrack.getSource()).concat("</u>:"))
+                                :"-- <u>".concat(displayedTrack.getSource()).concat("</u> --"))
                         +""
-                        .concat("<h1>")
                         .concat(displayedTrack.toString())
-                        .concat("</h1></html>"))));
+                        .concat("</html>"))));
                 ratingBar.setEnabled(false);
                 ratingBar.setRating(displayedTrack.getRating());
                 ratingBar.setEnabled(true);
