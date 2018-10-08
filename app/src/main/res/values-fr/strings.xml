@@ -13,7 +13,6 @@
     <string name="welcomeTitle">Bienvenue dans</string>
     <string name="pathInfo">Choisissez un chemin additionnel comme source locale de musique. A noter qu\'il est recommandé d\'utiliser JaMuz cependant.</string>
     <string name="history">Historique</string>
-    <string name="TTSlistening">Je vous écoute.</string>
     <string name="unknownCommand">Commande incomprise:</string>
     <string name="playlist">Liste de lecture</string>
     <string name="restored">restaurée</string>
