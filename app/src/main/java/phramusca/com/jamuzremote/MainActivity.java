@@ -203,26 +203,21 @@ public class MainActivity extends AppCompatActivity {
             public void onDone(String utteranceId) {
                 SpeechPostAction speechPostAction = SpeechPostAction.valueOf(utteranceId);
                 switch (speechPostAction) {
+                    case NONE:
+                        break;
                     case ASK_WITH_DELAY:
-                    case ASK:
                         new Thread() {
                             public void run() {
                                 try {
                                     if(speechPostAction.equals(SpeechPostAction.ASK_WITH_DELAY)) {
                                         Thread.sleep(2 * 1000);
                                     }
-                                    audioPlayer.pause();
-                                    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                                            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                                    startActivityForResult(intent, SPEECH_REQUEST_CODE);
+                                    speechRecognizer();
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
                             }
                         }.start();
-                        break;
-                    case DO_NOT_ASK:
                         break;
                 }
             }
@@ -801,6 +796,8 @@ public class MainActivity extends AppCompatActivity {
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
+
+
     private void setRating(int rating) {
         ratingBar.setEnabled(false);
         displayedTrack.setRating(Math.round(rating));
@@ -1227,22 +1224,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public enum SpeechPostAction {
-        ASK_WITH_DELAY, ASK, DO_NOT_ASK
+        NONE, ASK_WITH_DELAY
     }
 
     //https://developer.android.com/training/wearables/apps/voice.html
-    public void speakAndAsk(String msg, SpeechPostAction utteranceId) {
+    public void speakAnd(String msg, SpeechPostAction utteranceId) {
         helperToast.toastLong(msg);
-        textToSpeech.speak(msg.equals("")?getString(R.string.TTSlistening):msg,
-                TextToSpeech.QUEUE_FLUSH, null, utteranceId.name());
-    }
-
-    public void speechRecognizer() {
-        speakAndAsk("", SpeechPostAction.ASK);
+        textToSpeech.speak(msg, TextToSpeech.QUEUE_FLUSH, null, utteranceId.name());
     }
 
     public void speak(String msg) {
-        speakAndAsk(msg, SpeechPostAction.DO_NOT_ASK);
+        speakAnd(msg, SpeechPostAction.NONE);
+    }
+
+    private void speechRecognizer() {
+        audioPlayer.pause();
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        startActivityForResult(intent, SPEECH_REQUEST_CODE);
     }
 
     @Override
@@ -1604,7 +1604,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void askEdition(boolean force) {
-        SpeechPostAction speechPostAction = SpeechPostAction.DO_NOT_ASK;
+        SpeechPostAction speechPostAction = SpeechPostAction.NONE;
         if (force
                 || displayedTrack.getRating() < 1 //no rating
                 || displayedTrack.getTags(false).size() < 1)  //no user tags
@@ -1612,7 +1612,7 @@ public class MainActivity extends AppCompatActivity {
             if(toggleButtonDimMode.isChecked() && !toggleButtonEditTags.isChecked()) {
                 speechPostAction = SpeechPostAction.ASK_WITH_DELAY;
             }
-            speakAndAsk(getDisplayedTrackStatus(), speechPostAction);
+            speakAnd(getDisplayedTrackStatus(), speechPostAction);
         }
     }
 
