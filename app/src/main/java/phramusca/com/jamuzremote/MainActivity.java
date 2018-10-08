@@ -1308,6 +1308,7 @@ public class MainActivity extends AppCompatActivity {
                         msg="";
                     } catch (NumberFormatException ex) {
                     }
+                    audioPlayer.resume();
                     break;
                 case SET_TAGS:
                     String[] tags = arguments.split(" ");
@@ -1323,10 +1324,26 @@ public class MainActivity extends AppCompatActivity {
                     }
                     displayTrack(false);
                     askEdition(true);
+                    audioPlayer.resume();
+                    msg="";
+                    break;
+                case PLAYER_NEXT:
+                    playNext();
+                    msg="";
+                    break;
+                case PLAYER_PAUSE:
+                    audioPlayer.pause();
+                    msg="";
+                    break;
+                case PLAYER_RESUME:
+                    audioPlayer.resume();
+                    msg="";
+                    break;
+                case PLAYER_PULLUP:
+                    audioPlayer.pullUp();
                     msg="";
                     break;
             }
-            audioPlayer.resume();
 
             if(!msg.equals("")) {
                 helperToast.toastLong(msg);

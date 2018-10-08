@@ -43,10 +43,40 @@ public class VoiceKeyWords {
 
                     new KeyWord("tag it", Command.SET_TAGS),
                     new KeyWord("taguer", Command.SET_TAGS),
-                    new KeyWord("tag", Command.SET_TAGS)
+                    new KeyWord("tag", Command.SET_TAGS),
 
-                    //FIXME: Add a Cancel keywork
+                    new KeyWord("resume", Command.PLAYER_RESUME),
+                    new KeyWord("play", Command.PLAYER_RESUME),
+                    new KeyWord("continuer", Command.PLAYER_RESUME),
+                    new KeyWord("continue", Command.PLAYER_RESUME),
+                    new KeyWord("reprendre", Command.PLAYER_RESUME),
+                    new KeyWord("lire", Command.PLAYER_RESUME),
+                    new KeyWord("lecture", Command.PLAYER_RESUME),
 
+                    new KeyWord("play next track", Command.PLAYER_NEXT),
+                    new KeyWord("play next", Command.PLAYER_NEXT),
+                    new KeyWord("next track", Command.PLAYER_NEXT),
+                    new KeyWord("next", Command.PLAYER_NEXT),
+                    new KeyWord("prochaine", Command.PLAYER_NEXT),
+                    new KeyWord("prochain", Command.PLAYER_NEXT),
+                    new KeyWord("suivante", Command.PLAYER_NEXT),
+                    new KeyWord("suivant", Command.PLAYER_NEXT),
+
+                    new KeyWord("pause", Command.PLAYER_PAUSE),
+                    new KeyWord("stop", Command.PLAYER_PAUSE),
+                    new KeyWord("break", Command.PLAYER_PAUSE),
+                    new KeyWord("arret", Command.PLAYER_PAUSE),
+                    new KeyWord("arrêt", Command.PLAYER_PAUSE),
+                    new KeyWord("arreter", Command.PLAYER_PAUSE),
+
+                    new KeyWord("pullup", Command.PLAYER_PULLUP),
+                    new KeyWord("pull up", Command.PLAYER_PULLUP),
+                    new KeyWord("pull-up", Command.PLAYER_PULLUP),
+                    new KeyWord("poulpe", Command.PLAYER_PULLUP),
+                    new KeyWord("replay", Command.PLAYER_PULLUP),
+                    new KeyWord("restart", Command.PLAYER_PULLUP),
+                    new KeyWord("recommencer", Command.PLAYER_PULLUP),
+                    new KeyWord("rejouer", Command.PLAYER_PULLUP)
             ));
 
     public static KeyWord get(String spokenText) {
@@ -87,6 +117,10 @@ public class VoiceKeyWords {
         ALBUM,
         ALBUM_ONGOING,
         SET_RATING,
-        SET_TAGS
+        SET_TAGS,
+        PLAYER_RESUME,
+        PLAYER_NEXT,
+        PLAYER_PAUSE,
+        PLAYER_PULLUP,
     }
 }
