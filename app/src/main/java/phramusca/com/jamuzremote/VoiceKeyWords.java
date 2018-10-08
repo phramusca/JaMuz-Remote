@@ -92,6 +92,10 @@ public class VoiceKeyWords {
         return new KeyWord(searchValue, command);
     }
 
+    public static ArrayList<KeyWord> get() {
+        return KEY_WORDS;
+    }
+
     static class KeyWord {
         private String keyword;
         private Command command;
