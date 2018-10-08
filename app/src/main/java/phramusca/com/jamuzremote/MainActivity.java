@@ -210,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
                             public void run() {
                                 try {
                                     if(speechPostAction.equals(SpeechPostAction.ASK_WITH_DELAY)) {
-                                        Thread.sleep(2 * 1000);
+                                        Thread.sleep(3 * 1000);
                                     }
                                     speechRecognizer();
                                 } catch (InterruptedException e) {
@@ -1552,25 +1552,41 @@ public class MainActivity extends AppCompatActivity {
 
     class CallBackPlayer implements ICallBackPlayer {
 
-        private boolean isNearTheEnd;
+        private int quarterPosition=0;
 
         @Override
         public void reset() {
-            isNearTheEnd=false;
+            quarterPosition=0;
         }
 
         @Override
         public void onPositionChanged(int position, int duration) {
             if(!isRemoteConnected()) {
                 setSeekBar(position, duration);
-                Log.d(TAG, "onPositionChanged: "+(duration - position));
-                if ((duration - position) < 5001 && (duration - position) > 4501) {
+                int remaining=(duration - position);
+                Log.d(TAG, "onPositionChanged, remaining: "+remaining);
+                if (remaining < 5001 && remaining > 4501) { //TODO: Why those numbers ? (can't remember ...)
                     //setBrightness(1);
-                    Log.d(TAG, "onPositionChanged: DIM ON "+(duration - position));
+                    Log.d(TAG, "onPositionChanged: DIM ON "+remaining);
                     dimOn();
-                } else if(!isNearTheEnd && (duration - position) < duration/2 && (duration - position) > 4501) {
-                    isNearTheEnd=true;
-                    askEdition(false);
+                }
+
+                if(remaining > 1 && quarterPosition < 4) {
+                    int quarter=duration/4;
+                    Log.d(TAG, "START: quarterPosition: "+quarterPosition);
+                    Log.d(TAG, "START: quarter: "+quarter);
+                    if(quarterPosition < 1 && (remaining < 3*quarter)) {
+                        Log.d(TAG, "quarterPosition: "+quarterPosition);
+                        quarterPosition=1;
+                        askEdition(false);
+                    } else if(quarterPosition < 2 && (remaining < 2*quarter)) {
+                        quarterPosition=2;
+                        askEdition(false);
+                    } else if(quarterPosition < 3 && (remaining < quarter)) {
+                        quarterPosition=3;
+                        askEdition(false);
+                    }
+                    Log.d(TAG, "END: quarterPosition: "+quarterPosition);
                 }
             }
         }
