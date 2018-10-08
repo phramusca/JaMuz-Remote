@@ -7,7 +7,7 @@ import java.util.Arrays;
  * Created by raph on 18/03/18.
  */
 
-public class Commands {
+public class VoiceKeyWords {
     //TODO: Translate vocal search commands
     //TODO: Document this => help page
     private static final ArrayList<KeyWord> KEY_WORDS = new ArrayList<>(
