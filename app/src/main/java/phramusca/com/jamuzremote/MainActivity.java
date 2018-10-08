@@ -30,6 +30,7 @@ import android.os.Message;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -190,6 +191,45 @@ public class MainActivity extends AppCompatActivity {
         textToSpeech =new TextToSpeech(getApplicationContext(), status -> {
             if(status != TextToSpeech.ERROR) {
                 textToSpeech.setLanguage(textToSpeech.getDefaultVoice().getLocale());
+            }
+        });
+        textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onStart(String utteranceId) {
+
+            }
+
+            @Override
+            public void onDone(String utteranceId) {
+                SpeechPostAction speechPostAction = SpeechPostAction.valueOf(utteranceId);
+                switch (speechPostAction) {
+                    case ASK_WITH_DELAY:
+                    case ASK:
+                        new Thread() {
+                            public void run() {
+                                try {
+                                    if(speechPostAction.equals(SpeechPostAction.ASK_WITH_DELAY)) {
+                                        Thread.sleep(2 * 1000);
+                                    }
+                                    audioPlayer.pause();
+                                    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                                    startActivityForResult(intent, SPEECH_REQUEST_CODE);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }.start();
+                        break;
+                    case DO_NOT_ASK:
+                        break;
+                }
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+
             }
         });
 
@@ -632,7 +672,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Button button_speech = (Button) findViewById(R.id.button_speech);
-        button_speech.setOnClickListener(v -> displaySpeechRecognizer());
+        button_speech.setOnClickListener(v -> speechRecognizer());
 
         imageViewCover = (ImageView) findViewById(R.id.imageView);
         layoutMain = (LinearLayout) findViewById(R.id.panel_main);
@@ -703,7 +743,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onLongPressed() {
-                displaySpeechRecognizer();
+                speechRecognizer();
             }
         });
 
@@ -1186,29 +1226,23 @@ public class MainActivity extends AppCompatActivity {
         audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
     }
 
-    public void displaySpeechRecognizer() {
-        displaySpeechRecognizer("");
+    public enum SpeechPostAction {
+        ASK_WITH_DELAY, ASK, DO_NOT_ASK
     }
 
     //https://developer.android.com/training/wearables/apps/voice.html
-    public void displaySpeechRecognizer(String msg) {
+    public void speakAndAsk(String msg, SpeechPostAction utteranceId) {
+        helperToast.toastLong(msg);
         textToSpeech.speak(msg.equals("")?getString(R.string.TTSlistening):msg,
-                TextToSpeech.QUEUE_FLUSH, null,
-                this.hashCode() + "listening");
-        new Thread() {
-            public void run() {
-                try {
-                    Thread.sleep(msg.length()*100);
-                    audioPlayer.pause();
-                    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                    startActivityForResult(intent, SPEECH_REQUEST_CODE);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
+                TextToSpeech.QUEUE_FLUSH, null, utteranceId.name());
+    }
+
+    public void speechRecognizer() {
+        speakAndAsk("", SpeechPostAction.ASK);
+    }
+
+    public void speak(String msg) {
+        speakAndAsk(msg, SpeechPostAction.DO_NOT_ASK);
     }
 
     @Override
@@ -1270,9 +1304,10 @@ public class MainActivity extends AppCompatActivity {
                         int rating = Integer.parseInt(arguments);
                         ratingBar.setRating(rating);
                         setRating(rating);
+                        askEdition(true);
+                        msg="";
                     } catch (NumberFormatException ex) {
                     }
-                    msg=askEdition();
                     break;
                 case SET_TAGS:
                     String[] tags = arguments.split(" ");
@@ -1287,15 +1322,15 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     displayTrack(false);
-                    msg=askEdition();
+                    askEdition(true);
+                    msg="";
                     break;
             }
             audioPlayer.resume();
 
             if(!msg.equals("")) {
                 helperToast.toastLong(msg);
-                textToSpeech.speak(msg, TextToSpeech.QUEUE_FLUSH, null,
-                        this.hashCode() + "commandResult");
+                speak(msg);
             }
 
         } else if (requestCode == QUEUE_REQUEST_CODE && resultCode == RESULT_OK) {
@@ -1500,13 +1535,6 @@ public class MainActivity extends AppCompatActivity {
 
     class CallBackPlayer implements ICallBackPlayer {
 
-        @Override
-        public void onPlayBackEnd() {
-            if(!isRemoteConnected()) {
-                playNext();
-            }
-        }
-
         private boolean isNearTheEnd;
 
         @Override
@@ -1525,15 +1553,25 @@ public class MainActivity extends AppCompatActivity {
                     dimOn();
                 } else if(!isNearTheEnd && (duration - position) < duration/2 && (duration - position) > 4501) {
                     isNearTheEnd=true;
-                    //FIXME: Make this an option (not the default)
-                    String msg = askEdition();
-                    if(!msg.equals("") && (displayedTrack.getRating() < 1
-                            || displayedTrack.getTags(false).size() < 1)) {
-                        helperToast.toastLong(msg);
-                        textToSpeech.speak(msg, TextToSpeech.QUEUE_FLUSH, null,
-                                this.hashCode() + "commandResult");
-                    }
+                    askEdition(false);
                 }
+            }
+        }
+
+        @Override
+        public void displaySpeechRecognizer() {
+            speechRecognizer();
+        }
+
+        @Override
+        public void onPlayBackStart() {
+            displayTrack(true);
+        }
+
+        @Override
+        public void onPlayBackEnd() {
+            if(!isRemoteConnected()) {
+                playNext();
             }
         }
 
@@ -1546,32 +1584,19 @@ public class MainActivity extends AppCompatActivity {
         public void doPlayNext() {
             playNext();
         }
-
-        @Override
-        public void speech(String msg) {
-            displaySpeechRecognizer(msg);
-        }
-
-        @Override
-        public void onPlayBackStart() {
-            displayTrack(true);
-        }
-
     }
 
-    //FIXME !!!!!! askEdition cases
-    private String askEdition() {
-        if(toggleButtonDimMode.isChecked()) {
-            if(!toggleButtonEditTags.isChecked()) {
-                if (displayedTrack.getRating() < 1
-                        || displayedTrack.getTags(false).size() < 1) {
-                    displaySpeechRecognizer(getDisplayedTrackStatus());
-                    return "";
-                }
+    private void askEdition(boolean force) {
+        SpeechPostAction speechPostAction = SpeechPostAction.DO_NOT_ASK;
+        if (force
+                || displayedTrack.getRating() < 1 //no rating
+                || displayedTrack.getTags(false).size() < 1)  //no user tags
+        {
+            if(toggleButtonDimMode.isChecked() && !toggleButtonEditTags.isChecked()) {
+                speechPostAction = SpeechPostAction.ASK_WITH_DELAY;
             }
-            return getDisplayedTrackStatus();
+            speakAndAsk(getDisplayedTrackStatus(), speechPostAction);
         }
-        return "";
     }
 
     private String getDisplayedTrackStatus() {
