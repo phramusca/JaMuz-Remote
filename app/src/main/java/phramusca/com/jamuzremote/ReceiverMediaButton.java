@@ -47,7 +47,7 @@ public class ReceiverMediaButton extends MediaButtonReceiver
                     Log.i(TAG,"Tracking cancellation status: " + timerTask.cancel());
                     timerTask = null;
                 }
-                MainActivity.audioPlayer.speech();
+                MainActivity.audioPlayer.displaySpeechRecognizer();
             } else {
                 Log.i(TAG, "First Click");
                 timer = new Timer();

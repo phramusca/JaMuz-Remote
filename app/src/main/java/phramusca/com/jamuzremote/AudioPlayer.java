@@ -125,8 +125,8 @@ public class AudioPlayer {
         callback.doPlayNext();
     }
 
-    public void speech() {
-        callback.speech("");
+    public void displaySpeechRecognizer() {
+        callback.displaySpeechRecognizer();
     }
 
     public void playPrevious() {
