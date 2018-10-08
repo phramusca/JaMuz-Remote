@@ -1252,9 +1252,9 @@ public class MainActivity extends AppCompatActivity {
             List<String> results = data.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS);
 
-            //Commands
+            //VoiceKeyWords
             String spokenText = results.get(0);
-            Commands.KeyWord keyWord = Commands.get(spokenText);
+            VoiceKeyWords.KeyWord keyWord = VoiceKeyWords.get(spokenText);
             String arguments = keyWord.getKeyword();
             String msg= getString(R.string.unknownCommand) + " \"" + spokenText + "\".";
             switch (keyWord.getCommand()) {
