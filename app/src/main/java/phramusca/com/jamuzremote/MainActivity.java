@@ -264,20 +264,20 @@ public class MainActivity extends AppCompatActivity {
                 ClientInfo clientInfo = getClientInfo(true);
                 if(clientInfo!=null) {
                     clientRemote =  new ClientRemote(clientInfo, new CallBackRemote());
+                    new Thread() {
+                        public void run() {
+                            if(clientRemote.connect()) {
+                                enableRemote(false);
+                            }
+                            else {
+                                enableRemote(true);
+                            }
+                        }
+                    }.start();
                 } else {
                     enableRemote(true);
                     return;
                 }
-                new Thread() {
-                    public void run() {
-                        if(clientRemote.connect()) {
-                            enableRemote(false);
-                        }
-                        else {
-                            enableRemote(true);
-                        }
-                    }
-                }.start();
             }
             else {
                 enableRemote(true);

@@ -24,6 +24,7 @@ public class VoiceKeyWords {
                     new KeyWord("current album", Command.PLAY_NEW_PLAYLIST_ALBUM_ONGOING),
                     new KeyWord("ongoing album", Command.PLAY_NEW_PLAYLIST_ALBUM_ONGOING),
                     new KeyWord("album en cours", Command.PLAY_NEW_PLAYLIST_ALBUM_ONGOING),
+                    new KeyWord("album courant", Command.PLAY_NEW_PLAYLIST_ALBUM_ONGOING),
 
                     new KeyWord("artiste", Command.PLAY_NEW_PLAYLIST_ARTIST),
                     new KeyWord("artist", Command.PLAY_NEW_PLAYLIST_ARTIST),
