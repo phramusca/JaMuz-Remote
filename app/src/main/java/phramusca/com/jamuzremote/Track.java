@@ -29,6 +29,12 @@ public class Track implements Serializable {
     private int playCounter = 0;
     private Date lastPlayed = new Date(0);
     private Status status = Status.NULL;
+    //FIXME !!!!!! Some tracks are inserted with NULL status and size -1. That should not be !!
+    //                  + it messes up merge since they are reported as NotFound
+
+    //FIXME !!!!!! Some tracks have ACK status but artist="" or title="" or album="" (most ALL the 3)
+    //                  How ? Why ?
+
     private String path = "";
     private String relativeFullPath = "";
     private ArrayList<String> tags = null;
