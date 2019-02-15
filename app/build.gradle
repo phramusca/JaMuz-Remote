@@ -35,6 +35,7 @@ dependencies {
     implementation 'com.google.guava:guava:23.6-android'
     implementation 'com.google.android:flexbox:0.3.0'
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
+    implementation 'com.wdullaer:swipeactionadapter:2.0.0'
 }
 
 repositories {

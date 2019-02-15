@@ -1246,11 +1246,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode,
-                                    Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
-            List<String> results = data.getStringArrayListExtra(
-                    RecognizerIntent.EXTRA_RESULTS);
+            List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 
             //VoiceKeyWords
             String spokenText = results.get(0);
@@ -1352,7 +1350,6 @@ public class MainActivity extends AppCompatActivity {
 
         } else if (requestCode == QUEUE_REQUEST_CODE && resultCode == RESULT_OK) {
             boolean enqueue = data.getBooleanExtra("queueItem", false);
-
             int position = data.getIntExtra("positionPlay", -1);
             int histSize = data.getIntExtra("histSize", -1);
 

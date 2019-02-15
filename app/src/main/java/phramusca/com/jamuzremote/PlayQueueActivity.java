@@ -7,12 +7,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import com.wdullaer.swipeactionadapter.SwipeActionAdapter;
+import com.wdullaer.swipeactionadapter.SwipeDirection;
 
 import java.util.ArrayList;
 
-public class PlayQueueActivity extends AppCompatActivity implements TrackAdapter.TrackAdapterListener {
+public class PlayQueueActivity extends AppCompatActivity {
 
-    TrackAdapter adapter;
+    TrackAdapter trackAdapter;
+    SwipeActionAdapter trackSwipeAdapter;
     int histSize;
 
     @Override
@@ -32,18 +37,62 @@ public class PlayQueueActivity extends AppCompatActivity implements TrackAdapter
             histSize = intent.getIntExtra("histSize", 0);
             int position = histIndex<=0?0:histIndex;
             ListView listView = (ListView) findViewById(R.id.list_queue);
-            adapter = new TrackAdapter(this, queue, position);
-            adapter.addListener(this);
-            listView.setAdapter(adapter);
+            trackAdapter = new TrackAdapter(this, queue, position);
+            trackSwipeAdapter = new SwipeActionAdapter(trackAdapter);
+            trackSwipeAdapter.setListView(listView);
+            listView.setAdapter(trackSwipeAdapter);
             listView.setSelection(position);
+            trackSwipeAdapter.addBackground(SwipeDirection.DIRECTION_FAR_LEFT,R.layout.row_bg_left_far)
+                    .addBackground(SwipeDirection.DIRECTION_NORMAL_LEFT,R.layout.row_bg_left)
+                    .addBackground(SwipeDirection.DIRECTION_FAR_RIGHT,R.layout.row_bg_right_far)
+                    .addBackground(SwipeDirection.DIRECTION_NORMAL_RIGHT,R.layout.row_bg_right);
+            trackSwipeAdapter.setSwipeActionListener(new SwipeActionAdapter.SwipeActionListener(){
+                @Override
+                public boolean hasActions(int position, SwipeDirection direction){
+                    /*if(direction.isLeft()) return true; // Change this to false to disable left swipes
+                    if(direction.isRight()) return true;
+                    return false;*/
+                    return true;
+                }
 
+                @Override
+                public boolean shouldDismiss(int position, SwipeDirection direction){
+                    // Only dismiss an item when swiping normal left
+                    return false; //direction == SwipeDirection.DIRECTION_NORMAL_LEFT;
+                }
+
+                @Override
+                public void onSwipe(int[] positionList, SwipeDirection[] directionList){
+                    for(int i=0;i<positionList.length;i++) {
+                        SwipeDirection direction = directionList[i];
+                        int position = positionList[i];
+                        Track track = (Track) trackSwipeAdapter.getItem(position);
+                        switch (direction) {
+                            case DIRECTION_FAR_LEFT:
+                                setResult(false, position);
+                                break;
+                            case DIRECTION_NORMAL_LEFT:
+                                setResult(true, position);
+                                break;
+                            case DIRECTION_FAR_RIGHT:
+                                confirmRemoval(track);
+                                break;
+                            case DIRECTION_NORMAL_RIGHT:
+                                //FIXME: Move down
+                                //setResult(true, position);
+                                break;
+                        }
+                        trackSwipeAdapter.notifyDataSetChanged();
+                    }
+                }
+            });
             //Reads thumbnails in background
             new Thread() {
                 @Override
                 public void run() {
                     for(Track track : queue) {
                         if(track.getTumb(true)!=null) {
-                            runOnUiThread(() -> adapter.notifyDataSetChanged());
+                            runOnUiThread(() -> trackAdapter.notifyDataSetChanged());
                         }
                     }
                 }
@@ -51,34 +100,27 @@ public class PlayQueueActivity extends AppCompatActivity implements TrackAdapter
         }
     }
 
-    @Override
-    public void onClick(final Track item, final int position) {
+    private void confirmRemoval(Track track) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Play ?");
+        builder.setTitle("Remove ?");
         builder.setMessage(Html.fromHtml(
-                "<html>".concat(item.toString()).concat("</html>")));
-        builder.setPositiveButton("NOW !", (dialog, which) -> {
-            Intent data = new Intent();
-            data.putExtra("queueItem", false);
-            data.putExtra("positionPlay", position);
-            data.putExtra("histSize", histSize);
-            setResult(RESULT_OK, data);
-            finish();
+                "<html>".concat(track.toString()).concat("</html>")));
+        builder.setPositiveButton("Yes", (dialog, which) -> {
+            //FIXME: Remove item from queue
+            Toast.makeText(this, "TODO", Toast.LENGTH_SHORT);
         });
-
-        if(!item.isHistory()) {
-            builder.setNegativeButton("AFTER CURRENT.", (dialog, which) -> {
-                Intent data = new Intent();
-                data.putExtra("queueItem", true);
-                data.putExtra("positionPlay", position);
-                data.putExtra("histSize", histSize);
-                setResult(RESULT_OK, data);
-                finish();
-            });
-        }
-
+        builder.setNegativeButton("Ooopps, NOOO !", (dialog, which) -> {
+        });
         builder.setCancelable(true);
-
         builder.show();
+    }
+
+    private void setResult(boolean enqueue, int position) {
+        Intent data = new Intent();
+        data.putExtra("queueItem", enqueue);
+        data.putExtra("positionPlay", position);
+        data.putExtra("histSize", histSize);
+        setResult(RESULT_OK, data);
+        finish();
     }
 }
