@@ -1,0 +1,14 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="?android:listPreferredItemHeight"
+    android:background="@android:color/holo_green_light">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Next"
+        android:textColor="@color/textColor"
+        android:gravity="center_vertical"
+        android:textSize="40dp"
+        android:paddingStart="10dp"/>
+</LinearLayout>
