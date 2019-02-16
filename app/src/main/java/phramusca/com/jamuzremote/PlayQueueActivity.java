@@ -18,7 +18,7 @@ public class PlayQueueActivity extends AppCompatActivity {
 
     TrackAdapter trackAdapter;
     SwipeActionAdapter trackSwipeAdapter;
-    int histSize;
+    private int offset=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +33,9 @@ public class PlayQueueActivity extends AppCompatActivity {
         final ArrayList<Track> queue = (ArrayList<Track>) intent.getSerializableExtra("queueArrayList");
 
         if(queue!=null) {
-            int histIndex = intent.getIntExtra("histIndex", 0);
-            histSize = intent.getIntExtra("histSize", 0);
-            int position = histIndex<=0?0:histIndex;
+            int position = intent.getIntExtra("queueArrayPosition", 0);
+            offset = intent.getIntExtra("queueArrayOffset", 0);
+            position = position - offset;
             ListView listView = (ListView) findViewById(R.id.list_queue);
             trackAdapter = new TrackAdapter(this, queue, position);
             trackSwipeAdapter = new SwipeActionAdapter(trackAdapter);
@@ -69,16 +69,18 @@ public class PlayQueueActivity extends AppCompatActivity {
                         Track track = (Track) trackSwipeAdapter.getItem(position);
                         switch (direction) {
                             case DIRECTION_FAR_LEFT:
+                                //Insert next and play
                                 setResult(false, position);
                                 break;
                             case DIRECTION_NORMAL_LEFT:
+                                //Insert next in queue
                                 setResult(true, position);
                                 break;
                             case DIRECTION_FAR_RIGHT:
                                 confirmRemoval(track);
                                 break;
                             case DIRECTION_NORMAL_RIGHT:
-                                //FIXME: Move down
+                                //FIXME !!!! Move down
                                 //setResult(true, position);
                                 break;
                         }
@@ -106,7 +108,7 @@ public class PlayQueueActivity extends AppCompatActivity {
         builder.setMessage(Html.fromHtml(
                 "<html>".concat(track.toString()).concat("</html>")));
         builder.setPositiveButton("Yes", (dialog, which) -> {
-            //FIXME: Remove item from queue
+            //FIXME !!!! Remove item from queue
             Toast.makeText(this, "TODO", Toast.LENGTH_SHORT);
         });
         builder.setNegativeButton("Ooopps, NOOO !", (dialog, which) -> {
@@ -118,8 +120,7 @@ public class PlayQueueActivity extends AppCompatActivity {
     private void setResult(boolean enqueue, int position) {
         Intent data = new Intent();
         data.putExtra("queueItem", enqueue);
-        data.putExtra("positionPlay", position);
-        data.putExtra("histSize", histSize);
+        data.putExtra("positionPlay", position+offset);
         setResult(RESULT_OK, data);
         finish();
     }

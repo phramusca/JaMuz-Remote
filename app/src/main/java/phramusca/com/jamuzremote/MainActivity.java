@@ -119,8 +119,6 @@ public class MainActivity extends AppCompatActivity {
     public static File musicLibraryDbFile = new File(
             Environment.getExternalStorageDirectory()+"/JaMuz/JaMuzRemote.db");
 
-    private List<Track> queue = new ArrayList<>();
-    private ArrayList<Track> queueHistory = new ArrayList<>();
     private Map<String, Playlist> localPlaylists = new LinkedHashMap<>();
     private ArrayAdapter<Playlist> playListArrayAdapter;
     private Playlist localSelectedPlaylist;
@@ -128,8 +126,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int SPEECH_REQUEST_CODE = 0;
     private static final int QUEUE_REQUEST_CODE = 1;
     private static final int QR_REQUEST_CODE = 49374;
-
-    private static final int MAX_QUEUE = 10;
 
     // GUI elements
     private TextView textViewFileInfo;
@@ -643,26 +639,10 @@ public class MainActivity extends AppCompatActivity {
         Button button_queue = (Button) findViewById(R.id.button_queue);
         button_queue.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), PlayQueueActivity.class);
-            ArrayList<Track> list = new ArrayList<>();
-            //TODO: Implement pagination
-            // https://stackoverflow.com/questions/16661662/how-to-implement-pagination-in-android-listview
-            if(queueHistory!=null) {
-                list.addAll(queueHistory.size()> MAX_QUEUE ?
-                        new ArrayList<>(queueHistory.subList(queueHistory.size() - MAX_QUEUE, queueHistory.size()))
-                        :queueHistory);
-            }
-            if(queue!=null) {
-                list.addAll(queue.size()> MAX_QUEUE ? new ArrayList<>(queue.subList(0, MAX_QUEUE)):queue);
-            }
-            int histSize = 0;
-            int offset = 0;
-            if (queueHistory != null) {
-                histSize = queueHistory.size()> MAX_QUEUE ? MAX_QUEUE:queueHistory.size();
-                offset = queueHistory.size()-histSize;
-            }
-            intent.putExtra("queueArrayList", list);
-            intent.putExtra("histIndex", queueHistoryIndex-offset);
-            intent.putExtra("histSize", histSize);
+            PlayQueueRelative playQueueRelative = PlayQueue.getActivityList();
+            intent.putExtra("queueArrayList", playQueueRelative.getTracks());
+            intent.putExtra("queueArrayPosition", playQueueRelative.getPosition());
+            intent.putExtra("queueArrayOffset", playQueueRelative.getOffset());
             startActivityForResult(intent, QUEUE_REQUEST_CODE);
         });
 
@@ -795,8 +775,6 @@ public class MainActivity extends AppCompatActivity {
 
         setDimMode(toggleButtonDimMode.isChecked());
     }
-
-
 
     private void setRating(int rating) {
         ratingBar.setEnabled(false);
@@ -946,9 +924,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshQueueAndPlaylistSpinner(final boolean refreshAll) {
-        queue.clear();
+        PlayQueue.refresh(localSelectedPlaylist);
         refreshLocalPlaylistSpinner(refreshAll);
-        fillQueue(10, new ArrayList<>());
         button_save.setBackgroundResource(localSelectedPlaylist.isModified()?
                 R.drawable.ic_button_save_red:R.drawable.ic_button_save);
     }
@@ -989,7 +966,7 @@ public class MainActivity extends AppCompatActivity {
             displayPlaylist(playlist);
             localSelectedPlaylist = playlist;
             if(playNext) {
-                queue = playlist.getTracks(10);
+                PlayQueue.setQueue(playlist.getTracks(10));
                 playNext();
             } else {
                 refreshQueueAndPlaylistSpinner(false);
@@ -1351,38 +1328,12 @@ public class MainActivity extends AppCompatActivity {
         } else if (requestCode == QUEUE_REQUEST_CODE && resultCode == RESULT_OK) {
             boolean enqueue = data.getBooleanExtra("queueItem", false);
             int position = data.getIntExtra("positionPlay", -1);
-            int histSize = data.getIntExtra("histSize", -1);
 
-            if (position >= 0) {
-                int offset = queueHistory.size()-histSize;
-                position = position + offset;
-
-                if(position<queueHistory.size()) {
-                    queueHistoryIndex=position;
-                    playHistory();
-                } else {
-                    position = position-queueHistory.size();
-                    if(position<queue.size()) {
-                        Track track = queue.get(position);
-                        for(int i=0;i<=position;i++) {
-                            queue.remove(0);
-                        }
-                        Log.i(TAG, "playQueue(1/"+queue.size()+")");
-                        File file = new File(displayedTrack.getPath());
-                        if(file.exists()) {
-                            track.setHistory(true);
-                            queueHistory.add(track);
-                            queueHistoryIndex = queueHistory.size() - 1;
-                            if(!enqueue) {
-                                displayedTrack = track;
-                                playAudio("");
-                            } else {
-                                queueHistoryIndex--;
-                            }
-                        }
-                    }
-                }
+            PlayQueue.insertNext(position);
+            if (!enqueue) {
+                playNext();
             }
+
         } else if (requestCode == QR_REQUEST_CODE && resultCode == RESULT_OK) {
             //https://www.simplifiedcoding.net/android-qr-code-scanner-tutorial/
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
@@ -1467,83 +1418,59 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    public void playAudio(String source){
-        dimOn();
-        localTrack = displayedTrack;
-        refreshLocalPlaylistSpinner(false);
-        audioPlayer.stop(false);
-        displayedTrack.setSource(source.equals("")?localSelectedPlaylist.toString():source);
-        String msg = audioPlayer.play(displayedTrack);
-        if(!msg.equals("")) {
-            helperToast.toastLong(msg);
-        }
-    }
-
-    private void playHistory() {
-        displayedTrack = queueHistory.get(queueHistoryIndex);
-        Log.i(TAG, "playHistory("+(queueHistoryIndex+1)+"/"+queueHistory.size()+")");
-        playAudio(getString(R.string.history)+" "+(queueHistoryIndex+1)+"/"+queueHistory.size()+"");
-    }
-
-    private int queueHistoryIndex =-1;
-
-    private void playPrevious() {
-        if(queueHistory.size()>0 && queueHistoryIndex>0 && queueHistoryIndex<queueHistory.size()) {
-            queueHistoryIndex--;
-            playHistory();
+    private boolean play(Track track) {
+        displayedTrack=track;
+        File file = new File(displayedTrack.getPath());
+        if(file.exists()) {
+            dimOn();
+            localTrack = displayedTrack;
+            refreshLocalPlaylistSpinner(false);
+            audioPlayer.stop(false);
+            displayedTrack.setSource(displayedTrack.isHistory()?getString(R.string.history):localSelectedPlaylist.toString());
+            String msg = audioPlayer.play(displayedTrack);
+            if(!msg.equals("")) {
+                helperToast.toastLong(msg);
+            }
+            displayedTrack.setHistory(true);
+            return true;
         } else {
-            helperToast.toastLong("No tracks beyond.");
-        }
-    }
-
-    private void fillQueue(int number, List<Integer> IDs) {
-        if(queue.size()<number && localSelectedPlaylist!=null) {
-            List<Track> addToQueue = localSelectedPlaylist.getTracks(number-queue.size(), IDs);
-            queue.addAll(addToQueue);
+            Log.d(TAG, "play(): Remove track from db:"+displayedTrack);
+            displayedTrack.delete();
+            return false;
         }
     }
 
     private void playNext() {
-        if(queueHistoryIndex>=0 && (queueHistoryIndex+1)<queueHistory.size()) {
-            queueHistoryIndex++;
-            playHistory();
-        }
-        else {
-            //Update lastPlayed and playCounter
+        PlayQueue.fill(localSelectedPlaylist);
+        Track track = PlayQueue.getNext();
+        if(track!=null) {
+            //Update lastPlayed and playCounter of previous track
             displayedTrack.setPlayCounter(displayedTrack.getPlayCounter()+1);
             displayedTrack.setLastPlayed(new Date());
             displayedTrack.update();
-            //TODO: On tablet : java.lang.NoSuchMethodError: No interface method stream()Ljava/util/stream/Stream;
-            // in class Ljava/util/List; or its super classes
-            // (declaration of 'java.util.List' appears in /system/framework/core-libart.jar)
-            /*List<Integer> queueIds = queue.stream().map(Track::getIdFileRemote).collect(Collectors.toList());*/
 
-            List<Integer> queueIds = new ArrayList<>();
-            for(Track track : queue) {
-                queueIds.add(track.getIdFileRemote());
-            }
-
-            fillQueue(11, queueIds); // So it remains 10 after
-            //Play first track in queue
-            if(queue.size()>0) {
-                displayedTrack = queue.get(0);
-                queue.remove(0);
-                Log.i(TAG, "playQueue(1/"+queue.size()+")");
-                File file = new File(displayedTrack.getPath());
-                if(file.exists()) {
-                    displayedTrack.setHistory(true);
-                    queueHistory.add(displayedTrack);
-                    queueHistoryIndex = queueHistory.size()-1;
-                    playAudio("");
-                } else {
-                    Log.d(TAG, "play(): Remove track from db:"+displayedTrack);
-                    displayedTrack.delete();
-                    playNext();
-                }
+            //Play next one
+            if (play(track)) {
+                PlayQueue.setNext();
             } else {
-                refreshLocalPlaylistSpinner(false);
-                helperToast.toastLong("Empty Playlist.");
+                playNext();
             }
+        } else {
+            refreshLocalPlaylistSpinner(false);
+            helperToast.toastLong("Empty Playlist.");
+        }
+    }
+
+    private void playPrevious() {
+        Track track = PlayQueue.getPrevious();
+        if(track!=null) {
+            if (play(track)) {
+                PlayQueue.setPrevious();
+            } else {
+                playPrevious();
+            }
+        } else {
+            helperToast.toastLong("No tracks beyond.");
         }
     }
 
