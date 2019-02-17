@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">JaMuz</string>
     <string name="lt_ip_gt_lt_port_gt" translatable="false"><![CDATA[<IP>:<Port> :]]></string>
     <string name="defaultConnectionString" translatable="false">192.168.0.16:2013</string>
@@ -14,7 +14,7 @@
     <string name="order_by">Order by:</string>
     <string name="random">Random</string>
     <string name="play_counter_last_played">Play counter, Last played</string>
-    <string name="replaygain_base_volume">ReplayGain base volume :</string>
+    <string name="replayGainBaseVolume">ReplayGain base volume :</string>
     <string name="welcomeTitle">Welcome to</string>
     <string name="pathInfo">Choose an additional local path as a music source. Note that it is recommended to use JaMuz though.</string>
     <string name="history">History</string>
@@ -22,9 +22,9 @@
     <string name="playlist">Playlist</string>
     <string name="restored">restored</string>
     <string name="successfully">successfully.</string>
-    <string name="withErrors">with errors !</string>
+    <string name="withErrors">with errors!</string>
     <string name="saved">saved</string>
-    <string name="notfound">not found.</string>
+    <string name="notFound">not found.</string>
     <string name="artist">Artist</string>
     <string name="album">Album</string>
     <string name="specifyAlbum">Specify an album.</string>
@@ -56,13 +56,9 @@
     <string name="permissionMsg_8">Phone calls</string>
     <string name="permissionMsg_9">: Simply to be able to pause and resume audio on phone calls.</string>
     <string name="warning">Warning!</string>
-    <string name="play_now">Play Now !</string>
-    <string name="remove">Remove</string>
-    <string name="next">Next</string>
-    <string name="down">Down</string>
 
     <!--FIXME: Translate, knowing that it is also a keyword so need to split key and value-->
-    <string-array name="limitUnits">
+    <string-array name="limitUnits" tools:ignore="MissingTranslation">
         <item>minutes</item>
         <item>hours</item>
         <item>days</item>

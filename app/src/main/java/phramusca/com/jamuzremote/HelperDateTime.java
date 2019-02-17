@@ -3,6 +3,7 @@ package phramusca.com.jamuzremote;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -45,7 +46,7 @@ public class HelperDateTime {
      * @return UTC dateTime to custom format
      */
     private static String formatUTC(Date date, String format, boolean toLocal) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.ENGLISH);
         if(!toLocal) {
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         }
@@ -103,7 +104,7 @@ public class HelperDateTime {
             return new Date(0);
         }
         try {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format.getPattern());
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format.getPattern(), Locale.ENGLISH);
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             return simpleDateFormat.parse(date);
 

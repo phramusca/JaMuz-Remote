@@ -1233,7 +1233,7 @@ public class MainActivity extends AppCompatActivity {
             String msg= getString(R.string.unknownCommand) + " \"" + spokenText + "\".";
             switch (keyWord.getCommand()) {
                 case PLAY_PLAYLIST:
-                    msg = getString(R.string.playlist)+" \"" + arguments + "\" "+getString(R.string.notfound);
+                    msg = getString(R.string.playlist)+" \"" + arguments + "\" "+getString(R.string.notFound);
                     for(Playlist playlist : localPlaylists.values()) {
                         if(playlist.getName().equalsIgnoreCase(arguments)) {
                             applyPlaylist(playlist, true);
@@ -1246,7 +1246,7 @@ public class MainActivity extends AppCompatActivity {
                 case PLAY_NEW_PLAYLIST_ARTIST_ONGOING:
                     arguments = displayedTrack.getArtist();
                 case PLAY_NEW_PLAYLIST_ARTIST:
-                    msg = getString(R.string.artist)+" \"" + arguments + "\" "+getString(R.string.notfound);
+                    msg = getString(R.string.artist)+" \"" + arguments + "\" "+getString(R.string.notFound);
                     if(arguments.equals("")) {
                         //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
                         msg = getString(R.string.specifyArtist);
@@ -1261,7 +1261,7 @@ public class MainActivity extends AppCompatActivity {
                 case PLAY_NEW_PLAYLIST_ALBUM_ONGOING:
                     arguments = displayedTrack.getAlbum();
                 case PLAY_NEW_PLAYLIST_ALBUM:
-                    msg = getString(R.string.album)+" \"" + arguments + "\" "+getString(R.string.notfound);
+                    msg = getString(R.string.album)+" \"" + arguments + "\" "+getString(R.string.notFound);
                     if(arguments.equals("")) {
                         //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
                         msg = getString(R.string.specifyAlbum);
@@ -2058,8 +2058,7 @@ public class MainActivity extends AppCompatActivity {
         Collections.sort(mapValues);
         Collections.sort(mapKeys);
 
-        LinkedHashMap<String, Playlist> sortedMap =
-                new LinkedHashMap<>();
+        LinkedHashMap<String, Playlist> sortedMap = new LinkedHashMap<>();
 
         for (Playlist val : mapValues) {
             Iterator<String> keyIt = mapKeys.iterator();
@@ -2224,7 +2223,7 @@ public class MainActivity extends AppCompatActivity {
         //final Bitmap finalBitmap = bitmap;
         runOnUiThread(() -> {
             imageViewCover.setImageBitmap(finalBitmap);
-            BitmapDrawable bitmapDrawable = new BitmapDrawable(finalBitmap);
+            BitmapDrawable bitmapDrawable = new BitmapDrawable(getApplicationContext().getResources(), finalBitmap);
             bitmapDrawable.setAlpha(50);
             layoutMain.setBackground(bitmapDrawable);
         });

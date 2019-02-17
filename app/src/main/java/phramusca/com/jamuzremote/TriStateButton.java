@@ -2,12 +2,11 @@ package phramusca.com.jamuzremote;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.Button;
 
 /**
  * Created by raph on 17/06/17.
  */
-public class TriStateButton extends Button {
+public class TriStateButton extends android.support.v7.widget.AppCompatButton {
 
     //private final int MAX_STATES=3;
     int state;

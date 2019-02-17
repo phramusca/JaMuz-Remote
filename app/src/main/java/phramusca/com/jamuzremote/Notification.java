@@ -13,7 +13,7 @@ public class Notification {
     protected int id;
 
     Notification(Context context, int id, String title) {
-        builder = new NotificationCompat.Builder(context);
+        builder = new NotificationCompat.Builder(context, "MyNotificationChannelId");
         builder.setContentTitle(title)
                 .setContentText("Download in progress")
                 .setUsesChronometer(true)

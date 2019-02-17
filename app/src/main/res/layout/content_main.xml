@@ -128,11 +128,11 @@
                 android:enabled="true"
                 android:layout_gravity="start|end"
                 android:gravity="center_horizontal"
-
+                android:hint="@string/lt_ip_gt_lt_port_gt"
                 android:layout_row="0"
                 android:layout_column="2"
                 android:textColor="@color/textColor"
-                android:theme="@style/EditText"/>
+                android:theme="@style/EditText" />
 
             <Button
                 style="?android:attr/buttonStyleSmall"
@@ -185,7 +185,7 @@
                 android:layout_column="1"
                 android:textColor="@color/textColor"/>
 
-            <TextView
+            <EditText
                 android:id="@+id/textViewPath"
                 android:textColor="@color/textColor"
                 android:enabled="false"
@@ -195,10 +195,11 @@
                 android:layout_column="2"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:inputType="textCapSentences|textMultiLine"
                 android:maxLength="2000"
-                android:maxLines="4"/>
+                android:maxLines="4"
+                android:hint="IP:Port"
+                tools:ignore="HardcodedText" />
 
             <Button
                 style="?android:attr/buttonStyleSmall"
@@ -233,7 +234,7 @@
                 android:orientation="horizontal"
                 tools:ignore="UselessLeaf" />
             <TextView
-                android:text="@string/replaygain_base_volume"
+                android:text="@string/replayGainBaseVolume"
                 android:layout_row="0"
                 android:layout_column="1"
                 android:textColor="@color/textColor"/>

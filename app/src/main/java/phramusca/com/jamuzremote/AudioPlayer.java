@@ -17,7 +17,7 @@ public class AudioPlayer {
     private static MediaPlayer mediaPlayer;
     private static CountDownTimer timer;
 
-    public AudioPlayer(final ICallBackPlayer callback) {
+    AudioPlayer(final ICallBackPlayer callback) {
         this.callback = callback;
     }
 

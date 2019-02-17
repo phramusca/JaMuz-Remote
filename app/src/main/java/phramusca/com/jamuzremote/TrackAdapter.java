@@ -80,7 +80,7 @@ public class TrackAdapter extends BaseAdapter {
 
         ImageView imageViewCover = layoutItem.findViewById(R.id.imageView);
         imageViewCover.setImageBitmap(bitmap);
-        BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);
+        BitmapDrawable bitmapDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
         bitmapDrawable.setAlpha(50);
 
         if (tracks.get(position).isHistory()) {
