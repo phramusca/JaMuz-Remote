@@ -56,6 +56,10 @@
     <string name="permissionMsg_8">Phone calls</string>
     <string name="permissionMsg_9">: Simply to be able to pause and resume audio on phone calls.</string>
     <string name="warning">Warning!</string>
+    <string name="confirmNo">OOOOPs NO!</string>
+    <string name="confirmYes">YES</string>
+    <string name="confirmPlayNow">Play now ?</string>
+    <string name="confirmRemove">Remove ?</string>
 
     <!--FIXME: Translate, knowing that it is also a keyword so need to split key and value-->
     <string-array name="limitUnits" tools:ignore="MissingTranslation">

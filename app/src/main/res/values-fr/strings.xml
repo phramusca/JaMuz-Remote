@@ -51,4 +51,8 @@
     <string name="permissionMsg_8">Gestion des appels</string>
     <string name="permissionMsg_9">: Simplement pour mettre pause et reprendre la lecture lors des appels.</string>
     <string name="warning">Attention !</string>
+    <string name="confirmYes">OUI</string>
+    <string name="confirmNo">OOOOPS NON !</string>
+    <string name="confirmPlayNow">Jouer maintenant ?</string>
+    <string name="confirmRemove">Enlever ?</string>
 </resources>
