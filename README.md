@@ -11,5 +11,6 @@ ________________________________________________________________________________
   * ***Sync files from JaMuz over WiFi***
     * Select a playlist on JaMuz, connect JaMuz Remote sync, and wait for your files.
   * ***Remote Control for JaMuz***
-  
-<a href="https://liberapay.com/phramusca/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
+* I'll always be pleased if you offer me a beer (or a cup of tea, or more) to support my contribution :)
+  * Recurrent donations using Liberapay.com: <a href="https://liberapay.com/phramusca/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
+  * One time donation with PayPal.com: <a href="https://paypal.me/RaphaelCamus"><img alt="Donate using PayPal" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif"></a>
