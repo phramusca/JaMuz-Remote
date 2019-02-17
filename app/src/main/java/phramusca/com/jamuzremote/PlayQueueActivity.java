@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.wdullaer.swipeactionadapter.SwipeActionAdapter;
 import com.wdullaer.swipeactionadapter.SwipeDirection;
@@ -76,7 +75,7 @@ public class PlayQueueActivity extends AppCompatActivity {
                                 trackAdapter.insertNext(position);
                                 break;
                             case DIRECTION_FAR_RIGHT:
-                                confirmRemoval(track);
+                                confirmRemoval(track, position);
                                 break;
                             case DIRECTION_NORMAL_RIGHT:
                                 PlayQueue.moveDown(position+offset);
@@ -107,12 +106,12 @@ public class PlayQueueActivity extends AppCompatActivity {
         builder.setMessage(Html.fromHtml(
                 "<html>".concat(track.toString()).concat("</html>")));
         builder.setPositiveButton("Yes", (dialog, which) -> {
-            PlayQueue.insertNext(position);
-            //Play next and close queue activity
-            Intent data = new Intent();
-            data.putExtra("queueItem", false);
-            setResult(RESULT_OK, data);
-            finish();
+            if(PlayQueue.insertNext(position)) {
+                Intent data = new Intent();
+                data.putExtra("queueItem", false);
+                setResult(RESULT_OK, data);
+                finish();
+            }
         });
         builder.setNegativeButton("Ooopps, NOOO !", (dialog, which) -> {
         });
@@ -120,14 +119,15 @@ public class PlayQueueActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void confirmRemoval(Track track) {
+    private void confirmRemoval(Track track, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Remove ?");
         builder.setMessage(Html.fromHtml(
                 "<html>".concat(track.toString()).concat("</html>")));
         builder.setPositiveButton("Yes", (dialog, which) -> {
-            //FIXME !!!! Remove item from queue
-            Toast.makeText(this, "TODO", Toast.LENGTH_SHORT);
+            PlayQueue.remove(position+offset);
+            trackAdapter.remove(position);
+            trackAdapter.notifyDataSetChanged();
         });
         builder.setNegativeButton("Ooopps, NOOO !", (dialog, which) -> {
         });
