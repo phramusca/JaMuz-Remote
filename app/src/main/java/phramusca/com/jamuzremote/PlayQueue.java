@@ -29,8 +29,9 @@ public class PlayQueue {
         if(oldPosition!= positionPlaying) {
             Track track = getTrack(oldPosition);
             if(track!=null) {
-                if(oldPosition> positionPlaying) {
-                    queue.remove(oldPosition);
+                queue.remove(oldPosition);
+                if(oldPosition<positionPlaying) {
+                    positionPlaying--;
                 }
                 queue.add(positionPlaying +1, track);
             }
