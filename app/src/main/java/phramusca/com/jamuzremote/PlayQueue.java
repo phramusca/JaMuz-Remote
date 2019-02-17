@@ -6,8 +6,10 @@ import java.util.List;
 public class PlayQueue {
     private static List<Track> queue= new ArrayList<>();
     private static int position=-1;
-    private static final int MAX_QUEUE_PREVIOUS = 2;
-    private static final int MAX_QUEUE_NEXT = 5;
+
+    //TODO: Make MAX_QUEUE_PREVIOUS and MAX_QUEUE_NEXT user options
+    private static final int MAX_QUEUE_PREVIOUS = 10;
+    private static final int MAX_QUEUE_NEXT = 20;
 
     synchronized static PlayQueueRelative getActivityList() {
         //TODO: Implement pagination
