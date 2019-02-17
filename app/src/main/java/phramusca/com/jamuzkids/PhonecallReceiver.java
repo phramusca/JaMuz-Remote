@@ -1,7 +1,7 @@
 package phramusca.com.jamuzkids;
 
-/**
- * Created by raph on 17/06/17.
+/*
+  Created by raph on 17/06/17.
  */
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.telephony.TelephonyManager;
 
 import java.util.Date;
+import java.util.Objects;
 
 //https://stackoverflow.com/questions/15563921/how-to-detect-incoming-calls-in-an-android-device
 //https://gist.github.com/ftvs/e61ccb039f511eb288ee
@@ -26,11 +27,11 @@ public abstract class PhonecallReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
         //We listen to two intents.  The new outgoing call only tells us of an outgoing call.  We use it to get the number.
-        if (intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL")) {
-            savedNumber = intent.getExtras().getString("android.intent.extra.PHONE_NUMBER");
+        if (Objects.requireNonNull(intent.getAction()).equals("android.intent.action.NEW_OUTGOING_CALL")) {
+            savedNumber = Objects.requireNonNull(intent.getExtras()).getString("android.intent.extra.PHONE_NUMBER");
         }
         else{
-            String stateStr = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
+            String stateStr = Objects.requireNonNull(intent.getExtras()).getString(TelephonyManager.EXTRA_STATE);
             String number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
             int state = 0;
             if (stateStr != null) {

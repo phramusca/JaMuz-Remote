@@ -279,7 +279,7 @@ public class ServiceSync extends ServiceBase {
     private void requestNextFile() {
 
         //First, Acknowledge (ACK) reception of received files (REC)
-        // (server will insert in deviceFile and statsource tables and ack back)
+        // (server will insert in deviceFile and stat source tables and ack back)
         List<Track> received = RepoSync.getReceived();
         if(received.size()>0) {
             if (received.size() == 1) {

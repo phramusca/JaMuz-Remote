@@ -102,10 +102,10 @@ public class PlayQueueActivity extends AppCompatActivity {
 
     private void confirmPlayNext(Track track, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Play now ?");
+        builder.setTitle(phramusca.com.jamuzkids.R.string.confirmPlayNow);
         builder.setMessage(Html.fromHtml(
                 "<html>".concat(track.toString()).concat("</html>")));
-        builder.setPositiveButton("Yes", (dialog, which) -> {
+        builder.setPositiveButton(phramusca.com.jamuzkids.R.string.confirmYes, (dialog, which) -> {
             if(PlayQueue.insertNext(position)) {
                 Intent data = new Intent();
                 data.putExtra("queueItem", false);
@@ -113,7 +113,7 @@ public class PlayQueueActivity extends AppCompatActivity {
                 finish();
             }
         });
-        builder.setNegativeButton("Ooopps, NOOO !", (dialog, which) -> {
+        builder.setNegativeButton(phramusca.com.jamuzkids.R.string.confirmNo, (dialog, which) -> {
         });
         builder.setCancelable(true);
         builder.show();
@@ -121,15 +121,15 @@ public class PlayQueueActivity extends AppCompatActivity {
 
     private void confirmRemoval(Track track, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Remove ?");
+        builder.setTitle(phramusca.com.jamuzkids.R.string.confirmRemove);
         builder.setMessage(Html.fromHtml(
                 "<html>".concat(track.toString()).concat("</html>")));
-        builder.setPositiveButton("Yes", (dialog, which) -> {
+        builder.setPositiveButton(phramusca.com.jamuzkids.R.string.confirmYes, (dialog, which) -> {
             PlayQueue.remove(position+offset);
             trackAdapter.remove(position);
             trackAdapter.notifyDataSetChanged();
         });
-        builder.setNegativeButton("Ooopps, NOOO !", (dialog, which) -> {
+        builder.setNegativeButton(phramusca.com.jamuzkids.R.string.confirmNo, (dialog, which) -> {
         });
         builder.setCancelable(true);
         builder.show();
