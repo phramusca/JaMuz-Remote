@@ -1327,9 +1327,6 @@ public class MainActivity extends AppCompatActivity {
 
         } else if (requestCode == QUEUE_REQUEST_CODE && resultCode == RESULT_OK) {
             boolean enqueue = data.getBooleanExtra("queueItem", false);
-            int position = data.getIntExtra("positionPlay", -1);
-
-            PlayQueue.insertNext(position);
             if (!enqueue) {
                 playNext();
             }
