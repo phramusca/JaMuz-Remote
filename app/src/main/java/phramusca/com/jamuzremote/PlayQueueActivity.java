@@ -69,13 +69,7 @@ public class PlayQueueActivity extends AppCompatActivity {
                         Track track = (Track) trackSwipeAdapter.getItem(position);
                         switch (direction) {
                             case DIRECTION_FAR_LEFT:
-                                PlayQueue.insertNext(position+offset);
-
-                                //Play next and close queue activity
-                                Intent data = new Intent();
-                                data.putExtra("queueItem", false);
-                                setResult(RESULT_OK, data);
-                                finish();
+                                confirmPlayNext(track, position+offset);
                                 break;
                             case DIRECTION_NORMAL_LEFT:
                                 PlayQueue.insertNext(position+offset);
@@ -105,6 +99,25 @@ public class PlayQueueActivity extends AppCompatActivity {
                 }
             }.start();
         }
+    }
+
+    private void confirmPlayNext(Track track, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Play now ?");
+        builder.setMessage(Html.fromHtml(
+                "<html>".concat(track.toString()).concat("</html>")));
+        builder.setPositiveButton("Yes", (dialog, which) -> {
+            PlayQueue.insertNext(position);
+            //Play next and close queue activity
+            Intent data = new Intent();
+            data.putExtra("queueItem", false);
+            setResult(RESULT_OK, data);
+            finish();
+        });
+        builder.setNegativeButton("Ooopps, NOOO !", (dialog, which) -> {
+        });
+        builder.setCancelable(true);
+        builder.show();
     }
 
     private void confirmRemoval(Track track) {
