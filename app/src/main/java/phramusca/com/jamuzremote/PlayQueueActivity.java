@@ -69,19 +69,24 @@ public class PlayQueueActivity extends AppCompatActivity {
                         Track track = (Track) trackSwipeAdapter.getItem(position);
                         switch (direction) {
                             case DIRECTION_FAR_LEFT:
-                                //Insert next and play
-                                setResult(false, position);
+                                PlayQueue.insertNext(position+offset);
+
+                                //Play next and close queue activity
+                                Intent data = new Intent();
+                                data.putExtra("queueItem", false);
+                                setResult(RESULT_OK, data);
+                                finish();
                                 break;
                             case DIRECTION_NORMAL_LEFT:
-                                //Insert next in queue
-                                setResult(true, position);
+                                PlayQueue.insertNext(position+offset);
+                                trackAdapter.insertNext(position);
                                 break;
                             case DIRECTION_FAR_RIGHT:
                                 confirmRemoval(track);
                                 break;
                             case DIRECTION_NORMAL_RIGHT:
-                                //FIXME !!!! Move down
-                                //setResult(true, position);
+                                PlayQueue.moveDown(position+offset);
+                                trackAdapter.moveDown(position);
                                 break;
                         }
                         trackSwipeAdapter.notifyDataSetChanged();
@@ -115,13 +120,5 @@ public class PlayQueueActivity extends AppCompatActivity {
         });
         builder.setCancelable(true);
         builder.show();
-    }
-
-    private void setResult(boolean enqueue, int position) {
-        Intent data = new Intent();
-        data.putExtra("queueItem", enqueue);
-        data.putExtra("positionPlay", position+offset);
-        setResult(RESULT_OK, data);
-        finish();
     }
 }

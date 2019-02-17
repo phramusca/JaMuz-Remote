@@ -26,7 +26,7 @@ public class TrackAdapter extends BaseAdapter {
     private Context mContext;
     private List<Track> tracks;
     private LayoutInflater mInflater;
-    private final int positionPlaying;
+    private int positionPlaying;
 
     TrackAdapter(Context context, List<Track> tracks, int positionPlaying) {
         mContext = context;
@@ -108,4 +108,33 @@ public class TrackAdapter extends BaseAdapter {
         canvas.drawBitmap(playingBitmap, matrix, null);
         return bmOverlay;
     }
+
+    //TODO: Merge with the same ones on PlayQueue
+    public void insertNext(int oldPosition) {
+        if(oldPosition!=positionPlaying) {
+            Track track = tracks.get(oldPosition);
+            if(track!=null) {
+                if(oldPosition>positionPlaying) {
+                    tracks.remove(oldPosition);
+                }
+                tracks.add(positionPlaying+1, track);
+            }
+        }
+    }
+
+    public void moveDown(int oldPosition) {
+        if(oldPosition!=positionPlaying) {
+            Track track = tracks.get(oldPosition);
+            if(track!=null) {
+                tracks.remove(oldPosition);
+                oldPosition++;
+                if(oldPosition==positionPlaying) {
+                    positionPlaying--;
+                }
+                tracks.add(oldPosition, track);
+            }
+        }
+    }
+
+
 }
