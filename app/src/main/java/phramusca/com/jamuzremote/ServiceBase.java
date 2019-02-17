@@ -1,8 +1,8 @@
 package phramusca.com.jamuzremote;
 
-/**
- * Created by raph on 10/06/17.
- */
+/*
+  Created by raph on 10/06/17.
+*/
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -17,7 +17,7 @@ import android.util.Log;
 
 import java.io.File;
 
-public class ServiceBase extends Service {
+public abstract class ServiceBase extends Service {
 
     private static final String TAG = ServiceBase.class.getName();
     protected File getAppDataPath;

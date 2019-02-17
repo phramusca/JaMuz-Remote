@@ -189,7 +189,7 @@ public class MusicLibrary {
                 cursor.close();
             }
         }
-        return new Pair(-1, Long.valueOf(-1));
+        return new Pair<>(-1, (long) -1);
     }
 
     synchronized boolean insertOrUpdateTrackInDatabase(String absolutePath) {

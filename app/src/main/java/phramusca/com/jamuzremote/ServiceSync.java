@@ -377,11 +377,12 @@ public class ServiceSync extends ServiceBase {
                                     browseFS(file);
                                 }
                                 else {
-                                    if(!RepoSync.checkFile(getAppDataPath, file.getAbsolutePath())) {
+                                    if (RepoSync.checkFile(getAppDataPath, file.getAbsolutePath()))
+                                    { nbDeleted++; } else {
                                         //RepoSync.checkFile deletes file. Not counting deleted
                                         //to match RepoSync.getTotalSize() at the end (hopefully)
                                         nbFiles++;
-                                    } else { nbDeleted++; }
+                                    }
                                     helperNotification.notifyBar(notificationSyncScan,
                                             "Scan files. Deleted "+nbDeleted+" unrequested so far.",
                                             50,

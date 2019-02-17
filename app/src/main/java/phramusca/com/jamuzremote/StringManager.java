@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -130,7 +131,7 @@ public class StringManager {
      * @return MM:SS
      */
     public static String secondsToMMSS(int seconds) {
-        return String.format("%02d:%02d", //NOI18N
+        return String.format(Locale.ENGLISH,"%02d:%02d", //NOI18N
                 TimeUnit.SECONDS.toMinutes(seconds),
                 TimeUnit.SECONDS.toSeconds(seconds) - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(seconds))
         );
@@ -142,7 +143,7 @@ public class StringManager {
      * @return
      */
     public static String secondsToHHMM(int seconds) {
-        return String.format("%02d h %02d", //NOI18N
+        return String.format(Locale.ENGLISH,"%02d h %02d", //NOI18N
                 TimeUnit.SECONDS.toHours(seconds),
                 TimeUnit.SECONDS.toMinutes(seconds) - TimeUnit.HOURS.toMinutes(TimeUnit.SECONDS.toHours(seconds))
         );
@@ -174,11 +175,11 @@ public class StringManager {
             sb.append("d ");
         }
         if (hours > 0) {
-            sb.append(String.format("%02d", hours));
+            sb.append(String.format(Locale.ENGLISH,"%02d", hours));
             sb.append("h ");
         }
         if (minutes > 0) {
-            sb.append(String.format("%02d", minutes));
+            sb.append(String.format(Locale.ENGLISH,"%02d", minutes));
             sb.append("m");
         }
 

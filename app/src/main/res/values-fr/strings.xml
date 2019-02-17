@@ -9,7 +9,7 @@
     <string name="order_by">Trier par:</string>
     <string name="random">Aléatoire</string>
     <string name="play_counter_last_played">Nombre de lectures, Dernière lecture</string>
-    <string name="replaygain_base_volume">Volume de base ReplayGain :</string>
+    <string name="replayGainBaseVolume">Volume de base ReplayGain :</string>
     <string name="welcomeTitle">Bienvenue dans</string>
     <string name="pathInfo">Choisissez un chemin additionnel comme source locale de musique. A noter qu\'il est recommandé d\'utiliser JaMuz cependant.</string>
     <string name="history">Historique</string>
@@ -19,7 +19,7 @@
     <string name="successfully">avec succès.</string>
     <string name="withErrors">avec erreurs !</string>
     <string name="saved">sauvée</string>
-    <string name="notfound">introuvable.</string>
+    <string name="notFound">introuvable.</string>
     <string name="artist">Artiste</string>
     <string name="album">Album</string>
     <string name="specifyAlbum">Spécifiez un album.</string>
