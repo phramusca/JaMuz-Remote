@@ -272,7 +272,6 @@ public class MainActivity extends AppCompatActivity {
                     }.start();
                 } else {
                     enableRemote(true);
-                    return;
                 }
             }
             else {

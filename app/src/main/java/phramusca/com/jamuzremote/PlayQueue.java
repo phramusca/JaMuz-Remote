@@ -67,9 +67,8 @@ public class PlayQueue {
     }
 
     synchronized static void refresh(Playlist playlist) {
-        for(int i = positionPlaying +1; i<queue.size(); i++) {
-            queue.remove(i);
-        }
+        //FIXME: Do not remove items user intently queued (add a isQueued bool member in Track + store original playlist source)
+        queue.subList(positionPlaying+1, queue.size()).clear();
         add(new ArrayList<>(), playlist);
     }
 
@@ -117,7 +116,4 @@ public class PlayQueue {
     static void setPrevious() {
         positionPlaying--;
     }
-
-
-
 }
