@@ -363,7 +363,7 @@ public class MainActivity extends AppCompatActivity {
 
         ratingBar.setVisibility(View.GONE);
         spinnerGenre.setVisibility(View.GONE);
-        layoutTags.setVisibility(View.GONE);
+
         Button buttonRating2 = (Button) findViewById(R.id.button_rating_2);
         Button buttonRating3 = (Button) findViewById(R.id.button_rating_3);
         Button buttonRating4 = (Button) findViewById(R.id.button_rating_4);
