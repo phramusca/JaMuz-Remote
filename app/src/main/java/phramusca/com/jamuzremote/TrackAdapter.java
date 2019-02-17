@@ -114,8 +114,9 @@ public class TrackAdapter extends BaseAdapter {
         if(oldPosition!=positionPlaying) {
             Track track = tracks.get(oldPosition);
             if(track!=null) {
-                if(oldPosition>positionPlaying) {
-                    tracks.remove(oldPosition);
+                tracks.remove(oldPosition);
+                if(oldPosition<positionPlaying) {
+                    positionPlaying--;
                 }
                 tracks.add(positionPlaying+1, track);
             }
