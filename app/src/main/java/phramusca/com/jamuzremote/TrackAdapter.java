@@ -138,4 +138,15 @@ public class TrackAdapter extends BaseAdapter {
     }
 
 
+    public void remove(int position) {
+        if(position!= positionPlaying) {
+            Track track = tracks.get(position);
+            if(track!=null) {
+                tracks.remove(position);
+                if(position<positionPlaying) {
+                    positionPlaying--;
+                }
+            }
+        }
+    }
 }

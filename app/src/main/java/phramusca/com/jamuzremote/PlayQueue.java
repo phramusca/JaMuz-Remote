@@ -25,7 +25,7 @@ public class PlayQueue {
     }
 
     //TODO: Merge with the same ones on TrackAdapter
-    synchronized static void insertNext(int oldPosition) {
+    synchronized static boolean insertNext(int oldPosition) {
         if(oldPosition!= positionPlaying) {
             Track track = getTrack(oldPosition);
             if(track!=null) {
@@ -34,8 +34,10 @@ public class PlayQueue {
                     positionPlaying--;
                 }
                 queue.add(positionPlaying +1, track);
+                return true;
             }
         }
+        return false;
     }
 
     synchronized static void moveDown(int oldPosition) {
@@ -48,6 +50,18 @@ public class PlayQueue {
                     positionPlaying--;
                 }
                 queue.add(oldPosition, track);
+            }
+        }
+    }
+
+    synchronized static void remove(int position) {
+        if(position!= positionPlaying) {
+            Track track = getTrack(position);
+            if(track!=null) {
+                queue.remove(position);
+                if(position<positionPlaying) {
+                    positionPlaying--;
+                }
             }
         }
     }
@@ -103,6 +117,7 @@ public class PlayQueue {
     static void setPrevious() {
         positionPlaying--;
     }
+
 
 
 }
