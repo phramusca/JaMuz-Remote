@@ -70,12 +70,12 @@ public class ServiceScan extends ServiceBase {
                 scanLibrary.join();
             }
         } catch (InterruptedException e) {
-            Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
+            Log.e(TAG, "ActivityMain onDestroy: UNEXPECTED InterruptedException", e);
         }
     }
 
     private void scanFolder(final File path) {
-        scanLibrary = new ProcessAbstract("Thread.MainActivity.scanLibrayInThread") {
+        scanLibrary = new ProcessAbstract("Thread.ActivityMain.scanLibrayInThread") {
             public void run() {
                 try {
                     if(!path.getAbsolutePath().equals("/")) {
@@ -84,24 +84,24 @@ public class ServiceScan extends ServiceBase {
                         nbFilesTotal = 0;
                         checkAbort();
                         //Scan android filesystem for files
-                        processBrowseFS = new ProcessAbstract("Thread.MainActivity.browseFS") {
+                        processBrowseFS = new ProcessAbstract("Thread.ActivityMain.browseFS") {
                             public void run() {
                                 try {
                                     browseFS(path);
                                 } catch (IllegalStateException | InterruptedException e) {
-                                    Log.w(TAG, "Thread.MainActivity.browseFS InterruptedException");
+                                    Log.w(TAG, "Thread.ActivityMain.browseFS InterruptedException");
                                     scanLibrary.abort();
                                 }
                             }
                         };
                         processBrowseFS.start();
                         //Get total number of files
-                        processBrowseFScount = new ProcessAbstract("Thread.MainActivity.browseFScount") {
+                        processBrowseFScount = new ProcessAbstract("Thread.ActivityMain.browseFScount") {
                             public void run() {
                                 try {
                                     browseFScount(path);
                                 } catch (InterruptedException e) {
-                                    Log.w(TAG, "Thread.MainActivity.browseFScount InterruptedException");
+                                    Log.w(TAG, "Thread.ActivityMain.browseFScount InterruptedException");
                                     scanLibrary.abort();
                                 }
                             }
@@ -131,7 +131,7 @@ public class ServiceScan extends ServiceBase {
                         notifyScan("Scanning deleted files ... ", 200);
                     }
                 } catch (InterruptedException e) {
-                    Log.w(TAG, "Thread.MainActivity.scanLibrayInThread InterruptedException");
+                    Log.w(TAG, "Thread.ActivityMain.scanLibrayInThread InterruptedException");
                 }
             }
 
@@ -223,7 +223,7 @@ public class ServiceScan extends ServiceBase {
                 scanLibrary.join();
             }
         } catch (InterruptedException e) {
-            Log.e(TAG, "MainActivity onDestroy: UNEXPECTED InterruptedException", e);
+            Log.e(TAG, "ActivityMain onDestroy: UNEXPECTED InterruptedException", e);
         }
     }
 

@@ -67,7 +67,7 @@ public class TrackAdapter extends BaseAdapter {
         tv_album.setText(tracks.get(position).getAlbum());
         tv_title.setText(tracks.get(position).getTitle());
 
-        //TODO: Make a Repo in PlayQueueActivity to speed even further
+        //TODO: Make a Repo in ActivityPlayQueue to speed even further
         //Or make it global as for Remote
         //TODO: Add a limit (FIFO) to those repos not to overload android memory
         Bitmap bitmap = tracks.get(position).getTumb(false);

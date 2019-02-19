@@ -62,7 +62,7 @@ public abstract class ServiceBase extends Service {
     //This is to have application opened when clicking on notification
     private PendingIntent getApplicationIntent() {
         Intent notificationIntent = new Intent(getApplicationContext(),
-                MainActivity.class);
+                ActivityMain.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return PendingIntent.getActivity(getApplicationContext(), 0,

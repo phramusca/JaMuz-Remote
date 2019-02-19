@@ -47,7 +47,7 @@ public class ReceiverMediaButton extends MediaButtonReceiver
                     Log.i(TAG,"Tracking cancellation status: " + timerTask.cancel());
                     timerTask = null;
                 }
-                MainActivity.audioPlayer.displaySpeechRecognizer();
+                ActivityMain.audioPlayer.displaySpeechRecognizer();
             } else {
                 Log.i(TAG, "First Click");
                 timer = new Timer();
@@ -93,7 +93,7 @@ public class ReceiverMediaButton extends MediaButtonReceiver
 
     private void sendMessage(String msg) {
         Message completeMessage =
-                MainActivity.mHandler.obtainMessage(1, msg);
+                ActivityMain.mHandler.obtainMessage(1, msg);
         completeMessage.sendToTarget();
     }
 }

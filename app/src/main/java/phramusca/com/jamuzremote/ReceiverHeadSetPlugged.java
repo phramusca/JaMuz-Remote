@@ -18,11 +18,11 @@ public class ReceiverHeadSetPlugged extends BroadcastReceiver {
             if (headsetConnected && intent.getIntExtra("state", 0) == 0){
                 headsetConnected = false;
                 Log.i(TAG, "headset NOT Connected => pause");
-                MainActivity.audioPlayer.pause();
+                ActivityMain.audioPlayer.pause();
             } else if (!headsetConnected && intent.getIntExtra("state", 0) == 1){
                 headsetConnected = true;
                 Log.i(TAG, "headset IS Connected => resume");
-                MainActivity.audioPlayer.resume();
+                ActivityMain.audioPlayer.resume();
             }
         }
     }

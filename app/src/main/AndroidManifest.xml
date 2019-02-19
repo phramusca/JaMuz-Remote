@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".ActivityMain"
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
@@ -62,12 +62,12 @@
             android:exported="false"
             android:singleUser="false" />
 
-        <activity android:name="phramusca.com.jamuzremote.PlayQueueActivity"
-            android:parentActivityName=".MainActivity">
+        <activity android:name="phramusca.com.jamuzremote.ActivityPlayQueue"
+            android:parentActivityName=".ActivityMain">
             <!-- The meta-data tag is required if you support API level 15 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".ActivityMain" />
         </activity>
     </application>
 
