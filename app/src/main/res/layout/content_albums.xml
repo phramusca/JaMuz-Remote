@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:weightSum="1"
     android:background="@color/textColor"
-    tools:showIn="@layout/activity_queue">
+    tools:showIn="@layout/activity_albums">
 
     <GridLayout
         android:layout_width="match_parent"
@@ -14,7 +14,8 @@
         android:background="@color/colorPrimaryDark"
         android:alpha="0.9">
 
-        <Button android:id="@+id/button_exit_queue"
+        <Button
+            android:id="@+id/button_exit_albums"
             android:layout_row="0"
             android:layout_column="0"
             android:layout_width="45dp"
@@ -22,7 +23,7 @@
             android:background="@drawable/ic_button_back"/>
 
         <TextView
-            android:text="@string/play_queue"
+            android:text="@string/best_albums"
             android:layout_row="0"
             android:layout_column="1"
             android:textColor="@color/textColor"
@@ -34,7 +35,7 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/list_queue">
+        android:id="@+id/list_albums">
     </ListView>
 
 </LinearLayout>

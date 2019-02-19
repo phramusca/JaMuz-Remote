@@ -21,14 +21,14 @@ import java.util.List;
  * Created by raph on 03/03/18.
  */
 
-public class TrackAdapter extends BaseAdapter {
+public class AdapterAbstract extends BaseAdapter {
 
     private Context mContext;
-    private List<Track> tracks;
+    List<Track> tracks;
     private LayoutInflater mInflater;
     private int positionPlaying;
 
-    TrackAdapter(Context context, List<Track> tracks, int positionPlaying) {
+    AdapterAbstract(Context context, List<Track> tracks, int positionPlaying) {
         mContext = context;
         this.tracks = tracks;
         mInflater = LayoutInflater.from(context);
@@ -52,6 +52,14 @@ public class TrackAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        return getLayout(position, convertView, parent,
+                tracks.get(position).getArtist(),
+                tracks.get(position).getAlbum(),
+                tracks.get(position).getTitle());
+    }
+
+    LinearLayout getLayout(int position, View convertView, ViewGroup parent,
+                           String line1, String line2, String line3) {
         LinearLayout layoutItem;
         if (convertView == null) {
             layoutItem = (LinearLayout) mInflater.inflate(R.layout.queue_item, parent, false);
@@ -59,13 +67,13 @@ public class TrackAdapter extends BaseAdapter {
             layoutItem = (LinearLayout) convertView;
         }
 
-        TextView tv_artist = layoutItem.findViewById(R.id.tv_artist);
-        TextView tv_album = layoutItem.findViewById(R.id.tv_album);
-        TextView tv_title = layoutItem.findViewById(R.id.tv_title);
+        TextView item_line1 = layoutItem.findViewById(R.id.item_line1);
+        TextView item_line2 = layoutItem.findViewById(R.id.item_line2);
+        TextView item_line3 = layoutItem.findViewById(R.id.item_line3);
 
-        tv_artist.setText(tracks.get(position).getArtist());
-        tv_album.setText(tracks.get(position).getAlbum());
-        tv_title.setText(tracks.get(position).getTitle());
+        item_line1.setText(line1);
+        item_line2.setText(line2);
+        item_line3.setText(line3);
 
         //TODO: Make a Repo in ActivityPlayQueue to speed even further
         //Or make it global as for Remote

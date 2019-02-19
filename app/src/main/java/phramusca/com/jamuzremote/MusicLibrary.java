@@ -626,4 +626,30 @@ public class MusicLibrary {
         }
         return false;
     }
+
+    synchronized List<Track> getAlbums() {
+        List<Track> tracks = new ArrayList<>();
+        Cursor cursor = null;
+        try {
+            String query = "SELECT round(avg(rating), 0) AS rating, " +
+                        "group_concat(distinct artist) AS artist, " +
+                        "group_concat(distinct genre) AS genre, " +
+                        "count(idFileRemote) AS nbTracks, * " +
+                        "FROM (SELECT * from tracks GROUP BY album)\n" +
+                        "GROUP BY artist \n" +
+                        "order by rating DESC, nbTracks DESC, album, artist" +
+                        " LIMIT 50";
+            Log.i(TAG, query);
+            cursor = db.rawQuery(query, new String[] { });
+            tracks = getTracks(cursor);
+            Log.i(TAG, "getAlbums(): "+tracks.size()+"//"+cursor.getCount());
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "getAlbums()", ex);
+        } finally {
+            if(cursor!=null) {
+                cursor.close();
+            }
+        }
+        return tracks;
+    }
 }
