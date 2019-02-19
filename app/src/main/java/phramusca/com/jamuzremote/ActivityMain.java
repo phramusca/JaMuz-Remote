@@ -125,6 +125,7 @@ public class ActivityMain extends AppCompatActivity {
 
     private static final int SPEECH_REQUEST_CODE = 0;
     private static final int QUEUE_REQUEST_CODE = 1;
+    private static final int ALBUMS_REQUEST_CODE = 2;
     private static final int QR_REQUEST_CODE = 49374;
 
     // GUI elements
@@ -643,6 +644,16 @@ public class ActivityMain extends AppCompatActivity {
             intent.putExtra("queueArrayPosition", playQueueRelative.getPosition());
             intent.putExtra("queueArrayOffset", playQueueRelative.getOffset());
             startActivityForResult(intent, QUEUE_REQUEST_CODE);
+        });
+
+        Button button_albums = (Button) findViewById(R.id.button_albums);
+        button_albums.setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), ActivityAlbums.class);
+            PlayQueueRelative albumsRelativeList = new PlayQueueRelative((ArrayList<Track>) HelperLibrary.musicLibrary.getAlbums());
+            intent.putExtra("albumArrayList", albumsRelativeList.getTracks());
+            intent.putExtra("albumArrayPosition", albumsRelativeList.getPosition());
+            intent.putExtra("albumArrayOffset", albumsRelativeList.getOffset());
+            startActivityForResult(intent, ALBUMS_REQUEST_CODE);
         });
 
         Button button_speech = (Button) findViewById(R.id.button_speech);
@@ -1330,7 +1341,10 @@ public class ActivityMain extends AppCompatActivity {
                 playNext();
             }
 
-        } else if (requestCode == QR_REQUEST_CODE && resultCode == RESULT_OK) {
+        } else if (requestCode == ALBUMS_REQUEST_CODE && resultCode == RESULT_OK) {
+            //FIXME !!!!
+        }
+        else if (requestCode == QR_REQUEST_CODE && resultCode == RESULT_OK) {
             //https://www.simplifiedcoding.net/android-qr-code-scanner-tutorial/
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
             if (result == null || result.getContents() == null) {

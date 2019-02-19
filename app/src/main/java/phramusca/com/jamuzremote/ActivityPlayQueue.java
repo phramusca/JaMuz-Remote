@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class ActivityPlayQueue extends AppCompatActivity {
 
-    TrackAdapter trackAdapter;
+    AdapterTrack trackAdapter;
     SwipeActionAdapter trackSwipeAdapter;
     private int offset=0;
 
@@ -36,7 +36,7 @@ public class ActivityPlayQueue extends AppCompatActivity {
             offset = intent.getIntExtra("queueArrayOffset", 0);
             position = position - offset;
             ListView listView = (ListView) findViewById(R.id.list_queue);
-            trackAdapter = new TrackAdapter(this, queue, position);
+            trackAdapter = new AdapterTrack(this, queue, position);
             trackSwipeAdapter = new SwipeActionAdapter(trackAdapter);
             trackSwipeAdapter.setListView(listView);
             listView.setAdapter(trackSwipeAdapter);

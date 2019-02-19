@@ -55,4 +55,6 @@
     <string name="confirmNo">OOOOPS NON !</string>
     <string name="confirmPlayNow">Jouer maintenant ?</string>
     <string name="confirmRemove">Enlever ?</string>
+    <string name="best_albums">Meilleurs Albums</string>
+    <string name="play_queue">File d\'Attente</string>
 </resources>

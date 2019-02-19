@@ -69,6 +69,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ActivityMain" />
         </activity>
+        <activity android:name="phramusca.com.jamuzremote.ActivityAlbums"
+            android:parentActivityName=".ActivityMain">
+            <!-- The meta-data tag is required if you support API level 15 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ActivityMain" />
+        </activity>
     </application>
 
 </manifest>
