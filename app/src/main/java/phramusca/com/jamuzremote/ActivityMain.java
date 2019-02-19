@@ -99,9 +99,9 @@ import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
 // TODO: This class is far too big: move some out
 // FIXME: Move audio to a service
 // Why not using the standard android player by the way ? (less control for replaygain ?)
-public class MainActivity extends AppCompatActivity {
+public class ActivityMain extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getName();
+    private static final String TAG = ActivityMain.class.getName();
     private SharedPreferences preferences;
     private HelperToast helperToast = new HelperToast(this);
     private ClientRemote clientRemote;
@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG, "MainActivity onCreate");
+        Log.i(TAG, "ActivityMain onCreate");
         setContentView(R.layout.activity_main);
 
         textToSpeech =new TextToSpeech(getApplicationContext(), status -> {
@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v)
             {
                 DirectoryChooserDialog directoryChooserDialog =
-                        new DirectoryChooserDialog(MainActivity.this,
+                        new DirectoryChooserDialog(ActivityMain.this,
                                 chosenDir -> {
                                     textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
                                             .concat(chosenDir)
@@ -546,9 +546,9 @@ public class MainActivity extends AppCompatActivity {
 
         Button button_new = (Button) findViewById(R.id.button_new);
         button_new.setOnClickListener(v -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMain.this);
             builder.setTitle(R.string.playlistName);
-            final EditText input = new EditText(MainActivity.this);
+            final EditText input = new EditText(ActivityMain.this);
             input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
             builder.setView(input);
             builder.setPositiveButton(R.string.ok, (dialog, which) -> {
@@ -616,7 +616,7 @@ public class MainActivity extends AppCompatActivity {
         Button button_delete = (Button) findViewById(R.id.button_delete);
         button_delete.setOnClickListener(v -> {
             if(localSelectedPlaylist!=null) {
-                new AlertDialog.Builder(MainActivity.this)
+                new AlertDialog.Builder(ActivityMain.this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle(R.string.deletePlaylist)
                 .setMessage(getString(R.string.sureDelete) +
@@ -637,7 +637,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button button_queue = (Button) findViewById(R.id.button_queue);
         button_queue.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), PlayQueueActivity.class);
+            Intent intent = new Intent(getApplicationContext(), ActivityPlayQueue.class);
             PlayQueueRelative playQueueRelative = PlayQueue.getActivityList();
             intent.putExtra("queueArrayList", playQueueRelative.getTracks());
             intent.putExtra("queueArrayPosition", playQueueRelative.getPosition());
@@ -809,7 +809,7 @@ public class MainActivity extends AppCompatActivity {
             port=2013;
         }
         return new ClientInfo(address, port,
-                Settings.Secure.getString(MainActivity.this.getContentResolver(), Settings.Secure.ANDROID_ID),
+                Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID),
                 "tata", isRemote,
                 "jamuz", getAppDataPath().getAbsolutePath());
     }
@@ -1143,7 +1143,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        Log.i(TAG, "MainActivity onPause");
+        Log.i(TAG, "ActivityMain onPause");
         wasRemoteConnected=isRemoteConnected();
         stopRemote();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
@@ -1172,7 +1172,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i(TAG, "MainActivity onResume");
+        Log.i(TAG, "ActivityMain onResume");
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                         new IntentFilter("ServiceBase"));
@@ -1347,7 +1347,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "MainActivity onDestroy");
+        Log.i(TAG, "ActivityMain onDestroy");
         stopRemote();
 
         //Better unregister as it does not trigger anyway + raises exceptions if not
@@ -1768,7 +1768,7 @@ public class MainActivity extends AppCompatActivity {
                     "<i>- <u>"+getString(R.string.permissionMsg_8)+"</u></i> "+getString(R.string.permissionMsg_9)
                     +"</html>";
 
-            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+            AlertDialog alertDialog = new AlertDialog.Builder(ActivityMain.this).create();
             alertDialog.setTitle(getString(R.string.warning));
             alertDialog.setMessage(Html.fromHtml(msgStr));
             alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
@@ -2261,7 +2261,7 @@ public class MainActivity extends AppCompatActivity {
                             playlists.add(playList);
                         }
                         ArrayAdapter<Playlist> arrayAdapter =
-                                new ArrayAdapter<>(MainActivity.this,
+                                new ArrayAdapter<>(ActivityMain.this,
                                         R.layout.spinner_item, playlists);
                         setupPlaylistSpinner(arrayAdapter, temp);
                         enablePlaylistEdit(false);
@@ -2329,7 +2329,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Log.i(TAG, "MainActivity onCreateOptionsMenu");
+        Log.i(TAG, "ActivityMain onCreateOptionsMenu");
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
@@ -2340,7 +2340,7 @@ public class MainActivity extends AppCompatActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        Log.i(TAG, "MainActivity onOptionsItemSelected");
+        Log.i(TAG, "ActivityMain onOptionsItemSelected");
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -2353,7 +2353,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Log.i(TAG, "MainActivity onBackPressed");
+        Log.i(TAG, "ActivityMain onBackPressed");
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle("Closing JaMuz")

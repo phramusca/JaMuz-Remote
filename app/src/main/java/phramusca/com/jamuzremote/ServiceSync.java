@@ -331,7 +331,7 @@ public class ServiceSync extends ServiceBase {
 
     private void scanAndDeleteUnwantedInThread(final File path) {
         ProcessAbstract processAbstract = new ProcessAbstract(
-                "Thread.MainActivity.ScanUnWantedRepoSync") {
+                "Thread.ActivityMain.ScanUnWantedRepoSync") {
             public void run() {
                 try {
                     if(!path.getAbsolutePath().equals("/")) {
@@ -345,7 +345,7 @@ public class ServiceSync extends ServiceBase {
                                 10000));
                     }
                 } catch (InterruptedException e) {
-                    Log.w(TAG, "Thread.MainActivity.ScanUnWantedRepoSync InterruptedException");
+                    Log.w(TAG, "Thread.ActivityMain.ScanUnWantedRepoSync InterruptedException");
                 }
             }
 

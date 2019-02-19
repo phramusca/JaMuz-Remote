@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import static phramusca.com.jamuzremote.MainActivity.getAppDataPath;
+import static phramusca.com.jamuzremote.ActivityMain.getAppDataPath;
 
 public class ClientReception extends ProcessAbstract {
 

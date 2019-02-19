@@ -47,7 +47,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     //}
 
     MusicLibraryDb(final Context context) {
-        super(context, MainActivity.musicLibraryDbFile.getAbsolutePath(), null, DB_VERSION);
+        super(context, ActivityMain.musicLibraryDbFile.getAbsolutePath(), null, DB_VERSION);
     }
 
     @Override
