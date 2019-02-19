@@ -225,34 +225,34 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        layoutTags = (FlexboxLayout) findViewById(R.id.panel_tags);
-        layoutTagsPlaylist = (FlexboxLayout) findViewById(R.id.panel_tags_playlist);
-        layoutGenrePlaylist = (FlexboxLayout) findViewById(R.id.panel_genre_playlist);
-        layoutTagsPlaylistLayout = (LinearLayout) findViewById(R.id.panel_tags_playlist_layout);
-        layoutRatingPlaylistLayout = (LinearLayout) findViewById(R.id.panel_rating_playlist_layout);
-        layoutOrderPlaylistLayout = (LinearLayout) findViewById(R.id.panel_order_playlist_layout);
+        layoutTags = findViewById(R.id.panel_tags);
+        layoutTagsPlaylist = findViewById(R.id.panel_tags_playlist);
+        layoutGenrePlaylist = findViewById(R.id.panel_genre_playlist);
+        layoutTagsPlaylistLayout = findViewById(R.id.panel_tags_playlist_layout);
+        layoutRatingPlaylistLayout = findViewById(R.id.panel_rating_playlist_layout);
+        layoutOrderPlaylistLayout = findViewById(R.id.panel_order_playlist_layout);
 
-        playListOrderRadio = (RadioGroup) findViewById(R.id.playlist_order_radio);
+        playListOrderRadio = findViewById(R.id.playlist_order_radio);
 
-        layoutGenrePlaylistLayout = (LinearLayout) findViewById(R.id.panel_genre_playlist_layout);
-        layoutAttributes = (LinearLayout) findViewById(R.id.panel_attributes);
-        layoutPlaylist = (LinearLayout) findViewById(R.id.panel_playlist);
+        layoutGenrePlaylistLayout = findViewById(R.id.panel_genre_playlist_layout);
+        layoutAttributes = findViewById(R.id.panel_attributes);
+        layoutPlaylist = findViewById(R.id.panel_playlist);
 
-        layoutPlaylistToolBar = (GridLayout) findViewById(R.id.panel_playlist_toolbar);
-        layoutPlaylistEditBar = (LinearLayout) findViewById(R.id.panel_playlist_editbar);
+        layoutPlaylistToolBar = findViewById(R.id.panel_playlist_toolbar);
+        layoutPlaylistEditBar = findViewById(R.id.panel_playlist_editbar);
 
-        layoutControls = (LinearLayout) findViewById(R.id.panel_controls);
-        layoutOptions = (GridLayout) findViewById(R.id.panel_options);
+        layoutControls = findViewById(R.id.panel_controls);
+        layoutOptions = findViewById(R.id.panel_options);
 
-        textViewFileInfo = (TextView) findViewById(R.id.textFileInfo);
+        textViewFileInfo = findViewById(R.id.textFileInfo);
 
-        editTextConnectInfo = (EditText) findViewById(R.id.editText_info);
+        editTextConnectInfo = findViewById(R.id.editText_info);
         editTextConnectInfo.setOnTouchListener(dimOnTouchListener);
 
         preferences = getPreferences(MODE_PRIVATE);
         editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.11:2013"));
 
-        buttonRemote = (Button) findViewById(R.id.button_connect);
+        buttonRemote = findViewById(R.id.button_connect);
         buttonRemote.setOnClickListener(v -> {
             dimOn();
             buttonRemote.setEnabled(false);
@@ -281,7 +281,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        buttonSync = (Button) findViewById(R.id.button_sync);
+        buttonSync = findViewById(R.id.button_sync);
         buttonSync.setOnClickListener(v -> {
             dimOn();
             buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
@@ -306,17 +306,17 @@ public class ActivityMain extends AppCompatActivity {
 
         getFromQRcode(getIntent().getDataString());
 
-        textViewPath = (TextView) findViewById(R.id.textViewPath);
+        textViewPath = findViewById(R.id.textViewPath);
 
-        textViewPlaylist = (TextView) findViewById(R.id.textViewPlaylist);
+        textViewPlaylist = findViewById(R.id.textViewPlaylist);
 
-        Button buttonSaveConnectionString = (Button) findViewById(R.id.button_save_connectionString);
+        Button buttonSaveConnectionString = findViewById(R.id.button_save_connectionString);
         buttonSaveConnectionString.setOnClickListener(view ->
                 setConfig("connectionString", editTextConnectInfo.getText().toString())
         );
 
         qrScan = new IntentIntegrator(this);
-        Button button_scan_QR = (Button) findViewById(R.id.button_scan_QR);
+        Button button_scan_QR = findViewById(R.id.button_scan_QR);
         button_scan_QR.setOnClickListener(view ->
                 qrScan.initiateScan()
         );
@@ -328,7 +328,7 @@ public class ActivityMain extends AppCompatActivity {
         textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
                 .concat(display)
                 .concat("</html>"))));
-        Button dirChooserButton = (Button) findViewById(R.id.button_browse);
+        Button dirChooserButton = findViewById(R.id.button_browse);
         dirChooserButton.setOnClickListener(new View.OnClickListener()
         {
             private boolean m_newFolderEnabled = false;
@@ -349,7 +349,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        ratingBar = (RatingBar) findViewById(R.id.ratingBar);
+        ratingBar = findViewById(R.id.ratingBar);
         ratingBar.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
             if(fromUser) { //as it is also set when server sends file info (and it can be 0)
                 dimOn();
@@ -357,7 +357,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        ratingBarPlaylist = (RatingBar) findViewById(R.id.ratingBarPlaylist);
+        ratingBarPlaylist = findViewById(R.id.ratingBarPlaylist);
         ratingBarPlaylist.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
             if(fromUser) {
                 dimOn();
@@ -370,7 +370,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        Button buttonClearRating = (Button) findViewById(R.id.button_clear_rating);
+        Button buttonClearRating = findViewById(R.id.button_clear_rating);
         buttonClearRating.setOnClickListener(v -> {
             ratingBarPlaylist.setRating(0F);
             if(localSelectedPlaylist!=null) {
@@ -379,7 +379,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        buttonRatingOperator = (Button) findViewById(R.id.button_rating_operator);
+        buttonRatingOperator = findViewById(R.id.button_rating_operator);
         buttonRatingOperator.setOnClickListener(v -> {
             if(localSelectedPlaylist!=null) {
                 buttonRatingOperator.setText(localSelectedPlaylist.setRatingOperator());
@@ -390,7 +390,7 @@ public class ActivityMain extends AppCompatActivity {
         playListLimitUnitArrayAdapter = ArrayAdapter.createFromResource(this,
                 R.array.limitUnits, android.R.layout.simple_spinner_item);
         playListLimitUnitArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerPlaylistLimitUnit = (Spinner) findViewById(R.id.spinner_playlist_limit_unit);
+        spinnerPlaylistLimitUnit = findViewById(R.id.spinner_playlist_limit_unit);
         spinnerPlaylistLimitUnit.setAdapter(playListLimitUnitArrayAdapter);
         spinnerPlaylistLimitUnit.setOnItemSelectedListener(spinnerLimitUnitListener);
         spinnerPlaylistLimitUnit.setOnTouchListener(dimOnTouchListener);
@@ -402,15 +402,15 @@ public class ActivityMain extends AppCompatActivity {
         playListLimitValueArrayAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_item, limitValues);
         playListLimitValueArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerPlaylistLimitValue = (Spinner) findViewById(R.id.numberPicker_playlist_limit_value);
+        spinnerPlaylistLimitValue = findViewById(R.id.numberPicker_playlist_limit_value);
         spinnerPlaylistLimitValue.setAdapter(playListLimitValueArrayAdapter);
         spinnerPlaylistLimitValue.setOnItemSelectedListener(spinnerLimitValueListener);
         spinnerPlaylistLimitValue.setOnTouchListener(dimOnTouchListener);
 
-        seekBarPosition = (SeekBar) findViewById(R.id.seekBar);
+        seekBarPosition = findViewById(R.id.seekBar);
         seekBarPosition.setEnabled(false);
 
-        SeekBar seekBarReplayGain = (SeekBar) findViewById(R.id.seekBarReplayGain);
+        SeekBar seekBarReplayGain = findViewById(R.id.seekBarReplayGain);
         seekBarReplayGain.setProgress(70);
         seekBarReplayGain.setMax(100); //default, but still
         seekBarReplayGain.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -430,11 +430,11 @@ public class ActivityMain extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        spinnerPlaylist = (Spinner) findViewById(R.id.spinner_playlist);
+        spinnerPlaylist = findViewById(R.id.spinner_playlist);
         spinnerPlaylist.setOnItemSelectedListener(spinnerPlaylistListener);
         spinnerPlaylist.setOnTouchListener(dimOnTouchListener);
 
-        spinnerGenre = (Spinner) findViewById(R.id.spinner_genre);
+        spinnerGenre = findViewById(R.id.spinner_genre);
         spinnerGenre.setOnItemSelectedListener(spinnerGenreListener);
         spinnerGenre.setOnTouchListener(dimOnTouchListener);
 
@@ -447,16 +447,16 @@ public class ActivityMain extends AppCompatActivity {
         setupButton(R.id.button_volUp, "volUp");
         setupButton(R.id.button_volDown, "volDown");
 
-        toggleButtonDimMode = (ToggleButton) findViewById(R.id.button_dim_mode);
+        toggleButtonDimMode = findViewById(R.id.button_dim_mode);
         toggleButtonDimMode.setOnClickListener(v -> setDimMode(toggleButtonDimMode.isChecked()));
 
-        toggleButtonControls = (ToggleButton) findViewById(R.id.button_controls_toggle);
+        toggleButtonControls = findViewById(R.id.button_controls_toggle);
         toggleButtonControls.setOnClickListener(v -> {
             dimOn();
             toggle(layoutControls, !toggleButtonControls.isChecked());
         });
 
-        toggleButtonTagsPanel = (ToggleButton) findViewById(R.id.button_tags_panel_toggle);
+        toggleButtonTagsPanel = findViewById(R.id.button_tags_panel_toggle);
         toggleButtonTagsPanel.setOnClickListener(v -> {
             dimOn();
             toggle(layoutTagsPlaylistLayout, !toggleButtonTagsPanel.isChecked());
@@ -467,7 +467,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        toggleButtonRatingPanel = (ToggleButton) findViewById(R.id.button_rating_layout);
+        toggleButtonRatingPanel = findViewById(R.id.button_rating_layout);
         toggleButtonRatingPanel.setOnClickListener(v -> {
             dimOn();
             toggle(layoutRatingPlaylistLayout, !toggleButtonRatingPanel.isChecked());
@@ -478,7 +478,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        toggleButtonOrderPanel = (ToggleButton) findViewById(R.id.button_order_panel_toggle);
+        toggleButtonOrderPanel = findViewById(R.id.button_order_panel_toggle);
         toggleButtonOrderPanel.setOnClickListener(v -> {
             dimOn();
             toggle(layoutOrderPlaylistLayout, !toggleButtonOrderPanel.isChecked());
@@ -489,7 +489,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        toggleButtonGenresPanel = (ToggleButton) findViewById(R.id.button_genres_panel_toggle);
+        toggleButtonGenresPanel = findViewById(R.id.button_genres_panel_toggle);
         toggleButtonGenresPanel.setOnClickListener(v -> {
             dimOn();
             toggle(layoutGenrePlaylistLayout, !toggleButtonGenresPanel.isChecked());
@@ -500,7 +500,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        toggleButtonEditTags = (ToggleButton) findViewById(R.id.button_edit_toggle);
+        toggleButtonEditTags = findViewById(R.id.button_edit_toggle);
         toggleButtonEditTags.setOnClickListener(v -> {
             dimOn();
             toggle(layoutAttributes, !toggleButtonEditTags.isChecked());
@@ -515,7 +515,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        toggleButtonPlaylist = (ToggleButton) findViewById(R.id.button_playlist_toggle);
+        toggleButtonPlaylist = findViewById(R.id.button_playlist_toggle);
         toggleButtonPlaylist.setOnClickListener(v -> {
             dimOn();
             toggle(layoutPlaylist, !toggleButtonPlaylist.isChecked());
@@ -530,7 +530,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        toggleButtonOptions = (ToggleButton) findViewById(R.id.button_connect_toggle);
+        toggleButtonOptions = findViewById(R.id.button_connect_toggle);
         toggleButtonOptions.setOnClickListener(v -> {
             dimOn();
             toggle(layoutOptions, !toggleButtonOptions.isChecked());
@@ -545,7 +545,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        Button button_new = (Button) findViewById(R.id.button_new);
+        Button button_new = findViewById(R.id.button_new);
         button_new.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMain.this);
             builder.setTitle(R.string.playlistName);
@@ -574,7 +574,7 @@ public class ActivityMain extends AppCompatActivity {
             builder.show();
         });
 
-        button_save = (Button) findViewById(R.id.button_save);
+        button_save = findViewById(R.id.button_save);
         button_save.setOnClickListener(v -> {
             if(localSelectedPlaylist!=null) {
                 StringBuilder msg= new StringBuilder().append(getString(R.string.playlist))
@@ -593,7 +593,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        Button button_restore = (Button) findViewById(R.id.button_restore);
+        Button button_restore = findViewById(R.id.button_restore);
         button_restore.setOnClickListener(v -> {
             if(localSelectedPlaylist!=null) {
                 StringBuilder msg= new StringBuilder().append(getString(R.string.playlist))
@@ -614,7 +614,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        Button button_delete = (Button) findViewById(R.id.button_delete);
+        Button button_delete = findViewById(R.id.button_delete);
         button_delete.setOnClickListener(v -> {
             if(localSelectedPlaylist!=null) {
                 new AlertDialog.Builder(ActivityMain.this)
@@ -636,7 +636,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        Button button_queue = (Button) findViewById(R.id.button_queue);
+        Button button_queue = findViewById(R.id.button_queue);
         button_queue.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), ActivityPlayQueue.class);
             PlayQueueRelative playQueueRelative = PlayQueue.getActivityList();
@@ -646,7 +646,7 @@ public class ActivityMain extends AppCompatActivity {
             startActivityForResult(intent, QUEUE_REQUEST_CODE);
         });
 
-        Button button_albums = (Button) findViewById(R.id.button_albums);
+        Button button_albums = findViewById(R.id.button_albums);
         button_albums.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), ActivityAlbums.class);
             PlayQueueRelative albumsRelativeList = new PlayQueueRelative((ArrayList<Track>) HelperLibrary.musicLibrary.getAlbums());
@@ -656,13 +656,13 @@ public class ActivityMain extends AppCompatActivity {
             startActivityForResult(intent, ALBUMS_REQUEST_CODE);
         });
 
-        Button button_speech = (Button) findViewById(R.id.button_speech);
+        Button button_speech = findViewById(R.id.button_speech);
         button_speech.setOnClickListener(v -> speechRecognizer());
 
-        imageViewCover = (ImageView) findViewById(R.id.imageView);
-        layoutMain = (LinearLayout) findViewById(R.id.panel_main);
+        imageViewCover = findViewById(R.id.imageView);
+        layoutMain = findViewById(R.id.panel_main);
 
-        LinearLayout layoutTrackInfo = (LinearLayout) findViewById(R.id.trackInfo);
+        LinearLayout layoutTrackInfo = findViewById(R.id.trackInfo);
         layoutTrackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
             @Override
             public void onSwipeTop() {
@@ -1866,7 +1866,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void setupButton(final int buttonName, final String msg) {
-        Button button = (Button) findViewById(buttonName);
+        Button button = findViewById(buttonName);
         button.setOnClickListener(v -> doAction(msg));
     }
 
