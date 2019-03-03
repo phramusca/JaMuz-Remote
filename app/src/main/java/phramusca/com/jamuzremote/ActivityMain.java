@@ -185,6 +185,11 @@ public class ActivityMain extends AppCompatActivity {
         Log.i(TAG, "ActivityMain onCreate");
         setContentView(R.layout.activity_main);
 
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        BroadcastReceiver mReceiver = new ScreenReceiver();
+        registerReceiver(mReceiver, filter);
+
         textToSpeech =new TextToSpeech(getApplicationContext(), status -> {
             if(status != TextToSpeech.ERROR) {
                 textToSpeech.setLanguage(textToSpeech.getDefaultVoice().getLocale());
@@ -1561,11 +1566,14 @@ public class ActivityMain extends AppCompatActivity {
                 || displayedTrack.getRating() < 1 //no rating
                 || displayedTrack.getTags(false).size() < 1)  //no user tags
         {
-            //FIXME: Not if screen is off (replace if(toggleButtonDimMode.isChecked() by if(SCREEN_ON_DIMMED) )
-            if(toggleButtonDimMode.isChecked() && !toggleButtonEditTags.isChecked()) {
-                speechPostAction = SpeechPostAction.ASK_WITH_DELAY;
+            if(ScreenReceiver.isScreenOn
+                    && toggleButtonDimMode.isChecked()
+                    && !isDimOn) {
+                if(!toggleButtonEditTags.isChecked()) {
+                    speechPostAction = SpeechPostAction.ASK_WITH_DELAY;
+                }
+                speakAnd(getDisplayedTrackStatus(), speechPostAction);
             }
-            speakAnd(getDisplayedTrackStatus(), speechPostAction);
         }
     }
 
