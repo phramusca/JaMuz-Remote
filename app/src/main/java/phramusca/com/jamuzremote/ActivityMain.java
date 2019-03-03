@@ -206,9 +206,7 @@ public class ActivityMain extends AppCompatActivity {
                         new Thread() {
                             public void run() {
                                 try {
-                                    if(speechPostAction.equals(SpeechPostAction.ASK_WITH_DELAY)) {
-                                        Thread.sleep(3 * 1000);
-                                    }
+                                    Thread.sleep(3 * 1000);
                                     speechRecognizer();
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
@@ -989,6 +987,10 @@ public class ActivityMain extends AppCompatActivity {
         public void onItemSelected(AdapterView<?> parent, View view,
         int pos, long id) {
             if (spinnerPlaylistSend) {
+                //FIXME !!! This is triggered weirdly, when listAlbums is involved, it seems at least
+                //so queue is refreshed everytime. It should not
+                //refresh queue unless value is different
+                // but first it should not be set when having focus (if possible)
                 Playlist playlist = (Playlist) parent.getItemAtPosition(pos);
                 applyPlaylist(playlist, false);
             }
@@ -1559,6 +1561,7 @@ public class ActivityMain extends AppCompatActivity {
                 || displayedTrack.getRating() < 1 //no rating
                 || displayedTrack.getTags(false).size() < 1)  //no user tags
         {
+            //FIXME: Not if screen is off (replace if(toggleButtonDimMode.isChecked() by if(SCREEN_ON_DIMMED) )
             if(toggleButtonDimMode.isChecked() && !toggleButtonEditTags.isChecked()) {
                 speechPostAction = SpeechPostAction.ASK_WITH_DELAY;
             }
@@ -2244,8 +2247,16 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void displayImage(byte[] art) {
-        if( art != null ){
-            displayImage( BitmapFactory.decodeByteArray(art, 0, art.length));
+        Bitmap bitmap = null;
+        if(art != null ){
+            try {
+                bitmap = BitmapFactory.decodeByteArray(art, 0, art.length);
+            } catch (OutOfMemoryError ex) {
+                helperToast.toastLong("OutOfMemoryError reading cover !");
+            }
+        }
+        if(bitmap != null ){
+            displayImage( bitmap);
         } else {
             displayImage(HelperBitmap.getEmptyCover());
         }

@@ -152,9 +152,11 @@ public class ServiceSync extends ServiceBase {
                             newTracks.put(fileReceived.getIdFileServer(), fileReceived);
                         }
                         helperNotification.notifyBar(notificationSync,
-                                "Checking if files are already on disk ... ");
+                                getString(R.string.syncCheckFilesOnDisk));
                         //FIXME: Display a progress bar as process can take some time
                         RepoSync.set(newTracks);
+                        /*helperNotification.notifyBar(notificationSync, "Checking files on disk", nbTotal, progress, false, true, true, "Big Text");
+                        */
                         scanAndDeleteUnwantedInThread(getAppDataPath);
                         requestNextFile();
                         break;
@@ -250,6 +252,28 @@ public class ServiceSync extends ServiceBase {
             }
         }
     }
+
+    //FIXME: For displaying check files on disk when receiving a new list to be retrieved
+  /*  private void notifyBar() {
+        int max = RepoSync.getTotalSize();
+        int remaining = RepoSync.getRemainingSize();
+        int progress = max- remaining;
+
+        String bigText = "-"+ remaining + "/" + max
+                + "\n-" + StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false)
+                + "\n" + (fileInfoReception==null?"":fileInfoReception.getRelativeFullPath());
+
+        String msg = text
+                +(fileInfoReception==null
+                ?"":
+                (" "+StringManager.humanReadableByteCount(fileInfoReception.getSize(), false))
+        )
+                +bench.getLast();
+
+        helperNotification.notifyBar(notificationSync, msg, max, progress, false,
+                true, true,
+                msg+"\n"+bigText);
+    }*/
 
     private void notifyBar(String text) {
         notifyBar(text, null);
