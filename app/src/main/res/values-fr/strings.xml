@@ -57,4 +57,5 @@
     <string name="confirmRemove">Enlever ?</string>
     <string name="best_albums">Meilleurs Albums</string>
     <string name="play_queue">File d\'Attente</string>
+    <string name="syncCheckFilesOnDisk">Vérification de la présence des fichiers sur le disque ...</string>
 </resources>
