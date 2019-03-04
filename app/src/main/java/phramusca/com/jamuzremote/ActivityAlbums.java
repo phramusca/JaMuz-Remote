@@ -42,10 +42,10 @@ public class ActivityAlbums extends AppCompatActivity {
             swipeActionAdapter.setListView(listView);
             listView.setAdapter(swipeActionAdapter);
             listView.setSelection(position);
-            swipeActionAdapter.addBackground(SwipeDirection.DIRECTION_FAR_LEFT,R.layout.row_bg_left_far)
-                    .addBackground(SwipeDirection.DIRECTION_NORMAL_LEFT,R.layout.row_bg_left)
-                    .addBackground(SwipeDirection.DIRECTION_FAR_RIGHT,R.layout.row_bg_right_far)
-                    .addBackground(SwipeDirection.DIRECTION_NORMAL_RIGHT,R.layout.row_bg_right);
+            swipeActionAdapter.addBackground(SwipeDirection.DIRECTION_FAR_LEFT,R.layout.queue_slide_play)
+                    .addBackground(SwipeDirection.DIRECTION_NORMAL_LEFT,R.layout.queue_slide_add)
+                    .addBackground(SwipeDirection.DIRECTION_FAR_RIGHT,R.layout.queue_slide_list)
+                    .addBackground(SwipeDirection.DIRECTION_NORMAL_RIGHT,R.layout.queue_slide_list);
             swipeActionAdapter.setSwipeActionListener(new SwipeActionAdapter.SwipeActionListener(){
                 @Override
                 public boolean hasActions(int position, SwipeDirection direction){
@@ -69,15 +69,16 @@ public class ActivityAlbums extends AppCompatActivity {
                         Track track = (Track) swipeActionAdapter.getItem(position);
                         switch (direction) {
                             case DIRECTION_FAR_LEFT:
-                                //FIXME !!!!
+                                //FIXME !!!! Insert next, but in PlayQueue AND play
                                 break;
                             case DIRECTION_NORMAL_LEFT:
+                                //FIXME !!!! Insert next, but in PlayQueue !
                                 trackAdapter.insertNext(position);
                                 break;
                             case DIRECTION_FAR_RIGHT:
-                                //FIXME !!!!
-                                break;
                             case DIRECTION_NORMAL_RIGHT:
+                                //FIXME !!!! Open list of album tracks in a new activity, to be made
+                                // Also, use same layout
                                 PlayQueue.moveDown(position+offset);
                                 trackAdapter.moveDown(position);
                                 break;

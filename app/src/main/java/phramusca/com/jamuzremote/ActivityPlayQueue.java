@@ -41,10 +41,10 @@ public class ActivityPlayQueue extends AppCompatActivity {
             trackSwipeAdapter.setListView(listView);
             listView.setAdapter(trackSwipeAdapter);
             listView.setSelection(position);
-            trackSwipeAdapter.addBackground(SwipeDirection.DIRECTION_FAR_LEFT,R.layout.row_bg_left_far)
-                    .addBackground(SwipeDirection.DIRECTION_NORMAL_LEFT,R.layout.row_bg_left)
-                    .addBackground(SwipeDirection.DIRECTION_FAR_RIGHT,R.layout.row_bg_right_far)
-                    .addBackground(SwipeDirection.DIRECTION_NORMAL_RIGHT,R.layout.row_bg_right);
+            trackSwipeAdapter.addBackground(SwipeDirection.DIRECTION_FAR_LEFT,R.layout.queue_slide_play)
+                    .addBackground(SwipeDirection.DIRECTION_NORMAL_LEFT,R.layout.queue_slide_add)
+                    .addBackground(SwipeDirection.DIRECTION_FAR_RIGHT,R.layout.queue_slide_remove)
+                    .addBackground(SwipeDirection.DIRECTION_NORMAL_RIGHT,R.layout.queue_slide_down);
             trackSwipeAdapter.setSwipeActionListener(new SwipeActionAdapter.SwipeActionListener(){
                 @Override
                 public boolean hasActions(int position, SwipeDirection direction){

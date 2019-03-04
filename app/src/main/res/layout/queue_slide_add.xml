@@ -1,16 +1,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="?android:listPreferredItemHeight"
     android:background="@android:color/holo_green_light"
+    android:gravity="center_vertical"
     android:paddingStart="50dp"
-    android:paddingEnd="0dp"
-    android:gravity="center_vertical">
+    android:paddingEnd="0dp"    >
 
     <ImageView
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:background="@drawable/ic_slide_next"
+        android:background="@drawable/ic_slide_queue_add"
         android:contentDescription="Queue Next"
         tools:ignore="HardcodedText" />
 </LinearLayout>
