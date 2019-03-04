@@ -63,6 +63,7 @@
     <string name="best_albums">Best Albums</string>
     <string name="play_queue">Play Queue</string>
     <string name="syncCheckFilesOnDisk">Checking if files are already on disk ...</string>
+    <string name="nbTracks">track(s).</string>
 
     <!--FIXME: Translate, knowing that it is also a keyword so need to split key and value-->
     <string-array name="limitUnits" tools:ignore="MissingTranslation">

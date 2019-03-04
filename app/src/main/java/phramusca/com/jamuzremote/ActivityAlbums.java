@@ -18,14 +18,13 @@ public class ActivityAlbums extends AppCompatActivity {
 
     //FIXME !!! Implement pagination for albums
     //https://github.com/codepath/android_guides/wiki/Endless-Scrolling-with-AdapterViews-and-RecyclerView
-    private int offset=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_albums);
 
-        Button button_exit_albums = (Button) findViewById(R.id.button_exit_albums);
+        Button button_exit_albums = findViewById(R.id.button_exit_albums);
         button_exit_albums.setOnClickListener(v -> onBackPressed());
 
         Intent intent = getIntent();
@@ -33,15 +32,11 @@ public class ActivityAlbums extends AppCompatActivity {
         final ArrayList<Track> albums = (ArrayList<Track>) intent.getSerializableExtra("albumArrayList");
 
         if(albums!=null) {
-            int position = intent.getIntExtra("albumArrayPosition", 0);
-            offset = intent.getIntExtra("albumArrayOffset", 0);
-            position = position - offset;
-            ListView listView = (ListView) findViewById(R.id.list_albums);
-            trackAdapter = new AdapterAlbum(this, albums, position);
+            ListView listView = findViewById(R.id.list_albums);
+            trackAdapter = new AdapterAlbum(this, albums, -1);
             swipeActionAdapter = new SwipeActionAdapter(trackAdapter);
             swipeActionAdapter.setListView(listView);
             listView.setAdapter(swipeActionAdapter);
-            listView.setSelection(position);
             swipeActionAdapter.addBackground(SwipeDirection.DIRECTION_FAR_LEFT,R.layout.queue_slide_play)
                     .addBackground(SwipeDirection.DIRECTION_NORMAL_LEFT,R.layout.queue_slide_add)
                     .addBackground(SwipeDirection.DIRECTION_FAR_RIGHT,R.layout.queue_slide_list)
@@ -69,18 +64,14 @@ public class ActivityAlbums extends AppCompatActivity {
                         Track track = (Track) swipeActionAdapter.getItem(position);
                         switch (direction) {
                             case DIRECTION_FAR_LEFT:
-                                //FIXME !!!! Insert next, but in PlayQueue AND play
+                                insertAndSetResult(track, true);
                                 break;
                             case DIRECTION_NORMAL_LEFT:
-                                //FIXME !!!! Insert next, but in PlayQueue !
-                                trackAdapter.insertNext(position);
+                                insertAndSetResult(track, false);
                                 break;
                             case DIRECTION_FAR_RIGHT:
                             case DIRECTION_NORMAL_RIGHT:
                                 //FIXME !!!! Open list of album tracks in a new activity, to be made
-                                // Also, use same layout
-                                PlayQueue.moveDown(position+offset);
-                                trackAdapter.moveDown(position);
                                 break;
                         }
                         swipeActionAdapter.notifyDataSetChanged();
@@ -101,4 +92,14 @@ public class ActivityAlbums extends AppCompatActivity {
         }
     }
 
+    private void insertAndSetResult(Track track, boolean playNext) {
+        Playlist playlist = new Playlist(track.getAlbum(), true);
+        playlist.setAlbum(track.getAlbum());
+        PlayQueue.insert(playlist);
+
+        Intent data = new Intent();
+        data.putExtra("playNext", playNext);
+        setResult(RESULT_OK, data);
+        finish();
+    }
 }

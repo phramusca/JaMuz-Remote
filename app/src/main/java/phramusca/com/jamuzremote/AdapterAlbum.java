@@ -21,6 +21,6 @@ public class AdapterAlbum extends AdapterAbstract {
         return getLayout(position, convertView, parent,
                 tracks.get(position).getAlbum(),
                 tracks.get(position).getArtist(),
-                tracks.get(position).getGenre());
+                tracks.get(position).getGenre() + " | " + tracks.get(position).getPlayCounter() + " " + parent.getContext().getString(R.string.nbTracks));
     }
 }

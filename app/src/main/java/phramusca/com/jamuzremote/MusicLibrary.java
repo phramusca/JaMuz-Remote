@@ -631,7 +631,8 @@ public class MusicLibrary {
         List<Track> tracks = new ArrayList<>();
         Cursor cursor = null;
         try {
-            String query = "SELECT round(avg(rating), 0) AS rating, " +
+            String query = "SELECT count(idFileRemote) AS playCounter, " +
+                        "round(avg(rating), 0) AS rating, " +
                         "group_concat(distinct artist) AS artist, " +
                         "group_concat(distinct genre) AS genre, " +
                         "count(idFileRemote) AS nbTracks, * " +
