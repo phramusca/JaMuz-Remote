@@ -2,15 +2,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="?android:listPreferredItemHeight"
-    android:background="@android:color/holo_green_dark"
-    android:paddingStart="60dp"
-    android:paddingEnd="0dp"
-    android:gravity="center_vertical">
+    android:background="@android:color/holo_blue_bright"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:paddingEnd="50dp"
+    android:paddingStart="0dp">
 
     <ImageView
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:background="@drawable/ic_slide_play"
-        android:contentDescription="Play now"
+        android:layout_gravity="end"
+        android:background="@drawable/ic_slide_queue_list"
+        android:contentDescription="Down"
         tools:ignore="HardcodedText" />
 </LinearLayout>

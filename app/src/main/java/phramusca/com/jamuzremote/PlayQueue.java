@@ -15,8 +15,8 @@ public class PlayQueue {
         //TODO: Implement pagination
         // https://stackoverflow.com/questions/16661662/how-to-implement-pagination-in-android-listview
         if(positionPlaying >-1) {
-            int indexStart = (positionPlaying -MAX_QUEUE_PREVIOUS)>0? positionPlaying -MAX_QUEUE_PREVIOUS:0;
-            int indexEnd   = (positionPlaying +MAX_QUEUE_NEXT)<queue.size()? positionPlaying +MAX_QUEUE_NEXT:queue.size()-1;
+            int indexStart = (positionPlaying - MAX_QUEUE_PREVIOUS) > 0 ? positionPlaying - MAX_QUEUE_PREVIOUS : 0;
+            int indexEnd   = (positionPlaying + MAX_QUEUE_NEXT) < queue.size()? positionPlaying + MAX_QUEUE_NEXT : queue.size() - 1;
             ArrayList<Track> list = new ArrayList<>(queue.subList(indexStart, indexEnd + 1));
             return new PlayQueueRelative(positionPlaying, indexStart, list);
         }
