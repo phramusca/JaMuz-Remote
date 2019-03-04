@@ -45,9 +45,9 @@ public class Playlist implements Comparable {
         return getTracks(limit, new ArrayList<>());
     }
 
-    public List<Track> getTracks(int limit, List<Integer> IDs) {
+    public List<Track> getTracks(int limit, List<Integer> excluded) {
         if(HelperLibrary.musicLibrary!=null) {
-            return HelperLibrary.musicLibrary.getTracks(getWhere(IDs), getHaving(), order.value, limit);
+            return HelperLibrary.musicLibrary.getTracks(getWhere(excluded), getHaving(), order.value, limit);
         }
         return new ArrayList<>();
     }
@@ -260,7 +260,7 @@ public class Playlist implements Comparable {
         modified=true;
     }
 
-    private String getWhere(List<Integer> IDs) {
+    private String getWhere(List<Integer> excluded) {
 
         String in = "WHERE status IN (\""+ Track.Status.ACK.name() + "\",\"" + Track.Status.NULL.name() + "\") " +
                 " AND rating "+getRatingString()+" ";
@@ -295,16 +295,16 @@ public class Playlist implements Comparable {
             in += "\n AND album LIKE \"%"+album+"%\" ";
         }
 
-        in+=getCSVlist(IDs);
+        in+=getCSVlist(excluded);
 
         return in;
     }
 
-    private static String getCSVlist(List<Integer> IDs) {
+    private static String getCSVlist(List<Integer> excluded) {
         StringBuilder builder = new StringBuilder();
-        if(IDs.size()>0) {
+        if(excluded.size()>0) {
             builder.append("\n AND tracks.idFileRemote NOT IN (");
-            for (int integer : IDs) {
+            for (int integer : excluded) {
                 builder.append(integer).append(",");
             }
             builder.deleteCharAt(builder.length() - 1).append(") ");

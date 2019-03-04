@@ -641,12 +641,7 @@ public class ActivityMain extends AppCompatActivity {
 
         Button button_queue = findViewById(R.id.button_queue);
         button_queue.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), ActivityPlayQueue.class);
-            PlayQueueRelative playQueueRelative = PlayQueue.getActivityList();
-            intent.putExtra("queueArrayList", playQueueRelative.getTracks());
-            intent.putExtra("queueArrayPosition", playQueueRelative.getPosition());
-            intent.putExtra("queueArrayOffset", playQueueRelative.getOffset());
-            startActivityForResult(intent, QUEUE_REQUEST_CODE);
+            displayQueue();
         });
 
         Button button_albums = findViewById(R.id.button_albums);
@@ -654,8 +649,6 @@ public class ActivityMain extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), ActivityAlbums.class);
             PlayQueueRelative albumsRelativeList = new PlayQueueRelative((ArrayList<Track>) HelperLibrary.musicLibrary.getAlbums());
             intent.putExtra("albumArrayList", albumsRelativeList.getTracks());
-            intent.putExtra("albumArrayPosition", albumsRelativeList.getPosition());
-            intent.putExtra("albumArrayOffset", albumsRelativeList.getOffset());
             startActivityForResult(intent, ALBUMS_REQUEST_CODE);
         });
 
@@ -787,6 +780,15 @@ public class ActivityMain extends AppCompatActivity {
         //toggle(layoutPlaylist, true);
 
         setDimMode(toggleButtonDimMode.isChecked());
+    }
+
+    private void displayQueue() {
+        Intent intent = new Intent(getApplicationContext(), ActivityPlayQueue.class);
+        PlayQueueRelative playQueueRelative = PlayQueue.getActivityList();
+        intent.putExtra("queueArrayList", playQueueRelative.getTracks());
+        intent.putExtra("queueArrayPosition", playQueueRelative.getPosition());
+        intent.putExtra("queueArrayOffset", playQueueRelative.getOffset());
+        startActivityForResult(intent, QUEUE_REQUEST_CODE);
     }
 
     private void setRating(int rating) {
@@ -1349,7 +1351,11 @@ public class ActivityMain extends AppCompatActivity {
             }
 
         } else if (requestCode == ALBUMS_REQUEST_CODE && resultCode == RESULT_OK) {
-            //FIXME !!!!
+            boolean playNext = data.getBooleanExtra("playNext", false);
+            if (playNext) {
+                playNext();
+            }
+            displayQueue();
         }
         else if (requestCode == QR_REQUEST_CODE && resultCode == RESULT_OK) {
             //https://www.simplifiedcoding.net/android-qr-code-scanner-tutorial/

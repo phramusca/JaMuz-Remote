@@ -71,12 +71,17 @@ public class PlayQueue {
         add(new ArrayList<>(), playlist);
     }
 
+    synchronized static void insert(Playlist playlist) {
+        List<Track> insertIntoQueue = playlist.getTracks();
+        queue.addAll(positionPlaying+1, insertIntoQueue);
+    }
+
     synchronized static void fill(Playlist playlist) {
-        List<Integer> queueIds = new ArrayList<>();
+        List<Integer> excluded = new ArrayList<>();
         for(Track track : queue) {
-            queueIds.add(track.getIdFileRemote());
+            excluded.add(track.getIdFileRemote());
         }
-        add(queueIds, playlist);
+        add(excluded, playlist);
     }
 
     private synchronized static void add(List<Integer> excluded, Playlist playlist) {
