@@ -631,15 +631,13 @@ public class MusicLibrary {
         List<Track> tracks = new ArrayList<>();
         Cursor cursor = null;
         try {
-            String query = "SELECT count(idFileRemote) AS playCounter, " +
-                        "round(avg(rating), 0) AS rating, " +
-                        "group_concat(distinct artist) AS artist, " +
-                        "group_concat(distinct genre) AS genre, " +
-                        "count(idFileRemote) AS nbTracks, * " +
-                        "FROM (SELECT * from tracks GROUP BY album)\n" +
-                        "GROUP BY artist \n" +
-                        "order by rating DESC, nbTracks DESC, album, artist" +
-                        " LIMIT 50";
+            String query = "SELECT count(idFileRemote) AS playCounter, \n" +
+                    "round(avg(rating), 0) AS rating, \n" +
+                    "group_concat(distinct genre) AS genre, \n" +
+                    "group_concat(distinct artist) AS artist, \n" +
+                    "album, idFileRemote, idFileServer, title, addedDate, lastPlayed, status, size, path \n" +
+                    "FROM tracks \n" +
+                    "GROUP BY album ORDER BY rating DESC, playCounter DESC, album, artist LIMIT 50";
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[] { });
             tracks = getTracks(cursor);
