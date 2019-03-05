@@ -292,7 +292,7 @@ public class Playlist implements Comparable {
         }
 
         if(album!=null) {
-            in += "\n AND album LIKE \"%"+album+"%\" ";
+            in += "\n AND album = \""+album+"\" ";
         }
 
         in+=getCSVlist(excluded);
