@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="phramusca.com.jamuzremote.ActivityAlbums">
+    tools:context="phramusca.com.jamuzremote.ActivityAlbumTracks">
 
-    <include layout="@layout/content_albums" />
+    <include layout="@layout/content_album_tracks" />
 
 </android.support.constraint.ConstraintLayout>

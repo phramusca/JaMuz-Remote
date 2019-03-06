@@ -370,6 +370,7 @@ public class MusicLibrary {
 
         int idFileRemote = c.getInt(c.getColumnIndex(COL_ID_REMOTE));
         int idFileServer = c.getInt(c.getColumnIndex(COL_ID_SERVER));
+        //FIXME !!!! GetDouble (and display as int except for album)
         int rating=c.getInt(c.getColumnIndex(COL_RATING));
         String title=c.getString(c.getColumnIndex(COL_TITLE));
         String album=c.getString(c.getColumnIndex(COL_ALBUM));
