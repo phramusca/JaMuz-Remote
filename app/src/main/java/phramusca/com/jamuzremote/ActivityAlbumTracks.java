@@ -5,50 +5,47 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.wdullaer.swipeactionadapter.SwipeActionAdapter;
 import com.wdullaer.swipeactionadapter.SwipeDirection;
 
 import java.util.ArrayList;
 
-public class ActivityAlbums extends AppCompatActivity {
+public class ActivityAlbumTracks extends AppCompatActivity {
 
-    private static final int ALBUM_TRACK_REQUEST_CODE = 100;
-    AdapterAlbum trackAdapter;
+    AdapterAlbumTrack trackAdapter;
     SwipeActionAdapter swipeActionAdapter;
-
-    //FIXME !!! Implement pagination for albums
-    //https://github.com/codepath/android_guides/wiki/Endless-Scrolling-with-AdapterViews-and-RecyclerView
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_albums);
+        setContentView(R.layout.activity_album_tracks);
 
-        Button button_exit_albums = findViewById(R.id.button_exit_albums);
+        Button button_exit_albums = findViewById(R.id.button_exit_album_tracks);
         button_exit_albums.setOnClickListener(v -> onBackPressed());
+
+        TextView title = findViewById(R.id.album_tracks_title);
 
         Intent intent = getIntent();
         @SuppressWarnings("unchecked")
-        final ArrayList<Track> albums = (ArrayList<Track>) intent.getSerializableExtra("albumArrayList");
+        final ArrayList<Track> tracks = (ArrayList<Track>) intent.getSerializableExtra("tracksList");
 
-        if(albums!=null) {
-            ListView listView = findViewById(R.id.list_albums);
-            trackAdapter = new AdapterAlbum(this, albums, -1);
+        if(tracks!=null) {
+            ListView listView = findViewById(R.id.list_album_tracks);
+            trackAdapter = new AdapterAlbumTrack(this, tracks, -1);
+            title.setText(tracks.get(0).getAlbum());
             swipeActionAdapter = new SwipeActionAdapter(trackAdapter);
             swipeActionAdapter.setListView(listView);
             listView.setAdapter(swipeActionAdapter);
             swipeActionAdapter.addBackground(SwipeDirection.DIRECTION_FAR_LEFT,R.layout.queue_slide_play)
-                    .addBackground(SwipeDirection.DIRECTION_NORMAL_LEFT,R.layout.queue_slide_add)
-                    .addBackground(SwipeDirection.DIRECTION_FAR_RIGHT,R.layout.queue_slide_list)
-                    .addBackground(SwipeDirection.DIRECTION_NORMAL_RIGHT,R.layout.queue_slide_list);
+                    .addBackground(SwipeDirection.DIRECTION_NORMAL_LEFT,R.layout.queue_slide_add);
             swipeActionAdapter.setSwipeActionListener(new SwipeActionAdapter.SwipeActionListener(){
                 @Override
                 public boolean hasActions(int position, SwipeDirection direction){
-                    /*if(direction.isLeft()) return true; // Change this to false to disable left swipes
-                    if(direction.isRight()) return true;
-                    return false;*/
-                    return true;
+                    if(direction.isLeft()) return true; // Change this to false to disable left swipes
+                    if(direction.isRight()) return false; //Disabling right swipes
+                    return false;
                 }
 
                 @Override
@@ -65,21 +62,12 @@ public class ActivityAlbums extends AppCompatActivity {
                         Track track = (Track) swipeActionAdapter.getItem(position);
                         switch (direction) {
                             case DIRECTION_FAR_LEFT:
-                                insertAndSetResult(track, true);
+                                //FIXME !!!! Insert track and play
+                                //insertAndSetResult(track, true);
                                 break;
                             case DIRECTION_NORMAL_LEFT:
-                                insertAndSetResult(track, false);
-                                break;
-                            case DIRECTION_FAR_RIGHT:
-                            case DIRECTION_NORMAL_RIGHT:
-                                //Get album tracks
-                                Playlist playlist = new Playlist(track.getAlbum(), true);
-                                playlist.setAlbum(track.getAlbum());
-                                ArrayList<Track> tracks = (ArrayList<Track>) playlist.getTracks();
-                                //Open album tracks layout
-                                Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
-                                intent.putExtra("tracksList", tracks);
-                                startActivityForResult(intent, ALBUM_TRACK_REQUEST_CODE);
+                                //FIXME !!!! Insert track
+                                //insertAndSetResult(track, false);
                                 break;
                         }
                         swipeActionAdapter.notifyDataSetChanged();
@@ -90,7 +78,7 @@ public class ActivityAlbums extends AppCompatActivity {
             new Thread() {
                 @Override
                 public void run() {
-                    for(Track track : albums) {
+                    for(Track track : tracks) {
                         if(track.getTumb(true)!=null) {
                             runOnUiThread(() -> trackAdapter.notifyDataSetChanged());
                         }
@@ -98,25 +86,6 @@ public class ActivityAlbums extends AppCompatActivity {
                 }
             }.start();
         }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //FIXME !!! Manage ActivityAlbumTracks results
-        /*if (requestCode == QUEUE_REQUEST_CODE && resultCode == RESULT_OK) {
-            boolean enqueue = data.getBooleanExtra("queueItem", false);
-            if (!enqueue) {
-                playNext();
-            }
-
-        } else if (requestCode == ALBUMS_REQUEST_CODE && resultCode == RESULT_OK) {
-            boolean playNext = data.getBooleanExtra("playNext", false);
-            if (playNext) {
-                playNext();
-            }
-            displayQueue();
-        }*/
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void insertAndSetResult(Track track, boolean playNext) {

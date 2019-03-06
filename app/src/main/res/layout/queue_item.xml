@@ -26,7 +26,8 @@
             android:id="@+id/item_line1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="2dp"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
             android:textColor="@color/textColor"
             tools:ignore="HardcodedText">
         </TextView>
@@ -36,7 +37,8 @@
             android:id="@+id/item_line2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="2dp"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
             android:textColor="@color/textColor"
             tools:ignore="HardcodedText">
         </TextView>
@@ -46,8 +48,19 @@
             android:id="@+id/item_line3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="2dp"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
             tools:ignore="HardcodedText">
         </TextView>
+
+        <!--<TextView
+            android:text="Ligne 4"
+            android:id="@+id/item_line4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            tools:ignore="HardcodedText">
+        </TextView>-->
     </LinearLayout>
 </LinearLayout>

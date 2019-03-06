@@ -11,23 +11,22 @@ import java.util.Locale;
  * Created by raph on 03/03/18.
  */
 
-public class AdapterTrack extends AdapterAbstract {
+public class AdapterAlbumTrack extends AdapterAbstract {
 
-    AdapterTrack(Context context, List<Track> tracks, int positionPlaying) {
+    AdapterAlbumTrack(Context context, List<Track> tracks, int positionPlaying) {
         super(context, tracks, positionPlaying);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Track track = tracks.get(position);
-        track.getTags(false);
+        track.getTags(true);
         return getLayout(position, convertView, parent,
-                track.getArtist(),
-                String.format(Locale.ENGLISH,"%s | %s %d/5 %s",
-                        track.getTitle(),
+                track.getTitle(),
+                String.format(Locale.ENGLISH,"%s %d/5 %s",
                         track.getTags(),
                         track.getRating(),
                         track.getGenre()),
-                track.getAlbum());
+                track.getArtist());
     }
 }

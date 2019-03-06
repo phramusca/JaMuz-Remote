@@ -58,5 +58,6 @@
     <string name="best_albums">Meilleurs Albums</string>
     <string name="play_queue">File d\'Attente</string>
     <string name="syncCheckFilesOnDisk">Vérification de la présence des fichiers sur le disque ...</string>
-    <string name="nbTracks">morceau(x).</string>
+    <string name="nbTracks">piste(s)</string>
+    <string name="album_tracks">Pistes de l\'album</string>
 </resources>

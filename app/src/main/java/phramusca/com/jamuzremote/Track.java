@@ -175,18 +175,7 @@ public class Track implements Serializable {
 
     @Override
     public String toString() {
-        String tagsString="";
-        if(tags!=null) {
-            StringBuilder msg = new StringBuilder();
-            for (String tag : tags) {
-                msg.append(tag).append(",");
-            }
-            tagsString = msg.toString();
-            if (tagsString.endsWith(",")) {
-                tagsString = tagsString.substring(0, tagsString.length() - 1);
-            }
-        }
-        return  "<BR/>" + tagsString + " " + rating+"/5" + " " + genre + "<BR/>" +
+        return  "<BR/>" + getTags() + " " + rating+"/5" + " " + genre + "<BR/>" +
                 "<h1>" +
                 title + "<BR/>" +
                 artist + "<BR/>"+
@@ -340,6 +329,21 @@ public class Track implements Serializable {
             tags = HelperLibrary.musicLibrary.getTags(idFileRemote);
         }
         return tags;
+    }
+
+    public String getTags() {
+        String tagsString="";
+        if(tags!=null) {
+            StringBuilder msg = new StringBuilder();
+            for (String tag : tags) {
+                msg.append(tag).append(",");
+            }
+            tagsString = msg.toString();
+            if (tagsString.endsWith(",")) {
+                tagsString = tagsString.substring(0, tagsString.length() - 1);
+            }
+        }
+        return tagsString;
     }
 
     public void setTags(ArrayList<String> tags) {
