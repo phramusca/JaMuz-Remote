@@ -62,19 +62,19 @@ public class ActivityAlbums extends AppCompatActivity {
                     for(int i=0;i<positionList.length;i++) {
                         SwipeDirection direction = directionList[i];
                         int position = positionList[i];
-                        Track track = (Track) swipeActionAdapter.getItem(position);
+                        Track album = (Track) swipeActionAdapter.getItem(position);
                         switch (direction) {
                             case DIRECTION_FAR_LEFT:
-                                insertAndSetResult(track, true);
+                                insertAndSetResult(album, true);
                                 break;
                             case DIRECTION_NORMAL_LEFT:
-                                insertAndSetResult(track, false);
+                                insertAndSetResult(album, false);
                                 break;
                             case DIRECTION_FAR_RIGHT:
                             case DIRECTION_NORMAL_RIGHT:
                                 //Get album tracks
-                                Playlist playlist = new Playlist(track.getAlbum(), true);
-                                playlist.setAlbum(track.getAlbum());
+                                Playlist playlist = new Playlist(album.getAlbum(), true);
+                                playlist.setAlbum(album.getAlbum());
                                 ArrayList<Track> tracks = (ArrayList<Track>) playlist.getTracks();
                                 //Open album tracks layout
                                 Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
@@ -102,20 +102,10 @@ public class ActivityAlbums extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //FIXME !!! Manage ActivityAlbumTracks results
-        /*if (requestCode == QUEUE_REQUEST_CODE && resultCode == RESULT_OK) {
-            boolean enqueue = data.getBooleanExtra("queueItem", false);
-            if (!enqueue) {
-                playNext();
-            }
-
-        } else if (requestCode == ALBUMS_REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == ALBUM_TRACK_REQUEST_CODE && resultCode == RESULT_OK) {
             boolean playNext = data.getBooleanExtra("playNext", false);
-            if (playNext) {
-                playNext();
-            }
-            displayQueue();
-        }*/
+            setResult(playNext);
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -124,6 +114,10 @@ public class ActivityAlbums extends AppCompatActivity {
         playlist.setAlbum(track.getAlbum());
         PlayQueue.insert(playlist);
 
+        setResult(playNext);
+    }
+
+    private void setResult(boolean playNext) {
         Intent data = new Intent();
         data.putExtra("playNext", playNext);
         setResult(RESULT_OK, data);
