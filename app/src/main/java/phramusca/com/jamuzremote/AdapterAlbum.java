@@ -11,7 +11,7 @@ import java.util.Locale;
  * Created by raph on 03/03/18.
  */
 
-public class AdapterAlbum extends AdapterAbstract {
+public class AdapterAlbum extends AdapterTrack {
 
     AdapterAlbum(Context context, List<Track> tracks, int positionPlaying) {
         super(context, tracks, positionPlaying);
@@ -23,9 +23,10 @@ public class AdapterAlbum extends AdapterAbstract {
         return getLayout(position, convertView, parent,
                 track.getAlbum(),
                 track.getArtist(),
-                String.format(Locale.ENGLISH,"%d %s. %d/5 %s",
+                String.format(Locale.ENGLISH,"%d %s.",
                         track.getPlayCounter(), //Includes nb of tracks
-                        parent.getContext().getString(R.string.nbTracks),
+                        parent.getContext().getString(R.string.nbTracks)),
+                String.format(Locale.ENGLISH,"%d/5 %s",
                         track.getRating(),
                         track.getGenre()));
     }

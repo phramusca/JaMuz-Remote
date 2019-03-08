@@ -8,7 +8,7 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="center_horizontal|center_vertical"
         android:contentDescription="@string/cover"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -29,7 +29,8 @@
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
             android:textColor="@color/textColor"
-            tools:ignore="HardcodedText">
+            tools:ignore="HardcodedText"
+            android:textSize="14dp">
         </TextView>
 
         <TextView
@@ -40,7 +41,8 @@
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
             android:textColor="@color/textColor"
-            tools:ignore="HardcodedText">
+            tools:ignore="HardcodedText"
+            android:textSize="12dp">
         </TextView>
 
         <TextView
@@ -50,17 +52,19 @@
             android:layout_height="wrap_content"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
-            tools:ignore="HardcodedText">
+            tools:ignore="HardcodedText"
+            android:textSize="12dp">
         </TextView>
 
-        <!--<TextView
+        <TextView
             android:text="Ligne 4"
             android:id="@+id/item_line4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
-            tools:ignore="HardcodedText">
-        </TextView>-->
+            tools:ignore="HardcodedText"
+            android:textSize="10dp">
+        </TextView>
     </LinearLayout>
 </LinearLayout>
