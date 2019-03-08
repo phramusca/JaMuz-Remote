@@ -289,7 +289,7 @@ public class Track implements Serializable {
         return path;
     }
 
-    //TODO: Use the same cache system as for remote (that is not used by the way !!)
+    //FIXME: Use the same cache system as for remote (that is not used by the way !!)
     public byte[] getArt() {
         byte[]art=null;
         try {
@@ -302,8 +302,10 @@ public class Track implements Serializable {
         return art;
     }
 
-    private Bitmap thumb;
-
+    //FIXME !!!!! Use a Repo for thumbnails !!!
+    //As it is read too many times now that there is album list
+    //+ we need (transient) to ignore it in Intent serialization and re-read each time !
+    private transient Bitmap thumb;
     public Bitmap getTumb(boolean read) {
         if(thumb==null && read) {
             byte[]art=getArt();

@@ -71,7 +71,7 @@ public class ActivityPlayQueue extends AppCompatActivity {
                                 confirmPlayNext(track, position+offset);
                                 break;
                             case DIRECTION_NORMAL_LEFT:
-                                PlayQueue.insertNext(position+offset);
+                                PlayQueue.insert(position+offset);
                                 trackAdapter.insertNext(position);
                                 break;
                             case DIRECTION_FAR_RIGHT:
@@ -106,7 +106,7 @@ public class ActivityPlayQueue extends AppCompatActivity {
         builder.setMessage(Html.fromHtml(
                 "<html>".concat(track.toString()).concat("</html>")));
         builder.setPositiveButton(R.string.confirmYes, (dialog, which) -> {
-            if(PlayQueue.insertNext(position)) {
+            if(PlayQueue.insert(position)) {
                 Intent data = new Intent();
                 data.putExtra("queueItem", false);
                 setResult(RESULT_OK, data);

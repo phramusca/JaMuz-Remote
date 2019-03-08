@@ -43,14 +43,13 @@ public class ActivityAlbumTracks extends AppCompatActivity {
             swipeActionAdapter.setSwipeActionListener(new SwipeActionAdapter.SwipeActionListener(){
                 @Override
                 public boolean hasActions(int position, SwipeDirection direction){
-                    if(direction.isLeft()) return true; // Change this to false to disable left swipes
+                    if(direction.isLeft()) return true;
                     if(direction.isRight()) return false; //Disabling right swipes
                     return false;
                 }
 
                 @Override
                 public boolean shouldDismiss(int position, SwipeDirection direction){
-                    // Only dismiss an item when swiping normal left
                     return false; //direction == SwipeDirection.DIRECTION_NORMAL_LEFT;
                 }
 
@@ -62,12 +61,10 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                         Track track = (Track) swipeActionAdapter.getItem(position);
                         switch (direction) {
                             case DIRECTION_FAR_LEFT:
-                                //FIXME !!!! Insert track and play
-                                //insertAndSetResult(track, true);
+                                insertAndSetResult(track, true);
                                 break;
                             case DIRECTION_NORMAL_LEFT:
-                                //FIXME !!!! Insert track
-                                //insertAndSetResult(track, false);
+                                insertAndSetResult(track, false);
                                 break;
                         }
                         swipeActionAdapter.notifyDataSetChanged();
@@ -89,9 +86,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
     }
 
     private void insertAndSetResult(Track track, boolean playNext) {
-        Playlist playlist = new Playlist(track.getAlbum(), true);
-        playlist.setAlbum(track.getAlbum());
-        PlayQueue.insert(playlist);
+        PlayQueue.insert(track);
 
         Intent data = new Intent();
         data.putExtra("playNext", playNext);

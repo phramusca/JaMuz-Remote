@@ -24,7 +24,7 @@ public class PlayQueue {
     }
 
     //TODO: Merge with the same ones on AdapterTrack
-    synchronized static boolean insertNext(int oldPosition) {
+    synchronized static boolean insert(int oldPosition) {
         if(oldPosition!= positionPlaying) {
             Track track = getTrack(oldPosition);
             if(track!=null) {
@@ -74,6 +74,10 @@ public class PlayQueue {
     synchronized static void insert(Playlist playlist) {
         List<Track> insertIntoQueue = playlist.getTracks();
         queue.addAll(positionPlaying+1, insertIntoQueue);
+    }
+
+    synchronized static void insert(Track track) {
+        queue.add(positionPlaying+1, track);
     }
 
     synchronized static void fill(Playlist playlist) {
