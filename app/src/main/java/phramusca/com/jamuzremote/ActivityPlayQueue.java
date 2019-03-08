@@ -24,7 +24,7 @@ public class ActivityPlayQueue extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_queue);
 
-        Button button_exit_queue = (Button) findViewById(R.id.button_exit_queue);
+        Button button_exit_queue = findViewById(R.id.button_exit_queue);
         button_exit_queue.setOnClickListener(v -> onBackPressed());
 
         Intent intent = getIntent();
@@ -35,7 +35,7 @@ public class ActivityPlayQueue extends AppCompatActivity {
             int position = intent.getIntExtra("queueArrayPosition", 0);
             offset = intent.getIntExtra("queueArrayOffset", 0);
             position = position - offset;
-            ListView listView = (ListView) findViewById(R.id.list_queue);
+            ListView listView = findViewById(R.id.list_queue);
             trackAdapter = new AdapterTrack(this, queue, position);
             trackSwipeAdapter = new SwipeActionAdapter(trackAdapter);
             trackSwipeAdapter.setListView(listView);

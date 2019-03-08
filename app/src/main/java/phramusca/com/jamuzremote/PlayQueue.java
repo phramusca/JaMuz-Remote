@@ -23,7 +23,7 @@ public class PlayQueue {
         return new PlayQueueRelative();
     }
 
-    //TODO: Merge with the same ones on AdapterAbstract
+    //TODO: Merge with the same ones on AdapterTrack
     synchronized static boolean insertNext(int oldPosition) {
         if(oldPosition!= positionPlaying) {
             Track track = getTrack(oldPosition);
