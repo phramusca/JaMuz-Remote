@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -107,6 +108,13 @@ public class AdapterTrack extends BaseAdapter {
         } else {
             layoutItem.setBackgroundColor(ContextCompat.getColor(mContext, R.color.background_color));
         }
+
+        layoutItem.setTag(position);
+        layoutItem.setOnClickListener(view -> {
+            Integer position1 = (Integer)view.getTag();
+            sendListener(tracks.get(position1), position1);
+        });
+
         return layoutItem;
     }
 
@@ -166,6 +174,22 @@ public class AdapterTrack extends BaseAdapter {
                     positionPlaying--;
                 }
             }
+        }
+    }
+
+    public interface TrackAdapterListener {
+        void onClick(Track item, int position);
+    }
+
+    private ArrayList<TrackAdapterListener> mListListener = new ArrayList<>();
+
+    public void addListener(TrackAdapterListener aListener) {
+        mListListener.add(aListener);
+    }
+
+    private void sendListener(Track item, int position) {
+        for(int i = mListListener.size()-1; i >= 0; i--) {
+            mListListener.get(i).onClick(item, position);
         }
     }
 }

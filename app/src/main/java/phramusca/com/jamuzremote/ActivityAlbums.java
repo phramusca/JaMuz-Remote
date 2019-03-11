@@ -11,7 +11,7 @@ import com.wdullaer.swipeactionadapter.SwipeDirection;
 
 import java.util.ArrayList;
 
-public class ActivityAlbums extends AppCompatActivity {
+public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.TrackAdapterListener {
 
     private static final int ALBUM_TRACK_REQUEST_CODE = 100;
     AdapterAlbum trackAdapter;
@@ -35,6 +35,7 @@ public class ActivityAlbums extends AppCompatActivity {
         if(albums!=null) {
             ListView listView = findViewById(R.id.list_albums);
             trackAdapter = new AdapterAlbum(this, albums, -1);
+            trackAdapter.addListener(this);
             swipeActionAdapter = new SwipeActionAdapter(trackAdapter);
             swipeActionAdapter.setListView(listView);
             listView.setAdapter(swipeActionAdapter);
@@ -45,10 +46,9 @@ public class ActivityAlbums extends AppCompatActivity {
             swipeActionAdapter.setSwipeActionListener(new SwipeActionAdapter.SwipeActionListener(){
                 @Override
                 public boolean hasActions(int position, SwipeDirection direction){
-                    /*if(direction.isLeft()) return true; // Change this to false to disable left swipes
-                    if(direction.isRight()) return true;
-                    return false;*/
-                    return true;
+                    if(direction.isLeft()) return true; // Change this to false to
+                    if(direction.isRight()) return false; //disable right swipes
+                    return false;
                 }
 
                 @Override
@@ -69,17 +69,6 @@ public class ActivityAlbums extends AppCompatActivity {
                                 break;
                             case DIRECTION_NORMAL_LEFT:
                                 insertAndSetResult(album, false);
-                                break;
-                            case DIRECTION_FAR_RIGHT:
-                            case DIRECTION_NORMAL_RIGHT:
-                                //Get album tracks
-                                Playlist playlist = new Playlist(album.getAlbum(), true);
-                                playlist.setAlbum(album.getAlbum());
-                                ArrayList<Track> tracks = (ArrayList<Track>) playlist.getTracks();
-                                //Open album tracks layout
-                                Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
-                                intent.putExtra("tracksList", tracks);
-                                startActivityForResult(intent, ALBUM_TRACK_REQUEST_CODE);
                                 break;
                         }
                         swipeActionAdapter.notifyDataSetChanged();
@@ -103,8 +92,9 @@ public class ActivityAlbums extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ALBUM_TRACK_REQUEST_CODE && resultCode == RESULT_OK) {
-            boolean playNext = data.getBooleanExtra("playNext", false);
-            setResult(playNext);
+            //Redirects intent as-is from ActivityAlbumTracks to ActivityMain
+            setResult(RESULT_OK, data);
+            finish();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -114,13 +104,21 @@ public class ActivityAlbums extends AppCompatActivity {
         playlist.setAlbum(track.getAlbum());
         PlayQueue.insert(playlist);
 
-        setResult(playNext);
-    }
-
-    private void setResult(boolean playNext) {
         Intent data = new Intent();
-        data.putExtra("playNext", playNext);
+        data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");
         setResult(RESULT_OK, data);
         finish();
+    }
+
+    @Override
+    public void onClick(Track track, int position) {
+        //Get album tracks
+        Playlist playlist = new Playlist(track.getAlbum(), true);
+        playlist.setAlbum(track.getAlbum());
+        ArrayList<Track> tracks = (ArrayList<Track>) playlist.getTracks();
+        //Open album tracks layout
+        Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
+        intent.putExtra("tracksList", tracks);
+        startActivityForResult(intent, ALBUM_TRACK_REQUEST_CODE);
     }
 }

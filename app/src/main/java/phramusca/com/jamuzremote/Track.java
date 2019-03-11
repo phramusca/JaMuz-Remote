@@ -304,7 +304,7 @@ public class Track implements Serializable {
 
     //FIXME !!!!! Use a Repo for thumbnails !!!
     //As it is read too many times now that there is album list
-    //+ we need (transient) to ignore it in Intent serialization and re-read each time !
+    //+ we need (by using transient) to ignore it in Intent serialization and re-read each time !
     private transient Bitmap thumb;
     public Bitmap getTumb(boolean read) {
         if(thumb==null && read) {
