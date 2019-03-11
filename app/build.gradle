@@ -11,7 +11,7 @@ android {
         // http://chalup.github.io/blog/2014/06/15/minsdkversion-equals-15/
         targetSdkVersion 26
         versionCode 2
-        versionName "0.4.2"
+        versionName "0.4.3-dev"
     }
     buildTypes {
         release {
