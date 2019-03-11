@@ -123,9 +123,8 @@ public class ActivityMain extends AppCompatActivity {
     private ArrayAdapter<Playlist> playListArrayAdapter;
     private Playlist localSelectedPlaylist;
 
-    private static final int SPEECH_REQUEST_CODE = 0;
-    private static final int QUEUE_REQUEST_CODE = 1;
-    private static final int ALBUMS_REQUEST_CODE = 2;
+    private static final int SPEECH_REQUEST_CODE = 15489;
+    private static final int LISTS_REQUEST_CODE = 60568;
     private static final int QR_REQUEST_CODE = 49374;
 
     // GUI elements
@@ -649,7 +648,7 @@ public class ActivityMain extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), ActivityAlbums.class);
             PlayQueueRelative albumsRelativeList = new PlayQueueRelative((ArrayList<Track>) HelperLibrary.musicLibrary.getAlbums());
             intent.putExtra("albumArrayList", albumsRelativeList.getTracks());
-            startActivityForResult(intent, ALBUMS_REQUEST_CODE);
+            startActivityForResult(intent, LISTS_REQUEST_CODE);
         });
 
         Button button_speech = findViewById(R.id.button_speech);
@@ -788,7 +787,7 @@ public class ActivityMain extends AppCompatActivity {
         intent.putExtra("queueArrayList", playQueueRelative.getTracks());
         intent.putExtra("queueArrayPosition", playQueueRelative.getPosition());
         intent.putExtra("queueArrayOffset", playQueueRelative.getOffset());
-        startActivityForResult(intent, QUEUE_REQUEST_CODE);
+        startActivityForResult(intent, LISTS_REQUEST_CODE);
     }
 
     private void setRating(int rating) {
@@ -1344,18 +1343,21 @@ public class ActivityMain extends AppCompatActivity {
                 speak(msg);
             }
 
-        } else if (requestCode == QUEUE_REQUEST_CODE && resultCode == RESULT_OK) {
-            boolean enqueue = data.getBooleanExtra("queueItem", false);
-            if (!enqueue) {
-                playNext();
+        } else if (requestCode == LISTS_REQUEST_CODE && resultCode == RESULT_OK) {
+            String action = data.getStringExtra("action");
+            switch (action) {
+                case "playNextAndDisplayQueue":
+                    playNext();
+                    displayQueue();
+                    break;
+                case "playNext":
+                    playNext();
+                    break;
+                case "displayQueue":
+                    displayQueue();
+                    break;
             }
 
-        } else if (requestCode == ALBUMS_REQUEST_CODE && resultCode == RESULT_OK) {
-            boolean playNext = data.getBooleanExtra("playNext", false);
-            if (playNext) {
-                playNext();
-            }
-            displayQueue();
         }
         else if (requestCode == QR_REQUEST_CODE && resultCode == RESULT_OK) {
             //https://www.simplifiedcoding.net/android-qr-code-scanner-tutorial/

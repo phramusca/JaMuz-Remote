@@ -89,7 +89,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         PlayQueue.insert(track);
 
         Intent data = new Intent();
-        data.putExtra("playNext", playNext);
+        data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");
         setResult(RESULT_OK, data);
         finish();
     }

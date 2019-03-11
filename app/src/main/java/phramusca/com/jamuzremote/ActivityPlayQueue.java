@@ -13,11 +13,12 @@ import com.wdullaer.swipeactionadapter.SwipeDirection;
 
 import java.util.ArrayList;
 
-public class ActivityPlayQueue extends AppCompatActivity {
+public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack.TrackAdapterListener {
 
     AdapterTrack trackAdapter;
     SwipeActionAdapter trackSwipeAdapter;
     private int offset=0;
+    private static final int QUEUE_REQUEST_CODE = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,7 @@ public class ActivityPlayQueue extends AppCompatActivity {
             position = position - offset;
             ListView listView = findViewById(R.id.list_queue);
             trackAdapter = new AdapterTrack(this, queue, position);
+            trackAdapter.addListener(this);
             trackSwipeAdapter = new SwipeActionAdapter(trackAdapter);
             trackSwipeAdapter.setListView(listView);
             listView.setAdapter(trackSwipeAdapter);
@@ -107,9 +109,9 @@ public class ActivityPlayQueue extends AppCompatActivity {
                 "<html>".concat(track.toString()).concat("</html>")));
         builder.setPositiveButton(R.string.confirmYes, (dialog, which) -> {
             if(PlayQueue.insert(position)) {
-                Intent data = new Intent();
-                data.putExtra("queueItem", false);
-                setResult(RESULT_OK, data);
+                Intent intent = new Intent();
+                intent.putExtra("action", "playNext");
+                setResult(RESULT_OK, intent);
                 finish();
             }
         });
@@ -133,5 +135,64 @@ public class ActivityPlayQueue extends AppCompatActivity {
         });
         builder.setCancelable(true);
         builder.show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == QUEUE_REQUEST_CODE && resultCode == RESULT_OK) {
+            //Redirects intent as-is from ActivityAlbumTracks to ActivityMain
+            setResult(RESULT_OK, data);
+            finish();
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onClick(final Track track, final int position) {
+
+        //Get album tracks
+        Playlist playlist = new Playlist(track.getAlbum(), true);
+        playlist.setAlbum(track.getAlbum());
+        ArrayList<Track> tracks = (ArrayList<Track>) playlist.getTracks();
+        //Open album tracks layout
+        Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
+        intent.putExtra("tracksList", tracks);
+        startActivityForResult(intent, QUEUE_REQUEST_CODE);
+
+
+        /*Intent intent = new Intent();
+        intent.putExtra("action", "openAlbum");
+        intent.putExtra("track", track);
+        setResult(RESULT_OK, intent);
+        finish();*/
+
+        //FIXME Offer user a choice (and delete above code):
+        /*AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Make your choice");
+        CharSequence[] choices = new CharSequence[4];
+        choices[0]="Pistes de \""+track.getAlbum()+"\"";
+        choices[1]="Albums de \""+track.getArtist()+"\"";
+        builder.setSingleChoiceItems(choices, -1, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    //Album
+                    Intent intent = new Intent();
+                    intent.putExtra("action", "openAlbum");
+                    intent.putExtra("track", track);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                    break;
+                case 1:
+                case 2:
+                case 3:
+                    new HelperToast(this).toastShort(choices[which]+" : "+track.toString());
+                    dialog.cancel();
+                    break;
+            }
+        });
+        builder.setNegativeButton(R.string.confirmNo, (dialog, which) -> {
+        });
+        builder.setCancelable(true);
+        builder.show();*/
     }
 }
