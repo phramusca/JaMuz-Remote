@@ -174,6 +174,7 @@ public class ActivityMain extends AppCompatActivity {
     private LinearLayout layoutPlaylistEditBar;
     private GridLayout layoutPlaylistToolBar;
     private GridLayout layoutOptions;
+    private ArrayList<ButtonRating> buttonsRating;
 
     private IntentIntegrator qrScan;
 
@@ -355,9 +356,25 @@ public class ActivityMain extends AppCompatActivity {
         ratingBar.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
             if(fromUser) { //as it is also set when server sends file info (and it can be 0)
                 dimOn();
-                setRating((int)rating);
+                setRating(Math.round(rating));
             }
         });
+
+        ratingBar.setVisibility(View.GONE);
+        Button buttonRating2 = findViewById(R.id.button_rating_2);
+        Button buttonRating3 = findViewById(R.id.button_rating_3);
+        Button buttonRating4 = findViewById(R.id.button_rating_4);
+        Button buttonRating5 = findViewById(R.id.button_rating_5);
+        setupButtonRating(buttonRating2, 2);
+        setupButtonRating(buttonRating3, 3);
+        setupButtonRating(buttonRating4, 4);
+        setupButtonRating(buttonRating5, 5);
+
+        buttonsRating = new ArrayList<>();
+        buttonsRating.add(new ButtonRating(buttonRating2, 2, R.drawable.ic_button_rating_2, R.drawable.ic_button_rating_2_selected));
+        buttonsRating.add(new ButtonRating(buttonRating3, 3, R.drawable.ic_button_rating_3, R.drawable.ic_button_rating_3_selected));
+        buttonsRating.add(new ButtonRating(buttonRating4, 4, R.drawable.ic_button_rating_4, R.drawable.ic_button_rating_4_selected));
+        buttonsRating.add(new ButtonRating(buttonRating5, 5, R.drawable.ic_button_rating_5, R.drawable.ic_button_rating_5_selected));
 
         ratingBarPlaylist = findViewById(R.id.ratingBarPlaylist);
         ratingBarPlaylist.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
@@ -436,9 +453,11 @@ public class ActivityMain extends AppCompatActivity {
         spinnerPlaylist.setOnItemSelectedListener(spinnerPlaylistListener);
         spinnerPlaylist.setOnTouchListener(dimOnTouchListener);
 
-        spinnerGenre = findViewById(R.id.spinner_genre);
+        spinnerGenre = (Spinner) findViewById(R.id.spinner_genre);
         spinnerGenre.setOnItemSelectedListener(spinnerGenreListener);
         spinnerGenre.setOnTouchListener(dimOnTouchListener);
+
+        spinnerGenre.setVisibility(View.GONE);
 
         setupButton(R.id.button_previous, "previousTrack");
         setupButton(R.id.button_play, "playTrack");
@@ -779,6 +798,23 @@ public class ActivityMain extends AppCompatActivity {
         //toggle(layoutPlaylist, true);
 
         setDimMode(toggleButtonDimMode.isChecked());
+    }
+
+    private void setupButtonRating(Button button, int rating) {
+        button.setOnClickListener(view -> {
+            setRating(rating);
+            setButtonRating();
+        });
+    }
+
+    private void setButtonRating() {
+        if(displayedTrack!=null) {
+            for(ButtonRating buttonRating : buttonsRating) {
+                buttonRating.getButton().setBackground(ContextCompat.getDrawable(getBaseContext(),
+                        buttonRating.getRating()==displayedTrack.getRating()
+                                ?buttonRating.getResIdSelected():buttonRating.getResId()));
+            }
+        }
     }
 
     private void displayQueue() {
@@ -2167,6 +2203,9 @@ public class ActivityMain extends AppCompatActivity {
                 ratingBar.setEnabled(false);
                 ratingBar.setRating(displayedTrack.getRating());
                 ratingBar.setEnabled(true);
+
+                setButtonRating();
+
                 setupSpinnerGenre(RepoGenres.get(), displayedTrack.getGenre());
 
                 //Display file tags
