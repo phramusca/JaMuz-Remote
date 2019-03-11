@@ -166,7 +166,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
         setResult(RESULT_OK, intent);
         finish();*/
 
-        //FIXME Offer user a choice (and delete above code):
+        //TODO Offer user a choice (and delete above code):
         /*AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Make your choice");
         CharSequence[] choices = new CharSequence[4];
