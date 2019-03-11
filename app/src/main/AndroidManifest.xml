@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="phramusca.com.jamuzremote"
+    package="phramusca.com.jamuzkids"
     android:installLocation="preferExternal">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -62,9 +62,9 @@
             android:exported="false"
             android:singleUser="false" />
 
-        <activity android:name="phramusca.com.jamuzremote.ActivityPlayQueue" />
-        <activity android:name="phramusca.com.jamuzremote.ActivityAlbums" />
-        <activity android:name="phramusca.com.jamuzremote.ActivityAlbumTracks" />
+        <activity android:name="phramusca.com.jamuzkids.ActivityPlayQueue" />
+        <activity android:name="phramusca.com.jamuzkids.ActivityAlbums" />
+        <activity android:name="phramusca.com.jamuzkids.ActivityAlbumTracks" />
     </application>
 
 </manifest>
