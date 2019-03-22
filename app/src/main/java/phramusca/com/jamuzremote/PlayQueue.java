@@ -5,7 +5,7 @@ import java.util.List;
 
 public class PlayQueue {
     private static List<Track> queue= new ArrayList<>();
-    private static int positionPlaying =-1;
+    private static int positionPlaying =-1; //FIXME !!! Sync with real positionPlaying when it changes (and refresh display of course)
 
     //TODO: Make MAX_QUEUE_PREVIOUS and MAX_QUEUE_NEXT user options
     private static final int MAX_QUEUE_PREVIOUS = 5;

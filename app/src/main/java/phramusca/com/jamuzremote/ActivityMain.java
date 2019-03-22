@@ -728,7 +728,9 @@ public class ActivityMain extends AppCompatActivity {
         });
 
         localTrack = new Track(0, getString(R.string.welcomeTitle),
-                getString(R.string.welcomeYear), getString(R.string.app_name), "coverHash", "---");
+                getString(R.string.welcomeYear), getString(R.string.app_name),
+                "welcomeHash", //Warning: "welcomeHash" value has a meaning
+                "---");
         displayedTrack = localTrack;
         displayTrack(false);
 
@@ -2184,6 +2186,8 @@ public class ActivityMain extends AppCompatActivity {
                 displayImage(displayedTrack.getArt());
                 bluetoothNotifyChange(AVRCP_META_CHANGED);
 
+            } else if(displayedTrack.getCoverHash().equals("welcomeHash")) {
+                displayImage(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_startup_cover_foreground));
             } else {
                 displayCover();
             }
@@ -2271,11 +2275,10 @@ public class ActivityMain extends AppCompatActivity {
                 helperToast.toastLong("OutOfMemoryError reading cover !");
             }
         }
-        if(bitmap != null ){
-            displayImage( bitmap);
-        } else {
-            displayImage(HelperBitmap.getEmptyCover());
+        if (bitmap == null) {
+            bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_startup_cover_foreground);
         }
+        displayImage(bitmap);
     }
 
     class CallBackRemote implements ICallBackRemote {
