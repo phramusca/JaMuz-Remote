@@ -55,19 +55,6 @@
             android:layout_height="wrap_content"
             android:background="@drawable/ic_button_albums"/>
 
-        <Button android:id="@+id/button_connect"
-            android:background="@drawable/remote_off"
-            android:layout_width="40dp"
-            android:layout_height="wrap_content"
-            android:text="Connect"
-            android:layout_row="0"
-            android:layout_column="5"
-            android:textColor="@android:color/transparent"
-            android:textSize="10sp"
-            android:textAllCaps="false"
-            android:layout_gravity="center"
-            tools:ignore="HardcodedText,SmallSp" />
-
         <Button android:id="@+id/button_sync"
             android:background="@drawable/connect_off_new"
             android:layout_width="40dp"
@@ -543,20 +530,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
-                <Button android:id="@+id/button_rating_2"
-                    android:background="@drawable/ic_button_rating_2"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:textColor="@android:color/transparent"
-                    android:textAllCaps="false"
-                    android:layout_marginStart="5dp"
+                <Button
+                    android:id="@+id/button_rating_2"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:layout_marginBottom="5dp"
-                    android:alpha="0.7"/>
+                    android:layout_marginStart="5dp"
+                    android:alpha="0.7"
+                    android:background="@drawable/ic_button_rating_2"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/transparent" />
 
                 <Button android:id="@+id/button_rating_3"
                     android:background="@drawable/ic_button_rating_3"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:textColor="@android:color/transparent"
                     android:textAllCaps="false"
                     android:layout_marginStart="5dp"
@@ -565,8 +553,8 @@
 
                 <Button android:id="@+id/button_rating_4"
                     android:background="@drawable/ic_button_rating_4"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:textColor="@android:color/transparent"
                     android:textAllCaps="false"
                     android:layout_marginStart="5dp"
@@ -575,8 +563,8 @@
 
                 <Button android:id="@+id/button_rating_5"
                     android:background="@drawable/ic_button_rating_5"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:textColor="@android:color/transparent"
                     android:textAllCaps="false"
                     android:layout_marginStart="5dp"

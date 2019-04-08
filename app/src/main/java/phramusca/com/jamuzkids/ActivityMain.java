@@ -132,7 +132,6 @@ public class ActivityMain extends AppCompatActivity {
     private EditText editTextConnectInfo;
     private TextView textViewPath;
     private TextView textViewPlaylist;
-    private Button buttonRemote;
     private Button buttonSync;
     private ToggleButton toggleButtonDimMode;
     private ToggleButton toggleButtonControls;
@@ -254,35 +253,6 @@ public class ActivityMain extends AppCompatActivity {
 
         preferences = getPreferences(MODE_PRIVATE);
         editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.11:2013"));
-
-        buttonRemote = findViewById(R.id.button_connect);
-        buttonRemote.setOnClickListener(v -> {
-            dimOn();
-            buttonRemote.setEnabled(false);
-            buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
-            if(buttonRemote.getText().equals("Connect")) {
-                ClientInfo clientInfo = getClientInfo(true);
-                if(clientInfo!=null) {
-                    clientRemote =  new ClientRemote(clientInfo, new CallBackRemote());
-                    new Thread() {
-                        public void run() {
-                            if(clientRemote.connect()) {
-                                enableRemote(false);
-                            }
-                            else {
-                                enableRemote(true);
-                            }
-                        }
-                    }.start();
-                } else {
-                    enableRemote(true);
-                }
-            }
-            else {
-                enableRemote(true);
-                stopRemote();
-            }
-        });
 
         buttonSync = findViewById(R.id.button_sync);
         buttonSync.setOnClickListener(v -> {
@@ -1238,11 +1208,6 @@ public class ActivityMain extends AppCompatActivity {
             dimOn();
         }
 
-        if(wasRemoteConnected && !audioPlayer.isPlaying()) {
-            buttonRemote.setEnabled(false);
-            buttonRemote.performClick();
-        }
-
         //Only re-enable the following if loosing media button receiver again
         /*audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
         registerButtonReceiver();*/
@@ -1753,14 +1718,9 @@ public class ActivityMain extends AppCompatActivity {
     private void enableRemote(final boolean enable) {
         runOnUiThread(() -> {
             if (enable) {
-                buttonRemote.setBackgroundResource(R.drawable.remote_off);
                 enablePlaylistEdit(true);
                 setupLocalPlaylistSpinner();
-            } else {
-                buttonRemote.setText("Close");
-                buttonRemote.setBackgroundResource(R.drawable.remote_on);
             }
-            buttonRemote.setEnabled(true);
         });
     }
 
@@ -1802,11 +1762,9 @@ public class ActivityMain extends AppCompatActivity {
                 content=content.substring("jamuzremote://".length());
                 content=Encryption.decrypt(content, "NOTeBrrhzrtestSecretK");
 
-                buttonRemote.setEnabled(false);
                 buttonSync.setEnabled(false);
                 editTextConnectInfo.setText(content);
                 setConfig("connectionString", editTextConnectInfo.getText().toString());
-                buttonRemote.setEnabled(true);
                 buttonSync.setEnabled(true);
             }
         }
@@ -2401,7 +2359,6 @@ public class ActivityMain extends AppCompatActivity {
             clientRemote.close();
             clientRemote=null;
         }
-        enableClientRemote(buttonRemote, R.drawable.remote_off);
         setupLocalPlaylistSpinner();
         displayedTrack = localTrack;
         displayTrack(false);
