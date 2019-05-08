@@ -44,6 +44,7 @@ public class Track implements Serializable {
     private long size;
     private String coverHash="";
     private boolean isHistory=false;
+    private boolean isUser=false;
     private static final String TAG = Track.class.getName();
 
     public Track(File getAppDataPath, int idFileRemote, int idFileServer, int rating, String title,
@@ -164,6 +165,14 @@ public class Track implements Serializable {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public void setUser(boolean isUser) {
+        this.isUser=isUser;
+    }
+
+    public boolean isUser() {
+        return isUser;
     }
 
     public enum Status {

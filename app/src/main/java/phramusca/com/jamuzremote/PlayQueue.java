@@ -32,6 +32,7 @@ public class PlayQueue {
                 if(oldPosition<positionPlaying) {
                     positionPlaying--;
                 }
+                track.setUser(true);
                 queue.add(positionPlaying +1, track);
                 return true;
             }
@@ -40,14 +41,17 @@ public class PlayQueue {
     }
 
     synchronized static void moveDown(int oldPosition) {
-        if(oldPosition!= positionPlaying) {
+        if(oldPosition!= positionPlaying
+                && oldPosition<queue.size()) {
             Track track = getTrack(oldPosition);
             if(track!=null) {
                 queue.remove(oldPosition);
-                oldPosition++;
+                Track movedUpTrack = getTrack(oldPosition);
+                movedUpTrack.setUser(true);
                 if(oldPosition == positionPlaying) {
                     positionPlaying--;
                 }
+                track.setUser(true);
                 queue.add(oldPosition, track);
             }
         }
@@ -66,8 +70,12 @@ public class PlayQueue {
     }
 
     synchronized static void refresh(Playlist playlist) {
-        //FIXME: Do not remove items user intently queued (add a isQueued bool member in Track + store original playlist source)
-        queue.subList(positionPlaying+1, queue.size()).clear();
+        for (int i=queue.size()-1;i>positionPlaying;i--) {
+            Track track = queue.get(i);
+            if(!(track.isHistory() || track.isUser())) {
+                queue.remove(i);
+            }
+        }
         add(new ArrayList<>(), playlist);
     }
 
@@ -89,9 +97,9 @@ public class PlayQueue {
     }
 
     private synchronized static void add(List<Integer> excluded, Playlist playlist) {
-        int currentlyNext = queue.size()- positionPlaying -1;
-        if(playlist!=null && currentlyNext<MAX_QUEUE_NEXT+1 ) {
-            List<Track> addToQueue = playlist.getTracks(MAX_QUEUE_NEXT-currentlyNext+2, excluded);
+        int nbTracksAfterPlaying = queue.size()-1 - positionPlaying;
+        if(playlist!=null && nbTracksAfterPlaying<MAX_QUEUE_NEXT+1 ) {
+            List<Track> addToQueue = playlist.getTracks(MAX_QUEUE_NEXT-nbTracksAfterPlaying+2, excluded);
             queue.addAll(addToQueue);
         }
     }

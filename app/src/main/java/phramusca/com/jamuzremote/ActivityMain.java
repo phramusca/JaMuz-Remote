@@ -1453,7 +1453,12 @@ public class ActivityMain extends AppCompatActivity {
             localTrack = displayedTrack;
             refreshLocalPlaylistSpinner(false);
             audioPlayer.stop(false);
-            displayedTrack.setSource(displayedTrack.isHistory()?getString(R.string.history):localSelectedPlaylist.toString());
+            displayedTrack.setSource(
+                    displayedTrack.isHistory()
+                            ?getString(R.string.queue_history)
+                            :displayedTrack.isUser()
+                                ?getString(R.string.queue_user)
+                                :localSelectedPlaylist.toString());
             String msg = audioPlayer.play(displayedTrack);
             if(!msg.equals("")) {
                 helperToast.toastLong(msg);

@@ -17,7 +17,8 @@
     <string name="replayGainBaseVolume">ReplayGain base volume :</string>
     <string name="welcomeTitle">Welcome to</string>
     <string name="pathInfo">Choose an additional local path as a music source. Note that it is recommended to use JaMuz though.</string>
-    <string name="history">History</string>
+    <string name="queue_history">History</string>
+    <string name="queue_user">User</string>
     <string name="unknownCommand">Unknown Command:</string>
     <string name="playlist">Playlist</string>
     <string name="restored">restored</string>
@@ -74,4 +75,5 @@
         <item>months</item>
         <item>years</item>
     </string-array>
+
 </resources>
