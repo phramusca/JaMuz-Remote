@@ -63,6 +63,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.deezer.sdk.network.connect.DeezerConnect;
+import com.deezer.sdk.player.AlbumPlayer;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -706,8 +708,32 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         setDimMode(toggleButtonDimMode.isChecked());
-    }
 
+        // replace with your own Application ID
+        String applicationID = "213422";
+        DeezerConnect deezerConnect = new DeezerConnect(this, applicationID);
+
+        // create the player
+
+
+        albumPlayer = null;
+        /*try {
+            albumPlayer = new AlbumPlayer(this.getApplication(), deezerConnect, new WifiAndMobileNetworkStateChecker());
+        } catch (TooManyPlayersExceptions tooManyPlayersExceptions) {
+            tooManyPlayersExceptions.printStackTrace();
+        } catch (DeezerError deezerError) {
+            deezerError.printStackTrace();
+        }
+
+// start playing music
+        long albumId = 85837;
+        albumPlayer.playAlbum(albumId);*/
+
+// ...
+
+
+    }
+    AlbumPlayer albumPlayer;
     private void displayQueue() {
         Intent intent = new Intent(getApplicationContext(), ActivityPlayQueue.class);
         intent.putExtra("SelectedPlaylist", localSelectedPlaylist);
