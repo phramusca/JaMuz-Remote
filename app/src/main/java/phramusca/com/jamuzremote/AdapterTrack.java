@@ -151,7 +151,8 @@ public class AdapterTrack extends BaseAdapter {
     }
 
     public void moveDown(int oldPosition) {
-        if(oldPosition!=positionPlaying) {
+        if(oldPosition!=positionPlaying
+                && oldPosition<tracks.size()) {
             Track track = tracks.get(oldPosition);
             if(track!=null) {
                 tracks.remove(oldPosition);
