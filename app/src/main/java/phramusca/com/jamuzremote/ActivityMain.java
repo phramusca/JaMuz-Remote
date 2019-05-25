@@ -70,6 +70,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.kiddoware.kidsplace.sdk.KPUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -145,6 +146,9 @@ public class ActivityMain extends AppCompatActivity {
     private ToggleButton toggleButtonOptions;
     private Button buttonRatingOperator;
     private Button button_save;
+    private Button button_new;
+    private Button button_restore;
+    private Button button_delete;
     private SeekBar seekBarPosition;
     private Spinner spinnerPlaylist;
     private Spinner spinnerGenre;
@@ -169,7 +173,7 @@ public class ActivityMain extends AppCompatActivity {
     private LinearLayout layoutTagsPlaylistLayout;
     private LinearLayout layoutRatingPlaylistLayout;
     private LinearLayout layoutGenrePlaylistLayout;
-    private LinearLayout layoutAttributes;
+    private LinearLayout layoutEditTags;
     private LinearLayout layoutPlaylist;
     private LinearLayout layoutPlaylistEditBar;
     private GridLayout layoutPlaylistToolBar;
@@ -237,7 +241,7 @@ public class ActivityMain extends AppCompatActivity {
         playListOrderRadio = findViewById(R.id.playlist_order_radio);
 
         layoutGenrePlaylistLayout = findViewById(R.id.panel_genre_playlist_layout);
-        layoutAttributes = findViewById(R.id.panel_attributes);
+        layoutEditTags = findViewById(R.id.panel_edit);
         layoutPlaylist = findViewById(R.id.panel_playlist);
 
         layoutPlaylistToolBar = findViewById(R.id.panel_playlist_toolbar);
@@ -505,7 +509,7 @@ public class ActivityMain extends AppCompatActivity {
         toggleButtonEditTags = findViewById(R.id.button_edit_toggle);
         toggleButtonEditTags.setOnClickListener(v -> {
             dimOn();
-            toggle(layoutAttributes, !toggleButtonEditTags.isChecked());
+            toggle(layoutEditTags, !toggleButtonEditTags.isChecked());
             if(toggleButtonEditTags.isChecked()) {
                 toggleOff(toggleButtonPlaylist, layoutPlaylist);
                 toggleOff(toggleButtonOptions, layoutOptions);
@@ -522,7 +526,7 @@ public class ActivityMain extends AppCompatActivity {
             dimOn();
             toggle(layoutPlaylist, !toggleButtonPlaylist.isChecked());
             if(toggleButtonPlaylist.isChecked()) {
-                toggleOff(toggleButtonEditTags, layoutAttributes);
+                toggleOff(toggleButtonEditTags, layoutEditTags);
                 toggleOff(toggleButtonOptions, layoutOptions);
             } else {
                 toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
@@ -542,12 +546,12 @@ public class ActivityMain extends AppCompatActivity {
                 toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
                 toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
 
-                toggleOff(toggleButtonEditTags, layoutAttributes);
+                toggleOff(toggleButtonEditTags, layoutEditTags);
                 toggleOff(toggleButtonPlaylist, layoutPlaylist);
             }
         });
 
-        Button button_new = findViewById(R.id.button_new);
+        button_new = findViewById(R.id.button_new);
         button_new.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMain.this);
             builder.setTitle(R.string.playlistName);
@@ -566,7 +570,7 @@ public class ActivityMain extends AppCompatActivity {
                         newPlaylist = new Playlist(text, true);
                     }
                     localPlaylists.put(newPlaylist.getName(), newPlaylist);
-                    setupLocalPlaylistSpinner(newPlaylist);
+                    setupLocalPlaylistSpinner(newPlaylist.getName());
                 } else {
                     helperToast.toastLong(getString(R.string.playlist)+" \""+text+"\" "+getString(R.string.alreadyExists));
                 }
@@ -595,7 +599,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        Button button_restore = findViewById(R.id.button_restore);
+        button_restore = findViewById(R.id.button_restore);
         button_restore.setOnClickListener(v -> {
             if(localSelectedPlaylist!=null) {
                 StringBuilder msg= new StringBuilder().append(getString(R.string.playlist))
@@ -616,7 +620,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        Button button_delete = findViewById(R.id.button_delete);
+        button_delete = findViewById(R.id.button_delete);
         button_delete.setOnClickListener(v -> {
             if(localSelectedPlaylist!=null) {
                 new AlertDialog.Builder(ActivityMain.this)
@@ -771,15 +775,7 @@ public class ActivityMain extends AppCompatActivity {
             enableSync(false);
         }
 
-        toggle(layoutControls, true);
-        toggle(layoutOptions, true);
-        toggle(layoutAttributes, true);
-        toggle(layoutOrderPlaylistLayout, true);
-        toggle(layoutGenrePlaylistLayout, true);
-        toggle(layoutTagsPlaylistLayout, true);
-        toggle(layoutRatingPlaylistLayout, true);
-        //toggle(layoutPlaylist, true);
-
+        KPUtility.handleKPIntegration(this, KPUtility.GOOGLE_MARKET);
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
@@ -1204,14 +1200,39 @@ public class ActivityMain extends AppCompatActivity {
             dimOn();
         }
 
-        if(wasRemoteConnected && !audioPlayer.isPlaying()) {
-            buttonRemote.setEnabled(false);
-            buttonRemote.performClick();
+        toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
+        toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
+        toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
+        toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
+        toggleOff(toggleButtonControls, layoutControls);
+        toggleOff(toggleButtonOptions, layoutOptions);
+        toggleOff(toggleButtonEditTags, layoutEditTags);
+        toggle(layoutPlaylist, audioPlayer.isPlaying());
+        toggleButtonPlaylist.setChecked(!audioPlayer.isPlaying());
+
+        boolean isKidsPlace = KPUtility.isKidsPlaceRunning(this);
+        toggleButtonEditTags.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+        toggleButtonOptions.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+        buttonRemote.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+        buttonSync.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+
+        button_delete.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+        button_save.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+        button_new.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+        button_restore.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+
+        spinnerPlaylist.setEnabled(!isKidsPlace);
+        if(!isKidsPlace) {
+            if(wasRemoteConnected && !audioPlayer.isPlaying()) {
+                buttonRemote.setEnabled(false);
+                buttonRemote.performClick();
+            }
+        } else {
+            setupLocalPlaylistSpinner("Culin");
         }
 
-        //Only re-enable the following if loosing media button receiver again
-        /*audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
-        registerButtonReceiver();*/
+        audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
+        registerButtonReceiver();
     }
 
     private void registerButtonReceiver() {
@@ -1953,17 +1974,17 @@ public class ActivityMain extends AppCompatActivity {
         setupLocalPlaylistSpinner(null);
     }
 
-    private void setupLocalPlaylistSpinner(Playlist playlist) {
+    private void setupLocalPlaylistSpinner(String playlistName) {
         if (localPlaylists.size() > 0) {
             localPlaylists = sortHashMapByValues(localPlaylists);
         } else {
             Playlist playlistAll = new Playlist("All", true);
             localPlaylists.put(playlistAll.getName(), playlistAll);
-            playlist=playlistAll;
+            playlistName=playlistAll.getName();
         }
 
-        if(playlist!=null && localPlaylists.containsKey(playlist.getName())) {
-            localSelectedPlaylist=playlist;
+        if(playlistName!=null && localPlaylists.containsKey(playlistName)) {
+            localSelectedPlaylist=localPlaylists.get(playlistName);
         } else {
             localSelectedPlaylist = localPlaylists.values().iterator().next();
         }
