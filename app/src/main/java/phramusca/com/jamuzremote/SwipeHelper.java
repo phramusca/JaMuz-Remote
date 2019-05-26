@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+//https://stackoverflow.com/questions/44965278/recyclerview-itemtouchhelper-buttons-on-swipe?answertab=active#tab-top
 public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
     public static final int BUTTON_WIDTH = 100;

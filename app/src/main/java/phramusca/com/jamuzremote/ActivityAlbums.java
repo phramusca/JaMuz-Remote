@@ -39,21 +39,17 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
             adapterAlbum = new AdapterAlbum(this, recyclerView, albums, this);
             recyclerView.setAdapter(adapterAlbum);
             adapterAlbum.addListener(this);
-            //set load more listener for the RecyclerView adapter
             adapterAlbum.setOnLoadMoreListener(() -> {
                 if (!complete) {
                     albums.add(null);
                     adapterAlbum.notifyItemInserted(albums.size() - 1);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            albums.remove(albums.size() - 1);
-                            adapterAlbum.notifyItemRemoved(albums.size());
-                            complete=!addMore();
-                            adapterAlbum.notifyDataSetChanged();
-                            adapterAlbum.setLoaded();
-                        }
-                    }, 5000);
+                    new Handler().post(() -> {
+                        int loaderPos = albums.size() - 1;
+                        complete=!addMore();
+                        albums.remove(loaderPos);
+                        adapterAlbum.notifyDataSetChanged();
+                        adapterAlbum.setLoaded();
+                    });
                 } else {
                     Toast.makeText(ActivityAlbums.this, "Loading data completed", Toast.LENGTH_SHORT).show();
                 }
