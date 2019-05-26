@@ -1,14 +1,14 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.widget.Button;
 import android.widget.TextView;
-
-import com.wdullaer.swipeactionadapter.SwipeActionAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +16,6 @@ import java.util.List;
 public class ActivityAlbumTracks extends AppCompatActivity {
 
     AdapterAlbumTrack trackAdapter;
-    SwipeActionAdapter swipeActionAdapter;
-    RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,53 +46,31 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                 }
             };
             title.setText(tracks.get(0).getAlbum());
-            /*swipeActionAdapter = new SwipeActionAdapter(trackAdapter);
-            swipeActionAdapter.setListView(listView);
-            listView.setAdapter(swipeActionAdapter);
-            swipeActionAdapter.addBackground(SwipeDirection.DIRECTION_FAR_LEFT,R.layout.queue_slide_play)
-                    .addBackground(SwipeDirection.DIRECTION_NORMAL_LEFT,R.layout.queue_slide_add);
-            swipeActionAdapter.setSwipeActionListener(new SwipeActionAdapter.SwipeActionListener(){
-                @Override
-                public boolean hasActions(int position, SwipeDirection direction){
-                    if(direction.isLeft()) return true;
-                    if(direction.isRight()) return false; //Disabling right swipes
-                    return false;
-                }
 
+            SwipeHelper swipeHelper = new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
                 @Override
-                public boolean shouldDismiss(int position, SwipeDirection direction){
-                    return false; //direction == SwipeDirection.DIRECTION_NORMAL_LEFT;
-                }
-
-                @Override
-                public void onSwipe(int[] positionList, SwipeDirection[] directionList){
-                    for(int i=0;i<positionList.length;i++) {
-                        SwipeDirection direction = directionList[i];
-                        int position = positionList[i];
-                        Track track = (Track) swipeActionAdapter.getItem(position);
-                        switch (direction) {
-                            case DIRECTION_FAR_LEFT:
+                public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
+                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                            "",
+                            R.drawable.ic_slide_queue_play,
+                            Color.parseColor("#36ff00"),
+                            pos -> {
+                                Track track = (Track) tracks.get(pos);
                                 insertAndSetResult(track, true);
-                                break;
-                            case DIRECTION_NORMAL_LEFT:
+                            },
+                            getApplicationContext()));
+
+                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                            "",
+                            R.drawable.ic_slide_queue_add,
+                            Color.parseColor("#42f512"),
+                            pos -> {
+                                Track track = (Track)tracks.get(pos);
                                 insertAndSetResult(track, false);
-                                break;
-                        }
-                        swipeActionAdapter.notifyDataSetChanged();
-                    }
+                            },
+                            getApplicationContext()));
                 }
-            });
-            //Reads thumbnails in background
-            new Thread() {
-                @Override
-                public void run() {
-                    for(Track track : tracks) {
-                        if(track.getTumb(true)!=null) {
-                            runOnUiThread(() -> trackAdapter.notifyDataSetChanged());
-                        }
-                    }
-                }
-            }.start();*/
+            };
         }
     }
 

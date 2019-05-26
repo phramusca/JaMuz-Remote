@@ -85,7 +85,7 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
                         "",
                         R.drawable.ic_slide_queue_play,
-                        Color.parseColor("#FF3C30"),
+                        Color.parseColor("#36ff00"),
                         pos -> {
                             Track album = (Track) albums.get(pos);
                             insertAndSetResult(album, true);
@@ -95,7 +95,7 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
                         "",
                         R.drawable.ic_slide_queue_add,
-                        Color.parseColor("#FF9502"),
+                        Color.parseColor("#42f512"),
                         pos -> {
                             Track album = (Track)albums.get(pos);
                             insertAndSetResult(album, false);

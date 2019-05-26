@@ -1,12 +1,12 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Html;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.widget.Button;
 
 import com.wdullaer.swipeactionadapter.SwipeActionAdapter;
@@ -52,71 +52,62 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
                     return new ArrayList<>();
                 }
             };
-
             trackAdapter.addListener(this);
-/*
 
-
-            trackSwipeAdapter.addBackground(SwipeDirection.DIRECTION_FAR_LEFT,R.layout.queue_slide_play)
-                    .addBackground(SwipeDirection.DIRECTION_NORMAL_LEFT,R.layout.queue_slide_add)
-                    .addBackground(SwipeDirection.DIRECTION_FAR_RIGHT,R.layout.queue_slide_remove)
-                    .addBackground(SwipeDirection.DIRECTION_NORMAL_RIGHT,R.layout.queue_slide_down);
-            trackSwipeAdapter.setSwipeActionListener(new SwipeActionAdapter.SwipeActionListener(){
+            SwipeHelper swipeHelper = new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
                 @Override
-                public boolean hasActions(int position, SwipeDirection direction){
-                    *//*if(direction.isLeft()) return true; // Change this to false to disable left swipes
-                    if(direction.isRight()) return true;
-                    return false;*//*
-                    return true;
-                }
-
-                @Override
-                public boolean shouldDismiss(int position, SwipeDirection direction){
-                    // Only dismiss an item when swiping normal left
-                    return false; //direction == SwipeDirection.DIRECTION_NORMAL_LEFT;
-                }
-
-                @Override
-                public void onSwipe(int[] positionList, SwipeDirection[] directionList){
-                    for(int i=0;i<positionList.length;i++) {
-                        SwipeDirection direction = directionList[i];
-                        int position = positionList[i];
-                        Track track = (Track) trackSwipeAdapter.getItem(position);
-                        switch (direction) {
-                            case DIRECTION_FAR_LEFT:
-                                confirmPlayNext(track, position+offset);
-                                break;
-                            case DIRECTION_NORMAL_LEFT:
+                public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
+                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                            "",
+                            R.drawable.ic_slide_queue_add,
+                            Color.parseColor("#42f512"),
+                            position -> {
                                 PlayQueue.insert(position+offset);
                                 trackAdapter.insertNext(position);
-                                break;
-                            case DIRECTION_FAR_RIGHT:
-                                confirmRemoval(track, position);
-                                break;
-                            case DIRECTION_NORMAL_RIGHT:
+                            },
+                            getApplicationContext()));
+
+                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                            "",
+                            R.drawable.ic_slide_queue_play,
+                            Color.parseColor("#36ff00"),
+                            position -> {
+                                if(PlayQueue.insert(position+offset)) {
+                                    Intent intent = new Intent();
+                                    intent.putExtra("action", "playNext");
+                                    setResult(RESULT_OK, intent);
+                                    finish();
+                                }
+                            },
+                            getApplicationContext()));
+
+                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                            "",
+                            R.drawable.ic_slide_remove,
+                            Color.parseColor("#FF3C30"),
+                            position -> {
+                                PlayQueue.remove(position+offset);
+                                trackAdapter.remove(position);
+                                trackAdapter.notifyDataSetChanged();
+                            },
+                            getApplicationContext()));
+
+                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                            "",
+                            R.drawable.ic_slide_down,
+                            Color.parseColor("#FF9502"),
+                            position -> {
                                 PlayQueue.moveDown(position+offset);
                                 trackAdapter.moveDown(position);
-                                break;
-                        }
-                        trackSwipeAdapter.notifyDataSetChanged();
-                    }
+                            },
+                            getApplicationContext()));
                 }
-            });
-            //Reads thumbnails in background
-            new Thread() {
-                @Override
-                public void run() {
-                    for(Track track : queue) {
-                        if(track.getTumb(true)!=null) {
-                            runOnUiThread(() -> trackAdapter.notifyDataSetChanged());
-                        }
-                    }
-                }
-            }.start();*/
+            };
+
         }
     }
 
-    private void confirmPlayNext(Track track, int position) {
+ /*   private void confirmPlayNext(Track track, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.confirmPlayNow);
         builder.setMessage(Html.fromHtml(
@@ -133,9 +124,9 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
         });
         builder.setCancelable(true);
         builder.show();
-    }
+    }*/
 
-    private void confirmRemoval(Track track, int position) {
+/*    private void confirmRemoval(Track track, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.confirmRemove);
         builder.setMessage(Html.fromHtml(
@@ -149,7 +140,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
         });
         builder.setCancelable(true);
         builder.show();
-    }
+    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
