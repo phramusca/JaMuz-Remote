@@ -1,5 +1,6 @@
 package phramusca.com.jamuzremote;
 
-public interface OnLoadMoreListener {
+public interface OnLoadListener {
     void onLoadMore();
+    void onLoadTop();
 }
