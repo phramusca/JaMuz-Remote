@@ -10,6 +10,9 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -233,37 +236,60 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             return false;
         }
 
-        void onDraw(Canvas c, RectF rect, int pos, float dX){
+        void onDraw(Canvas canvas, RectF rect, int pos, float dX){
             Paint p = new Paint();
 
             // Draw background
             p.setColor(color);
-            c.drawRect(rect, p);
+            canvas.drawRect(rect, p);
 
             //Draw icon
             Drawable d = mContext.getResources().getDrawable(imageResId, null);
             int iconSize=70;
             int marginH=20;
             int marginV=15;
-            int left = (int) rect.left+marginH;
+            // Top left corner
+            /*int left = (int) rect.left+marginH;
             int top = (int) rect.top+marginV;
             int right = left+iconSize<rect.right-marginH?left+iconSize: (int) rect.right-marginH;
+            int bottom = top+iconSize;*/
+            //Center vertical and horizontal
+            float xD = rect.width() / 2f - iconSize / 2f;
+            float yD = rect.height() / 2f - iconSize / 2f;
+
+            int left = (int) (rect.left + xD);
+            int top = (int) (rect.top+yD);
+            int right = left+iconSize<rect.right-marginH?left+iconSize: (int) rect.right-marginH;
             int bottom = top+iconSize;
+
             d.setBounds(left, top, right, bottom);
-            d.draw(c);
+            d.draw(canvas);
 
             // Draw Text
             if(!text.equals("")) {
-                Rect r = new Rect();
-                float cHeight = rect.height();
-                float cWidth = rect.width();
+
+                //Center text horizontal and vertical
+                /*Rect r = new Rect();
                 p.setColor(Color.WHITE);
                 p.setTextAlign(Paint.Align.CENTER);
                 p.getTextBounds(text, 0, text.length(), r);
                 p.setTextSize(30);
-                float x = cWidth / 2f - r.width() / 2f - r.left;
-                float y = cHeight / 2f + r.height() / 2f - r.bottom;
-                c.drawText(text, rect.left + x, rect.top + y, p);
+                float x = rect.width() / 2f - r.width() / 2f - r.left;
+                float y = rect.height() / 2f + r.height() / 2f - r.bottom;
+                canvas.drawText(text, rect.left + x, rect.top + y, p);*/
+
+                //For long text on multiple lines (no needed/wanted on small texts)
+                TextPaint textPaint = new TextPaint();
+                textPaint.setTextSize(30);
+                textPaint.setColor(Color.WHITE);
+                StaticLayout sl = new StaticLayout(text, textPaint, (int)rect.width(),
+                        Layout.Alignment.ALIGN_CENTER, 1, 1, false);
+                canvas.save();
+                Rect r = new Rect();
+                float y = (rect.height() / 2f) + (r.height() / 2f) - r.bottom - (sl.getHeight() /2);
+                canvas.translate(rect.left, rect.top + y);
+                sl.draw(canvas);
+                canvas.restore();
             }
 
             clickRegion = rect;

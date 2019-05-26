@@ -64,7 +64,7 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
             @Override
             public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
-                        "Play",
+                        "",
                         R.drawable.ic_slide_queue_play,
                         Color.parseColor("#FF3C30"),
                         pos -> {
@@ -74,7 +74,7 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
                         getApplicationContext()));
 
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
-                        "Queue",
+                        "",
                         R.drawable.ic_slide_queue_add,
                         Color.parseColor("#FF9502"),
                         pos -> {
