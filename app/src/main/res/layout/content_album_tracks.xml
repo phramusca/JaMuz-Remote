@@ -34,10 +34,10 @@
             android:textSize="20sp"/>
     </GridLayout>
 
-    <ListView
+    <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/list_album_tracks">
-    </ListView>
+    </android.support.v7.widget.RecyclerView>
 
 </LinearLayout>

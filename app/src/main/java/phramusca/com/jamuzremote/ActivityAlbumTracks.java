@@ -3,19 +3,21 @@ package phramusca.com.jamuzremote;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.wdullaer.swipeactionadapter.SwipeActionAdapter;
-import com.wdullaer.swipeactionadapter.SwipeDirection;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ActivityAlbumTracks extends AppCompatActivity {
 
     AdapterAlbumTrack trackAdapter;
     SwipeActionAdapter swipeActionAdapter;
+    RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,10 +34,21 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         final ArrayList<Track> tracks = (ArrayList<Track>) intent.getSerializableExtra("tracksList");
 
         if(tracks!=null) {
-            ListView listView = findViewById(R.id.list_album_tracks);
-            trackAdapter = new AdapterAlbumTrack(this, tracks, -1);
+            RecyclerView recyclerView = findViewById(R.id.list_album_tracks);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            trackAdapter = new AdapterAlbumTrack(this, tracks, -1, recyclerView) {
+                @Override
+                List<Track> getMore() {
+                    return new ArrayList<>();
+                }
+
+                @Override
+                List<Track> getTop() {
+                    return new ArrayList<>();
+                }
+            };
             title.setText(tracks.get(0).getAlbum());
-            swipeActionAdapter = new SwipeActionAdapter(trackAdapter);
+            /*swipeActionAdapter = new SwipeActionAdapter(trackAdapter);
             swipeActionAdapter.setListView(listView);
             listView.setAdapter(swipeActionAdapter);
             swipeActionAdapter.addBackground(SwipeDirection.DIRECTION_FAR_LEFT,R.layout.queue_slide_play)
@@ -81,7 +94,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                         }
                     }
                 }
-            }.start();
+            }.start();*/
         }
     }
 

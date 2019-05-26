@@ -19,7 +19,7 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
     private static final int ALBUM_TRACK_REQUEST_CODE = 100;
 
     private List<Track> albums;
-    private AdapterAlbum adapterAlbum; //http://www.devexchanges.info/2017/02/android-recyclerview-dynamically-load.html
+    private AdapterAlbum adapterAlbum;
     private boolean complete;
     private boolean completeTop;
     RecyclerView recyclerView;
@@ -38,7 +38,7 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
         if(addMore()) {
             recyclerView = findViewById(R.id.recycler_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            adapterAlbum = new AdapterAlbum(this, recyclerView, albums, this);
+            adapterAlbum = new AdapterAlbum(this, recyclerView, albums);
             recyclerView.setAdapter(adapterAlbum);
             adapterAlbum.addListener(this);
             adapterAlbum.setOnLoadListener(new OnLoadListener() {

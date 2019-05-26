@@ -1,8 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
-import android.view.View;
-import android.view.ViewGroup;
+import android.support.v7.widget.RecyclerView;
 
 import java.util.List;
 import java.util.Locale;
@@ -11,22 +10,31 @@ import java.util.Locale;
  * Created by raph on 03/03/18.
  */
 
-public class AdapterAlbumTrack extends AdapterTrack {
+public abstract class AdapterAlbumTrack extends AdapterTrack {
 
-    AdapterAlbumTrack(Context context, List<Track> tracks, int positionPlaying) {
-        super(context, tracks, positionPlaying);
+    AdapterAlbumTrack(Context context, List<Track> tracks, int positionPlaying, RecyclerView recyclerView) {
+        super(context, tracks, positionPlaying, recyclerView);
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        Track track = tracks.get(position);
-        track.getTags(true);
-        return getLayout(position, convertView, parent,
-                track.getTitle(),
-                track.getArtist(),
-                String.format(Locale.ENGLISH,"%d/5 %s",
-                        track.getRating(),
-                        track.getGenre()),
-                track.getTags());
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof UserViewHolder) {
+            UserViewHolder userViewHolder = (UserViewHolder) holder;
+            Track track = tracks.get(position);
+            track.getTags(false);
+            setView(position, userViewHolder,
+                    track.getTitle(),
+                    track.getArtist(),
+                    String.format(Locale.ENGLISH,"%d/5 %s",
+                            track.getRating(),
+                            track.getGenre()),
+                    track.getTags());
+
+        } else if (holder instanceof LoadingViewHolder) {
+            LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
+            loadingViewHolder.progressBar.setIndeterminate(true);
+        }
     }
+
+
 }

@@ -6,16 +6,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Handler;
 import android.support.v4.content.ContextCompat;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.support.v7.widget.RecyclerView;
+import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -23,69 +18,131 @@ import java.util.Locale;
  * Created by raph on 03/03/18.
  */
 
-public class AdapterTrack extends BaseAdapter {
+public abstract class AdapterTrack extends AdapterLoad {
 
     private Context mContext;
     List<Track> tracks;
-    private LayoutInflater mInflater;
     private int positionPlaying;
+    private boolean complete;
+    private boolean completeTop;
 
-    AdapterTrack(Context context, List<Track> tracks, int positionPlaying) {
+    AdapterTrack(Context context, List<Track> tracks, int positionPlaying, RecyclerView recyclerView) {
+        super(context, recyclerView);
         mContext = context;
         this.tracks = tracks;
-        mInflater = LayoutInflater.from(context);
+        readCovers(tracks);
         this.positionPlaying = positionPlaying;
+        complete=false;
+        completeTop=false;
+        setOnLoadListener(new OnLoadListener() {
+            @Override
+            public void onLoadMore() {
+                if (!complete) {
+                    tracks.add(null);
+                    notifyItemInserted(tracks.size() - 1);
+                    new Handler().post(() -> {
+                        int loaderPos = tracks.size() - 1;
+                        complete=!addMore();
+                        remove(loaderPos);
+                        notifyDataSetChanged();
+                        setLoaded();
+                    });
+                } else {
+                    Toast.makeText(mContext, "Loading data completed", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onLoadTop() {
+                    if(!completeTop) {
+                        tracks.add(0, null);
+                        notifyItemInserted(0);
+                        recyclerView.getLayoutManager().scrollToPosition(0);
+                        new Handler().post(() -> {
+                            int nbAdded = addTop();
+                            completeTop=nbAdded<=0;
+                            tracks.remove(nbAdded);
+                            notifyDataSetChanged();
+                            setLoadedTop();
+                        });
+                    } else {
+                        Toast.makeText(mContext, "Loading data ON TOP completed", Toast.LENGTH_SHORT).show();
+                    }
+            }
+        });
+
+        //if(addMore()) {
+
+            recyclerView.setAdapter(this);
+        //}
     }
 
-    @Override
-    public int getCount() {
-        return tracks.size();
+    abstract List<Track> getMore();
+    abstract List<Track> getTop();
+
+    boolean addMore() {
+        List<Track> newTracks = getMore();
+        this.tracks.addAll(newTracks);
+        readCovers(newTracks);
+        return newTracks.size()>0;
     }
 
-    @Override
-    public Object getItem(int position) {
-        return tracks.get(position);
+    int addTop() {
+        List<Track> newTracks = getTop();
+        this.tracks.addAll(0, newTracks);
+        readCovers(newTracks);
+        return newTracks.size();
     }
 
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        Track track = tracks.get(position);
-        track.getTags(false);
-        return getLayout(position, convertView, parent,
-                track.getTitle(),
-                track.getArtist(),
-                track.getAlbum(),
-                String.format(Locale.ENGLISH,
-                        "%s %d/5 %s",
-                        track.getTags(),
-                        track.getRating(),
-                        track.getGenre()
-                ));
-    }
-
-    LinearLayout getLayout(int position, View convertView, ViewGroup parent,
-                           String line1, String line2, String line3, String line4) {
-        LinearLayout layoutItem;
-        if (convertView == null) {
-            layoutItem = (LinearLayout) mInflater.inflate(R.layout.queue_item, parent, false);
-        } else {
-            layoutItem = (LinearLayout) convertView;
+    private void readCovers(List<Track> tracks) {
+        for(Track track : tracks) {
+            if(track.getTumb(true)!=null) {
+                notifyDataSetChanged();
+            }
         }
+    }
 
-        TextView item_line1 = layoutItem.findViewById(R.id.item_line1);
-        TextView item_line2 = layoutItem.findViewById(R.id.item_line2);
-        TextView item_line3 = layoutItem.findViewById(R.id.item_line3);
-        TextView item_line4 = layoutItem.findViewById(R.id.item_line4);
+    @Override
+    public int getItemViewType(int position) {
+        return tracks.get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
+    }
 
-        item_line1.setText(line1);
-        item_line2.setText(line2);
-        item_line3.setText(line3);
-        item_line4.setText(line4);
+    @Override
+    public int getItemCount() {
+        return tracks == null ? 0 : tracks.size();
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof UserViewHolder) {
+            UserViewHolder userViewHolder = (UserViewHolder) holder;
+            Track track = tracks.get(position);
+            track.getTags(false);
+            setView(position, userViewHolder,
+                    track.getTitle(),
+                    track.getArtist(),
+                    track.getAlbum(),
+                    String.format(Locale.ENGLISH,
+                            "%s %d/5 %s",
+                            track.getTags(),
+                            track.getRating(),
+                            track.getGenre()
+                    ));
+
+        } else if (holder instanceof LoadingViewHolder) {
+            LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
+            loadingViewHolder.progressBar.setIndeterminate(true);
+        }
+    }
+
+
+    void setView(int position, UserViewHolder userViewHolder,
+                 String line1, String line2, String line3, String line4) {
+
+        userViewHolder.item_line1.setText(line1);
+        userViewHolder.item_line2.setText(line2);
+        userViewHolder.item_line3.setText(line3);
+        userViewHolder.item_line4.setText(line4);
 
         //TODO: Make a Repo in ActivityPlayQueue to speed even further
         //Or make it global as for Remote
@@ -98,24 +155,21 @@ public class AdapterTrack extends BaseAdapter {
             bitmap = overlayPlayingIcon(bitmap, 15);
         }
 
-        ImageView imageViewCover = layoutItem.findViewById(R.id.imageView);
-        imageViewCover.setImageBitmap(bitmap);
+        userViewHolder.imageViewCover.setImageBitmap(bitmap);
         BitmapDrawable bitmapDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
         bitmapDrawable.setAlpha(50);
 
         if (tracks.get(position).isHistory()) {
-            layoutItem.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
+            userViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
         } else {
-            layoutItem.setBackgroundColor(ContextCompat.getColor(mContext, R.color.background_color));
+            userViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.background_color));
         }
 
-        layoutItem.setTag(position);
-        layoutItem.setOnClickListener(view -> {
+        userViewHolder.itemView.setTag(position);
+        userViewHolder.itemView.setOnClickListener(view -> {
             Integer position1 = (Integer)view.getTag();
             sendListener(tracks.get(position1), position1);
         });
-
-        return layoutItem;
     }
 
     private Bitmap overlayPlayingIcon(Bitmap bitmap, int margin) {
@@ -180,17 +234,5 @@ public class AdapterTrack extends BaseAdapter {
 
     public interface TrackAdapterListener {
         void onClick(Track item, int position);
-    }
-
-    private ArrayList<TrackAdapterListener> mListListener = new ArrayList<>();
-
-    public void addListener(TrackAdapterListener aListener) {
-        mListListener.add(aListener);
-    }
-
-    private void sendListener(Track item, int position) {
-        for(int i = mListListener.size()-1; i >= 0; i--) {
-            mListListener.get(i).onClick(item, position);
-        }
     }
 }
