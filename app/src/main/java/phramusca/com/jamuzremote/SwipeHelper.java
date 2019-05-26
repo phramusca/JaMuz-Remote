@@ -23,7 +23,7 @@ import java.util.Queue;
 
 public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
-    public static final int BUTTON_WIDTH = 200;
+    public static final int BUTTON_WIDTH = 100;
     private RecyclerView recyclerView;
     private List<UnderlayButton> buttons;
     private GestureDetector gestureDetector;
@@ -69,8 +69,8 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         }
     };
 
-    public SwipeHelper(Context context, RecyclerView recyclerView) {
-        super(0, ItemTouchHelper.LEFT);
+    public SwipeHelper(Context context, RecyclerView recyclerView, int swipeDirs) {
+        super(0, swipeDirs);
         this.recyclerView = recyclerView;
         this.buttons = new ArrayList<>();
         this.gestureDetector = new GestureDetector(context, gestureListener);
@@ -88,7 +88,6 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
         attachSwipe();
     }
-
 
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
@@ -141,20 +140,18 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         }
 
         if(actionState == ItemTouchHelper.ACTION_STATE_SWIPE){
-            if(dX < 0) {
-                List<UnderlayButton> buffer = new ArrayList<>();
+            List<UnderlayButton> buffer = new ArrayList<>();
 
-                if (!buttonsBuffer.containsKey(pos)){
-                    instantiateUnderlayButton(viewHolder, buffer);
-                    buttonsBuffer.put(pos, buffer);
-                }
-                else {
-                    buffer = buttonsBuffer.get(pos);
-                }
-
-                translationX = dX * buffer.size() * BUTTON_WIDTH / itemView.getWidth();
-                drawButtons(c, itemView, buffer, pos, translationX);
+            if (!buttonsBuffer.containsKey(pos)){
+                instantiateUnderlayButton(viewHolder, buffer);
+                buttonsBuffer.put(pos, buffer);
             }
+            else {
+                buffer = buttonsBuffer.get(pos);
+            }
+
+            translationX = dX * buffer.size() * BUTTON_WIDTH / itemView.getWidth();
+            drawButtons(c, itemView, buffer, pos, translationX);
         }
 
         super.onChildDraw(c, recyclerView, viewHolder, translationX, dY, actionState, isCurrentlyActive);
@@ -171,22 +168,35 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
     private void drawButtons(Canvas c, View itemView, List<UnderlayButton> buffer, int pos, float dX){
         float right = itemView.getRight();
+        float left = itemView.getLeft();
         float dButtonWidth = (-1) * dX / buffer.size();
 
         for (UnderlayButton button : buffer) {
-            float left = right - dButtonWidth;
-            button.onDraw(
-                    c,
-                    new RectF(
-                            left,
-                            itemView.getTop(),
-                            right,
-                            itemView.getBottom()
-                    ),
-                    pos
-            );
-
-            right = left;
+            if (dX < 0) {
+                left = right - dButtonWidth;
+                button.onDraw(
+                        c,
+                        new RectF(
+                                left,
+                                itemView.getTop(),
+                                right,
+                                itemView.getBottom()
+                        ),
+                        pos, dX
+                );
+                right = left;
+            } else if (dX > 0) {
+                right = left - dButtonWidth;
+                button.onDraw(c,
+                        new RectF(
+                                left,
+                                itemView.getTop(),
+                                right,
+                                itemView.getBottom()
+                        ), pos, dX
+                );
+                left=right;
+            }
         }
     }
 
@@ -206,7 +216,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         private UnderlayButtonClickListener clickListener;
         private Context mContext;
 
-        public UnderlayButton(String text, int imageResId, int color, UnderlayButtonClickListener clickListener, Context mContext) {
+        UnderlayButton(String text, int imageResId, int color, UnderlayButtonClickListener clickListener, Context mContext) {
             this.text = text;
             this.imageResId = imageResId;
             this.color = color;
@@ -223,7 +233,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             return false;
         }
 
-        public void onDraw(Canvas c, RectF rect, int pos){
+        void onDraw(Canvas c, RectF rect, int pos, float dX){
             Paint p = new Paint();
 
             // Draw background
@@ -232,11 +242,9 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
             //Draw icon
             Drawable d = mContext.getResources().getDrawable(imageResId, null);
-
             int iconSize=70;
             int marginH=20;
             int marginV=15;
-
             int left = (int) rect.left+marginH;
             int top = (int) rect.top+marginV;
             int right = left+iconSize<rect.right-marginH?left+iconSize: (int) rect.right-marginH;
@@ -245,19 +253,18 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             d.draw(c);
 
             // Draw Text
-            Rect r = new Rect();
-            float cHeight = rect.height();
-            float cWidth = rect.width();
-            p.setColor(Color.WHITE);
-            p.setTextAlign(Paint.Align.CENTER);
-            p.getTextBounds(text, 0, text.length(), r);
-            p.setTextSize(30);
-            float x = cWidth / 2f - r.width() / 2f - r.left;
-            float y = cHeight / 2f + r.height() / 2f - r.bottom;
-            c.drawText(text, rect.left + x, rect.top + y, p);
-
-           /* c.drawText(text, left, top+iconSize,p);*/
-
+            if(!text.equals("")) {
+                Rect r = new Rect();
+                float cHeight = rect.height();
+                float cWidth = rect.width();
+                p.setColor(Color.WHITE);
+                p.setTextAlign(Paint.Align.CENTER);
+                p.getTextBounds(text, 0, text.length(), r);
+                p.setTextSize(30);
+                float x = cWidth / 2f - r.width() / 2f - r.left;
+                float y = cHeight / 2f + r.height() / 2f - r.bottom;
+                c.drawText(text, rect.left + x, rect.top + y, p);
+            }
 
             clickRegion = rect;
             this.pos = pos;
