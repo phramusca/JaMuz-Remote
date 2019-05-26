@@ -1,7 +1,6 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -51,9 +50,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                 @Override
                 public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
                     underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            "",
-                            R.drawable.ic_slide_queue_play,
-                            Color.parseColor("#36ff00"),
+                            ButtonInfo.PLAY,
                             pos -> {
                                 Track track = (Track) tracks.get(pos);
                                 insertAndSetResult(track, true);
@@ -61,9 +58,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                             getApplicationContext()));
 
                     underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            "",
-                            R.drawable.ic_slide_queue_add,
-                            Color.parseColor("#42f512"),
+                            ButtonInfo.QUEUE,
                             pos -> {
                                 Track track = (Track)tracks.get(pos);
                                 insertAndSetResult(track, false);

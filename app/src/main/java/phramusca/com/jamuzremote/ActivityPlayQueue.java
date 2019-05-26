@@ -1,7 +1,6 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -54,23 +53,31 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
             };
             trackAdapter.addListener(this);
 
+
+
             SwipeHelper swipeHelper = new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
                 @Override
                 public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
+
                     underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            "",
-                            R.drawable.ic_slide_queue_add,
-                            Color.parseColor("#42f512"),
+                            SwipeHelper.ButtonInfo.DEL,
                             position -> {
-                                PlayQueue.insert(position+offset);
-                                trackAdapter.insertNext(position);
+                                PlayQueue.remove(position+offset);
+                                trackAdapter.remove(position);
+                                trackAdapter.notifyDataSetChanged();
                             },
                             getApplicationContext()));
 
                     underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            "",
-                            R.drawable.ic_slide_queue_play,
-                            Color.parseColor("#36ff00"),
+                            ButtonInfo.DOWN,
+                            position -> {
+                                PlayQueue.moveDown(position+offset);
+                                trackAdapter.moveDown(position);
+                            },
+                            getApplicationContext()));
+
+                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                            ButtonInfo.PLAY,
                             position -> {
                                 if(PlayQueue.insert(position+offset)) {
                                     Intent intent = new Intent();
@@ -82,23 +89,10 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
                             getApplicationContext()));
 
                     underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            "",
-                            R.drawable.ic_slide_remove,
-                            Color.parseColor("#FF3C30"),
+                            ButtonInfo.QUEUE,
                             position -> {
-                                PlayQueue.remove(position+offset);
-                                trackAdapter.remove(position);
-                                trackAdapter.notifyDataSetChanged();
-                            },
-                            getApplicationContext()));
-
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            "",
-                            R.drawable.ic_slide_down,
-                            Color.parseColor("#FF9502"),
-                            position -> {
-                                PlayQueue.moveDown(position+offset);
-                                trackAdapter.moveDown(position);
+                                PlayQueue.insert(position+offset);
+                                trackAdapter.insertNext(position);
                             },
                             getApplicationContext()));
                 }

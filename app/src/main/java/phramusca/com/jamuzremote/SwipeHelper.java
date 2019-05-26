@@ -211,19 +211,33 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
     public abstract void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons);
 
+    public enum ButtonInfo {
+        PLAY("", R.drawable.ic_slide_queue_play, Color.parseColor("#1e8449")), //NOI18N
+        QUEUE("", R.drawable.ic_slide_queue_add, Color.parseColor("#82e0aa")), //NOI18N
+        DOWN("", R.drawable.ic_slide_down, Color.parseColor("#f7dc6f")), //NOI18N
+        DEL("", R.drawable.ic_slide_remove, Color.parseColor("#c0392b")); //NOI18N
+
+        public String text;
+        public int imageResId;
+        public int color;
+
+        ButtonInfo(String text, int imageResId, int color) {
+            this.text = text;
+            this.imageResId = imageResId;
+            this.color = color;
+        }
+    }
+
     public static class UnderlayButton {
-        private String text;
-        private int imageResId;
-        private int color;
+
         private int pos;
         private RectF clickRegion;
         private UnderlayButtonClickListener clickListener;
         private Context mContext;
+        private ButtonInfo buttonInfo;
 
-        UnderlayButton(String text, int imageResId, int color, UnderlayButtonClickListener clickListener, Context mContext) {
-            this.text = text;
-            this.imageResId = imageResId;
-            this.color = color;
+        UnderlayButton(ButtonInfo buttonInfo, UnderlayButtonClickListener clickListener, Context mContext) {
+            this.buttonInfo = buttonInfo;
             this.clickListener = clickListener;
             this.mContext = mContext;
         }
@@ -241,11 +255,11 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             Paint p = new Paint();
 
             // Draw background
-            p.setColor(color);
+            p.setColor(buttonInfo.color);
             canvas.drawRect(rect, p);
 
             //Draw icon
-            Drawable d = mContext.getResources().getDrawable(imageResId, null);
+            Drawable d = mContext.getResources().getDrawable(buttonInfo.imageResId, null);
             int iconSize=70;
             int marginH=20;
             int marginV=15;
@@ -267,7 +281,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             d.draw(canvas);
 
             // Draw Text
-            if(!text.equals("")) {
+            if(!buttonInfo.text.equals("")) {
 
                 //Center text horizontal and vertical
                 /*Rect r = new Rect();
@@ -283,7 +297,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
                 TextPaint textPaint = new TextPaint();
                 textPaint.setTextSize(30);
                 textPaint.setColor(Color.WHITE);
-                StaticLayout sl = new StaticLayout(text, textPaint, (int)rect.width(),
+                StaticLayout sl = new StaticLayout(buttonInfo.text, textPaint, (int)rect.width(),
                         Layout.Alignment.ALIGN_CENTER, 1, 1, false);
                 canvas.save();
                 Rect r = new Rect();

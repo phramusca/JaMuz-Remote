@@ -119,6 +119,7 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     private ArrayList<AdapterTrack.TrackAdapterListener> mListListener = new ArrayList<>();
+
     public void addListener(AdapterTrack.TrackAdapterListener aListener) {
         mListListener.add(aListener);
     }
