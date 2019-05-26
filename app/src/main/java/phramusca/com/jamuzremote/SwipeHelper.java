@@ -10,6 +10,9 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,7 +26,7 @@ import java.util.Queue;
 
 public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
-    public static final int BUTTON_WIDTH = 200;
+    public static final int BUTTON_WIDTH = 100;
     private RecyclerView recyclerView;
     private List<UnderlayButton> buttons;
     private GestureDetector gestureDetector;
@@ -51,6 +54,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             Point point = new Point((int) e.getRawX(), (int) e.getRawY());
 
             RecyclerView.ViewHolder swipedViewHolder = recyclerView.findViewHolderForAdapterPosition(swipedPos);
+            if(swipedViewHolder==null) {return false;}
             View swipedItem = swipedViewHolder.itemView;
             Rect rect = new Rect();
             swipedItem.getGlobalVisibleRect(rect);
@@ -68,8 +72,8 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         }
     };
 
-    public SwipeHelper(Context context, RecyclerView recyclerView) {
-        super(0, ItemTouchHelper.LEFT);
+    public SwipeHelper(Context context, RecyclerView recyclerView, int swipeDirs) {
+        super(0, swipeDirs);
         this.recyclerView = recyclerView;
         this.buttons = new ArrayList<>();
         this.gestureDetector = new GestureDetector(context, gestureListener);
@@ -87,7 +91,6 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
         attachSwipe();
     }
-
 
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
@@ -140,20 +143,18 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         }
 
         if(actionState == ItemTouchHelper.ACTION_STATE_SWIPE){
-            if(dX < 0) {
-                List<UnderlayButton> buffer = new ArrayList<>();
+            List<UnderlayButton> buffer = new ArrayList<>();
 
-                if (!buttonsBuffer.containsKey(pos)){
-                    instantiateUnderlayButton(viewHolder, buffer);
-                    buttonsBuffer.put(pos, buffer);
-                }
-                else {
-                    buffer = buttonsBuffer.get(pos);
-                }
-
-                translationX = dX * buffer.size() * BUTTON_WIDTH / itemView.getWidth();
-                drawButtons(c, itemView, buffer, pos, translationX);
+            if (!buttonsBuffer.containsKey(pos)){
+                instantiateUnderlayButton(viewHolder, buffer);
+                buttonsBuffer.put(pos, buffer);
             }
+            else {
+                buffer = buttonsBuffer.get(pos);
+            }
+
+            translationX = dX * buffer.size() * BUTTON_WIDTH / itemView.getWidth();
+            drawButtons(c, itemView, buffer, pos, translationX);
         }
 
         super.onChildDraw(c, recyclerView, viewHolder, translationX, dY, actionState, isCurrentlyActive);
@@ -170,22 +171,35 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
     private void drawButtons(Canvas c, View itemView, List<UnderlayButton> buffer, int pos, float dX){
         float right = itemView.getRight();
+        float left = itemView.getLeft();
         float dButtonWidth = (-1) * dX / buffer.size();
 
         for (UnderlayButton button : buffer) {
-            float left = right - dButtonWidth;
-            button.onDraw(
-                    c,
-                    new RectF(
-                            left,
-                            itemView.getTop(),
-                            right,
-                            itemView.getBottom()
-                    ),
-                    pos
-            );
-
-            right = left;
+            if (dX < 0) {
+                left = right - dButtonWidth;
+                button.onDraw(
+                        c,
+                        new RectF(
+                                left,
+                                itemView.getTop(),
+                                right,
+                                itemView.getBottom()
+                        ),
+                        pos, dX
+                );
+                right = left;
+            } else if (dX > 0) {
+                right = left - dButtonWidth;
+                button.onDraw(c,
+                        new RectF(
+                                left,
+                                itemView.getTop(),
+                                right,
+                                itemView.getBottom()
+                        ), pos, dX
+                );
+                left=right;
+            }
         }
     }
 
@@ -205,7 +219,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         private UnderlayButtonClickListener clickListener;
         private Context mContext;
 
-        public UnderlayButton(String text, int imageResId, int color, UnderlayButtonClickListener clickListener, Context mContext) {
+        UnderlayButton(String text, int imageResId, int color, UnderlayButtonClickListener clickListener, Context mContext) {
             this.text = text;
             this.imageResId = imageResId;
             this.color = color;
@@ -222,41 +236,61 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             return false;
         }
 
-        public void onDraw(Canvas c, RectF rect, int pos){
+        void onDraw(Canvas canvas, RectF rect, int pos, float dX){
             Paint p = new Paint();
 
             // Draw background
             p.setColor(color);
-            c.drawRect(rect, p);
+            canvas.drawRect(rect, p);
 
             //Draw icon
             Drawable d = mContext.getResources().getDrawable(imageResId, null);
-
             int iconSize=70;
             int marginH=20;
             int marginV=15;
-
-            int left = (int) rect.left+marginH;
+            // Top left corner
+            /*int left = (int) rect.left+marginH;
             int top = (int) rect.top+marginV;
             int right = left+iconSize<rect.right-marginH?left+iconSize: (int) rect.right-marginH;
+            int bottom = top+iconSize;*/
+            //Center vertical and horizontal
+            float xD = rect.width() / 2f - iconSize / 2f;
+            float yD = rect.height() / 2f - iconSize / 2f;
+
+            int left = (int) (rect.left + xD);
+            int top = (int) (rect.top+yD);
+            int right = left+iconSize<rect.right-marginH?left+iconSize: (int) rect.right-marginH;
             int bottom = top+iconSize;
+
             d.setBounds(left, top, right, bottom);
-            d.draw(c);
+            d.draw(canvas);
 
             // Draw Text
-            Rect r = new Rect();
-            float cHeight = rect.height();
-            float cWidth = rect.width();
-            p.setColor(Color.WHITE);
-            p.setTextAlign(Paint.Align.CENTER);
-            p.getTextBounds(text, 0, text.length(), r);
-            p.setTextSize(30);
-            float x = cWidth / 2f - r.width() / 2f - r.left;
-            float y = cHeight / 2f + r.height() / 2f - r.bottom;
-            c.drawText(text, rect.left + x, rect.top + y, p);
+            if(!text.equals("")) {
 
-           /* c.drawText(text, left, top+iconSize,p);*/
+                //Center text horizontal and vertical
+                /*Rect r = new Rect();
+                p.setColor(Color.WHITE);
+                p.setTextAlign(Paint.Align.CENTER);
+                p.getTextBounds(text, 0, text.length(), r);
+                p.setTextSize(30);
+                float x = rect.width() / 2f - r.width() / 2f - r.left;
+                float y = rect.height() / 2f + r.height() / 2f - r.bottom;
+                canvas.drawText(text, rect.left + x, rect.top + y, p);*/
 
+                //For long text on multiple lines (no needed/wanted on small texts)
+                TextPaint textPaint = new TextPaint();
+                textPaint.setTextSize(30);
+                textPaint.setColor(Color.WHITE);
+                StaticLayout sl = new StaticLayout(text, textPaint, (int)rect.width(),
+                        Layout.Alignment.ALIGN_CENTER, 1, 1, false);
+                canvas.save();
+                Rect r = new Rect();
+                float y = (rect.height() / 2f) + (r.height() / 2f) - r.bottom - (sl.getHeight() /2);
+                canvas.translate(rect.left, rect.top + y);
+                sl.draw(canvas);
+                canvas.restore();
+            }
 
             clickRegion = rect;
             this.pos = pos;
