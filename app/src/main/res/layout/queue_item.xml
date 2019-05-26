@@ -30,7 +30,7 @@
             android:paddingEnd="2dp"
             android:textColor="@color/textColor"
             tools:ignore="HardcodedText"
-            android:textSize="14dp">
+            android:textSize="16sp">
         </TextView>
 
         <TextView
@@ -42,7 +42,7 @@
             android:paddingEnd="2dp"
             android:textColor="@color/textColor"
             tools:ignore="HardcodedText"
-            android:textSize="12dp">
+            android:textSize="14sp">
         </TextView>
 
         <TextView
@@ -53,7 +53,7 @@
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
             tools:ignore="HardcodedText"
-            android:textSize="12dp">
+            android:textSize="14sp">
         </TextView>
 
         <TextView
@@ -64,7 +64,7 @@
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
             tools:ignore="HardcodedText"
-            android:textSize="10dp">
+            android:textSize="12sp">
         </TextView>
     </LinearLayout>
 </LinearLayout>

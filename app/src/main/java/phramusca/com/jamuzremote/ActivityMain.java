@@ -643,15 +643,11 @@ public class ActivityMain extends AppCompatActivity {
         });
 
         Button button_queue = findViewById(R.id.button_queue);
-        button_queue.setOnClickListener(v -> {
-            displayQueue();
-        });
+        button_queue.setOnClickListener(v -> displayQueue());
 
         Button button_albums = findViewById(R.id.button_albums);
         button_albums.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), ActivityAlbums.class);
-            PlayQueueRelative albumsRelativeList = new PlayQueueRelative((ArrayList<Track>) HelperLibrary.musicLibrary.getAlbums());
-            intent.putExtra("albumArrayList", albumsRelativeList.getTracks());
             startActivityForResult(intent, LISTS_REQUEST_CODE);
         });
 
@@ -1541,19 +1537,18 @@ public class ActivityMain extends AppCompatActivity {
             if(!isRemoteConnected()) {
                 setSeekBar(position, duration);
                 int remaining=(duration - position);
-                Log.d(TAG, "onPositionChanged, remaining: "+remaining);
+                Log.v(TAG, "onPositionChanged, remaining: "+remaining);
                 if (remaining < 5001 && remaining > 4501) { //TODO: Why those numbers ? (can't remember ...)
                     //setBrightness(1);
-                    Log.d(TAG, "onPositionChanged: DIM ON "+remaining);
+                    Log.v(TAG, "onPositionChanged: DIM ON "+remaining);
                     dimOn();
                 }
 
                 if(remaining > 1 && quarterPosition < 4) {
                     int quarter=duration/4;
-                    Log.d(TAG, "START: quarterPosition: "+quarterPosition);
-                    Log.d(TAG, "START: quarter: "+quarter);
+                    Log.v(TAG, "START: quarterPosition: "+quarterPosition);
+                    Log.v(TAG, "START: quarter: "+quarter);
                     if(quarterPosition < 1 && (remaining < 3*quarter)) {
-                        Log.d(TAG, "quarterPosition: "+quarterPosition);
                         quarterPosition=1;
                         askEdition(false);
                     } else if(quarterPosition < 2 && (remaining < 2*quarter)) {
@@ -1563,7 +1558,7 @@ public class ActivityMain extends AppCompatActivity {
                         quarterPosition=3;
                         askEdition(false);
                     }
-                    Log.d(TAG, "END: quarterPosition: "+quarterPosition);
+                    Log.v(TAG, "END: quarterPosition: "+quarterPosition);
                 }
             }
         }
