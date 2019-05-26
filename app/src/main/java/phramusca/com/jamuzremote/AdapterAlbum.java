@@ -1,100 +1,23 @@
 package phramusca.com.jamuzremote;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class AdapterAlbum extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class AdapterAlbum extends AdapterLoad {
 
-    private final int VIEW_TYPE_ITEM = 0;
-    private final int VIEW_TYPE_LOADING = 1;
-
-    private boolean isLoading;
-    private boolean isLoadingTop;
-    private Activity activity;
     private List<Track> albums;
-    private int visibleThreshold = 5;
-    private int lastVisibleItem, firstVisibleItem, totalItemCount;
     private Context mContext;
 
-    AdapterAlbum(Context context, RecyclerView recyclerView, List<Track> albums, Activity activity) {
+    AdapterAlbum(Context context, RecyclerView recyclerView, List<Track> albums) {
+        super(context, recyclerView);
         this.mContext = context;
         this.albums = albums;
-        this.activity = activity;
-        final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                totalItemCount = linearLayoutManager.getItemCount();
-                firstVisibleItem = linearLayoutManager.findFirstVisibleItemPosition();
-                lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
-                if (!isLoading) {
-                    if(totalItemCount <= (lastVisibleItem + visibleThreshold)) {
-                        isLoading = true;
-                        if (onLoadListener != null) {
-                            onLoadListener.onLoadMore();
-                        }
-                    }
-                }
-
-                if(!isLoadingTop) {
-                    if(firstVisibleItem <=0 && dy < 0) {
-                        isLoadingTop = true;
-                        if (onLoadListener != null) {
-                            onLoadListener.onLoadTop();
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // "Loading item" ViewHolder
-    private class LoadingViewHolder extends RecyclerView.ViewHolder {
-        ProgressBar progressBar;
-
-        LoadingViewHolder(View view) {
-            super(view);
-            progressBar = view.findViewById(R.id.progressBar1);
-        }
-    }
-
-    // "Normal item" ViewHolder
-    private class UserViewHolder extends RecyclerView.ViewHolder {
-        public TextView item_line1;
-        public TextView item_line2;
-        public TextView item_line3;
-        public TextView item_line4;
-        public ImageView imageViewCover;
-
-        UserViewHolder(View view) {
-            super(view);
-            item_line1 = view.findViewById(R.id.item_line1);
-            item_line2 = view.findViewById(R.id.item_line2);
-            item_line3 = view.findViewById(R.id.item_line3);
-            item_line4 = view.findViewById(R.id.item_line4);
-            imageViewCover = view.findViewById(R.id.imageView);
-        }
-    }
-
-    private OnLoadListener onLoadListener;
-    public void setOnLoadListener(OnLoadListener mOnLoadListener) {
-        this.onLoadListener = mOnLoadListener;
     }
 
     @Override
@@ -103,15 +26,8 @@ public class AdapterAlbum extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == VIEW_TYPE_ITEM) {
-            View view = LayoutInflater.from(activity).inflate(R.layout.queue_item_album, parent, false);
-            return new UserViewHolder(view);
-        } else if (viewType == VIEW_TYPE_LOADING) {
-            View view = LayoutInflater.from(activity).inflate(R.layout.queue_item_loading, parent, false);
-            return new LoadingViewHolder(view);
-        }
-        return null;
+    public int getItemCount() {
+        return albums == null ? 0 : albums.size();
     }
 
     @Override
@@ -153,34 +69,9 @@ public class AdapterAlbum extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 sendListener(albums.get(position1), position1);
             });
 
-
         } else if (holder instanceof LoadingViewHolder) {
             LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
             loadingViewHolder.progressBar.setIndeterminate(true);
-        }
-    }
-
-    @Override
-    public int getItemCount() {
-        return albums == null ? 0 : albums.size();
-    }
-
-    public void setLoaded() {
-        isLoading = false;
-    }
-
-    public void setLoadedTop() {
-        isLoadingTop = false;
-    }
-
-    private ArrayList<AdapterTrack.TrackAdapterListener> mListListener = new ArrayList<>();
-    public void addListener(AdapterTrack.TrackAdapterListener aListener) {
-        mListListener.add(aListener);
-    }
-
-    private void sendListener(Track item, int position) {
-        for(int i = mListListener.size()-1; i >= 0; i--) {
-            mListListener.get(i).onClick(item, position);
         }
     }
 }

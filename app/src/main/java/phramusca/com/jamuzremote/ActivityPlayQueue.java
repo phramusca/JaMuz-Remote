@@ -4,18 +4,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.widget.Button;
-import android.widget.ListView;
 
 import com.wdullaer.swipeactionadapter.SwipeActionAdapter;
-import com.wdullaer.swipeactionadapter.SwipeDirection;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack.TrackAdapterListener {
 
     AdapterTrack trackAdapter;
+
+    RecyclerView recyclerView;
     SwipeActionAdapter trackSwipeAdapter;
     private int offset=0;
     private static final int QUEUE_REQUEST_CODE = 200;
@@ -36,13 +39,24 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
             int position = intent.getIntExtra("queueArrayPosition", 0);
             offset = intent.getIntExtra("queueArrayOffset", 0);
             position = position - offset;
-            ListView listView = findViewById(R.id.list_queue);
-            trackAdapter = new AdapterTrack(this, queue, position);
+            recyclerView = findViewById(R.id.list_queue);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            trackAdapter = new AdapterTrack(this, queue, position, recyclerView) {
+                @Override
+                List<Track> getMore() {
+                    return new ArrayList<>();
+                }
+
+                @Override
+                List<Track> getTop() {
+                    return new ArrayList<>();
+                }
+            };
+
             trackAdapter.addListener(this);
-            trackSwipeAdapter = new SwipeActionAdapter(trackAdapter);
-            trackSwipeAdapter.setListView(listView);
-            listView.setAdapter(trackSwipeAdapter);
-            listView.setSelection(position);
+/*
+
+
             trackSwipeAdapter.addBackground(SwipeDirection.DIRECTION_FAR_LEFT,R.layout.queue_slide_play)
                     .addBackground(SwipeDirection.DIRECTION_NORMAL_LEFT,R.layout.queue_slide_add)
                     .addBackground(SwipeDirection.DIRECTION_FAR_RIGHT,R.layout.queue_slide_remove)
@@ -50,9 +64,9 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
             trackSwipeAdapter.setSwipeActionListener(new SwipeActionAdapter.SwipeActionListener(){
                 @Override
                 public boolean hasActions(int position, SwipeDirection direction){
-                    /*if(direction.isLeft()) return true; // Change this to false to disable left swipes
+                    *//*if(direction.isLeft()) return true; // Change this to false to disable left swipes
                     if(direction.isRight()) return true;
-                    return false;*/
+                    return false;*//*
                     return true;
                 }
 
@@ -98,7 +112,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
                         }
                     }
                 }
-            }.start();
+            }.start();*/
         }
     }
 
