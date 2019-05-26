@@ -1,6 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -9,19 +10,17 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.wdullaer.swipeactionadapter.SwipeActionAdapter;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.TrackAdapterListener {
 
     private static final int ALBUM_TRACK_REQUEST_CODE = 100;
-    SwipeActionAdapter swipeActionAdapter;
 
     private List<Track> albums;
     private AdapterAlbum adapterAlbum; //http://www.devexchanges.info/2017/02/android-recyclerview-dynamically-load.html
     private boolean complete;
+    RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +33,7 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
         albums = new ArrayList<>();
         complete=false;
         if(addMore()) {
-            RecyclerView recyclerView = findViewById(R.id.recycler_view);
+            recyclerView = findViewById(R.id.recycler_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             adapterAlbum = new AdapterAlbum(this, recyclerView, albums, this);
             recyclerView.setAdapter(adapterAlbum);
@@ -59,47 +58,38 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
                 }
             });
         }
-        //FIXME !!! Album pagination : SWipe
-        
-        //swipeActionAdapter = new SwipeActionAdapter(adapterAlbum);
-        //swipeActionAdapter.setListView(recyclerView);
-        //recyclerView.setAdapter(swipeActionAdapter);
-        /*swipeActionAdapter.addBackground(SwipeDirection.DIRECTION_FAR_LEFT,R.layout.queue_slide_play)
-                .addBackground(SwipeDirection.DIRECTION_NORMAL_LEFT,R.layout.queue_slide_add)
-                .addBackground(SwipeDirection.DIRECTION_FAR_RIGHT,R.layout.queue_slide_list)
-                .addBackground(SwipeDirection.DIRECTION_NORMAL_RIGHT,R.layout.queue_slide_list);
-        swipeActionAdapter.setSwipeActionListener(new SwipeActionAdapter.SwipeActionListener(){
-            @Override
-            public boolean hasActions(int position, SwipeDirection direction){
-                if(direction.isLeft()) return true; // Change this to false to
-                if(direction.isRight()) return false; //disable right swipes
-                return false;
-            }
 
+        SwipeHelper swipeHelper = new SwipeHelper(this, recyclerView) {
             @Override
-            public boolean shouldDismiss(int position, SwipeDirection direction){
-                // Only dismiss an item when swiping normal left
-                return false; //direction == SwipeDirection.DIRECTION_NORMAL_LEFT;
-            }
+            public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
+                underlayButtons.add(new SwipeHelper.UnderlayButton(
+                        "Play",
+                        R.drawable.ic_slide_queue_play,
+                        Color.parseColor("#FF3C30"),
+                        new SwipeHelper.UnderlayButtonClickListener() {
+                            @Override
+                            public void onClick(int pos) {
+                                Track album = (Track) albums.get(pos);
+                                insertAndSetResult(album, true);
+                            }
+                        },
+                        getApplicationContext()));
 
-            @Override
-            public void onSwipe(int[] positionList, SwipeDirection[] directionList){
-                for(int i=0;i<positionList.length;i++) {
-                    SwipeDirection direction = directionList[i];
-                    int position = positionList[i];
-                    Track album = (Track) swipeActionAdapter.getItem(position);
-                    switch (direction) {
-                        case DIRECTION_FAR_LEFT:
-                            insertAndSetResult(album, true);
-                            break;
-                        case DIRECTION_NORMAL_LEFT:
-                            insertAndSetResult(album, false);
-                            break;
-                    }
-                    swipeActionAdapter.notifyDataSetChanged();
-                }
+                underlayButtons.add(new SwipeHelper.UnderlayButton(
+                        "Queue",
+                        R.drawable.ic_slide_queue_add,
+                        Color.parseColor("#FF9502"),
+                        new SwipeHelper.UnderlayButtonClickListener() {
+                            @Override
+                            public void onClick(int pos) {
+                                Track album = (Track)albums.get(pos);
+                                insertAndSetResult(album, false);
+                            }
+                        },
+                        getApplicationContext()));
             }
-        });*/
+        };
+
     }
 
     private boolean addMore() {
