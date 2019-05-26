@@ -638,7 +638,7 @@ public class MusicLibrary {
                     "group_concat(distinct artist) AS artist, \n" +
                     "album, idFileRemote, idFileServer, title, addedDate, lastPlayed, status, size, path \n" +
                     "FROM tracks \n" +
-                    "GROUP BY album ORDER BY rating DESC, playCounter DESC, album, artist LIMIT 10 OFFSET "+offset;
+                    "GROUP BY album ORDER BY rating DESC, playCounter DESC, album, artist LIMIT 20 OFFSET "+offset;
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[] { });
             tracks = getTracks(cursor);

@@ -771,7 +771,7 @@ public class ActivityMain extends AppCompatActivity {
             enableSync(false);
         }
 
-        KPUtility.handleKPIntegration(this, KPUtility.GOOGLE_MARKET);
+        //KPUtility.handleKPIntegration(this, KPUtility.GOOGLE_MARKET);
         setDimMode(toggleButtonDimMode.isChecked());
     }
 

@@ -229,17 +229,6 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             p.setColor(color);
             c.drawRect(rect, p);
 
-            // Draw Text
-            Rect r = new Rect();
-            float cHeight = rect.height();
-            float cWidth = rect.width();
-            p.setColor(Color.WHITE);
-            p.setTextAlign(Paint.Align.LEFT);
-            p.getTextBounds(text, 0, text.length(), r);
-            float x = cWidth - r.width() / 2f - r.left;
-            float y = cHeight + r.height() / 2f - r.bottom;
-            c.drawText(text, rect.left + x, rect.top + y, p);
-
             //Draw icon
             Drawable d = mContext.getResources().getDrawable(imageResId, null);
 
@@ -253,6 +242,21 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             int bottom = top+iconSize;
             d.setBounds(left, top, right, bottom);
             d.draw(c);
+
+            // Draw Text
+            Rect r = new Rect();
+            float cHeight = rect.height();
+            float cWidth = rect.width();
+            p.setColor(Color.WHITE);
+            p.setTextAlign(Paint.Align.CENTER);
+            p.getTextBounds(text, 0, text.length(), r);
+            p.setTextSize(30);
+            float x = cWidth / 2f - r.width() / 2f - r.left;
+            float y = cHeight / 2f + r.height() / 2f - r.bottom;
+            c.drawText(text, rect.left + x, rect.top + y, p);
+
+           /* c.drawText(text, left, top+iconSize,p);*/
+
 
             clickRegion = rect;
             this.pos = pos;
