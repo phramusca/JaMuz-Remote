@@ -24,30 +24,41 @@ public class AdapterAlbum extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final int VIEW_TYPE_LOADING = 1;
 
     private boolean isLoading;
+    private boolean isLoadingTop;
     private Activity activity;
     private List<Track> albums;
     private int visibleThreshold = 5;
-    private int lastVisibleItem, totalItemCount;
-
+    private int lastVisibleItem, firstVisibleItem, totalItemCount;
     private Context mContext;
 
     AdapterAlbum(Context context, RecyclerView recyclerView, List<Track> albums, Activity activity) {
         this.mContext = context;
         this.albums = albums;
         this.activity = activity;
-
         final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 totalItemCount = linearLayoutManager.getItemCount();
+                firstVisibleItem = linearLayoutManager.findFirstVisibleItemPosition();
                 lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
-                if (!isLoading && totalItemCount <= (lastVisibleItem + visibleThreshold)) {
-                    if (onLoadMoreListener != null) {
-                        onLoadMoreListener.onLoadMore();
+                if (!isLoading) {
+                    if(totalItemCount <= (lastVisibleItem + visibleThreshold)) {
+                        isLoading = true;
+                        if (onLoadListener != null) {
+                            onLoadListener.onLoadMore();
+                        }
                     }
-                    isLoading = true;
+                }
+
+                if(!isLoadingTop) {
+                    if(firstVisibleItem <=0 && dy < 0) {
+                        isLoadingTop = true;
+                        if (onLoadListener != null) {
+                            onLoadListener.onLoadTop();
+                        }
+                    }
                 }
             }
         });
@@ -81,9 +92,9 @@ public class AdapterAlbum extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    private OnLoadMoreListener onLoadMoreListener;
-    public void setOnLoadMoreListener(OnLoadMoreListener mOnLoadMoreListener) {
-        this.onLoadMoreListener = mOnLoadMoreListener;
+    private OnLoadListener onLoadListener;
+    public void setOnLoadListener(OnLoadListener mOnLoadListener) {
+        this.onLoadListener = mOnLoadListener;
     }
 
     @Override
@@ -158,12 +169,11 @@ public class AdapterAlbum extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         isLoading = false;
     }
 
-    public interface TrackAdapterListener {
-        void onClick(Track item, int position);
+    public void setLoadedTop() {
+        isLoadingTop = false;
     }
 
     private ArrayList<AdapterTrack.TrackAdapterListener> mListListener = new ArrayList<>();
-
     public void addListener(AdapterTrack.TrackAdapterListener aListener) {
         mListListener.add(aListener);
     }

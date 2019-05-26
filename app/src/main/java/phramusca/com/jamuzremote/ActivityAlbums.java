@@ -21,6 +21,7 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
     private List<Track> albums;
     private AdapterAlbum adapterAlbum; //http://www.devexchanges.info/2017/02/android-recyclerview-dynamically-load.html
     private boolean complete;
+    private boolean completeTop;
     RecyclerView recyclerView;
 
     @Override
@@ -33,25 +34,47 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
 
         albums = new ArrayList<>();
         complete=false;
+        completeTop=false;
         if(addMore()) {
             recyclerView = findViewById(R.id.recycler_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             adapterAlbum = new AdapterAlbum(this, recyclerView, albums, this);
             recyclerView.setAdapter(adapterAlbum);
             adapterAlbum.addListener(this);
-            adapterAlbum.setOnLoadMoreListener(() -> {
-                if (!complete) {
-                    albums.add(null);
-                    adapterAlbum.notifyItemInserted(albums.size() - 1);
-                    new Handler().post(() -> {
-                        int loaderPos = albums.size() - 1;
-                        complete=!addMore();
-                        albums.remove(loaderPos);
-                        adapterAlbum.notifyDataSetChanged();
-                        adapterAlbum.setLoaded();
-                    });
-                } else {
-                    Toast.makeText(ActivityAlbums.this, "Loading data completed", Toast.LENGTH_SHORT).show();
+            adapterAlbum.setOnLoadListener(new OnLoadListener() {
+                @Override
+                public void onLoadMore() {
+                    if (!complete) {
+                        albums.add(null);
+                        adapterAlbum.notifyItemInserted(albums.size() - 1);
+                        new Handler().post(() -> {
+                            int loaderPos = albums.size() - 1;
+                            complete=!addMore();
+                            albums.remove(loaderPos);
+                            adapterAlbum.notifyDataSetChanged();
+                            adapterAlbum.setLoaded();
+                        });
+                    } else {
+                        Toast.makeText(ActivityAlbums.this, "Loading data completed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onLoadTop() {
+                   /* if(!completeTop) {
+                        albums.add(0, null);
+                        adapterAlbum.notifyItemInserted(0);
+                        recyclerView.getLayoutManager().scrollToPosition(0);
+                        new Handler().postDelayed(() -> {
+                            int nbAdded = addTop();
+                            completeTop=nbAdded<=0;
+                            albums.remove(nbAdded);
+                            adapterAlbum.notifyDataSetChanged();
+                            adapterAlbum.setLoadedTop();
+                        }, 4000);
+                    } else {
+                        Toast.makeText(ActivityAlbums.this, "Loading data ON TOP completed", Toast.LENGTH_SHORT).show();
+                    }*/
                 }
             });
         }
@@ -88,6 +111,13 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
         this.albums.addAll(newAlbums);
         readCovers(newAlbums);
         return newAlbums.size()>0;
+    }
+
+    private int addTop() {
+        List<Track> newAlbums = HelperLibrary.musicLibrary.getAlbums(albums.size());
+        this.albums.addAll(0, newAlbums);
+        readCovers(newAlbums);
+        return newAlbums.size();
     }
 
     private void readCovers(List<Track> tracks) {
