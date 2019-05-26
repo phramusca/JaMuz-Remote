@@ -66,12 +66,9 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
                         "Play",
                         R.drawable.ic_slide_queue_play,
                         Color.parseColor("#FF3C30"),
-                        new SwipeHelper.UnderlayButtonClickListener() {
-                            @Override
-                            public void onClick(int pos) {
-                                Track album = (Track) albums.get(pos);
-                                insertAndSetResult(album, true);
-                            }
+                        pos -> {
+                            Track album = (Track) albums.get(pos);
+                            insertAndSetResult(album, true);
                         },
                         getApplicationContext()));
 
@@ -79,12 +76,9 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
                         "Queue",
                         R.drawable.ic_slide_queue_add,
                         Color.parseColor("#FF9502"),
-                        new SwipeHelper.UnderlayButtonClickListener() {
-                            @Override
-                            public void onClick(int pos) {
-                                Track album = (Track)albums.get(pos);
-                                insertAndSetResult(album, false);
-                            }
+                        pos -> {
+                            Track album = (Track)albums.get(pos);
+                            insertAndSetResult(album, false);
                         },
                         getApplicationContext()));
             }
