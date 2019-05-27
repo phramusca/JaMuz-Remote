@@ -45,9 +45,6 @@ public class AdapterAlbum extends AdapterLoad {
                     track.getRating(),
                     track.getGenre()));
 
-            //TODO: Make a Repo in ActivityPlayQueue to speed even further
-            //Or make it global as for Remote
-            //TODO: Add a limit (FIFO) to those repos not to overload android memory
             Bitmap bitmap = albums.get(position).getTumb(false);
             if (bitmap == null) {
                 bitmap = HelperBitmap.getEmptyThumb();

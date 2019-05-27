@@ -8,8 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.widget.Button;
 
-import com.wdullaer.swipeactionadapter.SwipeActionAdapter;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +16,6 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
     AdapterTrack trackAdapter;
 
     RecyclerView recyclerView;
-    SwipeActionAdapter trackSwipeAdapter;
     private int offset=0;
     private static final int QUEUE_REQUEST_CODE = 200;
 
@@ -52,10 +49,9 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
                 }
             };
             trackAdapter.addListener(this);
+            recyclerView.getLayoutManager().scrollToPosition(position-1>=0?position-1:position);
 
-
-
-            SwipeHelper swipeHelper = new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
+            new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
                 @Override
                 public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
 
@@ -73,6 +69,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
                             position -> {
                                 PlayQueue.moveDown(position+offset);
                                 trackAdapter.moveDown(position);
+                                trackAdapter.notifyDataSetChanged();
                             },
                             getApplicationContext()));
 
@@ -93,6 +90,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
                             position -> {
                                 PlayQueue.insert(position+offset);
                                 trackAdapter.insertNext(position);
+                                trackAdapter.notifyDataSetChanged();
                             },
                             getApplicationContext()));
                 }
@@ -100,41 +98,6 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
 
         }
     }
-
- /*   private void confirmPlayNext(Track track, int position) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.confirmPlayNow);
-        builder.setMessage(Html.fromHtml(
-                "<html>".concat(track.toString()).concat("</html>")));
-        builder.setPositiveButton(R.string.confirmYes, (dialog, which) -> {
-            if(PlayQueue.insert(position)) {
-                Intent intent = new Intent();
-                intent.putExtra("action", "playNext");
-                setResult(RESULT_OK, intent);
-                finish();
-            }
-        });
-        builder.setNegativeButton(R.string.confirmNo, (dialog, which) -> {
-        });
-        builder.setCancelable(true);
-        builder.show();
-    }*/
-
-/*    private void confirmRemoval(Track track, int position) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.confirmRemove);
-        builder.setMessage(Html.fromHtml(
-                "<html>".concat(track.toString()).concat("</html>")));
-        builder.setPositiveButton(R.string.confirmYes, (dialog, which) -> {
-            PlayQueue.remove(position+offset);
-            trackAdapter.remove(position);
-            trackAdapter.notifyDataSetChanged();
-        });
-        builder.setNegativeButton(R.string.confirmNo, (dialog, which) -> {
-        });
-        builder.setCancelable(true);
-        builder.show();
-    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

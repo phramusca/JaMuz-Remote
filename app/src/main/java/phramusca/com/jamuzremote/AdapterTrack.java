@@ -9,7 +9,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.widget.Toast;
 
 import java.util.List;
 import java.util.Locale;
@@ -18,6 +17,7 @@ import java.util.Locale;
  * Created by raph on 03/03/18.
  */
 
+//FIXME !!!! Issue when list is small => no swipe !?
 public abstract class AdapterTrack extends AdapterLoad {
 
     private Context mContext;
@@ -39,57 +39,56 @@ public abstract class AdapterTrack extends AdapterLoad {
             public void onLoadMore() {
                 if (!complete) {
                     tracks.add(null);
-                    notifyItemInserted(tracks.size() - 1);
-                    new Handler().post(() -> {
-                        int loaderPos = tracks.size() - 1;
+                    int loaderPos = tracks.size() - 1;
+                    notifyItemInserted(loaderPos);
+                    new Handler().postDelayed(() -> {
                         complete=!addMore();
-                        remove(loaderPos);
+                        if(loaderPos<tracks.size()) { //FIXME !!! This ugly quick fix is because tracks is not synchronized. Should be !
+                            tracks.remove(loaderPos);
+                        }
                         notifyDataSetChanged();
                         setLoaded();
-                    });
-                } else {
-                    Toast.makeText(mContext, "Loading data completed", Toast.LENGTH_SHORT).show();
+                        /*if(complete) {
+                            Toast.makeText(mContext, "End of list", Toast.LENGTH_SHORT).show();
+                        }*/
+                    },500);
                 }
             }
 
             @Override
             public void onLoadTop() {
-                    if(!completeTop) {
-                        tracks.add(0, null);
-                        notifyItemInserted(0);
-                        recyclerView.getLayoutManager().scrollToPosition(0);
-                        new Handler().post(() -> {
-                            int nbAdded = addTop();
-                            completeTop=nbAdded<=0;
-                            tracks.remove(nbAdded);
-                            notifyDataSetChanged();
-                            setLoadedTop();
-                        });
-                    } else {
-                        Toast.makeText(mContext, "Loading data ON TOP completed", Toast.LENGTH_SHORT).show();
-                    }
+                if(!completeTop) {
+                    tracks.add(0, null);
+                    notifyItemInserted(0);
+                    recyclerView.getLayoutManager().scrollToPosition(0);
+                    new Handler().postDelayed(() -> {
+                        completeTop=addTop()<=0;
+                        tracks.remove(0);
+                        notifyDataSetChanged();
+                        setLoadedTop();
+                        /*if(completeTop) {
+                            Toast.makeText(mContext, "Top of list", Toast.LENGTH_SHORT).show();
+                        }*/
+                    }, 500);
+                }
             }
         });
-
-        //if(addMore()) {
-
-            recyclerView.setAdapter(this);
-        //}
+        recyclerView.setAdapter(this);
     }
 
     abstract List<Track> getMore();
     abstract List<Track> getTop();
 
-    boolean addMore() {
+    private boolean addMore() {
         List<Track> newTracks = getMore();
         this.tracks.addAll(newTracks);
         readCovers(newTracks);
         return newTracks.size()>0;
     }
 
-    int addTop() {
+    private int addTop() {
         List<Track> newTracks = getTop();
-        this.tracks.addAll(0, newTracks);
+        this.tracks.addAll(1, newTracks);
         readCovers(newTracks);
         return newTracks.size();
     }
@@ -144,15 +143,12 @@ public abstract class AdapterTrack extends AdapterLoad {
         userViewHolder.item_line3.setText(line3);
         userViewHolder.item_line4.setText(line4);
 
-        //TODO: Make a Repo in ActivityPlayQueue to speed even further
-        //Or make it global as for Remote
-        //TODO: Add a limit (FIFO) to those repos not to overload android memory
         Bitmap bitmap = tracks.get(position).getTumb(false);
         if (bitmap == null) {
             bitmap = HelperBitmap.getEmptyThumb();
         }
         if(position==positionPlaying) {
-            bitmap = overlayPlayingIcon(bitmap, 15);
+            bitmap = overlayPlayingIcon(bitmap);
         }
 
         userViewHolder.imageViewCover.setImageBitmap(bitmap);
@@ -160,9 +156,9 @@ public abstract class AdapterTrack extends AdapterLoad {
         bitmapDrawable.setAlpha(50);
 
         if (tracks.get(position).isHistory()) {
-            userViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
+            userViewHolder.layout_item.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
         } else {
-            userViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.background_color));
+            userViewHolder.layout_item.setBackgroundColor(ContextCompat.getColor(mContext, R.color.background_color));
         }
 
         userViewHolder.itemView.setTag(position);
@@ -172,7 +168,8 @@ public abstract class AdapterTrack extends AdapterLoad {
         });
     }
 
-    private Bitmap overlayPlayingIcon(Bitmap bitmap, int margin) {
+    private Bitmap overlayPlayingIcon(Bitmap bitmap) {
+        int margin = 15;
         Bitmap bmOverlay = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
         Canvas canvas = new Canvas(bmOverlay);
         canvas.drawBitmap(bitmap, new Matrix(), null);
@@ -190,7 +187,10 @@ public abstract class AdapterTrack extends AdapterLoad {
         return bmOverlay;
     }
 
-    //TODO: Merge with the same ones on PlayQueue
+    //FIXME !!!!! Merge with the same ones on PlayQueue
+    // - As it will (it happened) again diverge
+    // - it will ease debugging
+    // - As there are bugs: move down a track. Play the one above for example !
     public void insertNext(int oldPosition) {
         if(oldPosition!=positionPlaying) {
             Track track = tracks.get(oldPosition);
@@ -206,7 +206,7 @@ public abstract class AdapterTrack extends AdapterLoad {
 
     public void moveDown(int oldPosition) {
         if(oldPosition!=positionPlaying
-                && oldPosition<tracks.size()) {
+                && oldPosition<tracks.size()-1) {
             Track track = tracks.get(oldPosition);
             if(track!=null) {
                 tracks.remove(oldPosition);
