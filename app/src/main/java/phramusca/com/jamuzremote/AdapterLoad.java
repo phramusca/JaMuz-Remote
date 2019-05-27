@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -23,7 +24,7 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private int visibleThreshold = 5;
     private int lastVisibleItem, firstVisibleItem, totalItemCount;
 
-    public AdapterLoad(Context context, RecyclerView recyclerView) {
+    AdapterLoad(Context context, RecyclerView recyclerView) {
         mContext = context;
 
         final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
@@ -34,6 +35,7 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 totalItemCount = linearLayoutManager.getItemCount();
                 firstVisibleItem = linearLayoutManager.findFirstVisibleItemPosition();
                 lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
+
                 if (!isLoading) {
                     if(totalItemCount <= (lastVisibleItem + visibleThreshold)) {
                         isLoading = true;
@@ -44,6 +46,8 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
 
                 if(!isLoadingTop) {
+                    // TODO !!! Load on top: on page init, add a load item on top and select next one (so that loader at pos 0 is hidden)
+                    // Then no more need to check dY
                     if(firstVisibleItem <=0 && dy < 0) {
                         isLoadingTop = true;
                         if (onLoadListener != null) {
@@ -107,9 +111,11 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         public TextView item_line3;
         public TextView item_line4;
         public ImageView imageViewCover;
+        public LinearLayout layout_item;
 
         UserViewHolder(View view) {
             super(view);
+            layout_item = view.findViewById(R.id.layout_item);
             item_line1 = view.findViewById(R.id.item_line1);
             item_line2 = view.findViewById(R.id.item_line2);
             item_line3 = view.findViewById(R.id.item_line3);

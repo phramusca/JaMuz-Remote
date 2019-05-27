@@ -37,7 +37,8 @@
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/list_album_tracks">
+        android:id="@+id/list_album_tracks"
+        android:background="@color/colorPrimary">
     </android.support.v7.widget.RecyclerView>
 
 </LinearLayout>

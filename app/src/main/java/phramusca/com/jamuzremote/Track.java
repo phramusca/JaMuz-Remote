@@ -312,8 +312,10 @@ public class Track implements Serializable {
     }
 
     //FIXME !!!!! Use a Repo for thumbnails !!!
+    //   => Add a limit (FIFO) to those repos not to overload android memory
     //As it is read too many times now that there is album list
     //+ we need (by using transient) to ignore it in Intent serialization and re-read each time !
+
     private transient Bitmap thumb;
     public Bitmap getTumb(boolean read) {
         if(thumb==null && read) {

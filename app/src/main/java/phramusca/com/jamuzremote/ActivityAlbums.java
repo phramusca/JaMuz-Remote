@@ -20,7 +20,6 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
     private List<Track> albums;
     private AdapterAlbum adapterAlbum;
     private boolean complete;
-    private boolean completeTop;
     RecyclerView recyclerView;
 
     @Override
@@ -33,7 +32,6 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
 
         albums = new ArrayList<>();
         complete=false;
-        completeTop=false;
         if(addMore()) {
             recyclerView = findViewById(R.id.recycler_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -52,40 +50,26 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
                             albums.remove(loaderPos);
                             adapterAlbum.notifyDataSetChanged();
                             adapterAlbum.setLoaded();
+                            if(complete) {
+                                Toast.makeText(ActivityAlbums.this, "End of list", Toast.LENGTH_SHORT).show();
+                            }
                         });
-                    } else {
-                        Toast.makeText(ActivityAlbums.this, "Loading data completed", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
-                public void onLoadTop() {
-                   /* if(!completeTop) {
-                        albums.add(0, null);
-                        adapterAlbum.notifyItemInserted(0);
-                        recyclerView.getLayoutManager().scrollToPosition(0);
-                        new Handler().postDelayed(() -> {
-                            int nbAdded = addTop();
-                            completeTop=nbAdded<=0;
-                            albums.remove(nbAdded);
-                            adapterAlbum.notifyDataSetChanged();
-                            adapterAlbum.setLoadedTop();
-                        }, 4000);
-                    } else {
-                        Toast.makeText(ActivityAlbums.this, "Loading data ON TOP completed", Toast.LENGTH_SHORT).show();
-                    }*/
-                }
+                public void onLoadTop() { }
             });
         }
 
-        SwipeHelper swipeHelper = new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
+        new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
             @Override
             public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
 
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
                         ButtonInfo.PLAY,
                         pos -> {
-                            Track album = (Track) albums.get(pos);
+                            Track album = albums.get(pos);
                             insertAndSetResult(album, true);
                         },
                         getApplicationContext()));
@@ -93,7 +77,7 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
                         ButtonInfo.QUEUE,
                         pos -> {
-                            Track album = (Track)albums.get(pos);
+                            Track album = albums.get(pos);
                             insertAndSetResult(album, false);
                         },
                         getApplicationContext()));
@@ -107,13 +91,6 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
         this.albums.addAll(newAlbums);
         readCovers(newAlbums);
         return newAlbums.size()>0;
-    }
-
-    private int addTop() {
-        List<Track> newAlbums = HelperLibrary.musicLibrary.getAlbums(albums.size());
-        this.albums.addAll(0, newAlbums);
-        readCovers(newAlbums);
-        return newAlbums.size();
     }
 
     private void readCovers(List<Track> tracks) {
