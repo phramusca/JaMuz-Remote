@@ -26,9 +26,9 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
         Button button_exit_queue = findViewById(R.id.button_exit_queue);
         button_exit_queue.setOnClickListener(v -> onBackPressed());
         Intent intent = getIntent();
-        PlayQueueRelative playQueueRelative = PlayQueue.queue.getActivityList();
         final Playlist playlist = (Playlist) intent.getSerializableExtra("SelectedPlaylist");
 
+        PlayQueueRelative playQueueRelative = PlayQueue.queue.getActivityList();
         if(playQueueRelative.getTracks()!=null) {
             int position = playQueueRelative.getPosition();
             offset = playQueueRelative.getOffset();
@@ -38,7 +38,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
             trackAdapter = new AdapterTrack(this, playQueueRelative.getTracks(), position, recyclerView) {
                 @Override
                 List<Track> getMore() {
-                    return PlayQueue.queue.fill(playlist);
+                    return PlayQueue.queue.getMore(trackAdapter.getItemCount()-1+offset, playlist);
                 }
 
                 @Override
