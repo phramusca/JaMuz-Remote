@@ -43,20 +43,21 @@ public class TrackQueue extends TrackList {
         tracks.add(positionPlaying+1, track);
     }
 
-    synchronized void fill(Playlist playlist) {
+    synchronized List<Track> fill(Playlist playlist) {
         List<Integer> excluded = new ArrayList<>();
         for(Track track : tracks) {
             excluded.add(track.getIdFileRemote());
         }
-        add(excluded, playlist);
+        return add(excluded, playlist);
     }
 
-    private synchronized void add(List<Integer> excluded, Playlist playlist) {
-        int nbTracksAfterPlaying = tracks.size()-1 - positionPlaying;
-        if(playlist!=null && nbTracksAfterPlaying<MAX_QUEUE_NEXT+1 ) {
-            List<Track> addTotracks = playlist.getTracks(MAX_QUEUE_NEXT-nbTracksAfterPlaying+2, excluded);
-            tracks.addAll(addTotracks);
+    private synchronized List<Track> add(List<Integer> excluded, Playlist playlist) {
+        List<Track> addToTracks=new ArrayList<>();
+        if(playlist!=null ) {// && nbTracksAfterPlaying<MAX_QUEUE_NEXT+1 ) {
+            addToTracks = playlist.getTracks(MAX_QUEUE_NEXT, excluded);
+            tracks.addAll(addToTracks);
         }
+        return addToTracks;
     }
 
     synchronized Track getNext() {

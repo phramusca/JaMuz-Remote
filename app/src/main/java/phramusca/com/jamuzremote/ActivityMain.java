@@ -777,10 +777,7 @@ public class ActivityMain extends AppCompatActivity {
 
     private void displayQueue() {
         Intent intent = new Intent(getApplicationContext(), ActivityPlayQueue.class);
-        PlayQueueRelative playQueueRelative = PlayQueue.queue.getActivityList();
-        intent.putExtra("queueArrayList", playQueueRelative.getTracks());
-        intent.putExtra("queueArrayPosition", playQueueRelative.getPosition());
-        intent.putExtra("queueArrayOffset", playQueueRelative.getOffset());
+        intent.putExtra("SelectedPlaylist", localSelectedPlaylist);
         startActivityForResult(intent, LISTS_REQUEST_CODE);
     }
 

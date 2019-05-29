@@ -59,7 +59,7 @@ public abstract class AdapterTrack extends AdapterLoad {
                 if(!completeTop) {
                     trackList.addLoaderTop();
                     notifyItemInserted(0);
-                    new Handler().postDelayed(() -> {
+                    new Handler().post(() -> {
                         completeTop=addTop()<=0;
                         trackList.removeLoader(0);
                         notifyDataSetChanged();
@@ -67,7 +67,7 @@ public abstract class AdapterTrack extends AdapterLoad {
                         /*if(completeTop) {
                             Toast.makeText(mContext, "Top of list", Toast.LENGTH_SHORT).show();
                         }*/
-                    }, 500);
+                    });
                 }
             }
         });

@@ -4,6 +4,8 @@ import android.util.Pair;
 
 import android.support.annotation.NonNull;
 import com.google.gson.Gson;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.Set;
 /**
  * Created by raph on 11/06/17.
  */
-public class Playlist implements Comparable {
+public class Playlist implements Comparable, Serializable {
 
     private static final String TAG = Playlist.class.getName();
     private String name;
