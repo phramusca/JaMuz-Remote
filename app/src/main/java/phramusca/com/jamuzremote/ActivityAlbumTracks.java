@@ -70,7 +70,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
     }
 
     private void insertAndSetResult(Track track, boolean playNext) {
-        PlayQueue.insert(track);
+        PlayQueue.queue.insert(track);
 
         Intent data = new Intent();
         data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");

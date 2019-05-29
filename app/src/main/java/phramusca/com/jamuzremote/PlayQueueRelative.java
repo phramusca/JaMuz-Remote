@@ -13,11 +13,6 @@ public class PlayQueueRelative {
         this.tracks = new ArrayList<>();
     }
 
-    PlayQueueRelative(ArrayList<Track> tracks) {
-        this();
-        this.tracks = tracks;
-    }
-
     PlayQueueRelative(int position, int offset, ArrayList<Track> tracks) {
         this.position = position;
         this.offset = offset;

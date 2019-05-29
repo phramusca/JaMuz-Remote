@@ -21,7 +21,7 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final Context mContext;
     private boolean isLoading;
     private boolean isLoadingTop;
-    private int visibleThreshold = 5;
+    private int visibleThreshold = 3;
     private int lastVisibleItem, firstVisibleItem, totalItemCount;
 
     AdapterLoad(Context context, RecyclerView recyclerView) {
@@ -46,9 +46,11 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
 
                 if(!isLoadingTop) {
-                    // TODO !!! Load on top: on page init, add a load item on top and select next one (so that loader at pos 0 is hidden)
-                    // Then no more need to check dY
-                    if(firstVisibleItem <=0 && dy < 0) {
+                    // TODO !!! Load on top: on page init, add a load item on top
+                    // and select next one (so that loader at pos 0 is hidden)
+                    // So there is no need  to scroll down then scroll up to search up
+                    // as no more need to check dY
+                    if(firstVisibleItem <= visibleThreshold && dy < 0) {
                         isLoadingTop = true;
                         if (onLoadListener != null) {
                             onLoadListener.onLoadTop();

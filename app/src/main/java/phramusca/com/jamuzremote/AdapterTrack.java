@@ -17,35 +17,34 @@ import java.util.Locale;
  * Created by raph on 03/03/18.
  */
 
-//FIXME !!!! Issue when list is small => no swipe !?
 public abstract class AdapterTrack extends AdapterLoad {
 
     private Context mContext;
-    List<Track> tracks;
-    private int positionPlaying;
     private boolean complete;
     private boolean completeTop;
+    TrackList trackList;
+
+    //FIXME !!!! Issue when list is small
+    // => need to scroll down (fake since it should not be necessary in real)
+    // BEFORE swiping to make swipe to work
 
     AdapterTrack(Context context, List<Track> tracks, int positionPlaying, RecyclerView recyclerView) {
         super(context, recyclerView);
         mContext = context;
-        this.tracks = tracks;
-        readCovers(tracks);
-        this.positionPlaying = positionPlaying;
+        trackList = new TrackList(tracks, positionPlaying);
+        readCovers(trackList.get());
         complete=false;
         completeTop=false;
+        recyclerView.setAdapter(this);
         setOnLoadListener(new IListenerOnLoad() {
             @Override
             public void onLoadMore() {
                 if (!complete) {
-                    tracks.add(null);
-                    int loaderPos = tracks.size() - 1;
+                    int loaderPos = trackList.addLoader();
                     notifyItemInserted(loaderPos);
                     new Handler().postDelayed(() -> {
                         complete=!addMore();
-                        if(loaderPos<tracks.size()) { //FIXME !!! This ugly quick fix is because tracks is not synchronized. Should be !
-                            tracks.remove(loaderPos);
-                        }
+                        trackList.removeLoader(loaderPos);
                         notifyDataSetChanged();
                         setLoaded();
                         /*if(complete) {
@@ -58,12 +57,11 @@ public abstract class AdapterTrack extends AdapterLoad {
             @Override
             public void onLoadTop() {
                 if(!completeTop) {
-                    tracks.add(0, null);
+                    trackList.addLoaderTop();
                     notifyItemInserted(0);
-                    recyclerView.getLayoutManager().scrollToPosition(0);
                     new Handler().postDelayed(() -> {
                         completeTop=addTop()<=0;
-                        tracks.remove(0);
+                        trackList.removeLoader(0);
                         notifyDataSetChanged();
                         setLoadedTop();
                         /*if(completeTop) {
@@ -73,7 +71,7 @@ public abstract class AdapterTrack extends AdapterLoad {
                 }
             }
         });
-        recyclerView.setAdapter(this);
+
     }
 
     abstract List<Track> getMore();
@@ -81,14 +79,14 @@ public abstract class AdapterTrack extends AdapterLoad {
 
     private boolean addMore() {
         List<Track> newTracks = getMore();
-        this.tracks.addAll(newTracks);
+        this.trackList.addBottom(newTracks);
         readCovers(newTracks);
         return newTracks.size()>0;
     }
 
     private int addTop() {
         List<Track> newTracks = getTop();
-        this.tracks.addAll(1, newTracks);
+        this.trackList.addTop(newTracks);
         readCovers(newTracks);
         return newTracks.size();
     }
@@ -103,19 +101,19 @@ public abstract class AdapterTrack extends AdapterLoad {
 
     @Override
     public int getItemViewType(int position) {
-        return tracks.get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
+        return trackList.get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
     }
 
     @Override
     public int getItemCount() {
-        return tracks == null ? 0 : tracks.size();
+        return trackList.size();
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof UserViewHolder) {
             UserViewHolder userViewHolder = (UserViewHolder) holder;
-            Track track = tracks.get(position);
+            Track track = trackList.get(position);
             track.getTags(false);
             setView(position, userViewHolder,
                     track.getTitle(),
@@ -143,11 +141,11 @@ public abstract class AdapterTrack extends AdapterLoad {
         userViewHolder.item_line3.setText(line3);
         userViewHolder.item_line4.setText(line4);
 
-        Bitmap bitmap = tracks.get(position).getTumb(false);
+        Bitmap bitmap = trackList.get(position).getTumb(false);
         if (bitmap == null) {
             bitmap = HelperBitmap.getEmptyThumb();
         }
-        if(position==positionPlaying) {
+        if(position==trackList.getPositionPlaying()) {
             bitmap = overlayPlayingIcon(bitmap);
         }
 
@@ -155,7 +153,7 @@ public abstract class AdapterTrack extends AdapterLoad {
         BitmapDrawable bitmapDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
         bitmapDrawable.setAlpha(50);
 
-        if (tracks.get(position).isHistory()) {
+        if (trackList.get(position).isHistory()) {
             userViewHolder.layout_item.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
         } else {
             userViewHolder.layout_item.setBackgroundColor(ContextCompat.getColor(mContext, R.color.background_color));
@@ -164,7 +162,7 @@ public abstract class AdapterTrack extends AdapterLoad {
         userViewHolder.itemView.setTag(position);
         userViewHolder.itemView.setOnClickListener(view -> {
             Integer position1 = (Integer)view.getTag();
-            sendListener(tracks.get(position1), position1);
+            sendListener(trackList.get(position1), position1);
         });
     }
 
@@ -185,54 +183,5 @@ public abstract class AdapterTrack extends AdapterLoad {
         matrix.postTranslate(margin, margin);
         canvas.drawBitmap(playingBitmap, matrix, null);
         return bmOverlay;
-    }
-
-    //FIXME !!!!! Merge with the same ones on PlayQueue
-    // - As it will (it happened) again diverge
-    // - it will ease debugging
-    // - As there are bugs: move down a track. Play the one above for example !
-    public void insertNext(int oldPosition) {
-        if(oldPosition!=positionPlaying) {
-            Track track = tracks.get(oldPosition);
-            if(track!=null) {
-                tracks.remove(oldPosition);
-                if(oldPosition<positionPlaying) {
-                    positionPlaying--;
-                }
-                tracks.add(positionPlaying+1, track);
-            }
-        }
-    }
-
-    public void moveDown(int oldPosition) {
-        if(oldPosition!=positionPlaying
-                && oldPosition<tracks.size()-1) {
-            Track track = tracks.get(oldPosition);
-            if(track!=null) {
-                tracks.remove(oldPosition);
-                oldPosition++;
-                if(oldPosition==positionPlaying) {
-                    positionPlaying--;
-                }
-                tracks.add(oldPosition, track);
-            }
-        }
-    }
-
-
-    public void remove(int position) {
-        if(position!= positionPlaying) {
-            Track track = tracks.get(position);
-            if(track!=null) {
-                tracks.remove(position);
-                if(position<positionPlaying) {
-                    positionPlaying--;
-                }
-            }
-        }
-    }
-
-    public void setPositionPlaying(int positionPlaying) {
-        this.positionPlaying=positionPlaying;
     }
 }

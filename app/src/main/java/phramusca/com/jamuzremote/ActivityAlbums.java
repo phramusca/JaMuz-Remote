@@ -119,7 +119,7 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
     private void insertAndSetResult(Track track, boolean playNext) {
         Playlist playlist = new Playlist(track.getAlbum(), true);
         playlist.setAlbum(track.getAlbum());
-        PlayQueue.insert(playlist);
+        PlayQueue.queue.insert(playlist);
 
         Intent data = new Intent();
         data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");

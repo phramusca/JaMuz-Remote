@@ -777,7 +777,7 @@ public class ActivityMain extends AppCompatActivity {
 
     private void displayQueue() {
         Intent intent = new Intent(getApplicationContext(), ActivityPlayQueue.class);
-        PlayQueueRelative playQueueRelative = PlayQueue.getActivityList();
+        PlayQueueRelative playQueueRelative = PlayQueue.queue.getActivityList();
         intent.putExtra("queueArrayList", playQueueRelative.getTracks());
         intent.putExtra("queueArrayPosition", playQueueRelative.getPosition());
         intent.putExtra("queueArrayOffset", playQueueRelative.getOffset());
@@ -932,7 +932,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void refreshQueueAndPlaylistSpinner(final boolean refreshAll) {
-        PlayQueue.refresh(localSelectedPlaylist);
+        PlayQueue.queue.refresh(localSelectedPlaylist);
         refreshLocalPlaylistSpinner(refreshAll);
         button_save.setBackgroundResource(localSelectedPlaylist.isModified()?
                 R.drawable.ic_button_save_red:R.drawable.ic_button_save);
@@ -974,7 +974,7 @@ public class ActivityMain extends AppCompatActivity {
             displayPlaylist(playlist);
             localSelectedPlaylist = playlist;
             if(playNext) {
-                PlayQueue.setQueue(playlist.getTracks(10));
+                PlayQueue.queue.setQueue(playlist.getTracks(10));
                 playNext();
             } else {
                 refreshQueueAndPlaylistSpinner(false);
@@ -1490,8 +1490,8 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void playNext() {
-        PlayQueue.fill(localSelectedPlaylist);
-        Track track = PlayQueue.getNext();
+        PlayQueue.queue.fill(localSelectedPlaylist);
+        Track track = PlayQueue.queue.getNext();
         if(track!=null) {
             //Update lastPlayed and playCounter of previous track
             displayedTrack.setPlayCounter(displayedTrack.getPlayCounter()+1);
@@ -1500,7 +1500,7 @@ public class ActivityMain extends AppCompatActivity {
 
             //Play next one
             if (play(track)) {
-                PlayQueue.setNext();
+                PlayQueue.queue.setNext();
             } else {
                 playNext();
             }
@@ -1511,10 +1511,10 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void playPrevious() {
-        Track track = PlayQueue.getPrevious();
+        Track track = PlayQueue.queue.getPrevious();
         if(track!=null) {
             if (play(track)) {
-                PlayQueue.setPrevious();
+                PlayQueue.queue.setPrevious();
             } else {
                 playPrevious();
             }
