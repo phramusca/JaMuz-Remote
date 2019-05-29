@@ -38,28 +38,11 @@ public abstract class AdapterTrack extends AdapterLoad {
         recyclerView.setAdapter(this);
         setOnLoadListener(new IListenerOnLoad() {
             @Override
-            public void onLoadMore() {
-                if (!complete) {
-                    int loaderPos = trackList.addLoader();
-                    notifyItemInserted(loaderPos);
-                    new Handler().postDelayed(() -> {
-                        complete=!addMore();
-                        trackList.removeLoader(loaderPos);
-                        notifyDataSetChanged();
-                        setLoaded();
-                        /*if(complete) {
-                            Toast.makeText(mContext, "End of list", Toast.LENGTH_SHORT).show();
-                        }*/
-                    },500);
-                }
-            }
-
-            @Override
             public void onLoadTop() {
                 if(!completeTop) {
                     trackList.addLoaderTop();
                     notifyItemInserted(0);
-                    new Handler().post(() -> {
+                    new Handler().postDelayed(() -> {
                         completeTop=addTop()<=0;
                         trackList.removeLoader(0);
                         notifyDataSetChanged();
@@ -67,11 +50,27 @@ public abstract class AdapterTrack extends AdapterLoad {
                         /*if(completeTop) {
                             Toast.makeText(mContext, "Top of list", Toast.LENGTH_SHORT).show();
                         }*/
+                    }, 500);
+                }
+            }
+
+            @Override
+            public void onLoadMore() {
+                if (!complete) {
+                    int loaderPos = trackList.addLoader();
+                    notifyItemInserted(loaderPos);
+                    new Handler().post(() -> {
+                        complete=!addMore();
+                        trackList.removeLoader(loaderPos);
+                        notifyDataSetChanged();
+                        setLoaded();
+                        /*if(complete) {
+                            Toast.makeText(mContext, "End of list", Toast.LENGTH_SHORT).show();
+                        }*/
                     });
                 }
             }
         });
-
     }
 
     abstract List<Track> getMore();
