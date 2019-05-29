@@ -13,7 +13,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.TrackAdapterListener {
+public class ActivityAlbums extends AppCompatActivity implements IListenerTrackAdapter {
 
     private static final int ALBUM_TRACK_REQUEST_CODE = 100;
 
@@ -38,7 +38,7 @@ public class ActivityAlbums extends AppCompatActivity implements AdapterTrack.Tr
             adapterAlbum = new AdapterAlbum(this, recyclerView, albums);
             recyclerView.setAdapter(adapterAlbum);
             adapterAlbum.addListener(this);
-            adapterAlbum.setOnLoadListener(new OnLoadListener() {
+            adapterAlbum.setOnLoadListener(new IListenerOnLoad() {
                 @Override
                 public void onLoadMore() {
                     if (!complete) {

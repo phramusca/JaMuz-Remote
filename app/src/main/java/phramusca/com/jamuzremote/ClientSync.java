@@ -23,16 +23,16 @@ import java.util.List;
  */
 public class ClientSync extends Client {
 	private static final String TAG = ClientSync.class.getName();
-	private final ICallBackSync callback;
+	private final IListenerSync callback;
     private final SyncStatus syncStatus = new SyncStatus(Status.NOT_CONNECTED, 0);
     private CountDownTimer timerWatchTimeout;
     private static final Object timerLock = new Object();
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
-	ClientSync(ClientInfo clientInfo, ICallBackSync callback){
+	ClientSync(ClientInfo clientInfo, IListenerSync callback){
 		super(clientInfo);
 		this.callback = callback;
-		super.setCallback(new CallBackReception());
+		super.setCallback(new ListenerReception());
 	}
 
     @Override
@@ -46,7 +46,7 @@ public class ClientSync extends Client {
                     syncStatus.status=Status.CONNECTED;
                     syncStatus.nbRetries=0;
                     logStatus("Connected");
-                    callback.connected();
+                    callback.onConnected();
                     request("requestTags");
                     return true;
                 }
@@ -87,42 +87,42 @@ public class ClientSync extends Client {
             } else {
                 syncStatus.status=Status.STOPPING;
             }
-            callback.disconnected(reconnect, msg, millisInFuture);
+            callback.onDisconnected(reconnect, msg, millisInFuture);
         }
     }
 
-    class CallBackReception implements ICallBackReception {
+    class ListenerReception implements IListenerReception {
 
 		@Override
-		public void receivedJson(String json) {
+		public void onReceivedJson(String json) {
 		    synchronized (syncStatus) {
-                logStatus("receivedJson(" + json + ")");
+                logStatus("onReceivedJson(" + json + ")");
                 cancelWatchTimeOut();
-                callback.receivedJson(json);
+                callback.onReceivedJson(json);
             }
 		}
 
         @Override
-        public void receivedBitmap(Bitmap bitmap) {        }
+        public void onReceivedBitmap(Bitmap bitmap) {        }
 
         @Override
-        public void receivingFile(Track fileInfoReception) {
-            callback.receivingFile(fileInfoReception);
+        public void onReceivingFile(Track fileInfoReception) {
+            callback.onReceivingFile(fileInfoReception);
         }
 
         @Override
-        public void receivedFile(Track fileInfoReception) {
+        public void onReceivedFile(Track fileInfoReception) {
             synchronized (syncStatus) {
-                logStatus("receivedFile(" + fileInfoReception + ")");
+                logStatus("onReceivedFile(" + fileInfoReception + ")");
                 cancelWatchTimeOut();
-                callback.receivedFile(fileInfoReception);
+                callback.onReceivedFile(fileInfoReception);
             }
         }
 
         @Override
-		public void disconnected(String msg) {
+		public void onDisconnected(String msg) {
             synchronized (syncStatus) {
-                logStatus("disconnected(\""+msg+"\")");
+                logStatus("onDisconnected(\""+msg+"\")");
                 if(msg.equals("ENOSPC")) {
                     close(false, "No more space on device. Check your playlist limits and available space in your SD card.", -1);
                 } else if(syncStatus.status.equals(Status.CONNECTED)

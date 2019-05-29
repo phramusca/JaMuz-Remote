@@ -11,7 +11,7 @@ import android.widget.Button;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack.TrackAdapterListener {
+public class ActivityPlayQueue extends AppCompatActivity implements IListenerTrackAdapter {
 
     AdapterTrack trackAdapter;
 
@@ -51,9 +51,18 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
             trackAdapter.addListener(this);
             recyclerView.getLayoutManager().scrollToPosition(position-1>=0?position-1:position);
 
+            PlayQueue.addListener(new IListenerQueue() {
+                @Override
+                public void onPositionChanged(int positionPlaying) {
+                    trackAdapter.setPositionPlaying(positionPlaying);
+                    trackAdapter.notifyDataSetChanged();
+                }
+            });
+
             new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
                 @Override
-                public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
+                public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder,
+                                                      List<UnderlayButton> underlayButtons) {
 
                     underlayButtons.add(new SwipeHelper.UnderlayButton(
                             SwipeHelper.ButtonInfo.DEL,
@@ -95,7 +104,6 @@ public class ActivityPlayQueue extends AppCompatActivity implements AdapterTrack
                             getApplicationContext()));
                 }
             };
-
         }
     }
 

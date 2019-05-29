@@ -30,6 +30,7 @@ public class PlayQueue {
                 queue.remove(oldPosition);
                 if(oldPosition<positionPlaying) {
                     positionPlaying--;
+                    sendListener();
                 }
                 track.setUser(true);
                 queue.add(positionPlaying +1, track);
@@ -50,6 +51,7 @@ public class PlayQueue {
                 movedUpTrack.setUser(true);
                 if(oldPosition == positionPlaying) {
                     positionPlaying--;
+                    sendListener();
                 }
                 track.setUser(true);
                 queue.add(oldPosition, track);
@@ -64,6 +66,7 @@ public class PlayQueue {
                 queue.remove(position);
                 if(position<positionPlaying) {
                     positionPlaying--;
+                    sendListener();
                 }
             }
         }
@@ -123,13 +126,28 @@ public class PlayQueue {
     synchronized static void setQueue(List<Track> tracks) {
         queue = tracks;
         positionPlaying =0;
+        sendListener();
     }
 
-    static void setNext() {
+    synchronized static void setNext() {
         positionPlaying++;
+        sendListener();
     }
 
-    static void setPrevious() {
+    synchronized static void setPrevious() {
         positionPlaying--;
+        sendListener();
+    }
+
+    private static ArrayList<IListenerQueue> mListListener = new ArrayList<>();
+
+    synchronized public static void addListener(IListenerQueue aListener) {
+        mListListener.add(aListener);
+    }
+
+    synchronized static void sendListener() {
+        for(int i = mListListener.size()-1; i >= 0; i--) {
+            mListListener.get(i).onPositionChanged(positionPlaying);
+        }
     }
 }

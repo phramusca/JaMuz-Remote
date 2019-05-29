@@ -266,7 +266,7 @@ public class ActivityMain extends AppCompatActivity {
             if(buttonRemote.getText().equals("Connect")) {
                 ClientInfo clientInfo = getClientInfo(true);
                 if(clientInfo!=null) {
-                    clientRemote =  new ClientRemote(clientInfo, new CallBackRemote());
+                    clientRemote =  new ClientRemote(clientInfo, new ListenerRemote());
                     new Thread() {
                         public void run() {
                             if(clientRemote.connect()) {
@@ -742,7 +742,7 @@ public class ActivityMain extends AppCompatActivity {
         externalFilesDir = getExternalFilesDirs(null);
         checkPermissionsThenScanLibrary();
 
-        CallBackPlayer callBackPlayer = new CallBackPlayer();
+        ListenerPlayer callBackPlayer = new ListenerPlayer();
         audioPlayer = new AudioPlayer(callBackPlayer);
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -1523,7 +1523,7 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    class CallBackPlayer implements ICallBackPlayer {
+    class ListenerPlayer implements IListenerPlayer {
 
         private int quarterPosition=0;
 
@@ -2302,12 +2302,12 @@ public class ActivityMain extends AppCompatActivity {
         displayImage(bitmap);
     }
 
-    class CallBackRemote implements ICallBackRemote {
+    class ListenerRemote implements IListenerRemote {
 
-        private final String TAG = CallBackRemote.class.getName();
+        private final String TAG = ListenerRemote.class.getName();
 
         @Override
-        public void receivedJson(final String json) {
+        public void onReceivedJson(final String json) {
             try {
                 JSONObject jObject = new JSONObject(json);
                 String type = jObject.getString("type");
@@ -2357,8 +2357,8 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         @Override
-        public void receivedBitmap(final Bitmap bitmap) {
-            Log.d(TAG, "receivedBitmap: callback");
+        public void onReceivedBitmap(final Bitmap bitmap) {
+            Log.d(TAG, "onReceivedBitmap: callback");
             Log.d(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight());
 
             if (!coverMap.containsKey(displayedTrack.getCoverHash())) {
@@ -2370,7 +2370,7 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         @Override
-        public void disconnected(final String msg) {
+        public void onDisconnected(final String msg) {
             if(!msg.equals("")) {
                 runOnUiThread(() -> helperToast.toastShort(msg));
             }
@@ -2481,7 +2481,7 @@ public class ActivityMain extends AppCompatActivity {
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED);
                 if (state == BluetoothHeadset.STATE_CONNECTED)
                 {
-                    Log.i(TAG, "BT connected. Waiting 4s");
+                    Log.i(TAG, "BT onConnected. Waiting 4s");
                     try {
                         Thread.sleep(4000);
                     } catch (InterruptedException e) {
@@ -2508,7 +2508,7 @@ public class ActivityMain extends AppCompatActivity {
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_AUDIO_DISCONNECTED);
                 if (state == BluetoothHeadset.STATE_AUDIO_CONNECTED)
                 {
-                    Log.d(TAG, "BT AUDIO connected");
+                    Log.d(TAG, "BT AUDIO onConnected");
 
                 }
                 else if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED)

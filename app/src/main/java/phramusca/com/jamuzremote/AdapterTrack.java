@@ -34,7 +34,7 @@ public abstract class AdapterTrack extends AdapterLoad {
         this.positionPlaying = positionPlaying;
         complete=false;
         completeTop=false;
-        setOnLoadListener(new OnLoadListener() {
+        setOnLoadListener(new IListenerOnLoad() {
             @Override
             public void onLoadMore() {
                 if (!complete) {
@@ -232,7 +232,7 @@ public abstract class AdapterTrack extends AdapterLoad {
         }
     }
 
-    public interface TrackAdapterListener {
-        void onClick(Track item, int position);
+    public void setPositionPlaying(int positionPlaying) {
+        this.positionPlaying=positionPlaying;
     }
 }
