@@ -9,10 +9,10 @@ package phramusca.com.jamuzremote;
  *
  * @author phramusca
  */
-public interface ICallBackSync {
-	void receivedJson(String json);
-	void receivingFile(Track fileInfoReception);
-	void receivedFile(Track fileInfoReception);
-	void connected();
-	void disconnected(boolean reconnect, String msg, long millisInFuture);
+public interface IListenerSync {
+	void onReceivedJson(String json);
+	void onReceivingFile(Track fileInfoReception);
+	void onReceivedFile(Track fileInfoReception);
+	void onConnected();
+	void onDisconnected(boolean reconnect, String msg, long millisInFuture);
 }

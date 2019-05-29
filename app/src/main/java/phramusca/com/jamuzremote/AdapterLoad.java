@@ -59,8 +59,8 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         });
     }
 
-    private OnLoadListener onLoadListener;
-    public void setOnLoadListener(OnLoadListener mOnLoadListener) {
+    private IListenerOnLoad onLoadListener;
+    public void setOnLoadListener(IListenerOnLoad mOnLoadListener) {
         this.onLoadListener = mOnLoadListener;
     }
 
@@ -124,9 +124,9 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    private ArrayList<AdapterTrack.TrackAdapterListener> mListListener = new ArrayList<>();
+    private ArrayList<IListenerTrackAdapter> mListListener = new ArrayList<>();
 
-    public void addListener(AdapterTrack.TrackAdapterListener aListener) {
+    public void addListener(IListenerTrackAdapter aListener) {
         mListListener.add(aListener);
     }
 

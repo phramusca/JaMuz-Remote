@@ -12,12 +12,12 @@ import java.io.IOException;
  */
 public class AudioPlayer {
 
-    private final ICallBackPlayer callback;
+    private final IListenerPlayer callback;
     private static final String TAG = AudioPlayer.class.getName();
     private static MediaPlayer mediaPlayer;
     private static CountDownTimer timer;
 
-    AudioPlayer(final ICallBackPlayer callback) {
+    AudioPlayer(final IListenerPlayer callback) {
         this.callback = callback;
     }
 

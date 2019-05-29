@@ -31,7 +31,7 @@ public class Client {
 	private ClientEmission emission;
 	private ClientReception reception;
 
-	private ICallBackReception callback;
+	private IListenerReception callback;
     private BufferedReader bufferedReader;
 	private OutputStream outputStream;
     private ClientInfo clientInfo;
@@ -40,7 +40,7 @@ public class Client {
         this.clientInfo = clientInfo;
     }
 
-    void setCallback(ICallBackReception callback) {
+    void setCallback(IListenerReception callback) {
         this.callback = callback;
     }
 
@@ -68,12 +68,12 @@ public class Client {
                     return true;
                 }
             }
-            callback.disconnected("Authentication failed.");
+            callback.onDisconnected("Authentication failed.");
             return false;
 		} catch (IOException ex) {
             //Includes SocketException
             Log.w(TAG, "", ex);
-            callback.disconnected(ex.getMessage());
+            callback.onDisconnected(ex.getMessage());
 			return false;
 		}
 	}
@@ -141,7 +141,7 @@ public class Client {
 			} catch (IOException ex) {
                 //This includes SocketException
                 Log.e(TAG, "", ex);
-                callback.disconnected(ex.getMessage());
+                callback.onDisconnected(ex.getMessage());
 			}
 		}
 	}

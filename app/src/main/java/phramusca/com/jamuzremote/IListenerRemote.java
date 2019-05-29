@@ -11,8 +11,8 @@ import android.graphics.Bitmap;
  *
  * @author phramusca
  */
-public interface ICallBackRemote {
-	void receivedJson(String json);
-	void receivedBitmap(Bitmap bitmap);
-	void disconnected(String msg);
+public interface IListenerRemote {
+	void onReceivedJson(String json);
+	void onReceivedBitmap(Bitmap bitmap);
+	void onDisconnected(String msg);
 }

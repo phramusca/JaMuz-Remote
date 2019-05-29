@@ -44,7 +44,7 @@ public final class RepoSync {
      * File is deleted if not requested (not in tracks).
      * @param getAppDataPath application path
      * @param track the one to check
-     * @return true if receivedFile exists and length()==track.size
+     * @return true if onReceivedFile exists and length()==track.size
      */
     public synchronized static boolean receivedFile(File getAppDataPath, Track track) {
 
@@ -87,7 +87,7 @@ public final class RepoSync {
     /**
      * @param track the one to check
      * @param receivedFile the corresponding File
-     * @return true if receivedFile exists and length()==track.size
+     * @return true if onReceivedFile exists and length()==track.size
      */
     private synchronized static boolean checkFile(Track track,
                                                   File receivedFile) {

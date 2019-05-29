@@ -32,9 +32,9 @@ public class ClientReception extends ProcessAbstract {
     private static final String TAG = ClientReception.class.getName();
 	private final BufferedReader bufferedReader;
 	private InputStream inputStream;
-	private final ICallBackReception callback;
+	private final IListenerReception callback;
 
-	ClientReception(InputStream inputStream, ICallBackReception callback) {
+	ClientReception(InputStream inputStream, IListenerReception callback) {
 		super("Thread.Client.ClientReception");
 		this.inputStream = inputStream;
 
@@ -51,21 +51,21 @@ public class ClientReception extends ProcessAbstract {
 				String msg = bufferedReader.readLine();
                 if(msg==null) {
                     Log.d(TAG, "RECEIVED null");
-                    callback.disconnected("Socket closed (received null)");
+                    callback.onDisconnected("Socket closed (received null)");
                 }
                 else if (msg.startsWith("JSON_")) {
-                    callback.receivedJson(msg.substring(5));
+                    callback.onReceivedJson(msg.substring(5));
                 }
 				else if (msg.equals("SENDING_COVER")) {
                     Bitmap bitmap=null;
                     try {
                         bitmap = BitmapFactory.decodeStream(inputStream);
-                        Log.d(TAG, "receivedBitmap");
+                        Log.d(TAG, "onReceivedBitmap");
                     } catch (OutOfMemoryError ignored) {
                         //Handed in callback
                     } finally {
-                        Log.d(TAG, "receivedBitmap: calling callback");
-                        callback.receivedBitmap(bitmap);
+                        Log.d(TAG, "onReceivedBitmap: calling callback");
+                        callback.onReceivedBitmap(bitmap);
                     }
                 }
 				else if (msg.startsWith("SENDING_FILE")) {
@@ -79,7 +79,7 @@ public class ClientReception extends ProcessAbstract {
                         DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
                         double fileSize = fileInfoReception.getSize();
                         FileOutputStream fos = new FileOutputStream(fileInfoReception.getPath());
-                        callback.receivingFile(fileInfoReception);
+                        callback.onReceivingFile(fileInfoReception);
                         // TODO: Find best. Make a benchmark (and use it in notification progres bar)
                         //https://stackoverflow.com/questions/8748960/how-do-you-decide-what-byte-size-to-use-for-inputstream-read
                         byte[] buf = new byte[8192];
@@ -91,10 +91,10 @@ public class ClientReception extends ProcessAbstract {
                         }
                         fos.close();
                         checkAbort();
-                        callback.receivedFile(fileInfoReception);
+                        callback.onReceivedFile(fileInfoReception);
 					}
                     catch (OutOfMemoryError | JSONException e) {
-                        Log.e(TAG, "receivedFile", e);
+                        Log.e(TAG, "onReceivedFile", e);
                     }
 				}
 			}
@@ -106,7 +106,7 @@ public class ClientReception extends ProcessAbstract {
                 isENOSPC = errno == OsConstants.ENOSPC;
                 //FIXME: sync and merge: Manage errors like ENOENT (No such file or directory)") : SyncStatus{status=CONNECTED, nbRetries=0}
                 // 5-13 21:28:32.452 I/phramusca.com.jamuzremote.ClientSync:
-                // disconnected("/storage/extSdCard/Android/data/org.phramusca.jamuz/files/Autres/DJ Little Tune/
+                // onDisconnected("/storage/extSdCard/Android/data/org.phramusca.jamuz/files/Autres/DJ Little Tune/
                 // New Remix Maquette 2007 /02 track2 .mp3:
                 // open failed: ENOENT (No such file or directory)") : SyncStatus{status=CONNECTED, nbRetries=0}
                 //OsConstants.ENOENT
@@ -116,10 +116,10 @@ public class ClientReception extends ProcessAbstract {
             }
             if (isENOSPC) {
                 //Ex: java.io.IOException: write failed: ENOSPC (No space left on device)
-                callback.disconnected("ENOSPC");
+                callback.onDisconnected("ENOSPC");
             } else {
                 // Other IOExceptions incl. SocketException
-                callback.disconnected(ex.getMessage());
+                callback.onDisconnected(ex.getMessage());
             }
 		}
 		finally {

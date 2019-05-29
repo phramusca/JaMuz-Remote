@@ -70,7 +70,7 @@ public class ServiceSync extends ServiceBase {
 
                 helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
                 bench = new Benchmark(RepoSync.getRemainingSize(), 10);
-                clientSync = new ClientSync(clientInfo, new CallBackSync());
+                clientSync = new ClientSync(clientInfo, new ListenerSync());
                 clientSync.connect();
             }
         }.start();
@@ -104,12 +104,12 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    class CallBackSync implements ICallBackSync {
+    class ListenerSync implements IListenerSync {
 
-        private final String TAG = CallBackSync.class.getName();
+        private final String TAG = ListenerSync.class.getName();
 
         @Override
-        public void receivedJson(final String json) {
+        public void onReceivedJson(final String json) {
             try {
                 final JSONObject jObject = new JSONObject(json);
                 String type = jObject.getString("type");
@@ -221,7 +221,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         @Override
-        public void receivedFile(final Track fileInfoReception) {
+        public void onReceivedFile(final Track fileInfoReception) {
             Log.i(TAG, "Received file\n"+fileInfoReception
                     +"\nRemaining : "+ RepoSync.getRemainingSize()
                     +"/"+ RepoSync.getTotalSize());
@@ -231,18 +231,18 @@ public class ServiceSync extends ServiceBase {
         }
 
         @Override
-        public void receivingFile(final Track fileInfoReception) {
+        public void onReceivingFile(final Track fileInfoReception) {
             notifyBar("Down", fileInfoReception);
         }
 
         @Override
-        public void connected() {
+        public void onConnected() {
             sendMessage("connectedSync");
             helperNotification.notifyBar(notificationSync, "Connected ... ");
         }
 
         @Override
-        public void disconnected(boolean reconnect, final String msg, final long millisInFuture) {
+        public void onDisconnected(boolean reconnect, final String msg, final long millisInFuture) {
             if (!msg.equals("")) {
                 runOnUiThread(() -> helperNotification.notifyBar(notificationSync, msg, millisInFuture));
             }

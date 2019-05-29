@@ -11,10 +11,10 @@ import android.graphics.Bitmap;
  *
  * @author phramusca
  */
-public interface ICallBackReception {
-	void receivedJson(String json);
-	void receivedBitmap(Bitmap bitmap);
-	void receivingFile(Track fileInfoReception);
-	void receivedFile(Track fileInfoReception);
-	void disconnected(String msg);
+public interface IListenerReception {
+	void onReceivedJson(String json);
+	void onReceivedBitmap(Bitmap bitmap);
+	void onReceivingFile(Track fileInfoReception);
+	void onReceivedFile(Track fileInfoReception);
+	void onDisconnected(String msg);
 }

@@ -13,13 +13,13 @@ import android.graphics.Bitmap;
  */
 public class ClientRemote extends Client {
 
-	private final ICallBackRemote callback;
+	private final IListenerRemote callback;
 	private boolean userStop=false;
 
-	public ClientRemote(ClientInfo clientInfo, ICallBackRemote callback){
+	public ClientRemote(ClientInfo clientInfo, IListenerRemote callback){
 		super(clientInfo);
 		this.callback = callback;
-        super.setCallback(new CallBackReception());
+        super.setCallback(new ListenerReception());
 	}
 
     @Override
@@ -34,27 +34,27 @@ public class ClientRemote extends Client {
         super.close();
     }
 
-    class CallBackReception implements ICallBackReception {
+    class ListenerReception implements IListenerReception {
 
 		@Override
-		public void receivedJson(String json) {
-			callback.receivedJson(json);
+		public void onReceivedJson(String json) {
+			callback.onReceivedJson(json);
 		}
 
         @Override
-        public void receivedBitmap(Bitmap bitmap) {
-            callback.receivedBitmap(bitmap);
+        public void onReceivedBitmap(Bitmap bitmap) {
+            callback.onReceivedBitmap(bitmap);
         }
 
         @Override
-        public void receivingFile(Track fileInfoReception) {        }
+        public void onReceivingFile(Track fileInfoReception) {        }
 
         @Override
-        public void receivedFile(Track fileInfoReception) {        }
+        public void onReceivedFile(Track fileInfoReception) {        }
 
         @Override
-		public void disconnected(String msg) {
-            callback.disconnected(userStop?"":msg);
+		public void onDisconnected(String msg) {
+            callback.onDisconnected(userStop?"":msg);
 		}
 	}
 }
