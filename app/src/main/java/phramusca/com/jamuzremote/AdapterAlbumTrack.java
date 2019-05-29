@@ -20,7 +20,7 @@ public abstract class AdapterAlbumTrack extends AdapterTrack {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof UserViewHolder) {
             UserViewHolder userViewHolder = (UserViewHolder) holder;
-            Track track = tracks.get(position);
+            Track track = trackList.get(position);
             track.getTags(false);
             setView(position, userViewHolder,
                     track.getTitle(),
