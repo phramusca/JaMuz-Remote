@@ -88,7 +88,6 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         };
 
         attachSwipe();
-
     }
 
     @Override

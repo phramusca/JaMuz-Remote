@@ -984,10 +984,9 @@ public class ActivityMain extends AppCompatActivity {
         public void onItemSelected(AdapterView<?> parent, View view,
         int pos, long id) {
             if (spinnerPlaylistSend) {
-                //FIXME !!! This is triggered weirdly, when listAlbums is involved, it seems at least
-                //so queue is refreshed everytime. It should not
-                //refresh queue unless value is different
-                // but first it should not be set when having focus (if possible)
+                spinnerPlaylistSend = false;
+                //TODO When from another activity (ex: queue or albums)
+                //This can be triggered if Filter button is pressed too quickly
                 Playlist playlist = (Playlist) parent.getItemAtPosition(pos);
                 applyPlaylist(playlist, false);
             }
