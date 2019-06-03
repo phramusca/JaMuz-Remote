@@ -24,10 +24,6 @@ public abstract class AdapterTrack extends AdapterLoad {
     private boolean completeTop;
     TrackList trackList;
 
-    //FIXME !!!! Issue when list is small
-    // => need to scroll down (fake since it should not be necessary in real)
-    // BEFORE swiping to make swipe to work
-
     AdapterTrack(Context context, List<Track> tracks, int positionPlaying, RecyclerView recyclerView) {
         super(context, recyclerView);
         mContext = context;

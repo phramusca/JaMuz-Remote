@@ -18,6 +18,10 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
     private int offset=0;
     private static final int QUEUE_REQUEST_CODE = 200;
 
+    //FIXME !!!! Issue when list is small
+    // => need to scroll down (fake since it should not be necessary in real)
+    // BEFORE swiping to make swipe to work
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
