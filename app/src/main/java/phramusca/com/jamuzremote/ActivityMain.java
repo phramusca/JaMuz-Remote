@@ -1211,17 +1211,18 @@ public class ActivityMain extends AppCompatActivity {
         button_delete.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
         button_save.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
         button_new.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
-        button_restore.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+        //button_restore.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
 
-        spinnerPlaylist.setEnabled(!isKidsPlace);
+        //spinnerPlaylist.setEnabled(!isKidsPlace);
         if(!isKidsPlace) {
             if(wasRemoteConnected && !audioPlayer.isPlaying()) {
                 buttonRemote.setEnabled(false);
                 buttonRemote.performClick();
             }
-        } else {
-            setupLocalPlaylistSpinner("Culin");
         }
+        /*else {
+            setupLocalPlaylistSpinner("Specific KidsPlace playlist"); //TODO
+        }*/
 
         audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
         registerButtonReceiver();
