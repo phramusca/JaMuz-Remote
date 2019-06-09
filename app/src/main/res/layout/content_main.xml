@@ -60,19 +60,6 @@
             android:background="@drawable/ic_button_albums"
             android:gravity="center"/>
 
-        <Button android:id="@+id/button_connect"
-            android:layout_width="40dp"
-            android:layout_height="wrap_content"
-            android:layout_column="5"
-            android:layout_row="0"
-            android:background="@drawable/remote_off"
-            android:text="Connect"
-            android:textAllCaps="false"
-            android:textColor="@android:color/transparent"
-            android:textSize="10sp"
-            tools:ignore="HardcodedText,SmallSp"
-            android:gravity="center"/>
-
         <Button android:id="@+id/button_sync"
             android:background="@drawable/connect_off_new"
             android:layout_width="40dp"
