@@ -1,6 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Intent;
+import android.os.PowerManager;
 import android.util.Log;
 
 import java.io.File;
@@ -20,6 +21,7 @@ public class ServiceScan extends ServiceBase {
     private ProcessAbstract processBrowseFS;
     private ProcessAbstract processBrowseFScount;
     private String userPath;
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     public void onCreate(){
@@ -30,6 +32,12 @@ public class ServiceScan extends ServiceBase {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         super.onStartCommand(intent, flags, startId);
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        if (powerManager != null) {
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyPowerWakelockTag");
+            wakeLock.acquire(24*60*60*1000); //24 hours, enough to scan a lot, if not all !
+        }
+
         userPath = intent.getStringExtra("userPath");
         scanLibrayInThread();
         return START_REDELIVER_INTENT;
@@ -38,6 +46,7 @@ public class ServiceScan extends ServiceBase {
     @Override
     public void onDestroy(){
         stop();
+        wakeLock.release();
         super.onDestroy();
     }
 

@@ -99,13 +99,15 @@ public class AudioPlayer {
         return msg;
     }
 
-    public String setVolume(float volume, Track track) {
-        if(mediaPlayer!=null && mediaPlayer.isPlaying() && volume>=0) {
-            try {
-                this.baseVolume = volume;
-                return applyReplayGain(mediaPlayer, track);
-            } catch(Exception e) {
-                Log.w(TAG, "Failed to set volume");
+    public String setVolume(int volume, Track track) {
+        if(volume>=0) {
+            this.baseVolume = ((float)volume / 100.0f);
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                try {
+                    return applyReplayGain(mediaPlayer, track);
+                } catch (Exception e) {
+                    Log.w(TAG, "Failed to set volume");
+                }
             }
         }
         return "";

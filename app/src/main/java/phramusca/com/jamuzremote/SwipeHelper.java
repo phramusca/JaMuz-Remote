@@ -79,7 +79,9 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
                 return false;
             }
         };
-        this.recyclerView.setOnTouchListener(onTouchListener);
+        if(recyclerView!=null) {
+            this.recyclerView.setOnTouchListener(onTouchListener);
+        }
         recoverQueue = new LinkedList<Integer>(){
             @Override
             public boolean add(Integer o) {

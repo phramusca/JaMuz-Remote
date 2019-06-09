@@ -62,10 +62,10 @@
             android:exported="false"
             android:singleUser="false" />
 
-        <activity android:name="phramusca.com.jamuzremote.ActivityPlayQueue" />
-        <activity android:name="phramusca.com.jamuzremote.ActivityAlbums" />
-        <activity android:name="phramusca.com.jamuzremote.ActivityAlbumTracks" />
-        <activity android:name="phramusca.com.jamuzremote.ActivitySettings" />
+        <activity android:name=".ActivityPlayQueue" />
+        <activity android:name=".ActivityAlbums" />
+        <activity android:name=".ActivityAlbumTracks" />
+        <activity android:name=".ActivitySettings" />
     </application>
 
 </manifest>
