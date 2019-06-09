@@ -60,4 +60,6 @@
     <string name="syncCheckFilesOnDisk">Vérification de la présence des fichiers sur le disque ...</string>
     <string name="nbTracks">piste(s)</string>
     <string name="album_tracks">Pistes de l\'album</string>
+    <string name="settings">Paramètres</string>
+    <string name="queue_user">Utilisateur</string>
 </resources>

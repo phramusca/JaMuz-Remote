@@ -100,7 +100,7 @@ public class AudioPlayer {
     }
 
     public String setVolume(float volume, Track track) {
-        if(mediaPlayer!=null && mediaPlayer.isPlaying()) {
+        if(mediaPlayer!=null && mediaPlayer.isPlaying() && volume>=0) {
             try {
                 this.baseVolume = volume;
                 return applyReplayGain(mediaPlayer, track);

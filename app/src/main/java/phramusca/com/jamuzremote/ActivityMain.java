@@ -39,7 +39,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.InputType;
-import android.text.SpannableString;
 import android.text.Spanned;
 import android.util.Log;
 import android.view.Menu;
@@ -92,6 +91,7 @@ import java.util.TimerTask;
 
 import static phramusca.com.jamuzremote.Playlist.Order.PLAYCOUNTER_LASTPLAYED;
 import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
+import static phramusca.com.jamuzremote.StringManager.trimTrailingWhitespace;
 
 //FIXME: Submit to f-droid.org
 //https://gitlab.com/fdroid/fdroiddata/blob/master/CONTRIBUTING.md
@@ -127,14 +127,14 @@ public class ActivityMain extends AppCompatActivity {
     private static final int SPEECH_REQUEST_CODE = 15489;
     private static final int LISTS_REQUEST_CODE = 60568;
     private static final int QR_REQUEST_CODE = 49374;
+    private static final int SETTINGS_REQUEST_CODE = 23548;
 
     // GUI elements
     private TextView textViewFileInfo;
-    private EditText editTextConnectInfo;
-    private TextView textViewPath;
     private TextView textViewPlaylist;
     private Button buttonRemote;
     private Button buttonSync;
+    private Button button_settings;
     private ToggleButton toggleButtonDimMode;
     private ToggleButton toggleButtonControls;
     private ToggleButton toggleButtonTagsPanel;
@@ -143,11 +143,9 @@ public class ActivityMain extends AppCompatActivity {
     private ToggleButton toggleButtonGenresPanel;
     private ToggleButton toggleButtonEditTags;
     private ToggleButton toggleButtonPlaylist;
-    private ToggleButton toggleButtonOptions;
     private Button buttonRatingOperator;
     private Button button_save;
     private Button button_new;
-    private Button button_restore;
     private Button button_delete;
     private SeekBar seekBarPosition;
     private Spinner spinnerPlaylist;
@@ -177,9 +175,6 @@ public class ActivityMain extends AppCompatActivity {
     private LinearLayout layoutPlaylist;
     private LinearLayout layoutPlaylistEditBar;
     private GridLayout layoutPlaylistToolBar;
-    private GridLayout layoutOptions;
-
-    private IntentIntegrator qrScan;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -248,15 +243,10 @@ public class ActivityMain extends AppCompatActivity {
         layoutPlaylistEditBar = findViewById(R.id.panel_playlist_editbar);
 
         layoutControls = findViewById(R.id.panel_controls);
-        layoutOptions = findViewById(R.id.panel_options);
 
         textViewFileInfo = findViewById(R.id.textFileInfo);
 
-        editTextConnectInfo = findViewById(R.id.editText_info);
-        editTextConnectInfo.setOnTouchListener(dimOnTouchListener);
-
         preferences = getPreferences(MODE_PRIVATE);
-        editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.11:2013"));
 
         buttonRemote = findViewById(R.id.button_connect);
         buttonRemote.setOnClickListener(v -> {
@@ -312,48 +302,7 @@ public class ActivityMain extends AppCompatActivity {
 
         getFromQRcode(getIntent().getDataString());
 
-        textViewPath = findViewById(R.id.textViewPath);
-
         textViewPlaylist = findViewById(R.id.textViewPlaylist);
-
-        Button buttonSaveConnectionString = findViewById(R.id.button_save_connectionString);
-        buttonSaveConnectionString.setOnClickListener(view ->
-                setConfig("connectionString", editTextConnectInfo.getText().toString())
-        );
-
-        qrScan = new IntentIntegrator(this);
-        Button button_scan_QR = findViewById(R.id.button_scan_QR);
-        button_scan_QR.setOnClickListener(view ->
-                qrScan.initiateScan()
-        );
-
-        String userPath = preferences.getString("userPath", "/");
-        String display = userPath.equals("/")?
-                getString(R.string.pathInfo)
-                :userPath;
-        textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
-                .concat(display)
-                .concat("</html>"))));
-        Button dirChooserButton = findViewById(R.id.button_browse);
-        dirChooserButton.setOnClickListener(new View.OnClickListener()
-        {
-            private boolean m_newFolderEnabled = false;
-            @Override
-            public void onClick(View v)
-            {
-                DirectoryChooserDialog directoryChooserDialog =
-                        new DirectoryChooserDialog(ActivityMain.this,
-                                chosenDir -> {
-                                    textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
-                                            .concat(chosenDir)
-                                            .concat("</html>"))));
-                                    setConfig("userPath", chosenDir);
-                                    checkPermissionsThenScanLibrary();
-                                });
-                directoryChooserDialog.setNewFolderEnabled(m_newFolderEnabled);
-                directoryChooserDialog.chooseDirectory(preferences.getString("userPath", "/"));
-            }
-        });
 
         ratingBar = findViewById(R.id.ratingBar);
         ratingBar.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
@@ -415,26 +364,6 @@ public class ActivityMain extends AppCompatActivity {
 
         seekBarPosition = findViewById(R.id.seekBar);
         seekBarPosition.setEnabled(false);
-
-        SeekBar seekBarReplayGain = findViewById(R.id.seekBarReplayGain);
-        seekBarReplayGain.setProgress(70);
-        seekBarReplayGain.setMax(100); //default, but still
-        seekBarReplayGain.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float value = ((float)progress / 100.0f);
-                Log.i(TAG, "seekBarReplayGain: "+value);
-                String msg = audioPlayer.setVolume(value, displayedTrack);
-                if(!msg.equals("")) {
-                    helperToast.toastLong(msg);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
 
         spinnerPlaylist = findViewById(R.id.spinner_playlist);
         spinnerPlaylist.setOnItemSelectedListener(spinnerPlaylistListener);
@@ -512,7 +441,6 @@ public class ActivityMain extends AppCompatActivity {
             toggle(layoutEditTags, !toggleButtonEditTags.isChecked());
             if(toggleButtonEditTags.isChecked()) {
                 toggleOff(toggleButtonPlaylist, layoutPlaylist);
-                toggleOff(toggleButtonOptions, layoutOptions);
 
                 toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
                 toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
@@ -527,7 +455,6 @@ public class ActivityMain extends AppCompatActivity {
             toggle(layoutPlaylist, !toggleButtonPlaylist.isChecked());
             if(toggleButtonPlaylist.isChecked()) {
                 toggleOff(toggleButtonEditTags, layoutEditTags);
-                toggleOff(toggleButtonOptions, layoutOptions);
             } else {
                 toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
                 toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
@@ -536,19 +463,10 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        toggleButtonOptions = findViewById(R.id.button_connect_toggle);
-        toggleButtonOptions.setOnClickListener(v -> {
-            dimOn();
-            toggle(layoutOptions, !toggleButtonOptions.isChecked());
-            if(toggleButtonOptions.isChecked()) {
-                toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
-                toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
-                toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
-                toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
-
-                toggleOff(toggleButtonEditTags, layoutEditTags);
-                toggleOff(toggleButtonPlaylist, layoutPlaylist);
-            }
+        button_settings = findViewById(R.id.button_settings);
+        button_settings.setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), ActivitySettings.class);
+            startActivityForResult(intent, SETTINGS_REQUEST_CODE);
         });
 
         button_new = findViewById(R.id.button_new);
@@ -599,7 +517,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        button_restore = findViewById(R.id.button_restore);
+        Button button_restore = findViewById(R.id.button_restore);
         button_restore.setOnClickListener(v -> {
             if(localSelectedPlaylist!=null) {
                 StringBuilder msg= new StringBuilder().append(getString(R.string.playlist))
@@ -755,11 +673,8 @@ public class ActivityMain extends AppCompatActivity {
         {
            if (audioManager.isBluetoothScoAvailableOffCall())
             {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                {
-                    mBluetoothAdapter.getProfileProxy(this, mHeadsetProfileListener,
-                            BluetoothProfile.HEADSET);
-                }
+                mBluetoothAdapter.getProfileProxy(this, mHeadsetProfileListener,
+                        BluetoothProfile.HEADSET);
             }
         }
 
@@ -799,7 +714,7 @@ public class ActivityMain extends AppCompatActivity {
             helperToast.toastLong("You must connect to WiFi network.");
             return null;
         }
-        String infoConnect = editTextConnectInfo.getText().toString();
+        String infoConnect = preferences.getString("connectionString", "192.168.0.1:2013");
         String[] split = infoConnect.split(":");  //NOI18N
         if(split.length<2) {
             helperToast.toastLong("Bad format:\t"+infoConnect+"" +
@@ -825,11 +740,7 @@ public class ActivityMain extends AppCompatActivity {
         toggle(layout, true);
     }
 
-    private void setConfig(String id, String value) {
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(id, value);
-        editor.apply();
-    }
+
 
     private ToggleButton getButtonTag(int key, String value) {
         ToggleButton button = new ToggleButton(this);
@@ -1197,14 +1108,13 @@ public class ActivityMain extends AppCompatActivity {
         toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
         toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
         toggleOff(toggleButtonControls, layoutControls);
-        toggleOff(toggleButtonOptions, layoutOptions);
         toggleOff(toggleButtonEditTags, layoutEditTags);
         toggle(layoutPlaylist, audioPlayer.isPlaying());
         toggleButtonPlaylist.setChecked(!audioPlayer.isPlaying());
 
         boolean isKidsPlace = KPUtility.isKidsPlaceRunning(this);
         toggleButtonEditTags.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
-        toggleButtonOptions.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+        button_settings.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
         buttonRemote.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
         buttonSync.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
 
@@ -1382,6 +1292,22 @@ public class ActivityMain extends AppCompatActivity {
                 Toast.makeText(this, "Problem reading QR code", Toast.LENGTH_LONG).show();
             } else {
                 getFromQRcode(result.getContents());
+            }
+        }
+        else if(requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
+            String action = data.getStringExtra("action");
+            if(action!=null && action.equals("checkPermissionsThenScanLibrary")) {
+                checkPermissionsThenScanLibrary();
+            }
+
+            //FIXME: Update volume directly from Settings activity
+            // Need to move audio to a service, which is a good thing anyway !
+            float value = data.getFloatExtra("volume", -1);
+            if(value>=0) {
+                String msg = audioPlayer.setVolume(value, displayedTrack);
+                if(!msg.equals("")) {
+                    (new HelperToast(getApplicationContext())).toastLong(msg);
+                }
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -1701,8 +1627,6 @@ public class ActivityMain extends AppCompatActivity {
     private boolean isDimOn = true;
 
     private void dimOn() {
-        editTextConnectInfo.clearFocus();
-
         if(toggleButtonDimMode.isChecked()) {
             if (!isDimOn) {
                 dim(true);
@@ -1780,6 +1704,8 @@ public class ActivityMain extends AppCompatActivity {
         });
     }
 
+    //FIXME !!!!!! Still needed in ActivityMain ???
+    //To be moved to ActivitySettings
     private void getFromQRcode(String content) {
         if(content!=null) {
             if(!content.equals("")) {
@@ -1788,8 +1714,9 @@ public class ActivityMain extends AppCompatActivity {
 
                 buttonRemote.setEnabled(false);
                 buttonSync.setEnabled(false);
-                editTextConnectInfo.setText(content);
-                setConfig("connectionString", editTextConnectInfo.getText().toString());
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("connectionString", content);
+                editor.apply();
                 buttonRemote.setEnabled(true);
                 buttonSync.setEnabled(true);
             }
@@ -2210,35 +2137,6 @@ public class ActivityMain extends AppCompatActivity {
                 displayCover();
             }
         }
-    }
-
-    /**
-     * Trims trailing whitespace. Removes any of these characters:
-     * https://stackoverflow.com/questions/9589381/remove-extra-line-breaks-after-html-fromhtml
-     * 0009, HORIZONTAL TABULATION
-     * 000A, LINE FEED
-     * 000B, VERTICAL TABULATION
-     * 000C, FORM FEED
-     * 000D, CARRIAGE RETURN
-     * 001C, FILE SEPARATOR
-     * 001D, GROUP SEPARATOR
-     * 001E, RECORD SEPARATOR
-     * 001F, UNIT SEPARATOR
-     * @return "" if source is null, otherwise string with all trailing whitespace removed
-     */
-    public static Spanned trimTrailingWhitespace(Spanned source) {
-
-        if(source == null)
-            return new SpannableString("");
-
-        int i = source.length();
-
-        // loop back to the first non-whitespace character
-        while(true) {
-            if (!(--i >= 0 && Character.isWhitespace(source.charAt(i)))) break;
-        }
-
-        return new SpannableString(source.subSequence(0, i+1));
     }
 
     //private static final String AVRCP_PLAYSTATE_CHANGED = "com.android.music.playstatechanged";

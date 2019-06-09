@@ -66,6 +66,7 @@
     <string name="syncCheckFilesOnDisk">Checking if files are already on disk ...</string>
     <string name="nbTracks">track(s)</string>
     <string name="album_tracks">Album Tracks</string>
+    <string name="settings">Settings</string>
 
     <!--FIXME: Translate, knowing that it is also a keyword so need to split key and value-->
     <string-array name="limitUnits" tools:ignore="MissingTranslation">
