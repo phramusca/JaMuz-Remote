@@ -61,8 +61,7 @@
             android:background="@drawable/ic_button_albums"
             android:gravity="center"/>
 
-        <Button
-            android:id="@+id/button_connect"
+        <Button android:id="@+id/button_connect"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:layout_column="5"
@@ -97,175 +96,14 @@
             android:background="@drawable/ic_toggle_lightbulb"
             android:gravity="center"/>
 
-        <ToggleButton android:id="@+id/button_connect_toggle"
+        <Button android:id="@+id/button_settings"
             android:layout_row="0"
             android:layout_column="8"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
-            style="@style/ToggleButton"
             android:background="@drawable/ic_toggle_config"
             android:gravity="center"/>
 
-    </GridLayout>
-
-    <GridLayout android:id="@+id/panel_options"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:paddingBottom="5dp" >
-
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_row="0"
-            android:layout_column="0"
-            android:paddingTop="5dp">
-
-            <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
-            <LinearLayout android:id="@+id/dummy"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_row="0"
-                android:layout_column="0"
-                android:orientation="horizontal" />
-
-            <TextView android:text="@string/lt_ip_gt_lt_port_gt"
-                android:layout_row="0"
-                android:layout_column="1"
-                android:textColor="@color/textColor"/>
-
-            <EditText android:id="@+id/editText_info"
-                android:inputType="text"
-                android:imeOptions="actionDone"
-                android:text="@string/defaultConnectionString"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:enabled="true"
-                android:layout_gravity="start|end"
-                android:gravity="center_horizontal"
-                android:hint="@string/lt_ip_gt_lt_port_gt"
-                android:layout_row="0"
-                android:layout_column="2"
-                android:textColor="@color/textColor"
-                android:theme="@style/EditText" />
-
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:padding="5dp"
-                android:background="@drawable/ic_button"
-                android:textColor="@color/textColor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/save"
-                android:id="@+id/button_save_connectionString"
-                android:layout_row="0"
-                android:layout_column="3"
-                android:textAllCaps="false"/>
-
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:padding="5dp"
-                android:background="@drawable/ic_button"
-                android:textColor="@color/textColor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/scan_qr"
-                android:id="@+id/button_scan_QR"
-                android:layout_row="0"
-                android:layout_column="4"
-                android:textAllCaps="false"/>
-        </GridLayout>
-
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_row="1"
-            android:layout_column="0"
-            android:paddingTop="5dp">
-
-            <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
-            <LinearLayout
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:layout_width="0px"
-                android:layout_height="0px"
-                android:layout_row="0"
-                android:layout_column="0"
-                android:orientation="horizontal"
-                tools:ignore="UselessLeaf" />
-
-            <TextView
-                android:text="@string/path"
-                android:layout_row="0"
-                android:layout_column="1"
-                android:textColor="@color/textColor"/>
-
-            <EditText
-                android:id="@+id/textViewPath"
-                android:textColor="@color/textColor"
-                android:enabled="false"
-                android:layout_gravity="start|end|center_vertical"
-                android:gravity="center_horizontal"
-                android:layout_row="0"
-                android:layout_column="2"
-                android:layout_width="0dip"
-                android:layout_height="wrap_content"
-                android:inputType="textCapSentences|textMultiLine"
-                android:maxLength="2000"
-                android:maxLines="4"
-                android:hint="IP:Port"
-                tools:ignore="HardcodedText" />
-
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:padding="5dp"
-                android:background="@drawable/ic_button"
-                android:textColor="@color/textColor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/choose"
-                android:id="@+id/button_browse"
-                android:layout_row="0"
-                android:layout_column="3"
-                android:textAllCaps="false"/>
-
-        </GridLayout>
-
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_row="2"
-            android:layout_column="0"
-            android:paddingTop="5dp">
-
-            <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
-            <LinearLayout
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:layout_width="0px"
-                android:layout_height="0px"
-                android:layout_row="0"
-                android:layout_column="0"
-                android:orientation="horizontal"
-                tools:ignore="UselessLeaf" />
-            <TextView
-                android:text="@string/replayGainBaseVolume"
-                android:layout_row="0"
-                android:layout_column="1"
-                android:textColor="@color/textColor"/>
-
-            <SeekBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_row="0"
-                android:layout_column="2"
-                android:id="@+id/seekBarReplayGain"
-                android:layout_gravity="fill_horizontal"
-                android:indeterminate="false"
-                android:paddingTop="5dp"/>
-        </GridLayout>
     </GridLayout>
 
     <LinearLayout android:id="@+id/panel_playlist"

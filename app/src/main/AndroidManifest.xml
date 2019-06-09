@@ -65,6 +65,7 @@
         <activity android:name="phramusca.com.jamuzremote.ActivityPlayQueue" />
         <activity android:name="phramusca.com.jamuzremote.ActivityAlbums" />
         <activity android:name="phramusca.com.jamuzremote.ActivityAlbumTracks" />
+        <activity android:name="phramusca.com.jamuzremote.ActivitySettings" />
     </application>
 
 </manifest>

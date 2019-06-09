@@ -1,6 +1,8 @@
 package phramusca.com.jamuzremote;
 
 import android.support.annotation.NonNull;
+import android.text.SpannableString;
+import android.text.Spanned;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,6 +13,35 @@ import java.util.concurrent.TimeUnit;
  * Created by raph on 01/05/17.
  */
 public class StringManager {
+
+    /**
+     * Trims trailing whitespace. Removes any of these characters:
+     * https://stackoverflow.com/questions/9589381/remove-extra-line-breaks-after-html-fromhtml
+     * 0009, HORIZONTAL TABULATION
+     * 000A, LINE FEED
+     * 000B, VERTICAL TABULATION
+     * 000C, FORM FEED
+     * 000D, CARRIAGE RETURN
+     * 001C, FILE SEPARATOR
+     * 001D, GROUP SEPARATOR
+     * 001E, RECORD SEPARATOR
+     * 001F, UNIT SEPARATOR
+     * @return "" if source is null, otherwise string with all trailing whitespace removed
+     */
+    public static Spanned trimTrailingWhitespace(Spanned source) {
+
+        if(source == null)
+            return new SpannableString("");
+
+        int i = source.length();
+
+        // loop back to the first non-whitespace character
+        while(true) {
+            if (!(--i >= 0 && Character.isWhitespace(source.charAt(i)))) break;
+        }
+
+        return new SpannableString(source.subSequence(0, i+1));
+    }
 
     /**
      * Return left portion of a string
