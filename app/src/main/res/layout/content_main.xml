@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:weightSum="1"
-    android:background="@color/textColor"
     tools:showIn="@layout/activity_main"
     android:id="@+id/panel_main">
 
@@ -127,7 +126,6 @@
             <Spinner android:id="@+id/spinner_playlist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:popupBackground="#DDFFFFFF"
                 android:background="@drawable/ic_gradient_spinner"
                 android:layout_gravity="center_vertical|start|end"
                 android:layout_marginStart="20dp"
@@ -397,7 +395,6 @@
             <Spinner android:id="@+id/spinner_genre"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:popupBackground="#DDFFFFFF"
                 android:background="@drawable/ic_gradient_spinner"
                 android:layout_gravity="center"
                 android:paddingStart="10dp"

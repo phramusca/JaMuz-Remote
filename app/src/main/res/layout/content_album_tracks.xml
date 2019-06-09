@@ -5,13 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:weightSum="1"
-    android:background="@color/textColor"
     tools:showIn="@layout/activity_album_tracks">
 
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimaryDark"
         android:alpha="0.9">
 
         <Button
@@ -37,8 +35,7 @@
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/list_album_tracks"
-        android:background="@color/colorPrimary">
+        android:id="@+id/list_album_tracks">
     </android.support.v7.widget.RecyclerView>
 
 </LinearLayout>

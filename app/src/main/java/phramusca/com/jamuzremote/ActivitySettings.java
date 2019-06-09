@@ -8,8 +8,10 @@ import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -101,6 +103,12 @@ public class ActivitySettings extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
+
+        Spinner kidsplaceLimitPlaylist = findViewById(R.id.kidsplaceLimitPlaylist);
+
+        CheckBox kidsplaceLimit = findViewById(R.id.kidsplaceLimit);
+        kidsplaceLimit.setOnCheckedChangeListener(
+                (buttonView, isChecked) -> kidsplaceLimitPlaylist.setEnabled(isChecked));
 
     }
 
