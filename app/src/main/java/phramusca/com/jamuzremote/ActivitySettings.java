@@ -17,8 +17,10 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import java.util.ArrayList;
 
@@ -31,6 +33,7 @@ public class ActivitySettings extends AppCompatActivity {
     private SharedPreferences preferences;
     private IntentIntegrator qrScan;
     private TextView textViewPath;
+    private static final int QR_REQUEST_CODE = 49374;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +55,7 @@ public class ActivitySettings extends AppCompatActivity {
         );
 
         qrScan = new IntentIntegrator(this);
+        qrScan.setRequestCode(QR_REQUEST_CODE);
         Button button_scan_QR = findViewById(R.id.button_scan_QR);
         button_scan_QR.setOnClickListener(view ->
                 qrScan.initiateScan()
@@ -170,6 +174,25 @@ public class ActivitySettings extends AppCompatActivity {
         kidsplaceAllowEdition.setChecked(
                 preferences.getBoolean("kidsplaceAllowEdition", false));
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == QR_REQUEST_CODE && resultCode == RESULT_OK) {
+            //https://www.simplifiedcoding.net/android-qr-code-scanner-tutorial/
+            IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if (result == null || result.getContents() == null) {
+                Toast.makeText(this, "Problem reading QR code", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "QR code: "+result.getContents(), Toast.LENGTH_LONG).show();
+                data.putExtra("QRcode", result.getContents());
+                setResult(RESULT_OK, data);
+                finish();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
 
     private void setConfig(String id, int value) {
         SharedPreferences.Editor editor = preferences.edit();

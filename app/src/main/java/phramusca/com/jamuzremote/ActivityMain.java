@@ -61,15 +61,12 @@ import android.widget.RatingBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 import com.kiddoware.kidsplace.sdk.KPUtility;
 
 import org.json.JSONArray;
@@ -127,7 +124,6 @@ public class ActivityMain extends AppCompatActivity {
 
     private static final int SPEECH_REQUEST_CODE = 15489;
     private static final int LISTS_REQUEST_CODE = 60568;
-    private static final int QR_REQUEST_CODE = 49374;
     private static final int SETTINGS_REQUEST_CODE = 23548;
 
     // GUI elements
@@ -1303,15 +1299,6 @@ public class ActivityMain extends AppCompatActivity {
             }
 
         }
-        else if (requestCode == QR_REQUEST_CODE && resultCode == RESULT_OK) {
-            //https://www.simplifiedcoding.net/android-qr-code-scanner-tutorial/
-            IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-            if (result == null || result.getContents() == null) {
-                Toast.makeText(this, "Problem reading QR code", Toast.LENGTH_LONG).show();
-            } else {
-                getFromQRcode(result.getContents());
-            }
-        }
         else if(requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
             String action = data.getStringExtra("action");
             if(action!=null && action.equals("checkPermissionsThenScanLibrary")) {
@@ -1327,8 +1314,30 @@ public class ActivityMain extends AppCompatActivity {
                     (new HelperToast(getApplicationContext())).toastLong(msg);
                 }
             }
+
+            String QRcode = data.getStringExtra("QRcode");
+            if(QRcode!=null) {
+                getFromQRcode(QRcode);
+            }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void getFromQRcode(String content) {
+        if(content!=null) {
+            if(!content.equals("")) {
+                content=content.substring("jamuzremote://".length());
+                content=Encryption.decrypt(content, "NOTeBrrhzrtestSecretK");
+
+                buttonRemote.setEnabled(false);
+                buttonSync.setEnabled(false);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("connectionString", content);
+                editor.apply();
+                buttonRemote.setEnabled(true);
+                buttonSync.setEnabled(true);
+            }
+        }
     }
 
     TextToSpeech textToSpeech;
@@ -1722,25 +1731,6 @@ public class ActivityMain extends AppCompatActivity {
             toggle(layoutPlaylistEditBar, !enable);
             layoutPlaylistToolBar.setVisibility(enable?View.VISIBLE:View.GONE);
         });
-    }
-
-    //FIXME !!!!!! Still needed in ActivityMain ???
-    //To be moved to ActivitySettings
-    private void getFromQRcode(String content) {
-        if(content!=null) {
-            if(!content.equals("")) {
-                content=content.substring("jamuzremote://".length());
-                content=Encryption.decrypt(content, "NOTeBrrhzrtestSecretK");
-
-                buttonRemote.setEnabled(false);
-                buttonSync.setEnabled(false);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString("connectionString", content);
-                editor.apply();
-                buttonRemote.setEnabled(true);
-                buttonSync.setEnabled(true);
-            }
-        }
     }
 
     private static final int REQUEST = 112;
