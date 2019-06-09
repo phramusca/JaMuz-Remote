@@ -67,20 +67,6 @@
             android:layout_height="@dimen/button_menu_height"
             android:gravity="center"
             android:background="@drawable/ic_button_albums"/>
-
-        <Button android:id="@+id/button_connect"
-            android:layout_row="0"
-            android:layout_column="6"
-            android:layout_width="@dimen/button_menu_width"
-            android:layout_height="@dimen/button_menu_height"
-            android:gravity="center"
-            android:background="@drawable/remote_off"
-            android:text="1"
-            android:textAllCaps="false"
-            android:textSize="10sp"
-            android:textColor="@android:color/transparent"
-            tools:ignore="HardcodedText,SmallSp"/>
-
         <Button android:id="@+id/button_sync"
             android:layout_row="0"
             android:layout_column="7"

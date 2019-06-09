@@ -132,7 +132,6 @@ public class ActivityMain extends AppCompatActivity {
     private TextView textViewFileInfo3;
     private TextView textViewFileInfo4;
     private TextView textViewPlaylist;
-    private Button buttonRemote;
     private Button buttonSync;
     private Button buttonSearch;
     private Button button_settings;
@@ -251,35 +250,6 @@ public class ActivityMain extends AppCompatActivity {
         textViewFileInfo4 = findViewById(R.id.textFileInfo_line4);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        buttonRemote = findViewById(R.id.button_connect);
-        buttonRemote.setOnClickListener(v -> {
-            dimOn();
-            buttonRemote.setEnabled(false);
-            buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
-            if(buttonRemote.getText().equals("1")) {
-                ClientInfo clientInfo = getClientInfo(ClientCanal.REMOTE);
-                if(clientInfo!=null) {
-                    clientRemote =  new ClientRemote(clientInfo, new ListenerRemote());
-                    new Thread() {
-                        public void run() {
-                            if(clientRemote.connect()) {
-                                enableRemote(false);
-                            }
-                            else {
-                                enableRemote(true);
-                            }
-                        }
-                    }.start();
-                } else {
-                    enableRemote(true);
-                }
-            }
-            else {
-                enableRemote(true);
-                stopRemote();
-            }
-        });
 
         buttonSync = findViewById(R.id.button_sync);
         buttonSync.setOnClickListener(v -> {
@@ -1139,14 +1109,8 @@ public class ActivityMain extends AppCompatActivity {
     private void applyKidsPlaceOptions() {
         boolean isKidsPlace = KPUtility.isKidsPlaceRunning(this);
 
-        buttonRemote.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
         buttonSync.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
         button_settings.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
-
-        if(!isKidsPlace && wasRemoteConnected && !audioPlayer.isPlaying()) {
-            buttonRemote.setEnabled(false);
-            buttonRemote.performClick();
-        }
 
         boolean kidsplaceLimit = preferences.getBoolean("kidsplaceLimit", false);
         boolean isKidsPlacEnabled = !isKidsPlace || !kidsplaceLimit;
@@ -1346,13 +1310,10 @@ public class ActivityMain extends AppCompatActivity {
             if(!content.equals("")) {
                 content=content.substring("jamuzremote://".length());
                 content=Encryption.decrypt(content, "NOTeBrrhzrtestSecretK");
-
-                buttonRemote.setEnabled(false);
                 buttonSync.setEnabled(false);
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString("connectionString", content);
                 editor.apply();
-                buttonRemote.setEnabled(true);
                 buttonSync.setEnabled(true);
             }
         }
@@ -1710,14 +1671,9 @@ public class ActivityMain extends AppCompatActivity {
     private void enableRemote(final boolean enable) {
         runOnUiThread(() -> {
             if (enable) {
-                buttonRemote.setBackgroundResource(R.drawable.remote_off);
                 enablePlaylistEdit(true);
                 setupLocalPlaylistSpinner();
-            } else {
-                buttonRemote.setText("0");
-                buttonRemote.setBackgroundResource(R.drawable.remote_on);
             }
-            buttonRemote.setEnabled(true);
         });
     }
 
@@ -2322,7 +2278,6 @@ public class ActivityMain extends AppCompatActivity {
             clientRemote.close();
             clientRemote=null;
         }
-        enableClientRemote(buttonRemote, R.drawable.remote_off);
         setupLocalPlaylistSpinner();
         displayedTrack = localTrack;
         displayTrack(false);
