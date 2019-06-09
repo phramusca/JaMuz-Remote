@@ -3,10 +3,14 @@ package phramusca.com.jamuzremote;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -15,6 +19,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
+
+import java.util.ArrayList;
 
 import static phramusca.com.jamuzremote.StringManager.trimTrailingWhitespace;
 
@@ -31,7 +37,7 @@ public class ActivitySettings extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        preferences = getPreferences(MODE_PRIVATE);
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         Button button_exit_settings = findViewById(R.id.button_exit_settings);
         button_exit_settings.setOnClickListener(v -> onBackPressed());
@@ -85,16 +91,15 @@ public class ActivitySettings extends AppCompatActivity {
         });
 
         SeekBar seekBarReplayGain = findViewById(R.id.seekBarReplayGain);
-        seekBarReplayGain.setProgress(70); //FIXME: Save to preferences !
+        seekBarReplayGain.setProgress(preferences.getInt("baseVolume", 70));
         seekBarReplayGain.setMax(100);
         seekBarReplayGain.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float value = ((float)progress / 100.0f);
-                Log.i(TAG, "seekBarReplayGain: "+value);
-
+                Log.i(TAG, "seekBarReplayGain: "+progress);
+                setConfig("baseVolume", progress);
                 Intent data = new Intent();
-                data.putExtra("volume", value);
+                data.putExtra("volume", progress);
                 setResult(RESULT_OK, data);
             }
 
@@ -104,17 +109,83 @@ public class ActivitySettings extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        Spinner kidsplaceLimitPlaylist = findViewById(R.id.kidsplaceLimitPlaylist);
+        CheckBox kidsplaceAllowAddNewDel = findViewById(R.id.kidsplaceAllowAddNewDel);
+        kidsplaceAllowAddNewDel.setOnCheckedChangeListener(
+                (buttonView, isChecked) ->
+                        setConfig("kidsplaceAllowAddNewDel", isChecked)
+        );
+        kidsplaceAllowAddNewDel.setChecked(
+                preferences.getBoolean("kidsplaceAllowAddNewDel", false));
 
+        Spinner kidsplaceLimitPlaylist = findViewById(R.id.kidsplaceLimitPlaylist);
         CheckBox kidsplaceLimit = findViewById(R.id.kidsplaceLimit);
         kidsplaceLimit.setOnCheckedChangeListener(
-                (buttonView, isChecked) -> kidsplaceLimitPlaylist.setEnabled(isChecked));
+                (buttonView, isChecked) ->
+                {
+                    kidsplaceLimitPlaylist.setEnabled(isChecked);
+                    kidsplaceAllowAddNewDel.setEnabled(!isChecked);
+                    setConfig("kidsplaceLimit", isChecked);
+                }
+        );
+        kidsplaceLimitPlaylist.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int pos, long id) {
+                Playlist playlist = (Playlist) parent.getItemAtPosition(pos);
+                setConfig("kidsplaceLimitPlaylist", playlist.getName());
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) { }
+        });
+        ArrayList<Parcelable> localPlaylists = getIntent()
+                .getParcelableArrayListExtra("localPlaylists");
+        ArrayAdapter playListArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item,
+                localPlaylists);
+        kidsplaceLimitPlaylist.setAdapter(playListArrayAdapter);
+
+        String selectedPlaylist = preferences.getString("kidsplaceLimitPlaylist", null);
+        if(selectedPlaylist!=null) {
+            kidsplaceLimitPlaylist.setSelection(playListArrayAdapter.getPosition(
+                    new Playlist(selectedPlaylist, true)));
+        }
+
+        boolean isKidsPlaceLimit = preferences.getBoolean("kidsplaceLimit", false);
+        kidsplaceLimit.setChecked(isKidsPlaceLimit);
+        kidsplaceLimitPlaylist.setEnabled(isKidsPlaceLimit);
+
+        CheckBox kidsplaceOnStartup = findViewById(R.id.kidsplaceOnStartup);
+        kidsplaceOnStartup.setOnCheckedChangeListener(
+                (buttonView, isChecked) ->
+                        setConfig("kidsplaceOnStartup", isChecked)
+        );
+        kidsplaceOnStartup.setChecked(
+                preferences.getBoolean("kidsplaceOnStartup", false));
+
+        CheckBox kidsplaceAllowEdition = findViewById(R.id.kidsplaceAllowEdition);
+        kidsplaceAllowEdition.setOnCheckedChangeListener(
+                (buttonView, isChecked) ->
+                        setConfig("kidsplaceAllowEdition", isChecked)
+        );
+        kidsplaceAllowEdition.setChecked(
+                preferences.getBoolean("kidsplaceAllowEdition", false));
+    }
+
+    private void setConfig(String id, int value) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(id, value);
+        editor.apply();
     }
 
     private void setConfig(String id, String value) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(id, value);
+        editor.apply();
+    }
+
+    private void setConfig(String id, boolean value) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(id, value);
         editor.apply();
     }
 }

@@ -98,52 +98,6 @@
                     android:layout_column="4"
                     android:textAllCaps="false"/>
             </GridLayout>
-            <TextView android:text="Local files"
-                android:textColor="@color/textColor"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:gravity="center_horizontal"
-                android:layout_marginTop="5dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:background="@color/colorPrimaryDark"/>
-            <GridLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:background="@color/colorPrimary">
-                <TextView
-                    android:text="@string/path"
-                    android:layout_row="0"
-                    android:layout_column="1"
-                    android:textColor="@color/textColor"/>
-                <EditText
-                    android:id="@+id/textViewPath"
-                    android:textColor="@color/textColor"
-                    android:enabled="false"
-                    android:layout_gravity="start|end|center_vertical"
-                    android:gravity="center_horizontal"
-                    android:layout_row="0"
-                    android:layout_column="2"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:inputType="textCapSentences|textMultiLine"
-                    android:maxLength="2000"
-                    android:maxLines="4" />
-                <Button
-                    style="?android:attr/buttonStyleSmall"
-                    android:padding="5dp"
-                    android:background="@drawable/ic_button"
-                    android:textColor="@color/textColor"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/choose"
-                    android:id="@+id/button_browse"
-                    android:layout_row="0"
-                    android:layout_column="3"
-                    android:textAllCaps="false"/>
-            </GridLayout>
             <TextView android:text="ReplayGain"
                 android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
@@ -196,11 +150,7 @@
                     android:gravity="center_horizontal"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent" />
-                <CheckBox
-                    android:text="Start KidsPlace with JaMuz"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
-                    android:textColor="@color/textColor"/>
+
                 <CheckBox android:id="@+id/kidsplaceLimit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -213,17 +163,68 @@
                     android:layout_gravity="center_vertical|start|end"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"/>
-                <CheckBox
+                <CheckBox android:id="@+id/kidsplaceAllowAddNewDel"
                     android:text="Allow playlist add/new/delete"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:textColor="@color/textColor"/>
-                <CheckBox
-                    android:text="Allow edition"
+                <CheckBox android:id="@+id/kidsplaceAllowEdition"
+                    android:text="Allow track edition"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:textColor="@color/textColor"/>
+                <CheckBox android:id="@+id/kidsplaceOnStartup"
+                    android:text="Start KidsPlace with JaMuz"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:textColor="@color/textColor"/>
             </LinearLayout>
+            <TextView android:text="Local files"
+                android:textColor="@color/textColor"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="@color/colorPrimaryDark"/>
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="@color/colorPrimary">
+                <TextView
+                    android:text="@string/path"
+                    android:layout_row="0"
+                    android:layout_column="1"
+                    android:textColor="@color/textColor"/>
+                <EditText
+                    android:id="@+id/textViewPath"
+                    android:textColor="@color/textColor"
+                    android:enabled="false"
+                    android:layout_gravity="start|end|center_vertical"
+                    android:gravity="center_horizontal"
+                    android:layout_row="0"
+                    android:layout_column="2"
+                    android:layout_width="0dip"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:maxLength="2000"
+                    android:maxLines="4" />
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:padding="5dp"
+                    android:background="@drawable/ic_button"
+                    android:textColor="@color/textColor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/choose"
+                    android:id="@+id/button_browse"
+                    android:layout_row="0"
+                    android:layout_column="3"
+                    android:textAllCaps="false"/>
+            </GridLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

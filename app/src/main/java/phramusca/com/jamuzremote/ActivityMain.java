@@ -27,6 +27,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
@@ -246,7 +247,7 @@ public class ActivityMain extends AppCompatActivity {
 
         textViewFileInfo = findViewById(R.id.textFileInfo);
 
-        preferences = getPreferences(MODE_PRIVATE);
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         buttonRemote = findViewById(R.id.button_connect);
         buttonRemote.setOnClickListener(v -> {
@@ -466,6 +467,7 @@ public class ActivityMain extends AppCompatActivity {
         button_settings = findViewById(R.id.button_settings);
         button_settings.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), ActivitySettings.class);
+            intent.putExtra("localPlaylists", new ArrayList<>(localPlaylists.values()));
             startActivityForResult(intent, SETTINGS_REQUEST_CODE);
         });
 
@@ -662,6 +664,7 @@ public class ActivityMain extends AppCompatActivity {
 
         ListenerPlayer callBackPlayer = new ListenerPlayer();
         audioPlayer = new AudioPlayer(callBackPlayer);
+        audioPlayer.setVolume(preferences.getInt("baseVolume", 70), displayedTrack);
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
@@ -686,7 +689,11 @@ public class ActivityMain extends AppCompatActivity {
             enableSync(false);
         }
 
-        //KPUtility.handleKPIntegration(this, KPUtility.GOOGLE_MARKET);
+        boolean kidsplaceOnStartup = preferences.getBoolean("kidsplaceOnStartup", false);
+        if(kidsplaceOnStartup) {
+            KPUtility.handleKPIntegration(this, KPUtility.GOOGLE_MARKET);
+        }
+
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
@@ -1112,30 +1119,41 @@ public class ActivityMain extends AppCompatActivity {
         toggle(layoutPlaylist, audioPlayer.isPlaying());
         toggleButtonPlaylist.setChecked(!audioPlayer.isPlaying());
 
-        boolean isKidsPlace = KPUtility.isKidsPlaceRunning(this);
-        toggleButtonEditTags.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
-        button_settings.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
-        buttonRemote.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
-        buttonSync.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
-
-        button_delete.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
-        button_save.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
-        button_new.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
-        //button_restore.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
-
-        //spinnerPlaylist.setEnabled(!isKidsPlace);
-        if(!isKidsPlace) {
-            if(wasRemoteConnected && !audioPlayer.isPlaying()) {
-                buttonRemote.setEnabled(false);
-                buttonRemote.performClick();
-            }
-        }
-        /*else {
-            setupLocalPlaylistSpinner("Specific KidsPlace playlist"); //TODO
-        }*/
+        applyKidsPlaceOptions();
 
         audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
         registerButtonReceiver();
+    }
+
+    private void applyKidsPlaceOptions() {
+        boolean isKidsPlace = KPUtility.isKidsPlaceRunning(this);
+
+        buttonRemote.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+        buttonSync.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+        button_settings.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+
+        if(!isKidsPlace && wasRemoteConnected && !audioPlayer.isPlaying()) {
+            buttonRemote.setEnabled(false);
+            buttonRemote.performClick();
+        }
+
+        boolean kidsplaceLimit = preferences.getBoolean("kidsplaceLimit", false);
+        boolean isKidsPlacEnabled = !isKidsPlace || !kidsplaceLimit;
+        spinnerPlaylist.setEnabled(isKidsPlacEnabled);
+        if(!isKidsPlacEnabled) {
+            String selectedPlaylist = preferences.getString("kidsplaceLimitPlaylist", null);
+            setupLocalPlaylistSpinner(selectedPlaylist);
+        }
+
+        boolean kidsplaceAllowEdition = preferences.getBoolean("kidsplaceAllowEdition", false);
+        kidsplaceAllowEdition = !isKidsPlace || kidsplaceAllowEdition;
+        toggleButtonEditTags.setVisibility(kidsplaceAllowEdition?View.VISIBLE:View.GONE);
+
+        boolean kidsplaceAllowAddNewDel = preferences.getBoolean("kidsplaceAllowAddNewDel", false);
+        kidsplaceAllowAddNewDel = !isKidsPlace || (kidsplaceAllowAddNewDel && !kidsplaceLimit);
+        button_delete.setVisibility(kidsplaceAllowAddNewDel?View.VISIBLE:View.GONE);
+        button_save.setVisibility(kidsplaceAllowAddNewDel?View.VISIBLE:View.GONE);
+        button_new.setVisibility(kidsplaceAllowAddNewDel?View.VISIBLE:View.GONE);
     }
 
     private void registerButtonReceiver() {
@@ -1302,7 +1320,7 @@ public class ActivityMain extends AppCompatActivity {
 
             //FIXME: Update volume directly from Settings activity
             // Need to move audio to a service, which is a good thing anyway !
-            float value = data.getFloatExtra("volume", -1);
+            int value = data.getIntExtra("volume", -1);
             if(value>=0) {
                 String msg = audioPlayer.setVolume(value, displayedTrack);
                 if(!msg.equals("")) {
@@ -1341,7 +1359,9 @@ public class ActivityMain extends AppCompatActivity {
             textToSpeech.shutdown();
         }
 
-        HelperLibrary.close();
+        // Not closing as services may still need it
+        //TODO: Close when everybody's complete (scan, sync and jamuz)
+        /*HelperLibrary.close();*/
     }
 
     private static File[] externalFilesDir;
