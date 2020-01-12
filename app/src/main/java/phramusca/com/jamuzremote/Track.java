@@ -14,6 +14,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
+//FIXME: idFileServer can be null in db (so 0 in here) with a "REC" status
+// resulting in sync issues that blocks the transfer of other files
+// => how does it happen ???
+//FIXME !!!!!! Some tracks are inserted with NULL status and size -1. That should not be !!
+//                  + it messes up merge since they are reported as NotFound
+//FIXME !!!!!! Some tracks have ACK status but artist="" or title="" or album="" (most ALL the 3)
+//                  How ? Why ?
+
 /**
  * Created by raph on 01/05/17.
  */
@@ -29,12 +37,6 @@ public class Track implements Serializable {
     private int playCounter = 0;
     private Date lastPlayed = new Date(0);
     private Status status = Status.NULL;
-    //FIXME !!!!!! Some tracks are inserted with NULL status and size -1. That should not be !!
-    //                  + it messes up merge since they are reported as NotFound
-
-    //FIXME !!!!!! Some tracks have ACK status but artist="" or title="" or album="" (most ALL the 3)
-    //                  How ? Why ?
-
     private String path = "";
     private String relativeFullPath = "";
     private ArrayList<String> tags = null;
@@ -59,7 +61,12 @@ public class Track implements Serializable {
         this.coverHash = coverHash;
         this.genre=genre;
         this.path = path;
-        this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length()+1);
+        if(getAppDataPath.getAbsolutePath().length()+1>path.length()) {
+            this.relativeFullPath = path;
+        } else {
+            this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length()+1);
+        }
+
         this.addedDate = addedDate;
         this.lastPlayed = lastPlayed;
         this.playCounter = playCounter;

@@ -132,8 +132,9 @@ public class ServiceSync extends ServiceBase {
                                 Track fileReceived = new Track(
                                         (JSONObject) jsonArray.get(i),
                                         getAppDataPath);
-                                //FIXME: Display progress
                                 RepoSync.receivedAck(fileReceived);
+                                helperNotification.notifyBar(notificationSync,
+                                        "Received ack from server", 50, i+1, jsonArray.length());
                             }
                             bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                         }
@@ -164,13 +165,14 @@ public class ServiceSync extends ServiceBase {
                         helperNotification.notifyBar(notificationSync,
                                 "Updating database with merge changes ... ");
                         JSONArray filesToUpdate = (JSONArray) jObject.get("files");
-                        //FIXME: Display merge progress
                         for (int i = 0; i < filesToUpdate.length(); i++) {
                             Track fileReceived = new Track(
                                     (JSONObject) filesToUpdate.get(i),
                                     getAppDataPath);
                             fileReceived.readTags();
                             HelperLibrary.musicLibrary.insertOrUpdateTrackInDatabase(fileReceived);
+                            helperNotification.notifyBar(notificationSync,
+                                    "Updating database with merge changes", 50, i+1, filesToUpdate.length());
                         }
                         stopSync("Sync complete.", 20000);
                         stopSelf();
