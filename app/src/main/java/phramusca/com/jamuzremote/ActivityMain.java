@@ -1454,6 +1454,7 @@ public class ActivityMain extends AppCompatActivity {
             if (play(track)) {
                 PlayQueue.queue.setNext();
             } else {
+                PlayQueue.queue.removeNext();
                 playNext();
             }
         } else {
@@ -1468,6 +1469,7 @@ public class ActivityMain extends AppCompatActivity {
             if (play(track)) {
                 PlayQueue.queue.setPrevious();
             } else {
+                PlayQueue.queue.removePrevious();
                 playPrevious();
             }
         } else {

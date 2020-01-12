@@ -71,6 +71,16 @@ public class TrackQueue extends TrackList {
         sendListener();
     }
 
+    synchronized void removeNext() {
+        tracks.remove(positionPlaying+1);
+        positionPlaying++;
+    }
+
+    synchronized void removePrevious() {
+        tracks.remove(positionPlaying-1);
+        positionPlaying--;
+    }
+
     synchronized void setPrevious() {
         positionPlaying--;
         sendListener();
