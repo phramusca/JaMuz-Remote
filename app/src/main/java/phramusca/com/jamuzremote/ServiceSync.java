@@ -14,9 +14,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -142,22 +140,24 @@ public class ServiceSync extends ServiceBase {
                     case "FilesToGet":
                         helperNotification.notifyBar(notificationSync, "" +
                                 "Received new list of files to get");
-                        Map<Integer, Track> newTracks = new HashMap<>();
+                        ArrayList<Track> newTracks = new ArrayList<>();
                         JSONArray files = (JSONArray) jObject.get("files");
+                        helperNotification.notifyBar(notificationSync,
+                                getString(R.string.syncCheckFilesOnDisk));
+                        RepoSync.reset();
+                        HelperLibrary.musicLibrary.updateStatus();
                         for (int i = 0; i < files.length(); i++) {
                             Track fileReceived = new Track(
                                     (JSONObject) files.get(i),
                                     getAppDataPath);
                             fileReceived.setStatus(Track.Status.NEW);
-                            newTracks.put(fileReceived.getIdFileServer(), fileReceived);
+                            RepoSync.checkNewFile(fileReceived);
+                            newTracks.add(fileReceived);
+                            helperNotification.notifyBar(notificationSync,
+                                    getString(R.string.syncCheckFilesOnDisk), 50, i+1, files.length());
                         }
-                        helperNotification.notifyBar(notificationSync,
-                                getString(R.string.syncCheckFilesOnDisk));
-                        //FIXME: Display a progress bar as process can take some time
-                        RepoSync.set(newTracks);
+                        HelperLibrary.musicLibrary.insertTracks(newTracks);
                         bench = new Benchmark(RepoSync.getRemainingSize(), 10);
-                        /*helperNotification.notifyBar(notificationSync, "Checking files on disk", nbTotal, progress, false, true, true, "Big Text");
-                        */
                         scanAndDeleteUnwantedInThread(getAppDataPath);
                         requestNextFile();
                         break;
@@ -254,28 +254,6 @@ public class ServiceSync extends ServiceBase {
             }
         }
     }
-
-    //FIXME: For displaying check files on disk when receiving a new list to be retrieved
-  /*  private void notifyBar() {
-        int max = RepoSync.getTotalSize();
-        int remaining = RepoSync.getRemainingSize();
-        int progress = max- remaining;
-
-        String bigText = "-"+ remaining + "/" + max
-                + "\n-" + StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false)
-                + "\n" + (fileInfoReception==null?"":fileInfoReception.getRelativeFullPath());
-
-        String msg = text
-                +(fileInfoReception==null
-                ?"":
-                (" "+StringManager.humanReadableByteCount(fileInfoReception.getSize(), false))
-        )
-                +bench.getLast();
-
-        helperNotification.notifyBar(notificationSync, msg, max, progress, false,
-                true, true,
-                msg+"\n"+bigText);
-    }*/
 
     private void notifyBar(String text) {
         notifyBar(text, null);

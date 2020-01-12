@@ -8,7 +8,6 @@ import com.google.common.collect.Table;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -111,12 +110,13 @@ public final class RepoSync {
      * @return modified track with status set to REC (with tags read) if it exists
      *
      */
-    private synchronized static Track checkNewFile(Track track) {
+    public synchronized static Track checkNewFile(Track track) {
         File file = new File(track.getPath());
         if(checkFile(track, file)) {
             track.setStatus(Track.Status.REC);
             track.readTags();
         }
+        tracks.put(track.getIdFileServer(), track.getStatus(), track);
         return track;
     }
 
@@ -128,15 +128,8 @@ public final class RepoSync {
         }
     }
 
-    public synchronized static void set(Map<Integer, Track> newTracks) {
-        HelperLibrary.musicLibrary.updateStatus();
+    public synchronized static void reset() {
         tracks = HashBasedTable.create();
-        for(Map.Entry<Integer, Track> entry : newTracks.entrySet()) {
-            Track track = entry.getValue();
-            RepoSync.checkNewFile(track);
-            tracks.put(track.getIdFileServer(), track.getStatus(), track);
-        }
-        HelperLibrary.musicLibrary.insertTracks(newTracks.values());
     }
 
     public synchronized static int getRemainingSize() {
