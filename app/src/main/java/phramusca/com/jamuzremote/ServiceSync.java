@@ -69,7 +69,6 @@ public class ServiceSync extends ServiceBase {
                 RepoSync.read();
 
                 helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
-                bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                 clientSync = new ClientSync(clientInfo, new ListenerSync());
                 clientSync.connect();
             }
@@ -156,6 +155,7 @@ public class ServiceSync extends ServiceBase {
                                 getString(R.string.syncCheckFilesOnDisk));
                         //FIXME: Display a progress bar as process can take some time
                         RepoSync.set(newTracks);
+                        bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                         /*helperNotification.notifyBar(notificationSync, "Checking files on disk", nbTotal, progress, false, true, true, "Big Text");
                         */
                         scanAndDeleteUnwantedInThread(getAppDataPath);

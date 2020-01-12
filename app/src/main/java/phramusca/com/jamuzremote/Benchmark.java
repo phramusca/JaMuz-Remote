@@ -3,7 +3,6 @@ package phramusca.com.jamuzremote;
 import com.google.common.collect.EvictingQueue;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -17,15 +16,6 @@ public class Benchmark {
     private long partialTime;
     private Collection<Long> partialTimes;
     private Collection<Long> partialSizes;
-
-    private Benchmark(int size) {
-        this.size=size;
-        index=0;
-        startTime = System.currentTimeMillis();
-        partialTime = startTime;
-        partialTimes = new ArrayList<>();
-        partialSizes = new ArrayList<>();
-    }
 
     Benchmark(int size, int max) {
         this.size=size;
@@ -57,14 +47,6 @@ public class Benchmark {
 
     public String getLast() {
         return lastMsg;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
-    }
-
-    private static long mean(Collection<Long> numbers) {
-        return sum(numbers)/numbers.size();
     }
 
     private static long mean(Collection<Long> numbers, long sum) {
