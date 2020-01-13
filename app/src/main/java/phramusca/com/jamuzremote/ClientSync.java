@@ -173,7 +173,7 @@ public class ClientSync extends Client {
         }
     }
 
-    public void requestMerge(List<Track> tracks) {
+    public void requestMerge(List<Track> tracks, boolean stop) {
         synchronized (syncStatus) {
             logStatus("requestFile()");
             if(checkStatus()) {
@@ -186,6 +186,7 @@ public class ClientSync extends Client {
                         filesToMerge.put(track.toJSONObject());
                     }
                     obj.put("files", filesToMerge);
+                    obj.put("stop", stop);
                     watchTimeOut(4+tracks.size());
                     send("JSON_" + obj.toString());
                 } catch (JSONException e) {

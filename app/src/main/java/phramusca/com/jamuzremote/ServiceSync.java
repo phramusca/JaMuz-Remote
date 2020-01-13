@@ -165,6 +165,7 @@ public class ServiceSync extends ServiceBase {
                         helperNotification.notifyBar(notificationSync,
                                 "Updating database with merge changes ... ");
                         JSONArray filesToUpdate = (JSONArray) jObject.get("files");
+                        boolean stop = (boolean) jObject.get("stop");
                         for (int i = 0; i < filesToUpdate.length(); i++) {
                             Track fileReceived = new Track(
                                     (JSONObject) filesToUpdate.get(i),
@@ -174,8 +175,12 @@ public class ServiceSync extends ServiceBase {
                             helperNotification.notifyBar(notificationSync,
                                     "Updating database with merge changes", 50, i+1, filesToUpdate.length());
                         }
-                        stopSync("Sync complete.", 20000);
-                        stopSelf();
+                        if(stop) {
+                            stopSync("Sync complete.", 20000);
+                            stopSelf();
+                        } else {
+                            clientSync.request("requestNewFiles");
+                        }
                         break;
                     case "tags":
                         helperNotification.notifyBar(notificationSync, "Received tags ... ");
@@ -209,7 +214,7 @@ public class ServiceSync extends ServiceBase {
                                     }
                                     RepoGenres.set(newGenres);
                                     sendMessage("setupGenres");
-                                    clientSync.request("requestNewFiles");
+                                    requestMerge(false);
                                 } catch (JSONException e) {
                                     Log.e(TAG, e.toString());
                                 }
@@ -312,17 +317,8 @@ public class ServiceSync extends ServiceBase {
                 Log.i(TAG, msg);
                 runOnUiThread(() -> {
                     helperToast.toastLong(msg + "\n\n" + msg2);
-                    helperNotification.notifyBar(notificationSync,
-                            "Getting list of files for stats merge.");
                 });
-                //FIXME: Request merge before getting new list of devices
-                List<Track> tracks = HelperLibrary.musicLibrary.getTracks(Track.Status.ACK);
-                runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
-                        "Requesting statistics merge."));
-                for(Track track : tracks) {
-                    track.getTags(true);
-                }
-                clientSync.requestMerge(tracks);
+                requestMerge(true);
             } else {
                 Log.i(TAG, "No files to download.");
                 runOnUiThread(() -> helperToast.toastLong("No files to download." +
@@ -331,6 +327,20 @@ public class ServiceSync extends ServiceBase {
                 stopSync("No files to download.", 5000);
             }
         }
+    }
+
+    private void requestMerge(boolean stop) {
+        runOnUiThread(() -> {
+            helperNotification.notifyBar(notificationSync,
+                    "Getting list of files for stats merge.");
+        });
+        List<Track> tracks = HelperLibrary.musicLibrary.getTracks(Track.Status.ACK);
+        runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
+                "Requesting statistics merge."));
+        for(Track track : tracks) {
+            track.getTags(true);
+        }
+        clientSync.requestMerge(tracks, stop);
     }
 
     private void scanAndDeleteUnwantedInThread(final File path) {
