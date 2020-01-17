@@ -173,7 +173,7 @@ public class ClientSync extends Client {
         }
     }
 
-    public void requestMerge(List<Track> tracks, boolean stop) {
+    public void requestMerge(List<Track> tracks) {
         synchronized (syncStatus) {
             logStatus("requestFile()");
             if(checkStatus()) {
@@ -186,7 +186,6 @@ public class ClientSync extends Client {
                         filesToMerge.put(track.toJSONObject());
                     }
                     obj.put("files", filesToMerge);
-                    obj.put("stop", stop);
                     watchTimeOut(4+tracks.size());
                     send("JSON_" + obj.toString());
                 } catch (JSONException e) {
@@ -195,7 +194,7 @@ public class ClientSync extends Client {
         }
     }
 
-    // FIXME sync and merge: do NOT request genres and tags at every connection but only if required or on demand
+    // TODO sync and merge: do NOT request genres and tags at every connection but only if required or on demand
     // TODO => sync and merge: would even be better to merge genres and tags instead of getting, especially for tags
     // TODO sync and merge: avoid double acknowledgement:
     //          - Insert files in JaMuz deviceFiles directly at export

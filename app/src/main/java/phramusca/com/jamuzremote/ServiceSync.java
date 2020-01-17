@@ -65,8 +65,8 @@ public class ServiceSync extends ServiceBase {
             public void run() {
                 helperNotification.notifyBar(notificationSync, getString(R.string.readingList));
                 RepoSync.read();
-
                 helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
+                bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                 clientSync = new ClientSync(clientInfo, new ListenerSync());
                 clientSync.connect();
             }
@@ -165,7 +165,6 @@ public class ServiceSync extends ServiceBase {
                         helperNotification.notifyBar(notificationSync,
                                 "Updating database with merge changes ... ");
                         JSONArray filesToUpdate = (JSONArray) jObject.get("files");
-                        boolean stop = (boolean) jObject.get("stop");
                         for (int i = 0; i < filesToUpdate.length(); i++) {
                             Track fileReceived = new Track(
                                     (JSONObject) filesToUpdate.get(i),
@@ -175,12 +174,7 @@ public class ServiceSync extends ServiceBase {
                             helperNotification.notifyBar(notificationSync,
                                     "Updating database with merge changes", 50, i+1, filesToUpdate.length());
                         }
-                        if(stop) {
-                            stopSync("Sync complete.", 20000);
-                            stopSelf();
-                        } else {
-                            clientSync.request("requestNewFiles");
-                        }
+                        clientSync.request("requestNewFiles");
                         break;
                     case "tags":
                         helperNotification.notifyBar(notificationSync, "Received tags ... ");
@@ -214,7 +208,7 @@ public class ServiceSync extends ServiceBase {
                                     }
                                     RepoGenres.set(newGenres);
                                     sendMessage("setupGenres");
-                                    requestMerge(false);
+                                    requestMerge();
                                 } catch (JSONException e) {
                                     Log.e(TAG, e.toString());
                                 }
@@ -318,7 +312,7 @@ public class ServiceSync extends ServiceBase {
                 runOnUiThread(() -> {
                     helperToast.toastLong(msg + "\n\n" + msg2);
                 });
-                requestMerge(true);
+                stopSync("Sync complete.", 20000);
             } else {
                 Log.i(TAG, "No files to download.");
                 runOnUiThread(() -> helperToast.toastLong("No files to download." +
@@ -329,7 +323,7 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    private void requestMerge(boolean stop) {
+    private void requestMerge() {
         runOnUiThread(() -> {
             helperNotification.notifyBar(notificationSync,
                     "Getting list of files for stats merge.");
@@ -340,7 +334,7 @@ public class ServiceSync extends ServiceBase {
         for(Track track : tracks) {
             track.getTags(true);
         }
-        clientSync.requestMerge(tracks, stop);
+        clientSync.requestMerge(tracks);
     }
 
     private void scanAndDeleteUnwantedInThread(final File path) {
