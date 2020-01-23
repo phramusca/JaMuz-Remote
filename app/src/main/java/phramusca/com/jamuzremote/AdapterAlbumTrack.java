@@ -26,7 +26,7 @@ public abstract class AdapterAlbumTrack extends AdapterTrack {
                     track.getTitle(),
                     track.getArtist(),
                     String.format(Locale.ENGLISH,"%d/5 %s",
-                            track.getRating(),
+                            (int)track.getRating(),
                             track.getGenre()),
                     track.getTags());
 

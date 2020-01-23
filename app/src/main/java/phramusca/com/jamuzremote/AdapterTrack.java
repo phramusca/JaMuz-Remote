@@ -117,7 +117,7 @@ public abstract class AdapterTrack extends AdapterLoad {
                     String.format(Locale.ENGLISH,
                             "%s %d/5 %s",
                             track.getTags(),
-                            track.getRating(),
+                            (int)track.getRating(),
                             track.getGenre()
                     ));
 

@@ -262,7 +262,7 @@ public class MusicLibrary {
                     stmtTracks.bindString(4, track.getStatus().name());
                     stmtTracks.bindString(5, track.getGenre());
                     stmtTracks.bindString(6, track.getPath());
-                    stmtTracks.bindLong(7, track.getRating());
+                    stmtTracks.bindDouble(7, track.getRating());
                     stmtTracks.bindString(8, track.getFormattedAddedDate());
                     stmtTracks.bindString(9, track.getFormattedLastPlayed());
                     stmtTracks.bindLong(10, track.getPlayCounter());
@@ -310,7 +310,7 @@ public class MusicLibrary {
 
     synchronized boolean updateTrack(Track track){
         try {
-            if(db.update(TABLE_TRACKS, TrackToValues(track),
+            if(track.getIdFileRemote()>=0 && db.update(TABLE_TRACKS, TrackToValues(track),
                     COL_ID_REMOTE + " = " +track.getIdFileRemote(), null)==1) {
                 removeTags(track.getIdFileRemote());
                 for(String tag : track.getTags(false)) {
@@ -368,8 +368,7 @@ public class MusicLibrary {
 
         int idFileRemote = c.getInt(c.getColumnIndex(COL_ID_REMOTE));
         int idFileServer = c.getInt(c.getColumnIndex(COL_ID_SERVER));
-        //FIXME:  GetDouble (and display as int except for album)
-        int rating=c.getInt(c.getColumnIndex(COL_RATING));
+        double rating=c.getDouble(c.getColumnIndex(COL_RATING));
         String title=c.getString(c.getColumnIndex(COL_TITLE));
         String album=c.getString(c.getColumnIndex(COL_ALBUM));
         String artist=c.getString(c.getColumnIndex(COL_ARTIST));
@@ -632,7 +631,7 @@ public class MusicLibrary {
         Cursor cursor = null;
         try {
             String query = "SELECT count(idFileRemote) AS playCounter, \n" +
-                    "round(avg(rating), 0) AS rating, \n" +
+                    "round(avg(rating), 2) AS rating, \n" +
                     "group_concat(distinct genre) AS genre, \n" +
                     "group_concat(distinct artist) AS artist, \n" +
                     "album, idFileRemote, idFileServer, title, addedDate, lastPlayed, status, size, path, length \n" +

@@ -32,7 +32,7 @@ public class Track implements Serializable {
     private String title = "";
     private String album = "";
     private String genre = "";
-    private int rating = 0;
+    private double rating = 0.0;
     private Date addedDate = new Date(0);
     private int playCounter = 0;
     private Date lastPlayed = new Date(0);
@@ -50,7 +50,7 @@ public class Track implements Serializable {
     private boolean isUser=false;
     private static final String TAG = Track.class.getName();
 
-    public Track(File getAppDataPath, int idFileRemote, int idFileServer, int rating, String title,
+    public Track(File getAppDataPath, int idFileRemote, int idFileServer, double rating, String title,
                  String album, String artist, String coverHash, String path, String genre,
                  Date addedDate, Date lastPlayed, int playCounter, String status, long size, int length) {
         this.idFileRemote = idFileRemote;
@@ -76,7 +76,7 @@ public class Track implements Serializable {
         this.size = size;
     }
 
-    public Track(int rating, String title, String album,
+    public Track(double rating, String title, String album,
                  String artist, String coverHash, String genre) {
         this.rating = rating;
         this.title = title;
@@ -198,7 +198,7 @@ public class Track implements Serializable {
 
     @Override
     public String toString() {
-        return  "<BR/>" + getTags() + " " + rating+"/5" + " " + genre + "<BR/>" +
+        return  "<BR/>" + getTags() + " " + (int)rating+"/5" + " " + genre + "<BR/>" +
                 "<h1>" +
                 title + "<BR/>" +
                 artist + "<BR/>"+
@@ -240,7 +240,7 @@ public class Track implements Serializable {
         return coverHash;
     }
 
-    public int getRating() {
+    public double getRating() {
         return rating;
     }
 
@@ -425,7 +425,7 @@ public class Track implements Serializable {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("path", relativeFullPath);
-            jsonObject.put("rating", rating);
+            jsonObject.put("rating", (int)rating);
             jsonObject.put("addedDate", getFormattedAddedDate());
             jsonObject.put("lastPlayed", getFormattedLastPlayed());
             jsonObject.put("playCounter", playCounter);

@@ -2124,7 +2124,7 @@ public class ActivityMain extends AppCompatActivity {
                         .concat(displayedTrack.toString())
                         .concat("</html>"))));
                 ratingBar.setEnabled(false);
-                ratingBar.setRating(displayedTrack.getRating());
+                ratingBar.setRating((float)displayedTrack.getRating());
                 ratingBar.setEnabled(true);
                 setupSpinnerGenre(RepoGenres.get(), displayedTrack.getGenre());
 
