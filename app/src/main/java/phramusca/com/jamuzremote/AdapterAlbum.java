@@ -41,7 +41,7 @@ public class AdapterAlbum extends AdapterLoad {
             userViewHolder.item_line3.setText(String.format(Locale.ENGLISH,"%d %s.",
                     track.getPlayCounter(), //Includes nb of albums
                     mContext.getString(R.string.nbTracks)));
-            userViewHolder.item_line4.setText(String.format(Locale.ENGLISH,"%d/5 %s",
+            userViewHolder.item_line4.setText(String.format(Locale.ENGLISH,"%.1f/5 %s",
                     track.getRating(),
                     track.getGenre()));
 
