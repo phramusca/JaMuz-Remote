@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteStatement;
 import android.provider.BaseColumns;
 import android.util.Log;
-import android.util.Pair;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,6 +25,7 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.COL_GENRE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_REMOTE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_SERVER;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LAST_PLAYED;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LENGTH;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PATH;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PLAY_COUNTER;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
@@ -159,11 +159,11 @@ public class MusicLibrary {
         return tracks;
     }
 
-    public synchronized Pair<Integer, Long> getNb(String where, String having){
+    public synchronized Triplet<Integer, Long, Long> getNb(String where, String having){
         Cursor cursor=null;
         try {
-            String query = "SELECT count(*), SUM(size) AS sizeTotal \n" +
-                    " FROM (SELECT size FROM tracks \n" +
+            String query = "SELECT count(*), SUM(size) AS sizeTotal, SUM(length) AS lengthTotal \n" +
+                    " FROM (SELECT size, length FROM tracks \n" +
                     " LEFT JOIN tagfile ON tracks.idFileRemote=tagfile.idFile \n" +
                     " LEFT JOIN tag ON tag.id=tagfile.idTag \n"+
                     " " + where + " \n" +
@@ -173,14 +173,10 @@ public class MusicLibrary {
 
             if(cursor != null && cursor.moveToNext())
             {
-                int count = cursor.getInt(0); //cursor.getCount()
-                long sizeTotal = cursor.getLong(1); //cursor.getLong(cursor.getColumnIndex("sizeTotal"));
-                //FIXME: Introduce length in tracks table
-                //to be able to:
-                // SELECT SUM(length) AS lengthTotal
-                //long lengthTotal = cursor.getLong(3);
-
-                return new Pair<>(count, sizeTotal);
+                int count = cursor.getInt(0);
+                long sizeTotal = cursor.getLong(1);
+                long lengthTotal = cursor.getLong(2);
+                return new Triplet<>(count, sizeTotal, lengthTotal);
             }
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "getNb("+where+","+having+")", ex);
@@ -189,7 +185,7 @@ public class MusicLibrary {
                 cursor.close();
             }
         }
-        return new Pair<>(-1, (long) -1);
+        return new Triplet<>(-1, (long) -1, (long) -1);
     }
 
     synchronized boolean insertOrUpdateTrackInDatabase(String absolutePath) {
@@ -241,8 +237,8 @@ public class MusicLibrary {
                     +COL_GENRE+", "+COL_PATH+", "
                     +COL_RATING+", "+COL_ADDED_DATE+", "
                     +COL_LAST_PLAYED+", "+COL_PLAY_COUNTER+", "
-                    +COL_ID_SERVER+", "+COL_SIZE+") " +
-                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    +COL_ID_SERVER+", "+COL_SIZE+", "+COL_LENGTH+") " +
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             String sqlUpdateStatus = "UPDATE "+TABLE_TRACKS+" " +
                     "SET "+COL_STATUS+"=? WHERE "+COL_ID_SERVER+"=?";
             String sqlTagsDelete = "DELETE FROM tagFile WHERE idFile=?";
@@ -272,6 +268,7 @@ public class MusicLibrary {
                     stmtTracks.bindLong(10, track.getPlayCounter());
                     stmtTracks.bindLong(11, track.getIdFileServer());
                     stmtTracks.bindLong(12, track.getSize());
+                    stmtTracks.bindLong(13, track.getLength());
                     idFile = (int) stmtTracks.executeInsert();
                     stmtTracks.clearBindings();
                 }
@@ -356,6 +353,7 @@ public class MusicLibrary {
         values.put(COL_ALBUM, track.getAlbum());
         values.put(COL_ARTIST, track.getArtist());
         values.put(COL_SIZE, track.getSize());
+        values.put(COL_LENGTH, track.getLength());
         values.put(COL_STATUS, track.getStatus().name());
         values.put(COL_GENRE, track.getGenre());
         values.put(COL_PATH, track.getPath());
@@ -377,6 +375,7 @@ public class MusicLibrary {
         String artist=c.getString(c.getColumnIndex(COL_ARTIST));
         String status=c.getString(c.getColumnIndex(COL_STATUS));
         long size=c.getLong(c.getColumnIndex(COL_SIZE));
+        int length=c.getInt(c.getColumnIndex(COL_LENGTH));
         String path=c.getString(c.getColumnIndex(COL_PATH));
         String genre=c.getString(c.getColumnIndex(COL_GENRE));
 
@@ -387,7 +386,7 @@ public class MusicLibrary {
         int playCounter=c.getInt(c.getColumnIndex(COL_PLAY_COUNTER));
         return new Track(getAppDataPath, idFileRemote, idFileServer, rating, title, album, artist,
                 "coverHash", path, genre,
-                addedDate, lastPlayed, playCounter, status, size);
+                addedDate, lastPlayed, playCounter, status, size, length);
     }
 
     synchronized List<String> getGenres() {
@@ -636,7 +635,7 @@ public class MusicLibrary {
                     "round(avg(rating), 0) AS rating, \n" +
                     "group_concat(distinct genre) AS genre, \n" +
                     "group_concat(distinct artist) AS artist, \n" +
-                    "album, idFileRemote, idFileServer, title, addedDate, lastPlayed, status, size, path \n" +
+                    "album, idFileRemote, idFileServer, title, addedDate, lastPlayed, status, size, path, length \n" +
                     "FROM tracks \n" +
                     "GROUP BY album ORDER BY rating DESC, playCounter DESC, album, artist LIMIT 20 OFFSET "+offset;
             Log.i(TAG, query);
