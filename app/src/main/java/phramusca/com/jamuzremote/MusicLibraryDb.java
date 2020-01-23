@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class MusicLibraryDb extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 3;
+    private static final int DB_VERSION = 4;
 
     static final String TABLE_TRACKS = "tracks";
     static final String COL_ID_REMOTE = "idFileRemote";
@@ -25,6 +25,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     static final String COL_PLAY_COUNTER = "playCounter";
     static final String COL_STATUS = "status";
     static final String COL_SIZE = "size";
+    static final String COL_LENGTH = "length";
 
     private static final String CREATE_BDD = "CREATE TABLE " + TABLE_TRACKS + " ("
             + COL_ID_REMOTE + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -39,6 +40,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
             + COL_LAST_PLAYED + " TEXT NOT NULL, "
             + COL_STATUS + " TEXT NOT NULL, "
             + COL_SIZE + " LONG NOT NULL, "
+            + COL_LENGTH + " INTEGER NOT NULL, "
             + COL_PATH + " TEXT NOT NULL); ";
 
     //By default store in user internal folder

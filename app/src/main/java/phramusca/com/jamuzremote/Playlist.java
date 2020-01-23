@@ -1,8 +1,7 @@
 package phramusca.com.jamuzremote;
 
-import android.util.Pair;
-
 import android.support.annotation.NonNull;
+
 import com.google.gson.Gson;
 
 import java.io.Serializable;
@@ -381,17 +380,18 @@ public class Playlist implements Comparable, Serializable {
     @Override
     public String toString() {
         return isLocal?
-                name+" ("+ lengthOrSize +" | "+nbFiles+")"
+                name+" ("+ nbFiles +" | "+ lengthOrSize +")"
                 :name;
     }
 
     public void getNbFiles() {
 
         if(HelperLibrary.musicLibrary!=null) {
-            Pair<Integer, Long> entry=HelperLibrary.musicLibrary.getNb(getWhere(new ArrayList<>()), getHaving());
-            nbFiles=entry.first;
-            lengthOrSize = StringManager.humanReadableByteCount(entry.second, false);
-            /*lengthOrSize =StringManager.humanReadableSeconds(entry.second);*/
+            Triplet<Integer, Long, Long> entry=HelperLibrary.musicLibrary.getNb(getWhere(new ArrayList<>()), getHaving());
+            nbFiles=entry.getFirst();
+            //TODO: Offer choice to display one or the other (length OR size)
+            /*lengthOrSize = StringManager.humanReadableByteCount(entry.getSecond(), false);*/
+            lengthOrSize =StringManager.humanReadableSeconds(entry.getThird(), "");
         }
     }
 

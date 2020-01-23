@@ -40,10 +40,11 @@ public class Track implements Serializable {
     private String path = "";
     private String relativeFullPath = "";
     private ArrayList<String> tags = null;
-    //TODO: Store replaygain, no to read too often AND as a workaround for flac
+    //FIXME: Store replaygain, no to read too often AND as a workaround for flac
     private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
     private String source="";
     private long size;
+    private int length;
     private String coverHash="";
     private boolean isHistory=false;
     private boolean isUser=false;
@@ -51,7 +52,7 @@ public class Track implements Serializable {
 
     public Track(File getAppDataPath, int idFileRemote, int idFileServer, int rating, String title,
                  String album, String artist, String coverHash, String path, String genre,
-                 Date addedDate, Date lastPlayed, int playCounter, String status, long size) {
+                 Date addedDate, Date lastPlayed, int playCounter, String status, long size, int length) {
         this.idFileRemote = idFileRemote;
         this.idFileServer = idFileServer;
         this.rating = rating;
@@ -61,6 +62,7 @@ public class Track implements Serializable {
         this.coverHash = coverHash;
         this.genre=genre;
         this.path = path;
+        this.length = length;
         if(getAppDataPath.getAbsolutePath().length()+1>path.length()) {
             this.relativeFullPath = path;
         } else {
@@ -116,6 +118,7 @@ public class Track implements Serializable {
             path=new File(getAppDataPath, relativeFullPath)
                     .getAbsolutePath();
             size = file.getLong("size");
+            length = file.getInt("length");
             idFileServer = file.getInt("idFile");
             rating = file.getInt("rating");
             addedDate = getDate(file, "addedDate");
@@ -180,6 +183,10 @@ public class Track implements Serializable {
 
     public boolean isUser() {
         return isUser;
+    }
+
+    public int getLength() {
+        return length;
     }
 
     public enum Status {
