@@ -35,8 +35,7 @@ public class ClientSync extends Client {
 		super.setCallback(new ListenerReception());
 	}
 
-    @Override
-    public boolean connect() {
+    public boolean connect(boolean requestData) {
         synchronized (syncStatus) {
             logStatus("connect()");
             if (syncStatus.status.equals(Status.NOT_CONNECTED)) {
@@ -47,7 +46,11 @@ public class ClientSync extends Client {
                     syncStatus.nbRetries=0;
                     logStatus("Connected");
                     callback.onConnected();
-                    request("requestTags");
+                    if(requestData) {
+                        request("requestTags");
+                    } else {
+                        request("requestNewFiles");
+                    }
                     return true;
                 }
             }
@@ -76,7 +79,7 @@ public class ClientSync extends Client {
                             } catch (InterruptedException ignored) {
                             }
                             logStatus("Re-connecting now");
-                            connect();
+                            connect(false);
                         }
                     }.start();
                 } else {

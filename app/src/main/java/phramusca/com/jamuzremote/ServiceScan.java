@@ -166,7 +166,7 @@ public class ServiceScan extends ServiceBase {
                                         /*audioFiles.add("ogg");*/
                                         String ext = absolutePath.substring(absolutePath.lastIndexOf(".")+1);
                                         if(audioExtensions.contains(ext)) {
-                                            HelperLibrary.musicLibrary.insertOrUpdateTrackInDatabase(absolutePath);
+                                            HelperLibrary.musicLibrary.insertOrUpdateTrack(absolutePath);
                                         }
                                     }
                                     notifyScan("Scanning files ... ", 13);
