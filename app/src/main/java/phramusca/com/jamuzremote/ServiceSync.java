@@ -68,7 +68,7 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
                 bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                 clientSync = new ClientSync(clientInfo, new ListenerSync());
-                clientSync.connect();
+                clientSync.connect(true);
             }
         }.start();
         return START_REDELIVER_INTENT;
@@ -156,7 +156,9 @@ public class ServiceSync extends ServiceBase {
                             helperNotification.notifyBar(notificationSync,
                                     getString(R.string.syncCheckFilesOnDisk), 50, i+1, files.length());
                         }
-                        HelperLibrary.musicLibrary.insertTracks(newTracks);
+                        helperNotification.notifyBar(notificationSync,
+                                "Inserting "+newTracks.size()+" tracks in database. Please wait...");
+                        HelperLibrary.musicLibrary.insertTrackOrUpdateStatus(newTracks);
                         bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                         scanAndDeleteUnwantedInThread(getAppDataPath);
                         requestNextFile();
@@ -169,8 +171,9 @@ public class ServiceSync extends ServiceBase {
                             Track fileReceived = new Track(
                                     (JSONObject) filesToUpdate.get(i),
                                     getAppDataPath);
-                            fileReceived.readTags();
-                            HelperLibrary.musicLibrary.insertOrUpdateTrackInDatabase(fileReceived);
+                            if(fileReceived.readTags()) {
+                                HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived);
+                            }
                             helperNotification.notifyBar(notificationSync,
                                     "Updating database with merge changes", 50, i+1, filesToUpdate.length());
                         }

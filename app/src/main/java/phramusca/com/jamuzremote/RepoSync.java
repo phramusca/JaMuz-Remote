@@ -45,16 +45,15 @@ public final class RepoSync {
      * @param track the one to check
      * @return true if onReceivedFile exists and length()==track.size
      */
-    public synchronized static boolean receivedFile(File getAppDataPath, Track track) {
+    public synchronized static void receivedFile(File getAppDataPath, Track track) {
 
         File receivedFile = new File(getAppDataPath, track.getRelativeFullPath());
         if(tracks.containsRow(track.getIdFileServer())) {
-            if(checkFile(track, receivedFile)) {
+            if(checkFile(track, receivedFile)
+                    && track.readTags()
+                    && HelperLibrary.musicLibrary.insertOrUpdateTrack(track)) {
                 track.setStatus(Track.Status.REC);
                 updateTracks(track);
-                track.readTags();
-                HelperLibrary.musicLibrary.insertOrUpdateTrackInDatabase(track);
-                return true;
             } else {
                 track.setStatus(Track.Status.NEW);
                 updateTracks(track);
@@ -64,7 +63,6 @@ public final class RepoSync {
             //noinspection ResultOfMethodCallIgnored
             receivedFile.delete();
         }
-        return false;
     }
 
     /**
@@ -110,14 +108,12 @@ public final class RepoSync {
      * @return modified track with status set to REC (with tags read) if it exists
      *
      */
-    public synchronized static Track checkNewFile(Track track) {
+    public synchronized static void checkNewFile(Track track) {
         File file = new File(track.getPath());
         if(checkFile(track, file)) {
             track.setStatus(Track.Status.REC);
-            track.readTags();
         }
         tracks.put(track.getIdFileServer(), track.getStatus(), track);
-        return track;
     }
 
     public synchronized static void receivedAck(Track track) {

@@ -19,8 +19,11 @@ import java.util.Date;
 // => how does it happen ???
 //FIXME !!!!!! Some tracks are inserted with NULL status and size -1. That should not be !!
 //                  + it messes up merge since they are reported as NotFound
-//FIXME !!!!!! Some tracks have ACK status but artist="" or title="" or album="" (most ALL the 3)
+//FIXME !!!!  TOP TOP TOP  !!!! Some tracks have ACK status but artist="" or title="" or album="" (most ALL the 3)
 //                  How ? Why ?
+// => Seems to happen after an export, during scan of existing device in files / clean unwanted
+//          ONLY OCCURS ON EXISTING FILES, (ie not on new ...)
+//          AND only in prod (takes more time highlighting possible algo issue b/w processes): TRY TO REPRODUCE  IN TEST !!!!
 
 /**
  * Created by raph on 01/05/17.
@@ -96,7 +99,7 @@ public class Track implements Serializable {
         }
     }
 
-    public void readTags() {
+    public boolean readTags() {
         try {
             MediaMetadataRetriever mmr = new MediaMetadataRetriever();
             mmr.setDataSource(path);
@@ -104,9 +107,11 @@ public class Track implements Serializable {
             artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
             title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
             genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
+            return true;
         } catch (final RuntimeException ex) {
             Log.e(TAG, "Error reading file tags "+path, ex);
         }
+        return false;
     }
 
     /**

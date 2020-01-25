@@ -188,13 +188,15 @@ public class MusicLibrary {
         return new Triplet<>(-1, (long) -1, (long) -1);
     }
 
-    synchronized boolean insertOrUpdateTrackInDatabase(String absolutePath) {
+    synchronized boolean insertOrUpdateTrack(String absolutePath) {
         Track track = new Track(getAppDataPath, absolutePath);
-        track.readTags();
-        return insertOrUpdateTrackInDatabase(track);
+        if(track.readTags()) {
+            return insertOrUpdateTrack(track);
+        }
+        return false;
     }
 
-    synchronized boolean insertOrUpdateTrackInDatabase(Track track) {
+    synchronized boolean insertOrUpdateTrack(Track track) {
         int idFileRemote = getTrackIdFileRemote(track.getPath());
         boolean result;
         if(idFileRemote>=0) {
@@ -228,7 +230,7 @@ public class MusicLibrary {
         return false;
     }
 
-    synchronized boolean insertTracks(Collection<Track> tracks) {
+    synchronized boolean insertTrackOrUpdateStatus(Collection<Track> tracks) {
         db.beginTransaction();
         try {
             String sqlTracks = "INSERT OR IGNORE INTO "+TABLE_TRACKS+" ("
@@ -285,7 +287,7 @@ public class MusicLibrary {
             db.setTransactionSuccessful();
             return true;
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "insertTracks("+tracks+")", ex);
+            Log.e(TAG, "insertTrackOrUpdateStatus("+tracks+")", ex);
             return false;
         } finally {
             db.endTransaction();
