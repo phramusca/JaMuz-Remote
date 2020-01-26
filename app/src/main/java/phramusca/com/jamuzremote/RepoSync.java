@@ -9,9 +9,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *
@@ -22,7 +19,6 @@ public final class RepoSync {
     private static final String TAG = RepoSync.class.getName();
 
     private static Table<Integer, Track.Status, Track> tracks = null;
-    private static BlockingQueue<Track> downloadQueue = new LinkedBlockingDeque<>();
 
     private synchronized static void updateTracks(Track track) {
         tracks.row(track.getIdFileServer()).clear();
@@ -32,7 +28,6 @@ public final class RepoSync {
         tracks = HashBasedTable.create();
         read(Track.Status.NEW);
         read(Track.Status.REC);
-        read(Track.Status.ACK);
     }
 
     private synchronized static void read(Track.Status status) {
@@ -54,15 +49,13 @@ public final class RepoSync {
 
         File receivedFile = new File(getAppDataPath, track.getRelativeFullPath());
         if(tracks.containsRow(track.getIdFileServer())) {
-            if(checkFile(track, receivedFile)
-                    && track.readTags()
-                    && HelperLibrary.musicLibrary.insertOrUpdateTrack(track)) {
-                track.setStatus(Track.Status.REC);
-                updateTracks(track);
-            } else {
+            track.setStatus(Track.Status.REC);
+            if (!checkFile(track, receivedFile)
+                    || !track.readTags()
+                    || !HelperLibrary.musicLibrary.insertOrUpdateTrack(track)) {
                 track.setStatus(Track.Status.NEW);
-                updateTracks(track);
             }
+            updateTracks(track);
         } else {
             Log.w(TAG, "tracks does not contain file. Deleting " + receivedFile.getAbsolutePath());
             //noinspection ResultOfMethodCallIgnored
@@ -121,27 +114,17 @@ public final class RepoSync {
         tracks.put(track.getIdFileServer(), track.getStatus(), track);
     }
 
-    public synchronized static void receivedAck(Track track) {
-        if(tracks.containsRow(track.getIdFileServer())) {
-            track.setStatus(Track.Status.ACK);
-            updateTracks(track);
-            HelperLibrary.musicLibrary.updateStatus(track);
-        }
-    }
-
     public synchronized static void reset() {
         tracks = HashBasedTable.create();
-        downloadQueue = new LinkedBlockingDeque<>();
     }
 
     public synchronized static int getRemainingSize() {
         return tracks ==null?0:(tracks.column(Track.Status.NEW).size()
-                + tracks.column(Track.Status.REC).size())
-                 + downloadQueue.size();
+                +tracks.column(Track.Status.DOWN).size());
     }
 
     public synchronized static int getTotalSize() {
-        return tracks==null?0:tracks.size()+ downloadQueue.size();
+        return tracks==null?0:tracks.size();
     }
 
     public synchronized static long getRemainingFileSize() {
@@ -150,16 +133,7 @@ public final class RepoSync {
         }
         long nbRemaining=0;
         nbRemaining+=getRemainingFileSize(Track.Status.NEW);
-        nbRemaining+=getRemainingFileSize(Track.Status.REC);
-        nbRemaining+=getRemainingDownloadSize();
-        return nbRemaining;
-    }
-
-    private synchronized static long getRemainingDownloadSize() {
-        long nbRemaining=0;
-        for(Track track : downloadQueue) {
-            nbRemaining+=track.getSize();
-        }
+        nbRemaining+=getRemainingFileSize(Track.Status.DOWN);
         return nbRemaining;
     }
 
@@ -175,16 +149,18 @@ public final class RepoSync {
         return tracks ==null?new ArrayList<>():new ArrayList<>(tracks.column(Track.Status.REC).values());
     }
 
-    public synchronized static void extractNew() {
-        if(tracks == null) {
-            return;
+    public synchronized static Track getNew() {
+        Track track=null;
+        if(tracks != null) {
+            Collection<Track> values = tracks.column(Track.Status.NEW).values();
+            if(values.size()>0) {
+                track = tracks.column(Track.Status.NEW).entrySet().iterator().next().getValue();
+                if(track!=null) {
+                    track.setStatus(Track.Status.DOWN);
+                    updateTracks(track);
+                }
+            }
         }
-        Collection<Track> values = tracks.column(Track.Status.NEW).values();
-        downloadQueue = new LinkedBlockingQueue<>(values);
-        tracks.column(Track.Status.NEW).clear();
-    }
-
-    public synchronized static BlockingQueue<Track> getDownloadQueue() {
-        return downloadQueue;
+        return track;
     }
 }
