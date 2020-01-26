@@ -231,7 +231,7 @@ public class ClientSync extends Client {
 
                         @Override
                         public void onFinish() {
-                            close(doReconnect, "Timed out waiting.", -1);
+                            close(doReconnect, "Timed out waiting.", doReconnect?-1:5000);
                         }
                     };
                     Log.i(TAG, "timerWatchTimeout.start()");

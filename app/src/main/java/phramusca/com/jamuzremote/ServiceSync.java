@@ -161,7 +161,7 @@ public class ServiceSync extends ServiceBase {
                                 HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived);
                             }
                             helperNotification.notifyBar(notificationSync,
-                                    "Updating database with merge changes", 50, i+1, filesToUpdate.length());
+                                    "Updating database with merge changes", 10, i+1, filesToUpdate.length());
                         }
                         runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Merge complete. Request new files ... ", 2000));
                         clientSync.request("requestNewFiles");
@@ -217,7 +217,7 @@ public class ServiceSync extends ServiceBase {
                     +"\nRemaining : "+ RepoSync.getRemainingSize()
                     +"/"+ RepoSync.getTotalSize());
             notifyBar(notificationSync,"Rec.", fileInfoReception);
-            RepoSync.receivedFile(getAppDataPath, fileInfoReception);
+            RepoSync.checkReceivedFile(getAppDataPath, fileInfoReception);
             displayProgress();*/
         }
 
@@ -304,13 +304,9 @@ public class ServiceSync extends ServiceBase {
     }
 
     private void requestMerge() {
-        runOnUiThread(() -> {
-            helperNotification.notifyBar(notificationSync,
-                    "Getting list of files for stats merge.");
-        });
-        List<Track> tracks = HelperLibrary.musicLibrary.getTracks(Track.Status.REC);
         runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
                 "Requesting statistics merge."));
+        List<Track> tracks = RepoSync.getMerge();
         for(Track track : tracks) {
             track.getTags(true);
         }
@@ -389,7 +385,6 @@ public class ServiceSync extends ServiceBase {
         processAbstract.start();
     }
 
-    //FIXME: Download NEW files in multiple threads to speed up the process
     private class ProcessDownload extends ProcessAbstract {
 
         private List<DownloadService> downloadServices;
@@ -434,7 +429,6 @@ public class ServiceSync extends ServiceBase {
             for(DownloadService service : downloadServices) {
                 service.close(msg, millisInFuture);
             }
-            displayProgress();
         }
     }
 
@@ -444,6 +438,7 @@ public class ServiceSync extends ServiceBase {
         private Notification notifDownload;
         private boolean available =true;
         private ClientSync clientSyncDownload;
+        private Track track;
 
         private DownloadService(Context context, int notificationId, String title, ActivityMain.Canal canal) {
             this.canal = canal;
@@ -451,6 +446,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         public synchronized void download(Track track) {
+            this.track = track;
             available = false;
             clientSyncDownload = new ClientSync(new ClientInfo(clientInfo, canal), new ListenerSync(), false);
             runOnUiThread(() -> helperNotification.notifyBar(notifDownload, getString(R.string.connecting)));
@@ -468,6 +464,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         private synchronized void clean() {
+            RepoSync.checkDownloadedFile(track);
             clientSyncDownload = null;
             available =true;
         }
@@ -481,12 +478,13 @@ public class ServiceSync extends ServiceBase {
             }
 
             @Override
-            public void onReceivedFile(final Track track) {
-                Log.i(TAG, "Received file\n"+track
+            public void onReceivedFile(final Track receivedTrack) {
+                Log.i(TAG, "Received file\n"+receivedTrack
                         +"\nRemaining : "+ RepoSync.getRemainingSize()
                         +"/"+ RepoSync.getTotalSize());
-                notifyBar(notifDownload,"Rec.", track);
-                RepoSync.receivedFile(getAppDataPath, track);
+                notifyBar(notifDownload,"Rec.", receivedTrack);
+                RepoSync.checkReceivedFile(getAppDataPath, receivedTrack);
+                track=receivedTrack;
                 displayProgress();
                 close("Downloaded ", 1000);
             }
