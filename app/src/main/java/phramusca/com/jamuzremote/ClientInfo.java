@@ -17,7 +17,7 @@ import java.io.Serializable;
 public class ClientInfo implements Serializable {
 
 	private final String address;
-    private final boolean isRemote;
+    private final ActivityMain.Canal canal;
     private final String appId;
     private final int port;
 	private final String login;
@@ -25,14 +25,19 @@ public class ClientInfo implements Serializable {
     private String rootPath;
 
     public ClientInfo(String address, int port, String login, String password,
-                      boolean isRemote, String appId, String rootPath){
+                      ActivityMain.Canal canal, String appId, String rootPath){
 		this.port = port;
 		this.login = login;
 		this.password = password;
 		this.address = address;
-        this.isRemote = isRemote;
+        this.canal = canal;
         this.appId = appId;
         this.rootPath = rootPath;
+    }
+
+    public ClientInfo(ClientInfo clientInfo, ActivityMain.Canal canal) {
+        this(clientInfo.address, clientInfo.port, clientInfo.login, clientInfo.password,
+                canal, clientInfo.appId, clientInfo.rootPath);
     }
 
     public String getAddress() {
@@ -48,7 +53,7 @@ public class ClientInfo implements Serializable {
         try {
             jsonObject.put("login", login);
             jsonObject.put("password", password);
-            jsonObject.put("isRemote", isRemote);
+            jsonObject.put("canal", canal);
             jsonObject.put("appId", appId);
             jsonObject.put("rootPath", rootPath);
         } catch (JSONException e) {
