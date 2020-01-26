@@ -195,7 +195,7 @@ public class Track implements Serializable {
     }
 
     public enum Status {
-        NEW, REC, ACK, NULL, DEL;
+        NEW, DOWN, REC, NULL, DEL;
 
         Status() {
         }

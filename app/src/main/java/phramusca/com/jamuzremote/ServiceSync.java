@@ -120,29 +120,6 @@ public class ServiceSync extends ServiceBase {
                     case "StartSync":
                         requestFirstFile();
                         break;
-                    case "insertDeviceFileSAck":
-                        JSONArray jsonArray = (JSONArray) jObject.get("filesAcked");
-                        if (jsonArray.length() == 1) {
-                            Track fileReceived = new Track(
-                                    (JSONObject) jsonArray.get(0),
-                                    getAppDataPath);
-                            notifyBar(notificationSync,"Ack+", fileReceived);
-                            RepoSync.receivedAck(fileReceived);
-                            bench.get(fileReceived.getSize());
-                        } else {
-                            notifyBar(notificationSync,"Received ack from server");
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                Track fileReceived = new Track(
-                                        (JSONObject) jsonArray.get(i),
-                                        getAppDataPath);
-                                RepoSync.receivedAck(fileReceived);
-                                helperNotification.notifyBar(notificationSync,
-                                        "Received ack from server", 50, i+1, jsonArray.length());
-                            }
-                            bench = new Benchmark(RepoSync.getRemainingSize(), 10);
-                        }
-                        requestNextFile();
-                        break;
                     case "FilesToGet":
                         helperNotification.notifyBar(notificationSync, "" +
                                 "Received new list of files to get");
@@ -178,6 +155,7 @@ public class ServiceSync extends ServiceBase {
                                     (JSONObject) filesToUpdate.get(i),
                                     getAppDataPath);
                             if(fileReceived.readTags()) {
+                                fileReceived.setStatus(Track.Status.REC);
                                 HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived);
                             }
                             helperNotification.notifyBar(notificationSync,
@@ -289,32 +267,18 @@ public class ServiceSync extends ServiceBase {
     }
 
     private void requestFirstFile() {
-        //Acknowledge (ACK) reception of received files (REC)
-        // (server will insert in deviceFile and stat source tables and ack back)
-        List<Track> received = RepoSync.getReceived();
-        if(received.size()>0) {
-            if (received.size() == 1) {
-                notifyBar(notificationSync,"Ack.", received.get(0));
-            } else {
-                notifyBar(notificationSync,"Sending ack to server and waiting ack from server ... ");
-            }
-            sendMessage("refreshSpinner(true)");
-            clientSync.ackFilesReception(received);
-        }
-
-        //Create the download queue
-        RepoSync.extractNew();
-        if (RepoSync.getDownloadQueue().size()>0) {
+        RepoSync.getNew();
+        if (RepoSync.getRemainingSize()>0) {
             Log.i(TAG, "START ProcessDownload");
             processDownload = new ProcessDownload("ProcessDownload", this);
             processDownload.start();
+        } else {
+            requestNextFile();
         }
-
-        requestNextFile();
     }
 
     private void requestNextFile() {
-        if(RepoSync.getTotalSize()>0 && RepoSync.getDownloadQueue().size()<1) {
+        if(RepoSync.getTotalSize()>0 && RepoSync.getRemainingSize()<1) {
             final String msg = "No more files to download.";
             final String msg2 = "All " + RepoSync.getTotalSize() + " files" +
                     " have been retrieved successfully.";
@@ -337,7 +301,7 @@ public class ServiceSync extends ServiceBase {
             helperNotification.notifyBar(notificationSync,
                     "Getting list of files for stats merge.");
         });
-        List<Track> tracks = HelperLibrary.musicLibrary.getTracks(Track.Status.ACK);
+        List<Track> tracks = HelperLibrary.musicLibrary.getTracks(Track.Status.REC);
         runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
                 "Requesting statistics merge."));
         for(Track track : tracks) {
@@ -436,30 +400,35 @@ public class ServiceSync extends ServiceBase {
         public void run() {
             try {
                 Track track;
-                while ((track = RepoSync.getDownloadQueue().take())!=null) {
+                while ((track = RepoSync.getNew())!=null) {
                     checkAbort();
-                    /*downloadServices.stream().filter(d -> d.downloaded).findFirst().download(track);*/
-                    for(DownloadService service : downloadServices) {
-                        checkAbort();
-                        if(service.downloaded) {
-                           service.download(track);
-                           break;
-                        }
+                    DownloadService service;
+                    while((service = getService())==null) {
+                        Thread.sleep(1000);
                     }
+                    service.download(track);
                 }
             } catch (InterruptedException ignored) {
             } finally {
-                stop("Complete download", 500);
+                stop("Complete downloads", 500);
+                requestNextFile();
             }
         }
 
-        private void stop(String msg, long millisInFuture) {
-            this.abort();
+        private DownloadService getService() {
             for(DownloadService service : downloadServices) {
                 if(service.downloaded) {
-                    service.clientSync.close(false, msg, millisInFuture);
+                    return service;
                 }
             }
+            return null;
+        }
+
+        private void stop(String msg, long millisInFuture) {
+            for(DownloadService service : downloadServices) {
+                service.close(msg, millisInFuture);
+            }
+            this.abort();
         }
     }
 
@@ -484,43 +453,17 @@ public class ServiceSync extends ServiceBase {
             }
         }
 
+        public void close(String msg, long millisInFuture) {
+            clientSync.close(false, msg, millisInFuture);
+            downloaded=true;
+        }
+
         class ListenerSync implements IListenerSync {
 
             private final String TAG = ServiceSync.ListenerSync.class.getName();
 
             @Override
             public void onReceivedJson(final String json) {
-                try {
-                    final JSONObject jObject = new JSONObject(json);
-                    String type = jObject.getString("type");
-                    switch(type) {
-                        case "insertDeviceFileSAck":
-                            JSONArray jsonArray = (JSONArray) jObject.get("filesAcked");
-                            if (jsonArray.length() == 1) {
-                                Track fileReceived = new Track(
-                                        (JSONObject) jsonArray.get(0),
-                                        getAppDataPath);
-                                notifyBar(notifDownload,"Ack+", fileReceived);
-                                RepoSync.receivedAck(fileReceived);
-                                bench.get(fileReceived.getSize());
-                            } else {
-                                notifyBar(notifDownload,"Received ack from server");
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    Track fileReceived = new Track(
-                                            (JSONObject) jsonArray.get(i),
-                                            getAppDataPath);
-                                    RepoSync.receivedAck(fileReceived);
-                                    helperNotification.notifyBar(notifDownload,
-                                            "Received ack from server", 50, i+1, jsonArray.length());
-                                }
-                                bench = new Benchmark(RepoSync.getRemainingSize(), 10);
-                            }
-                            clientSync.close(false, "Downloaded ", 1000);
-                            break;
-                    }
-                } catch (JSONException e) {
-                    Log.e(TAG, e.toString());
-                }
             }
 
             @Override
@@ -530,9 +473,7 @@ public class ServiceSync extends ServiceBase {
                         +"/"+ RepoSync.getTotalSize());
                 notifyBar(notifDownload,"Rec.", track);
                 RepoSync.receivedFile(getAppDataPath, track);
-                List<Track> tracks = new ArrayList<>();
-                tracks.add(track);
-                clientSync.ackFilesReception(tracks);
+                clientSync.close(false, "Downloaded ", 1000);
             }
 
             @Override
@@ -550,10 +491,7 @@ public class ServiceSync extends ServiceBase {
                 if (!msg.equals("")) {
                     runOnUiThread(() -> helperNotification.notifyBar(notifDownload, msg, millisInFuture));
                 }
-                if (!reconnect) {
-                    downloaded=true;
-                    requestNextFile();
-                }
+                downloaded=true;
             }
         }
 
