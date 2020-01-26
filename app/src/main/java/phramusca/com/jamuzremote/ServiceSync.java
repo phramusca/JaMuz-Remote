@@ -68,7 +68,7 @@ public class ServiceSync extends ServiceBase {
                 RepoSync.read();
                 helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
                 bench = new Benchmark(RepoSync.getRemainingSize(), 10);
-                clientSync = new ClientSync(clientInfo, new ListenerSync());
+                clientSync = new ClientSync(clientInfo, new ListenerSync(), true);
                 if(clientSync.connect()) {
                     clientSync.request("requestTags");
                 }
@@ -118,7 +118,7 @@ public class ServiceSync extends ServiceBase {
                 String type = jObject.getString("type");
                 switch(type) {
                     case "StartSync":
-                        requestFirstFile();
+                        startSync();
                         break;
                     case "FilesToGet":
                         helperNotification.notifyBar(notificationSync, "" +
@@ -144,7 +144,9 @@ public class ServiceSync extends ServiceBase {
                         HelperLibrary.musicLibrary.insertTrackOrUpdateStatus(newTracks);
                         bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                         scanAndDeleteUnwantedInThread(getAppDataPath);
-                        requestFirstFile();
+                        runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
+                                "Received "+newTracks.size()+" files to dowload.", 2000));
+                        startSync();
                         break;
                     case "mergeListDbSelected":
                         helperNotification.notifyBar(notificationSync,
@@ -216,7 +218,7 @@ public class ServiceSync extends ServiceBase {
                     +"/"+ RepoSync.getTotalSize());
             notifyBar(notificationSync,"Rec.", fileInfoReception);
             RepoSync.receivedFile(getAppDataPath, fileInfoReception);
-            requestNextFile();*/
+            displayProgress();*/
         }
 
         @Override
@@ -267,17 +269,22 @@ public class ServiceSync extends ServiceBase {
                 msg+"\n"+bigText);
     }
 
-    private void requestFirstFile() {
+    private void startSync() {
         if (RepoSync.getRemainingSize()>0) {
             Log.i(TAG, "START ProcessDownload");
             processDownload = new ProcessDownload("ProcessDownload", this);
             processDownload.start();
-        } else {
-            requestNextFile();
         }
+        displayProgress();
     }
 
-    private void requestNextFile() {
+    private void displayProgress() {
+
+        runOnUiThread(() -> {
+            helperNotification.notifyBar(notificationSync,
+                    "Downloading ... ", 1, RepoSync.getTotalSize()-RepoSync.getRemainingSize(), RepoSync.getTotalSize());
+        });
+
         if(RepoSync.getTotalSize()>0 && RepoSync.getRemainingSize()<1) {
             final String msg = "No more files to download.";
             final String msg2 = "All " + RepoSync.getTotalSize() + " files" +
@@ -392,8 +399,8 @@ public class ServiceSync extends ServiceBase {
 
             downloadServices= new ArrayList<>();
             downloadServices.add(new DownloadService(context, NotificationId.SYNC_DOWN_1, "Down 1", ActivityMain.Canal.DOWN1));
-            /*downloadServices.add(new DownloadService(context, NotificationId.SYNC_DOWN_2, "Down 2", ActivityMain.Canal.DOWN2));
-            downloadServices.add(new DownloadService(context, NotificationId.SYNC_DOWN_3, "Down 3", ActivityMain.Canal.DOWN3));*/
+            downloadServices.add(new DownloadService(context, NotificationId.SYNC_DOWN_2, "Down 2", ActivityMain.Canal.DOWN2));
+            downloadServices.add(new DownloadService(context, NotificationId.SYNC_DOWN_3, "Down 3", ActivityMain.Canal.DOWN3));
         }
 
         @Override
@@ -406,6 +413,7 @@ public class ServiceSync extends ServiceBase {
                     while((service = getService())==null) {
                         Thread.sleep(1000);
                     }
+                    Thread.sleep(1000);
                     service.download(track);
                 }
             } catch (InterruptedException ignored) {
@@ -426,7 +434,7 @@ public class ServiceSync extends ServiceBase {
             for(DownloadService service : downloadServices) {
                 service.close(msg, millisInFuture);
             }
-            requestNextFile();
+            displayProgress();
         }
     }
 
@@ -442,9 +450,9 @@ public class ServiceSync extends ServiceBase {
             notifDownload = new Notification(context, notificationId, title);
         }
 
-        public void download(Track track) {
+        public synchronized void download(Track track) {
             available = false;
-            clientSyncDownload = new ClientSync(new ClientInfo(clientInfo, canal), new ListenerSync());
+            clientSyncDownload = new ClientSync(new ClientInfo(clientInfo, canal), new ListenerSync(), false);
             runOnUiThread(() -> helperNotification.notifyBar(notifDownload, getString(R.string.connecting)));
             /*bench = new Benchmark(RepoSync.getRemainingSize(), 10);*/
             if(clientSyncDownload.connect()) {
@@ -453,8 +461,13 @@ public class ServiceSync extends ServiceBase {
             }
         }
 
-        public void close(String msg, long millisInFuture) {
-            clientSyncDownload.close(false, msg, millisInFuture);
+        public synchronized void close(String msg, long millisInFuture) {
+            if(clientSyncDownload!=null) {
+                clientSyncDownload.close(false, msg, millisInFuture);
+            }
+        }
+
+        private synchronized void clean() {
             clientSyncDownload = null;
             available =true;
         }
@@ -474,6 +487,7 @@ public class ServiceSync extends ServiceBase {
                         +"/"+ RepoSync.getTotalSize());
                 notifyBar(notifDownload,"Rec.", track);
                 RepoSync.receivedFile(getAppDataPath, track);
+                displayProgress();
                 close("Downloaded ", 1000);
             }
 
@@ -492,8 +506,7 @@ public class ServiceSync extends ServiceBase {
                 if (!msg.equals("")) {
                     runOnUiThread(() -> helperNotification.notifyBar(notifDownload, msg, millisInFuture));
                 }
-                clientSyncDownload = null;
-                available =true;
+                clean();
             }
         }
 
