@@ -24,15 +24,17 @@ import java.util.List;
 public class ClientSync extends Client {
 	private static final String TAG = ClientSync.class.getName();
 	private final IListenerSync callback;
+    private final boolean doReconnect;
     private final SyncStatus syncStatus = new SyncStatus(Status.NOT_CONNECTED, 0);
     private CountDownTimer timerWatchTimeout;
     private static final Object timerLock = new Object();
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
-	ClientSync(ClientInfo clientInfo, IListenerSync callback){
+	ClientSync(ClientInfo clientInfo, IListenerSync callback, boolean doReconnect){
 		super(clientInfo);
 		this.callback = callback;
-		super.setCallback(new ListenerReception());
+        this.doReconnect = doReconnect;
+        super.setCallback(new ListenerReception());
 	}
 
     public boolean connect() {
@@ -127,7 +129,7 @@ public class ClientSync extends Client {
                     close(false, "No more space on device. Check your playlist limits and available space in your SD card.", -1);
                 } else if(syncStatus.status.equals(Status.CONNECTED)
                         || syncStatus.status.equals(Status.CONNECTING)) {
-                    close(true, (syncStatus.nbRetries>0?"Attempt "+syncStatus.nbRetries
+                    close(doReconnect, (syncStatus.nbRetries>0?"Attempt "+syncStatus.nbRetries
                             :"Disconnected")+": "+msg, -1);
                 }
             }
@@ -229,7 +231,7 @@ public class ClientSync extends Client {
 
                         @Override
                         public void onFinish() {
-                            close(true, "Timed out waiting.", -1);
+                            close(doReconnect, "Timed out waiting.", -1);
                         }
                     };
                     Log.i(TAG, "timerWatchTimeout.start()");
