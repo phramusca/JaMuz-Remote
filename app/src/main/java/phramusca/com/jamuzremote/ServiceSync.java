@@ -161,6 +161,7 @@ public class ServiceSync extends ServiceBase {
                             helperNotification.notifyBar(notificationSync,
                                     "Updating database with merge changes", 50, i+1, filesToUpdate.length());
                         }
+                        runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Merge complete. Request new files ... ", 2000));
                         clientSync.request("requestNewFiles");
                         break;
                     case "tags":
@@ -267,7 +268,6 @@ public class ServiceSync extends ServiceBase {
     }
 
     private void requestFirstFile() {
-        RepoSync.getNew();
         if (RepoSync.getRemainingSize()>0) {
             Log.i(TAG, "START ProcessDownload");
             processDownload = new ProcessDownload("ProcessDownload", this);
@@ -392,12 +392,12 @@ public class ServiceSync extends ServiceBase {
 
             downloadServices= new ArrayList<>();
             downloadServices.add(new DownloadService(context, NotificationId.SYNC_DOWN_1, "Down 1", ActivityMain.Canal.DOWN1));
-            downloadServices.add(new DownloadService(context, NotificationId.SYNC_DOWN_2, "Down 2", ActivityMain.Canal.DOWN2));
-            downloadServices.add(new DownloadService(context, NotificationId.SYNC_DOWN_3, "Down 3", ActivityMain.Canal.DOWN3));
+            /*downloadServices.add(new DownloadService(context, NotificationId.SYNC_DOWN_2, "Down 2", ActivityMain.Canal.DOWN2));
+            downloadServices.add(new DownloadService(context, NotificationId.SYNC_DOWN_3, "Down 3", ActivityMain.Canal.DOWN3));*/
         }
 
         @Override
-        public void run() {
+        public synchronized void run() {
             try {
                 Track track;
                 while ((track = RepoSync.getNew())!=null) {
@@ -409,53 +409,54 @@ public class ServiceSync extends ServiceBase {
                     service.download(track);
                 }
             } catch (InterruptedException ignored) {
-            } finally {
-                stop("Complete downloads", 500);
-                requestNextFile();
             }
         }
 
-        private DownloadService getService() {
+        private synchronized DownloadService getService() {
             for(DownloadService service : downloadServices) {
-                if(service.downloaded) {
+                if(service.available) {
                     return service;
                 }
             }
             return null;
         }
 
-        private void stop(String msg, long millisInFuture) {
+        private synchronized void stop(String msg, long millisInFuture) {
+            this.abort();
             for(DownloadService service : downloadServices) {
                 service.close(msg, millisInFuture);
             }
-            this.abort();
+            requestNextFile();
         }
     }
 
     private class DownloadService {
 
+        private final ActivityMain.Canal canal;
         private Notification notifDownload;
-        private boolean downloaded=true;
-        private ClientSync clientSync;
+        private boolean available =true;
+        private ClientSync clientSyncDownload;
 
         private DownloadService(Context context, int notificationId, String title, ActivityMain.Canal canal) {
+            this.canal = canal;
             notifDownload = new Notification(context, notificationId, title);
-            clientSync = new ClientSync(new ClientInfo(clientInfo, canal), new ListenerSync());
         }
 
         public void download(Track track) {
-            downloaded=false;
+            available = false;
+            clientSyncDownload = new ClientSync(new ClientInfo(clientInfo, canal), new ListenerSync());
             runOnUiThread(() -> helperNotification.notifyBar(notifDownload, getString(R.string.connecting)));
             /*bench = new Benchmark(RepoSync.getRemainingSize(), 10);*/
-            if(clientSync.connect()) {
+            if(clientSyncDownload.connect()) {
                 runOnUiThread(() -> notifyBar(notifDownload,"Req.", track));
-                clientSync.requestFile(track);
+                clientSyncDownload.requestFile(track);
             }
         }
 
         public void close(String msg, long millisInFuture) {
-            clientSync.close(false, msg, millisInFuture);
-            downloaded=true;
+            clientSyncDownload.close(false, msg, millisInFuture);
+            clientSyncDownload = null;
+            available =true;
         }
 
         class ListenerSync implements IListenerSync {
@@ -473,7 +474,7 @@ public class ServiceSync extends ServiceBase {
                         +"/"+ RepoSync.getTotalSize());
                 notifyBar(notifDownload,"Rec.", track);
                 RepoSync.receivedFile(getAppDataPath, track);
-                clientSync.close(false, "Downloaded ", 1000);
+                close("Downloaded ", 1000);
             }
 
             @Override
@@ -491,7 +492,8 @@ public class ServiceSync extends ServiceBase {
                 if (!msg.equals("")) {
                     runOnUiThread(() -> helperNotification.notifyBar(notifDownload, msg, millisInFuture));
                 }
-                downloaded=true;
+                clientSyncDownload = null;
+                available =true;
             }
         }
 
