@@ -6,6 +6,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -44,7 +45,7 @@ public final class RepoSync {
      * @param track the one to check
      * @return true if onReceivedFile exists and length()==track.size
      */
-    public synchronized static void receivedFile(File getAppDataPath, Track track) {
+    public synchronized static void checkReceivedFile(File getAppDataPath, Track track) {
 
         File receivedFile = new File(getAppDataPath, track.getRelativeFullPath());
         if(tracks.containsRow(track.getIdFileServer())) {
@@ -59,6 +60,13 @@ public final class RepoSync {
             Log.w(TAG, "tracks does not contain file. Deleting " + receivedFile.getAbsolutePath());
             //noinspection ResultOfMethodCallIgnored
             receivedFile.delete();
+        }
+    }
+
+    public synchronized static void checkDownloadedFile(Track track) {
+        if(track.getStatus().equals(Track.Status.DOWN)) {
+            track.setStatus(Track.Status.NEW);
+            updateTracks(track);
         }
     }
 
@@ -157,5 +165,11 @@ public final class RepoSync {
             }
         }
         return track;
+    }
+
+    public static List<Track> getMerge() {
+        List<Track> trackArrayList = new ArrayList<>(tracks.column(Track.Status.NEW).values());
+        trackArrayList.addAll(tracks.column(Track.Status.REC).values());
+        return trackArrayList;
     }
 }
