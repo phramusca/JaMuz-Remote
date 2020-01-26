@@ -6,7 +6,6 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -145,10 +144,6 @@ public final class RepoSync {
         return nbRemaining;
     }
 
-    public synchronized static List<Track> getReceived() {
-        return tracks ==null?new ArrayList<>():new ArrayList<>(tracks.column(Track.Status.REC).values());
-    }
-
     public synchronized static Track getNew() {
         Track track=null;
         if(tracks != null) {
@@ -156,7 +151,7 @@ public final class RepoSync {
             if(values.size()>0) {
                 track = tracks.column(Track.Status.NEW).entrySet().iterator().next().getValue();
                 if(track!=null) {
-                    track.setStatus(Track.Status.DOWN);
+                    track.setStatus(Track.Status.DOWN); //FIXME: Set back to NEW in case off any error during download
                     updateTracks(track);
                 }
             }
