@@ -281,8 +281,9 @@ public class ServiceSync extends ServiceBase {
     private void displayProgress() {
 
         runOnUiThread(() -> {
-            helperNotification.notifyBar(notificationSync,
-                    "Downloading ... ", 1, RepoSync.getTotalSize()-RepoSync.getRemainingSize(), RepoSync.getTotalSize());
+            notifyBar(notificationSync, "Downloading ... ");
+            /*helperNotification.notifyBar(notificationSync, "Downloading ... ");*/
+                    /*"Downloading ... ", 1, RepoSync.getTotalSize()-RepoSync.getRemainingSize(), RepoSync.getTotalSize());*/
         });
 
         if(RepoSync.getTotalSize()>0 && RepoSync.getRemainingSize()<1) {
@@ -482,6 +483,7 @@ public class ServiceSync extends ServiceBase {
                 Log.i(TAG, "Received file\n"+receivedTrack
                         +"\nRemaining : "+ RepoSync.getRemainingSize()
                         +"/"+ RepoSync.getTotalSize());
+                bench.get(receivedTrack.getSize());
                 notifyBar(notifDownload,"Rec.", receivedTrack);
                 RepoSync.checkReceivedFile(getAppDataPath, receivedTrack);
                 track=receivedTrack;
