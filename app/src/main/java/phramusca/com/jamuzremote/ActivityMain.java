@@ -251,7 +251,7 @@ public class ActivityMain extends AppCompatActivity {
             buttonRemote.setEnabled(false);
             buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
             if(buttonRemote.getText().equals("Connect")) {
-                ClientInfo clientInfo = getClientInfo(true);
+                ClientInfo clientInfo = getClientInfo(Canal.REMOTE);
                 if(clientInfo!=null) {
                     clientRemote =  new ClientRemote(clientInfo, new ListenerRemote());
                     new Thread() {
@@ -280,7 +280,7 @@ public class ActivityMain extends AppCompatActivity {
             buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
             if(buttonSync.getText().equals("Connect")) {
                 enableSync(false);
-                ClientInfo clientInfo = getClientInfo(false);
+                ClientInfo clientInfo = getClientInfo(Canal.SYNC);
                 if(clientInfo!=null) {
                     if(!isMyServiceRunning(ServiceSync.class)) {
                         Intent service = new Intent(getApplicationContext(), ServiceSync.class);
@@ -712,7 +712,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
 
-    private ClientInfo getClientInfo(boolean isRemote) {
+    private ClientInfo getClientInfo(Canal canal) {
         if(!checkConnectedViaWifi())  {
             helperToast.toastLong("You must connect to WiFi network.");
             return null;
@@ -734,8 +734,16 @@ public class ActivityMain extends AppCompatActivity {
         }
         return new ClientInfo(address, port,
                 Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID),
-                "tata", isRemote,
+                "tata", canal,
                 "jamuz", getAppDataPath().getAbsolutePath());
+    }
+
+    public enum Canal {
+        REMOTE,
+        SYNC,
+        DOWN1,
+        DOWN2,
+        DOWN3;
     }
 
     private void toggleOff(ToggleButton button, View layout) {

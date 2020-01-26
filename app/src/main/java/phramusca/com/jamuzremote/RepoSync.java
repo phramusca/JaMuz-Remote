@@ -7,7 +7,11 @@ import com.google.common.collect.Table;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *
@@ -18,6 +22,7 @@ public final class RepoSync {
     private static final String TAG = RepoSync.class.getName();
 
     private static Table<Integer, Track.Status, Track> tracks = null;
+    private static BlockingQueue<Track> downloadQueue = new LinkedBlockingDeque<>();
 
     private synchronized static void updateTracks(Track track) {
         tracks.row(track.getIdFileServer()).clear();
@@ -126,15 +131,17 @@ public final class RepoSync {
 
     public synchronized static void reset() {
         tracks = HashBasedTable.create();
+        downloadQueue = new LinkedBlockingDeque<>();
     }
 
     public synchronized static int getRemainingSize() {
         return tracks ==null?0:(tracks.column(Track.Status.NEW).size()
-                + tracks.column(Track.Status.REC).size());
+                + tracks.column(Track.Status.REC).size())
+                 + downloadQueue.size();
     }
 
     public synchronized static int getTotalSize() {
-        return tracks==null?0:tracks.size();
+        return tracks==null?0:tracks.size()+ downloadQueue.size();
     }
 
     public synchronized static long getRemainingFileSize() {
@@ -144,6 +151,15 @@ public final class RepoSync {
         long nbRemaining=0;
         nbRemaining+=getRemainingFileSize(Track.Status.NEW);
         nbRemaining+=getRemainingFileSize(Track.Status.REC);
+        nbRemaining+=getRemainingDownloadSize();
+        return nbRemaining;
+    }
+
+    private synchronized static long getRemainingDownloadSize() {
+        long nbRemaining=0;
+        for(Track track : downloadQueue) {
+            nbRemaining+=track.getSize();
+        }
         return nbRemaining;
     }
 
@@ -155,15 +171,20 @@ public final class RepoSync {
         return nbRemaining;
     }
 
-    public synchronized static Track takeNew() {
-        if (tracks != null && tracks.column(Track.Status.NEW).size() > 0) {
-            return tracks.column(Track.Status.NEW)
-                    .entrySet().iterator().next().getValue();
-        }
-        return null;
-    }
-
     public synchronized static List<Track> getReceived() {
         return tracks ==null?new ArrayList<>():new ArrayList<>(tracks.column(Track.Status.REC).values());
+    }
+
+    public synchronized static void extractNew() {
+        if(tracks == null) {
+            return;
+        }
+        Collection<Track> values = tracks.column(Track.Status.NEW).values();
+        downloadQueue = new LinkedBlockingQueue<>(values);
+        tracks.column(Track.Status.NEW).clear();
+    }
+
+    public synchronized static BlockingQueue<Track> getDownloadQueue() {
+        return downloadQueue;
     }
 }
