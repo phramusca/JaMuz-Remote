@@ -167,7 +167,11 @@ public final class RepoSync {
         return track;
     }
 
-    public static List<Track> getMerge() {
+    public static List<Track> getDownloadList() {
+        return new ArrayList<>(tracks.column(Track.Status.NEW).values());
+    }
+
+    public static List<Track> getMergeList() {
         List<Track> trackArrayList = new ArrayList<>(tracks.column(Track.Status.NEW).values());
         trackArrayList.addAll(tracks.column(Track.Status.REC).values());
         return trackArrayList;
