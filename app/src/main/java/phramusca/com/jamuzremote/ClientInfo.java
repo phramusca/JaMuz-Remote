@@ -17,7 +17,7 @@ import java.io.Serializable;
 public class ClientInfo implements Serializable {
 
 	private final String address;
-    private final ActivityMain.Canal canal;
+    private final int canal;
     private final String appId;
     private final int port;
 	private final String login;
@@ -25,7 +25,7 @@ public class ClientInfo implements Serializable {
     private String rootPath;
 
     public ClientInfo(String address, int port, String login, String password,
-                      ActivityMain.Canal canal, String appId, String rootPath){
+                      int canal, String appId, String rootPath){
 		this.port = port;
 		this.login = login;
 		this.password = password;
@@ -35,7 +35,7 @@ public class ClientInfo implements Serializable {
         this.rootPath = rootPath;
     }
 
-    public ClientInfo(ClientInfo clientInfo, ActivityMain.Canal canal) {
+    public ClientInfo(ClientInfo clientInfo, int canal) {
         this(clientInfo.address, clientInfo.port, clientInfo.login, clientInfo.password,
                 canal, clientInfo.appId, clientInfo.rootPath);
     }

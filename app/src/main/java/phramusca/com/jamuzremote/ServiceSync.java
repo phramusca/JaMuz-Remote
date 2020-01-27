@@ -216,14 +216,14 @@ public class ServiceSync extends ServiceBase {
            /* Log.i(TAG, "Received file\n"+fileInfoReception
                     +"\nRemaining : "+ RepoSync.getRemainingSize()
                     +"/"+ RepoSync.getTotalSize());
-            notifyBar(notificationSync,"Rec.", fileInfoReception);
+            notifyBar(notificationDownload,"Rec.", fileInfoReception);
             RepoSync.checkReceivedFile(getAppDataPath, fileInfoReception);
-            displayProgress();*/
+            checkCompleted();*/
         }
 
         @Override
         public void onReceivingFile(final Track fileInfoReception) {
-/*            notifyBar(notificationSync,"Down", fileInfoReception);*/
+/*            notifyBar(notificationDownload,"Down", fileInfoReception);*/
         }
 
         @Override
@@ -244,8 +244,8 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    /*private void notifyBar(Notification notificationSync, String text) {
-        notifyBar(notificationSync, text, null);
+    /*private void notifyBar(Notification notificationDownload, String text) {
+        notifyBar(notificationDownload, text, null);
     }*/
 
     private void notifyBar(Notification notificationSync, String text) {
@@ -255,8 +255,10 @@ public class ServiceSync extends ServiceBase {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("-").append(remaining).append("/").append(max)
         .append("\n").append(StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false));
-        for(DownloadService downloadService : processDownload.downloadServices) {
-            stringBuilder.append("\n").append(downloadService.canal).append(": ").append(downloadService.status);
+        if(processDownload!=null) {
+            for(DownloadService downloadService : processDownload.downloadServices) {
+                stringBuilder.append("\n").append(downloadService.canal).append(": ").append(downloadService.status);
+            }
         }
         String bigText = stringBuilder.toString();
         String msg = text+bench.getLast();
@@ -271,15 +273,10 @@ public class ServiceSync extends ServiceBase {
             processDownload = new ProcessDownload("ProcessDownload", this);
             processDownload.start();
         }
-        displayProgress();
+        checkCompleted();
     }
 
-    private void displayProgress() {
-        Log.i(TAG, "displayProgress !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        runOnUiThread(() -> {
-            notifyBar(notificationSync, "Downloading ... ");
-        });
-
+    private void checkCompleted() {
         if(RepoSync.getTotalSize()>0 && RepoSync.getRemainingSize()<1) {
             final String msg = "No more files to download.";
             final String msg2 = "All " + RepoSync.getTotalSize() + " files" +
@@ -383,14 +380,15 @@ public class ServiceSync extends ServiceBase {
     private class ProcessDownload extends ProcessAbstract {
 
         private List<DownloadService> downloadServices;
+        private Notification notificationDownload;
 
         ProcessDownload(String name, Context context) {
             super(name);
-
+            notificationDownload = new Notification(context, NotificationId.SYNC_DOWN, "Sync");
             downloadServices= new ArrayList<>();
-            downloadServices.add(new DownloadService(context, NotificationId.SYNC_DOWN_1, "Down 1", ActivityMain.Canal.DOWN1));
-            downloadServices.add(new DownloadService(context, NotificationId.SYNC_DOWN_2, "Down 2", ActivityMain.Canal.DOWN2));
-            downloadServices.add(new DownloadService(context, NotificationId.SYNC_DOWN_3, "Down 3", ActivityMain.Canal.DOWN3));
+            for(int i=0; i<20; i++) {
+                downloadServices.add(new DownloadService(100+i, this::setProgress));
+            }
         }
 
         @Override
@@ -425,18 +423,26 @@ public class ServiceSync extends ServiceBase {
                 service.close(msg, millisInFuture);
             }
         }
+
+        void setProgress() {
+            runOnUiThread(() -> {
+                notifyBar(notificationDownload, "Downloading ... ");
+            });
+        }
     }
 
     private class DownloadService {
 
-        private final ActivityMain.Canal canal;
+        private final int canal;
+        private final IListenerSyncDown callback;
         private boolean available =true;
         private ClientSync clientSyncDownload;
         private Track track;
         private String status="";
 
-        private DownloadService(Context context, int notificationId, String title, ActivityMain.Canal canal) {
+        private DownloadService(int canal, IListenerSyncDown callback) {
             this.canal = canal;
+            this.callback = callback;
         }
 
         public synchronized void download(Track track) {
@@ -484,7 +490,8 @@ public class ServiceSync extends ServiceBase {
                 setStatus("Rec.", receivedTrack);
                 RepoSync.checkReceivedFile(getAppDataPath, receivedTrack);
                 track=receivedTrack;
-                displayProgress();
+                callback.receivedFile();
+                checkCompleted();
                 close("Downloaded ", 1000);
             }
 
