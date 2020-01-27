@@ -15,6 +15,9 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -213,17 +216,10 @@ public class ServiceSync extends ServiceBase {
 
         @Override
         public void onReceivedFile(final Track fileInfoReception) {
-           /* Log.i(TAG, "Received file\n"+fileInfoReception
-                    +"\nRemaining : "+ RepoSync.getRemainingSize()
-                    +"/"+ RepoSync.getTotalSize());
-            notifyBar(notificationDownload,"Rec.", fileInfoReception);
-            RepoSync.checkReceivedFile(getAppDataPath, fileInfoReception);
-            checkCompleted();*/
         }
 
         @Override
         public void onReceivingFile(final Track fileInfoReception) {
-/*            notifyBar(notificationDownload,"Down", fileInfoReception);*/
         }
 
         @Override
@@ -244,11 +240,8 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    /*private void notifyBar(Notification notificationDownload, String text) {
-        notifyBar(notificationDownload, text, null);
-    }*/
-
     private void notifyBar(Notification notificationSync, String text) {
+        Log.i(TAG, "!!!!!!!!!!!!!! Notify Download !!!!!!!!!!!!!!");
         int max = RepoSync.getTotalSize();
         int remaining = RepoSync.getRemainingSize();
         int progress = max- remaining;
@@ -256,8 +249,10 @@ public class ServiceSync extends ServiceBase {
         stringBuilder.append("-").append(remaining).append("/").append(max)
         .append("\n").append(StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false));
         if(processDownload!=null) {
-            for(DownloadService downloadService : processDownload.downloadServices) {
-                stringBuilder.append("\n").append(downloadService.canal).append(": ").append(downloadService.status);
+            for(DownloadTask downloadService : processDownload.downloadServices) {
+                if(downloadService.clientSyncDownload!=null && downloadService.clientSyncDownload.isConnected()) {
+                    stringBuilder.append("\n").append(downloadService.canal).append(": ").append(downloadService.status);
+                }
             }
         }
         String bigText = stringBuilder.toString();
@@ -295,10 +290,11 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
+    //FIXME: !!!! Merge fails (dues to previousPlayCouter it seems, since ACK has been removed)
     private void requestMerge() {
         runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
                 "Requesting statistics merge."));
-        List<Track> tracks = RepoSync.getMerge();
+        List<Track> tracks = RepoSync.getMergeList();
         for(Track track : tracks) {
             track.getTags(true);
         }
@@ -379,51 +375,45 @@ public class ServiceSync extends ServiceBase {
 
     private class ProcessDownload extends ProcessAbstract {
 
-        private List<DownloadService> downloadServices;
+        private List<DownloadTask> downloadServices;
         private Notification notificationDownload;
+        private ExecutorService pool;
 
         ProcessDownload(String name, Context context) {
             super(name);
             notificationDownload = new Notification(context, NotificationId.SYNC_DOWN, "Sync");
             downloadServices= new ArrayList<>();
-            for(int i=0; i<20; i++) {
-                downloadServices.add(new DownloadService(100+i, this::setProgress));
-            }
         }
 
         @Override
         public synchronized void run() {
+            notifyBar(notificationDownload, "Downloading ... ");
+            pool = Executors.newFixedThreadPool(10);
+            int canal=100;
+            for (Track track : RepoSync.getDownloadList()) {
+                DownloadTask downloadTask = new DownloadTask(track, canal++, this::setProgress);
+                downloadServices.add(downloadTask);
+                pool.submit(downloadTask);
+            }
+            pool.shutdown();
             try {
-                Track track;
-                while ((track = RepoSync.getNew())!=null) {
-                    checkAbort();
-                    DownloadService service;
-                    while((service = getService())==null) {
-                        Thread.sleep(1000);
-                    }
-                    Thread.sleep(1000);
-                    service.download(track);
-                }
-            } catch (InterruptedException ignored) {
+                pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        }
-
-        private synchronized DownloadService getService() {
-            for(DownloadService service : downloadServices) {
-                if(service.available) {
-                    return service;
-                }
-            }
-            return null;
+            // all tasks have now finished (unless an exception is thrown above)
         }
 
         private synchronized void stop(String msg, long millisInFuture) {
+            pool.shutdownNow();
             this.abort();
-            for(DownloadService service : downloadServices) {
+            for(DownloadTask service : downloadServices) {
                 service.close(msg, millisInFuture);
             }
         }
 
+        //FIXME: Though files are downloaded, no progress is shown. Why ?
+        //+ process does not stop though completed  (and gui freezes :( )
         void setProgress() {
             runOnUiThread(() -> {
                 notifyBar(notificationDownload, "Downloading ... ");
@@ -431,29 +421,41 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    private class DownloadService {
-
+    private class DownloadTask extends ProcessAbstract implements Runnable {
         private final int canal;
         private final IListenerSyncDown callback;
-        private boolean available =true;
         private ClientSync clientSyncDownload;
         private Track track;
         private String status="";
+        private boolean completed = false;
 
-        private DownloadService(int canal, IListenerSyncDown callback) {
+        private DownloadTask(Track track, int canal, IListenerSyncDown callback) {
+            super("DownloadTask "+canal);
+            this.track = track;
             this.canal = canal;
             this.callback = callback;
         }
 
-        public synchronized void download(Track track) {
-            this.track = track;
-            available = false;
+        @Override
+        public void run() {
+            try {
+                download();
+            } catch (InterruptedException e) {
+                close("Interrupted", 5000);
+            }
+        }
+
+        synchronized void download() throws InterruptedException {
             clientSyncDownload = new ClientSync(new ClientInfo(clientInfo, canal), new ListenerSync(), false);
             status=getString(R.string.connecting);
             /*bench = new Benchmark(RepoSync.getRemainingSize(), 10);*/
             if(clientSyncDownload.connect()) {
                 setStatus("Req.", track);
                 clientSyncDownload.requestFile(track);
+                while(!completed) {
+                    checkAbort();
+                    Thread.sleep(500);
+                }
             }
         }
 
@@ -461,12 +463,13 @@ public class ServiceSync extends ServiceBase {
             if(clientSyncDownload!=null) {
                 clientSyncDownload.close(false, msg, millisInFuture);
             }
+            abort();
         }
 
         private synchronized void clean() {
             RepoSync.checkDownloadedFile(track);
             clientSyncDownload = null;
-            available =true;
+            completed=true;
         }
 
         private void setStatus(String text, Track track) {
@@ -491,6 +494,7 @@ public class ServiceSync extends ServiceBase {
                 RepoSync.checkReceivedFile(getAppDataPath, receivedTrack);
                 track=receivedTrack;
                 callback.receivedFile();
+                completed=true;
                 checkCompleted();
                 close("Downloaded ", 1000);
             }
@@ -513,6 +517,5 @@ public class ServiceSync extends ServiceBase {
                 clean();
             }
         }
-
     }
 }
