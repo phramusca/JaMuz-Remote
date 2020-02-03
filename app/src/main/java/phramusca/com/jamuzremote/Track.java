@@ -136,7 +136,8 @@ public class Track implements Serializable {
                 String tag = (String) jsonTags.get(i);
                 tags.add(tag);
             }
-        } catch (JSONException ignored) {
+        } catch (JSONException ex) {
+            Log.e(TAG, "Error creating new Track "+file, ex);
         }
     }
 

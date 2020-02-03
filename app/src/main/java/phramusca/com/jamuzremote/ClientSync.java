@@ -139,14 +139,14 @@ public class ClientSync extends Client {
     public void requestFile(Track track) {
         synchronized (syncStatus) {
             //TODO: Make sync timeouts configurable (use bench, to be based on size not nb)
-            long minTimeout = 15;  //Min timeout 15s (or 15s by 4Mo)
+            /*long minTimeout = 15;  //Min timeout 15s (or 15s by 4Mo)
             long maxTimeout = 120; //Max timeout 2 min
 
             long timeoutFile = track.getSize() < 4000000
                     ? minTimeout
                     : ((track.getSize() / 4000000) * minTimeout);
             timeoutFile = timeoutFile > maxTimeout ? maxTimeout : timeoutFile;
-            watchTimeOut(timeoutFile);
+            watchTimeOut(timeoutFile);*/
             logStatus("requestFile()");
             if(checkStatus()) {
                 JSONObject obj = new JSONObject();
