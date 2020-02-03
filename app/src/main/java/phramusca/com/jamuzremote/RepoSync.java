@@ -159,7 +159,7 @@ public final class RepoSync {
             if(values.size()>0) {
                 track = tracks.column(Track.Status.NEW).entrySet().iterator().next().getValue();
                 if(track!=null) {
-                    track.setStatus(Track.Status.DOWN); //FIXME: Set back to NEW in case off any error during download
+                    track.setStatus(Track.Status.DOWN);
                     updateTracks(track);
                 }
             }

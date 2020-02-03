@@ -240,28 +240,6 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    private void notifyBar(Notification notificationSync, String text) {
-        Log.i(TAG, "!!!!!!!!!!!!!! Notify Download !!!!!!!!!!!!!!");
-        int max = RepoSync.getTotalSize();
-        int remaining = RepoSync.getRemainingSize();
-        int progress = max- remaining;
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("-").append(remaining).append("/").append(max)
-        .append("\n").append(StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false));
-        if(processDownload!=null) {
-            for(DownloadTask downloadService : processDownload.downloadServices) {
-                if(downloadService.clientSyncDownload!=null && downloadService.clientSyncDownload.isConnected()) {
-                    stringBuilder.append("\n").append(downloadService.canal).append(": ").append(downloadService.status);
-                }
-            }
-        }
-        String bigText = stringBuilder.toString();
-        String msg = text+bench.getLast();
-        helperNotification.notifyBar(notificationSync, msg, max, progress, false,
-                true, true,
-                msg+"\n"+bigText);
-    }
-
     private void startSync() {
         if (RepoSync.getRemainingSize()>0) {
             Log.i(TAG, "START ProcessDownload");
@@ -271,7 +249,7 @@ public class ServiceSync extends ServiceBase {
         checkCompleted();
     }
 
-    private void checkCompleted() {
+    private boolean checkCompleted() {
         if(RepoSync.getTotalSize()>0 && RepoSync.getRemainingSize()<1) {
             final String msg = "No more files to download.";
             final String msg2 = "All " + RepoSync.getTotalSize() + " files" +
@@ -281,16 +259,18 @@ public class ServiceSync extends ServiceBase {
                 helperToast.toastLong(msg + "\n\n" + msg2);
             });
             stopSync("Sync complete.", 20000);
+            return true;
         } else if (RepoSync.getTotalSize()<=0){
             Log.i(TAG, "No files to download.");
             runOnUiThread(() -> helperToast.toastLong("No files to download." +
                     "\n\nYou can use JaMuz (Linux/Windows) to " +
                     "export a list of files to retrieve, based on playlists."));
             stopSync("No files to download.", 5000);
+            return true;
         }
+        return false;
     }
 
-    //FIXME: !!!! Merge fails (dues to previousPlayCouter it seems, since ACK has been removed)
     private void requestMerge() {
         runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
                 "Requesting statistics merge."));
@@ -385,13 +365,44 @@ public class ServiceSync extends ServiceBase {
             downloadServices= new ArrayList<>();
         }
 
+        private void notifyBarProgress(Notification notification, int every) {
+            int nbFilesTotal = RepoSync.getTotalSize();
+            every=nbFilesTotal<every?nbFilesTotal/10:every;
+            int remaining = RepoSync.getRemainingSize();
+            int progress = nbFilesTotal- remaining;
+            //if(((progress-1) % (every>0?every:1)) == 0) { //To prevent UI from freezing
+                Log.i(TAG, "!!!!!!!!!!!!!! Notify Download !!!!!!!!!!!!!!");
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("-").append(remaining).append("/").append(nbFilesTotal)
+                        .append("\n").append(StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false));
+                if(processDownload!=null) {
+                    for(DownloadTask downloadService : processDownload.downloadServices) {
+                        if(downloadService.clientSyncDownload!=null && downloadService.clientSyncDownload.isConnected()) {
+                            stringBuilder.append("\n").append(downloadService.canal).append(": ").append(downloadService.status);
+                        }
+                    }
+                }
+                String bigText = stringBuilder.toString();
+                String msg = "Downloading ... " +bench.getLast();
+                runOnUiThread(() -> {
+                    helperNotification.notifyBar(notification, msg, nbFilesTotal, progress, false,
+                            true, true,
+                            msg + "\n" + bigText);
+                });
+            //}
+        }
+
         @Override
         public synchronized void run() {
-            notifyBar(notificationDownload, "Downloading ... ");
-            pool = Executors.newFixedThreadPool(10);
+            runOnUiThread(() -> {
+                helperNotification.notifyBar(notificationDownload, "Starting download ... ");
+
+            });
+            pool = Executors.newFixedThreadPool(2);
             int canal=100;
             for (Track track : RepoSync.getDownloadList()) {
-                DownloadTask downloadTask = new DownloadTask(track, canal++, this::setProgress);
+                DownloadTask downloadTask = new DownloadTask(track, canal++,
+                        () -> notifyBarProgress(notificationDownload, 20));
                 downloadServices.add(downloadTask);
                 pool.submit(downloadTask);
             }
@@ -401,26 +412,30 @@ public class ServiceSync extends ServiceBase {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            // all tasks have now finished (unless an exception is thrown above)
-        }
-
-        private synchronized void stop(String msg, long millisInFuture) {
-            pool.shutdownNow();
-            this.abort();
-            for(DownloadTask service : downloadServices) {
-                service.close(msg, millisInFuture);
+            if(checkCompleted()) {
+                stop("Download complete", 5000);
+            } else {
+                //FIXME: Restart process. Some tracks are still missing. Why ? How ?
+                stop("Download done but incomplete :(", 5000);
             }
         }
 
-        //FIXME: Though files are downloaded, no progress is shown. Why ?
-        //+ process does not stop though completed  (and gui freezes :( )
-        void setProgress() {
+        private synchronized void stop(String msg, long millisInFuture) {
             runOnUiThread(() -> {
-                notifyBar(notificationDownload, "Downloading ... ");
+                helperNotification.notifyBar(notificationDownload, "Closing"); //, 5000);
+            });
+            for(DownloadTask service : downloadServices) {
+                service.close(msg, millisInFuture);
+            }
+            pool.shutdownNow();
+            this.abort();
+            runOnUiThread(() -> {
+                helperNotification.notifyBar(notificationDownload, "Closed", 5000);
             });
         }
     }
 
+    //FIXME !!!!!!! SYNC works but no progress displayed + gui freezes !!! :(
     private class DownloadTask extends ProcessAbstract implements Runnable {
         private final int canal;
         private final IListenerSyncDown callback;
@@ -454,7 +469,7 @@ public class ServiceSync extends ServiceBase {
                 clientSyncDownload.requestFile(track);
                 while(!completed) {
                     checkAbort();
-                    Thread.sleep(500);
+                    /*Thread.sleep(3000);*/
                 }
             }
         }
@@ -495,7 +510,6 @@ public class ServiceSync extends ServiceBase {
                 track=receivedTrack;
                 callback.receivedFile();
                 completed=true;
-                checkCompleted();
                 close("Downloaded ", 1000);
             }
 
