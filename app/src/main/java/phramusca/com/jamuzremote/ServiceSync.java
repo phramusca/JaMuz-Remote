@@ -241,12 +241,14 @@ public class ServiceSync extends ServiceBase {
     }
 
     private void startSync() {
-        if (RepoSync.getRemainingSize()>0) {
+        if ((processDownload==null || !processDownload.isAlive()) && RepoSync.getRemainingSize()>0) {
             Log.i(TAG, "START ProcessDownload");
             processDownload = new ProcessDownload("ProcessDownload", this);
             processDownload.start();
         }
-        checkCompleted();
+        if (!checkCompleted() && clientSync != null) {
+            clientSync.close(false, "Sync part done", 2000);
+        }
     }
 
     private boolean checkCompleted() {
@@ -374,11 +376,14 @@ public class ServiceSync extends ServiceBase {
                 Log.i(TAG, "!!!!!!!!!!!!!! Notify Download !!!!!!!!!!!!!!");
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append("-").append(remaining).append("/").append(nbFilesTotal)
-                        .append("\n").append(StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false));
+                        .append("\n").append(StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false)).append("\n");
                 if(processDownload!=null) {
                     for(DownloadTask downloadService : processDownload.downloadServices) {
-                        if(downloadService.clientSyncDownload!=null && downloadService.clientSyncDownload.isConnected()) {
-                            stringBuilder.append("\n").append(downloadService.canal).append(": ").append(downloadService.status);
+                        /*if(downloadService.clientSyncDownload!=null
+                                && downloadService.clientSyncDownload.isConnected()
+                                && */
+                                if(!downloadService.completed) {
+                            stringBuilder.append(downloadService.canal).append(": ").append(downloadService.status).append(" | ");
                         }
                     }
                 }
@@ -398,7 +403,7 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationDownload, "Starting download ... ");
 
             });
-            pool = Executors.newFixedThreadPool(2);
+            pool = Executors.newFixedThreadPool(20);
             int canal=100;
             for (Track track : RepoSync.getDownloadList()) {
                 DownloadTask downloadTask = new DownloadTask(track, canal++,
@@ -454,23 +459,15 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void run() {
             try {
-                download();
-            } catch (InterruptedException e) {
-                close("Interrupted", 5000);
-            }
-        }
-
-        synchronized void download() throws InterruptedException {
-            clientSyncDownload = new ClientSync(new ClientInfo(clientInfo, canal), new ListenerSync(), false);
-            status=getString(R.string.connecting);
-            /*bench = new Benchmark(RepoSync.getRemainingSize(), 10);*/
-            if(clientSyncDownload.connect()) {
-                setStatus("Req.", track);
-                clientSyncDownload.requestFile(track);
+                clientSyncDownload = new ClientSync(new ClientInfo(clientInfo, canal), new ListenerSync(), false);
+                status=getString(R.string.connecting);
+                /*bench = new Benchmark(RepoSync.getRemainingSize(), 10);*/
+                clientSyncDownload.connect();
                 while(!completed) {
                     checkAbort();
-                    /*Thread.sleep(3000);*/
                 }
+            } catch (InterruptedException e) {
+                close("Interrupted", 5000);
             }
         }
 
@@ -478,17 +475,16 @@ public class ServiceSync extends ServiceBase {
             if(clientSyncDownload!=null) {
                 clientSyncDownload.close(false, msg, millisInFuture);
             }
-            abort();
-        }
-
-        private synchronized void clean() {
-            RepoSync.checkDownloadedFile(track);
-            clientSyncDownload = null;
             completed=true;
         }
 
+        private void setStatus(String text) {
+            setStatus(text, null);
+        }
+
         private void setStatus(String text, Track track) {
-            status=text+" "+StringManager.humanReadableByteCount(track.getSize(), false);
+            status=text+(track==null?"":" "+StringManager.humanReadableByteCount(track.getSize(), false));
+            callback.receivedFile();
         }
 
         class ListenerSync implements IListenerSync {
@@ -508,8 +504,6 @@ public class ServiceSync extends ServiceBase {
                 setStatus("Rec.", receivedTrack);
                 RepoSync.checkReceivedFile(getAppDataPath, receivedTrack);
                 track=receivedTrack;
-                callback.receivedFile();
-                completed=true;
                 close("Downloaded ", 1000);
             }
 
@@ -520,15 +514,18 @@ public class ServiceSync extends ServiceBase {
 
             @Override
             public void onConnected() {
-                status="Connected ... ";
+                setStatus("Req.", track);
+                clientSyncDownload.requestFile(track);
             }
 
             @Override
             public void onDisconnected(boolean reconnect, final String msg, final long millisInFuture) {
                 if (!msg.equals("")) {
-                    status=msg;
+                    setStatus(msg);
                 }
-                clean();
+                RepoSync.checkDownloadedFile(track);
+                clientSyncDownload = null;
+                completed=true;
             }
         }
     }
