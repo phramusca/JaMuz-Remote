@@ -46,7 +46,6 @@ public final class RepoSync {
      * @return true if onReceivedFile exists and length()==track.size
      */
     public synchronized static void checkReceivedFile(File getAppDataPath, Track track) {
-
         File receivedFile = new File(getAppDataPath, track.getRelativeFullPath());
         if(tracks.containsRow(track.getIdFileServer())) {
             track.setStatus(Track.Status.REC);
@@ -60,13 +59,6 @@ public final class RepoSync {
             Log.w(TAG, "tracks does not contain file. Deleting " + receivedFile.getAbsolutePath());
             //noinspection ResultOfMethodCallIgnored
             receivedFile.delete();
-        }
-    }
-
-    public synchronized static void checkDownloadedFile(Track track) {
-        if(track.getStatus().equals(Track.Status.DOWN)) {
-            track.setStatus(Track.Status.NEW);
-            updateTracks(track);
         }
     }
 

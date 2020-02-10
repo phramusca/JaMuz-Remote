@@ -12,9 +12,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -145,7 +151,6 @@ public class ServiceSync extends ServiceBase {
                         helperNotification.notifyBar(notificationSync,
                                 "Inserting "+newTracks.size()+" tracks in database. Please wait...");
                         HelperLibrary.musicLibrary.insertTrackOrUpdateStatus(newTracks);
-                        bench = new Benchmark(RepoSync.getRemainingSize(), 10);
                         scanAndDeleteUnwantedInThread(getAppDataPath);
                         runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
                                 "Received "+newTracks.size()+" files to dowload.", 2000));
@@ -360,6 +365,7 @@ public class ServiceSync extends ServiceBase {
         private List<DownloadTask> downloadServices;
         private Notification notificationDownload;
         private ExecutorService pool;
+        private Timer timer;
 
         ProcessDownload(String name, Context context) {
             super(name);
@@ -373,27 +379,24 @@ public class ServiceSync extends ServiceBase {
             int remaining = RepoSync.getRemainingSize();
             int progress = nbFilesTotal- remaining;
             //if(((progress-1) % (every>0?every:1)) == 0) { //To prevent UI from freezing
-                Log.i(TAG, "!!!!!!!!!!!!!! Notify Download !!!!!!!!!!!!!!");
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("-").append(remaining).append("/").append(nbFilesTotal)
-                        .append("\n").append(StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false)).append("\n");
-                if(processDownload!=null) {
-                    for(DownloadTask downloadService : processDownload.downloadServices) {
-                        /*if(downloadService.clientSyncDownload!=null
-                                && downloadService.clientSyncDownload.isConnected()
-                                && */
-                                if(!downloadService.completed) {
-                            stringBuilder.append(downloadService.canal).append(": ").append(downloadService.status).append(" | ");
-                        }
+            Log.i(TAG, "!!!!!!!!!!!!!! Notify Download !!!!!!!!!!!!!!");
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("-").append(remaining).append("/").append(nbFilesTotal)
+                    .append("\n").append(StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false)).append("\n");
+            if(processDownload!=null) {
+                for(DownloadTask downloadService : processDownload.downloadServices) {
+                    if(!downloadService.status.equals("")) {
+                        stringBuilder.append(downloadService.canal).append(": ").append(downloadService.status).append(" | ");
                     }
                 }
-                String bigText = stringBuilder.toString();
-                String msg = "Downloading ... " +bench.getLast();
-                runOnUiThread(() -> {
-                    helperNotification.notifyBar(notification, msg, nbFilesTotal, progress, false,
-                            true, true,
-                            msg + "\n" + bigText);
-                });
+            }
+            String bigText = stringBuilder.toString();
+            String msg = "Downloading ... " +bench.getLast();
+            runOnUiThread(() -> {
+                helperNotification.notifyBar(notification, msg, nbFilesTotal, progress, false,
+                        true, true,
+                        msg + "\n" + bigText);
+            });
             //}
         }
 
@@ -403,15 +406,22 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationDownload, "Starting download ... ");
 
             });
-            pool = Executors.newFixedThreadPool(20);
+            bench = new Benchmark(RepoSync.getRemainingSize(), 10);
+            TimerTask timerTask = new TimerTask() {
+                public void run() {
+                    notifyBarProgress(notificationDownload, 20);
+                }
+            };
+            pool = Executors.newFixedThreadPool(30);
             int canal=100;
             for (Track track : RepoSync.getDownloadList()) {
-                DownloadTask downloadTask = new DownloadTask(track, canal++,
-                        () -> notifyBarProgress(notificationDownload, 20));
+                DownloadTask downloadTask = new DownloadTask(track, canal++, () -> notifyBarProgress(notificationDownload, 20));
                 downloadServices.add(downloadTask);
                 pool.submit(downloadTask);
             }
             pool.shutdown();
+            timer = new Timer();
+            timer.schedule(timerTask, 1000, 3000);
             try {
                 pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
@@ -425,14 +435,19 @@ public class ServiceSync extends ServiceBase {
             }
         }
 
+        void stoptimertask() {
+            if (timer != null) {
+                timer.cancel();
+                timer = null;
+            }
+        }
+
         private synchronized void stop(String msg, long millisInFuture) {
             runOnUiThread(() -> {
                 helperNotification.notifyBar(notificationDownload, "Closing"); //, 5000);
             });
-            for(DownloadTask service : downloadServices) {
-                service.close(msg, millisInFuture);
-            }
             pool.shutdownNow();
+            stoptimertask();
             this.abort();
             runOnUiThread(() -> {
                 helperNotification.notifyBar(notificationDownload, "Closed", 5000);
@@ -440,14 +455,11 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    //FIXME !!!!!!! SYNC works but no progress displayed + gui freezes !!! :(
     private class DownloadTask extends ProcessAbstract implements Runnable {
         private final int canal;
         private final IListenerSyncDown callback;
-        private ClientSync clientSyncDownload;
         private Track track;
         private String status="";
-        private boolean completed = false;
 
         private DownloadTask(Track track, int canal, IListenerSyncDown callback) {
             super("DownloadTask "+canal);
@@ -459,74 +471,38 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void run() {
             try {
-                clientSyncDownload = new ClientSync(new ClientInfo(clientInfo, canal), new ListenerSync(), false);
-                status=getString(R.string.connecting);
-                /*bench = new Benchmark(RepoSync.getRemainingSize(), 10);*/
-                clientSyncDownload.connect();
-                while(!completed) {
-                    checkAbort();
+                setStatus("Req.", track);
+                callback.setStatus();
+                String url = "http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/download?id="+track.getIdFileServer();
+                File destinationPath = new File(new File(track.getPath()).getParent());
+                destinationPath.mkdirs();
+                String destinationFile=new File(getAppDataPath, track.getRelativeFullPath()).getAbsolutePath();
+                BufferedInputStream in = new BufferedInputStream(new URL(url).openStream());
+                FileOutputStream fileOutputStream = new FileOutputStream(destinationFile);
+                byte dataBuffer[] = new byte[1024];
+                int bytesRead;
+                int bytesReceived=0;
+                setStatus("Down.", track);
+                while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                    fileOutputStream.write(dataBuffer, 0, bytesRead);
+                    /*bytesReceived=bytesReceived+bytesRead;
+                    setStatus("Down. "+StringManager.humanReadableByteCount(bytesReceived, false)+" /", track);*/
                 }
-            } catch (InterruptedException e) {
-                close("Interrupted", 5000);
+                setStatus("Rec.", track);
+                RepoSync.checkReceivedFile(getAppDataPath, track);
+                status="";
+                bench.get(track.getSize());
+                callback.setStatus();
+            } catch (IOException e) {
+                Log.e(TAG, "Error downloading "+track.getRelativeFullPath(), e);
+                //FIXME: Put file back in queue
+                setStatus("Err.", track);
+                callback.setStatus();
             }
-        }
-
-        public synchronized void close(String msg, long millisInFuture) {
-            if(clientSyncDownload!=null) {
-                clientSyncDownload.close(false, msg, millisInFuture);
-            }
-            completed=true;
-        }
-
-        private void setStatus(String text) {
-            setStatus(text, null);
         }
 
         private void setStatus(String text, Track track) {
             status=text+(track==null?"":" "+StringManager.humanReadableByteCount(track.getSize(), false));
-            callback.receivedFile();
-        }
-
-        class ListenerSync implements IListenerSync {
-
-            private final String TAG = ServiceSync.ListenerSync.class.getName();
-
-            @Override
-            public void onReceivedJson(final String json) {
-            }
-
-            @Override
-            public void onReceivedFile(final Track receivedTrack) {
-                Log.i(TAG, "Received file\n"+receivedTrack
-                        +"\nRemaining : "+ RepoSync.getRemainingSize()
-                        +"/"+ RepoSync.getTotalSize());
-                /*bench.get(receivedTrack.getSize());*/
-                setStatus("Rec.", receivedTrack);
-                RepoSync.checkReceivedFile(getAppDataPath, receivedTrack);
-                track=receivedTrack;
-                close("Downloaded ", 1000);
-            }
-
-            @Override
-            public void onReceivingFile(final Track track) {
-                setStatus("Down.", track);
-            }
-
-            @Override
-            public void onConnected() {
-                setStatus("Req.", track);
-                clientSyncDownload.requestFile(track);
-            }
-
-            @Override
-            public void onDisconnected(boolean reconnect, final String msg, final long millisInFuture) {
-                if (!msg.equals("")) {
-                    setStatus(msg);
-                }
-                RepoSync.checkDownloadedFile(track);
-                clientSyncDownload = null;
-                completed=true;
-            }
         }
     }
 }

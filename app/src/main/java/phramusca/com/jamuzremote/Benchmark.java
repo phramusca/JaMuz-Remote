@@ -26,7 +26,7 @@ public class Benchmark {
         partialSizes = EvictingQueue.create(max);
     }
 
-    public String get(long fileSize) {
+    public synchronized String get(long fileSize) {
         long currentTime=System.currentTimeMillis();
         long elapsedTime=currentTime-startTime;
         long actionTime=currentTime-partialTime;
@@ -45,15 +45,15 @@ public class Benchmark {
 
     private String lastMsg="";
 
-    public String getLast() {
+    public synchronized String getLast() {
         return lastMsg;
     }
 
-    private static long mean(Collection<Long> numbers, long sum) {
+    private synchronized static long mean(Collection<Long> numbers, long sum) {
         return sum/numbers.size();
     }
 
-    private static long sum(Collection<Long> numbers) {
+    private synchronized static long sum(Collection<Long> numbers) {
         long sum=0;
         for(long number : numbers) {
             sum+=number;
