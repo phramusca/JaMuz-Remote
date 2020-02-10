@@ -206,18 +206,18 @@ public class ClientSync extends Client {
     }
 
     private void cancelWatchTimeOut() {
-        Log.i(TAG, "timerWatchTimeout.cancel()");
+        /*Log.i(TAG, "timerWatchTimeout.cancel()");
         runOnUiThread(() -> {
             synchronized(timerLock) {
                 if(timerWatchTimeout!=null) {
                     timerWatchTimeout.cancel(); //Cancel previous if any
                 }
             }
-        });
+        });*/
     }
 
     private void watchTimeOut(final long timeout) {
-        synchronized(timerLock) {
+        /*synchronized(timerLock) {
             Log.i(TAG, "watchTimeOut(" + timeout + ")");
             cancelWatchTimeOut();
             runOnUiThread(() -> {
@@ -238,7 +238,7 @@ public class ClientSync extends Client {
                     timerWatchTimeout.start();
                 }
             });
-        }
+        }*/
     }
 
     private enum Status {
