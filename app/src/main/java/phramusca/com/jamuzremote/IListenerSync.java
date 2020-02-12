@@ -14,5 +14,5 @@ public interface IListenerSync {
 	void onReceivingFile(Track fileInfoReception);
 	void onReceivedFile(Track fileInfoReception);
 	void onConnected();
-	void onDisconnected(boolean reconnect, String msg, long millisInFuture);
+	void onDisconnected(boolean reconnect, String msg, long millisInFuture, boolean enable);
 }

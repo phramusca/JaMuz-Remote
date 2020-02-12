@@ -55,7 +55,7 @@ public class ClientSync extends Client {
         }
     }
 
-    public void close(boolean reconnect, String msg, long millisInFuture) {
+    public void close(boolean reconnect, String msg, long millisInFuture, boolean enable) {
         synchronized (syncStatus) {
             logStatus("close()");
             cancelWatchTimeOut();
@@ -89,7 +89,7 @@ public class ClientSync extends Client {
             } else {
                 syncStatus.status=Status.STOPPING;
             }
-            callback.onDisconnected(reconnect, msg, millisInFuture);
+            callback.onDisconnected(reconnect, msg, millisInFuture, enable);
         }
     }
 
@@ -126,11 +126,11 @@ public class ClientSync extends Client {
             synchronized (syncStatus) {
                 logStatus("onDisconnected(\""+msg+"\")");
                 if(msg.equals("ENOSPC")) {
-                    close(false, "No more space on device. Check your playlist limits and available space in your SD card.", -1);
+                    close(false, "No more space on device. Check your playlist limits and available space in your SD card.", -1, true);
                 } else if(syncStatus.status.equals(Status.CONNECTED)
                         || syncStatus.status.equals(Status.CONNECTING)) {
                     close(doReconnect, (syncStatus.nbRetries>0?"Attempt "+syncStatus.nbRetries
-                            :"Disconnected")+": "+msg, -1);
+                            :"Disconnected")+": "+msg, -1, true);
                 }
             }
 		}

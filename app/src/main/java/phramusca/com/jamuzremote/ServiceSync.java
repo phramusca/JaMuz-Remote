@@ -15,7 +15,6 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -109,11 +108,10 @@ public class ServiceSync extends ServiceBase {
             processDownload.stop(msg, millisInFuture);
         }
         if (clientSync != null) {
-            clientSync.close(false, msg, millisInFuture);
-        } else {
-            sendMessage("enableSync");
-            stopSelf();
+            clientSync.close(false, msg, millisInFuture, true);
         }
+        sendMessage("enableSync");
+        stopSelf();
     }
 
     class ListenerSync implements IListenerSync {
@@ -234,11 +232,11 @@ public class ServiceSync extends ServiceBase {
         }
 
         @Override
-        public void onDisconnected(boolean reconnect, final String msg, final long millisInFuture) {
+        public void onDisconnected(boolean reconnect, final String msg, final long millisInFuture, boolean enable) {
             if (!msg.equals("")) {
                 runOnUiThread(() -> helperNotification.notifyBar(notificationSync, msg, millisInFuture));
             }
-            if (!reconnect) {
+            if (!reconnect && enable) {
                 sendMessage("enableSync");
                 stopSelf();
             }
@@ -252,7 +250,7 @@ public class ServiceSync extends ServiceBase {
             processDownload.start();
         }
         if (!checkCompleted() && clientSync != null) {
-            clientSync.close(false, "Sync part done", 2000);
+            clientSync.close(false, "Sync part done", 2000, false);
         }
     }
 
@@ -383,13 +381,19 @@ public class ServiceSync extends ServiceBase {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("-").append(remaining).append("/").append(nbFilesTotal)
                     .append("\n").append(StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false)).append("\n");
-            if(processDownload!=null) {
-                for(DownloadTask downloadService : processDownload.downloadServices) {
-                    if(!downloadService.status.equals("")) {
-                        stringBuilder.append(downloadService.canal).append(": ").append(downloadService.status).append(" | ");
-                    }
+
+            StringBuilder stringBuilder2 = new StringBuilder();
+            int nbErrors = 0;
+            for(DownloadTask downloadService : downloadServices) {
+                if(downloadService.status.equals("Err.")) {
+                    nbErrors++;
+                }
+                else if(!downloadService.status.equals("")) {
+                    stringBuilder2.append(downloadService.canal).append(": ").append(downloadService.status).append(" | ");
                 }
             }
+            stringBuilder.append(nbErrors).append(" Error(s)\n");
+            stringBuilder.append(stringBuilder2);
             String bigText = stringBuilder.toString();
             String msg = "Downloading ... " +bench.getLast();
             runOnUiThread(() -> {
@@ -406,13 +410,13 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationDownload, "Starting download ... ");
 
             });
-            bench = new Benchmark(RepoSync.getRemainingSize(), 10);
+            bench = new Benchmark(RepoSync.getRemainingSize(), 50);
             TimerTask timerTask = new TimerTask() {
                 public void run() {
                     notifyBarProgress(notificationDownload, 20);
                 }
             };
-            pool = Executors.newFixedThreadPool(30);
+            pool = Executors.newFixedThreadPool(5);
             int canal=100;
             for (Track track : RepoSync.getDownloadList()) {
                 DownloadTask downloadTask = new DownloadTask(track, canal++, () -> notifyBarProgress(notificationDownload, 20));
@@ -421,7 +425,7 @@ public class ServiceSync extends ServiceBase {
             }
             pool.shutdown();
             timer = new Timer();
-            timer.schedule(timerTask, 1000, 3000);
+            //timer.schedule(timerTask, 1000, 4000);
             try {
                 pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
@@ -435,20 +439,19 @@ public class ServiceSync extends ServiceBase {
             }
         }
 
-        void stoptimertask() {
-            if (timer != null) {
-                timer.cancel();
-                timer = null;
-            }
-        }
-
         private synchronized void stop(String msg, long millisInFuture) {
             runOnUiThread(() -> {
                 helperNotification.notifyBar(notificationDownload, "Closing"); //, 5000);
             });
             pool.shutdownNow();
-            stoptimertask();
-            this.abort();
+            for(DownloadTask downloadService : downloadServices) {
+                downloadService.abort();
+            }
+            if (timer != null) {
+                timer.cancel();
+                timer = null;
+            }
+            abort();
             runOnUiThread(() -> {
                 helperNotification.notifyBar(notificationDownload, "Closed", 5000);
             });
@@ -472,32 +475,49 @@ public class ServiceSync extends ServiceBase {
         public void run() {
             try {
                 setStatus("Req.", track);
-                callback.setStatus();
+                //callback.setStatus();
                 String url = "http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/download?id="+track.getIdFileServer();
                 File destinationPath = new File(new File(track.getPath()).getParent());
                 destinationPath.mkdirs();
                 String destinationFile=new File(getAppDataPath, track.getRelativeFullPath()).getAbsolutePath();
                 BufferedInputStream in = new BufferedInputStream(new URL(url).openStream());
                 FileOutputStream fileOutputStream = new FileOutputStream(destinationFile);
-                byte dataBuffer[] = new byte[1024];
+                /*byte dataBuffer[] = new byte[1024];
                 int bytesRead;
                 int bytesReceived=0;
                 setStatus("Down.", track);
                 while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                     fileOutputStream.write(dataBuffer, 0, bytesRead);
-                    /*bytesReceived=bytesReceived+bytesRead;
-                    setStatus("Down. "+StringManager.humanReadableByteCount(bytesReceived, false)+" /", track);*/
+                    bytesReceived=bytesReceived+bytesRead;
+                    setStatus("Down. "+StringManager.humanReadableByteCount(bytesReceived, false)+" /", track);
+                }*/
+                checkAbort();
+                double fileSize = track.getSize();
+                // TODO: Find best. Make a benchmark (and use it in notification progres bar)
+                //https://stackoverflow.com/questions/8748960/how-do-you-decide-what-byte-size-to-use-for-inputstream-read
+                byte[] buf = new byte[8192];
+                int bytesRead;
+                int bytesReceived=0;
+                while (fileSize > 0 && (bytesRead = in.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
+                    checkAbort();
+                    fileOutputStream.write(buf, 0, bytesRead);
+                    fileSize -= bytesRead;
+                    bytesReceived=bytesReceived+bytesRead;
+                    setStatus("Down. "+StringManager.humanReadableByteCount(bytesReceived, false)+" /", track);
                 }
+                fileOutputStream.close();
+                
+
                 setStatus("Rec.", track);
                 RepoSync.checkReceivedFile(getAppDataPath, track);
                 status="";
                 bench.get(track.getSize());
                 callback.setStatus();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Error downloading "+track.getRelativeFullPath(), e);
                 //FIXME: Put file back in queue
-                setStatus("Err.", track);
-                callback.setStatus();
+                setStatus("Err.", null);
+                //callback.setStatus();
             }
         }
 
