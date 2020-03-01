@@ -1315,6 +1315,9 @@ public class ActivityMain extends AppCompatActivity {
                 }
             }
 
+            //FIXME: New Feature: read CD barcode, get album info from musicbrainz and display album
+
+
             String QRcode = data.getStringExtra("QRcode");
             if(QRcode!=null) {
                 getFromQRcode(QRcode);
