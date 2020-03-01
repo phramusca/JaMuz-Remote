@@ -27,7 +27,7 @@ public abstract class AdapterAlbumTrack extends AdapterTrack {
                     track.getArtist(),
                     String.format(Locale.ENGLISH,"%d/5 %s",
                             (int)track.getRating(), track.getGenre()),
-                    String.format(Locale.ENGLISH,"%s. Joué %s. Ajouté %s",
+                    String.format(Locale.ENGLISH,"%s\n%s %s",
                             track.getTags(), track.getLastPlayedAgo(), track.getAddedDateAgo()));
 
         } else if (holder instanceof LoadingViewHolder) {
