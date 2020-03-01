@@ -8,11 +8,13 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 //FIXME: idFileServer can be null in db (so 0 in here) with a "REC" status
 // resulting in sync issues that blocks the transfer of other files
@@ -195,6 +197,8 @@ public class Track implements Serializable {
         return length;
     }
 
+
+
     public enum Status {
         NEW, DOWN, REC, NULL, DEL;
 
@@ -204,12 +208,24 @@ public class Track implements Serializable {
 
     @Override
     public String toString() {
-        return  "<BR/>" + getTags() + " " + (int)rating+"/5" + " " + genre + "<BR/>" +
+        return  "<BR/>" + getTags() + " " + (int)rating+"/5" + " " + genre + ". " +
+                "Joué " + getLastPlayedAgo() + ". " +
+                "Ajouté " + getAddedDateAgo() +"<BR/>" +
                 "<h1>" +
                 title + "<BR/>" +
                 artist + "<BR/>"+
                 album +
                 "</h1>";
+    }
+
+    public String getLastPlayedAgo() {
+        PrettyTime prettyTime = new PrettyTime(Locale.getDefault());
+        return prettyTime.format(lastPlayed) + " ("+ playCounter + "x)";
+    }
+
+    public String getAddedDateAgo() {
+        PrettyTime prettyTime = new PrettyTime(Locale.getDefault());
+        return prettyTime.format(addedDate);
     }
 
     /*@Override
