@@ -209,17 +209,18 @@ public class Track implements Serializable {
     @Override
     public String toString() {
         return  "<BR/>" + getTags() + " " + (int)rating+"/5" + " " + genre + "<BR/>" +
-                "Joué " + getLastPlayedAgo() + ". Ajouté " + getAddedDateAgo() +"<BR/>";
+                getLastPlayedAgo() + getAddedDateAgo() +"<BR/>";
     }
 
     public String getLastPlayedAgo() {
         PrettyTime prettyTime = new PrettyTime(Locale.getDefault());
-        return prettyTime.format(lastPlayed) + " ("+ playCounter + "x)";
+        return playCounter<=0?"Jamais joué. "
+                : "Joué " + prettyTime.format(lastPlayed) + " ("+ playCounter + "x). ";
     }
 
     public String getAddedDateAgo() {
         PrettyTime prettyTime = new PrettyTime(Locale.getDefault());
-        return prettyTime.format(addedDate);
+        return "Ajouté " + prettyTime.format(addedDate)+". ";
     }
 
     /*@Override

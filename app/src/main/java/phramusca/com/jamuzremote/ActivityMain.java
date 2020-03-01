@@ -1583,7 +1583,7 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         if(displayedTrack.getRating()>0) {
-            msg.append(" Note: ").append(displayedTrack.getRating()).append(".");
+            msg.append(" Note: ").append((int)displayedTrack.getRating()).append(".");
         } else {
             msg.append(" Pas de note.");
         }
