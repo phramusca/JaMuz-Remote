@@ -127,7 +127,10 @@ public class ActivityMain extends AppCompatActivity {
     private static final int SETTINGS_REQUEST_CODE = 23548;
 
     // GUI elements
-    private TextView textViewFileInfo;
+    private TextView textViewFileInfo1;
+    private TextView textViewFileInfo2;
+    private TextView textViewFileInfo3;
+    private TextView textViewFileInfo4;
     private TextView textViewPlaylist;
     private Button buttonRemote;
     private Button buttonSync;
@@ -241,7 +244,10 @@ public class ActivityMain extends AppCompatActivity {
 
         layoutControls = findViewById(R.id.panel_controls);
 
-        textViewFileInfo = findViewById(R.id.textFileInfo);
+        textViewFileInfo1 = findViewById(R.id.textFileInfo_line1);
+        textViewFileInfo2 = findViewById(R.id.textFileInfo_line2);
+        textViewFileInfo3 = findViewById(R.id.textFileInfo_line3);
+        textViewFileInfo4 = findViewById(R.id.textFileInfo_line4);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -2119,18 +2125,29 @@ public class ActivityMain extends AppCompatActivity {
                 displayedTrack.getTags(true);
             }
             runOnUiThread(() -> {
-                setTextView(textViewFileInfo, trimTrailingWhitespace(Html.fromHtml(
+                setTextView(textViewFileInfo1, trimTrailingWhitespace(Html.fromHtml(
+                        "<html><b>"+
+                                displayedTrack.getTitle()
+                                .concat("</b></html>"))));
+                setTextView(textViewFileInfo2, trimTrailingWhitespace(Html.fromHtml(
+                        "<html><b>"+
+                                displayedTrack.getArtist()
+                                        .concat("</b></html>"))));
+                setTextView(textViewFileInfo3, trimTrailingWhitespace(Html.fromHtml(
                         "<html>"+
-                        (displayedTrack.getSource().equals("")?""
-                                :"-- <u>".concat(displayedTrack.getSource()).concat("</u> --"))
-                        +""
-                        .concat(displayedTrack.toString())
-                        .concat("</html>"))));
+                                displayedTrack.getAlbum()
+                                        .concat("</html>"))));
+                setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
+                        "<html><BR/>"+
+                                (displayedTrack.getSource().equals("")?""
+                                        :"<u>".concat(displayedTrack.getSource()).concat("</u>"))
+                                +""
+                                .concat(displayedTrack.toString())
+                                .concat("</html>"))));
                 ratingBar.setEnabled(false);
                 ratingBar.setRating((float)displayedTrack.getRating());
                 ratingBar.setEnabled(true);
                 setupSpinnerGenre(RepoGenres.get(), displayedTrack.getGenre());
-
                 //Display file tags
                 ArrayList<String> fileTags = displayedTrack.getTags(false);
                 for(Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
