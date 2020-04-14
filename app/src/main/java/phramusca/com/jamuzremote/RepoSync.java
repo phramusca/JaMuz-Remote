@@ -7,6 +7,7 @@ import com.google.common.collect.Table;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -27,7 +28,6 @@ public final class RepoSync {
         tracks = HashBasedTable.create();
         read(Track.Status.NEW);
         read(Track.Status.REC);
-        read(Track.Status.ACK);
     }
 
     private synchronized static void read(Track.Status status) {
@@ -45,19 +45,16 @@ public final class RepoSync {
      * @param track the one to check
      * @return true if onReceivedFile exists and length()==track.size
      */
-    public synchronized static void receivedFile(File getAppDataPath, Track track) {
-
+    public synchronized static void checkReceivedFile(File getAppDataPath, Track track) {
         File receivedFile = new File(getAppDataPath, track.getRelativeFullPath());
         if(tracks.containsRow(track.getIdFileServer())) {
-            if(checkFile(track, receivedFile)
-                    && track.readTags()
-                    && HelperLibrary.musicLibrary.insertOrUpdateTrack(track)) {
-                track.setStatus(Track.Status.REC);
-                updateTracks(track);
-            } else {
+            track.setStatus(Track.Status.REC);
+            if (!checkFile(track, receivedFile)
+                    || !track.readTags()
+                    || !HelperLibrary.musicLibrary.insertOrUpdateTrack(track)) {
                 track.setStatus(Track.Status.NEW);
-                updateTracks(track);
             }
+            updateTracks(track);
         } else {
             Log.w(TAG, "tracks does not contain file. Deleting " + receivedFile.getAbsolutePath());
             //noinspection ResultOfMethodCallIgnored
@@ -116,21 +113,13 @@ public final class RepoSync {
         tracks.put(track.getIdFileServer(), track.getStatus(), track);
     }
 
-    public synchronized static void receivedAck(Track track) {
-        if(tracks.containsRow(track.getIdFileServer())) {
-            track.setStatus(Track.Status.ACK);
-            updateTracks(track);
-            HelperLibrary.musicLibrary.updateStatus(track);
-        }
-    }
-
     public synchronized static void reset() {
         tracks = HashBasedTable.create();
     }
 
     public synchronized static int getRemainingSize() {
         return tracks ==null?0:(tracks.column(Track.Status.NEW).size()
-                + tracks.column(Track.Status.REC).size());
+                +tracks.column(Track.Status.DOWN).size());
     }
 
     public synchronized static int getTotalSize() {
@@ -143,7 +132,7 @@ public final class RepoSync {
         }
         long nbRemaining=0;
         nbRemaining+=getRemainingFileSize(Track.Status.NEW);
-        nbRemaining+=getRemainingFileSize(Track.Status.REC);
+        nbRemaining+=getRemainingFileSize(Track.Status.DOWN);
         return nbRemaining;
     }
 
@@ -155,15 +144,28 @@ public final class RepoSync {
         return nbRemaining;
     }
 
-    public synchronized static Track takeNew() {
-        if (tracks != null && tracks.column(Track.Status.NEW).size() > 0) {
-            return tracks.column(Track.Status.NEW)
-                    .entrySet().iterator().next().getValue();
+    public synchronized static Track getNew() {
+        Track track=null;
+        if(tracks != null) {
+            Collection<Track> values = tracks.column(Track.Status.NEW).values();
+            if(values.size()>0) {
+                track = tracks.column(Track.Status.NEW).entrySet().iterator().next().getValue();
+                if(track!=null) {
+                    track.setStatus(Track.Status.DOWN);
+                    updateTracks(track);
+                }
+            }
         }
-        return null;
+        return track;
     }
 
-    public synchronized static List<Track> getReceived() {
-        return tracks ==null?new ArrayList<>():new ArrayList<>(tracks.column(Track.Status.REC).values());
+    public static List<Track> getDownloadList() {
+        return new ArrayList<>(tracks.column(Track.Status.NEW).values());
+    }
+
+    public static List<Track> getMergeList() {
+        List<Track> trackArrayList = new ArrayList<>(tracks.column(Track.Status.REC).values());
+        //trackArrayList.addAll(tracks.column(Track.Status.NEW).values());
+        return trackArrayList;
     }
 }
