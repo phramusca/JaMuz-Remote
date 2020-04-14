@@ -133,7 +133,7 @@ public class ServiceSync extends ServiceBase {
                         helperNotification.notifyBar(notificationSync,
                                 getString(R.string.syncCheckFilesOnDisk));
                         RepoSync.reset();
-                        HelperLibrary.musicLibrary.updateStatus();
+                        HelperLibrary.musicLibrary.updateStatus(); //FIXME: Do this different as checking files takes time and meanwhile, files are not available for playing
                         for (int i = 0; i < files.length(); i++) {
                             Track fileReceived = new Track(
                                     (JSONObject) files.get(i),
@@ -145,7 +145,7 @@ public class ServiceSync extends ServiceBase {
                                     getString(R.string.syncCheckFilesOnDisk), 50, i+1, files.length());
                         }
                         helperNotification.notifyBar(notificationSync,
-                                "Inserting "+newTracks.size()+" tracks in database. Please wait...");
+                                "Updating database with new tracks ("+newTracks.size()+"). Please wait...");
                         HelperLibrary.musicLibrary.insertTrackOrUpdateStatus(newTracks);
                         scanAndDeleteUnwantedInThread(getAppDataPath);
                         runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
@@ -416,12 +416,9 @@ public class ServiceSync extends ServiceBase {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if(checkCompleted()) {
-                stopDownloads();
-            } else {
+            if(!checkCompleted()) {
                 //FIXME: Restart process. Some tracks are still missing. Why ? How ?
                 stopSync("Sync done but NOT complete :(", 10000);
-                stopDownloads();
             }
         }
 
