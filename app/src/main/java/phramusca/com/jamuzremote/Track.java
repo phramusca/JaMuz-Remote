@@ -8,11 +8,13 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 //FIXME: idFileServer can be null in db (so 0 in here) with a "REC" status
 // resulting in sync issues that blocks the transfer of other files
@@ -136,7 +138,8 @@ public class Track implements Serializable {
                 String tag = (String) jsonTags.get(i);
                 tags.add(tag);
             }
-        } catch (JSONException ignored) {
+        } catch (JSONException ex) {
+            Log.e(TAG, "Error creating new Track "+file, ex);
         }
     }
 
@@ -194,8 +197,10 @@ public class Track implements Serializable {
         return length;
     }
 
+
+
     public enum Status {
-        NEW, REC, ACK, NULL, DEL;
+        NEW, DOWN, REC, NULL, DEL;
 
         Status() {
         }
@@ -204,11 +209,18 @@ public class Track implements Serializable {
     @Override
     public String toString() {
         return  "<BR/>" + getTags() + " " + (int)rating+"/5" + " " + genre + "<BR/>" +
-                "<h1>" +
-                title + "<BR/>" +
-                artist + "<BR/>"+
-                album +
-                "</h1>";
+                getLastPlayedAgo() + getAddedDateAgo() +"<BR/>";
+    }
+
+    public String getLastPlayedAgo() {
+        PrettyTime prettyTime = new PrettyTime(Locale.getDefault());
+        return playCounter<=0?"Jamais joué. "
+                : "Joué " + prettyTime.format(lastPlayed) + " ("+ playCounter + "x). ";
+    }
+
+    public String getAddedDateAgo() {
+        PrettyTime prettyTime = new PrettyTime(Locale.getDefault());
+        return "Ajouté " + prettyTime.format(addedDate)+". ";
     }
 
     /*@Override

@@ -24,18 +24,20 @@ import java.util.List;
 public class ClientSync extends Client {
 	private static final String TAG = ClientSync.class.getName();
 	private final IListenerSync callback;
+    private final boolean doReconnect;
     private final SyncStatus syncStatus = new SyncStatus(Status.NOT_CONNECTED, 0);
     private CountDownTimer timerWatchTimeout;
     private static final Object timerLock = new Object();
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
-	ClientSync(ClientInfo clientInfo, IListenerSync callback){
+	ClientSync(ClientInfo clientInfo, IListenerSync callback, boolean doReconnect){
 		super(clientInfo);
 		this.callback = callback;
-		super.setCallback(new ListenerReception());
+        this.doReconnect = doReconnect;
+        super.setCallback(new ListenerReception());
 	}
 
-    public boolean connect(boolean requestData) {
+    public boolean connect() {
         synchronized (syncStatus) {
             logStatus("connect()");
             if (syncStatus.status.equals(Status.NOT_CONNECTED)) {
@@ -46,11 +48,6 @@ public class ClientSync extends Client {
                     syncStatus.nbRetries=0;
                     logStatus("Connected");
                     callback.onConnected();
-                    if(requestData) {
-                        request("requestTags");
-                    } else {
-                        request("requestNewFiles");
-                    }
                     return true;
                 }
             }
@@ -58,7 +55,7 @@ public class ClientSync extends Client {
         }
     }
 
-    public void close(boolean reconnect, String msg, long millisInFuture) {
+    public void close(boolean reconnect, String msg, long millisInFuture, boolean enable) {
         synchronized (syncStatus) {
             logStatus("close()");
             cancelWatchTimeOut();
@@ -79,7 +76,9 @@ public class ClientSync extends Client {
                             } catch (InterruptedException ignored) {
                             }
                             logStatus("Re-connecting now");
-                            connect(false);
+                            if(connect()) {
+                                request("requestNewFiles");
+                            }
                         }
                     }.start();
                 } else {
@@ -90,7 +89,7 @@ public class ClientSync extends Client {
             } else {
                 syncStatus.status=Status.STOPPING;
             }
-            callback.onDisconnected(reconnect, msg, millisInFuture);
+            callback.onDisconnected(reconnect, msg, millisInFuture, enable);
         }
     }
 
@@ -127,11 +126,11 @@ public class ClientSync extends Client {
             synchronized (syncStatus) {
                 logStatus("onDisconnected(\""+msg+"\")");
                 if(msg.equals("ENOSPC")) {
-                    close(false, "No more space on device. Check your playlist limits and available space in your SD card.", -1);
+                    close(false, "No more space on device. Check your playlist limits and available space in your SD card.", -1, true);
                 } else if(syncStatus.status.equals(Status.CONNECTED)
                         || syncStatus.status.equals(Status.CONNECTING)) {
-                    close(true, (syncStatus.nbRetries>0?"Attempt "+syncStatus.nbRetries
-                            :"Disconnected")+": "+msg, -1);
+                    close(doReconnect, (syncStatus.nbRetries>0?"Attempt "+syncStatus.nbRetries
+                            :"Disconnected")+": "+msg, -1, true);
                 }
             }
 		}
@@ -140,14 +139,14 @@ public class ClientSync extends Client {
     public void requestFile(Track track) {
         synchronized (syncStatus) {
             //TODO: Make sync timeouts configurable (use bench, to be based on size not nb)
-            long minTimeout = 15;  //Min timeout 15s (or 15s by 4Mo)
+            /*long minTimeout = 15;  //Min timeout 15s (or 15s by 4Mo)
             long maxTimeout = 120; //Max timeout 2 min
 
             long timeoutFile = track.getSize() < 4000000
                     ? minTimeout
                     : ((track.getSize() / 4000000) * minTimeout);
             timeoutFile = timeoutFile > maxTimeout ? maxTimeout : timeoutFile;
-            watchTimeOut(timeoutFile);
+            watchTimeOut(timeoutFile);*/
             logStatus("requestFile()");
             if(checkStatus()) {
                 JSONObject obj = new JSONObject();
@@ -197,31 +196,7 @@ public class ClientSync extends Client {
         }
     }
 
-    // TODO sync and merge: do NOT request genres and tags at every connection but only if required or on demand
     // TODO => sync and merge: would even be better to merge genres and tags instead of getting, especially for tags
-    // TODO sync and merge: avoid double acknowledgement:
-    //          - Insert files in JaMuz deviceFiles directly at export
-    //          - Use a status in JaMuz as in JaMuzRemote
-
-    public void ackFilesReception(List<Track> files) {
-        synchronized (syncStatus) {
-            logStatus("ackFilesReception()");
-            if(checkStatus()) {
-                JSONObject obj = new JSONObject();
-                try {
-                    obj.put("type", "ackFileSReception");
-                    JSONArray idFiles = new JSONArray();
-                    for (Track file : files) {
-                        idFiles.put(file.getIdFileServer());
-                    }
-                    obj.put("idFiles", idFiles);
-                    watchTimeOut(4+files.size());
-                    send("JSON_" + obj.toString());
-                } catch (JSONException e) {
-                }
-            }
-        }
-    }
 
     private boolean checkStatus() {
         synchronized (syncStatus) {
@@ -231,18 +206,18 @@ public class ClientSync extends Client {
     }
 
     private void cancelWatchTimeOut() {
-        Log.i(TAG, "timerWatchTimeout.cancel()");
+        /*Log.i(TAG, "timerWatchTimeout.cancel()");
         runOnUiThread(() -> {
             synchronized(timerLock) {
                 if(timerWatchTimeout!=null) {
                     timerWatchTimeout.cancel(); //Cancel previous if any
                 }
             }
-        });
+        });*/
     }
 
     private void watchTimeOut(final long timeout) {
-        synchronized(timerLock) {
+        /*synchronized(timerLock) {
             Log.i(TAG, "watchTimeOut(" + timeout + ")");
             cancelWatchTimeOut();
             runOnUiThread(() -> {
@@ -256,14 +231,14 @@ public class ClientSync extends Client {
 
                         @Override
                         public void onFinish() {
-                            close(true, "Timed out waiting.", -1);
+                            close(doReconnect, "Timed out waiting.", doReconnect?-1:5000);
                         }
                     };
                     Log.i(TAG, "timerWatchTimeout.start()");
                     timerWatchTimeout.start();
                 }
             });
-        }
+        }*/
     }
 
     private enum Status {

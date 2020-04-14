@@ -127,7 +127,10 @@ public class ActivityMain extends AppCompatActivity {
     private static final int SETTINGS_REQUEST_CODE = 23548;
 
     // GUI elements
-    private TextView textViewFileInfo;
+    private TextView textViewFileInfo1;
+    private TextView textViewFileInfo2;
+    private TextView textViewFileInfo3;
+    private TextView textViewFileInfo4;
     private TextView textViewPlaylist;
     private Button buttonRemote;
     private Button buttonSync;
@@ -241,7 +244,10 @@ public class ActivityMain extends AppCompatActivity {
 
         layoutControls = findViewById(R.id.panel_controls);
 
-        textViewFileInfo = findViewById(R.id.textFileInfo);
+        textViewFileInfo1 = findViewById(R.id.textFileInfo_line1);
+        textViewFileInfo2 = findViewById(R.id.textFileInfo_line2);
+        textViewFileInfo3 = findViewById(R.id.textFileInfo_line3);
+        textViewFileInfo4 = findViewById(R.id.textFileInfo_line4);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -251,7 +257,7 @@ public class ActivityMain extends AppCompatActivity {
             buttonRemote.setEnabled(false);
             buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
             if(buttonRemote.getText().equals("Connect")) {
-                ClientInfo clientInfo = getClientInfo(true);
+                ClientInfo clientInfo = getClientInfo(ClientCanal.REMOTE);
                 if(clientInfo!=null) {
                     clientRemote =  new ClientRemote(clientInfo, new ListenerRemote());
                     new Thread() {
@@ -280,7 +286,7 @@ public class ActivityMain extends AppCompatActivity {
             buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
             if(buttonSync.getText().equals("Connect")) {
                 enableSync(false);
-                ClientInfo clientInfo = getClientInfo(false);
+                ClientInfo clientInfo = getClientInfo(ClientCanal.SYNC);
                 if(clientInfo!=null) {
                     if(!isMyServiceRunning(ServiceSync.class)) {
                         Intent service = new Intent(getApplicationContext(), ServiceSync.class);
@@ -291,6 +297,7 @@ public class ActivityMain extends AppCompatActivity {
                 }
             }
             else {
+                //FIXME !!!! TOP TOP TOP !!!! GUI freezes and application crash :(
                 Log.i(TAG, "Broadcast("+ServiceSync.USER_STOP_SERVICE_REQUEST+")");
                 sendBroadcast(new Intent(ServiceSync.USER_STOP_SERVICE_REQUEST));
                 enableSync(true);
@@ -712,7 +719,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
 
-    private ClientInfo getClientInfo(boolean isRemote) {
+    private ClientInfo getClientInfo(int canal) {
         if(!checkConnectedViaWifi())  {
             helperToast.toastLong("You must connect to WiFi network.");
             return null;
@@ -734,7 +741,7 @@ public class ActivityMain extends AppCompatActivity {
         }
         return new ClientInfo(address, port,
                 Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID),
-                "tata", isRemote,
+                "tata", canal,
                 "jamuz", getAppDataPath().getAbsolutePath());
     }
 
@@ -1315,6 +1322,9 @@ public class ActivityMain extends AppCompatActivity {
                 }
             }
 
+            //FIXME: New Feature: read CD barcode, get album info from musicbrainz and display album
+
+
             String QRcode = data.getStringExtra("QRcode");
             if(QRcode!=null) {
                 getFromQRcode(QRcode);
@@ -1574,7 +1584,7 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         if(displayedTrack.getRating()>0) {
-            msg.append(" Note: ").append(displayedTrack.getRating()).append(".");
+            msg.append(" Note: ").append((int)displayedTrack.getRating()).append(".");
         } else {
             msg.append(" Pas de note.");
         }
@@ -2116,18 +2126,29 @@ public class ActivityMain extends AppCompatActivity {
                 displayedTrack.getTags(true);
             }
             runOnUiThread(() -> {
-                setTextView(textViewFileInfo, trimTrailingWhitespace(Html.fromHtml(
+                setTextView(textViewFileInfo1, trimTrailingWhitespace(Html.fromHtml(
+                        "<html><b>"+
+                                displayedTrack.getTitle()
+                                .concat("</b></html>"))));
+                setTextView(textViewFileInfo2, trimTrailingWhitespace(Html.fromHtml(
+                        "<html><b>"+
+                                displayedTrack.getArtist()
+                                        .concat("</b></html>"))));
+                setTextView(textViewFileInfo3, trimTrailingWhitespace(Html.fromHtml(
                         "<html>"+
-                        (displayedTrack.getSource().equals("")?""
-                                :"-- <u>".concat(displayedTrack.getSource()).concat("</u> --"))
-                        +""
-                        .concat(displayedTrack.toString())
-                        .concat("</html>"))));
+                                displayedTrack.getAlbum()
+                                        .concat("</html>"))));
+                setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
+                        "<html><BR/>"+
+                                (displayedTrack.getSource().equals("")?""
+                                        :"<u>".concat(displayedTrack.getSource()).concat("</u>"))
+                                +""
+                                .concat(displayedTrack.toString())
+                                .concat("</html>"))));
                 ratingBar.setEnabled(false);
                 ratingBar.setRating((float)displayedTrack.getRating());
                 ratingBar.setEnabled(true);
                 setupSpinnerGenre(RepoGenres.get(), displayedTrack.getGenre());
-
                 //Display file tags
                 ArrayList<String> fileTags = displayedTrack.getTags(false);
                 for(Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
