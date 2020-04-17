@@ -713,7 +713,7 @@ public class ActivityMain extends AppCompatActivity {
             clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
         } else {
             displayedTrack.update();
-            refreshQueueAndPlaylistSpinner(true);
+            refreshLocalPlaylistSpinner(true);
         }
         ratingBar.setEnabled(true);
     }
@@ -782,7 +782,7 @@ public class ActivityMain extends AppCompatActivity {
     private void toggleTag(String tag) {
         if(!isRemoteConnected()) {
             displayedTrack.toggleTag(tag);
-            refreshQueueAndPlaylistSpinner(true);
+            refreshLocalPlaylistSpinner(true);
         } else {
             //displayedTrack.toggleTag(buttonText); //TODO: Manage this too
             //clientRemote.send("setTag".concat(String.valueOf(Math.round(rating)))); //TODO
@@ -929,7 +929,7 @@ public class ActivityMain extends AppCompatActivity {
                 String genre = (String) parent.getItemAtPosition(pos);
                 if(!isRemoteConnected()) {
                     displayedTrack.updateGenre(genre);
-                    refreshQueueAndPlaylistSpinner(true);
+                    refreshLocalPlaylistSpinner(true);
                 }
             }
             spinnerGenreSend=true;
