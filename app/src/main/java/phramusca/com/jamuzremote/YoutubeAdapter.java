@@ -56,21 +56,6 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
         holder.video_title.setText(singleVideo.getTitle());
         holder.video_description.setText(singleVideo.getDescription());
 
-        //Picasso library allows for hassle-free image loading
-        // in your application—often in one line of code!
-        //Features :
-        //-Handling ImageView recycling and download cancelation in an adapter
-        //-Complex image transformations with minimal memory use
-        //-Automatic memory and disk caching
-
-        //placing the thumbnail with picasso library
-        //by resizing it to the size of thumbnail
-
-        //with method gives access to the global default Picasso instance
-        //load method starts an image request using the specified path may be a remote URL, file resource, etc.
-        //resize method resizes the image to the specified size in pixels wrt width and height
-        //centerCrop crops an image inside of the bounds specified by resize(int, int) rather than distorting the aspect ratio
-        //into method asynchronously fulfills the request into the specified Target
         Picasso.with(mContext)
                 .load(singleVideo.getThumbnailURL())
                 .resize(480,270)
