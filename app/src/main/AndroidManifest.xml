@@ -66,9 +66,8 @@
         <activity android:name=".ActivityAlbums" />
         <activity android:name=".ActivityAlbumTracks" />
         <activity android:name=".ActivitySettings" />
-        <activity android:name=".YouTubePlayerFragmentActivity" />
         <activity android:name=".ActivityYouTubeSearch" />
-        <activity android:name=".PlayerActivity" />
+        <activity android:name=".ActivityYouTubePlayer" />
     </application>
 
 </manifest>
