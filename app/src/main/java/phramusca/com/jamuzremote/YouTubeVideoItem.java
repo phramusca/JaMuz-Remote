@@ -1,26 +1,14 @@
 package phramusca.com.jamuzremote;
 
-/**
- * Created by Abhishek on 14-Feb-18.
- */
+// Adapted from https://github.com/abhi5658/search-youtube
 
-//Bean class for a single video item
-public class VideoItem {
+public class YouTubeVideoItem {
 
-    //stores id of a video
     private String id;
-
-    //stores title of the video
     private String title;
-
-    //stores the description of video
     private String description;
-
-    //stores the url of thumbnail of video
     private String thumbnailURL;
 
-
-    //getter and setter methods for id
     public String getId() {
         return id;
     }
@@ -29,8 +17,6 @@ public class VideoItem {
         this.id = id;
     }
 
-
-    //getter and setter methods for video Title
     public String getTitle() {
         return title;
     }
@@ -39,8 +25,6 @@ public class VideoItem {
         this.title = title;
     }
 
-
-    //getter and setter methods for video description
     public String getDescription() {
         return description;
     }
@@ -49,8 +33,6 @@ public class VideoItem {
         this.description = description;
     }
 
-
-    //getter and setter methods for thumbnail url
     public String getThumbnailURL() {
         return thumbnailURL;
     }
