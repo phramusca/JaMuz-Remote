@@ -16,7 +16,7 @@ import java.util.List;
 
 // Adapted from https://github.com/abhi5658/search-youtube
 
-public class ActivityYouTubeSearch extends AppCompatActivity {
+public class ActivitySearch extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
     private ProgressDialog mProgressDialog;
@@ -40,6 +40,9 @@ public class ActivityYouTubeSearch extends AppCompatActivity {
         //button set on the bottom right of keyboard
         searchInput.setOnEditorActionListener((v, actionId, event) -> {
             if(actionId == EditorInfo.IME_ACTION_SEARCH){
+
+                //FIXME: Enable search on sqlite library
+                //+ review what options offer youtube
                 mProgressDialog.setMessage("Finding videos for "+v.getText().toString());
                 mProgressDialog.show();
                 searchOnYoutube(v.getText().toString());
@@ -56,7 +59,7 @@ public class ActivityYouTubeSearch extends AppCompatActivity {
 
         new Thread(){
             public void run(){
-                YoutubeConnector yc = new YoutubeConnector(ActivityYouTubeSearch.this);
+                YoutubeConnector yc = new YoutubeConnector(ActivitySearch.this);
                 searchResults = yc.search(keywords);
                 if(searchResults!=null) {
                     handler.post(() -> {
@@ -66,7 +69,7 @@ public class ActivityYouTubeSearch extends AppCompatActivity {
                 } else {
                     mProgressDialog.dismiss();
                     runOnUiThread(() -> {
-                        Toast.makeText(ActivityYouTubeSearch.this, "No results !!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(ActivitySearch.this, "No results !!", Toast.LENGTH_LONG).show();
                         onBackPressed();
                     });
                 }

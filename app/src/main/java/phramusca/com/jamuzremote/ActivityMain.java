@@ -134,7 +134,7 @@ public class ActivityMain extends AppCompatActivity {
     private TextView textViewPlaylist;
     private Button buttonRemote;
     private Button buttonSync;
-    private Button buttonYouTube;
+    private Button buttonSearch;
     private Button button_settings;
     private ToggleButton toggleButtonDimMode;
     private ToggleButton toggleButtonControls;
@@ -305,10 +305,10 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        buttonYouTube = findViewById(R.id.button_search);
-        buttonYouTube.setOnClickListener(v -> {
+        buttonSearch = findViewById(R.id.button_search);
+        buttonSearch.setOnClickListener(v -> {
             //dimOn();
-            Intent intent = new Intent(getApplicationContext(), ActivityYouTubeSearch.class);
+            Intent intent = new Intent(getApplicationContext(), ActivitySearch.class);
             startActivity(intent);
         });
 

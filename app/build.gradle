@@ -55,8 +55,7 @@ dependencies {
         exclude module: 'guava-jdk5'
     }
 
-    //Picasso library dependency
-    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.squareup.picasso:picasso:2.5.2' //Picasso (hassle-free image loading)
 }
 
 repositories {
