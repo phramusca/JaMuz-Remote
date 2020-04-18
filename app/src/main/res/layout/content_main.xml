@@ -52,9 +52,17 @@
             android:background="@drawable/ic_button_queue"
             android:gravity="center"/>
 
-        <Button android:id="@+id/button_albums"
+        <Button android:id="@+id/button_search"
             android:layout_row="0"
             android:layout_column="4"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_button_search"
+            android:gravity="center"/>
+
+        <Button android:id="@+id/button_albums"
+            android:layout_row="0"
+            android:layout_column="5"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:background="@drawable/ic_button_albums"
@@ -63,7 +71,7 @@
         <Button android:id="@+id/button_connect"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
-            android:layout_column="5"
+            android:layout_column="6"
             android:layout_row="0"
             android:background="@drawable/remote_off"
             android:text="Connect"
@@ -79,7 +87,7 @@
             android:layout_height="wrap_content"
             android:text="Connect"
             android:layout_row="0"
-            android:layout_column="6"
+            android:layout_column="7"
             android:textColor="@android:color/transparent"
             android:textSize="10sp"
             android:textAllCaps="false"
@@ -88,7 +96,7 @@
 
         <ToggleButton android:id="@+id/button_dim_mode"
             android:layout_row="0"
-            android:layout_column="7"
+            android:layout_column="8"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             style="@style/ToggleButton"
@@ -97,7 +105,7 @@
 
         <Button android:id="@+id/button_settings"
             android:layout_row="0"
-            android:layout_column="8"
+            android:layout_column="9"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:background="@drawable/ic_toggle_config"
@@ -105,13 +113,6 @@
 
     </GridLayout>
 
-        <Button
-            android:layout_row="3"
-            android:layout_column="0"
-            android:id="@+id/player_fragment_example"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="YouTube test" />
     <LinearLayout android:id="@+id/panel_playlist"
         android:orientation="vertical"
         android:layout_width="match_parent"

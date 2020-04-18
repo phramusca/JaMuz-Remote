@@ -305,7 +305,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        buttonYouTube = findViewById(R.id.player_fragment_example);
+        buttonYouTube = findViewById(R.id.button_search);
         buttonYouTube.setOnClickListener(v -> {
             //dimOn();
             Intent intent = new Intent(getApplicationContext(), ActivityYouTubeSearch.class);
