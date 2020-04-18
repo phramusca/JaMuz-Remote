@@ -73,8 +73,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -308,7 +315,12 @@ public class ActivityMain extends AppCompatActivity {
         buttonYouTube = (Button) findViewById(R.id.player_fragment_example);
         buttonYouTube.setOnClickListener(v -> {
             //dimOn();
-            startActivity(new Intent(this, YouTubePlayerFragmentActivity.class));
+            //startActivity(new Intent(this, YouTubePlayerFragmentActivity.class));
+
+            Intent intent = new Intent(getApplicationContext(), ActivityYouTubeSearch.class);
+            startActivity(intent);
+            /*intent.putExtra("SelectedPlaylist", localSelectedPlaylist);
+            startActivityForResult(intent, LISTS_REQUEST_CODE);*/
         });
 
         getFromQRcode(getIntent().getDataString());
@@ -706,6 +718,58 @@ public class ActivityMain extends AppCompatActivity {
 
         setDimMode(toggleButtonDimMode.isChecked());
     }
+
+    private static void downloadFile(String url, File outputFile) {
+        try {
+            URL u = new URL(url);
+            URLConnection conn = u.openConnection();
+            int contentLength = conn.getContentLength();
+
+            DataInputStream stream = new DataInputStream(u.openStream());
+
+            byte[] buffer = new byte[contentLength];
+            stream.readFully(buffer);
+            stream.close();
+
+            DataOutputStream fos = new DataOutputStream(new FileOutputStream(outputFile));
+            fos.write(buffer);
+            fos.flush();
+            fos.close();
+        } catch(FileNotFoundException e) {
+            return; // swallow a 404
+        } catch (IOException e) {
+            return; // swallow a 404
+        }
+    }
+
+/*    private final YouTubeExtractor mExtractor = YouTubeExtractor.create();
+
+
+    private Callback<YouTubeExtractionResult> mExtractionCallback = new Callback<YouTubeExtractionResult>() {
+        @Override
+        public void onResponse(Call<YouTubeExtractionResult> call, Response<YouTubeExtractionResult> response) {
+            bindVideoResult(response.body());
+        }
+
+        @Override
+        public void onFailure(Call<YouTubeExtractionResult> call, Throwable t) {
+            onError(t);
+        }
+    };
+
+    private void onError(Throwable t) {
+        t.printStackTrace();
+        Toast.makeText(ActivityMain.this, "It failed to extract. So sad", Toast.LENGTH_SHORT).show();
+    }
+
+
+    private void bindVideoResult(YouTubeExtractionResult result) {
+
+//        Here you can get download url link
+        Log.d("OnSuccess", "Got a result with the best url: " + result.getBestAvailableQualityVideoUri());
+
+        Toast.makeText(this, "result : " + result.getSd360VideoUri(), Toast.LENGTH_SHORT).show();
+    }*/
 
     private void displayQueue() {
         Intent intent = new Intent(getApplicationContext(), ActivityPlayQueue.class);
