@@ -257,7 +257,7 @@ public class ActivityMain extends AppCompatActivity {
             dimOn();
             buttonRemote.setEnabled(false);
             buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
-            if(buttonRemote.getText().equals("Connect")) {
+            if(buttonRemote.getText().equals("1")) {
                 ClientInfo clientInfo = getClientInfo(ClientCanal.REMOTE);
                 if(clientInfo!=null) {
                     clientRemote =  new ClientRemote(clientInfo, new ListenerRemote());
@@ -285,7 +285,7 @@ public class ActivityMain extends AppCompatActivity {
         buttonSync.setOnClickListener(v -> {
             dimOn();
             buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
-            if(buttonSync.getText().equals("Connect")) {
+            if(buttonSync.getText().equals("1")) {
                 enableSync(false);
                 ClientInfo clientInfo = getClientInfo(ClientCanal.SYNC);
                 if(clientInfo!=null) {
@@ -1714,7 +1714,7 @@ public class ActivityMain extends AppCompatActivity {
                 enablePlaylistEdit(true);
                 setupLocalPlaylistSpinner();
             } else {
-                buttonRemote.setText("Close");
+                buttonRemote.setText("0");
                 buttonRemote.setBackgroundResource(R.drawable.remote_on);
             }
             buttonRemote.setEnabled(true);
@@ -1726,10 +1726,10 @@ public class ActivityMain extends AppCompatActivity {
         runOnUiThread(() -> {
             buttonSync.setEnabled(false);
             if (enable) {
-                buttonSync.setText("Connect");
+                buttonSync.setText("1");
                 buttonSync.setBackgroundResource(R.drawable.connect_off_new);
             } else {
-                buttonSync.setText("Close");
+                buttonSync.setText("0");
                 buttonSync.setBackgroundResource(R.drawable.connect_on);
             }
             buttonSync.setEnabled(true);
@@ -1740,7 +1740,7 @@ public class ActivityMain extends AppCompatActivity {
     private void enableClientRemote(final Button button, final int resId) {
         runOnUiThread(() -> {
             button.setEnabled(false);
-            button.setText("Connect");
+            button.setText("1");
             button.setBackgroundResource(resId);
             button.setEnabled(true);
         });
