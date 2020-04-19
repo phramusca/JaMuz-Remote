@@ -66,6 +66,8 @@
         <activity android:name=".ActivityAlbums" />
         <activity android:name=".ActivityAlbumTracks" />
         <activity android:name=".ActivitySettings" />
+        <activity android:name=".ActivitySearch" />
+        <activity android:name=".ActivityYouTubePlayer" />
     </application>
 
 </manifest>
