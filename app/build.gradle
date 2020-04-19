@@ -1,15 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 27
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         applicationId "org.phramusca.jamuz"
         minSdkVersion 21
-        // https://developer.android.com/about/dashboards/index.html
-        // http://chalup.github.io/blog/2014/06/15/minsdkversion-equals-15/
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 2
         versionName "0.4.4-DEV"
     }
@@ -29,19 +27,35 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-    implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'com.android.support:design:26.1.0'
-    implementation 'com.google.code.gson:gson:2.8.0'
-    implementation 'com.google.guava:guava:23.6-android'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.android.support:cardview-v7:27.1.1'
+
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.google.guava:guava:24.1-jre'
     implementation 'com.google.android:flexbox:0.3.0'
-    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
+
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0' //QR Code
     implementation 'com.wdullaer:swipeactionadapter:2.0.0'
 
-    implementation 'com.android.support:appcompat-v7:25.1.0'
-    implementation 'com.android.support:recyclerview-v7:25.1.0'
-    implementation 'com.android.support:cardview-v7:25.1.0'
-
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.3.Final'
+
+    //google client for android api dependency
+    //excluding org.apache.httpcomponents so as to resolve anonymity
+    implementation('com.google.api-client:google-api-client-android:1.23.0') {
+        exclude group: 'org.apache.httpcomponents'
+        exclude module: 'guava-jdk5'
+    }
+
+    //youtube data api v3 dependency
+    //excluding org.apache.httpcomponents so as to resolve anonymity
+    implementation('com.google.apis:google-api-services-youtube:v3-rev192-1.23.0') {
+        exclude group: 'org.apache.httpcomponents'
+        exclude module: 'guava-jdk5'
+    }
+
+    implementation 'com.squareup.picasso:picasso:2.5.2' //Picasso (hassle-free image loading)
 }
 
 repositories {
