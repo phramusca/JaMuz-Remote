@@ -2,6 +2,7 @@ package phramusca.com.jamuzremote;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,13 +19,13 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
 
     private Context mContext;
     private List<YouTubeVideoItem> mVideoList;
-    public class MyViewHolder extends RecyclerView.ViewHolder{
+    static class MyViewHolder extends RecyclerView.ViewHolder{
 
-        public ImageView thumbnail;
-        public TextView video_title, video_id, video_description;
-        public RelativeLayout video_view;
+        ImageView thumbnail;
+        TextView video_title, video_id, video_description;
+        RelativeLayout video_view;
 
-        public MyViewHolder(View view) {
+        MyViewHolder(View view) {
             super(view);
             thumbnail = view.findViewById(R.id.video_thumbnail);
             video_title = view.findViewById(R.id.video_title);
@@ -39,20 +40,18 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
         this.mVideoList = mVideoList;
     }
 
+    @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-        // create a new view
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.video_item, parent, false);
-
         return new MyViewHolder(itemView);
     }
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         final YouTubeVideoItem singleVideo = mVideoList.get(position);
-        holder.video_id.setText("Video ID : "+singleVideo.getId()+" ");
+        holder.video_id.setText(String.format("Video ID : %s ", singleVideo.getId()));
         holder.video_title.setText(singleVideo.getTitle());
         holder.video_description.setText(singleVideo.getDescription());
 

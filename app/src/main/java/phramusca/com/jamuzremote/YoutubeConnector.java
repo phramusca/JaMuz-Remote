@@ -21,9 +21,7 @@ import java.util.Properties;
 
 // Adapted from https://github.com/abhi5658/search-youtube
 
-public class YoutubeConnector {
-
-    private YouTube youtube;
+class YoutubeConnector {
 
     //custom list of youtube which gets returned when searched for keyword
     //Returns a collection of search results that match the query parameters specified in the API request
@@ -34,30 +32,30 @@ public class YoutubeConnector {
     //Developer API key a developer can obtain after creating a new project in google developer console
     //Developer has to enable YouTube Data API v3 in the project
     //Add credentials and then provide the Application's package name and SHA fingerprint
-    public static String KEY;
+    static String KEY;
 
     //SHA1 fingerprint of APP can be found by double clicking on the app signing report on right tab called gradle
-    public static final String SHA1 = "A9:F0:59:BF:34:49:FB:67:4A:C8:08:A6:EC:E2:AD:BE:3E:1C:06:61";
+    private static final String SHA1 = "A9:F0:59:BF:34:49:FB:67:4A:C8:08:A6:EC:E2:AD:BE:3E:1C:06:61";
 
     //Package name of the app that will call the YouTube Data API
-    public static final String PACKAGENAME = "phramusca.com.jamuzremote";
+    private static final String PACKAGENAME = "phramusca.com.jamuzremote";
 
     //maximum results that should be downloaded via the YouTube data API at a time
     private static final long MAXRESULTS = 25;
 
-    public YoutubeConnector(Context context) {
+    YoutubeConnector(Context context) {
         try {
 
             //TODO: Read only once at app start
             AssetManager am = context.getAssets();
             InputStream inputStream = am.open("keys.properties");
-            Properties properties= new Properties();;
+            Properties properties= new Properties();
             properties.load(inputStream);
             KEY=properties.getProperty("youtube.key");
 
-            youtube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), request -> {
+            YouTube youtube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), request -> {
                 request.getHeaders().set("X-Android-Package", PACKAGENAME);
-                request.getHeaders().set("X-Android-Cert",SHA1);
+                request.getHeaders().set("X-Android-Cert", SHA1);
             }).build();
 
             // Define the API request for retrieving search results.
@@ -83,7 +81,7 @@ public class YoutubeConnector {
         }
     }
 
-    public List<YouTubeVideoItem> search(String keywords) {
+    List<YouTubeVideoItem> search(String keywords) {
         query.setQ(keywords);
         query.setMaxResults(MAXRESULTS);
 

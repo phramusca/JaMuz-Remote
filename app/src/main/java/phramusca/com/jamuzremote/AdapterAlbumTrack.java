@@ -35,6 +35,4 @@ public abstract class AdapterAlbumTrack extends AdapterTrack {
             loadingViewHolder.progressBar.setIndeterminate(true);
         }
     }
-
-
 }
