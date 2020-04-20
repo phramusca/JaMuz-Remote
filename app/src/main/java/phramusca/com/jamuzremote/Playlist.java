@@ -27,6 +27,7 @@ public class Playlist implements Comparable, Serializable {
     private boolean isLocal;
     private String artist;
     private String album;
+    private String searchValue;
     private Order order=Order.PLAYCOUNTER_LASTPLAYED;
     private int limitValue=0;
     private String limitUnit ="minutes";
@@ -262,14 +263,12 @@ public class Playlist implements Comparable, Serializable {
     }
 
     private String getWhere(List<Integer> excluded) {
-
-        String in = "WHERE status IN (\""+ Track.Status.REC.name() + "\",\"" + Track.Status.NULL.name() + "\") " +
-                " AND rating "+getRatingString()+" ";
-
+        StringBuilder sb = new StringBuilder();
+        sb.append("WHERE status IN (\"").append(Track.Status.REC.name()).append("\",\"").append(Track.Status.NULL.name()).append("\") ")
+                .append(" AND rating ").append(getRatingString()).append(" ");
         if(limitValue>0) {
-            in += "\n AND lastPlayed < datetime(datetime('now'), '-" + limitValue + " " + limitUnit + "')";
+            sb.append("\n AND lastPlayed < datetime(datetime('now'), '-" + limitValue + " " + limitUnit + "')");
         }
-
         ArrayList<String> include = new ArrayList<>();
         ArrayList<String> exclude = new ArrayList<>();
         for (Map.Entry<String, TriStateButton.STATE> entry : genres.entrySet()) {
@@ -280,25 +279,23 @@ public class Playlist implements Comparable, Serializable {
                     include.add(entry.getKey()); break;
             }
         }
-
         if(include.size()>0) {
-            in += "\n AND genre IN ("+getInClause(include)+") ";
+            sb.append("\n AND genre IN ("+getInClause(include)+") ");
         }
         if(exclude.size()>0) {
-            in += "\n AND genre NOT IN ("+getInClause(exclude)+") ";
+            sb.append("\n AND genre NOT IN ("+getInClause(exclude)+") ");
         }
-
         if(artist!=null) {
-            in += "\n AND artist LIKE \"%"+artist+"%\" ";
+            sb.append("\n AND artist LIKE \"%"+artist+"%\" ");
         }
-
         if(album!=null) {
-            in += "\n AND album = \""+album+"\" ";
+            sb.append("\n AND album = \""+album+"\" ");
         }
-
-        in+=getCSVlist(excluded);
-
-        return in;
+        if(searchValue!=null) {
+            sb.append("\n AND (artist LIKE \"%"+searchValue+"%\" OR album LIKE \"%"+searchValue+"%\" OR title LIKE \"%"+searchValue+"%\")");
+        }
+        sb.append(getCSVlist(excluded));
+        return sb.toString();
     }
 
     private static String getCSVlist(List<Integer> excluded) {
@@ -425,6 +422,10 @@ public class Playlist implements Comparable, Serializable {
 
     public void setAlbum(String album) {
         this.album = album;
+    }
+
+    public void setSearchValue(String value) {
+        searchValue = value;
     }
 
     /**

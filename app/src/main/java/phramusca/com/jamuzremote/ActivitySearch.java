@@ -12,6 +12,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // Adapted from https://github.com/abhi5658/search-youtube
@@ -45,7 +46,8 @@ public class ActivitySearch extends AppCompatActivity {
                 //+ review what options offer youtube
                 mProgressDialog.setMessage("Finding videos for "+v.getText().toString());
                 mProgressDialog.show();
-                searchOnYoutube(v.getText().toString());
+                //searchOnYoutube(v.getText().toString());
+                searchOnJaMuz(v.getText().toString());
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                         InputMethodManager.RESULT_UNCHANGED_SHOWN);
@@ -55,8 +57,30 @@ public class ActivitySearch extends AppCompatActivity {
         });
     }
 
-    private void searchOnYoutube(final String keywords){
+    private void searchOnJaMuz(String keywords) {
+        new Thread(){
+            public void run(){
+                Playlist playlist = new Playlist("Search", true);
+                playlist.setSearchValue(keywords);
+                ArrayList<Track> tracks = (ArrayList<Track>) playlist.getTracks();
+                searchResults = new ArrayList<>();
+                for (Track track : tracks) {
+                    YouTubeVideoItem item = new YouTubeVideoItem();
+                    item.setId(String.valueOf(track.getIdFileServer()));
+                    item.setTitle(track.getArtist()+" / "+track.getTitle());
+                    item.setDescription(track.toString());
+                    item.setThumbnailURL(track.getCoverHash());
+                    searchResults.add(item);
+                }
+                handler.post(() -> {
+                    fillYoutubeVideos();
+                    mProgressDialog.dismiss();
+                });
+            }
+        }.start();
+    }
 
+    private void searchOnYoutube(final String keywords){
         new Thread(){
             public void run(){
                 YoutubeConnector yc = new YoutubeConnector(ActivitySearch.this);
@@ -73,7 +97,6 @@ public class ActivitySearch extends AppCompatActivity {
                         onBackPressed();
                     });
                 }
-
             }
         }.start();
     }
