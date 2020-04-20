@@ -20,7 +20,6 @@ import java.util.List;
 
 public class YoutubeConnector {
 
-    //Youtube object for executing api related queries through Youtube Data API
     private YouTube youtube;
 
     //custom list of youtube which gets returned when searched for keyword
@@ -34,11 +33,11 @@ public class YoutubeConnector {
     //Add credentials and then provide the Application's package name and SHA fingerprint
     public static final String KEY = "API_KEY_FROM_GOOGLE_CLOUD_CONSOLE";
 
-    //Package name of the app that will call the YouTube Data API
-    public static final String PACKAGENAME = "com.test.abhishek.searchyoutube";
-
     //SHA1 fingerprint of APP can be found by double clicking on the app signing report on right tab called gradle
-    public static final String SHA1 = "SHA1_FINGERPRINT_STRING";
+    public static final String SHA1 = "A9:F0:59:BF:34:49:FB:67:4A:C8:08:A6:EC:E2:AD:BE:3E:1C:06:61";
+
+    //Package name of the app that will call the YouTube Data API
+    public static final String PACKAGENAME = "phramusca.com.jamuzremote";
 
     //maximum results that should be downloaded via the YouTube data API at a time
     private static final long MAXRESULTS = 25;
