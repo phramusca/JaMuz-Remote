@@ -5,7 +5,7 @@ android {
     buildToolsVersion '28.0.3'
 
     defaultConfig {
-        applicationId "org.phramusca.jamuz"
+        applicationId "org.phramusca.jamuzkids"
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 2
