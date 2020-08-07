@@ -59,7 +59,7 @@ public class ServiceSync extends ServiceBase {
         clientInfo = (ClientInfo)intent.getSerializableExtra("clientInfo");
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         if (powerManager != null) {
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyPowerWakelockTag");
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
             wakeLock.acquire(24*60*60*1000); //24 hours, enough to download a lot !
         }
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
@@ -126,8 +126,7 @@ public class ServiceSync extends ServiceBase {
                         startSync();
                         break;
                     case "FilesToGet":
-                        helperNotification.notifyBar(notificationSync, "" +
-                                "Received new list of files to get");
+                        helperNotification.notifyBar(notificationSync, "Received new list of files to get");
                         ArrayList<Track> newTracks = new ArrayList<>();
                         JSONArray files = (JSONArray) jObject.get("files");
                         helperNotification.notifyBar(notificationSync,
@@ -149,7 +148,7 @@ public class ServiceSync extends ServiceBase {
                         HelperLibrary.musicLibrary.insertTrackOrUpdateStatus(newTracks);
                         scanAndDeleteUnwantedInThread(getAppDataPath);
                         runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
-                                "Received "+newTracks.size()+" files to dowload.", 2000));
+                                "Received "+newTracks.size()+" files to download.", 2000));
                         startSync();
                         break;
                     case "mergeListDbSelected":
@@ -175,6 +174,8 @@ public class ServiceSync extends ServiceBase {
                         new Thread() {
                             public void run() {
                                 try {
+                                    //FIXME: Get tags list with their respective number of files, for sorting
+                                    //TODO: Then add a "x/y" button to display pages x/y (# of tags per page to be defined/optional)
                                     final JSONArray jsonTags = (JSONArray) jObject.get("tags");
                                     final List<String> newTags = new ArrayList<>();
                                     for (int i = 0; i < jsonTags.length(); i++) {
