@@ -17,12 +17,12 @@ import java.util.Date;
 import java.util.Locale;
 
 //FIXME: idFileServer can be null in db (so 0 in here) with a "REC" status
-// resulting in sync issues that blocks the transfer of other files
+//resulting in sync issues that blocks the transfer of other files
 // => how does it happen ???
 //FIXME !!!!!! Some tracks are inserted with NULL status and size -1. That should not be !!
-//                  + it messes up merge since they are reported as NotFound
+//+ it messes up merge since they are reported as NotFound
 //FIXME !!!!  TOP TOP TOP  !!!! Some tracks have ACK status but artist="" or title="" or album="" (most ALL the 3)
-//                  How ? Why ?
+//How ? Why ?
 // => Seems to happen after an export, during scan of existing device in files / clean unwanted
 //          ONLY OCCURS ON EXISTING FILES, (ie not on new ...)
 //          AND only in prod (takes more time highlighting possible algo issue b/w processes): TRY TO REPRODUCE  IN TEST !!!!
@@ -343,7 +343,7 @@ public class Track implements Serializable {
     }
 
     //FIXME !!!!! Use a Repo for thumbnails !!!
-    //   => Add a limit (FIFO) to those repos not to overload android memory
+    //=> Add a limit (FIFO) to those repos not to overload android memory
     //As it is read too many times now that there is album list
     //+ we need (by using transient) to ignore it in Intent serialization and re-read each time !
 
