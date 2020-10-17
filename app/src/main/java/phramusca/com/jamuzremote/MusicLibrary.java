@@ -242,7 +242,7 @@ public class MusicLibrary {
                     +COL_ID_SERVER+", "+COL_SIZE+", "+COL_LENGTH+") " +
                     " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             String sqlUpdateStatus = "UPDATE "+TABLE_TRACKS+" " +
-                    "SET "+COL_STATUS+"=? WHERE "+COL_ID_SERVER+"=?";
+                    "SET "+COL_STATUS+"=?, "+COL_PATH+"=? WHERE "+COL_ID_SERVER+"=?";
             String sqlTagsDelete = "DELETE FROM tagFile WHERE idFile=?";
             String sqlTags = "INSERT OR REPLACE INTO tagfile (idFile, idTag) " +
                     "VALUES (?, (SELECT id FROM tag WHERE value=?))";
@@ -254,7 +254,8 @@ public class MusicLibrary {
                 int idFile = getTrackIdFileRemote(track.getIdFileServer());
                 if(idFile>=0) {
                     stmtStatus.bindString(1, track.getStatus().name());
-                    stmtStatus.bindLong(2, track.getIdFileServer());
+                    stmtStatus.bindString(2, track.getPath());
+                    stmtStatus.bindLong(3, track.getIdFileServer());
                     stmtStatus.executeUpdateDelete();
                     stmtStatus.clearBindings();
                 } else {
