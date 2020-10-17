@@ -418,7 +418,9 @@ public class ServiceSync extends ServiceBase {
                 e.printStackTrace();
             }
             if(!checkCompleted()) {
-                //FIXME: Restart process. Some tracks are still missing. Why ? How ?
+                //FIXME: Restart process. Some tracks are still missing.
+                // due to some transfer errors
+                // Need to manage a fail counter with a limit (to be determined)
                 stopSync("Sync done but NOT complete :(", 10000);
             }
         }

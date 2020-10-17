@@ -16,23 +16,31 @@ public class AudioPlayer {
     private static final String TAG = AudioPlayer.class.getName();
     private static MediaPlayer mediaPlayer;
     private static CountDownTimer timer;
+    private int duration;
+    private boolean enableControl=false;
 
     AudioPlayer(final IListenerPlayer callback) {
         this.callback = callback;
     }
 
     public String play(Track track) {
-        String msg ="";
+        final String[] msg = {""};
         try {
+            Log.i(TAG, "Playing "+track.getRelativeFullPath());
+            enableControl=false;
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(track.getPath());
             mediaPlayer.prepare();
             callback.reset();
-            mediaPlayer.start();
-            startTimer();
-            msg = applyReplayGain(mediaPlayer, track);
-            mediaPlayer.setOnCompletionListener(mediaPlayer -> callback.onPlayBackEnd());
-            mediaPlayer.setOnSeekCompleteListener(mediaPlayer -> startTimer());
+            mediaPlayer.setOnPreparedListener(mp -> {
+                duration = mediaPlayer.getDuration();
+                mediaPlayer.start();
+                startTimer();
+                msg[0] = applyReplayGain(mediaPlayer, track);
+                mediaPlayer.setOnCompletionListener(mediaPlayer -> callback.onPlayBackEnd());
+                mediaPlayer.setOnSeekCompleteListener(mediaPlayer -> startTimer());
+                enableControl=true;
+            });
         } catch (IOException e) {
             Log.e(TAG, "Error playing (\""+track+"\") => DELETING IT !!!!!!", e);
             //TODO: Put back in RepoSync (take info from there)
@@ -42,7 +50,7 @@ public class AudioPlayer {
             file.delete();
             callback.onPlayBackEnd();
         }
-        return msg;
+        return msg[0];
     }
 
     //TODO: Make Replaygain options.
@@ -102,6 +110,7 @@ public class AudioPlayer {
     public String setVolume(int volume, Track track) {
         if(volume>=0) {
             this.baseVolume = ((float)volume / 100.0f);
+            Log.i(TAG, "setVolume()");
             if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                 try {
                     return applyReplayGain(mediaPlayer, track);
@@ -114,6 +123,7 @@ public class AudioPlayer {
     }
 
     public void play() {
+        Log.i(TAG, "play()");
         if(mediaPlayer==null) {
             playNext();
         }
@@ -136,6 +146,7 @@ public class AudioPlayer {
     }
 
     public void togglePlay() {
+        Log.i(TAG, "togglePlay()");
         if(mediaPlayer ==null) {
             playNext();
         }
@@ -149,6 +160,7 @@ public class AudioPlayer {
     }
 
     public void pause() {
+        Log.i(TAG, "pause()");
         if(mediaPlayer!=null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             stopTimer();
@@ -156,6 +168,7 @@ public class AudioPlayer {
     }
 
     public void resume() {
+        Log.i(TAG, "resume()");
         if(mediaPlayer!=null && !mediaPlayer.isPlaying()) {
             mediaPlayer.start();
             startTimer();
@@ -163,31 +176,37 @@ public class AudioPlayer {
     }
 
     public void stop(boolean release) {
-        if (mediaPlayer !=null && mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-            if(release) {
-                mediaPlayer.release();
-                mediaPlayer=null;
+        Log.i(TAG, "stop()");
+        try {
+            if (mediaPlayer !=null && mediaPlayer.isPlaying()) {
+                Log.i(TAG, "mediaPlayer.stop()"+mediaPlayer.getTrackInfo().toString());
+                mediaPlayer.stop();
+                if(release) {
+                    mediaPlayer.release();
+                    mediaPlayer=null;
+                }
+                callback.onPositionChanged(0, 1);
             }
-            callback.onPositionChanged(0, 1);
+            stopTimer();
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to stop");
         }
-        stopTimer();
     }
 
     public void forward() {
-        if(mediaPlayer != null) {
-            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()+ mediaPlayer.getDuration()/10);
+        if(mediaPlayer != null && enableControl) {
+            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()+ duration/10);
         }
     }
 
     public void rewind() {
-        if(mediaPlayer != null) {
-            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() - mediaPlayer.getDuration() / 10);
+        if(mediaPlayer != null && enableControl) {
+            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() - duration / 10);
         }
     }
 
     public void pullUp() {
-        if(mediaPlayer != null) {
+        if(mediaPlayer != null && enableControl) {
             mediaPlayer.seekTo(0);
         }
     }
@@ -198,12 +217,11 @@ public class AudioPlayer {
 
     private void startTimer() {
         callback.onPlayBackStart();
-
-        timer = new CountDownTimer(mediaPlayer.getDuration()- mediaPlayer.getCurrentPosition()-1,500) {
+        timer = new CountDownTimer(duration- mediaPlayer.getCurrentPosition()-1,500) {
             @Override
             public void onTick(long millisUntilFinished_) {
                 if(mediaPlayer !=null) {
-                    callback.onPositionChanged(mediaPlayer.getCurrentPosition(), mediaPlayer.getDuration());
+                    callback.onPositionChanged(mediaPlayer.getCurrentPosition(), duration);
                 }
                 if(!isPlaying()) {
                     this.cancel();
