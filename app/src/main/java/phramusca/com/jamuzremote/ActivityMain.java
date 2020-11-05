@@ -298,7 +298,6 @@ public class ActivityMain extends AppCompatActivity {
                 }
             }
             else {
-                //FIXME !!!! TOP TOP TOP !!!! GUI freezes and application crash :(
                 Log.i(TAG, "Broadcast("+ServiceSync.USER_STOP_SERVICE_REQUEST+")");
                 sendBroadcast(new Intent(ServiceSync.USER_STOP_SERVICE_REQUEST));
                 enableSync(true);
