@@ -275,6 +275,9 @@ public class ServiceSync extends ServiceBase {
         return false;
     }
 
+    //FIXME !!! User tags issue: somehow user tags can be deleted or at least not inserted @ download time
+    // It results in user tags to be removed on sync too :(
+    // Need to find how this happens !! (flac to mp3 ? sync with other source meantime ? multiple merges through whole sync ? ... ?)
     private void requestMerge() {
         runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
                 "Requesting statistics merge."));

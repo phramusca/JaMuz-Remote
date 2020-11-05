@@ -16,11 +16,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-//FIXME: idFileServer can be null in db (so 0 in here) with a "REC" status
-//resulting in sync issues that blocks the transfer of other files
-// => how does it happen ???
-//FIXME !!!!!! Some tracks are inserted with NULL status and size -1. That should not be !!
-//+ it messes up merge since they are reported as NotFound
 //FIXME !!!!  TOP TOP TOP  !!!! Some tracks have ACK status but artist="" or title="" or album="" (most ALL the 3)
 //How ? Why ?
 // => Seems to happen after an export, during scan of existing device in files / clean unwanted
