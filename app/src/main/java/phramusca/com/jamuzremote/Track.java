@@ -16,12 +16,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-//FIXME !!!!  TOP TOP TOP  !!!! Some tracks have ACK status but artist="" or title="" or album="" (most ALL the 3)
-//How ? Why ?
-// => Seems to happen after an export, during scan of existing device in files / clean unwanted
-//          ONLY OCCURS ON EXISTING FILES, (ie not on new ...)
-//          AND only in prod (takes more time highlighting possible algo issue b/w processes): TRY TO REPRODUCE  IN TEST !!!!
-
 /**
  * Created by raph on 01/05/17.
  */

@@ -110,6 +110,12 @@ public final class RepoSync {
         if(checkFile(track, file)) {
             track.setStatus(Track.Status.REC);
         }
+        if (!track.readTags()) {
+            Log.w(TAG, "Cannot read tags. Deleting " + file.getAbsolutePath());
+            //noinspection ResultOfMethodCallIgnored
+            file.delete();
+            track.setStatus(Track.Status.NEW);
+        }
         tracks.put(track.getIdFileServer(), track.getStatus(), track);
     }
 
