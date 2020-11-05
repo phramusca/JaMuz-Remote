@@ -164,8 +164,6 @@ public final class RepoSync {
     }
 
     public static List<Track> getMergeList() {
-        List<Track> trackArrayList = new ArrayList<>(tracks.column(Track.Status.REC).values());
-        //trackArrayList.addAll(tracks.column(Track.Status.NEW).values());
-        return trackArrayList;
+        return new ArrayList<>(tracks.column(Track.Status.REC).values());
     }
 }
