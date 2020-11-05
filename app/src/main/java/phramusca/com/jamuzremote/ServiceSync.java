@@ -104,6 +104,7 @@ public class ServiceSync extends ServiceBase {
     private void stopSync(String msg, long millisInFuture) {
         if(processDownload!=null) {
             processDownload.stopDownloads();
+            processDownload = null;
         }
         if (clientSync != null) {
             clientSync.close(false, msg, millisInFuture, true);
@@ -152,8 +153,7 @@ public class ServiceSync extends ServiceBase {
                         startSync();
                         break;
                     case "mergeListDbSelected":
-                        helperNotification.notifyBar(notificationSync,
-                                "Updating database with merge changes ... ");
+                        helperNotification.notifyBar(notificationSync,"Updating database with merge changes ... ");
                         JSONArray filesToUpdate = (JSONArray) jObject.get("files");
                         for (int i = 0; i < filesToUpdate.length(); i++) {
                             Track fileReceived = new Track(
@@ -401,7 +401,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         @Override
-        public synchronized void run() {
+        public void run() {
             runOnUiThread(() -> {
                 helperNotification.notifyBar(notificationDownload, "Starting download ... ");
 
@@ -428,9 +428,9 @@ public class ServiceSync extends ServiceBase {
             }
         }
 
-        private synchronized void stopDownloads() {
+        private void stopDownloads() {
             runOnUiThread(() -> {
-                helperNotification.notifyBar(notificationDownload, "Closing"); //, 5000);
+                helperNotification.notifyBar(notificationDownload, "Stopping downloads ... "); //, 5000);
             });
             pool.shutdownNow();
             for(DownloadTask downloadService : downloadServices) {
@@ -438,7 +438,7 @@ public class ServiceSync extends ServiceBase {
             }
             abort();
             runOnUiThread(() -> {
-                helperNotification.notifyBar(notificationDownload, "Closed", 5000);
+                helperNotification.notifyBar(notificationDownload, "Download stopped.", 5000);
             });
         }
     }
@@ -486,12 +486,15 @@ public class ServiceSync extends ServiceBase {
                 RepoSync.checkReceivedFile(getAppDataPath, track);
                 status="";
                 bench.get(track.getSize());
+                callback.setStatus();
+            } catch (InterruptedException e) {
+                Log.w(TAG, "Download interrupted for "+track.getRelativeFullPath(), e);
             } catch (Exception e) {
                 setStatus("Err. "+e.getMessage(), null);
                 Log.e(TAG, "Error downloading "+track.getRelativeFullPath(), e);
                 //FIXME: Put file back in queue
+                callback.setStatus();
             }
-            callback.setStatus();
         }
 
         private void setStatus(String text, Track track) {
