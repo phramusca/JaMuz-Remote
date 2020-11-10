@@ -159,7 +159,7 @@ public class ServiceSync extends ServiceBase {
                             Track fileReceived = new Track(
                                     (JSONObject) filesToUpdate.get(i),
                                     getAppDataPath);
-                            if(fileReceived.readTags()) {
+                            if(fileReceived.readMetadata()) {
                                 fileReceived.setStatus(Track.Status.REC);
                                 HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived);
                             }
@@ -275,9 +275,6 @@ public class ServiceSync extends ServiceBase {
         return false;
     }
 
-    //FIXME !!! User tags issue: somehow user tags can be deleted or at least not inserted @ download time
-    // It results in user tags to be removed on sync too :(
-    // Need to find how this happens !! (flac to mp3 ? sync with other source meantime ? multiple merges through whole sync ? ... ?)
     private void requestMerge() {
         runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
                 "Requesting statistics merge."));
@@ -410,6 +407,7 @@ public class ServiceSync extends ServiceBase {
             pool = Executors.newFixedThreadPool(5);
             int canal=100;
             for (Track track : RepoSync.getDownloadList()) {
+                track.getTags(true);
                 DownloadTask downloadTask = new DownloadTask(track, canal++, () -> notifyBarProgress());
                 downloadServices.add(downloadTask);
                 pool.submit(downloadTask);
@@ -486,15 +484,15 @@ public class ServiceSync extends ServiceBase {
                 RepoSync.checkReceivedFile(getAppDataPath, track);
                 status="";
                 bench.get(track.getSize());
-                callback.setStatus();
             } catch (InterruptedException e) {
+                setStatus("Interrupted", null);
                 Log.w(TAG, "Download interrupted for "+track.getRelativeFullPath(), e);
             } catch (Exception e) {
                 setStatus("Err. "+e.getMessage(), null);
                 Log.e(TAG, "Error downloading "+track.getRelativeFullPath(), e);
                 //FIXME: Put file back in queue
-                callback.setStatus();
             }
+            callback.setStatus();
         }
 
         private void setStatus(String text, Track track) {
