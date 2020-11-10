@@ -1386,7 +1386,7 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         // Not closing as services may still need it
-        //TODO: Close when everybody's complete (scan, sync and jamuz)
+        //TODO: Close when everything's complete (scan, sync and jamuz)
         /*HelperLibrary.close();*/
     }
 

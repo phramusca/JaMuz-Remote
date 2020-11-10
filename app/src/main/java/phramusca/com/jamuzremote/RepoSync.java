@@ -50,8 +50,11 @@ public final class RepoSync {
         if(tracks.containsRow(track.getIdFileServer())) {
             track.setStatus(Track.Status.REC);
             if (!checkFile(track, receivedFile)
-                    || !track.readTags()
+                    || !track.readMetadata()
                     || !HelperLibrary.musicLibrary.insertOrUpdateTrack(track)) {
+                Log.w(TAG, "Error with received file. Deleting " + receivedFile.getAbsolutePath());
+                //noinspection ResultOfMethodCallIgnored
+                receivedFile.delete();
                 track.setStatus(Track.Status.NEW);
             }
             updateTracks(track);
@@ -109,7 +112,7 @@ public final class RepoSync {
         File file = new File(track.getPath());
         if(checkFile(track, file)) {
             track.setStatus(Track.Status.REC);
-            if (!track.readTags()) {
+            if (!track.readMetadata()) {
                 Log.w(TAG, "Cannot read tags. Deleting " + file.getAbsolutePath());
                 //noinspection ResultOfMethodCallIgnored
                 file.delete();

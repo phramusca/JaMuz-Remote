@@ -68,6 +68,7 @@ public class Track implements Serializable {
         this.playCounter = playCounter;
         this.status = Status.valueOf(status);
         this.size = size;
+        tags = new ArrayList<>();
     }
 
     public Track(double rating, String title, String album,
@@ -78,11 +79,13 @@ public class Track implements Serializable {
         this.artist = artist;
         this.coverHash = coverHash;
         this.genre=genre;
+        tags = new ArrayList<>();
         source="Remote";
     }
 
     public Track(File getAppDataPath, String absolutePath) {
         this.path = absolutePath;
+        tags = new ArrayList<>();
         try {
             this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length() + 1);
         } catch (StringIndexOutOfBoundsException ex) {
@@ -90,7 +93,7 @@ public class Track implements Serializable {
         }
     }
 
-    public boolean readTags() {
+    public boolean readMetadata() {
         try {
             MediaMetadataRetriever mmr = new MediaMetadataRetriever();
             mmr.setDataSource(path);
@@ -348,7 +351,7 @@ public class Track implements Serializable {
         return thumb;
     }
 
-    //TODO: Do not update all, only requeted fields
+    //TODO: Do not update all, only requested fields
     public boolean update() {
         return HelperLibrary.musicLibrary != null && HelperLibrary.musicLibrary.updateTrack(this);
     }
@@ -358,7 +361,7 @@ public class Track implements Serializable {
      * @return boolean
      */
     public ArrayList<String> getTags(boolean force) {
-        if(HelperLibrary.musicLibrary!=null && (force || tags==null)) {
+        if(HelperLibrary.musicLibrary!=null && idFileRemote>-1 && (force || tags==null)) {
             tags = HelperLibrary.musicLibrary.getTags(idFileRemote);
         }
         return tags;
@@ -377,10 +380,6 @@ public class Track implements Serializable {
             }
         }
         return tagsString;
-    }
-
-    public void setTags(ArrayList<String> tags) {
-        this.tags = tags;
     }
 
     /**
