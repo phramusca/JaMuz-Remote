@@ -46,6 +46,8 @@ public class VoiceKeyWords {
                     new KeyWord("taguer", Command.SET_TAGS),
                     new KeyWord("tag", Command.SET_TAGS),
 
+                    new KeyWord("genre", Command.SET_GENRE),
+
                     new KeyWord("resume", Command.PLAYER_RESUME),
                     new KeyWord("play", Command.PLAYER_RESUME),
                     new KeyWord("continuer", Command.PLAYER_RESUME),
@@ -82,7 +84,7 @@ public class VoiceKeyWords {
 
     public static KeyWord get(String spokenText) {
         String searchValue=spokenText.toLowerCase().trim();
-        Command command = Command.PLAY_PLAYLIST;
+        Command command = Command.UNKNOWN;
         for(KeyWord word : KEY_WORDS) {
             if(searchValue.startsWith(word.getKeyword())) {
                 command =word.getCommand();
@@ -121,11 +123,13 @@ public class VoiceKeyWords {
         PLAY_NEW_PLAYLIST_ARTIST_ONGOING,
         PLAY_NEW_PLAYLIST_ALBUM,
         PLAY_NEW_PLAYLIST_ALBUM_ONGOING,
+        SET_GENRE,
         SET_RATING,
         SET_TAGS,
         PLAYER_RESUME,
         PLAYER_NEXT,
         PLAYER_PAUSE,
         PLAYER_PULLUP,
+        UNKNOWN;
     }
 }

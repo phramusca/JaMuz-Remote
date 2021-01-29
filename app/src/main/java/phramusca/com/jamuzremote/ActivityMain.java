@@ -86,6 +86,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collector;
 
 import static phramusca.com.jamuzremote.Playlist.Order.PLAYCOUNTER_LASTPLAYED;
 import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
@@ -211,6 +212,7 @@ public class ActivityMain extends AppCompatActivity {
                             public void run() {
                                 try {
                                     Thread.sleep(3 * 1000);
+                                    runOnUiThread(() -> speak("A vous"));
                                     speechRecognizer();
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
@@ -726,6 +728,18 @@ public class ActivityMain extends AppCompatActivity {
         ratingBar.setEnabled(true);
     }
 
+    private void setGenre(String genre) {
+        spinnerGenre.setEnabled(false);
+        displayedTrack.setGenre(genre);
+        if (isRemoteConnected()) {
+            clientRemote.send("setGenre".concat(genre)); //FIXME: Check if JaMuz handles "setGenre". Do it if not
+        } else {
+            displayedTrack.updateGenre(genre);
+            displayTrack(false);
+            refreshLocalPlaylistSpinner(true);
+        }
+        spinnerGenre.setEnabled(true);
+    }
 
     private ClientInfo getClientInfo(int canal) {
         if(!checkConnectedViaWifi())  {
@@ -935,10 +949,7 @@ public class ActivityMain extends AppCompatActivity {
             if(spinnerGenreSend) {
                 dimOn();
                 String genre = (String) parent.getItemAtPosition(pos);
-                if(!isRemoteConnected()) {
-                    displayedTrack.updateGenre(genre);
-                    refreshLocalPlaylistSpinner(true);
-                }
+                setGenre(genre);
             }
             spinnerGenreSend=true;
         }
@@ -1188,11 +1199,18 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void speechRecognizer() {
-        audioPlayer.pause();
+        //audioPlayer.pause(); //FIXME: Make pause/resume an option, another option being lowerVolume/resumeVolume
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Dites une commande.\n  ex: \"Note 4\", \"Suivant\" ...");
         startActivityForResult(intent, SPEECH_REQUEST_CODE);
+
+        //FIXME: Use a custom speech recognition:
+        // - to avoid google ui
+        // - to handle errors and so being able to ask user again
+        // - to avoid issue selecting wrongly Playlist subActivity with "Suivant" vocal command
+        //https://www.truiton.com/2014/06/android-speech-recognition-without-dialog-custom-activity/
     }
 
     @Override
@@ -1206,6 +1224,16 @@ public class ActivityMain extends AppCompatActivity {
             String arguments = keyWord.getKeyword();
             String msg= getString(R.string.unknownCommand) + " \"" + spokenText + "\".";
             switch (keyWord.getCommand()) {
+                case UNKNOWN:
+                    speak(msg);
+                    try {
+                        Thread.sleep(2000); //TODO: Can't we wait for speak to complete instead of sleeping ?
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    msg = "";
+                    askEdition(true);
+                    break;
                 case PLAY_PLAYLIST:
                     msg = getString(R.string.playlist)+" \"" + arguments + "\" "+getString(R.string.notFound);
                     for(Playlist playlist : localPlaylists.values()) {
@@ -1247,16 +1275,46 @@ public class ActivityMain extends AppCompatActivity {
                         msg = "";
                     }
                     break;
+                case SET_GENRE:
+                    String genre = arguments;
+                    if(arguments.length()>1) {
+                        genre = arguments.substring(0, 1).toUpperCase() + arguments.substring(1);
+                    }
+                    if(RepoGenres.get().contains(genre)) {
+                        setupSpinnerGenre(RepoGenres.get(), genre);
+                        setGenre(genre);
+                    } else {
+                        speak("Genre ".concat(genre).concat(" inconnu."));
+                        try {
+                            Thread.sleep(2000); //TODO: Can't we wait for speak to complete instead of sleeping ?
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    askEdition(true);
+                    msg = "";
+                    //audioPlayer.resume();
+                    break;
                 case SET_RATING:
+                    int rating=-1;
                     try {
-                        int rating = Integer.parseInt(arguments);
-                        ratingBar.setRating(rating);
-                        setRating(rating);
-                        askEdition(true);
-                        msg="";
+                         rating = Integer.parseInt(arguments);
                     } catch (NumberFormatException ex) {
                     }
-                    audioPlayer.resume();
+                    if(rating>0 && rating<6) {
+                        ratingBar.setRating(rating);
+                        setRating(rating);
+                    } else {
+                        speak("Note ".concat(arguments).concat(" incorrecte."));
+                        try {
+                            Thread.sleep(2000); //TODO: Can't we wait for speak to complete instead of sleeping ?
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    askEdition(true);
+                    msg="";
+                    //audioPlayer.resume();
                     break;
                 case SET_TAGS:
                     String[] tags = arguments.split(" ");
@@ -1272,7 +1330,7 @@ public class ActivityMain extends AppCompatActivity {
                     }
                     displayTrack(false);
                     askEdition(true);
-                    audioPlayer.resume();
+                    //audioPlayer.resume();
                     msg="";
                     break;
                 case PLAYER_NEXT:
@@ -1542,7 +1600,7 @@ public class ActivityMain extends AppCompatActivity {
 
         @Override
         public void onPlayBackStart() {
-            displayTrack(true);
+            displayTrack(false);
         }
 
         @Override
@@ -1571,7 +1629,7 @@ public class ActivityMain extends AppCompatActivity {
         {
             if(ScreenReceiver.isScreenOn
                     && toggleButtonDimMode.isChecked()
-                    && !isDimOn) {
+                    && (!isDimOn || force)) {
                 if(!toggleButtonEditTags.isChecked()) {
                     speechPostAction = SpeechPostAction.ASK_WITH_DELAY;
                 }
@@ -1594,8 +1652,9 @@ public class ActivityMain extends AppCompatActivity {
         if(displayedTrack.getRating()>0) {
             msg.append(" Note: ").append((int)displayedTrack.getRating()).append(".");
         } else {
-            msg.append(" Pas de note.");
+            msg.append(" Pas de note. ");
         }
+        msg.append(" Genre: ").append(displayedTrack.getGenre()).append(".");
         return msg.toString();
     }
 
