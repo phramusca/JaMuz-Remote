@@ -68,7 +68,6 @@ public class Track implements Serializable {
         this.playCounter = playCounter;
         this.status = Status.valueOf(status);
         this.size = size;
-        tags = new ArrayList<>();
     }
 
     public Track(double rating, String title, String album,
@@ -79,13 +78,11 @@ public class Track implements Serializable {
         this.artist = artist;
         this.coverHash = coverHash;
         this.genre=genre;
-        tags = new ArrayList<>();
         source="Remote";
     }
 
     public Track(File getAppDataPath, String absolutePath) {
         this.path = absolutePath;
-        tags = new ArrayList<>();
         try {
             this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length() + 1);
         } catch (StringIndexOutOfBoundsException ex) {
@@ -102,7 +99,7 @@ public class Track implements Serializable {
             title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
             genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
             return true;
-        } catch (final RuntimeException ex) {
+        } catch (RuntimeException ex) {
             Log.e(TAG, "Error reading file tags "+path, ex);
         }
         return false;
@@ -364,6 +361,7 @@ public class Track implements Serializable {
 
     public String getTags() {
         String tagsString="";
+        ArrayList<String> tags = getTags(false);
         if(tags!=null) {
             StringBuilder msg = new StringBuilder();
             for (String tag : tags) {
