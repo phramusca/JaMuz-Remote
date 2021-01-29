@@ -86,7 +86,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.stream.Collector;
 
 import static phramusca.com.jamuzremote.Playlist.Order.PLAYCOUNTER_LASTPLAYED;
 import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
@@ -722,7 +721,7 @@ public class ActivityMain extends AppCompatActivity {
             clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
         } else {
             displayedTrack.update();
-            displayTrack(false);
+            displayTrackDetails();
             refreshLocalPlaylistSpinner(true);
         }
         ratingBar.setEnabled(true);
@@ -735,7 +734,7 @@ public class ActivityMain extends AppCompatActivity {
             clientRemote.send("setGenre".concat(genre)); //FIXME: Check if JaMuz handles "setGenre". Do it if not
         } else {
             displayedTrack.updateGenre(genre);
-            displayTrack(false);
+            displayTrackDetails();
             refreshLocalPlaylistSpinner(true);
         }
         spinnerGenre.setEnabled(true);
@@ -1328,7 +1327,7 @@ public class ActivityMain extends AppCompatActivity {
                             }
                         }
                     }
-                    displayTrack(false);
+                    displayTrackDetails();
                     askEdition(true);
                     //audioPlayer.resume();
                     msg="";
@@ -1862,7 +1861,7 @@ public class ActivityMain extends AppCompatActivity {
                     makeButtonTagPlaylist(tag.getKey(), tag.getValue());
                 }
                 //Re-display track and playlist
-                displayTrack(false);
+                displayTrackDetails();
                 displayPlaylist(localSelectedPlaylist);
             }
         });
@@ -2187,6 +2186,18 @@ public class ActivityMain extends AppCompatActivity {
         });
     }
 
+    private void displayTrackDetails() {
+        runOnUiThread(() -> {
+            setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
+            "<html><BR/>"+
+                    (displayedTrack.getSource().equals("")?""
+                            :"<u>".concat(displayedTrack.getSource()).concat("</u>"))
+                    +""
+                    .concat(displayedTrack.toString())
+                    .concat("</html>"))));
+        });
+    }
+
     private void displayTrack(boolean forceReadTags) {
         if(displayedTrack!=null) {
             displayedTrack.getTags(forceReadTags);
@@ -2203,13 +2214,7 @@ public class ActivityMain extends AppCompatActivity {
                         "<html>"+
                                 displayedTrack.getAlbum()
                                         .concat("</html>"))));
-                setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
-                        "<html><BR/>"+
-                                (displayedTrack.getSource().equals("")?""
-                                        :"<u>".concat(displayedTrack.getSource()).concat("</u>"))
-                                +""
-                                .concat(displayedTrack.toString())
-                                .concat("</html>"))));
+                displayTrackDetails();
                 ratingBar.setEnabled(false);
                 ratingBar.setRating((float)displayedTrack.getRating());
                 ratingBar.setEnabled(true);
