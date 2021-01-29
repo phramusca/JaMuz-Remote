@@ -215,11 +215,6 @@ public class Track implements Serializable {
         return "Ajouté " + prettyTime.format(addedDate)+". ";
     }
 
-    /*@Override
-    public String toString() {
-        return relativeFullPath+"\nSize: "+size+" bytes. idFileServer="+idFileServer+". status="+status;
-    }*/
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
