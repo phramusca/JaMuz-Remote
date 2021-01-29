@@ -248,9 +248,6 @@ public class ServiceSync extends ServiceBase {
             processDownload = new ProcessDownload("ProcessDownload", this);
             processDownload.start();
         }
-        if (!checkCompleted() && clientSync != null) {
-            clientSync.close(false, "Sync part done", 2000, false);
-        }
     }
 
     private boolean checkCompleted() {
@@ -362,6 +359,8 @@ public class ServiceSync extends ServiceBase {
         private List<DownloadTask> downloadServices;
         private Notification notificationDownload;
         private ExecutorService pool;
+        private int nbRetries=0;
+        private int maxNbRetries=10;//TODO: Make number of retries an option eventually
 
         ProcessDownload(String name, Context context) {
             super(name);
@@ -375,7 +374,7 @@ public class ServiceSync extends ServiceBase {
             int progress = nbFilesTotal- remaining;
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("-").append(remaining).append("/").append(nbFilesTotal)
-                    .append("\n").append(StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false)).append("\n");
+                    .append("\n").append(StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false)).append("/").append(RepoSync.getTotalFileSize()).append("\n");
             StringBuilder stringBuilder2 = new StringBuilder();
             int nbErrors = 0;
             for(DownloadTask downloadService : downloadServices) {
@@ -386,7 +385,7 @@ public class ServiceSync extends ServiceBase {
                     stringBuilder2.append(downloadService.canal).append(": ").append(downloadService.status).append(" | ");
                 }
             }
-            stringBuilder.append(nbErrors).append(" Error(s)\n");
+            stringBuilder.append("Attempt ").append(nbRetries+1).append("/").append(maxNbRetries).append(". ").append(nbErrors).append(" Error(s).\n");
             stringBuilder.append(stringBuilder2.toString());
             String bigText = stringBuilder.toString();
             String msg = "Downloading ... " +bench.getLast();
@@ -399,12 +398,43 @@ public class ServiceSync extends ServiceBase {
 
         @Override
         public void run() {
+            boolean completed=false;
+            do {
+                startDownloads();
+                if(checkCompleted()) {
+                    completed=true;
+                    break;
+                }
+                nbRetries++;
+                try {
+                    int sleepSeconds=nbRetries*10;
+                    runOnUiThread(() -> {
+                        helperNotification.notifyBar(notificationDownload,
+                                new StringBuilder()
+                                        .append("Waiting ").append(sleepSeconds)
+                                        .append("s before attempt ")
+                                        .append(nbRetries+1).append("/").append(maxNbRetries)
+                                    .toString());
+                    });
+                    sleep(sleepSeconds*1000);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            } while (nbRetries<maxNbRetries);
+
+            if(!completed && !checkCompleted()) {
+                stopSync("Sync done but NOT complete :(", 10000);
+            }
+        }
+
+        private void startDownloads() {
             runOnUiThread(() -> {
                 helperNotification.notifyBar(notificationDownload, "Starting download ... ");
 
             });
             bench = new Benchmark(RepoSync.getRemainingSize(), 10);
-            pool = Executors.newFixedThreadPool(5);
+            pool = Executors.newFixedThreadPool(5); //TODO: Make number of threads an option
+            downloadServices= new ArrayList<>();
             int canal=100;
             for (Track track : RepoSync.getDownloadList()) {
                 track.getTags(true);
@@ -417,12 +447,6 @@ public class ServiceSync extends ServiceBase {
                 pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
-            if(!checkCompleted()) {
-                //FIXME: Restart process. Some tracks are still missing.
-                // due to some transfer errors
-                // Need to manage a fail counter with a limit (to be determined)
-                stopSync("Sync done but NOT complete :(", 10000);
             }
         }
 
@@ -490,7 +514,6 @@ public class ServiceSync extends ServiceBase {
             } catch (Exception e) {
                 setStatus("Err. "+e.getMessage(), null);
                 Log.e(TAG, "Error downloading "+track.getRelativeFullPath(), e);
-                //FIXME: Put file back in queue
             }
             callback.setStatus();
         }
