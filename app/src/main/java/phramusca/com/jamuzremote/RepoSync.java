@@ -135,6 +135,20 @@ public final class RepoSync {
         return tracks==null?0:tracks.size();
     }
 
+    static String totalFilesSize;
+
+    public synchronized static String getTotalFileSize() {
+        if(totalFilesSize!=null || tracks==null) {
+            return totalFilesSize;
+        }
+        long totalSize=0;
+        totalSize+=getRemainingFileSize(Track.Status.NEW);
+        totalSize+=getRemainingFileSize(Track.Status.DOWN);
+        totalSize+=getRemainingFileSize(Track.Status.DEL);
+        totalFilesSize=StringManager.humanReadableByteCount(totalSize, false);
+        return totalFilesSize;
+    }
+
     public synchronized static long getRemainingFileSize() {
         if(tracks ==null) {
             return 0;
