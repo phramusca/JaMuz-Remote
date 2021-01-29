@@ -112,12 +112,20 @@ public final class RepoSync {
         File file = new File(track.getPath());
         if(checkFile(track, file)) {
             track.setStatus(Track.Status.REC);
-            if (!track.readMetadata()) {
-                Log.w(TAG, "Cannot read tags. Deleting " + file.getAbsolutePath());
-                //noinspection ResultOfMethodCallIgnored
-                file.delete();
-                track.setStatus(Track.Status.NEW);
-            }
+            //FIXME: readMetadata often return false (at checkNewFile, when checking new list of files)
+            //java.lang.RuntimeException: setDataSource failed: status = 0x80000000
+            //which is weird as it has been read at previous reception and was valid.
+            // - Does it happen because we overload the file system by checking too much ?
+            // => Validate the file using a file hash instead (includes below metadata changes so if metadata changes, it will be re-downloaded)
+            //          OR sync album, artist, title and genre instead of reading file metadata
+            //            (IF not, unless file size does not change when metadata does we would not get metadata updates on those fields)
+            //  (only read file metadata for local files - ie: the one not synced)
+//            if (!track.readMetadata()) {
+//                Log.w(TAG, "Cannot read tags. Deleting " + file.getAbsolutePath());
+//                //noinspection ResultOfMethodCallIgnored
+//                file.delete();
+//                track.setStatus(Track.Status.NEW);
+//            }
         }
         tracks.put(track.getIdFileServer(), track.getStatus(), track);
     }
