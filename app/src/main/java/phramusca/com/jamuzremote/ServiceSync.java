@@ -248,6 +248,9 @@ public class ServiceSync extends ServiceBase {
             processDownload = new ProcessDownload("ProcessDownload", this);
             processDownload.start();
         }
+        if (!checkCompleted() && clientSync != null) {
+            clientSync.close(false, "Sync part done", 2000, false);
+        }
     }
 
     private boolean checkCompleted() {
