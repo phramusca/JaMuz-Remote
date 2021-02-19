@@ -16,17 +16,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-//FIXME: idFileServer can be null in db (so 0 in here) with a "REC" status
-//resulting in sync issues that blocks the transfer of other files
-// => how does it happen ???
-//FIXME !!!!!! Some tracks are inserted with NULL status and size -1. That should not be !!
-//+ it messes up merge since they are reported as NotFound
-//FIXME !!!!  TOP TOP TOP  !!!! Some tracks have ACK status but artist="" or title="" or album="" (most ALL the 3)
-//How ? Why ?
-// => Seems to happen after an export, during scan of existing device in files / clean unwanted
-//          ONLY OCCURS ON EXISTING FILES, (ie not on new ...)
-//          AND only in prod (takes more time highlighting possible algo issue b/w processes): TRY TO REPRODUCE  IN TEST !!!!
-
 /**
  * Created by raph on 01/05/17.
  */
@@ -101,7 +90,7 @@ public class Track implements Serializable {
         }
     }
 
-    public boolean readTags() {
+    public boolean readMetadata() {
         try {
             MediaMetadataRetriever mmr = new MediaMetadataRetriever();
             mmr.setDataSource(path);
@@ -110,7 +99,7 @@ public class Track implements Serializable {
             title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
             genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
             return true;
-        } catch (final RuntimeException ex) {
+        } catch (RuntimeException ex) {
             Log.e(TAG, "Error reading file tags "+path, ex);
         }
         return false;
@@ -222,11 +211,6 @@ public class Track implements Serializable {
         PrettyTime prettyTime = new PrettyTime(Locale.getDefault());
         return "Ajouté " + prettyTime.format(addedDate)+". ";
     }
-
-    /*@Override
-    public String toString() {
-        return relativeFullPath+"\nSize: "+size+" bytes. idFileServer="+idFileServer+". status="+status;
-    }*/
 
     @Override
     public boolean equals(Object o) {
@@ -359,7 +343,7 @@ public class Track implements Serializable {
         return thumb;
     }
 
-    //TODO: Do not update all, only requeted fields
+    //TODO: Do not update all, only requested fields
     public boolean update() {
         return HelperLibrary.musicLibrary != null && HelperLibrary.musicLibrary.updateTrack(this);
     }
@@ -369,7 +353,7 @@ public class Track implements Serializable {
      * @return boolean
      */
     public ArrayList<String> getTags(boolean force) {
-        if(HelperLibrary.musicLibrary!=null && (force || tags==null)) {
+        if(HelperLibrary.musicLibrary!=null && idFileRemote>-1 && (force || tags==null)) {
             tags = HelperLibrary.musicLibrary.getTags(idFileRemote);
         }
         return tags;
@@ -377,6 +361,7 @@ public class Track implements Serializable {
 
     public String getTags() {
         String tagsString="";
+        ArrayList<String> tags = getTags(false);
         if(tags!=null) {
             StringBuilder msg = new StringBuilder();
             for (String tag : tags) {
@@ -388,10 +373,6 @@ public class Track implements Serializable {
             }
         }
         return tagsString;
-    }
-
-    public void setTags(ArrayList<String> tags) {
-        this.tags = tags;
     }
 
     /**
