@@ -190,7 +190,7 @@ public class MusicLibrary {
 
     synchronized boolean insertOrUpdateTrack(String absolutePath) {
         Track track = new Track(getAppDataPath, absolutePath);
-        if(track.readTags()) {
+        if(track.readMetadata()) {
             return insertOrUpdateTrack(track);
         }
         return false;
@@ -545,7 +545,7 @@ public class MusicLibrary {
             ContentValues values = new ContentValues();
             values.put(COL_GENRE, track.getGenre());
             return db.update(TABLE_TRACKS,
-                    values,
+                                values,
                     COL_ID_REMOTE + " = " +track.getIdFileRemote(), null);
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "updateGenre("+track.getIdFileRemote()+")", ex);
