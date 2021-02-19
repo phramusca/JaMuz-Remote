@@ -248,6 +248,7 @@ public class ServiceSync extends ServiceBase {
             processDownload = new ProcessDownload("ProcessDownload", this);
             processDownload.start();
         }
+        //TODO: Do not even try to connect when download is already running
         if (!checkCompleted() && clientSync != null) {
             clientSync.close(false, "Sync part done", 2000, false);
         }
