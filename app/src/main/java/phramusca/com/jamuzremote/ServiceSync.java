@@ -15,12 +15,20 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  *
@@ -31,7 +39,6 @@ public class ServiceSync extends ServiceBase {
     private static final String TAG = ServiceSync.class.getName();
     public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE_SCAN_REMOTE";
 
-    private ClientSync clientSync;
     private ProcessDownload processDownload;
     private ClientInfo clientInfo;
     private Benchmark bench;
@@ -74,13 +81,197 @@ public class ServiceSync extends ServiceBase {
                 RepoSync.read();
                 helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
                 bench = new Benchmark(RepoSync.getRemainingSize(), 10);
-                clientSync = new ClientSync(clientInfo, new ListenerSync(), true);
-                if(clientSync.connect()) {
-                    clientSync.request("requestTags");
+
+                //FIXME: GET /version to check both server is reachable and ... version of course
+
+                if(!getTags()) {
+                    //TODO: then what ?
+                }
+                if(!getGenres()) {
+                    //TODO: then what ?
+                }
+                if(!requestMerge()) {
+                    //TODO: then what ?
+                }
+                if(!getNewFiles()) {
+                    //TODO: then what ?
+                }
+                startSync();
+
+                if(!checkCompleted()) {
+                    //TODO: then what ?
                 }
             }
         }.start();
         return START_REDELIVER_INTENT;
+    }
+
+    private boolean getTags() {
+        OkHttpClient client = new OkHttpClient();
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/tags").newBuilder();
+//                urlBuilder.addQueryParameter("client", key);
+        String url = urlBuilder.build().toString();
+        Request request = new Request.Builder().url(url).build();
+        Response response;
+        try {
+            response = client.newCall(request).execute();
+            helperNotification.notifyBar(notificationSync, "Received tags ... ");
+            String body = response.body().string();
+            System.out.println("postJSONRequest response.body : "+body);
+            //TODO: use gson instead
+//                    final Gson gson = new Gson();
+//                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
+//                    fromJson.chromaprint=chromaprint;
+            final JSONObject jObject = new JSONObject(body);
+            //FIXME: Get tags list with their respective number of files, for sorting
+            //TODO: Then add a "x/y" button to display pages x/y (# of tags per page to be defined/optional)
+            final JSONArray jsonTags = (JSONArray) jObject.get("tags");
+            final List<String> newTags = new ArrayList<>();
+            for (int i = 0; i < jsonTags.length(); i++) {
+                newTags.add((String) jsonTags.get(i));
+            }
+            RepoTags.set(newTags);
+            sendMessage("setupTags");
+            return true;
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean getGenres() {
+        OkHttpClient client = new OkHttpClient();
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/genres").newBuilder();
+//                urlBuilder.addQueryParameter("client", key);
+        String url = urlBuilder.build().toString();
+        Request request = new Request.Builder().url(url).build();
+        Response response;
+        try {
+            response = client.newCall(request).execute();
+            helperNotification.notifyBar(notificationSync, "Received tags ... ");
+            String body = response.body().string();
+            System.out.println("postJSONRequest response.body : "+body);
+            //TODO: use gson instead
+//                    final Gson gson = new Gson();
+//                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
+//                    fromJson.chromaprint=chromaprint;
+            final JSONObject jObject = new JSONObject(body);
+            final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
+            final List<String> newGenres = new ArrayList<>();
+            for (int i = 0; i < jsonGenres.length(); i++) {
+                final String genre = (String) jsonGenres.get(i);
+                newGenres.add(genre);
+            }
+            RepoGenres.set(newGenres);
+            sendMessage("setupGenres");
+            return true;
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean requestMerge() {
+        helperNotification.notifyBar(notificationSync,"Requesting statistics merge.");
+        List<Track> tracks = RepoSync.getMergeList();
+        for(Track track : tracks) {
+            track.getTags(true);
+        }
+
+        OkHttpClient client = new OkHttpClient();
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/files").newBuilder();
+        String url = urlBuilder.build().toString();
+        try {
+            JSONObject obj = new JSONObject();
+            obj.put("type", "FilesToMerge");
+            JSONArray filesToMerge = new JSONArray();
+            for (Track track : tracks) {
+                filesToMerge.put(track.toJSONObject());
+            }
+            obj.put("files", filesToMerge);
+            obj.put("user", clientInfo.toJSONObject());
+            Request request = new Request.Builder()
+                    .post(RequestBody.create(obj.toString(), MediaType.parse("application/json; charset=utf-8"))).url(url).build();
+            Response response = client.newCall(request).execute();
+            if(!response.isSuccessful()) {
+                return false;
+            }
+            //FIXME: Test merge (both sides). WARNING: not sure that received list is the proper one (completed:List instead of mergeListDbSelected)
+
+            helperNotification.notifyBar(notificationSync,"Updating database with merge changes ... ");
+            String body = response.body().string();
+            //TODO: use gson instead
+//                    final Gson gson = new Gson();
+//                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
+//                    fromJson.chromaprint=chromaprint;
+            final JSONObject jObject = new JSONObject(body);
+            JSONArray filesToUpdate = (JSONArray) jObject.get("files");
+            for (int i = 0; i < filesToUpdate.length(); i++) {
+                Track fileReceived = new Track(
+                        (JSONObject) filesToUpdate.get(i),
+                        getAppDataPath);
+                if(fileReceived.readMetadata()) {
+                    fileReceived.setStatus(Track.Status.REC);
+                    HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived);
+                }
+                helperNotification.notifyBar(notificationSync,
+                        "Updating database with merge changes", 10, i+1, filesToUpdate.length());
+            }
+            runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Merge complete. Request new files ... ", 2000));
+            return true;
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean getNewFiles() {
+        OkHttpClient client = new OkHttpClient();
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/files").newBuilder();
+        String url = urlBuilder.build().toString();
+        Request request = new Request.Builder()
+                .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
+                .get().url(url).build();
+        Response response;
+        try {
+            response = client.newCall(request).execute();
+            if(!response.isSuccessful()) {
+                return false;
+            }
+            String body = response.body().string();
+            //TODO: use gson instead
+//                    final Gson gson = new Gson();
+//                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
+//                    fromJson.chromaprint=chromaprint;
+            final JSONObject jObject = new JSONObject(body);
+            helperNotification.notifyBar(notificationSync, "Received new list of files to get");
+            ArrayList<Track> newTracks = new ArrayList<>();
+            JSONArray files = (JSONArray) jObject.get("files");
+            helperNotification.notifyBar(notificationSync,
+                    getString(R.string.syncCheckFilesOnDisk));
+            RepoSync.reset();
+            HelperLibrary.musicLibrary.updateStatus(); //FIXME: Do this different as checking files takes time and meanwhile, files are not available for playing
+            for (int i = 0; i < files.length(); i++) {
+                Track fileReceived = new Track(
+                        (JSONObject) files.get(i),
+                        getAppDataPath);
+                fileReceived.setStatus(Track.Status.NEW);
+                RepoSync.checkNewFile(fileReceived);
+                newTracks.add(fileReceived);
+                helperNotification.notifyBar(notificationSync,
+                        getString(R.string.syncCheckFilesOnDisk), 50, i+1, files.length());
+            }
+            helperNotification.notifyBar(notificationSync,
+                    "Updating database with new tracks ("+newTracks.size()+"). Please wait...");
+            HelperLibrary.musicLibrary.insertTrackOrUpdateStatus(newTracks);
+            scanAndDeleteUnwantedInThread(getAppDataPath);
+            runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
+                    "Received "+newTracks.size()+" files to download.", 2000));
+            return true;
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
@@ -106,140 +297,11 @@ public class ServiceSync extends ServiceBase {
             processDownload.stopDownloads();
             processDownload = null;
         }
-        if (clientSync != null) {
-            clientSync.close(false, msg, millisInFuture, true);
+        if (!msg.equals("")) {
+            runOnUiThread(() -> helperNotification.notifyBar(notificationSync, msg, millisInFuture));
         }
         sendMessage("enableSync");
         stopSelf();
-    }
-
-    class ListenerSync implements IListenerSync {
-
-        private final String TAG = ListenerSync.class.getName();
-
-        @Override
-        public void onReceivedJson(final String json) {
-            try {
-                final JSONObject jObject = new JSONObject(json);
-                String type = jObject.getString("type");
-                switch(type) {
-                    case "StartSync":
-                        startSync();
-                        break;
-                    case "FilesToGet":
-                        helperNotification.notifyBar(notificationSync, "Received new list of files to get");
-                        ArrayList<Track> newTracks = new ArrayList<>();
-                        JSONArray files = (JSONArray) jObject.get("files");
-                        helperNotification.notifyBar(notificationSync,
-                                getString(R.string.syncCheckFilesOnDisk));
-                        RepoSync.reset();
-                        HelperLibrary.musicLibrary.updateStatus(); //FIXME: Do this different as checking files takes time and meanwhile, files are not available for playing
-                        for (int i = 0; i < files.length(); i++) {
-                            Track fileReceived = new Track(
-                                    (JSONObject) files.get(i),
-                                    getAppDataPath);
-                            fileReceived.setStatus(Track.Status.NEW);
-                            RepoSync.checkNewFile(fileReceived);
-                            newTracks.add(fileReceived);
-                            helperNotification.notifyBar(notificationSync,
-                                    getString(R.string.syncCheckFilesOnDisk), 50, i+1, files.length());
-                        }
-                        helperNotification.notifyBar(notificationSync,
-                                "Updating database with new tracks ("+newTracks.size()+"). Please wait...");
-                        HelperLibrary.musicLibrary.insertTrackOrUpdateStatus(newTracks);
-                        scanAndDeleteUnwantedInThread(getAppDataPath);
-                        runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
-                                "Received "+newTracks.size()+" files to download.", 2000));
-                        startSync();
-                        break;
-                    case "mergeListDbSelected":
-                        helperNotification.notifyBar(notificationSync,"Updating database with merge changes ... ");
-                        JSONArray filesToUpdate = (JSONArray) jObject.get("files");
-                        for (int i = 0; i < filesToUpdate.length(); i++) {
-                            Track fileReceived = new Track(
-                                    (JSONObject) filesToUpdate.get(i),
-                                    getAppDataPath);
-                            if(fileReceived.readMetadata()) {
-                                fileReceived.setStatus(Track.Status.REC);
-                                HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived);
-                            }
-                            helperNotification.notifyBar(notificationSync,
-                                    "Updating database with merge changes", 10, i+1, filesToUpdate.length());
-                        }
-                        runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Merge complete. Request new files ... ", 2000));
-                        clientSync.request("requestNewFiles");
-                        break;
-                    case "tags":
-                        helperNotification.notifyBar(notificationSync, "Received tags ... ");
-                        new Thread() {
-                            public void run() {
-                                try {
-                                    //FIXME: Get tags list with their respective number of files, for sorting
-                                    //TODO: Then add a "x/y" button to display pages x/y (# of tags per page to be defined/optional)
-                                    final JSONArray jsonTags = (JSONArray) jObject.get("tags");
-                                    final List<String> newTags = new ArrayList<>();
-                                    for (int i = 0; i < jsonTags.length(); i++) {
-                                        newTags.add((String) jsonTags.get(i));
-                                    }
-                                    RepoTags.set(newTags);
-                                    sendMessage("setupTags");
-                                    clientSync.request("requestGenres");
-                                } catch (JSONException e) {
-                                    Log.e(TAG, e.toString());
-                                }
-                            }
-                        }.start();
-                        break;
-                    case "genres":
-                        helperNotification.notifyBar(notificationSync, "Received genres ... ");
-                        new Thread() {
-                            public void run() {
-                                try {
-                                    final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
-                                    final List<String> newGenres = new ArrayList<>();
-                                    for (int i = 0; i < jsonGenres.length(); i++) {
-                                        final String genre = (String) jsonGenres.get(i);
-                                        newGenres.add(genre);
-                                    }
-                                    RepoGenres.set(newGenres);
-                                    sendMessage("setupGenres");
-                                    requestMerge();
-                                } catch (JSONException e) {
-                                    Log.e(TAG, e.toString());
-                                }
-                            }
-                        }.start();
-                        break;
-                }
-            } catch (JSONException e) {
-                Log.e(TAG, e.toString());
-            }
-        }
-
-        @Override
-        public void onReceivedFile(final Track fileInfoReception) {
-        }
-
-        @Override
-        public void onReceivingFile(final Track fileInfoReception) {
-        }
-
-        @Override
-        public void onConnected() {
-            sendMessage("connectedSync");
-            helperNotification.notifyBar(notificationSync, "Connected ... ");
-        }
-
-        @Override
-        public void onDisconnected(boolean reconnect, final String msg, final long millisInFuture, boolean enable) {
-            if (!msg.equals("")) {
-                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, msg, millisInFuture));
-            }
-            if (!reconnect && enable) {
-                sendMessage("enableSync");
-                stopSelf();
-            }
-        }
     }
 
     private void startSync() {
@@ -247,10 +309,6 @@ public class ServiceSync extends ServiceBase {
             Log.i(TAG, "START ProcessDownload");
             processDownload = new ProcessDownload("ProcessDownload", this);
             processDownload.start();
-        }
-        //TODO: Do not even try to connect when download is already running
-        if (!checkCompleted() && clientSync != null) {
-            clientSync.close(false, "Sync part done", 2000, false);
         }
     }
 
@@ -274,16 +332,6 @@ public class ServiceSync extends ServiceBase {
             return true;
         }
         return false;
-    }
-
-    private void requestMerge() {
-        runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
-                "Requesting statistics merge."));
-        List<Track> tracks = RepoSync.getMergeList();
-        for(Track track : tracks) {
-            track.getTags(true);
-        }
-        clientSync.requestMerge(tracks);
     }
 
     private void scanAndDeleteUnwantedInThread(final File path) {
@@ -361,10 +409,10 @@ public class ServiceSync extends ServiceBase {
     private class ProcessDownload extends ProcessAbstract {
 
         private List<DownloadTask> downloadServices;
-        private Notification notificationDownload;
+        private final Notification notificationDownload;
         private ExecutorService pool;
         private int nbRetries=0;
-        private int maxNbRetries=10;//TODO: Make number of retries an option eventually
+        private final int maxNbRetries=10;//TODO: Make number of retries an option eventually
 
         ProcessDownload(String name, Context context) {
             super(name);
@@ -472,7 +520,7 @@ public class ServiceSync extends ServiceBase {
     private class DownloadTask extends ProcessAbstract implements Runnable {
         private final int canal;
         private final IListenerSyncDown callback;
-        private Track track;
+        private final Track track;
         private String status="";
 
         private DownloadTask(Track track, int canal, IListenerSyncDown callback) {

@@ -55,6 +55,9 @@ dependencies {
     }
 
     implementation 'com.squareup.picasso:picasso:2.5.2' //Picasso (hassle-free image loading)
+
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
+
 }
 
 repositories {
