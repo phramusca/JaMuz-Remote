@@ -125,7 +125,7 @@ public class ServiceScan extends ServiceBase {
                     //This will remove from db files not in filesystem
                     //It IS compatible with ServiceSync
                     checkAbort();
-                    List<Track> tracks = new Playlist("ScanFolder", false).getTracks();
+                    List<Track> tracks = new Playlist("ScanFolder", false).getTracks(false);
                     nbFilesTotal = tracks.size();
                     nbFiles=0;
                     for(Track track : tracks) {

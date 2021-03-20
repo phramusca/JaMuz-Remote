@@ -913,7 +913,7 @@ public class ActivityMain extends AppCompatActivity {
             displayPlaylist(playlist);
             localSelectedPlaylist = playlist;
             if(playNext) {
-                PlayQueue.queue.setQueue(playlist.getTracks(10));
+                PlayQueue.queue.setQueue(playlist.getTracks(10, false));
                 playNext();
             } else {
                 refreshQueueAndPlaylistSpinner(false);
@@ -1321,7 +1321,6 @@ public class ActivityMain extends AppCompatActivity {
                         if(tag.length()>1) {
                             String s1 = tag.substring(0, 1).toUpperCase();
                             String tagCamel = s1 + tag.substring(1).toLowerCase();
-                            System.out.println(tagCamel);
                             if(RepoTags.get().containsValue(tagCamel)) {
                                 toggleTag(tagCamel);
                             }
@@ -1972,7 +1971,7 @@ public class ActivityMain extends AppCompatActivity {
                 if(file.endsWith(".plli")) {
                     Playlist playlist = readPlaylist(file);
                     if(playlist != null) {
-                        playlist.getNbFiles();
+                        playlist.getNbFiles(false);
                         localPlaylists.put(playlist.getName(), playlist);
                     }
                 }
@@ -2032,10 +2031,10 @@ public class ActivityMain extends AppCompatActivity {
                 public void run() {
                     if(refreshAll) {
                         for(Playlist playlist : localPlaylists.values()) {
-                            playlist.getNbFiles();
+                            playlist.getNbFiles(false);
                         }
                     } else {
-                        localSelectedPlaylist.getNbFiles();
+                        localSelectedPlaylist.getNbFiles(false);
                     }
                     runOnUiThread(() -> playListArrayAdapter.notifyDataSetChanged());
                 }

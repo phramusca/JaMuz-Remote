@@ -26,12 +26,7 @@ public final class RepoSync {
     }
     protected synchronized static void read() {
         tracks = HashBasedTable.create();
-        read(Track.Status.NEW);
-        read(Track.Status.REC);
-    }
-
-    private synchronized static void read(Track.Status status) {
-        List<Track> newTracks = HelperLibrary.musicLibrary.getTracks(status);
+        List<Track> newTracks = HelperLibrary.musicLibrary.getTracks("", "", "", -1);
         for(Track track : newTracks) {
             tracks.put(track.getIdFileServer(), track.getStatus(), track);
         }
@@ -196,5 +191,12 @@ public final class RepoSync {
 
     public static List<Track> getMergeList() {
         return new ArrayList<>(tracks.column(Track.Status.REC).values());
+    }
+
+    public static Track getFile(int i) {
+        if(tracks.containsRow(i)) {
+            return tracks.row(i).values().iterator().next();
+        }
+        return null;
     }
 }

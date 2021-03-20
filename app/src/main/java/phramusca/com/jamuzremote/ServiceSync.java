@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.PowerManager;
 import android.util.Log;
+import android.util.Pair;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,7 +19,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -97,6 +100,61 @@ public class ServiceSync extends ServiceBase {
                 if(!requestMerge()) {
                     //TODO: then what ?
                 }
+
+                Pair<Integer, Integer>  filesInfos = getFilesInfos();
+                if(filesInfos==null) {
+                    stopSync("Error receiving filesInfos: "+filesInfos+".", 5000);
+                    return;
+                }
+                int maxIdFileServer=filesInfos.first;
+                int nbFilesServer=filesInfos.second;
+
+                //FIXME: Get maxIdFileRemote and only do the following if maxIdFileRemote<maxIdFileServer
+
+                //Get server library
+                int nbFilesInBatch=10;
+                Map<Integer, Track> filesServer = new HashMap<>();
+                for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
+                    filesServer.putAll(getFiles(i, nbFilesInBatch));
+                }
+
+                int i =0;
+                for (Track trackServer:filesServer.values()) {
+                    Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
+                    if(trackRemote==null) {
+                        helperNotification.notifyBar(notificationSync,
+                                "Inserting files", 10, i+1, filesServer.size());
+                        i++;
+                        trackServer.setStatus(Track.Status.INFO);
+                        HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
+                    } else {
+                        //FIXME: What ?
+                    }
+                }
+
+                //FIXME: Prevent inserting Status.INFO tracks in playQueue
+
+                //FIXME: Offer to download the file
+
+                //FIXME: Continue from here:
+
+/*
+                Track trackServer = filesServer.get(i);
+
+                Track track = RepoSync.getFile(i);
+                if(track==null) {
+                    //FIXME: Insert in db
+                    track.setStatus(Track.Status.INFO);
+                    HelperLibrary.musicLibrary.insertOrUpdateTrack(track);
+                } else {
+                    //FIXME: Based on both statuses, either:
+                    //- Add to download list
+                    //- Delete
+                    //- merge ?
+                }
+                */
+
+                //FIXME: Include this in above loop
                 if(!getNewFiles()) {
                     //TODO: then what ?
                 }
@@ -121,11 +179,35 @@ public class ServiceSync extends ServiceBase {
             response = client.newCall(request).execute();
             helperNotification.notifyBar(notificationSync, "Received version ... ");
             String body = response.body().string();
-            System.out.println("postJSONRequest response.body : "+body);
             return body;
         } catch (IOException e) {
             e.printStackTrace();
             return "";
+        }
+    }
+
+    private Pair<Integer, Integer> getFilesInfos() {
+        OkHttpClient client = new OkHttpClient();
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/files/maxId").newBuilder();
+//                urlBuilder.addQueryParameter("client", key);
+        String url = urlBuilder.build().toString();
+        Request request = new Request.Builder().url(url).build();
+        Response response;
+        try {
+            response = client.newCall(request).execute();
+            helperNotification.notifyBar(notificationSync, "Received maxId ... ");
+            String body = response.body().string();
+            //TODO: use gson instead
+//                    final Gson gson = new Gson();
+//                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
+//                    fromJson.chromaprint=chromaprint;
+            final JSONObject jObject = new JSONObject(body);
+            final Integer maxId = (Integer) jObject.get("max");
+            final Integer count = (Integer) jObject.get("count");
+            return new Pair<>(maxId, count);
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -140,7 +222,6 @@ public class ServiceSync extends ServiceBase {
             response = client.newCall(request).execute();
             helperNotification.notifyBar(notificationSync, "Received tags ... ");
             String body = response.body().string();
-            System.out.println("postJSONRequest response.body : "+body);
             //TODO: use gson instead
 //                    final Gson gson = new Gson();
 //                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
@@ -173,7 +254,6 @@ public class ServiceSync extends ServiceBase {
             response = client.newCall(request).execute();
             helperNotification.notifyBar(notificationSync, "Received tags ... ");
             String body = response.body().string();
-            System.out.println("postJSONRequest response.body : "+body);
             //TODO: use gson instead
 //                    final Gson gson = new Gson();
 //                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
@@ -219,8 +299,6 @@ public class ServiceSync extends ServiceBase {
             if(!response.isSuccessful()) {
                 return false;
             }
-            //FIXME: Test merge (both sides). WARNING: not sure that received list is the proper one (completed:List instead of mergeListDbSelected)
-
             helperNotification.notifyBar(notificationSync,"Updating database with merge changes ... ");
             String body = response.body().string();
             //TODO: use gson instead
@@ -248,9 +326,46 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    private boolean getNewFiles() {
+    private Map<Integer, Track> getFiles(int idFrom, int nbFilesInBatch) {
         OkHttpClient client = new OkHttpClient();
         HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/files").newBuilder();
+        urlBuilder.addQueryParameter("idFrom", String.valueOf(idFrom));
+        urlBuilder.addQueryParameter("nbFilesInBatch", String.valueOf(nbFilesInBatch));
+        String url = urlBuilder.build().toString();
+        Request request = new Request.Builder()
+                .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
+                .get().url(url).build();
+        Response response;
+        try {
+            response = client.newCall(request).execute();
+            if(!response.isSuccessful()) {
+                return null;
+            }
+            String body = response.body().string();
+            //TODO: use gson instead
+//                    final Gson gson = new Gson();
+//                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
+//                    fromJson.chromaprint=chromaprint;
+            final JSONObject jObject = new JSONObject(body);
+            helperNotification.notifyBar(notificationSync, "Received files from "+idFrom);
+            Map<Integer, Track> newTracks = new HashMap<>();
+            JSONArray files = (JSONArray) jObject.get("files");
+            for (int i = 0; i < files.length(); i++) {
+                Track fileReceived = new Track(
+                        (JSONObject) files.get(i),
+                        getAppDataPath);
+                newTracks.put(fileReceived.getIdFileServer(), fileReceived);
+            }
+            return newTracks;
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private boolean getNewFiles() {
+        OkHttpClient client = new OkHttpClient();
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/new-files").newBuilder();
         String url = urlBuilder.build().toString();
         Request request = new Request.Builder()
                 .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
