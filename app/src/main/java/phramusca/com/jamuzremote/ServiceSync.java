@@ -82,7 +82,11 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
                 bench = new Benchmark(RepoSync.getRemainingSize(), 10);
 
-                //FIXME: GET /version to check both server is reachable and ... version of course
+                String version = getVersion();
+                if(!version.equals("1")) {
+                    stopSync("Server version \""+version+"\" is not supported.", 5000);
+                    return;
+                }
 
                 if(!getTags()) {
                     //TODO: then what ?
@@ -104,6 +108,25 @@ public class ServiceSync extends ServiceBase {
             }
         }.start();
         return START_REDELIVER_INTENT;
+    }
+
+    private String getVersion() {
+        OkHttpClient client = new OkHttpClient();
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/version").newBuilder();
+//                urlBuilder.addQueryParameter("client", key);
+        String url = urlBuilder.build().toString();
+        Request request = new Request.Builder().url(url).build();
+        Response response;
+        try {
+            response = client.newCall(request).execute();
+            helperNotification.notifyBar(notificationSync, "Received version ... ");
+            String body = response.body().string();
+            System.out.println("postJSONRequest response.body : "+body);
+            return body;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
     private boolean getTags() {
@@ -298,7 +321,10 @@ public class ServiceSync extends ServiceBase {
             processDownload = null;
         }
         if (!msg.equals("")) {
-            runOnUiThread(() -> helperNotification.notifyBar(notificationSync, msg, millisInFuture));
+            runOnUiThread(() -> {
+                helperNotification.notifyBar(notificationSync, msg, millisInFuture);
+                helperToast.toastLong(msg);
+            });
         }
         sendMessage("enableSync");
         stopSelf();
