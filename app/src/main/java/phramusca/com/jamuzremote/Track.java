@@ -121,6 +121,11 @@ public class Track implements Serializable {
             lastPlayed = getDate(file, "lastPlayed");
             playCounter = file.getInt("playCounter");
             genre = file.getString("genre");
+
+            album= file.getString("album");
+            artist= file.getString("artist");
+            title= file.getString("title");
+
             JSONArray jsonTags = (JSONArray) file.get("tags");
             tags = new ArrayList<>();
             for(int i=0; i<jsonTags.length(); i++) {
@@ -186,10 +191,8 @@ public class Track implements Serializable {
         return length;
     }
 
-
-
     public enum Status {
-        NEW, DOWN, REC, NULL, DEL;
+        NEW, DOWN, REC, NULL, DEL, INFO;
 
         Status() {
         }

@@ -532,7 +532,7 @@ public class MusicLibrary {
             values.put(COL_STATUS, Track.Status.DEL.name());
             return db.update(TABLE_TRACKS,
                     values,
-                    COL_STATUS+"!=\"NULL\"", null);
+                    COL_STATUS+"WHERE status NOT IN (\"" + Track.Status.NULL.name() + "\") ,\"" + Track.Status.INFO.name() + "\") ", null);
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "updateStatus()", ex);
         }
