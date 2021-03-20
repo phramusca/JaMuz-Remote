@@ -70,11 +70,15 @@ public class ActivityAlbumTracks extends AppCompatActivity {
     }
 
     private void insertAndSetResult(Track track, boolean playNext) {
-        PlayQueue.queue.insert(track);
+        if(!track.getStatus().equals(Track.Status.INFO)) {
+            PlayQueue.queue.insert(track);
 
-        Intent data = new Intent();
-        data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");
-        setResult(RESULT_OK, data);
-        finish();
+            Intent data = new Intent();
+            data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");
+            setResult(RESULT_OK, data);
+            finish();
+        } else {
+            new HelperToast(getApplicationContext()).toastShort("Can't insert this file, it has not been downloaded.");
+        }
     }
 }
