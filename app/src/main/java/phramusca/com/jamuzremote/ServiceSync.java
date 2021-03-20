@@ -121,18 +121,16 @@ public class ServiceSync extends ServiceBase {
                 int i =0;
                 for (Track trackServer:filesServer.values()) {
                     Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
+                    helperNotification.notifyBar(notificationSync,
+                            "Inserting files (if missing)", 10, i+1, filesServer.size());
+                    i++;
                     if(trackRemote==null) {
-                        helperNotification.notifyBar(notificationSync,
-                                "Inserting files", 10, i+1, filesServer.size());
-                        i++;
                         trackServer.setStatus(Track.Status.INFO);
                         HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
                     } else {
                         //FIXME: What ?
                     }
                 }
-
-                //FIXME: Prevent inserting Status.INFO tracks in playQueue
 
                 //FIXME: Offer to download the file
 
