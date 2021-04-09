@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -113,10 +114,17 @@ public class ServiceSync extends ServiceBase {
 
                 //Get server library
                 int nbFilesInBatch=10;
-                Map<Integer, Track> filesServer = new HashMap<>();
+                Map<Integer, Track> filesServer = new LinkedHashMap<>();
                 for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
-                    filesServer.putAll(getFiles(i, nbFilesInBatch));
+                    Map<Integer, Track> filesMap = getFiles(i, nbFilesInBatch);
+                    if(filesMap!=null) {
+                        filesServer.putAll(filesMap);
+                    } else {
+                        //FIXME: What ?
+                    }
                 }
+
+                //FIXME !!!!!!!!!!! Continue from here:
 
                 int i =0;
                 for (Track trackServer:filesServer.values()) {
@@ -346,7 +354,7 @@ public class ServiceSync extends ServiceBase {
 //                    fromJson.chromaprint=chromaprint;
             final JSONObject jObject = new JSONObject(body);
             helperNotification.notifyBar(notificationSync, "Received files from "+idFrom);
-            Map<Integer, Track> newTracks = new HashMap<>();
+            Map<Integer, Track> newTracks = new LinkedHashMap<>();
             JSONArray files = (JSONArray) jObject.get("files");
             for (int i = 0; i < files.length(); i++) {
                 Track fileReceived = new Track(

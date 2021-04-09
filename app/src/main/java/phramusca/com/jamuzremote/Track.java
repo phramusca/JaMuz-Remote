@@ -125,6 +125,7 @@ public class Track implements Serializable {
             album= file.getString("album");
             artist= file.getString("artist");
             title= file.getString("title");
+            status=Status.valueOf(file.getString("status"));
 
             JSONArray jsonTags = (JSONArray) file.get("tags");
             tags = new ArrayList<>();
