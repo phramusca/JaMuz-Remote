@@ -98,6 +98,8 @@ public class ServiceSync extends ServiceBase {
                 if(!getGenres()) {
                     //TODO: then what ?
                 }
+
+                //FIXME !!!! Check status for merge to avoid merge errors
                 if(!requestMerge()) {
                     //TODO: then what ?
                 }
@@ -110,7 +112,9 @@ public class ServiceSync extends ServiceBase {
                 int maxIdFileServer=filesInfos.first;
                 int nbFilesServer=filesInfos.second;
 
-                //FIXME: Get maxIdFileRemote and only do the following if maxIdFileRemote<maxIdFileServer
+                //FIXME: Review sync process below (statuses handling)
+                // - Maybe Use maxIdFileRemote and only do the following if maxIdFileRemote<maxIdFileServer
+                // - ...
 
                 //Get server library
                 int nbFilesInBatch=10;
@@ -121,15 +125,16 @@ public class ServiceSync extends ServiceBase {
                         for (Track trackServer:filesMap.values()) {
                             Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
                             switch (trackServer.getStatus()) {
-                                case DEL:
-                                case INFO: //FIXME: Merge INFO into DEL (so that files are ONLY either to be retrieved or deleted)
+                                case INFO:
+                                    File file = new File(trackServer.getPath());
+                                    file.delete();
                                     break;
                                 case NEW:
                                     RepoSync.checkNewFile(trackServer);
                                     break;
                             }
                             helperNotification.notifyBar(notificationSync,
-                                    getString(R.string.syncCheckFilesOnDisk), 10, j+1, filesMap.size());
+                                    getString(R.string.syncCheckFilesOnDisk), 50, i+j+1, nbFilesServer);
                             j++;
                             trackServer.setStatus(trackServer.getStatus());
                             HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
@@ -138,7 +143,6 @@ public class ServiceSync extends ServiceBase {
                         //FIXME: What ?
                     }
                 }
-                scanAndDeleteUnwantedInThread(getAppDataPath);
 
                 //FIXME: Offer to download one file
 
@@ -408,78 +412,6 @@ public class ServiceSync extends ServiceBase {
             return true;
         }
         return false;
-    }
-
-    private void scanAndDeleteUnwantedInThread(final File path) {
-        ProcessAbstract processAbstract = new ProcessAbstract(
-                "Thread.ActivityMain.ScanUnWantedRepoSync") {
-            public void run() {
-                try {
-                    if(!path.getAbsolutePath().equals("/")) {
-                        nbFiles = 0;
-                        nbDeleted = 0;
-                        browseDb();
-                        nbFiles = 0;
-                        browseFS(path);
-                        runOnUiThread(() -> helperNotification.notifyBar(notificationSyncScan,
-                                "Deleted "+nbDeleted+" unrequested files.",
-                                10000));
-                    }
-                } catch (InterruptedException e) {
-                    Log.w(TAG, "Thread.ActivityMain.ScanUnWantedRepoSync InterruptedException");
-                }
-            }
-
-            private void browseDb() {
-                List<Track> tracks = HelperLibrary.musicLibrary.getTracks(Track.Status.DEL);
-                for(Track track : tracks) {
-                    File file = new File(track.getPath());
-                    if(!file.exists() || file.delete()) {
-                        nbDeleted++;
-                        HelperLibrary.musicLibrary.deleteTrack(track.getPath());
-                    }
-                    nbFiles++;
-                    helperNotification.notifyBar(notificationSyncScan,
-                            "Scan Db. Deleted "+nbDeleted+" unrequested so far.",
-                            50,
-                            nbFiles, tracks.size());
-                }
-            }
-
-            private void browseFS(File path) throws InterruptedException {
-                checkAbort();
-                if (path.isDirectory()) {
-                    File[] files = path.listFiles();
-                    if (files != null) {
-                        if(files.length>0) {
-                            for (File file : files) {
-                                checkAbort();
-                                if (file.isDirectory()) {
-                                    browseFS(file);
-                                }
-                                else {
-                                    if (RepoSync.checkFile(getAppDataPath, file.getAbsolutePath()))
-                                    { nbDeleted++; } else {
-                                        //RepoSync.checkFile deletes file. Not counting deleted
-                                        //to match RepoSync.getTotalSize() at the end (hopefully)
-                                        nbFiles++;
-                                    }
-                                    helperNotification.notifyBar(notificationSyncScan,
-                                            "Scan files. Deleted "+nbDeleted+" unrequested so far.",
-                                            50,
-                                            nbFiles, RepoSync.getTotalSize());
-                                }
-                            }
-                        } else {
-                            Log.i(TAG, "Deleting empty folder "+path.getAbsolutePath());
-                            //noinspection ResultOfMethodCallIgnored
-                            path.delete();
-                        }
-                    }
-                }
-            }
-        };
-        processAbstract.start();
     }
 
     private class ProcessDownload extends ProcessAbstract {
