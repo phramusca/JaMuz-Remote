@@ -114,56 +114,34 @@ public class ServiceSync extends ServiceBase {
 
                 //Get server library
                 int nbFilesInBatch=10;
-                Map<Integer, Track> filesServer = new LinkedHashMap<>();
                 for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
                     Map<Integer, Track> filesMap = getFiles(i, nbFilesInBatch);
                     if(filesMap!=null) {
-                        filesServer.putAll(filesMap);
+                        int j =0;
+                        for (Track trackServer:filesMap.values()) {
+                            Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
+                            switch (trackServer.getStatus()) {
+                                case DEL:
+                                case INFO: //FIXME: Merge INFO into DEL (so that files are ONLY either to be retrieved or deleted)
+                                    break;
+                                case NEW:
+                                    RepoSync.checkNewFile(trackServer);
+                                    break;
+                            }
+                            helperNotification.notifyBar(notificationSync,
+                                    getString(R.string.syncCheckFilesOnDisk), 10, j+1, filesMap.size());
+                            j++;
+                            trackServer.setStatus(trackServer.getStatus());
+                            HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
+                        }
                     } else {
                         //FIXME: What ?
                     }
                 }
+                scanAndDeleteUnwantedInThread(getAppDataPath);
 
-                //FIXME !!!!!!!!!!! Continue from here:
+                //FIXME: Offer to download one file
 
-                int i =0;
-                for (Track trackServer:filesServer.values()) {
-                    Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
-                    helperNotification.notifyBar(notificationSync,
-                            "Inserting files (if missing)", 10, i+1, filesServer.size());
-                    i++;
-                    if(trackRemote==null) {
-                        trackServer.setStatus(Track.Status.INFO);
-                        HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
-                    } else {
-                        //FIXME: What ?
-                    }
-                }
-
-                //FIXME: Offer to download the file
-
-                //FIXME: Continue from here:
-
-/*
-                Track trackServer = filesServer.get(i);
-
-                Track track = RepoSync.getFile(i);
-                if(track==null) {
-                    //FIXME: Insert in db
-                    track.setStatus(Track.Status.INFO);
-                    HelperLibrary.musicLibrary.insertOrUpdateTrack(track);
-                } else {
-                    //FIXME: Based on both statuses, either:
-                    //- Add to download list
-                    //- Delete
-                    //- merge ?
-                }
-                */
-
-                //FIXME: Include this in above loop
-                if(!getNewFiles()) {
-                    //TODO: then what ?
-                }
                 startSync();
 
                 if(!checkCompleted()) {
@@ -366,55 +344,6 @@ public class ServiceSync extends ServiceBase {
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             return null;
-        }
-    }
-
-    private boolean getNewFiles() {
-        OkHttpClient client = new OkHttpClient();
-        HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/new-files").newBuilder();
-        String url = urlBuilder.build().toString();
-        Request request = new Request.Builder()
-                .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
-                .get().url(url).build();
-        Response response;
-        try {
-            response = client.newCall(request).execute();
-            if(!response.isSuccessful()) {
-                return false;
-            }
-            String body = response.body().string();
-            //TODO: use gson instead
-//                    final Gson gson = new Gson();
-//                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
-//                    fromJson.chromaprint=chromaprint;
-            final JSONObject jObject = new JSONObject(body);
-            helperNotification.notifyBar(notificationSync, "Received new list of files to get");
-            ArrayList<Track> newTracks = new ArrayList<>();
-            JSONArray files = (JSONArray) jObject.get("files");
-            helperNotification.notifyBar(notificationSync,
-                    getString(R.string.syncCheckFilesOnDisk));
-            RepoSync.reset();
-            HelperLibrary.musicLibrary.updateStatus(); //FIXME: Do this different as checking files takes time and meanwhile, files are not available for playing
-            for (int i = 0; i < files.length(); i++) {
-                Track fileReceived = new Track(
-                        (JSONObject) files.get(i),
-                        getAppDataPath);
-                fileReceived.setStatus(Track.Status.NEW);
-                RepoSync.checkNewFile(fileReceived);
-                newTracks.add(fileReceived);
-                helperNotification.notifyBar(notificationSync,
-                        getString(R.string.syncCheckFilesOnDisk), 50, i+1, files.length());
-            }
-            helperNotification.notifyBar(notificationSync,
-                    "Updating database with new tracks ("+newTracks.size()+"). Please wait...");
-            HelperLibrary.musicLibrary.insertTrackOrUpdateStatus(newTracks);
-            scanAndDeleteUnwantedInThread(getAppDataPath);
-            runOnUiThread(() -> helperNotification.notifyBar(notificationSync,
-                    "Received "+newTracks.size()+" files to download.", 2000));
-            return true;
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            return false;
         }
     }
 
