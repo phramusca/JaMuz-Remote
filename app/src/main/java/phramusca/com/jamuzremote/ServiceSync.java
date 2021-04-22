@@ -19,7 +19,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,17 +46,13 @@ public class ServiceSync extends ServiceBase {
     private ClientInfo clientInfo;
     private Benchmark bench;
     private Notification notificationSync;
-    private Notification notificationSyncScan;
     private BroadcastReceiver userStopReceiver;
-    private int nbFiles;
-    private int nbDeleted;
     private PowerManager.WakeLock wakeLock;
     private WifiManager.WifiLock wifiLock;
 
     @Override
     public void onCreate(){
         notificationSync = new Notification(this, NotificationId.SYNC, "Sync");
-        notificationSyncScan = new Notification(this, NotificationId.SYNC_SCAN, "Sync");
         userStopReceiver=new UserStopServiceReceiver();
         registerReceiver(userStopReceiver,  new IntentFilter(USER_STOP_SERVICE_REQUEST));
         super.onCreate();
@@ -104,13 +99,13 @@ public class ServiceSync extends ServiceBase {
                     //TODO: then what ?
                 }
 
-                Pair<Integer, Integer>  filesInfos = getFilesInfos();
-                if(filesInfos==null) {
-                    stopSync("Error receiving filesInfos: "+filesInfos+".", 5000);
+                Pair<Integer, Integer>  filesInfo = getFilesInfos();
+                if(filesInfo==null) {
+                    stopSync("Error receiving files information.", 5000);
                     return;
                 }
-                int maxIdFileServer=filesInfos.first;
-                int nbFilesServer=filesInfos.second;
+                int maxIdFileServer=filesInfo.first;
+                int nbFilesServer=filesInfo.second;
 
                 //FIXME: Review sync process below (statuses handling)
                 // - Maybe Use maxIdFileRemote and only do the following if maxIdFileRemote<maxIdFileServer
@@ -123,7 +118,6 @@ public class ServiceSync extends ServiceBase {
                     if(filesMap!=null) {
                         int j =0;
                         for (Track trackServer:filesMap.values()) {
-                            Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
                             switch (trackServer.getStatus()) {
                                 case INFO:
                                     File file = new File(trackServer.getPath());
