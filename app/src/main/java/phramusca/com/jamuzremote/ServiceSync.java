@@ -81,7 +81,13 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
                 bench = new Benchmark(RepoSync.getRemainingSize(), 10);
 
-                String version = getVersion();
+                String version;
+                try {
+                    version = getVersion();
+                } catch (IOException e) {
+                    stopSync(e.getLocalizedMessage(), 5000);
+                    return;
+                }
                 if(!version.equals("1")) {
                     stopSync("Server version \""+version+"\" is not supported.", 5000);
                     return;
@@ -107,10 +113,6 @@ public class ServiceSync extends ServiceBase {
                 int maxIdFileServer=filesInfo.first;
                 int nbFilesServer=filesInfo.second;
 
-                //FIXME: Review sync process below (statuses handling)
-                // - Maybe Use maxIdFileRemote and only do the following if maxIdFileRemote<maxIdFileServer
-                // - ...
-
                 //Get server library
                 int nbFilesInBatch=10;
                 for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
@@ -130,7 +132,6 @@ public class ServiceSync extends ServiceBase {
                             helperNotification.notifyBar(notificationSync,
                                     getString(R.string.syncCheckFilesOnDisk), 50, i+j+1, nbFilesServer);
                             j++;
-                            trackServer.setStatus(trackServer.getStatus());
                             HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
                         }
                     } else {
@@ -140,7 +141,7 @@ public class ServiceSync extends ServiceBase {
 
                 //FIXME: Offer to download one file
 
-                startSync();
+                startDownloads();
 
                 if(!checkCompleted()) {
                     //TODO: then what ?
@@ -150,22 +151,17 @@ public class ServiceSync extends ServiceBase {
         return START_REDELIVER_INTENT;
     }
 
-    private String getVersion() {
+    private String getVersion() throws IOException {
         OkHttpClient client = new OkHttpClient();
         HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/version").newBuilder();
 //                urlBuilder.addQueryParameter("client", key);
         String url = urlBuilder.build().toString();
         Request request = new Request.Builder().url(url).build();
         Response response;
-        try {
-            response = client.newCall(request).execute();
-            helperNotification.notifyBar(notificationSync, "Received version ... ");
-            String body = response.body().string();
-            return body;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "";
-        }
+        response = client.newCall(request).execute();
+        helperNotification.notifyBar(notificationSync, "Received version ... ");
+        String body = response.body().string();
+        return body;
     }
 
     private Pair<Integer, Integer> getFilesInfos() {
@@ -378,7 +374,7 @@ public class ServiceSync extends ServiceBase {
         stopSelf();
     }
 
-    private void startSync() {
+    private void startDownloads() {
         if ((processDownload==null || !processDownload.isAlive()) && RepoSync.getRemainingSize()>0) {
             Log.i(TAG, "START ProcessDownload");
             processDownload = new ProcessDownload("ProcessDownload", this);
