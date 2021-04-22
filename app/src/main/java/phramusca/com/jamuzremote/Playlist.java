@@ -265,7 +265,7 @@ public class Playlist implements Comparable, Serializable {
 
     private String getWhere(List<Integer> excluded, boolean includeINFO) {
 
-        String in = "WHERE "+COL_STATUS+" IN (\""+ Track.Status.REC.name() + "\",\"" + Track.Status.NULL.name() + "\""+(includeINFO?",\"" + Track.Status.INFO.name() + "\"":"")+") " +
+        String in = "WHERE "+COL_STATUS+" IN (\""+ Track.Status.REC.name() + "\",\"" + Track.Status.LOCAL.name() + "\""+(includeINFO?",\"" + Track.Status.INFO.name() + "\"":"")+") " +
                 " AND rating "+getRatingString()+" ";
 
         if(limitValue>0) {

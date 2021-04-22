@@ -30,7 +30,7 @@ public class Track implements Serializable {
     private Date addedDate = new Date(0);
     private int playCounter = 0;
     private Date lastPlayed = new Date(0);
-    private Status status = Status.NULL;
+    private Status status = Status.LOCAL;
     private String path = "";
     private String relativeFullPath = "";
     private ArrayList<String> tags = null;
@@ -193,7 +193,7 @@ public class Track implements Serializable {
     }
 
     public enum Status {
-        NEW, DOWN, REC, NULL, DEL, INFO;
+        NEW, REC, LOCAL, INFO;
 
         Status() {
         }

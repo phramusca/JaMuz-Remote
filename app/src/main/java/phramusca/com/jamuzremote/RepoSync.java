@@ -7,7 +7,6 @@ import com.google.common.collect.Table;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -61,22 +60,6 @@ public final class RepoSync {
     }
 
     /**
-     * Checks if absolutePath is in tracks. Delete file if not.
-     * @param absolutePath relative full path
-     */
-    public synchronized static boolean checkFile(File getAppDataPath, String absolutePath) {
-        Track track = new Track(getAppDataPath, absolutePath);
-        if(tracks != null && !tracks.containsValue(track)) {
-            Log.i(TAG, "DELETE UNWANTED: "+absolutePath);
-            File file = new File(getAppDataPath, track.getRelativeFullPath());
-            //noinspection ResultOfMethodCallIgnored
-            file.delete();
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * @param track the one to check
      * @param receivedFile the corresponding File
      * @return true if onReceivedFile exists and length()==track.size
@@ -125,13 +108,8 @@ public final class RepoSync {
         tracks.put(track.getIdFileServer(), track.getStatus(), track);
     }
 
-    public synchronized static void reset() {
-        tracks = HashBasedTable.create();
-    }
-
     public synchronized static int getRemainingSize() {
-        return tracks ==null?0:(tracks.column(Track.Status.NEW).size()
-                +tracks.column(Track.Status.DOWN).size());
+        return tracks ==null?0:tracks.column(Track.Status.NEW).size();
     }
 
     public synchronized static int getTotalSize() {
@@ -145,9 +123,7 @@ public final class RepoSync {
             return totalFilesSize;
         }
         long totalSize=0;
-        totalSize+=getRemainingFileSize(Track.Status.NEW);
-        totalSize+=getRemainingFileSize(Track.Status.DOWN);
-        totalSize+=getRemainingFileSize(Track.Status.DEL);
+        totalSize+=getRemainingFileSize();
         totalFilesSize=StringManager.humanReadableByteCount(totalSize, false);
         return totalFilesSize;
     }
@@ -157,32 +133,10 @@ public final class RepoSync {
             return 0;
         }
         long nbRemaining=0;
-        nbRemaining+=getRemainingFileSize(Track.Status.NEW);
-        nbRemaining+=getRemainingFileSize(Track.Status.DOWN);
-        return nbRemaining;
-    }
-
-    private synchronized static long getRemainingFileSize(Track.Status status) {
-        long nbRemaining=0;
-        for(Track track : tracks.column(status).values()) {
+        for(Track track : tracks.column(Track.Status.NEW).values()) {
             nbRemaining+=track.getSize();
         }
         return nbRemaining;
-    }
-
-    public synchronized static Track getNew() {
-        Track track=null;
-        if(tracks != null) {
-            Collection<Track> values = tracks.column(Track.Status.NEW).values();
-            if(values.size()>0) {
-                track = tracks.column(Track.Status.NEW).entrySet().iterator().next().getValue();
-                if(track!=null) {
-                    track.setStatus(Track.Status.DOWN);
-                    updateTracks(track);
-                }
-            }
-        }
-        return track;
     }
 
     public static List<Track> getDownloadList() {
@@ -193,10 +147,4 @@ public final class RepoSync {
         return new ArrayList<>(tracks.column(Track.Status.REC).values());
     }
 
-    public static Track getFile(int i) {
-        if(tracks.containsRow(i)) {
-            return tracks.row(i).values().iterator().next();
-        }
-        return null;
-    }
 }
