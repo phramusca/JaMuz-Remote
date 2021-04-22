@@ -7,7 +7,9 @@ import com.google.common.collect.Table;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -143,6 +145,10 @@ public final class RepoSync {
         return new ArrayList<>(tracks.column(Track.Status.NEW).values());
     }
 
+    public static List<Track> getList() {
+        return new ArrayList<>(tracks.values());
+    }
+
     public static List<Track> getMergeList() {
         return new ArrayList<>(tracks.column(Track.Status.REC).values());
     }
@@ -153,5 +159,4 @@ public final class RepoSync {
         }
         return null;
     }
-
 }
