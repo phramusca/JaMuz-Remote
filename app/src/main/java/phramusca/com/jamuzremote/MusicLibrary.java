@@ -352,6 +352,7 @@ public class MusicLibrary {
 
     private synchronized ContentValues TrackToValues(Track track) {
         ContentValues values = new ContentValues();
+        values.put(COL_ID_SERVER, track.getIdFileServer());
         values.put(COL_TITLE, track.getTitle());
         values.put(COL_ALBUM, track.getAlbum());
         values.put(COL_ARTIST, track.getArtist());

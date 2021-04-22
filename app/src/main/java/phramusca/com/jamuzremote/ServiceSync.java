@@ -120,6 +120,10 @@ public class ServiceSync extends ServiceBase {
                     if(filesMap!=null) {
                         int j =0;
                         for (Track trackServer:filesMap.values()) {
+                            j++;
+                            helperNotification.notifyBar(notificationSync,
+                                    "Checking files ...", 50, i+j, nbFilesServer);
+                            Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
                             switch (trackServer.getStatus()) {
                                 case INFO:
                                     File file = new File(trackServer.getPath());
@@ -129,18 +133,19 @@ public class ServiceSync extends ServiceBase {
                                     RepoSync.checkNewFile(trackServer);
                                     break;
                             }
-                            helperNotification.notifyBar(notificationSync,
-                                    getString(R.string.syncCheckFilesOnDisk), 50, i+j+1, nbFilesServer);
-                            j++;
-                            HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
+                            if(trackRemote==null || trackRemote.getStatus()!=trackServer.getStatus()) {
+                                HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
+                            }
                         }
                     } else {
                         //FIXME: What ?
                     }
                 }
+                //FIXME: Somehow remove files that have been removed from server
+
+                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Sync check complete.", 5000));
 
                 //FIXME: Offer to download one file
-
                 startDownloads();
 
                 if(!checkCompleted()) {
@@ -325,7 +330,6 @@ public class ServiceSync extends ServiceBase {
 //                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
 //                    fromJson.chromaprint=chromaprint;
             final JSONObject jObject = new JSONObject(body);
-            helperNotification.notifyBar(notificationSync, "Received files from "+idFrom);
             Map<Integer, Track> newTracks = new LinkedHashMap<>();
             JSONArray files = (JSONArray) jObject.get("files");
             for (int i = 0; i < files.length(); i++) {

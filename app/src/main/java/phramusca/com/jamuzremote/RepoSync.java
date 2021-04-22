@@ -113,7 +113,7 @@ public final class RepoSync {
     }
 
     public synchronized static int getTotalSize() {
-        return tracks==null?0:tracks.size();
+        return tracks==null?0:tracks.column(Track.Status.REC).size();
     }
 
     static String totalFilesSize;
@@ -145,6 +145,13 @@ public final class RepoSync {
 
     public static List<Track> getMergeList() {
         return new ArrayList<>(tracks.column(Track.Status.REC).values());
+    }
+
+    public static Track getFile(int i) {
+        if(tracks.containsRow(i)) {
+            return tracks.row(i).values().iterator().next();
+        }
+        return null;
     }
 
 }
