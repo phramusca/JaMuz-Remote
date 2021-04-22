@@ -84,6 +84,7 @@ public class ServiceSync extends ServiceBase {
                 String version;
                 try {
                     version = getVersion();
+            //FIXME: Use a global try/catch and catch all exceptions from server calls => exit at first error
                 } catch (IOException e) {
                     stopSync(e.getLocalizedMessage(), 5000);
                     return;
@@ -115,11 +116,12 @@ public class ServiceSync extends ServiceBase {
 
                 //Get server library
                 int nbFilesInBatch=10;
+                Map<Integer, Track> filesMap = new LinkedHashMap<>();
                 for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
-                    Map<Integer, Track> filesMap = getFiles(i, nbFilesInBatch);
-                    if(filesMap!=null) {
+                    Map<Integer, Track> filesMapBatch = getFiles(i, nbFilesInBatch);
+                    if(filesMapBatch!=null) {
                         int j =0;
-                        for (Track trackServer:filesMap.values()) {
+                        for (Track trackServer:filesMapBatch.values()) {
                             j++;
                             helperNotification.notifyBar(notificationSync,
                                     "Checking files ...", 50, i+j, nbFilesServer);
@@ -137,11 +139,23 @@ public class ServiceSync extends ServiceBase {
                                 HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
                             }
                         }
+                        filesMap.putAll(filesMapBatch);
                     } else {
                         //FIXME: What ?
                     }
                 }
-                //FIXME: Somehow remove files that have been removed from server
+
+                //Remove tracks that have been removed from server
+                int i=0;
+                for(Track track : RepoSync.getList()) {
+                    helperNotification.notifyBar(notificationSync,
+                            "Checking deleted files ...", 50, i, nbFilesServer);
+                    if(!filesMap.containsKey(track.getIdFileServer())) {
+                        File file = new File(track.getPath());
+                        file.delete();
+                        HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
+                    }
+                }
 
                 runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Sync check complete.", 5000));
 

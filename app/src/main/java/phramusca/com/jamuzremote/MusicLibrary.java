@@ -338,6 +338,15 @@ public class MusicLibrary {
         return -1;
     }
 
+    synchronized int deleteTrack(int idFileServer){
+        try {
+            return db.delete(TABLE_TRACKS, COL_ID_SERVER + " = " + idFileServer, null);
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "deleteTrack("+idFileServer+")", ex);
+        }
+        return -1;
+    }
+
     private synchronized List<Track> getTracks(Cursor cursor) {
         List<Track> tracks = new ArrayList<>();
         if(cursor != null && cursor.moveToFirst())
