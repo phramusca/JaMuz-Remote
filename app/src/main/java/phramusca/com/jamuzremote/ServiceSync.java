@@ -506,7 +506,7 @@ public class ServiceSync extends ServiceBase {
             int canal=100;
             for (Track track : RepoSync.getDownloadList()) {
                 track.getTags(true);
-                DownloadTask downloadTask = new DownloadTask(track, canal++, () -> notifyBarProgress());
+                DownloadTask downloadTask = new DownloadTask(track, canal++, () -> notifyBarProgress(), clientInfo, getAppDataPath, bench);
                 downloadServices.add(downloadTask);
                 pool.submit(downloadTask);
             }
@@ -533,17 +533,23 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    private class DownloadTask extends ProcessAbstract implements Runnable {
+    static class DownloadTask extends ProcessAbstract implements Runnable {
         private final int canal;
         private final IListenerSyncDown callback;
+        private ClientInfo clientInfo;
+        private File getAppDataPath;
+        private Benchmark bench;
         private final Track track;
         private String status="";
 
-        private DownloadTask(Track track, int canal, IListenerSyncDown callback) {
+        DownloadTask(Track track, int canal, IListenerSyncDown callback, ClientInfo clientInfo, File getAppDataPath, Benchmark bench) {
             super("DownloadTask "+canal);
             this.track = track;
             this.canal = canal;
             this.callback = callback;
+            this.clientInfo = clientInfo;
+            this.getAppDataPath = getAppDataPath;
+            this.bench = bench;
         }
 
         @Override

@@ -131,6 +131,15 @@ public abstract class AdapterTrack extends AdapterLoad {
     void setView(int position, UserViewHolder userViewHolder,
                  String line1, String line2, String line3, String line4) {
 
+        if(trackList.get(position).getStatus().equals(Track.Status.INFO)) {
+            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.colorAccent));
+            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.colorAccent));
+
+        } else {
+            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
+            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
+        }
+
         userViewHolder.item_line1.setText(line1);
         userViewHolder.item_line2.setText(line2);
         userViewHolder.item_line3.setText(line3);
@@ -141,7 +150,11 @@ public abstract class AdapterTrack extends AdapterLoad {
             bitmap = HelperBitmap.getEmptyThumb();
         }
         if(position==trackList.getPositionPlaying()) {
-            bitmap = overlayPlayingIcon(bitmap);
+            bitmap = overlayIcon(bitmap, R.drawable.ic_playing);
+        }
+
+        if(trackList.get(position).getStatus().equals(Track.Status.DOWN)) {
+            bitmap = overlayIcon(bitmap, R.drawable.ic_download);
         }
 
         userViewHolder.imageViewCover.setImageBitmap(bitmap);
@@ -161,12 +174,12 @@ public abstract class AdapterTrack extends AdapterLoad {
         });
     }
 
-    private Bitmap overlayPlayingIcon(Bitmap bitmap) {
+    private Bitmap overlayIcon(Bitmap bitmap, int iconId) {
         int margin = 15;
         Bitmap bmOverlay = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
         Canvas canvas = new Canvas(bmOverlay);
         canvas.drawBitmap(bitmap, new Matrix(), null);
-        Bitmap playingBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_playing);
+        Bitmap playingBitmap = BitmapFactory.decodeResource(mContext.getResources(), iconId);
         int newWidth = bmOverlay.getWidth()-(margin*2);
         int newHeight = bmOverlay.getHeight()-(margin*2);
         int width = playingBitmap.getWidth();
