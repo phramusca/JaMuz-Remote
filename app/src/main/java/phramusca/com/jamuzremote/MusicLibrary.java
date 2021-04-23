@@ -212,7 +212,7 @@ public class MusicLibrary {
         return result;
     }
 
-    private synchronized boolean insertTrack(Track track){
+     synchronized boolean insertTrack(Track track){
         try {
             int id = (int) db.insert(TABLE_TRACKS, null, TrackToValues(track));
             if(id>0) {

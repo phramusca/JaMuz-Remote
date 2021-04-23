@@ -78,7 +78,19 @@ public class ActivityAlbumTracks extends AppCompatActivity {
             setResult(RESULT_OK, data);
             finish();
         } else {
-            new HelperToast(getApplicationContext()).toastShort("Can't insert this file, it has not been downloaded.");
+            track.getTags(true);
+            track.setStatus(Track.Status.DOWN);
+
+            HelperToast helperToast = new HelperToast(getApplicationContext());
+            ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
+            Benchmark bench = new Benchmark(1, 1);
+            ServiceSync.DownloadTask downloadTask = new ServiceSync.DownloadTask(track, 0, () -> notifyBarProgress(track), clientInfo, ActivityMain.getAppDataPath(), bench);
+            downloadTask.start();
         }
+    }
+
+    private void notifyBarProgress(Track track) {
+        runOnUiThread(() -> new HelperToast(getApplicationContext()).toastShort("File downloaded."));
+        track.setStatus(Track.Status.DOWN);
     }
 }
