@@ -101,7 +101,7 @@ public class ServiceSync extends ServiceBase {
                     //TODO: then what ?
                 }
 
-                //FIXME !!!! Check status for merge to avoid merge errors
+                //FIXME !!!! Check status (on server side) for merge to avoid merge errors
                 if(!requestMerge()) {
                     //TODO: then what ?
                 }
