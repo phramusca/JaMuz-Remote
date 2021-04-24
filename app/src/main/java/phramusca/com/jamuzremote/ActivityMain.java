@@ -305,6 +305,8 @@ public class ActivityMain extends AppCompatActivity {
                         service.putExtra("getAppDataPath", getAppDataPath());
                         startService(service);
                     }
+                } else {
+                    enableSync(true);
                 }
             }
             else {
