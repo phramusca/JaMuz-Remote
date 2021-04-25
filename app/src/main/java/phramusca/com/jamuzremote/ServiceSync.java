@@ -75,50 +75,35 @@ public class ServiceSync extends ServiceBase {
 
         new Thread() {
             public void run() {
-                helperNotification.notifyBar(notificationSync, getString(R.string.readingList));
-                RepoSync.read();
-                helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
-                bench = new Benchmark(RepoSync.getRemainingSize(), 10);
-
-                String version;
                 try {
-                    version = getVersion();
-            //FIXME: Use a global try/catch and catch all exceptions from server calls => exit at first error
-                } catch (IOException e) {
-                    stopSync(e.getLocalizedMessage(), 5000);
-                    return;
-                }
-                if(!version.equals("1")) {
-                    stopSync("Server version \""+version+"\" is not supported.", 5000);
-                    return;
-                }
+                    helperNotification.notifyBar(notificationSync, getString(R.string.readingList));
+                    RepoSync.read();
+                    helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
+                    bench = new Benchmark(RepoSync.getRemainingSize(), 10);
 
-                if(!getTags()) {
-                    //TODO: then what ?
-                }
-                if(!getGenres()) {
-                    //TODO: then what ?
-                }
+                    String version = getVersion();
+                    if(!version.equals("1")) {
+                        stopSync("Server version \""+version+"\" is not supported.", 5000);
+                        return;
+                    }
 
-                //FIXME !!!! Check status (on server side) for merge to avoid merge errors
-                if(!requestMerge()) {
-                    //TODO: then what ?
-                }
+                    getTags();
+                    getGenres();
+                    requestMerge();
 
-                Pair<Integer, Integer>  filesInfo = getFilesInfos();
-                if(filesInfo==null) {
-                    stopSync("Error receiving files information.", 5000);
-                    return;
-                }
-                int maxIdFileServer=filesInfo.first;
-                int nbFilesServer=filesInfo.second;
+                    Pair<Integer, Integer>  filesInfo = getFilesInfos();
+                    if(filesInfo==null) {
+                        stopSync("Error receiving files information.", 5000);
+                        return;
+                    }
+                    //int maxIdFileServer=filesInfo.first;
+                    int nbFilesServer=filesInfo.second;
 
-                //Get server library
-                int nbFilesInBatch=10;
-                Map<Integer, Track> filesMap = new LinkedHashMap<>();
-                for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
-                    Map<Integer, Track> filesMapBatch = getFiles(i, nbFilesInBatch);
-                    if(filesMapBatch!=null) {
+                    //Get server library
+                    int nbFilesInBatch=10;
+                    Map<Integer, Track> filesMap = new LinkedHashMap<>();
+                    for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
+                        Map<Integer, Track> filesMapBatch = getFiles(i, nbFilesInBatch);
                         int j =0;
                         for (Track trackServer:filesMapBatch.values()) {
                             j++;
@@ -139,55 +124,61 @@ public class ServiceSync extends ServiceBase {
                             }
                         }
                         filesMap.putAll(filesMapBatch);
-                    } else {
-                        //FIXME: What ?
                     }
-                }
 
-                //Remove tracks that have been removed from server
-                int i=0;
-                for(Track track : RepoSync.getList()) {
-                    helperNotification.notifyBar(notificationSync,
-                            "Checking deleted files ...", 50, i, nbFilesServer);
-                    if(!filesMap.containsKey(track.getIdFileServer())) {
-                        File file = new File(track.getPath());
-                        file.delete();
-                        HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
+                    //Remove tracks that have been removed from server
+                    int i=0;
+                    for(Track track : RepoSync.getList()) {
+                        helperNotification.notifyBar(notificationSync,
+                                "Checking deleted files ...", 50, i, nbFilesServer);
+                        if(!filesMap.containsKey(track.getIdFileServer())) {
+                            File file = new File(track.getPath());
+                            file.delete();
+                            HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
+                        }
                     }
-                }
+                    runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Sync check complete.", 5000));
 
-                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Sync check complete.", 5000));
+                    startDownloads();
+                    checkCompleted();
 
-                //FIXME: Offer to download one file
-                startDownloads();
-
-                if(!checkCompleted()) {
-                    //TODO: then what ?
+                } catch (IOException | UnauthorizedException | JSONException e) {
+                    stopSync(e.getLocalizedMessage(), 5000);
                 }
             }
         }.start();
         return START_REDELIVER_INTENT;
     }
 
-    private String getVersion() throws IOException {
+    private static class UnauthorizedException extends Exception {
+        public UnauthorizedException(String errorMessage) {
+            super(errorMessage);
+        }
+    }
+
+    private String getVersion() throws IOException, UnauthorizedException {
         OkHttpClient client = new OkHttpClient();
         HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/version").newBuilder();
-//                urlBuilder.addQueryParameter("client", key);
         String url = urlBuilder.build().toString();
-        Request request = new Request.Builder().url(url).build();
+        Request request = new Request.Builder()
+                .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
+                .url(url).build();
         Response response;
         response = client.newCall(request).execute();
+        if(!response.isSuccessful()) {
+            throw new UnauthorizedException(response.message());
+        }
         helperNotification.notifyBar(notificationSync, "Received version ... ");
-        String body = response.body().string();
-        return body;
+        return response.body().string();
     }
 
     private Pair<Integer, Integer> getFilesInfos() {
         OkHttpClient client = new OkHttpClient();
         HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/files/maxId").newBuilder();
-//                urlBuilder.addQueryParameter("client", key);
         String url = urlBuilder.build().toString();
-        Request request = new Request.Builder().url(url).build();
+        Request request = new Request.Builder()
+                .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
+                .url(url).build();
         Response response;
         try {
             response = client.newCall(request).execute();
@@ -207,70 +198,68 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    private boolean getTags() {
+    private void getTags() throws IOException, UnauthorizedException, JSONException {
         OkHttpClient client = new OkHttpClient();
         HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/tags").newBuilder();
 //                urlBuilder.addQueryParameter("client", key);
         String url = urlBuilder.build().toString();
-        Request request = new Request.Builder().url(url).build();
+        Request request = new Request.Builder()
+                .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
+                .url(url).build();
         Response response;
-        try {
-            response = client.newCall(request).execute();
-            helperNotification.notifyBar(notificationSync, "Received tags ... ");
-            String body = response.body().string();
-            //TODO: use gson instead
+        response = client.newCall(request).execute();
+        if(!response.isSuccessful()) {
+            throw new UnauthorizedException(response.message());
+        }
+        helperNotification.notifyBar(notificationSync, "Received tags ... ");
+        String body = response.body().string();
+        //TODO: use gson instead
 //                    final Gson gson = new Gson();
 //                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
 //                    fromJson.chromaprint=chromaprint;
-            final JSONObject jObject = new JSONObject(body);
-            //FIXME: Get tags list with their respective number of files, for sorting
-            //TODO: Then add a "x/y" button to display pages x/y (# of tags per page to be defined/optional)
-            final JSONArray jsonTags = (JSONArray) jObject.get("tags");
-            final List<String> newTags = new ArrayList<>();
-            for (int i = 0; i < jsonTags.length(); i++) {
-                newTags.add((String) jsonTags.get(i));
-            }
-            RepoTags.set(newTags);
-            sendMessage("setupTags");
-            return true;
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            return false;
+        final JSONObject jObject = new JSONObject(body);
+        //FIXME: Get tags list with their respective number of files, for sorting
+        //TODO: Then add a "x/y" button to display pages x/y (# of tags per page to be defined/optional)
+        final JSONArray jsonTags = (JSONArray) jObject.get("tags");
+        final List<String> newTags = new ArrayList<>();
+        for (int i = 0; i < jsonTags.length(); i++) {
+            newTags.add((String) jsonTags.get(i));
         }
+        RepoTags.set(newTags);
+        sendMessage("setupTags");
     }
 
-    private boolean getGenres() {
+    private void getGenres() throws IOException, UnauthorizedException, JSONException {
         OkHttpClient client = new OkHttpClient();
         HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/genres").newBuilder();
 //                urlBuilder.addQueryParameter("client", key);
         String url = urlBuilder.build().toString();
-        Request request = new Request.Builder().url(url).build();
+        Request request = new Request.Builder()
+                .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
+                .url(url).build();
         Response response;
-        try {
-            response = client.newCall(request).execute();
-            helperNotification.notifyBar(notificationSync, "Received tags ... ");
-            String body = response.body().string();
-            //TODO: use gson instead
+        response = client.newCall(request).execute();
+        if(!response.isSuccessful()) {
+            throw new UnauthorizedException(response.message());
+        }
+        helperNotification.notifyBar(notificationSync, "Received tags ... ");
+        String body = response.body().string();
+        //TODO: use gson instead
 //                    final Gson gson = new Gson();
 //                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
 //                    fromJson.chromaprint=chromaprint;
-            final JSONObject jObject = new JSONObject(body);
-            final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
-            final List<String> newGenres = new ArrayList<>();
-            for (int i = 0; i < jsonGenres.length(); i++) {
-                final String genre = (String) jsonGenres.get(i);
-                newGenres.add(genre);
-            }
-            RepoGenres.set(newGenres);
-            sendMessage("setupGenres");
-            return true;
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            return false;
+        final JSONObject jObject = new JSONObject(body);
+        final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
+        final List<String> newGenres = new ArrayList<>();
+        for (int i = 0; i < jsonGenres.length(); i++) {
+            final String genre = (String) jsonGenres.get(i);
+            newGenres.add(genre);
         }
+        RepoGenres.set(newGenres);
+        sendMessage("setupGenres");
     }
 
-    private boolean requestMerge() {
+    private void requestMerge() throws JSONException, UnauthorizedException, IOException {
         helperNotification.notifyBar(notificationSync,"Requesting statistics merge.");
         List<Track> tracks = RepoSync.getMergeList();
         for(Track track : tracks) {
@@ -280,49 +269,43 @@ public class ServiceSync extends ServiceBase {
         OkHttpClient client = new OkHttpClient();
         HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/files").newBuilder();
         String url = urlBuilder.build().toString();
-        try {
-            JSONObject obj = new JSONObject();
-            obj.put("type", "FilesToMerge");
-            JSONArray filesToMerge = new JSONArray();
-            for (Track track : tracks) {
-                filesToMerge.put(track.toJSONObject());
-            }
-            obj.put("files", filesToMerge);
-            obj.put("user", clientInfo.toJSONObject());
-            Request request = new Request.Builder()
-                    .post(RequestBody.create(obj.toString(), MediaType.parse("application/json; charset=utf-8"))).url(url).build();
-            Response response = client.newCall(request).execute();
-            if(!response.isSuccessful()) {
-                return false;
-            }
-            helperNotification.notifyBar(notificationSync,"Updating database with merge changes ... ");
-            String body = response.body().string();
-            //TODO: use gson instead
+        JSONObject obj = new JSONObject();
+        obj.put("type", "FilesToMerge");
+        JSONArray filesToMerge = new JSONArray();
+        for (Track track : tracks) {
+            filesToMerge.put(track.toJSONObject());
+        }
+        obj.put("files", filesToMerge);
+        Request request = new Request.Builder()
+                .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
+                .post(RequestBody.create(obj.toString(), MediaType.parse("application/json; charset=utf-8"))).url(url).build();
+        Response response = client.newCall(request).execute();
+        if(!response.isSuccessful()) {
+            throw new UnauthorizedException(response.message());
+        }
+        helperNotification.notifyBar(notificationSync,"Updating database with merge changes ... ");
+        String body = response.body().string();
+        //TODO: use gson instead
 //                    final Gson gson = new Gson();
 //                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
 //                    fromJson.chromaprint=chromaprint;
-            final JSONObject jObject = new JSONObject(body);
-            JSONArray filesToUpdate = (JSONArray) jObject.get("files");
-            for (int i = 0; i < filesToUpdate.length(); i++) {
-                Track fileReceived = new Track(
-                        (JSONObject) filesToUpdate.get(i),
-                        getAppDataPath);
-                if(fileReceived.readMetadata()) {
-                    fileReceived.setStatus(Track.Status.REC);
-                    HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived);
-                }
-                helperNotification.notifyBar(notificationSync,
-                        "Updating database with merge changes", 10, i+1, filesToUpdate.length());
+        final JSONObject jObject = new JSONObject(body);
+        JSONArray filesToUpdate = (JSONArray) jObject.get("files");
+        for (int i = 0; i < filesToUpdate.length(); i++) {
+            Track fileReceived = new Track(
+                    (JSONObject) filesToUpdate.get(i),
+                    getAppDataPath);
+            if(fileReceived.readMetadata()) {
+                fileReceived.setStatus(Track.Status.REC);
+                HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived);
             }
-            runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Merge complete. Request new files ... ", 2000));
-            return true;
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            return false;
+            helperNotification.notifyBar(notificationSync,
+                    "Updating database with merge changes", 10, i+1, filesToUpdate.length());
         }
+        runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Merge complete. Request new files ... ", 2000));
     }
 
-    private Map<Integer, Track> getFiles(int idFrom, int nbFilesInBatch) {
+    private Map<Integer, Track> getFiles(int idFrom, int nbFilesInBatch) throws IOException, UnauthorizedException, JSONException {
         OkHttpClient client = new OkHttpClient();
         HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/files").newBuilder();
         urlBuilder.addQueryParameter("idFrom", String.valueOf(idFrom));
@@ -332,30 +315,25 @@ public class ServiceSync extends ServiceBase {
                 .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
                 .get().url(url).build();
         Response response;
-        try {
-            response = client.newCall(request).execute();
-            if(!response.isSuccessful()) {
-                return null;
-            }
-            String body = response.body().string();
-            //TODO: use gson instead
+        response = client.newCall(request).execute();
+        if(!response.isSuccessful()) {
+            throw new UnauthorizedException(response.message());
+        }
+        String body = response.body().string();
+        //TODO: use gson instead
 //                    final Gson gson = new Gson();
 //                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
 //                    fromJson.chromaprint=chromaprint;
-            final JSONObject jObject = new JSONObject(body);
-            Map<Integer, Track> newTracks = new LinkedHashMap<>();
-            JSONArray files = (JSONArray) jObject.get("files");
-            for (int i = 0; i < files.length(); i++) {
-                Track fileReceived = new Track(
-                        (JSONObject) files.get(i),
-                        getAppDataPath);
-                newTracks.put(fileReceived.getIdFileServer(), fileReceived);
-            }
-            return newTracks;
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            return null;
+        final JSONObject jObject = new JSONObject(body);
+        Map<Integer, Track> newTracks = new LinkedHashMap<>();
+        JSONArray files = (JSONArray) jObject.get("files");
+        for (int i = 0; i < files.length(); i++) {
+            Track fileReceived = new Track(
+                    (JSONObject) files.get(i),
+                    getAppDataPath);
+            newTracks.put(fileReceived.getIdFileServer(), fileReceived);
         }
+        return newTracks;
     }
 
     @Override
@@ -405,9 +383,7 @@ public class ServiceSync extends ServiceBase {
             final String msg2 = "All " + RepoSync.getTotalSize() + " files" +
                     " have been retrieved successfully.";
             Log.i(TAG, msg);
-            runOnUiThread(() -> {
-                helperToast.toastLong(msg + "\n\n" + msg2);
-            });
+            runOnUiThread(() -> helperToast.toastLong(msg + "\n\n" + msg2));
             stopSync("Sync complete.", 20000);
             return true;
         } else if (RepoSync.getTotalSize()<=0){
@@ -456,11 +432,9 @@ public class ServiceSync extends ServiceBase {
             stringBuilder.append(stringBuilder2.toString());
             String bigText = stringBuilder.toString();
             String msg = "Downloading ... " +bench.getLast();
-            runOnUiThread(() -> {
-                helperNotification.notifyBar(notificationDownload, msg, nbFilesTotal, progress, false,
-                        true, true,
-                        msg + "\n" + bigText);
-            });
+            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, msg, nbFilesTotal, progress, false,
+                    true, true,
+                    msg + "\n" + bigText));
         }
 
         @Override
@@ -475,14 +449,10 @@ public class ServiceSync extends ServiceBase {
                 nbRetries++;
                 try {
                     int sleepSeconds=nbRetries*10;
-                    runOnUiThread(() -> {
-                        helperNotification.notifyBar(notificationDownload,
-                                new StringBuilder()
-                                        .append("Waiting ").append(sleepSeconds)
-                                        .append("s before attempt ")
-                                        .append(nbRetries+1).append("/").append(maxNbRetries)
-                                    .toString());
-                    });
+                    runOnUiThread(() -> helperNotification.notifyBar(notificationDownload,
+                            "Waiting " + sleepSeconds +
+                                    "s before attempt " +
+                                    (nbRetries + 1) + "/" + maxNbRetries));
                     sleep(sleepSeconds*1000);
                 } catch (InterruptedException e) {
                     break;
@@ -495,17 +465,14 @@ public class ServiceSync extends ServiceBase {
         }
 
         private void startDownloads() {
-            runOnUiThread(() -> {
-                helperNotification.notifyBar(notificationDownload, "Starting download ... ");
-
-            });
+            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Starting download ... "));
             bench = new Benchmark(RepoSync.getRemainingSize(), 10);
-            pool = Executors.newFixedThreadPool(5); //TODO: Make number of threads an option
+            pool = Executors.newFixedThreadPool(20); //TODO: Make number of threads an option
             downloadServices= new ArrayList<>();
             int canal=100;
             for (Track track : RepoSync.getDownloadList()) {
                 track.getTags(true);
-                DownloadTask downloadTask = new DownloadTask(track, canal++, () -> notifyBarProgress(), clientInfo, getAppDataPath, bench);
+                DownloadTask downloadTask = new DownloadTask(track, canal++, this::notifyBarProgress, clientInfo, getAppDataPath, bench);
                 downloadServices.add(downloadTask);
                 pool.submit(downloadTask);
             }
@@ -526,18 +493,16 @@ public class ServiceSync extends ServiceBase {
                 downloadService.abort();
             }
             abort();
-            runOnUiThread(() -> {
-                helperNotification.notifyBar(notificationDownload, "Download stopped.", 5000);
-            });
+            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Download stopped.", 5000));
         }
     }
 
     static class DownloadTask extends ProcessAbstract implements Runnable {
         private final int canal;
         private final IListenerSyncDown callback;
-        private ClientInfo clientInfo;
-        private File getAppDataPath;
-        private Benchmark bench;
+        private final ClientInfo clientInfo;
+        private final File getAppDataPath;
+        private final Benchmark bench;
         private final Track track;
         private String status="";
 
@@ -567,6 +532,9 @@ public class ServiceSync extends ServiceBase {
                 Response response;
                 OkHttpClient client = new OkHttpClient();
                 response = client.newCall(request).execute();
+                if(!response.isSuccessful()) {
+                    throw new UnauthorizedException(response.message());
+                }
                 if (destinationFile.exists()) {
                     boolean fileDeleted = destinationFile.delete();
                     Log.v("fileDeleted", fileDeleted + "");
