@@ -43,7 +43,6 @@ public class ServiceSync extends ServiceBase {
 
     private ProcessDownload processDownload;
     private ClientInfo clientInfo;
-    private Benchmark bench;
     private Notification notificationSync;
     private BroadcastReceiver userStopReceiver;
     private PowerManager.WakeLock wakeLock;
@@ -79,8 +78,6 @@ public class ServiceSync extends ServiceBase {
                     helperNotification.notifyBar(notificationSync, getString(R.string.readingList));
                     RepoSync.read();
                     helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
-                    bench = new Benchmark(RepoSync.getRemainingSize(), 10);
-
                     String version = getVersion();
                     if(!version.equals("1")) {
                         stopSync("Server version \""+version+"\" is not supported.", 5000);
@@ -404,6 +401,7 @@ public class ServiceSync extends ServiceBase {
         private ExecutorService pool;
         private int nbRetries=0;
         private final int maxNbRetries=10;//TODO: Make number of retries an option eventually
+        private Benchmark bench;
 
         ProcessDownload(String name, Context context) {
             super(name);
