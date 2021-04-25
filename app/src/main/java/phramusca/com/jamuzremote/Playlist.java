@@ -55,6 +55,17 @@ public class Playlist implements Comparable, Serializable {
         return new ArrayList<>();
     }
 
+    public void getNbFiles(boolean includeINFO) {
+
+        if(HelperLibrary.musicLibrary!=null) {
+            Triplet<Integer, Long, Long> entry=HelperLibrary.musicLibrary.getNb(getWhere(new ArrayList<>(), includeINFO), getHaving());
+            nbFiles=entry.getFirst();
+            //TODO: Offer choice to display one or the other (length OR size)
+            /*lengthOrSize = StringManager.humanReadableByteCount(entry.getSecond(), false);*/
+            lengthOrSize =StringManager.humanReadableSeconds(entry.getThird(), "");
+        }
+    }
+
     public Set<Map.Entry<String, TriStateButton.STATE>> getTags() {
         return tags.entrySet();
     }
@@ -387,17 +398,6 @@ public class Playlist implements Comparable, Serializable {
         return isLocal?
                 name+" ("+ nbFiles +" | "+ lengthOrSize +")"
                 :name;
-    }
-
-    public void getNbFiles(boolean includeINFO) {
-
-        if(HelperLibrary.musicLibrary!=null) {
-            Triplet<Integer, Long, Long> entry=HelperLibrary.musicLibrary.getNb(getWhere(new ArrayList<>(), includeINFO), getHaving());
-            nbFiles=entry.getFirst();
-            //TODO: Offer choice to display one or the other (length OR size)
-            /*lengthOrSize = StringManager.humanReadableByteCount(entry.getSecond(), false);*/
-            lengthOrSize =StringManager.humanReadableSeconds(entry.getThird(), "");
-        }
     }
 
     @Override

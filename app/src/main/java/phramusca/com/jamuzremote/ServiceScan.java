@@ -34,7 +34,7 @@ public class ServiceScan extends ServiceBase {
         super.onStartCommand(intent, flags, startId);
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         if (powerManager != null) {
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyPowerWakelockTag");
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"jamuzremote:MyPowerWakelockTag");
             wakeLock.acquire(24*60*60*1000); //24 hours, enough to scan a lot, if not all !
         }
 
@@ -124,6 +124,11 @@ public class ServiceScan extends ServiceBase {
                     //Scan deleted files
                     //This will remove from db files not in filesystem
                     //It IS compatible with ServiceSync
+                    //FIXME: replace includeINFO with a List<Track.Status> so that only looking for LOCAL
+                    //and leave other statuses to sync process so that it is really fully compatible
+                        // REC, LOCAL => remove from db if file not found
+                        // includeINFO=false : INFO & NEW not included
+
                     checkAbort();
                     List<Track> tracks = new Playlist("ScanFolder", false).getTracks(false);
                     nbFilesTotal = tracks.size();
@@ -132,8 +137,6 @@ public class ServiceScan extends ServiceBase {
                         checkAbort();
                         File file = new File(track.getPath());
                         if(!file.exists()) {
-                            //TODO: File may be currently being inserted by ServiceSync ...
-                            // => handle that situation
                             Log.d(TAG, "Remove track from db: "+track);
                             track.delete();
                         }

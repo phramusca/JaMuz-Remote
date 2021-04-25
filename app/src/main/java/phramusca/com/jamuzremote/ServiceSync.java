@@ -47,6 +47,7 @@ public class ServiceSync extends ServiceBase {
     private BroadcastReceiver userStopReceiver;
     private PowerManager.WakeLock wakeLock;
     private WifiManager.WifiLock wifiLock;
+    private ProcessSync processSync;
 
     @Override
     public void onCreate(){
@@ -72,79 +73,107 @@ public class ServiceSync extends ServiceBase {
             wifiLock.acquire();
         }
 
-        new Thread() {
-            public void run() {
-                try {
-                    helperNotification.notifyBar(notificationSync, getString(R.string.readingList));
-                    RepoSync.read();
-                    helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
-                    String version = getVersion();
-                    if(!version.equals("1")) {
-                        stopSync("Server version \""+version+"\" is not supported.", 5000);
-                        return;
-                    }
-
-                    getTags();
-                    getGenres();
-                    requestMerge();
-
-                    Pair<Integer, Integer>  filesInfo = getFilesInfos();
-                    if(filesInfo==null) {
-                        stopSync("Error receiving files information.", 5000);
-                        return;
-                    }
-                    //int maxIdFileServer=filesInfo.first;
-                    int nbFilesServer=filesInfo.second;
-
-                    //Get server library
-                    int nbFilesInBatch=10;
-                    Map<Integer, Track> filesMap = new LinkedHashMap<>();
-                    for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
-                        Map<Integer, Track> filesMapBatch = getFiles(i, nbFilesInBatch);
-                        int j =0;
-                        for (Track trackServer:filesMapBatch.values()) {
-                            j++;
-                            helperNotification.notifyBar(notificationSync,
-                                    "Checking files ...", 50, i+j, nbFilesServer);
-                            Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
-                            switch (trackServer.getStatus()) {
-                                case INFO:
-                                    File file = new File(trackServer.getPath());
-                                    file.delete();
-                                    break;
-                                case NEW:
-                                    RepoSync.checkNewFile(trackServer);
-                                    break;
-                            }
-                            if(trackRemote==null || trackRemote.getStatus()!=trackServer.getStatus()) {
-                                HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
-                            }
-                        }
-                        filesMap.putAll(filesMapBatch);
-                    }
-
-                    //Remove tracks that have been removed from server
-                    int i=0;
-                    for(Track track : RepoSync.getList()) {
-                        helperNotification.notifyBar(notificationSync,
-                                "Checking deleted files ...", 50, i, nbFilesServer);
-                        if(!filesMap.containsKey(track.getIdFileServer())) {
-                            File file = new File(track.getPath());
-                            file.delete();
-                            HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
-                        }
-                    }
-                    runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Sync check complete.", 5000));
-
-                    startDownloads();
-                    checkCompleted();
-
-                } catch (IOException | UnauthorizedException | JSONException e) {
-                    stopSync(e.getLocalizedMessage(), 5000);
-                }
-            }
-        }.start();
+        processSync = new ProcessSync("Thread.ServiceSync.processSync");
+        processSync.start();
         return START_REDELIVER_INTENT;
+    }
+
+    private class ProcessSync extends ProcessAbstract {
+
+        ProcessSync(String name) {
+            super(name);
+        }
+
+        @Override
+        public void run() {
+            try {
+                checkAbort();
+                helperNotification.notifyBar(notificationSync, getString(R.string.readingList));
+                RepoSync.read();
+                checkAbort();
+                helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
+                String version = getVersion();
+                if(!version.equals("1")) {
+                    stopSync("Server version \""+version+"\" is not supported.", 5000);
+                    return;
+                }
+
+                checkAbort();
+                getTags();
+
+                checkAbort();
+                getGenres();
+
+                checkAbort();
+                requestMerge();
+
+                checkAbort();
+                Pair<Integer, Integer>  filesInfo = getFilesInfos();
+                if(filesInfo==null) {
+                    stopSync("Error receiving files information.", 5000);
+                    return;
+                }
+                //int maxIdFileServer=filesInfo.first;
+                int nbFilesServer=filesInfo.second;
+
+                //FIXME: Speed up process !!!!
+                // 1 - update status to INFO WHERE status IN (REC, NEW)
+                // 2- Get NEW only and check
+                // 3- Download NEW
+                // 4- GET INFO, from MAX(idFileServer) WHERE status NOT IN (REC, NEW)
+
+                //Get server library
+                int nbFilesInBatch=1000;
+                Map<Integer, Track> filesMap = new LinkedHashMap<>();
+                for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
+                    checkAbort();
+                    Map<Integer, Track> filesMapBatch = getFiles(i, nbFilesInBatch);
+                    int j =0;
+                    for (Track trackServer:filesMapBatch.values()) {
+                        checkAbort();
+                        j++;
+                        helperNotification.notifyBar(notificationSync,
+                                "Checking files ...", 10, i+j, nbFilesServer);
+                        Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
+                        switch (trackServer.getStatus()) {
+                            case INFO:
+                                File file = new File(trackServer.getPath());
+                                file.delete();
+                                break;
+                            case NEW:
+                                RepoSync.checkNewFile(trackServer);
+                                break;
+                        }
+                        if(trackRemote==null || trackRemote.getStatus()!=trackServer.getStatus()) {
+                            HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
+                        }
+                    }
+                    checkAbort();
+                    filesMap.putAll(filesMapBatch);
+                }
+
+                //Remove tracks that have been removed from server
+                int i=0;
+                for(Track track : RepoSync.getList()) {
+                    checkAbort();
+                    helperNotification.notifyBar(notificationSync,
+                            "Checking deleted files ...", 50, i, nbFilesServer);
+                    if(!filesMap.containsKey(track.getIdFileServer())) {
+                        File file = new File(track.getPath());
+                        file.delete();
+                        HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
+                    }
+                }
+                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Sync check complete.", 5000));
+                checkAbort();
+                startDownloads();
+                checkCompleted();
+
+            } catch (IOException | UnauthorizedException | JSONException | InterruptedException e) {
+                Log.e(TAG, "Error ProcessSync", e);
+                stopSync(e.getLocalizedMessage(), 5000);
+            }
+        }
     }
 
     private static class UnauthorizedException extends Exception {
@@ -356,6 +385,7 @@ public class ServiceSync extends ServiceBase {
             processDownload.stopDownloads();
             processDownload = null;
         }
+        processSync.abort();
         if (!msg.equals("")) {
             runOnUiThread(() -> {
                 helperNotification.notifyBar(notificationSync, msg, millisInFuture);
