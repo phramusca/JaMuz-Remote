@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @author phramusca
  */
-public final class RepoSync { //FIXME: Can't we get rid of this repo now that sync process changed ?
+public final class RepoSync { //TODO: Can't we get rid of this repo now that sync process changed ?
 
     private static final String TAG = RepoSync.class.getName();
 
