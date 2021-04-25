@@ -116,14 +116,9 @@ public class ServiceSync extends ServiceBase {
                 //int maxIdFileServer=filesInfo.first;
                 int nbFilesServer=filesInfo.second;
 
-                //FIXME: Speed up process !!!!
-                // 1 - update status to INFO WHERE status IN (REC, NEW)
-                // 2- Get NEW only and check
-                // 3- Download NEW
-                // 4- GET INFO, from MAX(idFileServer) WHERE status NOT IN (REC, NEW)
-
                 //Get server library
-                int nbFilesInBatch=1000;
+                int nbFilesInBatch=5000;
+                helperNotification.notifyBar(notificationSync, "Checking files ...");
                 Map<Integer, Track> filesMap = new LinkedHashMap<>();
                 for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
                     checkAbort();
@@ -169,9 +164,13 @@ public class ServiceSync extends ServiceBase {
                 startDownloads();
                 checkCompleted();
 
-            } catch (IOException | UnauthorizedException | JSONException | InterruptedException e) {
+            } catch (IOException | UnauthorizedException | JSONException e) {
                 Log.e(TAG, "Error ProcessSync", e);
                 stopSync(e.getLocalizedMessage(), 5000);
+            }
+            catch (InterruptedException e) {
+                Log.e(TAG, "Error ProcessSync", e);
+                stopSync("", 5000);
             }
         }
     }
