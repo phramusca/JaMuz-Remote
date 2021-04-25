@@ -50,9 +50,9 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
                             albums.remove(loaderPos);
                             adapterAlbum.notifyDataSetChanged();
                             adapterAlbum.setLoaded();
-                            if(complete) {
-                                Toast.makeText(ActivityAlbums.this, "End of list", Toast.LENGTH_SHORT).show();
-                            }
+//                            if(complete) {
+//                                Toast.makeText(ActivityAlbums.this, "End of list", Toast.LENGTH_SHORT).show();
+//                            }
                         });
                     }
                 }
@@ -91,7 +91,7 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
     private boolean addMore() {
         List<Track> newAlbums = HelperLibrary.musicLibrary.getAlbums(albums.size());
         this.albums.addAll(newAlbums);
-        readCovers(newAlbums);
+        readCovers(newAlbums); //FIXME: Find a way to get a cover if first album track does not have one (read from other tracks)
         return newAlbums.size()>0;
     }
 

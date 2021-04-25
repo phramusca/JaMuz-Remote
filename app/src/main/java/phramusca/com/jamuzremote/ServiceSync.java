@@ -13,11 +13,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,6 +29,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okio.BufferedSink;
+import okio.Okio;
 
 /**
  *
@@ -556,28 +555,27 @@ public class ServiceSync extends ServiceBase {
         public void run() {
             try {
                 setStatus("Req.", track);
-                //callback.setStatus();
                 String url = "http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/download?id="+track.getIdFileServer();
                 File destinationPath = new File(new File(track.getPath()).getParent());
                 destinationPath.mkdirs();
-                String destinationFile=new File(getAppDataPath, track.getRelativeFullPath()).getAbsolutePath();
-                BufferedInputStream in = new BufferedInputStream(new URL(url).openStream());
-                FileOutputStream fileOutputStream = new FileOutputStream(destinationFile);
+                File destinationFile=new File(getAppDataPath, track.getRelativeFullPath());
                 checkAbort();
-                double fileSize = track.getSize();
-                // TODO: Find best. Make a benchmark (and use it in notification progres bar)
-                //https://stackoverflow.com/questions/8748960/how-do-you-decide-what-byte-size-to-use-for-inputstream-read
-                byte[] buf = new byte[8192];
-                int bytesRead;
-                int bytesReceived=0;
-                while (fileSize > 0 && (bytesRead = in.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
-                    checkAbort();
-                    fileOutputStream.write(buf, 0, bytesRead);
-                    fileSize -= bytesRead;
-                    bytesReceived=bytesReceived+bytesRead;
-                    setStatus("Down. "+StringManager.humanReadableByteCount(bytesReceived, false)+" /", track);
+                setStatus("Down.", track);
+                Request request = new Request.Builder()
+                        .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
+                        .url(url).build();
+                Response response;
+                OkHttpClient client = new OkHttpClient();
+                response = client.newCall(request).execute();
+                if (destinationFile.exists()) {
+                    boolean fileDeleted = destinationFile.delete();
+                    Log.v("fileDeleted", fileDeleted + "");
                 }
-                fileOutputStream.close();
+                boolean fileCreated = destinationFile.createNewFile();
+                Log.v("fileCreated", fileCreated + "");
+                BufferedSink sink = Okio.buffer(Okio.sink(destinationFile));
+                sink.writeAll(response.body().source());
+                sink.close();
                 setStatus("Rec.", track);
                 RepoSync.checkReceivedFile(getAppDataPath, track);
                 status="";

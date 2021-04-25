@@ -153,7 +153,7 @@ public abstract class AdapterTrack extends AdapterLoad {
             bitmap = overlayIcon(bitmap, R.drawable.ic_playing);
         }
 
-        if(trackList.get(position).getStatus().equals(Track.Status.DOWN)) {
+        if(trackList.get(position).getStatus().equals(Track.Status.NEW)) {
             bitmap = overlayIcon(bitmap, R.drawable.ic_download);
         }
 
