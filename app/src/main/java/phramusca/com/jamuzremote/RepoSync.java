@@ -21,11 +21,11 @@ public final class RepoSync { //TODO: Can't we get rid of this repo now that syn
 
     private static Table<Integer, Track.Status, Track> tracks = null;
 
-    private synchronized static void updateTracks(Track track) {
+    private static void updateTracks(Track track) {
         tracks.row(track.getIdFileServer()).clear();
         tracks.put(track.getIdFileServer(), track.getStatus(), track);
     }
-    protected synchronized static void read() {
+    protected static void read() {
         tracks = HashBasedTable.create();
         List<Track> newTracks = HelperLibrary.musicLibrary.getTracks("", "", "", -1);
         for(Track track : newTracks) {
@@ -41,7 +41,7 @@ public final class RepoSync { //TODO: Can't we get rid of this repo now that syn
      * @param track the one to check
      * @return true if onReceivedFile exists and length()==track.size
      */
-    public synchronized static void checkReceivedFile(File getAppDataPath, Track track) {
+    public static void checkReceivedFile(File getAppDataPath, Track track) {
         File receivedFile = new File(getAppDataPath, track.getRelativeFullPath());
         if(tracks.containsRow(track.getIdFileServer())) {
             track.setStatus(Track.Status.REC);
@@ -66,7 +66,7 @@ public final class RepoSync { //TODO: Can't we get rid of this repo now that syn
      * @param receivedFile the corresponding File
      * @return true if onReceivedFile exists and length()==track.size
      */
-    private synchronized static boolean checkFile(Track track,
+    private static boolean checkFile(Track track,
                                                   File receivedFile) {
         if(receivedFile.exists()) {
             if (receivedFile.length() == track.getSize()) {
@@ -88,7 +88,7 @@ public final class RepoSync { //TODO: Can't we get rid of this repo now that syn
      * @return modified track with status set to REC (with tags read) if it exists
      *
      */
-    public synchronized static void checkNewFile(Track track) {
+    public static void checkNewFile(Track track) {
         File file = new File(track.getPath());
         if(checkFile(track, file)) {
             track.setStatus(Track.Status.REC);
@@ -110,17 +110,17 @@ public final class RepoSync { //TODO: Can't we get rid of this repo now that syn
         tracks.put(track.getIdFileServer(), track.getStatus(), track);
     }
 
-    public synchronized static int getRemainingSize() {
+    public static int getRemainingSize() {
         return tracks ==null?0:tracks.column(Track.Status.NEW).size();
     }
 
-    public synchronized static int getTotalSize() {
+    public static int getTotalSize() {
         return tracks==null?0:tracks.column(Track.Status.REC).size();
     }
 
     static String totalFilesSize;
 
-    public synchronized static String getTotalFileSize() {
+    public static String getTotalFileSize() {
         if(totalFilesSize!=null || tracks==null) {
             return totalFilesSize;
         }
@@ -130,7 +130,7 @@ public final class RepoSync { //TODO: Can't we get rid of this repo now that syn
         return totalFilesSize;
     }
 
-    public synchronized static long getRemainingFileSize() {
+    public static long getRemainingFileSize() {
         if(tracks ==null) {
             return 0;
         }
