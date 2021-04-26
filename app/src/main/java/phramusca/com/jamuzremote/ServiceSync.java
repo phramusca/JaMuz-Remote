@@ -88,15 +88,17 @@ public class ServiceSync extends ServiceBase {
         public void run() {
             try {
                 checkAbort();
-                helperNotification.notifyBar(notificationSync, getString(R.string.readingList));
-                RepoSync.read();
-                checkAbort();
+
                 helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
                 String version = getVersion();
                 if(!version.equals("1")) {
                     stopSync("Server version \""+version+"\" is not supported.", 5000);
                     return;
                 }
+
+                helperNotification.notifyBar(notificationSync, getString(R.string.readingList));
+                RepoSync.read();
+                checkAbort();
 
                 checkAbort();
                 getTags();
