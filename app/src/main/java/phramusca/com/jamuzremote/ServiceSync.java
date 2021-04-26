@@ -119,7 +119,7 @@ public class ServiceSync extends ServiceBase {
                 //Get server library
                 int nbFilesInBatch=5000;
                 helperNotification.notifyBar(notificationSync, "Checking files ...");
-                Map<Integer, Track> filesMap = new LinkedHashMap<>();
+                //Map<Integer, Track> filesMap = new LinkedHashMap<>();
                 for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
                     checkAbort();
                     Map<Integer, Track> filesMapBatch = getFiles(i, nbFilesInBatch);
@@ -144,21 +144,27 @@ public class ServiceSync extends ServiceBase {
                         }
                     }
                     checkAbort();
-                    filesMap.putAll(filesMapBatch);
+                    //filesMap.putAll(filesMapBatch);
                 }
 
+                //FIXME: Do this different as filesMap gets too big an crash application !!
+                //A/art: art/runtime/indirect_reference_table.cc:145] JNI ERROR (app bug): weak global reference table overflow (max=51200)
+                //    art/runtime/indirect_reference_table.cc:145] weak global reference table dump:
+                //    art/runtime/indirect_reference_table.cc:145]   Last 10 entries (of 51200):
+                //    art/runtime/indirect_reference_table.cc:145]     51199: 0x29a78570 phramusca.com.jamuzremote.Track
+
                 //Remove tracks that have been removed from server
-                int i=0;
-                for(Track track : RepoSync.getList()) {
-                    checkAbort();
-                    helperNotification.notifyBar(notificationSync,
-                            "Checking deleted files ...", 50, i, nbFilesServer);
-                    if(!filesMap.containsKey(track.getIdFileServer())) {
-                        File file = new File(track.getPath());
-                        file.delete();
-                        HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
-                    }
-                }
+//                int i=0;
+//                for(Track track : RepoSync.getList()) {
+//                    checkAbort();
+//                    helperNotification.notifyBar(notificationSync,
+//                            "Checking deleted files ...", 50, i, nbFilesServer);
+//                    if(!filesMap.containsKey(track.getIdFileServer())) {
+//                        File file = new File(track.getPath());
+//                        file.delete();
+//                        HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
+//                    }
+//                }
                 runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Sync check complete.", 5000));
                 checkAbort();
                 startDownloads();
