@@ -115,7 +115,7 @@ public final class RepoSync { //TODO: Can't we get rid of this repo now that syn
     }
 
     public static int getTotalSize() {
-        return tracks==null?0:tracks.column(Track.Status.REC).size();
+        return tracks==null?0:tracks.column(Track.Status.REC).size()+tracks.column(Track.Status.NEW).size();
     }
 
     static String totalFilesSize;
