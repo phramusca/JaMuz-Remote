@@ -136,16 +136,14 @@ public class ServiceSync extends ServiceBase {
 //                        HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
 //                    }
 //                }
-                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Sync check complete.", 5000));
                 checkCompleted();
 
-            } catch (IOException | UnauthorizedException | JSONException e) {
+            } catch (IOException | UnauthorizedException | JSONException | InterruptedException e) {
                 Log.e(TAG, "Error ProcessSync", e);
-                stopSync(e.getLocalizedMessage(), 5000);
-            }
-            catch (InterruptedException e) {
-                Log.e(TAG, "Error ProcessSync", e);
-                stopSync("", 5000);
+                helperNotification.notifyBar(notificationSync, "ERROR: "+e.getLocalizedMessage());
+                //FIXME: Retry a number of times (in checkFiles) similar to what is done for downloads
+                //stopSync also stop downloads if any so not stopping and letting user stop and restart
+                //stopSync(e.getLocalizedMessage(), 5000);
             }
         }
 
@@ -246,7 +244,7 @@ public class ServiceSync extends ServiceBase {
                 return Integer.valueOf(response.body().string());
             } catch (IOException e) {
                 e.printStackTrace();
-                return null;
+                return 0;
             }
         }
 
@@ -415,7 +413,7 @@ public class ServiceSync extends ServiceBase {
                     " have been retrieved successfully.";
             Log.i(TAG, msg);
             runOnUiThread(() -> helperToast.toastLong(msg + "\n\n" + msg2));
-            stopSync("Sync complete.", 20000);
+            stopSync("Sync complete.", -1);
             return true;
         } else if (RepoSync.getTotalSize()<=0){
             Log.i(TAG, "No files to download.");
@@ -500,7 +498,7 @@ public class ServiceSync extends ServiceBase {
                 Log.i(TAG, "ProcessDownload received InterruptedException");
             }
             if(!completed && !checkCompleted()) {
-                stopSync("Sync done but NOT complete :(", 10000);
+                stopSync("Sync done but NOT complete :(", -1);
             }
         }
 
