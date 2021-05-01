@@ -150,7 +150,7 @@ public class ServiceSync extends ServiceBase {
                 throws InterruptedException, JSONException, UnauthorizedException, IOException {
             String msg = "Checking "+status.name().toLowerCase()+" files ...";
             helperNotification.notifyBar(notificationSync, msg);
-            int nbFilesInBatch=500;
+            int nbFilesInBatch=5000;
             int nbFilesServer = getFilesCount(status);
             if(nbFilesServer>0) {
                 for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
@@ -162,19 +162,30 @@ public class ServiceSync extends ServiceBase {
                         j++;
                         helperNotification.notifyBar(notificationSync, msg, 10, i+j, nbFilesServer);
                         Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
-                        switch (trackServer.getStatus()) {
-                            case INFO:
-                                File file = new File(trackServer.getPath());
-                                file.delete();
-                                break;
-                            case NEW:
-                                RepoSync.checkNewFile(trackServer);
-                                break;
-                        }
-                        if (trackRemote == null || trackRemote.getStatus() != trackServer.getStatus()) {
+                        if(trackRemote!=null) {
+                            switch (trackServer.getStatus()) {
+                                case INFO:
+                                    if(!trackRemote.getStatus().equals(Track.Status.INFO)) {
+                                        File file = new File(trackRemote.getPath());
+                                        file.delete();
+                                        HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
+                                        RepoSync.put(trackServer);
+                                    }
+                                    break;
+                                case NEW:
+                                    if(!trackRemote.getStatus().equals(Track.Status.REC)) {
+                                        RepoSync.checkNewFile(trackRemote);
+                                        if(!trackRemote.getStatus().equals(Track.Status.REC)) {
+                                            HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
+                                            RepoSync.put(trackServer);
+                                        }
+                                    }
+                                    break;
+                            }
+                        } else {
                             HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
+                            RepoSync.put(trackServer);
                         }
-
                     }
                     checkAbort();
                 }
@@ -233,7 +244,7 @@ public class ServiceSync extends ServiceBase {
                 throw new UnauthorizedException(response.message());
             }
             String body = response.body().string();
-            //TODO: use gson instead
+            //TODO: use gson instead (or retrofit !)
 //                    final Gson gson = new Gson();
 //                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
 //                    fromJson.chromaprint=chromaprint;
@@ -299,7 +310,7 @@ public class ServiceSync extends ServiceBase {
             }
             helperNotification.notifyBar(notificationSync, "Received tags ... ");
             String body = response.body().string();
-            //TODO: use gson instead
+            //TODO: use gson instead (or retrofit !)
 //                    final Gson gson = new Gson();
 //                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
 //                    fromJson.chromaprint=chromaprint;
@@ -328,9 +339,9 @@ public class ServiceSync extends ServiceBase {
             if(!response.isSuccessful()) {
                 throw new UnauthorizedException(response.message());
             }
-            helperNotification.notifyBar(notificationSync, "Received tags ... ");
+            helperNotification.notifyBar(notificationSync, "Received genres ... ");
             String body = response.body().string();
-            //TODO: use gson instead
+            //TODO: use gson instead (or retrofit !)
 //                    final Gson gson = new Gson();
 //                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
 //                    fromJson.chromaprint=chromaprint;
@@ -373,7 +384,7 @@ public class ServiceSync extends ServiceBase {
             }
             helperNotification.notifyBar(notificationSync,"Updating database with merge changes ... ");
             String body = response.body().string();
-            //TODO: use gson instead
+            //TODO: use gson instead (or retrofit !)
 //                    final Gson gson = new Gson();
 //                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
 //                    fromJson.chromaprint=chromaprint;
@@ -536,6 +547,7 @@ public class ServiceSync extends ServiceBase {
             if(!completed && !checkCompleted()) {
                 stopSync("Sync done but NOT complete :(", -1);
             }
+            //FIXME: checkCompleted can stop sync as downloads are complete though check info files may still run !!
         }
 
         private boolean startDownloads() {

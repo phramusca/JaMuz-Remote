@@ -7,29 +7,25 @@ import com.google.common.collect.Table;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
  * @author phramusca
  */
-public final class RepoSync { //TODO: Can't we get rid of this repo now that sync process changed ?
+public final class RepoSync {
 
     private static final String TAG = RepoSync.class.getName();
 
     private static Table<Integer, Track.Status, Track> tracks = null;
 
-    private static void updateTracks(Track track) {
-        tracks.row(track.getIdFileServer()).clear();
-        tracks.put(track.getIdFileServer(), track.getStatus(), track);
-    }
     protected static void read() {
-        tracks = HashBasedTable.create();
-        List<Track> newTracks = HelperLibrary.musicLibrary.getTracks("", "", "", -1);
-        for(Track track : newTracks) {
-            tracks.put(track.getIdFileServer(), track.getStatus(), track);
+        if(tracks==null) {
+            tracks = HashBasedTable.create();
+            List<Track> newTracks = HelperLibrary.musicLibrary.getTracks("", "", "", -1);
+            for(Track track : newTracks) {
+                put(track);
+            }
         }
     }
 
@@ -53,7 +49,7 @@ public final class RepoSync { //TODO: Can't we get rid of this repo now that syn
                 receivedFile.delete();
                 track.setStatus(Track.Status.NEW);
             }
-            updateTracks(track);
+            put(track);
         } else {
             Log.w(TAG, "tracks does not contain file. Deleting " + receivedFile.getAbsolutePath());
             //noinspection ResultOfMethodCallIgnored
@@ -83,6 +79,10 @@ public final class RepoSync { //TODO: Can't we get rid of this repo now that syn
         return false;
     }
 
+    public static void put(Track track) {
+        tracks.put(track.getIdFileServer(), track.getStatus(), track);
+    }
+
     /**
      * @param track the NEW file to check
      * @return modified track with status set to REC (with tags read) if it exists
@@ -92,22 +92,8 @@ public final class RepoSync { //TODO: Can't we get rid of this repo now that syn
         File file = new File(track.getPath());
         if(checkFile(track, file)) {
             track.setStatus(Track.Status.REC);
-            //FIXME: readMetadata often return false (at checkNewFile, when checking new list of files)
-            //java.lang.RuntimeException: setDataSource failed: status = 0x80000000
-            //which is weird as it has been read at previous reception and was valid.
-            // - Does it happen because we overload the file system by checking too much ?
-            // => Validate the file using a file hash instead (includes below metadata changes so if metadata changes, it will be re-downloaded)
-            //          OR sync album, artist, title and genre instead of reading file metadata
-            //            (IF not, unless file size does not change when metadata does we would not get metadata updates on those fields)
-            //  (only read file metadata for local files - ie: the one not synced)
-//            if (!track.readMetadata()) {
-//                Log.w(TAG, "Cannot read tags. Deleting " + file.getAbsolutePath());
-//                //noinspection ResultOfMethodCallIgnored
-//                file.delete();
-//                track.setStatus(Track.Status.NEW);
-//            }
         }
-        tracks.put(track.getIdFileServer(), track.getStatus(), track);
+        put(track);
     }
 
     public static int getRemainingSize() {
