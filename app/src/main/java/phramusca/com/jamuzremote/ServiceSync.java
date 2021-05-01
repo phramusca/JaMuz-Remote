@@ -353,10 +353,10 @@ public class ServiceSync extends ServiceBase {
                     fileReceived.setStatus(Track.Status.REC);
                     HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived);
                 }
-                helperNotification.notifyBar(notificationSync,
-                        "Updating database with merge changes", 10, i+1, filesToUpdate.length());
+                helperNotification.notifyBar(notificationSync, "Updating database with merge changes",
+                        10, i+1, filesToUpdate.length());
             }
-            runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Merge complete. Request new files ... ", 2000));
+            runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Merge complete."));
         }
     }
 
@@ -477,32 +477,34 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void run() {
             boolean completed=false;
-            do {
-                startDownloads();
-                if(checkCompleted()) {
-                    completed=true;
-                    break;
-                }
-                nbRetries++;
-                try {
+            try {
+                do {
+                    checkAbort();
+                    if(!startDownloads()) {
+                        break;
+                    }
+                    if(checkCompleted()) {
+                        completed=true;
+                        break;
+                    }
+                    checkAbort();
+                    nbRetries++;
                     int sleepSeconds=nbRetries*10;
                     runOnUiThread(() -> helperNotification.notifyBar(notificationDownload,
-                            "Waiting " + sleepSeconds +
-                                    "s before attempt " +
+                            "Waiting " + sleepSeconds + "s before attempt " +
                                     (nbRetries + 1) + "/" + maxNbRetries));
                     sleep(sleepSeconds*1000);
-                } catch (InterruptedException e) {
-                    //FIXME: When user stops, downloads are stopped, but restart !!! (should not)
-                    break;
-                }
-            } while (nbRetries<maxNbRetries);
-
+                    checkAbort();
+                } while (nbRetries<maxNbRetries);
+            } catch (InterruptedException e) {
+                Log.i(TAG, "ProcessDownload received InterruptedException");
+            }
             if(!completed && !checkCompleted()) {
                 stopSync("Sync done but NOT complete :(", 10000);
             }
         }
 
-        private void startDownloads() {
+        private boolean startDownloads() {
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Starting download ... "));
             bench = new Benchmark(RepoSync.getRemainingSize(), 10);
             pool = Executors.newFixedThreadPool(20); //TODO: Make number of threads an option
@@ -520,8 +522,10 @@ public class ServiceSync extends ServiceBase {
             pool.shutdown();
             try {
                 pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+                return true;
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                return false;
             }
         }
 
