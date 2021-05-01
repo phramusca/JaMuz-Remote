@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.PowerManager;
 import android.util.Log;
-import android.util.Pair;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -141,7 +141,6 @@ public class ServiceSync extends ServiceBase {
             } catch (IOException | UnauthorizedException | JSONException | InterruptedException e) {
                 Log.e(TAG, "Error ProcessSync", e);
                 helperNotification.notifyBar(notificationSync, "ERROR: "+e.getLocalizedMessage());
-                //FIXME: Retry a number of times (in checkFiles) similar to what is done for downloads
                 //stopSync also stop downloads if any so not stopping and letting user stop and restart
                 //stopSync(e.getLocalizedMessage(), 5000);
             }
@@ -151,7 +150,7 @@ public class ServiceSync extends ServiceBase {
                 throws InterruptedException, JSONException, UnauthorizedException, IOException {
             String msg = "Checking "+status.name().toLowerCase()+" files ...";
             helperNotification.notifyBar(notificationSync, msg);
-            int nbFilesInBatch=5000;
+            int nbFilesInBatch=500;
             int nbFilesServer = getFilesCount(status);
             if(nbFilesServer>0) {
                 for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
@@ -182,8 +181,45 @@ public class ServiceSync extends ServiceBase {
             }
         }
 
+        class RetryInterceptor implements Interceptor {
+            private final int sleepSeconds = 5; //TODO: Make this an option
+            private final int maxNbRetries = 5; //TODO: Make this an option
+
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request request = chain.request();
+                int nbRetries = 0;
+                Response response = null;
+                String msg = "";
+                do {
+                    nbRetries++;
+                    try {
+                        Log.d(TAG, "CALLING: "+ request.toString());
+                        response = chain.proceed(request);
+                        break;
+                    } catch (IOException e) {
+                        msg = e.getLocalizedMessage();
+                        Log.d(TAG, "ERROR: "+ msg);
+                        helperNotification.notifyBar(notificationSync,sleepSeconds + "s before " +
+                                (nbRetries + 1) + "/" + maxNbRetries + " : " + msg);
+                        try {
+                            sleep(sleepSeconds*1000);
+                        } catch (InterruptedException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                } while (nbRetries < maxNbRetries-1);
+                if(response==null) {
+                    throw new IOException(msg);
+                }
+                return response;
+            }
+        }
+
         private Map<Integer, Track> getFiles(int idFrom, int nbFilesInBatch, Track.Status status) throws IOException, UnauthorizedException, JSONException {
-            OkHttpClient client = new OkHttpClient();
+            RetryInterceptor interceptor = new RetryInterceptor();
+            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+
             HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/files/"+status.name().toLowerCase()).newBuilder();
             urlBuilder.addQueryParameter("idFrom", String.valueOf(idFrom));
             urlBuilder.addQueryParameter("nbFilesInBatch", String.valueOf(nbFilesInBatch));
@@ -378,7 +414,7 @@ public class ServiceSync extends ServiceBase {
         public void onReceive(Context context, Intent intent)
         {
             Log.i(TAG, "UserStopServiceReceiver.onReceive()");
-            stopSync("User stopped.", 5000);
+            stopSync("User stopped.", 1500);
         }
     }
 
