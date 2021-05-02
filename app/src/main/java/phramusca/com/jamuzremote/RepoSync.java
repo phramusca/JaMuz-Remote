@@ -42,7 +42,6 @@ public final class RepoSync {
         if(tracks.containsRow(track.getIdFileServer())) {
             track.setStatus(Track.Status.REC);
             if (!checkFile(track, receivedFile)
-                    || !track.readMetadata()
                     || !HelperLibrary.musicLibrary.updateStatus(track)) {
                 Log.w(TAG, "Error with received file. Deleting " + receivedFile.getAbsolutePath());
                 //noinspection ResultOfMethodCallIgnored
