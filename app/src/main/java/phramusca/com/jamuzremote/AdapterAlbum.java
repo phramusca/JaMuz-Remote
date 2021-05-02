@@ -54,12 +54,6 @@ public class AdapterAlbum extends AdapterLoad {
             BitmapDrawable bitmapDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
             bitmapDrawable.setAlpha(50);
 
-            if (albums.get(position).isHistory()) {
-                userViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
-            } else {
-                userViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.background_color));
-            }
-
             userViewHolder.itemView.setTag(position);
             userViewHolder.itemView.setOnClickListener(view -> {
                 Integer position1 = (Integer)view.getTag();

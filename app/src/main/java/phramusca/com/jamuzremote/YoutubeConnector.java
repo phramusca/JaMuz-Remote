@@ -105,7 +105,7 @@ public class YoutubeConnector {
     private static List<YouTubeVideoItem> setItemsList(Iterator<SearchResult> iteratorSearchResults) {
         List<YouTubeVideoItem> tempSetItems = new ArrayList<>();
         if (!iteratorSearchResults.hasNext()) {
-            System.out.println(" There aren't any results for your query.");
+            Log.e("YC", "There aren't any results for your query.");
         }
         while (iteratorSearchResults.hasNext()) {
             SearchResult singleVideo = iteratorSearchResults.next();

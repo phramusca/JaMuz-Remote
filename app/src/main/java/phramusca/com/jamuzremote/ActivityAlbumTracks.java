@@ -53,7 +53,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                             ButtonInfo.PLAY,
                             pos -> {
                                 Track track = tracks.get(pos);
-                                insertAndSetResult(track, true);
+                                insertAndSetResult(track, true, pos);
                             },
                             getApplicationContext()));
 
@@ -61,7 +61,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                             ButtonInfo.QUEUE,
                             pos -> {
                                 Track track = tracks.get(pos);
-                                insertAndSetResult(track, false);
+                                insertAndSetResult(track, false, pos);
                             },
                             getApplicationContext()));
                 }
@@ -69,12 +69,30 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         }
     }
 
-    private void insertAndSetResult(Track track, boolean playNext) {
-        PlayQueue.queue.insert(track);
+    private void insertAndSetResult(Track track, boolean playNext, int pos) {
+        if(!track.getStatus().equals(Track.Status.INFO)) {
+            PlayQueue.queue.insert(track);
 
-        Intent data = new Intent();
-        data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");
-        setResult(RESULT_OK, data);
-        finish();
+            Intent data = new Intent();
+            data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");
+            setResult(RESULT_OK, data);
+            finish();
+        } else {
+            track.getTags(true);
+            track.setStatus(Track.Status.NEW);
+            trackAdapter.notifyItemChanged(pos);
+            HelperToast helperToast = new HelperToast(getApplicationContext());
+            ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
+            Benchmark bench = new Benchmark(1, 1);
+            ServiceSync.DownloadTask downloadTask = new ServiceSync.DownloadTask(track, 0,
+                    () -> notifyDownload(track, pos), clientInfo, ActivityMain.getAppDataPath(), bench);
+            downloadTask.start();
+        }
+    }
+
+    private void notifyDownload(Track track, int pos) {
+        track.setStatus(Track.Status.REC);
+        track.getTumb(true);
+        runOnUiThread(() -> trackAdapter.notifyItemChanged(pos));
     }
 }
