@@ -101,7 +101,7 @@ import static phramusca.com.jamuzremote.StringManager.trimTrailingWhitespace;
 public class ActivityMain extends AppCompatActivity {
 
     private static final String TAG = ActivityMain.class.getName();
-    private SharedPreferences preferences;
+    private static SharedPreferences preferences;
     private HelperToast helperToast = new HelperToast(this);
     private ClientRemote clientRemote;
     private Track displayedTrack;
@@ -109,6 +109,7 @@ public class ActivityMain extends AppCompatActivity {
     protected static Map<String, Bitmap> coverMap = new HashMap<>();
     private AudioManager audioManager;
     public static AudioPlayer audioPlayer;
+    public static String login;
 
     //In internal SD emulated storage:
     //TODO: Possibly, change database location to external SD as we now have rights
@@ -183,6 +184,8 @@ public class ActivityMain extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "ActivityMain onCreate");
         setContentView(R.layout.activity_main);
+
+        login=Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -259,7 +262,10 @@ public class ActivityMain extends AppCompatActivity {
             buttonRemote.setEnabled(false);
             buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
             if(buttonRemote.getText().equals("1")) {
-                ClientInfo clientInfo = getClientInfo(ClientCanal.REMOTE);
+                ClientInfo clientInfo = null;
+                if(checkWifiConnection()) {
+                    clientInfo = getClientInfo(ClientCanal.REMOTE, helperToast);
+                }
                 if(clientInfo!=null) {
                     clientRemote =  new ClientRemote(clientInfo, new ListenerRemote());
                     new Thread() {
@@ -288,7 +294,10 @@ public class ActivityMain extends AppCompatActivity {
             buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
             if(buttonSync.getText().equals("1")) {
                 enableSync(false);
-                ClientInfo clientInfo = getClientInfo(ClientCanal.SYNC);
+                ClientInfo clientInfo = null;
+                if(checkWifiConnection()) {
+                    clientInfo = getClientInfo(ClientCanal.SYNC, helperToast);
+                }
                 if(clientInfo!=null) {
                     if(!isMyServiceRunning(ServiceSync.class)) {
                         Intent service = new Intent(getApplicationContext(), ServiceSync.class);
@@ -296,6 +305,8 @@ public class ActivityMain extends AppCompatActivity {
                         service.putExtra("getAppDataPath", getAppDataPath());
                         startService(service);
                     }
+                } else {
+                    enableSync(true);
                 }
             }
             else {
@@ -740,11 +751,15 @@ public class ActivityMain extends AppCompatActivity {
         spinnerGenre.setEnabled(true);
     }
 
-    private ClientInfo getClientInfo(int canal) {
+    private boolean checkWifiConnection() {
         if(!checkConnectedViaWifi())  {
             helperToast.toastLong("You must connect to WiFi network.");
-            return null;
+            return false;
         }
+        return true;
+    }
+
+    static ClientInfo getClientInfo(int canal, HelperToast helperToast) {
         String infoConnect = preferences.getString("connectionString", "192.168.0.1:2013");
         String[] split = infoConnect.split(":");  //NOI18N
         if(split.length<2) {
@@ -760,9 +775,7 @@ public class ActivityMain extends AppCompatActivity {
         } catch(NumberFormatException ex) {
             port=2013;
         }
-        return new ClientInfo(address, port,
-                Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID),
-                "tata", canal,
+        return new ClientInfo(address, port, login,"tata", canal,
                 "jamuz", getAppDataPath().getAbsolutePath());
     }
 
@@ -913,7 +926,7 @@ public class ActivityMain extends AppCompatActivity {
             displayPlaylist(playlist);
             localSelectedPlaylist = playlist;
             if(playNext) {
-                PlayQueue.queue.setQueue(playlist.getTracks(10));
+                PlayQueue.queue.setQueue(playlist.getTracks(10, false));
                 playNext();
             } else {
                 refreshQueueAndPlaylistSpinner(false);
@@ -1321,7 +1334,6 @@ public class ActivityMain extends AppCompatActivity {
                         if(tag.length()>1) {
                             String s1 = tag.substring(0, 1).toUpperCase();
                             String tagCamel = s1 + tag.substring(1).toLowerCase();
-                            System.out.println(tagCamel);
                             if(RepoTags.get().containsValue(tagCamel)) {
                                 toggleTag(tagCamel);
                             }
@@ -1972,7 +1984,7 @@ public class ActivityMain extends AppCompatActivity {
                 if(file.endsWith(".plli")) {
                     Playlist playlist = readPlaylist(file);
                     if(playlist != null) {
-                        playlist.getNbFiles();
+                        playlist.getNbFiles(false);
                         localPlaylists.put(playlist.getName(), playlist);
                     }
                 }
@@ -2032,10 +2044,10 @@ public class ActivityMain extends AppCompatActivity {
                 public void run() {
                     if(refreshAll) {
                         for(Playlist playlist : localPlaylists.values()) {
-                            playlist.getNbFiles();
+                            playlist.getNbFiles(false);
                         }
                     } else {
-                        localSelectedPlaylist.getNbFiles();
+                        localSelectedPlaylist.getNbFiles(false);
                     }
                     runOnUiThread(() -> playListArrayAdapter.notifyDataSetChanged());
                 }

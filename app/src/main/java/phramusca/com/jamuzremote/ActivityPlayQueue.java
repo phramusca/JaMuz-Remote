@@ -122,7 +122,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
         //Get album tracks
         Playlist playlist = new Playlist(track.getAlbum(), true);
         playlist.setAlbum(track.getAlbum());
-        ArrayList<Track> tracks = (ArrayList<Track>) playlist.getTracks();
+        ArrayList<Track> tracks = (ArrayList<Track>) playlist.getTracks(true);
         //Open album tracks layout
         Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
         intent.putExtra("tracksList", tracks);

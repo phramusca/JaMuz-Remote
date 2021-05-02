@@ -50,9 +50,9 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
                             albums.remove(loaderPos);
                             adapterAlbum.notifyDataSetChanged();
                             adapterAlbum.setLoaded();
-                            if(complete) {
-                                Toast.makeText(ActivityAlbums.this, "End of list", Toast.LENGTH_SHORT).show();
-                            }
+//                            if(complete) {
+//                                Toast.makeText(ActivityAlbums.this, "End of list", Toast.LENGTH_SHORT).show();
+//                            }
                         });
                     }
                 }
@@ -70,6 +70,8 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
                         ButtonInfo.PLAY,
                         pos -> {
                             Track album = albums.get(pos);
+                            //FIXME: Why are next inserted are removed once we go out then back to queue activity ?
+                            // and not when only queuing (without play) ??
                             insertAndSetResult(album, true);
                         },
                         getApplicationContext()));
@@ -89,7 +91,7 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
     private boolean addMore() {
         List<Track> newAlbums = HelperLibrary.musicLibrary.getAlbums(albums.size());
         this.albums.addAll(newAlbums);
-        readCovers(newAlbums);
+        readCovers(newAlbums); //FIXME: Find a way to get a cover if first album track does not have one (read from other tracks)
         return newAlbums.size()>0;
     }
 
@@ -132,7 +134,7 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
         //Get album tracks
         Playlist playlist = new Playlist(track.getAlbum(), true);
         playlist.setAlbum(track.getAlbum());
-        ArrayList<Track> tracks = (ArrayList<Track>) playlist.getTracks();
+        ArrayList<Track> tracks = (ArrayList<Track>) playlist.getTracks(true);
         //Open album tracks layout
         Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
         intent.putExtra("tracksList", tracks);

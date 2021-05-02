@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_STATUS;
+
 /**
  * Created by raph on 11/06/17.
  */
@@ -38,19 +40,30 @@ public class Playlist implements Comparable, Serializable {
         this.isLocal = isLocal;
     }
 
-    public List<Track> getTracks() {
-        return getTracks(-1);
+    public List<Track> getTracks(boolean includeINFO) {
+        return getTracks(-1, includeINFO);
     }
 
-    public List<Track> getTracks(int limit) {
-        return getTracks(limit, new ArrayList<>());
+    public List<Track> getTracks(int limit, boolean includeINFO) {
+        return getTracks(limit, new ArrayList<>(), includeINFO);
     }
 
-    public List<Track> getTracks(int limit, List<Integer> excluded) {
+    public List<Track> getTracks(int limit, List<Integer> excluded, boolean includeINFO) {
         if(HelperLibrary.musicLibrary!=null) {
-            return HelperLibrary.musicLibrary.getTracks(getWhere(excluded), getHaving(), order.value, limit);
+            return HelperLibrary.musicLibrary.getTracks(getWhere(excluded, includeINFO), getHaving(), order.value, limit);
         }
         return new ArrayList<>();
+    }
+
+    public void getNbFiles(boolean includeINFO) {
+
+        if(HelperLibrary.musicLibrary!=null) {
+            Triplet<Integer, Long, Long> entry=HelperLibrary.musicLibrary.getNb(getWhere(new ArrayList<>(), includeINFO), getHaving());
+            nbFiles=entry.getFirst();
+            //TODO: Offer choice to display one or the other (length OR size)
+            /*lengthOrSize = StringManager.humanReadableByteCount(entry.getSecond(), false);*/
+            lengthOrSize =StringManager.humanReadableSeconds(entry.getThird(), "");
+        }
     }
 
     public Set<Map.Entry<String, TriStateButton.STATE>> getTags() {
@@ -261,9 +274,12 @@ public class Playlist implements Comparable, Serializable {
         modified=true;
     }
 
-    private String getWhere(List<Integer> excluded) {
+    private String getWhere(List<Integer> excluded, boolean includeINFO) {
 
-        String in = "WHERE status IN (\""+ Track.Status.REC.name() + "\",\"" + Track.Status.NULL.name() + "\") " +
+        String in = "WHERE "+COL_STATUS+" IN (" +
+                "\""+ Track.Status.REC.name() + "\"," +
+                "\"" + Track.Status.LOCAL.name() + "\""
+                +(includeINFO?",\"" + Track.Status.INFO.name() + "\", \"" + Track.Status.NEW.name() + "\"":"")+") " +
                 " AND rating "+getRatingString()+" ";
 
         if(limitValue>0) {
@@ -382,17 +398,6 @@ public class Playlist implements Comparable, Serializable {
         return isLocal?
                 name+" ("+ nbFiles +" | "+ lengthOrSize +")"
                 :name;
-    }
-
-    public void getNbFiles() {
-
-        if(HelperLibrary.musicLibrary!=null) {
-            Triplet<Integer, Long, Long> entry=HelperLibrary.musicLibrary.getNb(getWhere(new ArrayList<>()), getHaving());
-            nbFiles=entry.getFirst();
-            //TODO: Offer choice to display one or the other (length OR size)
-            /*lengthOrSize = StringManager.humanReadableByteCount(entry.getSecond(), false);*/
-            lengthOrSize =StringManager.humanReadableSeconds(entry.getThird(), "");
-        }
     }
 
     @Override

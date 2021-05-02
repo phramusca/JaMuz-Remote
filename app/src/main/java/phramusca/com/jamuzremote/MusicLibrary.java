@@ -212,7 +212,7 @@ public class MusicLibrary {
         return result;
     }
 
-    private synchronized boolean insertTrack(Track track){
+     synchronized boolean insertTrack(Track track){
         try {
             int id = (int) db.insert(TABLE_TRACKS, null, TrackToValues(track));
             if(id>0) {
@@ -338,6 +338,15 @@ public class MusicLibrary {
         return -1;
     }
 
+    synchronized int deleteTrack(int idFileServer){
+        try {
+            return db.delete(TABLE_TRACKS, COL_ID_SERVER + " = " + idFileServer, null);
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "deleteTrack("+idFileServer+")", ex);
+        }
+        return -1;
+    }
+
     private synchronized List<Track> getTracks(Cursor cursor) {
         List<Track> tracks = new ArrayList<>();
         if(cursor != null && cursor.moveToFirst())
@@ -352,6 +361,7 @@ public class MusicLibrary {
 
     private synchronized ContentValues TrackToValues(Track track) {
         ContentValues values = new ContentValues();
+        values.put(COL_ID_SERVER, track.getIdFileServer());
         values.put(COL_TITLE, track.getTitle());
         values.put(COL_ALBUM, track.getAlbum());
         values.put(COL_ARTIST, track.getArtist());
@@ -509,34 +519,19 @@ public class MusicLibrary {
         return idTag;
     }
 
-    synchronized int updateStatus(Track track){
+    synchronized boolean updateStatus(Track track){
         try {
+            Log.d(TAG, "updateStatus("+track.getIdFileServer()+"): "+track.getStatus());
             ContentValues values = new ContentValues();
             values.put(COL_STATUS, track.getStatus().name());
-            return db.update(TABLE_TRACKS,
+            db.update(TABLE_TRACKS,
                     values,
                     COL_ID_SERVER + " = " +track.getIdFileServer(), null);
+            return true;
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "updateStatus("+track.getIdFileServer()+")", ex);
+            Log.e(TAG, "updateStatus("+track.getIdFileServer()+"): "+track.getStatus(), ex);
         }
-        return -1;
-    }
-
-    /**
-     * Set Status DEL where Status!="NULL"
-     * @return the number of rows affected
-     */
-    synchronized int updateStatus(){
-        try {
-            ContentValues values = new ContentValues();
-            values.put(COL_STATUS, Track.Status.DEL.name());
-            return db.update(TABLE_TRACKS,
-                    values,
-                    COL_STATUS+"!=\"NULL\"", null);
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "updateStatus()", ex);
-        }
-        return -1;
+        return false;
     }
 
     synchronized int updateGenre(Track track){

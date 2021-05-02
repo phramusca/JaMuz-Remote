@@ -22,7 +22,7 @@ public class ClientInfo implements Serializable {
     private final int port;
 	private final String login;
 	private final String password;
-    private String rootPath;
+    private final String rootPath;
 
     public ClientInfo(String address, int port, String login, String password,
                       int canal, String appId, String rootPath){
@@ -35,17 +35,20 @@ public class ClientInfo implements Serializable {
         this.rootPath = rootPath;
     }
 
-    public ClientInfo(ClientInfo clientInfo, int canal) {
-        this(clientInfo.address, clientInfo.port, clientInfo.login, clientInfo.password,
-                canal, clientInfo.appId, clientInfo.rootPath);
-    }
-
     public String getAddress() {
         return address;
     }
 
     public int getPort() {
         return port;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public String getAppId() {
+        return appId;
     }
 
     public JSONObject toJSONObject() {
