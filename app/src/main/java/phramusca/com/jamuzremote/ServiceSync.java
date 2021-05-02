@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.PowerManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -50,6 +51,8 @@ public class ServiceSync extends ServiceBase {
     private PowerManager.WakeLock wakeLock;
     private WifiManager.WifiLock wifiLock;
     private ProcessSync processSync;
+
+    protected static OkHttpClient client = new OkHttpClient();
 
     @Override
     public void onCreate(){
@@ -197,6 +200,7 @@ public class ServiceSync extends ServiceBase {
             private final int sleepSeconds = 5; //TODO: Make this an option
             private final int maxNbRetries = 5; //TODO: Make this an option
 
+            @NonNull
             @Override
             public Response intercept(Chain chain) throws IOException {
                 Request request = chain.request();
@@ -262,7 +266,6 @@ public class ServiceSync extends ServiceBase {
         }
 
         private String getVersion() throws IOException, UnauthorizedException {
-            OkHttpClient client = new OkHttpClient();
             HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/version").newBuilder();
             String url = urlBuilder.build().toString();
             Request request = new Request.Builder()
@@ -278,7 +281,6 @@ public class ServiceSync extends ServiceBase {
         }
 
         private Integer getFilesCount(Track.Status status) {
-            OkHttpClient client = new OkHttpClient();
             HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/files/"+status.name().toLowerCase()).newBuilder();
             urlBuilder.addQueryParameter("getCount", "true");
             String url = urlBuilder.build().toString();
@@ -297,9 +299,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         private void getTags() throws IOException, UnauthorizedException, JSONException {
-            OkHttpClient client = new OkHttpClient();
             HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/tags").newBuilder();
-//                urlBuilder.addQueryParameter("client", key);
             String url = urlBuilder.build().toString();
             Request request = new Request.Builder()
                     .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
@@ -328,9 +328,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         private void getGenres() throws IOException, UnauthorizedException, JSONException {
-            OkHttpClient client = new OkHttpClient();
             HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/genres").newBuilder();
-//                urlBuilder.addQueryParameter("client", key);
             String url = urlBuilder.build().toString();
             Request request = new Request.Builder()
                     .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
@@ -621,7 +619,6 @@ public class ServiceSync extends ServiceBase {
                         .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
                         .url(url).build();
                 Response response;
-                OkHttpClient client = new OkHttpClient();
                 response = client.newCall(request).execute();
                 if(!response.isSuccessful()) {
                     throw new UnauthorizedException(response.message());
