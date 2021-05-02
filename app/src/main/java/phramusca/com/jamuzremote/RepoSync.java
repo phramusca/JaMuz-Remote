@@ -37,31 +37,23 @@ public final class RepoSync {
      * @return true if onReceivedFile exists and length()==track.size
      */
     public static void checkReceivedFile(Track track) {
-        File receivedFile = new File(track.getPath());
-        if(tracks.containsRow(track.getIdFileServer())) {
-            track.setStatus(Track.Status.REC);
-            if (!checkFile(track, receivedFile)
-                    || !HelperLibrary.musicLibrary.updateStatus(track)) {
-                Log.w(TAG, "Error with received file. Deleting " + receivedFile.getAbsolutePath());
-                //noinspection ResultOfMethodCallIgnored
-                receivedFile.delete();
-                track.setStatus(Track.Status.NEW);
-            }
-            updateStatus(track);
-        } else {
-            Log.w(TAG, "tracks does not contain file. Deleting " + receivedFile.getAbsolutePath());
+        track.setStatus(Track.Status.REC);
+        if (!checkFile(track) || !HelperLibrary.musicLibrary.updateStatus(track)) {
+            File receivedFile = new File(track.getPath());
+            Log.w(TAG, "Error with received file. Deleting " + receivedFile.getAbsolutePath());
             //noinspection ResultOfMethodCallIgnored
             receivedFile.delete();
+            track.setStatus(Track.Status.NEW);
         }
+        updateStatus(track);
     }
 
     /**
      * @param track the one to check
-     * @param receivedFile the corresponding File
      * @return true if onReceivedFile exists and length()==track.size
      */
-    private static boolean checkFile(Track track,
-                                                  File receivedFile) {
+    public static boolean checkFile(Track track) {
+        File receivedFile = new File(track.getPath());
         if(receivedFile.exists()) {
             if (receivedFile.length() == track.getSize()) {
                 Log.i(TAG, "Correct file size: " + receivedFile.length());

@@ -149,7 +149,12 @@ public class ServiceSync extends ServiceBase {
 //                }
                 checkCompleted();
 
-            } catch (IOException | UnauthorizedException | JSONException | InterruptedException e) {
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Error ProcessSync", e);
+                helperNotification.notifyBar(notificationSync, "Interrupted.");
+                //stopSync also stop downloads if any so not stopping and letting user stop and restart
+                //stopSync(e.getLocalizedMessage(), 5000);
+            } catch (IOException | UnauthorizedException | JSONException e) {
                 Log.e(TAG, "Error ProcessSync", e);
                 helperNotification.notifyBar(notificationSync, "ERROR: "+e.getLocalizedMessage());
                 //stopSync also stop downloads if any so not stopping and letting user stop and restart
@@ -192,6 +197,9 @@ public class ServiceSync extends ServiceBase {
                                     break;
                             }
                         } else {
+                            if(trackServer.getStatus().equals(Track.Status.NEW) && RepoSync.checkFile(trackServer)) {
+                                trackServer.setStatus(Track.Status.REC);
+                            }
                             HelperLibrary.musicLibrary.insertTrack(trackServer);
                             RepoSync.updateStatus(trackServer);
                         }
@@ -414,7 +422,7 @@ public class ServiceSync extends ServiceBase {
     private void startDownloads() {
         if ((processDownload==null || !processDownload.isAlive()) && RepoSync.getRemainingSize()>0) {
             Log.i(TAG, "START ProcessDownload");
-            processDownload = new ProcessDownload("ProcessDownload", this);
+            processDownload = new ProcessDownload("ProcessDownload");
             processDownload.start();
         }
     }
@@ -449,7 +457,7 @@ public class ServiceSync extends ServiceBase {
         private int nbFiles;
         private int nbFailed;
 
-        ProcessDownload(String name, Context context) {
+        ProcessDownload(String name) {
             super(name);
             downloadServices= new ArrayList<>();
         }
@@ -559,7 +567,6 @@ public class ServiceSync extends ServiceBase {
                 File destinationFile=new File(track.getPath());
                 File destinationPath = destinationFile.getParentFile();
                 destinationPath.mkdirs();
-
                 checkAbort();
                 Request request = new Request.Builder()
                         .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
