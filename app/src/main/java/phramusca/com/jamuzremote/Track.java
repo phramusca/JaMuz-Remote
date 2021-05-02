@@ -90,7 +90,6 @@ public class Track implements Serializable {
         }
     }
 
-    //FIXME: Only read metadata for LOCAL files
     public boolean readMetadata() {
         try {
             MediaMetadataRetriever mmr = new MediaMetadataRetriever();

@@ -395,10 +395,8 @@ public class ServiceSync extends ServiceBase {
                 Track fileReceived = new Track(
                         (JSONObject) filesToUpdate.get(i),
                         getAppDataPath);
-                if(fileReceived.readMetadata()) {
-                    fileReceived.setStatus(Track.Status.REC);
-                    HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived);
-                }
+                fileReceived.setStatus(Track.Status.REC);
+                HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived);
                 helperNotification.notifyBar(notificationSync, "Updating database with merge changes",
                         10, i+1, filesToUpdate.length());
             }
