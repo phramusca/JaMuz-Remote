@@ -20,13 +20,15 @@ public final class RepoSync {
     private static Table<Integer, Track.Status, Track> tracks = null;
 
     protected static void read() {
-        if(tracks==null) {
+        //FIXME: Update this repo for each track change (rating, genre) to avoid reading at every sync
+        //  Otherwise tracks stats updates (except tags as re-read before merge request) are not available for merge !!!
+        //if(tracks==null) {
             tracks = HashBasedTable.create();
             List<Track> newTracks = HelperLibrary.musicLibrary.getTracks("", "", "", -1);
             for(Track track : newTracks) {
                 tracks.put(track.getIdFileServer(), track.getStatus(), track);
             }
-        }
+        //}
     }
 
     /**
