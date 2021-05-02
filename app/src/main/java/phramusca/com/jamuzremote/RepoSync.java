@@ -24,7 +24,7 @@ public final class RepoSync {
             tracks = HashBasedTable.create();
             List<Track> newTracks = HelperLibrary.musicLibrary.getTracks("", "", "", -1);
             for(Track track : newTracks) {
-                put(track);
+                tracks.put(track.getIdFileServer(), track.getStatus(), track);
             }
         }
     }
@@ -43,13 +43,13 @@ public final class RepoSync {
             track.setStatus(Track.Status.REC);
             if (!checkFile(track, receivedFile)
                     || !track.readMetadata()
-                    || !HelperLibrary.musicLibrary.insertOrUpdateTrack(track)) {
+                    || !HelperLibrary.musicLibrary.updateStatus(track)) {
                 Log.w(TAG, "Error with received file. Deleting " + receivedFile.getAbsolutePath());
                 //noinspection ResultOfMethodCallIgnored
                 receivedFile.delete();
                 track.setStatus(Track.Status.NEW);
             }
-            put(track);
+            updateStatus(track);
         } else {
             Log.w(TAG, "tracks does not contain file. Deleting " + receivedFile.getAbsolutePath());
             //noinspection ResultOfMethodCallIgnored
@@ -79,21 +79,9 @@ public final class RepoSync {
         return false;
     }
 
-    public static void put(Track track) {
+    public static void updateStatus(Track track) {
+        tracks.row(track.getIdFileServer()).clear();
         tracks.put(track.getIdFileServer(), track.getStatus(), track);
-    }
-
-    /**
-     * @param track the NEW file to check
-     * @return modified track with status set to REC (with tags read) if it exists
-     *
-     */
-    public static void checkNewFile(Track track) {
-        File file = new File(track.getPath());
-        if(checkFile(track, file)) {
-            track.setStatus(Track.Status.REC);
-        }
-        put(track);
     }
 
     public static int getRemainingSize() {
