@@ -33,12 +33,11 @@ public final class RepoSync {
      * Sets status to NEW if track does not exists
      * or REC if track exists and has correct size.
      * File is deleted if not requested (not in tracks).
-     * @param getAppDataPath application path
      * @param track the one to check
      * @return true if onReceivedFile exists and length()==track.size
      */
-    public static void checkReceivedFile(File getAppDataPath, Track track) {
-        File receivedFile = new File(getAppDataPath, track.getRelativeFullPath());
+    public static void checkReceivedFile(Track track) {
+        File receivedFile = new File(track.getPath());
         if(tracks.containsRow(track.getIdFileServer())) {
             track.setStatus(Track.Status.REC);
             if (!checkFile(track, receivedFile)
