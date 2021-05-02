@@ -1,5 +1,5 @@
 package phramusca.com.jamuzremote;
 
 public interface IListenerSyncDown {
-    void setStatus();
+    void setStatus(Track track);
 }

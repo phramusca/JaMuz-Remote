@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.PowerManager;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -24,7 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -51,12 +49,19 @@ public class ServiceSync extends ServiceBase {
     private PowerManager.WakeLock wakeLock;
     private WifiManager.WifiLock wifiLock;
     private ProcessSync processSync;
-
     protected static OkHttpClient client = new OkHttpClient();
+    private Notification notificationDownload;
+    protected static OkHttpClient clientDownload;
 
     @Override
     public void onCreate(){
         notificationSync = new Notification(this, NotificationId.SYNC, "Sync");
+        notificationDownload= new Notification(this, NotificationId.SYNC_DOWN, "Sync");
+        clientDownload = new OkHttpClient.Builder()
+                //FIXME: Add and interceptor for file downloads, but need to handle better retries and notifications since it is shared among X instances
+                //.addInterceptor(new RetryInterceptor(5, 5, helperNotification, notificationDownload))
+                .readTimeout(60, TimeUnit.SECONDS)
+                .build();
         userStopReceiver=new UserStopServiceReceiver();
         registerReceiver(userStopReceiver,  new IntentFilter(USER_STOP_SERVICE_REQUEST));
         super.onCreate();
@@ -196,44 +201,8 @@ public class ServiceSync extends ServiceBase {
             }
         }
 
-        class RetryInterceptor implements Interceptor {
-            private final int sleepSeconds = 5; //TODO: Make this an option
-            private final int maxNbRetries = 5; //TODO: Make this an option
-
-            @NonNull
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request request = chain.request();
-                int nbRetries = 0;
-                Response response = null;
-                String msg = "";
-                do {
-                    nbRetries++;
-                    try {
-                        Log.d(TAG, "CALLING: "+ request.toString());
-                        response = chain.proceed(request);
-                        break;
-                    } catch (IOException e) {
-                        msg = e.getLocalizedMessage();
-                        Log.d(TAG, "ERROR: "+ msg);
-                        helperNotification.notifyBar(notificationSync,sleepSeconds + "s before " +
-                                (nbRetries + 1) + "/" + maxNbRetries + " : " + msg);
-                        try {
-                            sleep(sleepSeconds*1000);
-                        } catch (InterruptedException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                } while (nbRetries < maxNbRetries-1);
-                if(response==null) {
-                    throw new IOException(msg);
-                }
-                return response;
-            }
-        }
-
         private Map<Integer, Track> getFiles(int idFrom, int nbFilesInBatch, Track.Status status) throws IOException, UnauthorizedException, JSONException {
-            RetryInterceptor interceptor = new RetryInterceptor();
+            RetryInterceptor interceptor = new RetryInterceptor(5,5, helperNotification, notificationSync);
             OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
             HttpUrl.Builder urlBuilder = HttpUrl.parse("http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/files/"+status.name().toLowerCase()).newBuilder();
@@ -470,51 +439,37 @@ public class ServiceSync extends ServiceBase {
         return false;
     }
 
-    private class ProcessDownload extends ProcessAbstract {
+    class ProcessDownload extends ProcessAbstract {
 
         private List<DownloadTask> downloadServices;
-        private final Notification notificationDownload;
         private ExecutorService pool;
         private int nbRetries=0;
         private final int maxNbRetries=10;//TODO: Make number of retries an option eventually
-        private Benchmark bench;
         private int nbFilesTotal;
         private int nbFiles;
+        private int nbFailed;
 
         ProcessDownload(String name, Context context) {
             super(name);
-            notificationDownload = new Notification(context, NotificationId.SYNC_DOWN, "Sync");
             downloadServices= new ArrayList<>();
         }
 
-        //FIXME: Add back some progress information, trying not to slow down process
-        private void notifyBarProgress() {
-            nbFiles++;
-            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Downloading", 1, nbFiles, nbFilesTotal));
+        private void notifyBarProgress(Track track) {
 
-//            int nbFilesTotal = RepoSync.getTotalSize();
-//            int remaining = RepoSync.getRemainingSize();
-//            int progress = nbFilesTotal- remaining;
-//            StringBuilder stringBuilder = new StringBuilder();
-//            stringBuilder.append("-").append(remaining).append("/").append(nbFilesTotal)
-//                    .append("\n").append(StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false)).append("/").append(RepoSync.getTotalFileSize()).append("\n");
-//            StringBuilder stringBuilder2 = new StringBuilder();
-//            int nbErrors = 0;
-//            for(DownloadTask downloadService : downloadServices) {
-//                if(downloadService.status.startsWith("Err.")) {
-//                    nbErrors++;
-//                }
-//                else if(!downloadService.status.equals("")) {
-//                    stringBuilder2.append(downloadService.canal).append(": ").append(downloadService.status).append(" | ");
-//                }
-//            }
-//            stringBuilder.append("Attempt ").append(nbRetries+1).append("/").append(maxNbRetries).append(". ").append(nbErrors).append(" Error(s).\n");
-//            stringBuilder.append(stringBuilder2.toString());
-//            String bigText = stringBuilder.toString();
-//            String msg = "Downloading ... " +bench.getLast();
-//            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, msg, nbFilesTotal, progress, false,
-//                    true, true,
-//                    msg + "\n" + bigText));
+            if(!track.getStatus().equals(Track.Status.REC)) {
+                nbFailed++;
+            } else {
+                nbFiles++;
+            }
+            int remaining = nbFilesTotal - nbFiles;
+            //FIXME: DO NOT use getRemainingFileSize and only getTotalFileSize at startup
+            String bigText = "-" + remaining + "/" + nbFilesTotal +
+                    "\n" + StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false) + "/" + RepoSync.getTotalFileSize() + "\n" +
+                    "Attempt " + (nbRetries + 1) + "/" + maxNbRetries + ". " + nbFailed + " Error(s).\n";
+            String msg = "Downloading ... ";
+            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, msg, nbFilesTotal, nbFiles, false,
+                    true, true,
+                    msg + "\n" + bigText));
         }
 
         @Override
@@ -550,15 +505,14 @@ public class ServiceSync extends ServiceBase {
 
         private boolean startDownloads() {
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Starting download ... "));
-            bench = new Benchmark(RepoSync.getRemainingSize(), 10);
             pool = Executors.newFixedThreadPool(20); //TODO: Make number of threads an option
             downloadServices= new ArrayList<>();
-            int canal=100;
             nbFilesTotal=0;
             nbFiles=0;
+            nbFailed=0;
             for (Track track : RepoSync.getDownloadList()) {
                 track.getTags(true);
-                DownloadTask downloadTask = new DownloadTask(track, canal++, this::notifyBarProgress, clientInfo, getAppDataPath, bench);
+                DownloadTask downloadTask = new DownloadTask(track, this::notifyBarProgress, clientInfo);
                 downloadServices.add(downloadTask);
                 pool.submit(downloadTask);
                 nbFilesTotal++;
@@ -587,39 +541,31 @@ public class ServiceSync extends ServiceBase {
     }
 
     static class DownloadTask extends ProcessAbstract implements Runnable {
-        private final int canal;
         private final IListenerSyncDown callback;
         private final ClientInfo clientInfo;
-        private final File getAppDataPath;
-        //private final Benchmark bench;
         private final Track track;
-        private String status="";
 
-        DownloadTask(Track track, int canal, IListenerSyncDown callback, ClientInfo clientInfo, File getAppDataPath, Benchmark bench) {
-            super("DownloadTask "+canal);
+        DownloadTask(Track track, IListenerSyncDown callback, ClientInfo clientInfo) {
+            super("DownloadTask idFileServer="+track.getIdFileServer());
             this.track = track;
-            this.canal = canal;
             this.callback = callback;
             this.clientInfo = clientInfo;
-            this.getAppDataPath = getAppDataPath;
-            //this.bench = bench;
         }
 
         @Override
         public void run() {
             try {
-                setStatus("Req.", track);
                 String url = "http://"+clientInfo.getAddress()+":"+(clientInfo.getPort()+1)+"/download?id="+track.getIdFileServer();
-                File destinationPath = new File(new File(track.getPath()).getParent());
+                File destinationFile=new File(track.getPath());
+                File destinationPath = destinationFile.getParentFile();
                 destinationPath.mkdirs();
-                File destinationFile=new File(getAppDataPath, track.getRelativeFullPath());
+
                 checkAbort();
-                setStatus("Down.", track);
                 Request request = new Request.Builder()
                         .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
                         .url(url).build();
                 Response response;
-                response = client.newCall(request).execute();
+                response = clientDownload.newCall(request).execute();
                 if(!response.isSuccessful()) {
                     throw new UnauthorizedException(response.message());
                 }
@@ -632,22 +578,13 @@ public class ServiceSync extends ServiceBase {
                 BufferedSink sink = Okio.buffer(Okio.sink(destinationFile));
                 sink.writeAll(response.body().source());
                 sink.close();
-                setStatus("Rec.", track);
-                RepoSync.checkReceivedFile(getAppDataPath, track);
-                status="";
-                //bench.get(track.getSize());
+                RepoSync.checkReceivedFile(track);
             } catch (InterruptedException e) {
-                setStatus("Interrupted", null);
                 Log.w(TAG, "Download interrupted for "+track.getRelativeFullPath(), e);
             } catch (Exception e) {
-                setStatus("Err. "+e.getMessage(), null);
                 Log.e(TAG, "Error downloading "+track.getRelativeFullPath(), e);
             }
-            callback.setStatus();
-        }
-
-        private void setStatus(String text, Track track) {
-            status=text+(track==null?"":" "+StringManager.humanReadableByteCount(track.getSize(), false));
+            callback.setStatus(track);
         }
     }
 }
