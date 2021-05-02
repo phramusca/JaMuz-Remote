@@ -519,17 +519,19 @@ public class MusicLibrary {
         return idTag;
     }
 
-    synchronized int updateStatus(Track track){
+    synchronized boolean updateStatus(Track track){
         try {
+            Log.d(TAG, "updateStatus("+track.getIdFileServer()+"): "+track.getStatus());
             ContentValues values = new ContentValues();
             values.put(COL_STATUS, track.getStatus().name());
-            return db.update(TABLE_TRACKS,
+            db.update(TABLE_TRACKS,
                     values,
                     COL_ID_SERVER + " = " +track.getIdFileServer(), null);
+            return true;
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "updateStatus("+track.getIdFileServer()+")", ex);
+            Log.e(TAG, "updateStatus("+track.getIdFileServer()+"): "+track.getStatus(), ex);
         }
-        return -1;
+        return false;
     }
 
     synchronized int updateGenre(Track track){

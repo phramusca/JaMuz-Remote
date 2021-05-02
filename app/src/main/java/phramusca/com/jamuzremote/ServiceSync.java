@@ -32,6 +32,8 @@ import okhttp3.Response;
 import okio.BufferedSink;
 import okio.Okio;
 
+//FIXME: Update track if it has changed on server (format, filename, metadata ...) other than only status
+
 /**
  *
  * @author phramusca
@@ -117,6 +119,7 @@ public class ServiceSync extends ServiceBase {
 
                 //Check INFO files
                 checkFiles(Track.Status.INFO);
+                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Check complete.", 5000));
 
                 //FIXME: Do this different as filesMap gets too big an crash application !!
                 //A/art: art/runtime/indirect_reference_table.cc:145] JNI ERROR (app bug): weak global reference table overflow (max=51200)
@@ -148,10 +151,10 @@ public class ServiceSync extends ServiceBase {
 
         private void checkFiles(Track.Status status)
                 throws InterruptedException, JSONException, UnauthorizedException, IOException {
-            String msg = "Checking "+status.name().toLowerCase()+" files ...";
-            helperNotification.notifyBar(notificationSync, msg);
             int nbFilesInBatch=5000;
             int nbFilesServer = getFilesCount(status);
+            String msg = "Checking "+status.name().toLowerCase()+" files ...";
+            helperNotification.notifyBar(notificationSync, msg);
             if(nbFilesServer>0) {
                 for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
                     checkAbort();
@@ -168,23 +171,21 @@ public class ServiceSync extends ServiceBase {
                                     if(!trackRemote.getStatus().equals(Track.Status.INFO)) {
                                         File file = new File(trackRemote.getPath());
                                         file.delete();
-                                        HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
-                                        RepoSync.put(trackServer);
+                                        HelperLibrary.musicLibrary.updateStatus(trackServer);
+                                        RepoSync.updateStatus(trackServer);
                                     }
                                     break;
                                 case NEW:
-                                    if(!trackRemote.getStatus().equals(Track.Status.REC)) {
-                                        RepoSync.checkNewFile(trackRemote);
-                                        if(!trackRemote.getStatus().equals(Track.Status.REC)) {
-                                            HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
-                                            RepoSync.put(trackServer);
-                                        }
+                                    if(! (trackRemote.getStatus().equals(Track.Status.REC)
+                                            || trackRemote.getStatus().equals(Track.Status.NEW))) {
+                                        HelperLibrary.musicLibrary.updateStatus(trackServer);
+                                        RepoSync.updateStatus(trackServer);
                                     }
                                     break;
                             }
                         } else {
-                            HelperLibrary.musicLibrary.insertOrUpdateTrack(trackServer);
-                            RepoSync.put(trackServer);
+                            HelperLibrary.musicLibrary.insertTrack(trackServer);
+                            RepoSync.updateStatus(trackServer);
                         }
                     }
                     checkAbort();
@@ -401,7 +402,7 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationSync, "Updating database with merge changes",
                         10, i+1, filesToUpdate.length());
             }
-            runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Merge complete."));
+            helperNotification.notifyBar(notificationSync, "Merge complete.");
         }
     }
 
@@ -490,6 +491,7 @@ public class ServiceSync extends ServiceBase {
             downloadServices= new ArrayList<>();
         }
 
+        //FIXME: Add back some progress information, trying not to slow down process
         private void notifyBarProgress() {
             nbFiles++;
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Downloading", 1, nbFiles, nbFilesTotal));
