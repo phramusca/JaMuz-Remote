@@ -214,6 +214,7 @@ public class MusicLibrary {
 
      synchronized boolean insertTrack(Track track){
         try {
+            Log.d(TAG, "insertTrack " + track.getPath());
             int id = (int) db.insert(TABLE_TRACKS, null, TrackToValues(track));
             if(id>0) {
                 track.setIdFileRemote(id);
