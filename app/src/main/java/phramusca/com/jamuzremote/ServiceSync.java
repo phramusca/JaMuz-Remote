@@ -572,6 +572,13 @@ public class ServiceSync extends ServiceBase {
                         .addHeader("login", clientInfo.getLogin()+"-"+clientInfo.getAppId())
                         .url(url).build();
                 Response response;
+                if(clientDownload==null) {
+                    clientDownload = new OkHttpClient.Builder()
+                            //FIXME: Add and interceptor for file downloads, but need to handle better retries and notifications since it is shared among X instances
+                            //.addInterceptor(new RetryInterceptor(5, 5, helperNotification, notificationDownload))
+                            .readTimeout(60, TimeUnit.SECONDS)
+                            .build();
+                }
                 response = clientDownload.newCall(request).execute();
                 if(!response.isSuccessful()) {
                     throw new UnauthorizedException(response.message());

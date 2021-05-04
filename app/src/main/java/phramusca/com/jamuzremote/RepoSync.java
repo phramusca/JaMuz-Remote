@@ -72,7 +72,9 @@ public final class RepoSync {
     }
 
     public static void updateStatus(Track track) {
-        tracks.row(track.getIdFileServer()).clear();
+        if(tracks.containsRow(track.getIdFileServer())) {
+            tracks.row(track.getIdFileServer()).clear();
+        }
         tracks.put(track.getIdFileServer(), track.getStatus(), track);
     }
 
@@ -109,10 +111,6 @@ public final class RepoSync {
 
     public static List<Track> getDownloadList() {
         return new ArrayList<>(tracks.column(Track.Status.NEW).values());
-    }
-
-    public static List<Track> getList() {
-        return new ArrayList<>(tracks.values());
     }
 
     public static List<Track> getMergeList() {
