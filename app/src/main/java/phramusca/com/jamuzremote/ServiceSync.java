@@ -236,7 +236,7 @@ public class ServiceSync extends ServiceBase {
             for (int i = 0; i < files.length(); i++) {
                 Track fileReceived = new Track(
                         (JSONObject) files.get(i),
-                        getAppDataPath);
+                        getAppDataPath, false);
                 newTracks.put(fileReceived.getIdFileServer(), fileReceived);
             }
             return newTracks;
@@ -369,9 +369,9 @@ public class ServiceSync extends ServiceBase {
             for (int i = 0; i < filesToUpdate.length(); i++) {
                 Track fileReceived = new Track(
                         (JSONObject) filesToUpdate.get(i),
-                        getAppDataPath);
+                        getAppDataPath, true);
                 fileReceived.setStatus(Track.Status.REC);
-                HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived);
+                HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived, true);
                 helperNotification.notifyBar(notificationSync, "Updating database with merge changes",
                         10, i+1, filesToUpdate.length());
             }

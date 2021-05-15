@@ -72,7 +72,7 @@ public class ClientReception extends ProcessAbstract {
                     Track fileInfoReception;
                     try {
                         String json = msg.substring("SENDING_FILE".length());
-                        fileInfoReception = new Track(new JSONObject(json), getAppDataPath());
+                        fileInfoReception = new Track(new JSONObject(json), getAppDataPath(), false);
                         File destinationPath = new File(new File(fileInfoReception.getPath()).getParent());
                         destinationPath.mkdirs();
                         Log.i(TAG, "Start file reception: \n"+fileInfoReception);
