@@ -98,11 +98,7 @@ public class ServiceSync extends ServiceBase {
                 checkAbort();
 
                 helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
-                String version = getVersion();
-                if(!version.equals("1")) {
-                    stopSync("Server version \""+version+"\" is not supported.", 5000);
-                    return;
-                }
+                clientInfo.getBodyString("connect", client);
 
                 helperNotification.notifyBar(notificationSync, getString(R.string.readingList));
                 RepoSync.read();
@@ -152,16 +148,17 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationSync, "Interrupted.");
                 //stopSync also stop downloads if any so not stopping and letting user stop and restart
                 //stopSync(e.getLocalizedMessage(), 5000);
-            } catch (IOException | UnauthorizedException | JSONException e) {
+            } catch (IOException | ServerException | JSONException e) {
                 Log.e(TAG, "Error ProcessSync", e);
-                helperNotification.notifyBar(notificationSync, "ERROR: "+e.getLocalizedMessage());
+                helperNotification.notifyBar(notificationSync, "ERROR: "+e.getLocalizedMessage(), 0, 0, false,
+                        true, false, "ERROR: "+e.getLocalizedMessage());
                 //stopSync also stop downloads if any so not stopping and letting user stop and restart
                 //stopSync(e.getLocalizedMessage(), 5000);
             }
         }
 
         private void checkFiles(Track.Status status)
-                throws InterruptedException, JSONException, UnauthorizedException, IOException {
+                throws InterruptedException, JSONException, ServerException, IOException {
             int nbFilesInBatch=5000;
             int nbFilesServer = getFilesCount(status);
             String msg = "Checking "+status.name().toLowerCase()+" files ...";
@@ -215,7 +212,7 @@ public class ServiceSync extends ServiceBase {
 //                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
 //                    fromJson.chromaprint=chromaprint;
 
-        private Map<Integer, Track> getFiles(int idFrom, int nbFilesInBatch, Track.Status status) throws IOException, UnauthorizedException, JSONException {
+        private Map<Integer, Track> getFiles(int idFrom, int nbFilesInBatch, Track.Status status) throws IOException, ServerException, JSONException {
             RetryInterceptor interceptor = new RetryInterceptor(5,5, helperNotification, notificationSync);
             OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
             HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/"+status.name().toLowerCase());
@@ -234,14 +231,7 @@ public class ServiceSync extends ServiceBase {
             return newTracks;
         }
 
-        //FIXME 0.5.0: Remove getVersion and replace by "Api-Version" in header
-        private String getVersion() throws IOException, UnauthorizedException {
-            String body = clientInfo.getBodyString("version", client);
-            helperNotification.notifyBar(notificationSync, "Received version ... ");
-            return body;
-        }
-
-        private Integer getFilesCount(Track.Status status) throws IOException, UnauthorizedException {
+        private Integer getFilesCount(Track.Status status) throws IOException, ServerException {
             HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/"+status.name().toLowerCase());
             urlBuilder.addQueryParameter("getCount", "true");
             String body = clientInfo.getBodyString(urlBuilder, client);
@@ -249,7 +239,7 @@ public class ServiceSync extends ServiceBase {
             return Integer.valueOf(body);
         }
 
-        private void getTags() throws IOException, UnauthorizedException, JSONException {
+        private void getTags() throws IOException, ServerException, JSONException {
             String body = clientInfo.getBodyString("tags", client);
             helperNotification.notifyBar(notificationSync, "Received tags ... ");
             final JSONObject jObject = new JSONObject(body);
@@ -264,7 +254,7 @@ public class ServiceSync extends ServiceBase {
             sendMessage("setupTags");
         }
 
-        private void getGenres() throws IOException, UnauthorizedException, JSONException {
+        private void getGenres() throws IOException, ServerException, JSONException {
             String body = clientInfo.getBodyString("genres", client);
             helperNotification.notifyBar(notificationSync, "Received genres ... ");
             final JSONObject jObject = new JSONObject(body);
@@ -278,7 +268,7 @@ public class ServiceSync extends ServiceBase {
             sendMessage("setupGenres");
         }
 
-        private void requestMerge() throws JSONException, UnauthorizedException, IOException {
+        private void requestMerge() throws JSONException, ServerException, IOException {
             helperNotification.notifyBar(notificationSync,"Preparing statistics merge.");
             List<Track> tracks = RepoSync.getMergeList();
             for(Track track : tracks) {
@@ -323,8 +313,8 @@ public class ServiceSync extends ServiceBase {
         super.onDestroy();
     }
 
-    static class UnauthorizedException extends Exception {
-        public UnauthorizedException(String errorMessage) {
+    static class ServerException extends Exception {
+        public ServerException(String errorMessage) {
             super(errorMessage);
         }
     }
