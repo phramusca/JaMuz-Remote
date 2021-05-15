@@ -49,33 +49,37 @@ public class ClientInfo implements Serializable {
     public Request.Builder getRequestBuilder(HttpUrl.Builder urlBuilder) {
         return new Request.Builder()
                 .addHeader("login", getLogin()+"-"+getAppId())
-                .addHeader("Api-Version", "1.0")
+                .addHeader("api-version", "1.0")
                 .url(urlBuilder.build());
     }
 
-    public String getBodyString(String url, OkHttpClient client) throws IOException, ServiceSync.UnauthorizedException {
+    public String getBodyString(String url, OkHttpClient client) throws IOException, ServiceSync.ServerException {
         HttpUrl.Builder urlBuilder = getUrlBuilder(url);
         return getBodyString(urlBuilder, client);
     }
 
-    public String getBodyString(HttpUrl.Builder urlBuilder, OkHttpClient client) throws IOException, ServiceSync.UnauthorizedException {
+    public String getBodyString(HttpUrl.Builder urlBuilder, OkHttpClient client) throws IOException, ServiceSync.ServerException {
         return getBody(urlBuilder, client).string();
     }
 
-    public ResponseBody getBody(HttpUrl.Builder urlBuilder, OkHttpClient client) throws IOException, ServiceSync.UnauthorizedException {
+    public ResponseBody getBody(HttpUrl.Builder urlBuilder, OkHttpClient client) throws IOException, ServiceSync.ServerException {
         Request request = getRequestBuilder(urlBuilder).build();
         return getBody(request, client);
     }
 
-    public String getBodyString(Request request, OkHttpClient client) throws IOException, ServiceSync.UnauthorizedException {
+    public String getBodyString(Request request, OkHttpClient client) throws IOException, ServiceSync.ServerException {
         return getBody(request, client).string();
     }
 
-    private ResponseBody getBody(Request request, OkHttpClient client) throws IOException, ServiceSync.UnauthorizedException {
+    private ResponseBody getBody(Request request, OkHttpClient client) throws IOException, ServiceSync.ServerException {
         Response response = client.newCall(request).execute();
-        //FIXME: Better handle responses, not all errors are 401
         if(!response.isSuccessful()) {
-            throw new ServiceSync.UnauthorizedException(response.message());
+            switch (response.code()) {
+                case 301:
+                    throw new ServiceSync.ServerException(request.header("api-version")+" not supported. "+response.body().string());
+                default:
+                    throw new ServiceSync.ServerException(response.code()+": "+response.message());
+            }
         }
         return response.body();
     }
