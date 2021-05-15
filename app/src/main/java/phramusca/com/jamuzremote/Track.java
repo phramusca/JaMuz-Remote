@@ -131,7 +131,7 @@ public class Track implements Serializable {
             genre = file.getString("genre");
             playCounter = file.getInt("playCounter");
 
-            //FIXME: Those are only set on merge
+            //FIXME !!!! 0.5.0 !!!! Those are only set on merge
             int previousPlayCounter = file.getInt("previousPlayCounter");
             Date genreModifDate = getDate(file, "genreModifDate");
             Date tagsModifDate = getDate(file, "tagsModifDate");
@@ -144,29 +144,29 @@ public class Track implements Serializable {
                 size = file.getLong("size");
                 status = Status.valueOf(file.getString("status"));
 
-                //FIXME: Those are not set or not set properly in Server
+                //FIXME !!!! 0.5.0 !!!!  Those are not set or not set properly in Server
                 Date ratingModifDate = getDate(file, "ratingModifDate");
                 String lyrics = file.getString("lyrics");
                 Date pathModifDate = getDate(file, "pathModifDate");
                 String pathMbid = file.getString("pathMbid");
                 String comment = file.getString("comment");
 
-                //FIXME: Replaygain is always null:
+                //FIXME !!!! 0.5.0 !!!! Replaygain is always null:
 //                        "replaygain": {
 //                            "trackGain": null,
 //                                    "albumGain": null
 //                        }
-                //FIXME: Change the way replayGain is used before setting it from server and Store in db : no to read too often AND as a workaround for flac
+                //FIXME !!!! 0.5.0 !!!!  Change the way replayGain is used before setting it from server and Store in db : no to read too often AND as a workaround for flac
 //            JSONObject replayGainJsonObject = file.getJSONObject("replaygain");
 //            ReplayGain.GainValues replayGainServer = new ReplayGain.GainValues();
 //            replayGainServer.setTrackGain((float) replayGainJsonObject.getDouble("trackGain"));
 //            replayGainServer.setAlbumGain((float) replayGainJsonObject.getDouble("albumGain"));
                 //replayGain = replayGainServer;
 
-                //FIXME: Change the way coverHash is used before setting it from server
+                //FIXME !!!! 0.5.0 !!!!  Change the way coverHash is used before setting it from server
                 //coverHash = file.getString("coverHash");
 
-                //FIXME: Store and use unsused variables below !!!
+                //FIXME !!!! 0.5.0 !!!!  Store and use unsused variables below !!!
                 // WARNING: Some do not have proper value on server !!
                 String year = file.getString("year");
                 int trackNo = file.getInt("trackNo");
