@@ -74,9 +74,8 @@ public class ReplayGain {
 	public static class GainValues implements Serializable {
 		private float albumGain=Float.NaN;
 		private float trackGain=Float.NaN;
-		
-		float trackPeak; //Not used
-		float albumPeak; //Not used
+		private float trackPeak; //Not used
+		private float albumPeak; //Not used
 		String MP3GAIN_MINMAX; //mp3gain only, Not used
 		String MP3GAIN_ALBUM_MINMAX; //mp3gain only, Not used
 		String MP3GAIN_UNDO; //mp3gain only, Not used
@@ -97,6 +96,14 @@ public class ReplayGain {
 
 		public float getTrackGain() {
 			return trackGain;
+		}
+
+		public void setAlbumGain(float albumGain) {
+			this.albumGain = albumGain;
+		}
+
+		public void setTrackGain(float trackGain) {
+			this.trackGain = trackGain;
 		}
 	}
 	

@@ -15,11 +15,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Created by raph on 01/05/17.
  */
 public class Track implements Serializable {
+    private static final String TAG = Track.class.getName();
+    private boolean isHistory=false;
+    private boolean isUser=false;
     private int idFileRemote = -1;
     private int idFileServer = -1;
     private String artist = "";
@@ -34,15 +38,19 @@ public class Track implements Serializable {
     private String path = "";
     private String relativeFullPath = "";
     private ArrayList<String> tags = null;
-    //FIXME: Store replaygain, no to read too often AND as a workaround for flac
-    private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
     private String source="";
     private long size;
     private int length;
+    //FIXME: Get replaygain from server and Store in db : no to read too often AND as a workaround for flac
+    private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
+		//jsonAsMap.put("replaygain", replaygain.toMap());
+    //FIXME !!!!! Use a Repo for thumbnails !!!
+    //=> Add a limit (FIFO) to those repos not to overload android memory
+    //As it is read too many times now that there is album list
+    //+ we need (by using transient) to ignore it in Intent serialization and re-read each time !
+    private transient Bitmap thumb;
+    //TODO: coverHash should be changed together with thumb above
     private String coverHash="";
-    private boolean isHistory=false;
-    private boolean isUser=false;
-    private static final String TAG = Track.class.getName();
 
     public Track(File getAppDataPath, int idFileRemote, int idFileServer, double rating, String title,
                  String album, String artist, String coverHash, String path, String genre,
@@ -105,34 +113,60 @@ public class Track implements Serializable {
         return false;
     }
 
-    /**
-     * @param file FileInfoReception as JSONObject
-     */
     Track(JSONObject file, File getAppDataPath) {
         try {
-            relativeFullPath = file.getString("path");
-            path=new File(getAppDataPath, relativeFullPath)
-                    .getAbsolutePath();
-            size = file.getLong("size");
-            length = file.getInt("length");
-            idFileServer = file.getInt("idFile");
-            rating = file.getInt("rating");
+            //FIXME: Store and use unsused variables fomr this constructor !!!
             addedDate = getDate(file, "addedDate");
+            artist = file.getString("artist");
+            String year = file.getString("year");
+            rating = file.getInt("rating");
+            int previousPlayCounter = file.getInt("previousPlayCounter");
+            title = file.getString("title");
+            int trackNo = file.getInt("trackNo");
+            Date ratingModifDate = getDate(file, "ratingModifDate");
             lastPlayed = getDate(file, "lastPlayed");
-            playCounter = file.getInt("playCounter");
+            Date genreModifDate = getDate(file, "genreModifDate");
+            relativeFullPath = file.getString("path");
+            path = new File(getAppDataPath, relativeFullPath)
+                    .getAbsolutePath();
+            int discNo = file.getInt("discNo");
+            Date tagsModifDate = getDate(file, "tagsModifDate");
+            String bitRate = file.getString("bitRate");
             genre = file.getString("genre");
-
+            String lyrics = file.getString("lyrics");
+            playCounter = file.getInt("playCounter");
+            //FIXME: Change the way replayGain is used before setting it from server
+//            JSONObject replayGainJsonObject = file.getJSONObject("replaygain");
+//            ReplayGain.GainValues replayGainServer = new ReplayGain.GainValues();
+//            replayGainServer.setTrackGain((float) replayGainJsonObject.getDouble("trackGain"));
+//            replayGainServer.setAlbumGain((float) replayGainJsonObject.getDouble("albumGain"));
+            //replayGain = replayGainServer;
+            //FIXME: Change the way coverHash is used before setting it from server
+            //coverHash = file.getString("coverHash");
+            String checkedFlag = file.getString("checkedFlag");
+            Date pathModifDate = getDate(file, "pathModifDate");
+            String copyRight = file.getString("copyRight");
+            String pathMbid = file.getString("pathMbid");
             album= file.getString("album");
-            artist= file.getString("artist");
-            title= file.getString("title");
-            status=Status.valueOf(file.getString("status"));
-
+            length = file.getInt("length");
+            int discTotal = file.getInt("discTotal");
+            String format = file.getString("format");
             JSONArray jsonTags = (JSONArray) file.get("tags");
             tags = new ArrayList<>();
             for(int i=0; i<jsonTags.length(); i++) {
                 String tag = (String) jsonTags.get(i);
                 tags.add(tag);
             }
+            Date modifDate = getDate(file, "modifDate");
+            boolean deleted = file.getBoolean("deleted");
+            int idPath = file.getInt("idPath");
+            size = file.getLong("size");
+            idFileServer = file.getInt("idFile");
+            String albumArtist = file.getString("albumArtist");
+            String comment = file.getString("comment");
+            double BPM = file.getDouble("BPM");
+            status=Status.valueOf(file.getString("status"));
+            int trackTotal = file.getInt("trackTotal");
         } catch (JSONException ex) {
             Log.e(TAG, "Error creating new Track "+file, ex);
         }
@@ -221,7 +255,7 @@ public class Track implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Track that = (Track) o;
-        return relativeFullPath != null ? relativeFullPath.equals(that.relativeFullPath) : that.relativeFullPath == null;
+        return Objects.equals(relativeFullPath, that.relativeFullPath);
     }
 
     @Override
@@ -330,12 +364,6 @@ public class Track implements Serializable {
         return art;
     }
 
-    //FIXME !!!!! Use a Repo for thumbnails !!!
-    //=> Add a limit (FIFO) to those repos not to overload android memory
-    //As it is read too many times now that there is album list
-    //+ we need (by using transient) to ignore it in Intent serialization and re-read each time !
-
-    private transient Bitmap thumb;
     public Bitmap getTumb(boolean read) {
         if(thumb==null && read) {
             byte[]art=getArt();
