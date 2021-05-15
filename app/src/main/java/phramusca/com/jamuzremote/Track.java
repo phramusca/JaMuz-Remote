@@ -113,60 +113,66 @@ public class Track implements Serializable {
         return false;
     }
 
-    Track(JSONObject file, File getAppDataPath) {
+    Track(JSONObject file, File getAppDataPath, boolean statsOnly) {
         try {
-            //FIXME: Store and use unsused variables fomr this constructor !!!
+
             addedDate = getDate(file, "addedDate");
-            artist = file.getString("artist");
-            String year = file.getString("year");
             rating = file.getInt("rating");
             int previousPlayCounter = file.getInt("previousPlayCounter");
-            title = file.getString("title");
-            int trackNo = file.getInt("trackNo");
-            Date ratingModifDate = getDate(file, "ratingModifDate");
             lastPlayed = getDate(file, "lastPlayed");
-            Date genreModifDate = getDate(file, "genreModifDate");
-            relativeFullPath = file.getString("path");
-            path = new File(getAppDataPath, relativeFullPath)
-                    .getAbsolutePath();
-            int discNo = file.getInt("discNo");
-            Date tagsModifDate = getDate(file, "tagsModifDate");
-            String bitRate = file.getString("bitRate");
-            genre = file.getString("genre");
-            String lyrics = file.getString("lyrics");
-            playCounter = file.getInt("playCounter");
-            //FIXME: Change the way replayGain is used before setting it from server
-//            JSONObject replayGainJsonObject = file.getJSONObject("replaygain");
-//            ReplayGain.GainValues replayGainServer = new ReplayGain.GainValues();
-//            replayGainServer.setTrackGain((float) replayGainJsonObject.getDouble("trackGain"));
-//            replayGainServer.setAlbumGain((float) replayGainJsonObject.getDouble("albumGain"));
-            //replayGain = replayGainServer;
-            //FIXME: Change the way coverHash is used before setting it from server
-            //coverHash = file.getString("coverHash");
-            String checkedFlag = file.getString("checkedFlag");
-            Date pathModifDate = getDate(file, "pathModifDate");
-            String copyRight = file.getString("copyRight");
-            String pathMbid = file.getString("pathMbid");
-            album= file.getString("album");
-            length = file.getInt("length");
-            int discTotal = file.getInt("discTotal");
-            String format = file.getString("format");
             JSONArray jsonTags = (JSONArray) file.get("tags");
             tags = new ArrayList<>();
             for(int i=0; i<jsonTags.length(); i++) {
                 String tag = (String) jsonTags.get(i);
                 tags.add(tag);
             }
-            Date modifDate = getDate(file, "modifDate");
+            Date genreModifDate = getDate(file, "genreModifDate");
+            relativeFullPath = file.getString("path");
+            path = new File(getAppDataPath, relativeFullPath)
+                    .getAbsolutePath();
             boolean deleted = file.getBoolean("deleted");
-            int idPath = file.getInt("idPath");
-            size = file.getLong("size");
+            Date tagsModifDate = getDate(file, "tagsModifDate");
             idFileServer = file.getInt("idFile");
-            String albumArtist = file.getString("albumArtist");
-            String comment = file.getString("comment");
-            double BPM = file.getDouble("BPM");
-            status=Status.valueOf(file.getString("status"));
-            int trackTotal = file.getInt("trackTotal");
+            genre = file.getString("genre");
+            playCounter = file.getInt("playCounter");
+
+            if(!statsOnly) {
+                artist = file.getString("artist");
+                title = file.getString("title");
+                album = file.getString("album");
+                length = file.getInt("length");
+                size = file.getLong("size");
+                status = Status.valueOf(file.getString("status"));
+
+                //FIXME: Store and use unsused variables below !!!
+                // WARNING: Some do not have proper value on server !!
+                String year = file.getString("year");
+                int trackNo = file.getInt("trackNo");
+                Date ratingModifDate = getDate(file, "ratingModifDate");
+                int discNo = file.getInt("discNo");
+                String bitRate = file.getString("bitRate");
+                String lyrics = file.getString("lyrics");
+                //FIXME: Change the way replayGain is used before setting it from server
+//            JSONObject replayGainJsonObject = file.getJSONObject("replaygain");
+//            ReplayGain.GainValues replayGainServer = new ReplayGain.GainValues();
+//            replayGainServer.setTrackGain((float) replayGainJsonObject.getDouble("trackGain"));
+//            replayGainServer.setAlbumGain((float) replayGainJsonObject.getDouble("albumGain"));
+                //replayGain = replayGainServer;
+                //FIXME: Change the way coverHash is used before setting it from server
+                //coverHash = file.getString("coverHash");
+                String checkedFlag = file.getString("checkedFlag");
+                Date pathModifDate = getDate(file, "pathModifDate");
+                String copyRight = file.getString("copyRight");
+                String pathMbid = file.getString("pathMbid");
+                int discTotal = file.getInt("discTotal");
+                String format = file.getString("format");
+                Date modifDate = getDate(file, "modifDate");
+                int idPath = file.getInt("idPath");
+                String albumArtist = file.getString("albumArtist");
+                String comment = file.getString("comment");
+                double BPM = file.getDouble("BPM");
+                int trackTotal = file.getInt("trackTotal");
+            }
         } catch (JSONException ex) {
             Log.e(TAG, "Error creating new Track "+file, ex);
         }
@@ -377,7 +383,7 @@ public class Track implements Serializable {
 
     //TODO: Do not update all, only requested fields
     public boolean update() {
-        return HelperLibrary.musicLibrary != null && HelperLibrary.musicLibrary.updateTrack(this);
+        return HelperLibrary.musicLibrary != null && HelperLibrary.musicLibrary.updateTrack(this, false);
     }
 
     /**

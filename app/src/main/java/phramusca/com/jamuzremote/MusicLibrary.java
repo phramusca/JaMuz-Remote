@@ -191,12 +191,12 @@ public class MusicLibrary {
     synchronized boolean insertOrUpdateTrack(String absolutePath) {
         Track track = new Track(getAppDataPath, absolutePath);
         if(track.readMetadata()) {
-            return insertOrUpdateTrack(track);
+            return insertOrUpdateTrack(track, false);
         }
         return false;
     }
 
-    synchronized boolean insertOrUpdateTrack(Track track) {
+    synchronized boolean insertOrUpdateTrack(Track track, boolean statsOnly) {
         int idFileRemote = getTrackIdFileRemote(track.getPath());
         boolean result;
         if(idFileRemote>=0) {
@@ -204,7 +204,7 @@ public class MusicLibrary {
             //TODO, for user path only: update only if file is modified:
             //based on lastModificationDate and/or size (not on content as longer than updateTrack)
             Log.d(TAG, "updateTrack " + track.getPath());
-            result=updateTrack(track);
+            result=updateTrack(track, statsOnly);
         } else {
             Log.d(TAG, "insertTrack " + track.getPath());
             result=insertTrack(track);
@@ -215,7 +215,7 @@ public class MusicLibrary {
      synchronized boolean insertTrack(Track track){
         try {
             Log.d(TAG, "insertTrack " + track.getPath());
-            int id = (int) db.insert(TABLE_TRACKS, null, TrackToValues(track));
+            int id = (int) db.insert(TABLE_TRACKS, null, TrackToValues(track, false));
             if(id>0) {
                 track.setIdFileRemote(id);
                 for(String tag : track.getTags(false)) {
@@ -312,9 +312,9 @@ public class MusicLibrary {
         return false;
     }
 
-    synchronized boolean updateTrack(Track track){
+    synchronized boolean updateTrack(Track track, boolean statsOnly){
         try {
-            if(track.getIdFileRemote()>=0 && db.update(TABLE_TRACKS, TrackToValues(track),
+            if(track.getIdFileRemote()>=0 && db.update(TABLE_TRACKS, TrackToValues(track, statsOnly),
                     COL_ID_REMOTE + " = " +track.getIdFileRemote(), null)==1) {
                 removeTags(track.getIdFileRemote());
                 for(String tag : track.getTags(false)) {
@@ -360,21 +360,23 @@ public class MusicLibrary {
         return tracks;
     }
 
-    private synchronized ContentValues TrackToValues(Track track) {
+    private synchronized ContentValues TrackToValues(Track track, boolean statsOnly) {
         ContentValues values = new ContentValues();
-        values.put(COL_ID_SERVER, track.getIdFileServer());
-        values.put(COL_TITLE, track.getTitle());
-        values.put(COL_ALBUM, track.getAlbum());
-        values.put(COL_ARTIST, track.getArtist());
-        values.put(COL_SIZE, track.getSize());
-        values.put(COL_LENGTH, track.getLength());
-        values.put(COL_STATUS, track.getStatus().name());
         values.put(COL_GENRE, track.getGenre());
-        values.put(COL_PATH, track.getPath());
         values.put(COL_RATING, track.getRating());
         values.put(COL_ADDED_DATE, track.getFormattedAddedDate());
         values.put(COL_LAST_PLAYED, track.getFormattedLastPlayed());
         values.put(COL_PLAY_COUNTER, track.getPlayCounter());
+        if(!statsOnly) {
+            values.put(COL_ID_SERVER, track.getIdFileServer());
+            values.put(COL_TITLE, track.getTitle());
+            values.put(COL_ALBUM, track.getAlbum());
+            values.put(COL_ARTIST, track.getArtist());
+            values.put(COL_SIZE, track.getSize());
+            values.put(COL_LENGTH, track.getLength());
+            values.put(COL_STATUS, track.getStatus().name());
+            values.put(COL_PATH, track.getPath());
+        }
         return values;
     }
 
