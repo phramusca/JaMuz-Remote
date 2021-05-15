@@ -221,8 +221,8 @@ public class ServiceSync extends ServiceBase {
             HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/"+status.name().toLowerCase());
             urlBuilder.addQueryParameter("idFrom", String.valueOf(idFrom));
             urlBuilder.addQueryParameter("nbFilesInBatch", String.valueOf(nbFilesInBatch));
-            ResponseBody body = clientInfo.getBody(urlBuilder, client);
-            final JSONObject jObject = new JSONObject(body.string());
+            String body = clientInfo.getBodyString(urlBuilder, client);
+            final JSONObject jObject = new JSONObject(body);
             Map<Integer, Track> newTracks = new LinkedHashMap<>();
             JSONArray files = (JSONArray) jObject.get("files");
             for (int i = 0; i < files.length(); i++) {
@@ -236,23 +236,23 @@ public class ServiceSync extends ServiceBase {
 
         //FIXME 0.5.0: Remove getVersion and replace by "Api-Version" in header
         private String getVersion() throws IOException, UnauthorizedException {
-            ResponseBody body = clientInfo.getBody("version", client);
+            String body = clientInfo.getBodyString("version", client);
             helperNotification.notifyBar(notificationSync, "Received version ... ");
-            return body.string();
+            return body;
         }
 
         private Integer getFilesCount(Track.Status status) throws IOException, UnauthorizedException {
             HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/"+status.name().toLowerCase());
             urlBuilder.addQueryParameter("getCount", "true");
-            ResponseBody body = clientInfo.getBody(urlBuilder, client);
+            String body = clientInfo.getBodyString(urlBuilder, client);
             helperNotification.notifyBar(notificationSync, "Received "+status.name()+" files count ... ");
-            return Integer.valueOf(body.string());
+            return Integer.valueOf(body);
         }
 
         private void getTags() throws IOException, UnauthorizedException, JSONException {
-            ResponseBody body = clientInfo.getBody("tags", client);
+            String body = clientInfo.getBodyString("tags", client);
             helperNotification.notifyBar(notificationSync, "Received tags ... ");
-            final JSONObject jObject = new JSONObject(body.string());
+            final JSONObject jObject = new JSONObject(body);
             //FIXME: Get tags list with their respective number of files, for sorting
             //TODO: Then add a "x/y" button to display pages x/y (# of tags per page to be defined/optional)
             final JSONArray jsonTags = (JSONArray) jObject.get("tags");
@@ -265,9 +265,9 @@ public class ServiceSync extends ServiceBase {
         }
 
         private void getGenres() throws IOException, UnauthorizedException, JSONException {
-            ResponseBody body = clientInfo.getBody("genres", client);
+            String body = clientInfo.getBodyString("genres", client);
             helperNotification.notifyBar(notificationSync, "Received genres ... ");
-            final JSONObject jObject = new JSONObject(body.string());
+            final JSONObject jObject = new JSONObject(body);
             final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
             final List<String> newGenres = new ArrayList<>();
             for (int i = 0; i < jsonGenres.length(); i++) {
@@ -298,9 +298,9 @@ public class ServiceSync extends ServiceBase {
             Request request = clientInfo.getRequestBuilder(urlBuilder)
                     .post(RequestBody.create(obj.toString(), MediaType.parse("application/json; charset=utf-8"))).build();
             helperNotification.notifyBar(notificationSync,"Requesting statistics merge.");
-            ResponseBody body = clientInfo.getBody(request, client);
+            String body = clientInfo.getBodyString(request, client);
             helperNotification.notifyBar(notificationSync,"Updating database with merge changes ... ");
-            final JSONObject jObject = new JSONObject(body.string());
+            final JSONObject jObject = new JSONObject(body);
             JSONArray filesToUpdate = (JSONArray) jObject.get("files");
             for (int i = 0; i < filesToUpdate.length(); i++) {
                 Track fileReceived = new Track(

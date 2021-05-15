@@ -53,9 +53,13 @@ public class ClientInfo implements Serializable {
                 .url(urlBuilder.build());
     }
 
-    public ResponseBody getBody(String url, OkHttpClient client) throws IOException, ServiceSync.UnauthorizedException {
+    public String getBodyString(String url, OkHttpClient client) throws IOException, ServiceSync.UnauthorizedException {
         HttpUrl.Builder urlBuilder = getUrlBuilder(url);
-        return getBody(urlBuilder, client);
+        return getBodyString(urlBuilder, client);
+    }
+
+    public String getBodyString(HttpUrl.Builder urlBuilder, OkHttpClient client) throws IOException, ServiceSync.UnauthorizedException {
+        return getBody(urlBuilder, client).string();
     }
 
     public ResponseBody getBody(HttpUrl.Builder urlBuilder, OkHttpClient client) throws IOException, ServiceSync.UnauthorizedException {
@@ -63,7 +67,11 @@ public class ClientInfo implements Serializable {
         return getBody(request, client);
     }
 
-    public ResponseBody getBody(Request request, OkHttpClient client) throws IOException, ServiceSync.UnauthorizedException {
+    public String getBodyString(Request request, OkHttpClient client) throws IOException, ServiceSync.UnauthorizedException {
+        return getBody(request, client).string();
+    }
+
+    private ResponseBody getBody(Request request, OkHttpClient client) throws IOException, ServiceSync.UnauthorizedException {
         Response response = client.newCall(request).execute();
         //FIXME: Better handle responses, not all errors are 401
         if(!response.isSuccessful()) {

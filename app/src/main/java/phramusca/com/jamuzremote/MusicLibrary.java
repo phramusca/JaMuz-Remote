@@ -369,13 +369,14 @@ public class MusicLibrary {
         values.put(COL_PLAY_COUNTER, track.getPlayCounter());
         if(!statsOnly) {
             values.put(COL_ID_SERVER, track.getIdFileServer());
+            values.put(COL_PATH, track.getPath());
+
             values.put(COL_TITLE, track.getTitle());
             values.put(COL_ALBUM, track.getAlbum());
             values.put(COL_ARTIST, track.getArtist());
             values.put(COL_SIZE, track.getSize());
             values.put(COL_LENGTH, track.getLength());
             values.put(COL_STATUS, track.getStatus().name());
-            values.put(COL_PATH, track.getPath());
         }
         return values;
     }
