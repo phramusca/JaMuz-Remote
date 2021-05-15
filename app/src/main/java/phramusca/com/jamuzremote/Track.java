@@ -41,9 +41,7 @@ public class Track implements Serializable {
     private String source="";
     private long size;
     private int length;
-    //FIXME: Get replaygain from server and Store in db : no to read too often AND as a workaround for flac
     private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
-		//jsonAsMap.put("replaygain", replaygain.toMap());
     //FIXME !!!!! Use a Repo for thumbnails !!!
     //=> Add a limit (FIFO) to those repos not to overload android memory
     //As it is read too many times now that there is album list
@@ -152,7 +150,7 @@ public class Track implements Serializable {
                 int discNo = file.getInt("discNo");
                 String bitRate = file.getString("bitRate");
                 String lyrics = file.getString("lyrics");
-                //FIXME: Change the way replayGain is used before setting it from server
+                //FIXME: Change the way replayGain is used before setting it from server and Store in db : no to read too often AND as a workaround for flac
 //            JSONObject replayGainJsonObject = file.getJSONObject("replaygain");
 //            ReplayGain.GainValues replayGainServer = new ReplayGain.GainValues();
 //            replayGainServer.setTrackGain((float) replayGainJsonObject.getDouble("trackGain"));
