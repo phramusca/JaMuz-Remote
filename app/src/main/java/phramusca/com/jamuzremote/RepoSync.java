@@ -32,9 +32,8 @@ public final class RepoSync {
     }
 
     /**
-     * Sets status to NEW if track does not exists
-     * or REC if track exists and has correct size.
-     * File is deleted if not requested (not in tracks).
+     * Sets status to REC if track exists and has correct size.
+     * Otherwise, file is deleted and status set back to NEW
      * @param track the one to check
      * @return true if onReceivedFile exists and length()==track.size
      */
