@@ -442,6 +442,7 @@ public class ServiceSync extends ServiceBase {
             nbFilesTotal=0;
             nbFiles=0;
             nbFailed=0;
+            wifiLock.acquire();
             for (Track track : RepoSync.getDownloadList()) {
                 track.getTags(true);
                 DownloadTask downloadTask = new DownloadTask(track, this::notifyBarProgress, clientInfo);

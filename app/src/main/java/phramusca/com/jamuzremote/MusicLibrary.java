@@ -48,13 +48,15 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACK_TOTAL;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_YEAR;
 import static phramusca.com.jamuzremote.MusicLibraryDb.TABLE_TRACKS;
 
+//TODO: Use the COL_xxx everywhere !!
+
 /**
  * Created by raph on 12/06/17.
  */
 public class MusicLibrary {
     SQLiteDatabase db;
     private final File getAppDataPath;
-    private MusicLibraryDb musicLibraryDb;
+    private final MusicLibraryDb musicLibraryDb;
     private static final String TAG = MusicLibrary.class.getName();
 
     MusicLibrary(File getAppDataPath, Context context){
@@ -71,45 +73,33 @@ public class MusicLibrary {
     }
 
     private synchronized int getTrackIdFileRemote(String path){
-        Cursor cursor = null;
-        try {
-            cursor = db.query(TABLE_TRACKS,
-                    new String[] {COL_ID_REMOTE},
-                    COL_PATH + " LIKE \"" + path +"\"",
-                    null, null, null, null);
+        try (Cursor cursor = db.query(TABLE_TRACKS,
+                new String[]{COL_ID_REMOTE},
+                COL_PATH + " LIKE \"" + path + "\"",
+                null, null, null, null)) {
             if (cursor.getCount() == 0) {
                 return -1;
             }
             cursor.moveToFirst();
             return cursor.getInt(cursor.getColumnIndex(COL_ID_REMOTE));
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getTrackIdFileRemote("+path+")", ex);
-        } finally {
-            if(cursor!=null) {
-                cursor.close();
-            }
+            Log.e(TAG, "getTrackIdFileRemote(" + path + ")", ex);
         }
         return -1;
     }
 
     private synchronized int getTrackIdFileRemote(int idFileServer) {
-        Cursor cursor = null;
-        try {
-            cursor = db.query(TABLE_TRACKS,
-                    new String[] {COL_ID_REMOTE},
-                    COL_ID_SERVER+"=" + idFileServer,
-                    null, null, null, null);
+        try (Cursor cursor = db.query(TABLE_TRACKS,
+                new String[]{COL_ID_REMOTE},
+                COL_ID_SERVER + "=" + idFileServer,
+                null, null, null, null)) {
             if (cursor.getCount() == 0) {
                 return -1;
             }
             cursor.moveToFirst();
             return cursor.getInt(cursor.getColumnIndex(COL_ID_REMOTE));
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getTrackIdFileRemote("+idFileServer+")", ex);
-        } finally {
-            if(cursor!=null) {
-                cursor.close();
-            }
+            Log.e(TAG, "getTrackIdFileRemote(" + idFileServer + ")", ex);
         }
         return -1;
     }
@@ -118,30 +108,15 @@ public class MusicLibrary {
         List<Track> tracks = new ArrayList<>();
         Cursor cursor = null;
         try {
-            String query = new StringBuilder()
-                    .append("SELECT GROUP_CONCAT(tag.value) AS tags, tracks.* \n")
-//                    .append(", ").append(COL_STATUS)
-//                    .append(", ").append(COL_LAST_PLAYED)
-//                    .append(", ").append(COL_ADDED_DATE)
-//                    .append(", ").append(COL_ALBUM)
-//                    .append(", ").append(COL_ARTIST)
-//                    .append(", ").append(COL_GENRE)
-//                    .append(", ").append(COL_ID_REMOTE)
-//                    .append(", ").append(COL_ID_SERVER)
-//                    .append(", ").append(COL_LENGTH)
-//                    .append(", ").append(COL_PATH)
-//                    .append(", ").append(COL_PLAY_COUNTER)
-//                    .append(", ").append(COL_RATING)
-//                    .append(", ").append(COL_SIZE)
-//                    .append(", ").append(COL_TITLE)
-                    .append(" FROM tracks \n")
-                    .append(" LEFT JOIN tagfile ON tracks.idFileRemote=tagfile.idFile \n")
-                    .append(" LEFT JOIN tag ON tag.id=tagfile.idTag \n")
-                    .append(" ").append(where).append(" \n")
-                    .append(" GROUP BY tracks.idFileRemote \n")
-                    .append(" ").append(having).append(" \n")
-                    .append(" ").append(order).append(" \n")
-                    .append(" ").append(limit > 0 ? "LIMIT " + limit : "").toString();
+            String query = "SELECT GROUP_CONCAT(tag.value) AS tags, tracks.* \n" +
+                    " FROM tracks \n" +
+                    " LEFT JOIN tagfile ON tracks.idFileRemote=tagfile.idFile \n" +
+                    " LEFT JOIN tag ON tag.id=tagfile.idTag \n" +
+                    " " + where + " \n" +
+                    " GROUP BY tracks.idFileRemote \n" +
+                    " " + having + " \n" +
+                    " " + order + " \n" +
+                    " " + (limit > 0 ? "LIMIT " + limit : "");
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[] { });
             tracks = getTracks(cursor);
@@ -562,20 +537,14 @@ public class MusicLibrary {
 
     private synchronized int getIdTag(String tag){
         int idTag=-1;
-        Cursor cursor = null;
-        try {
-            cursor = db.query("tag", null, "value=?",
-                    new String[] { tag }, "", "", "");
+        try (Cursor cursor = db.query("tag", null, "value=?",
+                new String[]{tag}, "", "", "")) {
             if (cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 idTag = cursor.getInt(0);
             }
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getIdTag("+tag+")", ex);
-        } finally {
-            if(cursor!=null) {
-                cursor.close();
-            }
+            Log.e(TAG, "getIdTag(" + tag + ")", ex);
         }
         return idTag;
     }
@@ -650,37 +619,25 @@ public class MusicLibrary {
     }
 
     synchronized boolean getArtist(String artist){
-        Cursor cursor = null;
-        try {
-            cursor = db.query("tracks", null, "artist=?",
-                    new String[] { artist }, "", "", "");
+        try (Cursor cursor = db.query("tracks", null, "artist=?",
+                new String[]{artist}, "", "", "")) {
             if (cursor.getCount() > 0) {
                 return true;
             }
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getArtist("+artist+")", ex);
-        } finally {
-            if(cursor!=null) {
-                cursor.close();
-            }
+            Log.e(TAG, "getArtist(" + artist + ")", ex);
         }
         return false;
     }
 
     synchronized boolean getAlbum(String album){
-        Cursor cursor = null;
-        try {
-            cursor = db.query("tracks", null, "album=?",
-                    new String[] { album }, "", "", "");
+        try (Cursor cursor = db.query("tracks", null, "album=?",
+                new String[]{album}, "", "", "")) {
             if (cursor.getCount() > 0) {
                 return true;
             }
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getAlbum("+album+")", ex);
-        } finally {
-            if(cursor!=null) {
-                cursor.close();
-            }
+            Log.e(TAG, "getAlbum(" + album + ")", ex);
         }
         return false;
     }
@@ -689,34 +646,39 @@ public class MusicLibrary {
         List<Track> tracks = new ArrayList<>();
         Cursor cursor = null;
         try {
-
-            //FIXME !!!! 0.5.0 !!!! SELECT new fields !!
-            String query = new StringBuilder()
-                    //TODO: Use the COL_xxx everywhere !!
-                    .append("SELECT count(idFileRemote) AS playCounter, \n")
-                    .append("round(avg(rating), 2) AS rating, \n")
-                    .append("group_concat(distinct genre) AS genre, \n")
-                    .append("group_concat(distinct artist) AS artist, \n")
-                    .append("album, idFileRemote, idFileServer, title, addedDate, lastPlayed, \n")
-                    .append("status, size, path, length \n")
-                    .append(", ").append(COL_ID_PATH)
-                    .append(", ").append(COL_ALBUM_ARTIST)
-                    .append(", ").append(COL_YEAR)
-                    .append(", ").append(COL_TRACK_NO )
-                    .append(", ").append(COL_TRACK_TOTAL)
-                    .append(", ").append(COL_DISC_NO)
-                    .append(", ").append(COL_DISC_TOTAL)
-                    .append(", ").append(COL_BITRATE)
-                    .append(", ").append(COL_FORMAT)
-                    .append(", ").append(COL_BPM)
-                    .append(", ").append(COL_MODIF_DATE)
-                    .append(", ").append(COL_CHECKED_FLAG)
-                    .append(", ").append(COL_COPYRIGHT)
-                    .append(", ").append(COL_COVER_HASH)
-                    .append(" FROM tracks \n")
-                    .append(" GROUP BY album ORDER BY rating DESC, playCounter DESC, album, artist LIMIT 20 OFFSET ")
-                    .append(offset)
-                    .toString();
+            String query = "SELECT count(" + COL_ID_REMOTE + ") AS " + COL_PLAY_COUNTER + ", \n" +
+                    "round(avg(" + COL_RATING + "), 2) AS " + COL_RATING + ", \n" +
+                    "group_concat(distinct " + COL_GENRE + ") AS " + COL_GENRE + ", \n" +
+                    "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + ", \n" +
+                    ", " + COL_ALBUM +
+                    ", " + COL_ID_REMOTE +
+                    ", " + COL_ID_SERVER +
+                    ", " + COL_TITLE +
+                    ", " + COL_ADDED_DATE +
+                    ", " + COL_LAST_PLAYED +
+                    ", " + COL_STATUS +
+                    ", " + COL_SIZE +
+                    ", " + COL_PATH +
+                    ", " + COL_LENGTH +
+                    ", " + COL_ID_PATH +
+                    ", " + COL_ALBUM_ARTIST +
+                    ", " + COL_YEAR +
+                    ", " + COL_TRACK_NO +
+                    ", " + COL_TRACK_TOTAL +
+                    ", " + COL_DISC_NO +
+                    ", " + COL_DISC_TOTAL +
+                    ", " + COL_BITRATE +
+                    ", " + COL_FORMAT +
+                    ", " + COL_BPM +
+                    ", " + COL_MODIF_DATE +
+                    ", " + COL_CHECKED_FLAG +
+                    ", " + COL_COPYRIGHT +
+                    ", " + COL_COVER_HASH +
+                    " FROM tracks \n" +
+                    " GROUP BY " + COL_ALBUM + " " +
+                    " ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, " + COL_ALBUM + ", " + COL_ARTIST + "" +
+                    " LIMIT 20 OFFSET " +
+                    offset;
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[] { });
             tracks = getTracks(cursor);
