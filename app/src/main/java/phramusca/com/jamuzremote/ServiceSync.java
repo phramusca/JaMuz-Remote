@@ -157,7 +157,7 @@ public class ServiceSync extends ServiceBase {
 
         private void checkFiles(Track.Status status)
                 throws InterruptedException, JSONException, ServerException, IOException {
-            int nbFilesInBatch=5000;
+            int nbFilesInBatch=2500;
             int nbFilesServer = getFilesCount(status);
             String msg = "Checking "+status.name().toLowerCase()+" files ...";
             helperNotification.notifyBar(notificationSync, msg);
