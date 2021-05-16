@@ -22,7 +22,10 @@ import java.util.Objects;
  */
 public class Track implements Serializable {
     private static final String TAG = Track.class.getName();
-
+    private String lyrics = "";
+    private Date pathModifDate = new Date(0);
+    private String pathMbId = "";
+    private String comment = "";
     private int idPath = -1;
     private String albumArtist = "";
     private String year = "";
@@ -56,15 +59,20 @@ public class Track implements Serializable {
     private long size;
     private int length;
     private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
-    //FIXME !!!!! Use a Repo for thumbnails !!!
+    //TODO Use a Repo for thumbnails
     //=> Add a limit (FIFO) to those repos not to overload android memory
     //As it is read too many times now that there is album list
     //+ we need (by using transient) to ignore it in Intent serialization and re-read each time !
     private transient Bitmap thumb;
-    //TODO: coverHash should be changed together with thumb above
+    //TODO: coverHash should be changed together with thumb above.
+    //    Only used for remote for now, yet retrieved from sync and stored in db
     private String coverHash="";
 
     /** From database
+     * @param lyrics
+     * @param pathModifDate
+     * @param pathMbId
+     * @param comment
      * @param idPath -
      * @param albumArtist -
      * @param year -
@@ -95,12 +103,16 @@ public class Track implements Serializable {
      * @param size -
      * @param length -
      */
-    public Track(int idPath, String albumArtist, String year, int trackNo, int trackTotal,
+    public Track(String lyrics, Date pathModifDate, String pathMbId, String comment, int idPath, String albumArtist, String year, int trackNo, int trackTotal,
                  int discNo, int discTotal, String bitRate, String format, double bpm,
                  Date modifDate, String checkedFlag, String copyRight, File getAppDataPath,
                  int idFileRemote, int idFileServer, double rating, String title, String album,
                  String artist, String coverHash, String path, String genre, Date addedDate,
                  Date lastPlayed, int playCounter, String status, long size, int length) {
+        this.lyrics = lyrics;
+        this.pathModifDate = pathModifDate;
+        this.pathMbId = pathMbId;
+        this.comment = comment;
         this.idPath = idPath;
         this.albumArtist = albumArtist;
         this.year = year;
@@ -133,12 +145,11 @@ public class Track implements Serializable {
         this.playCounter = playCounter;
         this.status = Status.valueOf(status);
         this.size = size;
-
-        //FIXME !!!! 0.5.0 !!!! VERIFY usage of coverHash !!!!
-        //this.coverHash = coverHash;
+        this.coverHash = coverHash;
     }
 
     /** Track to display
+     * @param lyrics
      * @param albumArtist -
      * @param year -
      * @param trackNo -
@@ -155,9 +166,10 @@ public class Track implements Serializable {
      * @param coverHash -
      * @param genre -
      */
-    public Track(String albumArtist, String year, int trackNo, int trackTotal, int discNo,
+    public Track(String lyrics, String albumArtist, String year, int trackNo, int trackTotal, int discNo,
                  int discTotal, String bitRate, String format, double bpm, double rating, String title,
                  String album, String artist, String coverHash, String genre) {
+        this.lyrics = lyrics;
         this.albumArtist = albumArtist;
         this.year = year;
         this.trackNo = trackNo;
@@ -218,16 +230,17 @@ public class Track implements Serializable {
             relativeFullPath = file.getString("path");
             path = new File(getAppDataPath, relativeFullPath)
                     .getAbsolutePath();
-            boolean deleted = file.getBoolean("deleted");
             idFileServer = file.getInt("idFile");
             genre = file.getString("genre");
             playCounter = file.getInt("playCounter");
-
-            //FIXME !!!! 0.5.0 !!!! Those are only set on merge
-            int previousPlayCounter = file.getInt("previousPlayCounter");
-            Date genreModifDate = getDate(file, "genreModifDate");
-            Date tagsModifDate = getDate(file, "tagsModifDate");
-
+            //FIXME: Use those below, to improve sync and/or merge
+//            boolean deleted = file.getBoolean("deleted");
+//            //Those are only valid during merge process
+//            int previousPlayCounter = file.getInt("previousPlayCounter");
+//            Date genreModifDate = getDate(file, "genreModifDate");
+//            Date tagsModifDate = getDate(file, "tagsModifDate");
+//            Date ratingModifDate = getDate(file, "ratingModifDate");
+//            //END Those are only valid during merge process
             if(!statsOnly) {
                 artist = file.getString("artist");
                 title = file.getString("title");
@@ -245,26 +258,18 @@ public class Track implements Serializable {
                 bitRate = file.getString("bitRate");
                 format = file.getString("format");
                 BPM = file.getDouble("BPM");
-                modifDate = getDate(file, "modifDate");
                 checkedFlag = file.getString("checkedFlag");
                 copyRight = file.getString("copyRight");
-
-                //FIXME !!!! 0.5.0 !!!!  Change the way coverHash is used before setting it from server
-                //coverHash = file.getString("coverHash");
+                coverHash = file.getString("coverHash");
+                modifDate = getDate(file, "modifDate");
 
                 //FIXME !!!! 0.5.0 !!!!  Those are not set or not set properly in Server
-                Date ratingModifDate = getDate(file, "ratingModifDate");
-                String lyrics = file.getString("lyrics");
-                Date pathModifDate = getDate(file, "pathModifDate");
-                String pathMbid = file.getString("pathMbid");
-                String comment = file.getString("comment");
+                lyrics = file.getString("lyrics");
+                pathModifDate = getDate(file, "pathModifDate");
+                pathMbId = file.getString("pathMbid");
+                comment = file.getString("comment");
 
-                //FIXME !!!! 0.5.0 !!!! Replaygain is always null:
-//                        "replaygain": {
-//                            "trackGain": null,
-//                                    "albumGain": null
-//                        }
-                //FIXME !!!! 0.5.0 !!!!  Change the way replayGain is used before setting it from server and Store in db : no to read too often AND as a workaround for flac
+                //FIXME !!!! 0.5.0 !!!! Replaygain
 //            JSONObject replayGainJsonObject = file.getJSONObject("replaygain");
 //            ReplayGain.GainValues replayGainServer = new ReplayGain.GainValues();
 //            replayGainServer.setTrackGain((float) replayGainJsonObject.getDouble("trackGain"));
@@ -428,6 +433,38 @@ public class Track implements Serializable {
 
     public void setCopyRight(String copyRight) {
         this.copyRight = copyRight;
+    }
+
+    public String getLyrics() {
+        return lyrics;
+    }
+
+    public void setLyrics(String lyrics) {
+        this.lyrics = lyrics;
+    }
+
+    public Date getPathModifDate() {
+        return pathModifDate;
+    }
+
+    public void setPathModifDate(Date pathModifDate) {
+        this.pathModifDate = pathModifDate;
+    }
+
+    public String getPathMbId() {
+        return pathMbId;
+    }
+
+    public void setPathMbId(String pathMbId) {
+        this.pathMbId = pathMbId;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public enum Status {

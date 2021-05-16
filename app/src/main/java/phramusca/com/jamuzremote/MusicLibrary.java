@@ -25,6 +25,7 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ARTIST;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_BITRATE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_BPM;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_CHECKED_FLAG;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_COMMENT;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_COPYRIGHT;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_COVER_HASH;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_DISC_NO;
@@ -36,8 +37,11 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_REMOTE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_SERVER;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LAST_PLAYED;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LENGTH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LYRICS;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_MODIF_DATE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PATH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PATH_MB_ID;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PATH_MODIF_DATE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PLAY_COUNTER;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_SIZE;
@@ -366,6 +370,11 @@ public class MusicLibrary {
             values.put(COL_CHECKED_FLAG, track.getCheckedFlag());
             values.put(COL_COPYRIGHT, track.getCopyRight());
             values.put(COL_COVER_HASH, track.getCoverHash());
+
+            values.put(COL_LYRICS, track.getLyrics());
+            values.put(COL_PATH_MODIF_DATE, HelperDateTime.formatUTCtoSqlUTC(track.getPathModifDate()));
+            values.put(COL_PATH_MB_ID, track.getPathMbId());
+            values.put(COL_COMMENT, track.getComment());
         }
         return values;
     }
@@ -402,10 +411,24 @@ public class MusicLibrary {
         String checkedFlag=c.getString(c.getColumnIndex(COL_CHECKED_FLAG));
         String copyRight=c.getString(c.getColumnIndex(COL_COPYRIGHT));
         String coverHash=c.getString(c.getColumnIndex(COL_COVER_HASH));
-        return new Track(idPath, albumArtist, year, trackNo, trackTotal, discNo, discTotal, bitRate,
-                format, bpm, modifDate, checkedFlag, copyRight, getAppDataPath, idFileRemote,
-                idFileServer, rating, title, album, artist, coverHash, path, genre, addedDate,
-                lastPlayed, playCounter, status, size, length);
+
+        String lyrics=c.getString(c.getColumnIndex(COL_LYRICS));
+        Date pathModifDate=HelperDateTime.parseSqlUtc(
+                c.getString(c.getColumnIndex(COL_PATH_MODIF_DATE)));
+        String pathMbid=c.getString(c.getColumnIndex(COL_PATH_MB_ID));
+        String comment=c.getString(c.getColumnIndex(COL_COMMENT));
+
+        //FIXME: Use below in sync or merge processes (DO NOT store in db, or values from remote)
+//        boolean deleted=c.getString(c.getColumnIndex(COL_));
+//        int previousPlayCounter=c.getInt(c.getColumnIndex(COL_));
+//        Date genreModifDate=c.getString(c.getColumnIndex(COL_));
+//        Date tagsModifDate=c.getString(c.getColumnIndex(COL_));
+//        Date ratingModifDate=c.getString(c.getColumnIndex(COL_));
+
+        return new Track(lyrics, pathModifDate, pathMbid, comment, idPath, albumArtist, year,
+                trackNo, trackTotal, discNo, discTotal, bitRate, format, bpm, modifDate, checkedFlag,
+                copyRight, getAppDataPath, idFileRemote, idFileServer, rating, title, album, artist,
+                coverHash, path, genre, addedDate, lastPlayed, playCounter, status, size, length);
     }
 
     List<String> getGenres() {
@@ -644,6 +667,10 @@ public class MusicLibrary {
                     ", " + COL_CHECKED_FLAG +
                     ", " + COL_COPYRIGHT +
                     ", " + COL_COVER_HASH +
+                    ", " + COL_LYRICS +
+                    ", " + COL_PATH_MODIF_DATE +
+                    ", " + COL_PATH_MB_ID +
+                    ", " + COL_COMMENT +
                     " FROM tracks \n" +
                     " GROUP BY " + COL_ALBUM + " " +
                     " ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, " + COL_ALBUM + ", " + COL_ARTIST + "" +

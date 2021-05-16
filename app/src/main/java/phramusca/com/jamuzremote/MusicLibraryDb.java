@@ -9,9 +9,12 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class MusicLibraryDb extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 5;
+    private static final int DB_VERSION = 6;
 
     static final String TABLE_TRACKS = "tracks";
+
+    //TODO: Use this syntax and make the same for other tables
+    //static final String COL_ID_REMOTE = TABLE_TRACKS+".idFileRemote";
     static final String COL_ID_REMOTE = "idFileRemote";
     static final String COL_ID_SERVER = "idFileServer";
     static final String COL_TITLE = "title";
@@ -26,7 +29,6 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     static final String COL_STATUS = "status";
     static final String COL_SIZE = "size";
     static final String COL_LENGTH = "length";
-
     static final String COL_ID_PATH = "idPath";
     static final String COL_ALBUM_ARTIST = "albumArtist";
     static final String COL_YEAR = "year";
@@ -37,21 +39,26 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     static final String COL_BITRATE = "bitrate";
     static final String COL_FORMAT = "format";
     static final String COL_BPM = "bpm";
-    static final String COL_MODIF_DATE = "modifDate";
     static final String COL_CHECKED_FLAG = "checkedFlag";
     static final String COL_COPYRIGHT = "copyright";
+
     static final String COL_COVER_HASH = "coverhash";
+    static final String COL_MODIF_DATE = "modifDate";
+    static final String COL_LYRICS = "lyrics";
+    static final String COL_COMMENT = "comment";
+    static final String COL_PATH_MODIF_DATE = "pathModifDate";
+    static final String COL_PATH_MB_ID = "pathMbId";
 
     private static final String CREATE_BDD = "CREATE TABLE " + TABLE_TRACKS + " ("
             + COL_ID_REMOTE + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + COL_ID_SERVER + " INTEGER, "
-            + COL_ID_PATH + " INTEGER, "
+            + COL_ID_SERVER + " INTEGER NOT NULL, "
+            + COL_ID_PATH + " INTEGER NOT NULL, "
             + COL_ALBUM_ARTIST + " TEXT NOT NULL, "
             + COL_YEAR + " TEXT NOT NULL, "
-            + COL_TRACK_NO + " INTEGER, "
-            + COL_TRACK_TOTAL + " INTEGER, "
-            + COL_DISC_NO + " INTEGER, "
-            + COL_DISC_TOTAL + " INTEGER, "
+            + COL_TRACK_NO + " INTEGER NOT NULL, "
+            + COL_TRACK_TOTAL + " INTEGER NOT NULL, "
+            + COL_DISC_NO + " INTEGER NOT NULL, "
+            + COL_DISC_TOTAL + " INTEGER NOT NULL, "
             + COL_BITRATE + " TEXT NOT NULL, "
             + COL_FORMAT + " TEXT NOT NULL, "
             + COL_BPM + " TEXT NOT NULL, "
@@ -62,7 +69,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
             + COL_ARTIST + " TEXT NOT NULL, "
             + COL_TITLE + " TEXT NOT NULL, "
             + COL_ALBUM + " TEXT NOT NULL, "
-            + COL_GENRE + " TEXT, "
+            + COL_GENRE + " TEXT NOT NULL, "
             + COL_RATING + " INTEGER NOT NULL, "
             + COL_ADDED_DATE + " TEXT NOT NULL, "
             + COL_PLAY_COUNTER + " INTEGER NOT NULL, "
@@ -70,6 +77,10 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
             + COL_STATUS + " TEXT NOT NULL, "
             + COL_SIZE + " LONG NOT NULL, "
             + COL_LENGTH + " INTEGER NOT NULL, "
+            + COL_LYRICS + " TEXT NOT NULL, "
+            + COL_PATH_MODIF_DATE + " TEXT NOT NULL, "
+            + COL_PATH_MB_ID + " TEXT NOT NULL, "
+            + COL_COMMENT + " TEXT NOT NULL, "
             + COL_PATH + " TEXT NOT NULL); ";
 
     //By default store in user internal folder
