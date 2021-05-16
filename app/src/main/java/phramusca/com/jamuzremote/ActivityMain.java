@@ -782,8 +782,6 @@ public class ActivityMain extends AppCompatActivity {
         toggle(layout, true);
     }
 
-
-
     private ToggleButton getButtonTag(int key, String value) {
         ToggleButton button = new ToggleButton(this);
         button.setId(key);
@@ -1474,17 +1472,9 @@ public class ActivityMain extends AppCompatActivity {
             public void run() {
                 setupTags();
                 setupGenres();
-                setupLocalPlaylists();
+                setupLocalPlaylistsThenStartServiceScan();
             }
         }.start();
-
-        //Start Scan Service
-        if(!isMyServiceRunning(ServiceScan.class)) {
-            Intent service = new Intent(getApplicationContext(), ServiceScan.class);
-            service.putExtra("userPath", preferences.getString("userPath", "/"));
-            service.putExtra("getAppDataPath", getAppDataPath());
-            startService(service);
-        }
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -1974,7 +1964,7 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    private void setupLocalPlaylists() {
+    private void setupLocalPlaylistsThenStartServiceScan() {
         localPlaylists = new HashMap<>();
         File playlistFolder = HelperFile.createFolder("Playlists");
         if (playlistFolder != null) {
@@ -1989,6 +1979,14 @@ public class ActivityMain extends AppCompatActivity {
             }
         }
         setupLocalPlaylistSpinner(null);
+
+        //Start Scan Service
+        if(!isMyServiceRunning(ServiceScan.class)) {
+            Intent service = new Intent(getApplicationContext(), ServiceScan.class);
+            service.putExtra("userPath", preferences.getString("userPath", "/"));
+            service.putExtra("getAppDataPath", getAppDataPath());
+            startService(service);
+        }
     }
 
     private void setupLocalPlaylistSpinner(String playlistName) {
