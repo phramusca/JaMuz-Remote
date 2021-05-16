@@ -262,8 +262,6 @@ public class Track implements Serializable {
                 copyRight = file.getString("copyRight");
                 coverHash = file.getString("coverHash");
                 modifDate = getDate(file, "modifDate");
-
-                //FIXME !!!! 0.5.0 !!!!  Those are not set or not set properly in Server
                 lyrics = file.getString("lyrics");
                 pathModifDate = getDate(file, "pathModifDate");
                 pathMbId = file.getString("pathMbid");
