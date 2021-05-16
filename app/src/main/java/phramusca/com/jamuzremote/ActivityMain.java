@@ -178,7 +178,7 @@ public class ActivityMain extends AppCompatActivity {
     private LinearLayout layoutPlaylistEditBar;
     private GridLayout layoutPlaylistToolBar;
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint({"HardwareIds", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -270,12 +270,7 @@ public class ActivityMain extends AppCompatActivity {
                     clientRemote =  new ClientRemote(clientInfo, new ListenerRemote());
                     new Thread() {
                         public void run() {
-                            if(clientRemote.connect()) {
-                                enableRemote(false);
-                            }
-                            else {
-                                enableRemote(true);
-                            }
+                            enableRemote(!clientRemote.connect());
                         }
                     }.start();
                 } else {
@@ -2355,17 +2350,7 @@ public class ActivityMain extends AppCompatActivity {
                         }
                         break;
                     case "fileInfoInt":
-                        //FIXME !!!! 0.5.0 !!!!  Get proper values !!
-                        displayedTrack = new Track(
-                                "albumArtist", "year", -1,
-                                -1, -1, -1,
-                                "bitRate", "format", -1, jObject.getInt("rating"),
-                                jObject.getString("title"),
-                                jObject.getString("album"),
-                                jObject.getString("artist"),
-                                jObject.getString("coverHash"),
-                                jObject.getString("genre"));
-                        //FIXME: Display user tags from remote file
+                        displayedTrack = new Track(jObject, new File(""), false);
                         //TODO: Display Playlist name and nbFiles
                         displayTrack(false);
                         break;
