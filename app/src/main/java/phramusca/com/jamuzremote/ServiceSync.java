@@ -68,7 +68,6 @@ public class ServiceSync extends ServiceBase {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         super.onStartCommand(intent, flags, startId);
-
         clientInfo = (ClientInfo)intent.getSerializableExtra("clientInfo");
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         if (powerManager != null) {
@@ -77,10 +76,9 @@ public class ServiceSync extends ServiceBase {
         }
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         if (wifiManager != null) {
-            wifiLock= wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL,"MyWifiWakelockTag");
+            wifiLock= wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF,TAG);
             wifiLock.acquire();
         }
-
         processSync = new ProcessSync("Thread.ServiceSync.processSync");
         processSync.start();
         return START_REDELIVER_INTENT;
@@ -148,7 +146,7 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationSync, "Interrupted.");
                 //stopSync also stop downloads if any so not stopping and letting user stop and restart
                 //stopSync(e.getLocalizedMessage(), 5000);
-            } catch (IOException | ServerException | JSONException e) {
+            } catch (OutOfMemoryError | Exception e) {
                 Log.e(TAG, "Error ProcessSync", e);
                 helperNotification.notifyBar(notificationSync, "ERROR: "+e.getLocalizedMessage(), 0, 0, false,
                         true, false, "ERROR: "+e.getLocalizedMessage());
@@ -453,7 +451,7 @@ public class ServiceSync extends ServiceBase {
             }
             pool.shutdown();
             try {
-                pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+                pool.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
                 return true;
             } catch (InterruptedException e) {
                 e.printStackTrace();

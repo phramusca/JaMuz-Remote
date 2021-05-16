@@ -669,7 +669,10 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        localTrack = new Track(0, getString(R.string.welcomeTitle),
+        //TODO: Use proper values
+        localTrack = new Track("albumArtist", "year", -1, -1,
+                -1, -1, "bitRate", "format", -1, 0,
+                getString(R.string.welcomeTitle),
                 getString(R.string.welcomeYear), getString(R.string.app_name),
                 "welcomeHash", //Warning: "welcomeHash" value has a meaning
                 "---");
@@ -2352,8 +2355,11 @@ public class ActivityMain extends AppCompatActivity {
                         }
                         break;
                     case "fileInfoInt":
+                        //FIXME !!!! 0.5.0 !!!!  Get proper values !!
                         displayedTrack = new Track(
-                                jObject.getInt("rating"),
+                                "albumArtist", "year", -1,
+                                -1, -1, -1,
+                                "bitRate", "format", -1, jObject.getInt("rating"),
                                 jObject.getString("title"),
                                 jObject.getString("album"),
                                 jObject.getString("artist"),

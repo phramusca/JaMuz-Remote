@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class MusicLibraryDb extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 4;
+    private static final int DB_VERSION = 5;
 
     static final String TABLE_TRACKS = "tracks";
     static final String COL_ID_REMOTE = "idFileRemote";
@@ -27,9 +27,38 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     static final String COL_SIZE = "size";
     static final String COL_LENGTH = "length";
 
+    static final String COL_ID_PATH = "idPath";
+    static final String COL_ALBUM_ARTIST = "albumArtist";
+    static final String COL_YEAR = "year";
+    static final String COL_TRACK_NO = "trackNo";
+    static final String COL_TRACK_TOTAL = "trackTotal";
+    static final String COL_DISC_NO = "discNo";
+    static final String COL_DISC_TOTAL = "discTotal";
+    static final String COL_BITRATE = "bitrate";
+    static final String COL_FORMAT = "format";
+    static final String COL_BPM = "bpm";
+    static final String COL_MODIF_DATE = "modifDate";
+    static final String COL_CHECKED_FLAG = "checkedFlag";
+    static final String COL_COPYRIGHT = "copyright";
+    static final String COL_COVER_HASH = "coverhash";
+
     private static final String CREATE_BDD = "CREATE TABLE " + TABLE_TRACKS + " ("
             + COL_ID_REMOTE + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COL_ID_SERVER + " INTEGER, "
+            + COL_ID_PATH + " INTEGER, "
+            + COL_ALBUM_ARTIST + " TEXT NOT NULL, "
+            + COL_YEAR + " TEXT NOT NULL, "
+            + COL_TRACK_NO + " INTEGER, "
+            + COL_TRACK_TOTAL + " INTEGER, "
+            + COL_DISC_NO + " INTEGER, "
+            + COL_DISC_TOTAL + " INTEGER, "
+            + COL_BITRATE + " TEXT NOT NULL, "
+            + COL_FORMAT + " TEXT NOT NULL, "
+            + COL_BPM + " TEXT NOT NULL, "
+            + COL_MODIF_DATE + " TEXT NOT NULL, "
+            + COL_CHECKED_FLAG + " TEXT NOT NULL, "
+            + COL_COPYRIGHT + " TEXT NOT NULL, "
+            + COL_COVER_HASH + " TEXT NOT NULL, "
             + COL_ARTIST + " TEXT NOT NULL, "
             + COL_TITLE + " TEXT NOT NULL, "
             + COL_ALBUM + " TEXT NOT NULL, "
