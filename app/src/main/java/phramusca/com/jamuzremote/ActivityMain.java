@@ -665,7 +665,7 @@ public class ActivityMain extends AppCompatActivity {
         });
 
         //TODO: Use proper values
-        localTrack = new Track("albumArtist", "year", -1, -1,
+        localTrack = new Track("lyrics", "albumArtist", "year", -1, -1,
                 -1, -1, "bitRate", "format", -1, 0,
                 getString(R.string.welcomeTitle),
                 getString(R.string.welcomeYear), getString(R.string.app_name),
@@ -2242,7 +2242,6 @@ public class ActivityMain extends AppCompatActivity {
             if(displayedTrack.getIdFileRemote()>=0) {
                 displayImage(displayedTrack.getArt());
                 bluetoothNotifyChange(AVRCP_META_CHANGED);
-
             } else if(displayedTrack.getCoverHash().equals("welcomeHash")) {
                 displayImage(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_startup_cover_foreground));
             } else {
@@ -2269,9 +2268,9 @@ public class ActivityMain extends AppCompatActivity {
 
     //Display cover from cache or ask for it
     private void displayCover() {
-        Bitmap bitmap = null;
         if (coverMap.containsKey(displayedTrack.getCoverHash())) {
-            bitmap = coverMap.get(displayedTrack.getCoverHash());
+            Bitmap bitmap = coverMap.get(displayedTrack.getCoverHash());
+            displayImage(bitmap);
         } else { //Ask cover
             int maxWidth = this.getWindow().getDecorView().getWidth();
             if(maxWidth<=0) {
@@ -2281,7 +2280,6 @@ public class ActivityMain extends AppCompatActivity {
                 clientRemote.send("sendCover"+maxWidth);
             }
         }
-        displayImage(bitmap);
     }
 
     private void displayImage(final Bitmap finalBitmap) {
