@@ -22,6 +22,20 @@ import java.util.Objects;
  */
 public class Track implements Serializable {
     private static final String TAG = Track.class.getName();
+
+    private int idPath = -1;
+    private String albumArtist = "";
+    private String year = "";
+    private int trackNo = -1;
+    private int trackTotal = -1;
+    private int discNo = -1;
+    private int discTotal = -1;
+    private String bitRate = "";
+    private String format;
+    private double BPM = -1;
+    private Date modifDate = new Date(0);
+    private String checkedFlag = "";
+    private String copyRight = "";
     private boolean isHistory=false;
     private boolean isUser=false;
     private int idFileRemote = -1;
@@ -50,16 +64,62 @@ public class Track implements Serializable {
     //TODO: coverHash should be changed together with thumb above
     private String coverHash="";
 
-    public Track(File getAppDataPath, int idFileRemote, int idFileServer, double rating, String title,
-                 String album, String artist, String coverHash, String path, String genre,
-                 Date addedDate, Date lastPlayed, int playCounter, String status, long size, int length) {
+    /** From database
+     * @param idPath -
+     * @param albumArtist -
+     * @param year -
+     * @param trackNo -
+     * @param trackTotal -
+     * @param discNo -
+     * @param discTotal -
+     * @param bitRate -
+     * @param format -
+     * @param bpm -
+     * @param modifDate
+     * @param checkedFlag
+     * @param copyRight
+     * @param getAppDataPath
+     * @param idFileRemote -
+     * @param idFileServer -
+     * @param rating -
+     * @param title -
+     * @param album -
+     * @param artist -
+     * @param coverHash
+     * @param path -
+     * @param genre -
+     * @param addedDate -
+     * @param lastPlayed -
+     * @param playCounter -
+     * @param status -
+     * @param size -
+     * @param length -
+     */
+    public Track(int idPath, String albumArtist, String year, int trackNo, int trackTotal,
+                 int discNo, int discTotal, String bitRate, String format, double bpm,
+                 Date modifDate, String checkedFlag, String copyRight, File getAppDataPath,
+                 int idFileRemote, int idFileServer, double rating, String title, String album,
+                 String artist, String coverHash, String path, String genre, Date addedDate,
+                 Date lastPlayed, int playCounter, String status, long size, int length) {
+        this.idPath = idPath;
+        this.albumArtist = albumArtist;
+        this.year = year;
+        this.trackNo = trackNo;
+        this.trackTotal = trackTotal;
+        this.discNo = discNo;
+        this.discTotal = discTotal;
+        this.bitRate = bitRate;
+        this.format = format;
+        this.BPM = bpm;
+        this.modifDate = modifDate;
+        this.checkedFlag = checkedFlag;
+        this.copyRight = copyRight;
         this.idFileRemote = idFileRemote;
         this.idFileServer = idFileServer;
         this.rating = rating;
         this.title = title;
         this.album = album;
         this.artist = artist;
-        this.coverHash = coverHash;
         this.genre=genre;
         this.path = path;
         this.length = length;
@@ -68,16 +128,45 @@ public class Track implements Serializable {
         } else {
             this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length()+1);
         }
-
         this.addedDate = addedDate;
         this.lastPlayed = lastPlayed;
         this.playCounter = playCounter;
         this.status = Status.valueOf(status);
         this.size = size;
+
+        //FIXME !!!! 0.5.0 !!!!  Change the way coverHash is used before setting it from database
+        //this.coverHash = coverHash;
     }
 
-    public Track(double rating, String title, String album,
-                 String artist, String coverHash, String genre) {
+    /** Track to display
+     * @param albumArtist -
+     * @param year -
+     * @param trackNo -
+     * @param trackTotal -
+     * @param discNo -
+     * @param discTotal -
+     * @param bitRate -
+     * @param format
+     * @param bpm -
+     * @param rating -
+     * @param title -
+     * @param album -
+     * @param artist -
+     * @param coverHash -
+     * @param genre -
+     */
+    public Track(String albumArtist, String year, int trackNo, int trackTotal, int discNo,
+                 int discTotal, String bitRate, String format, double bpm, double rating, String title,
+                 String album, String artist, String coverHash, String genre) {
+        this.albumArtist = albumArtist;
+        this.year = year;
+        this.trackNo = trackNo;
+        this.trackTotal = trackTotal;
+        this.discNo = discNo;
+        this.discTotal = discTotal;
+        this.bitRate = bitRate;
+        this.format = format;
+        BPM = bpm;
         this.rating = rating;
         this.title = title;
         this.album = album;
@@ -87,6 +176,10 @@ public class Track implements Serializable {
         source="Remote";
     }
 
+    /** Creates a LOCAL track
+     * @param getAppDataPath
+     * @param absolutePath
+     */
     public Track(File getAppDataPath, String absolutePath) {
         this.path = absolutePath;
         try {
@@ -143,6 +236,22 @@ public class Track implements Serializable {
                 length = file.getInt("length");
                 size = file.getLong("size");
                 status = Status.valueOf(file.getString("status"));
+                idPath = file.getInt("idPath");
+                albumArtist = file.getString("albumArtist");
+                year = file.getString("year");
+                trackNo = file.getInt("trackNo");
+                trackTotal = file.getInt("trackTotal");
+                discNo = file.getInt("discNo");
+                discTotal = file.getInt("discTotal");
+                bitRate = file.getString("bitRate");
+                format = file.getString("format");
+                BPM = file.getDouble("BPM");
+                modifDate = getDate(file, "modifDate");
+                checkedFlag = file.getString("checkedFlag");
+                copyRight = file.getString("copyRight");
+
+                //FIXME !!!! 0.5.0 !!!!  Change the way coverHash is used before setting it from server
+                //coverHash = file.getString("coverHash");
 
                 //FIXME !!!! 0.5.0 !!!!  Those are not set or not set properly in Server
                 Date ratingModifDate = getDate(file, "ratingModifDate");
@@ -163,24 +272,8 @@ public class Track implements Serializable {
 //            replayGainServer.setAlbumGain((float) replayGainJsonObject.getDouble("albumGain"));
                 //replayGain = replayGainServer;
 
-                //FIXME !!!! 0.5.0 !!!!  Change the way coverHash is used before setting it from server
-                //coverHash = file.getString("coverHash");
 
-                //FIXME !!!! 0.5.0 !!!!  Store and use unsused variables below !!!
-                // WARNING: Some do not have proper value on server !!
-                String year = file.getString("year");
-                int trackNo = file.getInt("trackNo");
-                int discNo = file.getInt("discNo");
-                String bitRate = file.getString("bitRate");
-                String checkedFlag = file.getString("checkedFlag");
-                String copyRight = file.getString("copyRight");
-                int discTotal = file.getInt("discTotal");
-                String format = file.getString("format");
-                Date modifDate = getDate(file, "modifDate");
-                int idPath = file.getInt("idPath");
-                String albumArtist = file.getString("albumArtist");
-                double BPM = file.getDouble("BPM");
-                int trackTotal = file.getInt("trackTotal");
+
             }
         } catch (JSONException ex) {
             Log.e(TAG, "Error creating new Track "+file, ex);
@@ -239,6 +332,106 @@ public class Track implements Serializable {
 
     public int getLength() {
         return length;
+    }
+
+    public Integer getIdPath() {
+        return idPath;
+    }
+
+    public void setIdPath(Integer idPath) {
+        this.idPath = idPath;
+    }
+
+    public String getAlbumArtist() {
+        return albumArtist;
+    }
+
+    public void setAlbumArtist(String albumArtist) {
+        this.albumArtist = albumArtist;
+    }
+
+    public String getYear() {
+        return year;
+    }
+
+    public void setYear(String year) {
+        this.year = year;
+    }
+
+    public Integer getTrackNo() {
+        return trackNo;
+    }
+
+    public void setTrackNo(Integer trackNo) {
+        this.trackNo = trackNo;
+    }
+
+    public Integer getTrackTotal() {
+        return trackTotal;
+    }
+
+    public void setTrackTotal(Integer trackTotal) {
+        this.trackTotal = trackTotal;
+    }
+
+    public Integer getDiscNo() {
+        return discNo;
+    }
+
+    public void setDiscNo(Integer discNo) {
+        this.discNo = discNo;
+    }
+
+    public Integer getDiscTotal() {
+        return discTotal;
+    }
+
+    public void setDiscTotal(Integer discTotal) {
+        this.discTotal = discTotal;
+    }
+
+    public String getBitrate() {
+        return bitRate;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
+    }
+
+    public Double getBPM() {
+        return BPM;
+    }
+
+    public void setBPM(Double bpm) {
+        this.BPM = bpm;
+    }
+
+    public Date getModifDate() {
+        return modifDate;
+    }
+
+    public void setModifDate(Date modifDate) {
+        this.modifDate = modifDate;
+    }
+
+    public String getCheckedFlag() {
+        return checkedFlag;
+    }
+
+    public void setCheckedFlag(String checkedFlag) {
+        this.checkedFlag = checkedFlag;
+    }
+
+    public String getCopyRight() {
+        return copyRight;
+    }
+
+    public void setCopyRight(String copyRight) {
+        this.copyRight = copyRight;
     }
 
     public enum Status {

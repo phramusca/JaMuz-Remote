@@ -20,25 +20,38 @@ import java.util.Map;
 
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ADDED_DATE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ALBUM;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ALBUM_ARTIST;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ARTIST;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_BITRATE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_BPM;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_CHECKED_FLAG;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_COPYRIGHT;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_COVER_HASH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_DISC_NO;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_DISC_TOTAL;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_FORMAT;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_GENRE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_PATH;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_REMOTE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_SERVER;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LAST_PLAYED;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LENGTH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_MODIF_DATE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PATH;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PLAY_COUNTER;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_SIZE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_STATUS;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TITLE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACK_NO;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACK_TOTAL;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_YEAR;
 import static phramusca.com.jamuzremote.MusicLibraryDb.TABLE_TRACKS;
 
 /**
  * Created by raph on 12/06/17.
  */
 public class MusicLibrary {
-
     SQLiteDatabase db;
     private final File getAppDataPath;
     private MusicLibraryDb musicLibraryDb;
@@ -105,15 +118,30 @@ public class MusicLibrary {
         List<Track> tracks = new ArrayList<>();
         Cursor cursor = null;
         try {
-            String query = "SELECT GROUP_CONCAT(tag.value) AS tags, tracks.* \n" +
-                    " FROM tracks \n" +
-                    " LEFT JOIN tagfile ON tracks.idFileRemote=tagfile.idFile \n" +
-                    " LEFT JOIN tag ON tag.id=tagfile.idTag \n"+
-                    " " + where + " \n" +
-                    " GROUP BY tracks.idFileRemote \n" +
-                    " " + having + " \n" +
-                    " " + order + " \n" +
-                    " " + (limit>0?"LIMIT "+limit:"");
+            String query = new StringBuilder()
+                    .append("SELECT GROUP_CONCAT(tag.value) AS tags, tracks.* \n")
+//                    .append(", ").append(COL_STATUS)
+//                    .append(", ").append(COL_LAST_PLAYED)
+//                    .append(", ").append(COL_ADDED_DATE)
+//                    .append(", ").append(COL_ALBUM)
+//                    .append(", ").append(COL_ARTIST)
+//                    .append(", ").append(COL_GENRE)
+//                    .append(", ").append(COL_ID_REMOTE)
+//                    .append(", ").append(COL_ID_SERVER)
+//                    .append(", ").append(COL_LENGTH)
+//                    .append(", ").append(COL_PATH)
+//                    .append(", ").append(COL_PLAY_COUNTER)
+//                    .append(", ").append(COL_RATING)
+//                    .append(", ").append(COL_SIZE)
+//                    .append(", ").append(COL_TITLE)
+                    .append(" FROM tracks \n")
+                    .append(" LEFT JOIN tagfile ON tracks.idFileRemote=tagfile.idFile \n")
+                    .append(" LEFT JOIN tag ON tag.id=tagfile.idTag \n")
+                    .append(" ").append(where).append(" \n")
+                    .append(" GROUP BY tracks.idFileRemote \n")
+                    .append(" ").append(having).append(" \n")
+                    .append(" ").append(order).append(" \n")
+                    .append(" ").append(limit > 0 ? "LIMIT " + limit : "").toString();
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[] { });
             tracks = getTracks(cursor);
@@ -368,6 +396,7 @@ public class MusicLibrary {
         values.put(COL_LAST_PLAYED, track.getFormattedLastPlayed());
         values.put(COL_PLAY_COUNTER, track.getPlayCounter());
         if(!statsOnly) {
+            //TODO: track.getIdFileServer() and track.getPath() are available if statsOnly
             values.put(COL_ID_SERVER, track.getIdFileServer());
             values.put(COL_PATH, track.getPath());
 
@@ -377,12 +406,25 @@ public class MusicLibrary {
             values.put(COL_SIZE, track.getSize());
             values.put(COL_LENGTH, track.getLength());
             values.put(COL_STATUS, track.getStatus().name());
+            values.put(COL_ID_PATH, track.getIdPath());
+            values.put(COL_ALBUM_ARTIST, track.getAlbumArtist());
+            values.put(COL_YEAR, track.getYear());
+            values.put(COL_TRACK_NO, track.getTrackNo());
+            values.put(COL_TRACK_TOTAL, track.getTrackTotal());
+            values.put(COL_DISC_NO, track.getDiscNo());
+            values.put(COL_DISC_TOTAL, track.getDiscTotal());
+            values.put(COL_BITRATE, track.getBitrate());
+            values.put(COL_FORMAT, track.getFormat());
+            values.put(COL_BPM, track.getBPM());
+            values.put(COL_MODIF_DATE, HelperDateTime.formatUTCtoSqlUTC(track.getModifDate()));
+            values.put(COL_CHECKED_FLAG, track.getCheckedFlag());
+            values.put(COL_COPYRIGHT, track.getCopyRight());
+            values.put(COL_COVER_HASH, track.getCoverHash());
         }
         return values;
     }
 
     private synchronized Track cursorToTrack(Cursor c){
-
         int idFileRemote = c.getInt(c.getColumnIndex(COL_ID_REMOTE));
         int idFileServer = c.getInt(c.getColumnIndex(COL_ID_SERVER));
         double rating=c.getDouble(c.getColumnIndex(COL_RATING));
@@ -394,15 +436,30 @@ public class MusicLibrary {
         int length=c.getInt(c.getColumnIndex(COL_LENGTH));
         String path=c.getString(c.getColumnIndex(COL_PATH));
         String genre=c.getString(c.getColumnIndex(COL_GENRE));
-
         Date addedDate=HelperDateTime.parseSqlUtc(
                 c.getString(c.getColumnIndex(COL_ADDED_DATE)));
         Date lastPlayed=HelperDateTime.parseSqlUtc(
                 c.getString(c.getColumnIndex(COL_LAST_PLAYED)));
         int playCounter=c.getInt(c.getColumnIndex(COL_PLAY_COUNTER));
-        return new Track(getAppDataPath, idFileRemote, idFileServer, rating, title, album, artist,
-                "coverHash", path, genre,
-                addedDate, lastPlayed, playCounter, status, size, length);
+        int idPath = c.getInt(c.getColumnIndex(COL_ID_PATH));
+        String albumArtist=c.getString(c.getColumnIndex(COL_ALBUM_ARTIST));
+        String year=c.getString(c.getColumnIndex(COL_YEAR));
+        int trackNo = c.getInt(c.getColumnIndex(COL_TRACK_NO));
+        int trackTotal = c.getInt(c.getColumnIndex(COL_TRACK_TOTAL));
+        int discNo = c.getInt(c.getColumnIndex(COL_DISC_NO));
+        int discTotal = c.getInt(c.getColumnIndex(COL_DISC_TOTAL));
+        String bitRate=c.getString(c.getColumnIndex(COL_BITRATE));
+        String format=c.getString(c.getColumnIndex(COL_FORMAT));
+        double bpm=c.getDouble(c.getColumnIndex(COL_BPM));
+        Date modifDate=HelperDateTime.parseSqlUtc(
+                c.getString(c.getColumnIndex(COL_MODIF_DATE)));
+        String checkedFlag=c.getString(c.getColumnIndex(COL_CHECKED_FLAG));
+        String copyRight=c.getString(c.getColumnIndex(COL_COPYRIGHT));
+        String coverHash=c.getString(c.getColumnIndex(COL_COVER_HASH));
+        return new Track(idPath, albumArtist, year, trackNo, trackTotal, discNo, discTotal, bitRate,
+                format, bpm, modifDate, checkedFlag, copyRight, getAppDataPath, idFileRemote,
+                idFileServer, rating, title, album, artist, coverHash, path, genre, addedDate,
+                lastPlayed, playCounter, status, size, length);
     }
 
     synchronized List<String> getGenres() {
@@ -632,13 +689,34 @@ public class MusicLibrary {
         List<Track> tracks = new ArrayList<>();
         Cursor cursor = null;
         try {
-            String query = "SELECT count(idFileRemote) AS playCounter, \n" +
-                    "round(avg(rating), 2) AS rating, \n" +
-                    "group_concat(distinct genre) AS genre, \n" +
-                    "group_concat(distinct artist) AS artist, \n" +
-                    "album, idFileRemote, idFileServer, title, addedDate, lastPlayed, status, size, path, length \n" +
-                    "FROM tracks \n" +
-                    "GROUP BY album ORDER BY rating DESC, playCounter DESC, album, artist LIMIT 20 OFFSET "+offset;
+
+            //FIXME !!!! 0.5.0 !!!! SELECT new fields !!
+            String query = new StringBuilder()
+                    //TODO: Use the COL_xxx everywhere !!
+                    .append("SELECT count(idFileRemote) AS playCounter, \n")
+                    .append("round(avg(rating), 2) AS rating, \n")
+                    .append("group_concat(distinct genre) AS genre, \n")
+                    .append("group_concat(distinct artist) AS artist, \n")
+                    .append("album, idFileRemote, idFileServer, title, addedDate, lastPlayed, \n")
+                    .append("status, size, path, length \n")
+                    .append(", ").append(COL_ID_PATH)
+                    .append(", ").append(COL_ALBUM_ARTIST)
+                    .append(", ").append(COL_YEAR)
+                    .append(", ").append(COL_TRACK_NO )
+                    .append(", ").append(COL_TRACK_TOTAL)
+                    .append(", ").append(COL_DISC_NO)
+                    .append(", ").append(COL_DISC_TOTAL)
+                    .append(", ").append(COL_BITRATE)
+                    .append(", ").append(COL_FORMAT)
+                    .append(", ").append(COL_BPM)
+                    .append(", ").append(COL_MODIF_DATE)
+                    .append(", ").append(COL_CHECKED_FLAG)
+                    .append(", ").append(COL_COPYRIGHT)
+                    .append(", ").append(COL_COVER_HASH)
+                    .append(" FROM tracks \n")
+                    .append(" GROUP BY album ORDER BY rating DESC, playCounter DESC, album, artist LIMIT 20 OFFSET ")
+                    .append(offset)
+                    .toString();
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[] { });
             tracks = getTracks(cursor);
