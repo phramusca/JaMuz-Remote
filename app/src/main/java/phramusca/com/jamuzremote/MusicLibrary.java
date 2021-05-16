@@ -104,7 +104,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    synchronized List<Track> getTracks(String where, String having, String order, int limit) {
+    List<Track> getTracks(String where, String having, String order, int limit) {
         List<Track> tracks = new ArrayList<>();
         Cursor cursor = null;
         try {
@@ -134,35 +134,7 @@ public class MusicLibrary {
         return tracks;
     }
 
-    synchronized List<Track> getTracks(Track.Status status) {
-        return getTracks(status, false);
-    }
-
-    synchronized List<Track> getTracks(Track.Status status, boolean negative) {
-        List<Track> tracks = new ArrayList<>();
-        Cursor cursor = null;
-        try {
-            String query = "SELECT GROUP_CONCAT(tag.value) AS tags, tracks.* \n" +
-                    " FROM tracks \n" +
-                    " LEFT JOIN tagfile ON tracks.idFileRemote=tagfile.idFile \n" +
-                    " LEFT JOIN tag ON tag.id=tagfile.idTag \n"+
-                    " WHERE " + COL_STATUS + " "+(negative?"!":"")+"= \""+status.name()+"\" \n"+
-                    " GROUP BY tracks.idFileRemote";
-            Log.i(TAG, query);
-            cursor = db.rawQuery(query, new String[] { });
-            tracks = getTracks(cursor);
-            Log.i(TAG, "getTracks(): "+tracks.size()+"//"+cursor.getCount());
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getTracks()", ex);
-        } finally {
-            if(cursor!=null) {
-                cursor.close();
-            }
-        }
-        return tracks;
-    }
-
-    public synchronized Triplet<Integer, Long, Long> getNb(String where, String having){
+    public Triplet<Integer, Long, Long> getNb(String where, String having){
         Cursor cursor=null;
         try {
             String query = "SELECT count(*), SUM(size) AS sizeTotal, SUM(length) AS lengthTotal \n" +
@@ -173,7 +145,6 @@ public class MusicLibrary {
                     " GROUP BY tracks.idFileRemote \n" +
                     " " + having + ")";
             cursor = db.rawQuery(query, new String [] {});
-
             if(cursor != null && cursor.moveToNext())
             {
                 int count = cursor.getInt(0);
@@ -351,7 +322,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    private synchronized List<Track> getTracks(Cursor cursor) {
+    private List<Track> getTracks(Cursor cursor) {
         List<Track> tracks = new ArrayList<>();
         if(cursor != null && cursor.moveToFirst())
         {
@@ -399,7 +370,7 @@ public class MusicLibrary {
         return values;
     }
 
-    private synchronized Track cursorToTrack(Cursor c){
+    private Track cursorToTrack(Cursor c){
         int idFileRemote = c.getInt(c.getColumnIndex(COL_ID_REMOTE));
         int idFileServer = c.getInt(c.getColumnIndex(COL_ID_SERVER));
         double rating=c.getDouble(c.getColumnIndex(COL_RATING));
@@ -437,7 +408,7 @@ public class MusicLibrary {
                 lastPlayed, playCounter, status, size, length);
     }
 
-    synchronized List<String> getGenres() {
+    List<String> getGenres() {
         List<String> genres = new ArrayList<>();
         Cursor cursor = db.rawQuery("SELECT id, value FROM genre ORDER BY value", new String [] {});
         if(cursor != null && cursor.moveToFirst())
@@ -453,7 +424,7 @@ public class MusicLibrary {
         return genres;
     }
 
-    public synchronized Map<Integer, String> getTags() {
+    public Map<Integer, String> getTags() {
         Map<Integer, String> tags = new LinkedHashMap<>();
         Cursor cursor = db.rawQuery("SELECT id, value FROM tag ORDER BY value", new String [] {});
         if(cursor != null && cursor.moveToFirst())
@@ -468,7 +439,7 @@ public class MusicLibrary {
         return tags;
     }
 
-    synchronized ArrayList<String> getTags(int idFile) {
+    ArrayList<String> getTags(int idFile) {
         ArrayList<String> tags = new ArrayList<>();
         Cursor cursor = db.rawQuery("SELECT value FROM tag T " +
                 "JOIN tagFile F ON T.id=F.idTag " +
@@ -565,7 +536,6 @@ public class MusicLibrary {
     }
 
     synchronized int updateGenre(Track track){
-
         try {
             ContentValues values = new ContentValues();
             values.put(COL_GENRE, track.getGenre());
@@ -618,7 +588,7 @@ public class MusicLibrary {
         return -1;
     }
 
-    synchronized boolean getArtist(String artist){
+    boolean getArtist(String artist){
         try (Cursor cursor = db.query("tracks", null, "artist=?",
                 new String[]{artist}, "", "", "")) {
             if (cursor.getCount() > 0) {
@@ -630,7 +600,7 @@ public class MusicLibrary {
         return false;
     }
 
-    synchronized boolean getAlbum(String album){
+    boolean getAlbum(String album){
         try (Cursor cursor = db.query("tracks", null, "album=?",
                 new String[]{album}, "", "", "")) {
             if (cursor.getCount() > 0) {
@@ -642,14 +612,14 @@ public class MusicLibrary {
         return false;
     }
 
-    synchronized List<Track> getAlbums(int offset) {
+    List<Track> getAlbums(int offset) {
         List<Track> tracks = new ArrayList<>();
         Cursor cursor = null;
         try {
             String query = "SELECT count(" + COL_ID_REMOTE + ") AS " + COL_PLAY_COUNTER + ", \n" +
                     "round(avg(" + COL_RATING + "), 2) AS " + COL_RATING + ", \n" +
                     "group_concat(distinct " + COL_GENRE + ") AS " + COL_GENRE + ", \n" +
-                    "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + ", \n" +
+                    "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + " \n" +
                     ", " + COL_ALBUM +
                     ", " + COL_ID_REMOTE +
                     ", " + COL_ID_SERVER +
