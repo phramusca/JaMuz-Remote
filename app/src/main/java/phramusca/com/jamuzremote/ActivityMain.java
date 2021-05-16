@@ -745,7 +745,7 @@ public class ActivityMain extends AppCompatActivity {
         spinnerGenre.setEnabled(false);
         displayedTrack.setGenre(genre);
         if (isRemoteConnected()) {
-            clientRemote.send("setGenre".concat(genre)); //FIXME: Check if JaMuz handles "setGenre". Do it if not
+            clientRemote.send("setGenre".concat(genre));
         } else {
             displayedTrack.updateGenre(genre);
             displayTrackDetails();

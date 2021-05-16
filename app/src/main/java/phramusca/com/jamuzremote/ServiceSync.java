@@ -387,7 +387,6 @@ public class ServiceSync extends ServiceBase {
         }
 
         private void notifyBarProgress(Track track) {
-
             if(!track.getStatus().equals(Track.Status.REC)) {
                 nbFailed++;
             } else {
@@ -423,6 +422,7 @@ public class ServiceSync extends ServiceBase {
                     runOnUiThread(() -> helperNotification.notifyBar(notificationDownload,
                             "Waiting " + sleepSeconds + "s before attempt " +
                                     (nbRetries + 1) + "/" + maxNbRetries));
+                    //noinspection BusyWait
                     sleep(sleepSeconds*1000);
                     checkAbort();
                 } while (nbRetries<maxNbRetries);
@@ -437,7 +437,7 @@ public class ServiceSync extends ServiceBase {
 
         private boolean startDownloads() {
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Starting download ... "));
-            pool = Executors.newFixedThreadPool(20); //TODO: Make number of threads an option
+            pool = Executors.newFixedThreadPool(5); //TODO: Make number of threads an option
             downloadServices= new ArrayList<>();
             nbFilesTotal=0;
             nbFiles=0;
