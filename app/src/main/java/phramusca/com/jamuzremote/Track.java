@@ -134,7 +134,7 @@ public class Track implements Serializable {
         this.status = Status.valueOf(status);
         this.size = size;
 
-        //FIXME !!!! 0.5.0 !!!!  Change the way coverHash is used before setting it from database
+        //FIXME !!!! 0.5.0 !!!! VERIFY usage of coverHash !!!!
         //this.coverHash = coverHash;
     }
 
@@ -206,7 +206,6 @@ public class Track implements Serializable {
 
     Track(JSONObject file, File getAppDataPath, boolean statsOnly) {
         try {
-
             addedDate = getDate(file, "addedDate");
             rating = file.getInt("rating");
             lastPlayed = getDate(file, "lastPlayed");
@@ -271,9 +270,6 @@ public class Track implements Serializable {
 //            replayGainServer.setTrackGain((float) replayGainJsonObject.getDouble("trackGain"));
 //            replayGainServer.setAlbumGain((float) replayGainJsonObject.getDouble("albumGain"));
                 //replayGain = replayGainServer;
-
-
-
             }
         } catch (JSONException ex) {
             Log.e(TAG, "Error creating new Track "+file, ex);
