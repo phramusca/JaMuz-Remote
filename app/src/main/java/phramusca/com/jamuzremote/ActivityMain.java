@@ -810,12 +810,11 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void toggleTag(String tag) {
-        if(!isRemoteConnected()) {
+        if (isRemoteConnected()) {
+            clientRemote.send("toggleTag".concat(tag));
+        } else {
             displayedTrack.toggleTag(tag);
             refreshLocalPlaylistSpinner(true);
-        } else {
-            //displayedTrack.toggleTag(buttonText); //TODO: Manage this too
-            //clientRemote.send("setTag".concat(String.valueOf(Math.round(rating)))); //TODO
         }
     }
 
@@ -2208,7 +2207,6 @@ public class ActivityMain extends AppCompatActivity {
 
     private void displayTrack(boolean forceReadTags) {
         if(displayedTrack!=null) {
-            displayedTrack.getTags(forceReadTags);
             runOnUiThread(() -> {
                 setTextView(textViewFileInfo1, trimTrailingWhitespace(Html.fromHtml(
                         "<html><b>"+
@@ -2228,7 +2226,7 @@ public class ActivityMain extends AppCompatActivity {
                 ratingBar.setEnabled(true);
                 setupSpinnerGenre(RepoGenres.get(), displayedTrack.getGenre());
                 //Display file tags
-                ArrayList<String> fileTags = displayedTrack.getTags(false);
+                ArrayList<String> fileTags = displayedTrack.getTags(forceReadTags);
                 if(fileTags==null) {
                     fileTags = new ArrayList<>();
                 }
