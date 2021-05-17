@@ -1502,10 +1502,7 @@ public class ActivityMain extends AppCompatActivity {
                             :displayedTrack.isUser()
                                 ?getString(R.string.queue_user)
                                 :localSelectedPlaylist.toString());
-            String msg = audioPlayer.play(displayedTrack);
-            if(!msg.equals("")) {
-                helperToast.toastLong(msg);
-            }
+            audioPlayer.play(displayedTrack, helperToast);
             displayedTrack.setHistory(true);
             return true;
         } else {

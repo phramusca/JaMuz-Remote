@@ -41,13 +41,14 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     static final String COL_BPM = "bpm";
     static final String COL_CHECKED_FLAG = "checkedFlag";
     static final String COL_COPYRIGHT = "copyright";
-
     static final String COL_COVER_HASH = "coverhash";
     static final String COL_MODIF_DATE = "modifDate";
     static final String COL_LYRICS = "lyrics";
     static final String COL_COMMENT = "comment";
     static final String COL_PATH_MODIF_DATE = "pathModifDate";
     static final String COL_PATH_MB_ID = "pathMbId";
+    static final String COL_TRACK_GAIN = "trackGain";
+    static final String COL_ALBUM_GAIN = "albumGain";
 
     private static final String CREATE_BDD = "CREATE TABLE " + TABLE_TRACKS + " ("
             + COL_ID_REMOTE + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -81,6 +82,8 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
             + COL_PATH_MODIF_DATE + " TEXT NOT NULL, "
             + COL_PATH_MB_ID + " TEXT NOT NULL, "
             + COL_COMMENT + " TEXT NOT NULL, "
+            + COL_TRACK_GAIN + " REAL, "
+            + COL_ALBUM_GAIN + " REAL, "
             + COL_PATH + " TEXT NOT NULL); ";
 
     //By default store in user internal folder
