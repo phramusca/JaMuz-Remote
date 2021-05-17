@@ -23,8 +23,7 @@ public class AudioPlayer {
         this.callback = callback;
     }
 
-    public String play(Track track) {
-        final String[] msg = {""};
+    public void play(Track track, HelperToast helperToast) {
         try {
             Log.i(TAG, "Playing "+track.getRelativeFullPath());
             enableControl=false;
@@ -36,7 +35,10 @@ public class AudioPlayer {
                 duration = mediaPlayer.getDuration();
                 mediaPlayer.start();
                 startTimer();
-                msg[0] = applyReplayGain(mediaPlayer, track);
+                String msg = applyReplayGain(mediaPlayer, track);
+                if(!msg.equals("")) {
+                    helperToast.toastLong(msg);
+                }
                 mediaPlayer.setOnCompletionListener(mediaPlayer -> callback.onPlayBackEnd());
                 mediaPlayer.setOnSeekCompleteListener(mediaPlayer -> startTimer());
                 enableControl=true;
@@ -50,7 +52,6 @@ public class AudioPlayer {
             file.delete();
             callback.onPlayBackEnd();
         }
-        return msg[0];
     }
 
     //TODO: Make Replaygain options.

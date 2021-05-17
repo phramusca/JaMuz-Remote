@@ -81,6 +81,14 @@ public class ReplayGain {
 		String MP3GAIN_UNDO; //mp3gain only, Not used
 		String REPLAYGAIN_REFERENCE_LOUDNESS; //Flac only, Not used
 
+		public GainValues() {
+		}
+
+		public GainValues(float trackGain, float albumGain) {
+			this.trackGain = trackGain;
+			this.albumGain = albumGain;
+		}
+
 		@Override
 		public String toString() {
 			return "albumGain=" + albumGain + ", trackGain=" + trackGain;

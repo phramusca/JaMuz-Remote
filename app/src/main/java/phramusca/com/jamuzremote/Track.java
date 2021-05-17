@@ -103,12 +103,14 @@ public class Track implements Serializable {
      * @param size -
      * @param length -
      */
-    public Track(String lyrics, Date pathModifDate, String pathMbId, String comment, int idPath, String albumArtist, String year, int trackNo, int trackTotal,
+    public Track(String lyrics, Date pathModifDate, String pathMbId, String comment, int idPath,
+                 String albumArtist, String year, int trackNo, int trackTotal,
                  int discNo, int discTotal, String bitRate, String format, double bpm,
                  Date modifDate, String checkedFlag, String copyRight, File getAppDataPath,
                  int idFileRemote, int idFileServer, double rating, String title, String album,
                  String artist, String coverHash, String path, String genre, Date addedDate,
-                 Date lastPlayed, int playCounter, String status, long size, int length) {
+                 Date lastPlayed, int playCounter, String status, long size, int length,
+                 float trackGain, float albumGain) {
         this.lyrics = lyrics;
         this.pathModifDate = pathModifDate;
         this.pathMbId = pathMbId;
@@ -146,6 +148,7 @@ public class Track implements Serializable {
         this.status = Status.valueOf(status);
         this.size = size;
         this.coverHash = coverHash;
+        this.replayGain =new ReplayGain.GainValues(trackGain, albumGain);
     }
 
     /** Track to display
@@ -266,13 +269,11 @@ public class Track implements Serializable {
                 pathModifDate = getDate(file, "pathModifDate");
                 pathMbId = file.getString("pathMbid");
                 comment = file.getString("comment");
-
-                //FIXME !!!! 0.5.0 !!!! Replaygain
-//            JSONObject replayGainJsonObject = file.getJSONObject("replaygain");
-//            ReplayGain.GainValues replayGainServer = new ReplayGain.GainValues();
-//            replayGainServer.setTrackGain((float) replayGainJsonObject.getDouble("trackGain"));
-//            replayGainServer.setAlbumGain((float) replayGainJsonObject.getDouble("albumGain"));
-                //replayGain = replayGainServer;
+                JSONObject replayGainJsonObject = file.getJSONObject("replaygain");
+                ReplayGain.GainValues replayGainServer = new ReplayGain.GainValues();
+                replayGainServer.setTrackGain((float) replayGainJsonObject.getDouble("trackGain"));
+                replayGainServer.setAlbumGain((float) replayGainJsonObject.getDouble("albumGain"));
+                replayGain = replayGainServer;
             }
         } catch (JSONException ex) {
             Log.e(TAG, "Error creating new Track "+file, ex);

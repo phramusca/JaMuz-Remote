@@ -21,6 +21,7 @@ import java.util.Map;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ADDED_DATE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ALBUM;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ALBUM_ARTIST;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ALBUM_GAIN;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ARTIST;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_BITRATE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_BPM;
@@ -47,6 +48,7 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_SIZE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_STATUS;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TITLE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACK_GAIN;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACK_NO;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACK_TOTAL;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_YEAR;
@@ -346,10 +348,8 @@ public class MusicLibrary {
         values.put(COL_LAST_PLAYED, track.getFormattedLastPlayed());
         values.put(COL_PLAY_COUNTER, track.getPlayCounter());
         if(!statsOnly) {
-            //TODO: track.getIdFileServer() and track.getPath() are available if statsOnly
             values.put(COL_ID_SERVER, track.getIdFileServer());
             values.put(COL_PATH, track.getPath());
-
             values.put(COL_TITLE, track.getTitle());
             values.put(COL_ALBUM, track.getAlbum());
             values.put(COL_ARTIST, track.getArtist());
@@ -370,11 +370,13 @@ public class MusicLibrary {
             values.put(COL_CHECKED_FLAG, track.getCheckedFlag());
             values.put(COL_COPYRIGHT, track.getCopyRight());
             values.put(COL_COVER_HASH, track.getCoverHash());
-
             values.put(COL_LYRICS, track.getLyrics());
             values.put(COL_PATH_MODIF_DATE, HelperDateTime.formatUTCtoSqlUTC(track.getPathModifDate()));
             values.put(COL_PATH_MB_ID, track.getPathMbId());
             values.put(COL_COMMENT, track.getComment());
+            ReplayGain.GainValues gainValues = track.getReplayGain(false);
+            values.put(COL_TRACK_GAIN, gainValues.getTrackGain());
+            values.put(COL_ALBUM_GAIN, gainValues.getAlbumGain());
         }
         return values;
     }
@@ -417,6 +419,8 @@ public class MusicLibrary {
                 c.getString(c.getColumnIndex(COL_PATH_MODIF_DATE)));
         String pathMbid=c.getString(c.getColumnIndex(COL_PATH_MB_ID));
         String comment=c.getString(c.getColumnIndex(COL_COMMENT));
+        float trackGain=c.getFloat(c.getColumnIndex(COL_TRACK_GAIN));
+        float albumGain=c.getFloat(c.getColumnIndex(COL_ALBUM_GAIN));
 
         //FIXME: Use below in sync or merge processes (DO NOT store in db, or values from remote)
 //        boolean deleted=c.getString(c.getColumnIndex(COL_));
@@ -428,7 +432,8 @@ public class MusicLibrary {
         return new Track(lyrics, pathModifDate, pathMbid, comment, idPath, albumArtist, year,
                 trackNo, trackTotal, discNo, discTotal, bitRate, format, bpm, modifDate, checkedFlag,
                 copyRight, getAppDataPath, idFileRemote, idFileServer, rating, title, album, artist,
-                coverHash, path, genre, addedDate, lastPlayed, playCounter, status, size, length);
+                coverHash, path, genre, addedDate, lastPlayed, playCounter, status, size, length,
+                trackGain, albumGain);
     }
 
     List<String> getGenres() {
@@ -671,9 +676,12 @@ public class MusicLibrary {
                     ", " + COL_PATH_MODIF_DATE +
                     ", " + COL_PATH_MB_ID +
                     ", " + COL_COMMENT +
+                    ", " + COL_TRACK_GAIN +
+                    ", " + COL_ALBUM_GAIN +
                     " FROM tracks \n" +
                     " GROUP BY " + COL_ALBUM + " " +
-                    " ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, " + COL_ALBUM + ", " + COL_ARTIST + "" +
+                    " ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, "
+                        + COL_ALBUM + ", " + COL_ARTIST + "" +
                     " LIMIT 20 OFFSET " +
                     offset;
             Log.i(TAG, query);
