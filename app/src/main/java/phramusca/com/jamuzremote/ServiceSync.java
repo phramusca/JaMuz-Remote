@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,7 +28,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
+import okhttp3.Response;
 import okio.BufferedSink;
 import okio.Okio;
 
@@ -56,8 +57,6 @@ public class ServiceSync extends ServiceBase {
         notificationSync = new Notification(this, NotificationId.SYNC, "Sync");
         notificationDownload= new Notification(this, NotificationId.SYNC_DOWN, "Sync");
         clientDownload = new OkHttpClient.Builder()
-                //FIXME: Add and interceptor for file downloads, but need to handle better retries and notifications since it is shared among X instances
-                //.addInterceptor(new RetryInterceptor(5, 5, helperNotification, notificationDownload))
                 .readTimeout(60, TimeUnit.SECONDS)
                 .build();
         userStopReceiver=new UserStopServiceReceiver();
@@ -93,14 +92,13 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void run() {
             try {
-                checkAbort();
-
                 helperNotification.notifyBar(notificationSync, getString(R.string.connecting));
+                checkAbort();
                 clientInfo.getBodyString("connect", client);
 
                 helperNotification.notifyBar(notificationSync, getString(R.string.readingList));
-                RepoSync.read();
                 checkAbort();
+                RepoSync.read();
 
                 checkAbort();
                 getTags();
@@ -112,33 +110,33 @@ public class ServiceSync extends ServiceBase {
                 requestMerge();
 
                 checkAbort();
-                //Check NEW files and start downloads
                 checkFiles(Track.Status.NEW);
+
                 checkAbort();
                 startDownloads();
 
-                //Check INFO files
                 checkFiles(Track.Status.INFO);
+
+                //Remove files in db but not received from server
+                helperNotification.notifyBar(notificationSync, "Removing deleted files...");
+                List<Track> trackList = RepoSync.getNotSyncedList();
+                int nbTracks = trackList.size();
+                int i=0;
+                for(Track track : trackList) {
+                    checkAbort();
+                    i++;
+                    helperNotification.notifyBar(notificationSync, "Removing deleted files", 10, i, nbTracks);
+                    File file = new File(track.getPath());
+                    file.delete();
+                    HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
+                }
+
+                //TODO: This should not be needed !! Did I only needed to add this due to to bugs during dev ?
+                helperNotification.notifyBar(notificationSync, "Deleting unwanted files...");
+                newAndRec = RepoSync.getNewAndRec();
+                deleteFilesNotInDb(getAppDataPath);
+
                 runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Check complete.", 5000));
-
-                //FIXME: Remove tracks that have been removed from server // Do this different as filesMap gets too big an crash application !!
-                //A/art: art/runtime/indirect_reference_table.cc:145] JNI ERROR (app bug): weak global reference table overflow (max=51200)
-                //    art/runtime/indirect_reference_table.cc:145] weak global reference table dump:
-                //    art/runtime/indirect_reference_table.cc:145]   Last 10 entries (of 51200):
-                //    art/runtime/indirect_reference_table.cc:145]     51199: 0x29a78570 phramusca.com.jamuzremote.Track
-
-                //Remove tracks that have been removed from server
-//                int i=0;
-//                for(Track track : RepoSync.getList()) {
-//                    checkAbort();
-//                    helperNotification.notifyBar(notificationSync,
-//                            "Checking deleted files ...", 50, i, nbFilesServer);
-//                    if(!filesMap.containsKey(track.getIdFileServer())) {
-//                        File file = new File(track.getPath());
-//                        file.delete();
-//                        HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
-//                    }
-//                }
                 checkCompleted();
 
             } catch (InterruptedException e) {
@@ -155,9 +153,55 @@ public class ServiceSync extends ServiceBase {
             }
         }
 
+        private List<Track> newAndRec;
+        private int nbFilesTotal=0;
+        private int nbFilesDeleted=0;
+        private int nbFilesTreated=0;
+
+        private void deleteFilesNotInDb(File path) throws InterruptedException {
+            checkAbort();
+            if (path.isDirectory()) {
+                File[] files = path.listFiles();
+                if (files != null) {
+                    if(files.length>0) {
+                        nbFilesTotal+=files.length;
+                        for (File file : files) {
+                            checkAbort();
+                            if (file.isDirectory()) {
+                                nbFilesTotal--;
+                                deleteFilesNotInDb(file);
+                            }
+                            else {
+                                nbFilesTreated++;
+                                if (!checkFile(file.getAbsolutePath())) {
+                                    file.delete();
+                                    nbFilesDeleted++;
+                                }
+                                helperNotification.notifyBar(notificationSync,
+                                        "Deleted " + nbFilesDeleted + " unwanted files",
+                                        10, nbFilesTreated, nbFilesTotal);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private boolean checkFile(String absolutePath) {
+            ListIterator<Track> trackListIterator = newAndRec.listIterator();
+            while (trackListIterator.hasNext()) {
+                Track next = trackListIterator.next();
+                if(next.getPath().equals(absolutePath)) {
+                    trackListIterator.remove();
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private void checkFiles(Track.Status status)
                 throws InterruptedException, JSONException, ServerException, IOException {
-            int nbFilesInBatch=2500;
+            int nbFilesInBatch=500;
             int nbFilesServer = getFilesCount(status);
             String msg = "Checking "+status.name().toLowerCase()+" files ...";
             helperNotification.notifyBar(notificationSync, msg);
@@ -168,39 +212,44 @@ public class ServiceSync extends ServiceBase {
                     int j =0;
                     for (Track trackServer:filesMapBatch.values()) {
                         checkAbort();
+                        helperNotification.notifyBar(notificationSync, msg, 50, i+j, nbFilesServer);
                         j++;
-                        helperNotification.notifyBar(notificationSync, msg, 10, i+j, nbFilesServer);
                         Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
                         if(trackRemote!=null) {
-                            //FIXME: Update track (not statistics) if it has changed on server (format, filename, metadata ...) other than only status
-                            // TODO: We could also replace merge (and so simplify process on JaMuz Server)
-                            //      But is it really worth it ? Lot of work, no more logs (and backups) on server side (or need to reimplement), need to duplicate comparison algo, ...
-                            switch (trackServer.getStatus()) {
-                                case INFO:
-                                    if(!trackRemote.getStatus().equals(Track.Status.INFO)) {
-                                        File file = new File(trackRemote.getPath());
-                                        file.delete();
-                                        HelperLibrary.musicLibrary.updateStatus(trackServer);
-                                        RepoSync.updateStatus(trackServer);
-                                    }
-                                    break;
-                                case NEW:
-                                    if(! (trackRemote.getStatus().equals(Track.Status.REC)
-                                            || trackRemote.getStatus().equals(Track.Status.NEW))) {
-                                        HelperLibrary.musicLibrary.updateStatus(trackServer);
-                                        RepoSync.updateStatus(trackServer);
-                                    }
-                                    break;
+                            //FIXME: Update track for other changes too (format, metadata ...)
+                            if(trackServer.getSize()!=trackRemote.getSize()
+                                    || !trackServer.getRelativeFullPath().equals(trackRemote.getRelativeFullPath())) {
+                                File file = new File(trackRemote.getPath());
+                                file.delete();
+                                trackServer.setIdFileRemote(trackRemote.getIdFileRemote());
+                                HelperLibrary.musicLibrary.updateTrack(trackServer, false);
+
+                            } else {
+                                switch (trackServer.getStatus()) {
+                                    case INFO:
+                                        if(!trackRemote.getStatus().equals(Track.Status.INFO)) {
+                                            File file = new File(trackRemote.getPath());
+                                            file.delete();
+                                            HelperLibrary.musicLibrary.updateStatus(trackServer);
+                                        }
+                                        break;
+                                    case NEW:
+                                        if(trackRemote.getStatus().equals(Track.Status.REC)) {
+                                            trackServer.setStatus(Track.Status.REC);
+                                        } else if(!trackRemote.getStatus().equals(Track.Status.NEW)) {
+                                            HelperLibrary.musicLibrary.updateStatus(trackServer);
+                                        }
+                                        break;
+                                }
                             }
                         } else {
                             if(trackServer.getStatus().equals(Track.Status.NEW) && RepoSync.checkFile(trackServer)) {
                                 trackServer.setStatus(Track.Status.REC);
                             }
                             HelperLibrary.musicLibrary.insertTrack(trackServer);
-                            RepoSync.updateStatus(trackServer);
                         }
+                        RepoSync.update(trackServer);
                     }
-                    checkAbort();
                 }
             }
         }
@@ -211,20 +260,48 @@ public class ServiceSync extends ServiceBase {
 //                    fromJson.chromaprint=chromaprint;
 
         private Map<Integer, Track> getFiles(int idFrom, int nbFilesInBatch, Track.Status status) throws IOException, ServerException, JSONException {
-            RetryInterceptor interceptor = new RetryInterceptor(5,5, helperNotification, notificationSync);
-            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
-            HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/"+status.name().toLowerCase());
-            urlBuilder.addQueryParameter("idFrom", String.valueOf(idFrom));
-            urlBuilder.addQueryParameter("nbFilesInBatch", String.valueOf(nbFilesInBatch));
-            String body = clientInfo.getBodyString(urlBuilder, client);
-            final JSONObject jObject = new JSONObject(body);
-            Map<Integer, Track> newTracks = new LinkedHashMap<>();
-            JSONArray files = (JSONArray) jObject.get("files");
-            for (int i = 0; i < files.length(); i++) {
-                Track fileReceived = new Track(
-                        (JSONObject) files.get(i),
-                        getAppDataPath, false);
-                newTracks.put(fileReceived.getIdFileServer(), fileReceived);
+
+            //Interceptor cannot catch .body().string() network errors, so looping here instead
+            //RetryInterceptor interceptor = new RetryInterceptor(5,5, helperNotification, notificationSync);
+            //OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+            int nbRetries = 0;
+            int sleepSeconds=5;
+            int maxNbRetries=20;
+            Map<Integer, Track> newTracks = null;
+            String msg = "";
+            do {
+                nbRetries++;
+                try {
+                    HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/"+status.name().toLowerCase());
+                    urlBuilder.addQueryParameter("idFrom", String.valueOf(idFrom));
+                    urlBuilder.addQueryParameter("nbFilesInBatch", String.valueOf(nbFilesInBatch));
+                    //FIXME: Move this retry process to clientInfo so that it can benefit to all calls to .string() [what about .source() ?]
+                    String body = clientInfo.getBodyString(urlBuilder, client);
+                    final JSONObject jObject = new JSONObject(body);
+                    JSONArray files = (JSONArray) jObject.get("files");
+                    newTracks = new LinkedHashMap<>();
+                    for (int i = 0; i < files.length(); i++) {
+                        Track fileReceived = new Track(
+                                (JSONObject) files.get(i),
+                                getAppDataPath, false);
+                        fileReceived.setSync();
+                        newTracks.put(fileReceived.getIdFileServer(), fileReceived);
+                    }
+                    break;
+                } catch (OutOfMemoryError | Exception e) {
+                    msg = e.getLocalizedMessage();
+                    Log.d(TAG, "ERROR: "+ msg);
+                    helperNotification.notifyBar(notificationSync, sleepSeconds + "s before " +
+                            (nbRetries + 1) + "/" + maxNbRetries + " : " + msg);
+                    try {
+                        sleep(sleepSeconds*1000);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            } while (nbRetries < maxNbRetries-1);
+            if(newTracks==null) {
+                throw new IOException(msg);
             }
             return newTracks;
         }
@@ -425,7 +502,7 @@ public class ServiceSync extends ServiceBase {
                     //noinspection BusyWait
                     sleep(sleepSeconds*1000);
                     checkAbort();
-                } while (nbRetries<maxNbRetries);
+                } while (nbRetries<maxNbRetries-1);
             } catch (InterruptedException e) {
                 Log.i(TAG, "ProcessDownload received InterruptedException");
             }
@@ -494,27 +571,48 @@ public class ServiceSync extends ServiceBase {
                 checkAbort();
                 if(clientDownload==null) {
                     clientDownload = new OkHttpClient.Builder()
-                            //FIXME: Add and interceptor for file downloads, but need to handle better retries and notifications since it is shared among X instances
-                            //.addInterceptor(new RetryInterceptor(5, 5, helperNotification, notificationDownload))
                             .readTimeout(60, TimeUnit.SECONDS)
                             .build();
                 }
                 HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("download");
                 urlBuilder.addQueryParameter("id", String.valueOf(track.getIdFileServer()));
-                ResponseBody body = clientInfo.getBody(urlBuilder, client);
-                if (destinationFile.exists()) {
-                    boolean fileDeleted = destinationFile.delete();
-                    Log.v("fileDeleted", fileDeleted + "");
+                Request request = clientInfo.getRequestBuilder(urlBuilder).build();
+                Response response = clientDownload.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    if (destinationFile.exists()) {
+                        boolean fileDeleted = destinationFile.delete();
+                        Log.v("fileDeleted", fileDeleted + "");
+                    }
+                    boolean fileCreated = destinationFile.createNewFile();
+                    Log.v("fileCreated", fileCreated + "");
+                    BufferedSink sink = Okio.buffer(Okio.sink(destinationFile));
+                    sink.writeAll(response.body().source());
+                    response.body().source().close();
+                    sink.close();
+                    RepoSync.checkReceivedFile(track);
+                } else {
+                    switch (response.code()) {
+                        case 301:
+                            throw new ServerException(request.header("api-version")+" not supported. "+response.body().string());
+                        case 404: // File does not exist on server
+                            HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
+                            track.setStatus(Track.Status.REC); //To be ignored by current sync process
+                            RepoSync.update(track);
+                            break;
+                        default:
+                            throw new ServerException(response.code()+": "+response.message());
+                    }
                 }
-                boolean fileCreated = destinationFile.createNewFile();
-                Log.v("fileCreated", fileCreated + "");
-                BufferedSink sink = Okio.buffer(Okio.sink(destinationFile));
-                sink.writeAll(body.source());
-                sink.close();
-                RepoSync.checkReceivedFile(track);
             } catch (InterruptedException e) {
                 Log.w(TAG, "Download interrupted for "+track.getRelativeFullPath(), e);
-            } catch (Exception e) {
+            } catch (IOException e) {
+                Log.e(TAG, "Error downloading "+track.getRelativeFullPath(), e);
+                if(e.getMessage().contains("ENOSPC")) {
+                    //FIXME: Stop downloads if java.io.IOException: write failed: ENOSPC (No space left on device)
+                    // BUT only if sync check has completed as it can free some space
+                }
+            }
+            catch (Exception e) {
                 Log.e(TAG, "Error downloading "+track.getRelativeFullPath(), e);
             }
             callback.setStatus(track);

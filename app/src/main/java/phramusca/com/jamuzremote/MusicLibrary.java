@@ -111,10 +111,20 @@ public class MusicLibrary {
     }
 
     List<Track> getTracks(String where, String having, String order, int limit) {
+        return getTracks(false, where, having, order,limit);
+    }
+
+    List<Track> getTracks(boolean statsOnly, String where, String having, String order, int limit) {
         List<Track> tracks = new ArrayList<>();
         Cursor cursor = null;
         try {
-            String query = "SELECT GROUP_CONCAT(tag.value) AS tags, tracks.* \n" +
+            String select = "GROUP_CONCAT(tag.value) AS tags, tracks.*";
+            if(statsOnly) {
+                select = " tracks.idFileRemote, tracks.idFileServer, tracks.rating, tracks.addedDate, " +
+                        " tracks.lastPlayed, tracks.playCounter, tracks.genre, tracks.path, tracks.size," +
+                        " tracks.status, tracks.length, tracks.idPath";
+            }
+            String query = "SELECT "+select+" \n" +
                     " FROM tracks \n" +
                     " LEFT JOIN tagfile ON tracks.idFileRemote=tagfile.idFile \n" +
                     " LEFT JOIN tag ON tag.id=tagfile.idTag \n" +
@@ -125,7 +135,7 @@ public class MusicLibrary {
                     " " + (limit > 0 ? "LIMIT " + limit : "");
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[] { });
-            tracks = getTracks(cursor);
+            tracks = getTracks(cursor, statsOnly);
             if(limit>0) {
                 Collections.shuffle(tracks);
             }
@@ -328,12 +338,12 @@ public class MusicLibrary {
         return -1;
     }
 
-    private List<Track> getTracks(Cursor cursor) {
+    private List<Track> getTracks(Cursor cursor, boolean statsOnly) {
         List<Track> tracks = new ArrayList<>();
         if(cursor != null && cursor.moveToFirst())
         {
             do {
-                Track track = cursorToTrack(cursor);
+                Track track = cursorToTrack(cursor, statsOnly);
                 tracks.add(track);
             } while(cursor.moveToNext());
         }
@@ -381,13 +391,10 @@ public class MusicLibrary {
         return values;
     }
 
-    private Track cursorToTrack(Cursor c){
+    private Track cursorToTrack(Cursor c, boolean statsOnly){
         int idFileRemote = c.getInt(c.getColumnIndex(COL_ID_REMOTE));
         int idFileServer = c.getInt(c.getColumnIndex(COL_ID_SERVER));
         double rating=c.getDouble(c.getColumnIndex(COL_RATING));
-        String title=c.getString(c.getColumnIndex(COL_TITLE));
-        String album=c.getString(c.getColumnIndex(COL_ALBUM));
-        String artist=c.getString(c.getColumnIndex(COL_ARTIST));
         String status=c.getString(c.getColumnIndex(COL_STATUS));
         long size=c.getLong(c.getColumnIndex(COL_SIZE));
         int length=c.getInt(c.getColumnIndex(COL_LENGTH));
@@ -399,28 +406,56 @@ public class MusicLibrary {
                 c.getString(c.getColumnIndex(COL_LAST_PLAYED)));
         int playCounter=c.getInt(c.getColumnIndex(COL_PLAY_COUNTER));
         int idPath = c.getInt(c.getColumnIndex(COL_ID_PATH));
-        String albumArtist=c.getString(c.getColumnIndex(COL_ALBUM_ARTIST));
-        String year=c.getString(c.getColumnIndex(COL_YEAR));
-        int trackNo = c.getInt(c.getColumnIndex(COL_TRACK_NO));
-        int trackTotal = c.getInt(c.getColumnIndex(COL_TRACK_TOTAL));
-        int discNo = c.getInt(c.getColumnIndex(COL_DISC_NO));
-        int discTotal = c.getInt(c.getColumnIndex(COL_DISC_TOTAL));
-        String bitRate=c.getString(c.getColumnIndex(COL_BITRATE));
-        String format=c.getString(c.getColumnIndex(COL_FORMAT));
-        double bpm=c.getDouble(c.getColumnIndex(COL_BPM));
-        Date modifDate=HelperDateTime.parseSqlUtc(
-                c.getString(c.getColumnIndex(COL_MODIF_DATE)));
-        String checkedFlag=c.getString(c.getColumnIndex(COL_CHECKED_FLAG));
-        String copyRight=c.getString(c.getColumnIndex(COL_COPYRIGHT));
-        String coverHash=c.getString(c.getColumnIndex(COL_COVER_HASH));
 
-        String lyrics=c.getString(c.getColumnIndex(COL_LYRICS));
-        Date pathModifDate=HelperDateTime.parseSqlUtc(
-                c.getString(c.getColumnIndex(COL_PATH_MODIF_DATE)));
-        String pathMbid=c.getString(c.getColumnIndex(COL_PATH_MB_ID));
-        String comment=c.getString(c.getColumnIndex(COL_COMMENT));
-        float trackGain=c.getFloat(c.getColumnIndex(COL_TRACK_GAIN));
-        float albumGain=c.getFloat(c.getColumnIndex(COL_ALBUM_GAIN));
+        String title="";
+        String album="";
+        String artist="";
+        String albumArtist="";
+        String year="";
+        int trackNo = -1;
+        int trackTotal = -1;
+        int discNo = -1;
+        int discTotal = -1;
+        String bitRate="";
+        String format="";
+        double bpm=-1;
+        Date modifDate=new Date(0);
+        String checkedFlag="";
+        String copyRight="";
+        String coverHash="";
+        String lyrics="";
+        Date pathModifDate=new Date(0);
+        String pathMbid="";
+        String comment="";
+        float trackGain=-1;
+        float albumGain=-1;
+
+        if(!statsOnly) {
+            title=c.getString(c.getColumnIndex(COL_TITLE));
+            album=c.getString(c.getColumnIndex(COL_ALBUM));
+            artist=c.getString(c.getColumnIndex(COL_ARTIST));
+            albumArtist=c.getString(c.getColumnIndex(COL_ALBUM_ARTIST));
+            year=c.getString(c.getColumnIndex(COL_YEAR));
+            trackNo = c.getInt(c.getColumnIndex(COL_TRACK_NO));
+            trackTotal = c.getInt(c.getColumnIndex(COL_TRACK_TOTAL));
+            discNo = c.getInt(c.getColumnIndex(COL_DISC_NO));
+            discTotal = c.getInt(c.getColumnIndex(COL_DISC_TOTAL));
+            bitRate=c.getString(c.getColumnIndex(COL_BITRATE));
+            format=c.getString(c.getColumnIndex(COL_FORMAT));
+            bpm=c.getDouble(c.getColumnIndex(COL_BPM));
+            modifDate=HelperDateTime.parseSqlUtc(
+                    c.getString(c.getColumnIndex(COL_MODIF_DATE)));
+            checkedFlag=c.getString(c.getColumnIndex(COL_CHECKED_FLAG));
+            copyRight=c.getString(c.getColumnIndex(COL_COPYRIGHT));
+            coverHash=c.getString(c.getColumnIndex(COL_COVER_HASH));
+            lyrics=c.getString(c.getColumnIndex(COL_LYRICS));
+            pathModifDate=HelperDateTime.parseSqlUtc(
+                    c.getString(c.getColumnIndex(COL_PATH_MODIF_DATE)));
+            pathMbid=c.getString(c.getColumnIndex(COL_PATH_MB_ID));
+            comment=c.getString(c.getColumnIndex(COL_COMMENT));
+            trackGain=c.getFloat(c.getColumnIndex(COL_TRACK_GAIN));
+            albumGain=c.getFloat(c.getColumnIndex(COL_ALBUM_GAIN));
+        }
 
         //FIXME: Use below in sync or merge processes (DO NOT store in db, or values from remote)
 //        boolean deleted=c.getString(c.getColumnIndex(COL_));
@@ -686,7 +721,7 @@ public class MusicLibrary {
                     offset;
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[] { });
-            tracks = getTracks(cursor);
+            tracks = getTracks(cursor, false);
             Log.i(TAG, "getAlbums(): "+tracks.size()+"//"+cursor.getCount());
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "getAlbums()", ex);
