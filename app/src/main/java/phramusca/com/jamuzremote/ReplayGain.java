@@ -199,7 +199,7 @@ public class ReplayGain {
 		}
 	}
 
-    //FIXME: Read FLAC ReplayGain
+    //TODO: Read FLAC ReplayGain (no more urgent since getting replayGain from server)
     //=> using jaudiotagger 2.2.4 instead of 2.2.6 to avoid : java.lang.NoSuchMethodError: ...
     //https://bitbucket.org/ijabz/jaudiotagger/issues/149/some-nio-classes-are-unavailable-while
     //=> but 2.2.4 does not (seem to) read FLAC replaygain

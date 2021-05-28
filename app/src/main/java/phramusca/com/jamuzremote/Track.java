@@ -41,6 +41,7 @@ public class Track implements Serializable {
     private String copyRight = "";
     private boolean isHistory=false;
     private boolean isUser=false;
+    private boolean isSync=false;
     private int idFileRemote = -1;
     private int idFileServer = -1;
     private String artist = "";
@@ -181,14 +182,14 @@ public class Track implements Serializable {
         this.discTotal = discTotal;
         this.bitRate = bitRate;
         this.format = format;
-        BPM = bpm;
+        this.BPM = bpm;
         this.rating = rating;
         this.title = title;
         this.album = album;
         this.artist = artist;
         this.coverHash = coverHash;
         this.genre=genre;
-        source="Remote";
+        this.source="Remote";
     }
 
     /** Creates a LOCAL track
@@ -694,6 +695,7 @@ public class Track implements Serializable {
     public JSONObject toJSONObject() {
         JSONObject jsonObject = new JSONObject();
         try {
+            jsonObject.put("idFile", (int)idFileServer);
             jsonObject.put("path", relativeFullPath);
             jsonObject.put("rating", (int)rating);
             jsonObject.put("addedDate", getFormattedAddedDate());
@@ -713,5 +715,13 @@ public class Track implements Serializable {
 
     public Status getStatus() {
         return status;
+    }
+
+    public boolean isSync() {
+        return isSync;
+    }
+
+    public void setSync() {
+        isSync = true;
     }
 }

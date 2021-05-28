@@ -7,6 +7,7 @@ import com.google.common.collect.Table;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -19,12 +20,13 @@ public final class RepoSync {
 
     private static Table<Integer, Track.Status, Track> tracks = null;
 
-    protected static void read() {
+    protected synchronized static void read() {
         //FIXME: Update this repo for each track change (rating, genre) to avoid reading at every sync
         //  Otherwise tracks stats updates (except tags as re-read before merge request) are not available for merge !!!
+        //   WARNING: Need to reset isSync to false too before a new sync
         //if(tracks==null) {
             tracks = HashBasedTable.create();
-            List<Track> newTracks = HelperLibrary.musicLibrary.getTracks("", "", "", -1);
+            List<Track> newTracks = HelperLibrary.musicLibrary.getTracks(true, "WHERE status!=\""+ Track.Status.LOCAL.name()+"\"", "", "", -1);
             for(Track track : newTracks) {
                 tracks.put(track.getIdFileServer(), track.getStatus(), track);
             }
@@ -37,7 +39,7 @@ public final class RepoSync {
      * @param track the one to check
      * @return true if onReceivedFile exists and length()==track.size
      */
-    public static void checkReceivedFile(Track track) {
+    public synchronized static void checkReceivedFile(Track track) {
         track.setStatus(Track.Status.REC);
         if (!checkFile(track) || !HelperLibrary.musicLibrary.updateStatus(track)) {
             File receivedFile = new File(track.getPath());
@@ -46,14 +48,14 @@ public final class RepoSync {
             receivedFile.delete();
             track.setStatus(Track.Status.NEW);
         }
-        updateStatus(track);
+        update(track);
     }
 
     /**
      * @param track the one to check
      * @return true if onReceivedFile exists and length()==track.size
      */
-    public static boolean checkFile(Track track) {
+    public synchronized static boolean checkFile(Track track) {
         File receivedFile = new File(track.getPath());
         if(receivedFile.exists()) {
             if (receivedFile.length() == track.getSize()) {
@@ -70,24 +72,33 @@ public final class RepoSync {
         return false;
     }
 
-    public static void updateStatus(Track track) {
+    public synchronized static boolean checkFile(String absolutePath) {
+        for(Track track : tracks.values()) {
+            if(track.getPath().equals(absolutePath)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized static void update(Track track) {
         if(tracks.containsRow(track.getIdFileServer())) {
             tracks.row(track.getIdFileServer()).clear();
         }
         tracks.put(track.getIdFileServer(), track.getStatus(), track);
     }
 
-    public static int getRemainingSize() {
+    public synchronized static int getRemainingSize() {
         return tracks ==null?0:tracks.column(Track.Status.NEW).size();
     }
 
-    public static int getTotalSize() {
+    public synchronized static int getTotalSize() {
         return tracks==null?0:tracks.column(Track.Status.REC).size()+tracks.column(Track.Status.NEW).size();
     }
 
     static String totalFilesSize;
 
-    public static String getTotalFileSize() {
+    public synchronized static String getTotalFileSize() {
         if(totalFilesSize!=null || tracks==null) {
             return totalFilesSize;
         }
@@ -97,7 +108,7 @@ public final class RepoSync {
         return totalFilesSize;
     }
 
-    public static long getRemainingFileSize() {
+    public synchronized static long getRemainingFileSize() {
         if(tracks ==null) {
             return 0;
         }
@@ -108,18 +119,34 @@ public final class RepoSync {
         return nbRemaining;
     }
 
-    public static List<Track> getDownloadList() {
+    public synchronized static List<Track> getDownloadList() {
         return new ArrayList<>(tracks.column(Track.Status.NEW).values());
     }
 
-    public static List<Track> getMergeList() {
+    public synchronized static List<Track> getMergeList() {
         return new ArrayList<>(tracks.column(Track.Status.REC).values());
     }
 
-    public static Track getFile(int i) {
+    public synchronized static Track getFile(int i) {
         if(tracks.containsRow(i)) {
             return tracks.row(i).values().iterator().next();
         }
         return null;
+    }
+
+    public synchronized static List<Track> getNotSyncedList() {
+        List<Track> trackList = new ArrayList<>();
+        for(Track track : tracks.values()) {
+            if(!track.isSync()) {
+                trackList.add(track);
+            }
+        }
+        return trackList;
+    }
+
+    public synchronized static List<Track> getNewAndRec() {
+        ArrayList<Track> tracksRec = new ArrayList<>(RepoSync.tracks.column(Track.Status.REC).values());
+        tracksRec.addAll(RepoSync.tracks.column(Track.Status.NEW).values());
+        return tracksRec;
     }
 }
