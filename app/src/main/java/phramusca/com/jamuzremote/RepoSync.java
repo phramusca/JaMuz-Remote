@@ -7,7 +7,6 @@ import com.google.common.collect.Table;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -68,15 +67,6 @@ public final class RepoSync {
             }
         } else {
             Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
-        }
-        return false;
-    }
-
-    public synchronized static boolean checkFile(String absolutePath) {
-        for(Track track : tracks.values()) {
-            if(track.getPath().equals(absolutePath)) {
-                return true;
-            }
         }
         return false;
     }

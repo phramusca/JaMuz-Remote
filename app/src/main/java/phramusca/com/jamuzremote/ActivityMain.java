@@ -665,7 +665,7 @@ public class ActivityMain extends AppCompatActivity {
         });
 
         //TODO: Use proper values
-        localTrack = new Track("lyrics", "albumArtist", "year", -1, -1,
+        localTrack =  new Track("albumArtist", "year", -1, -1,
                 -1, -1, "bitRate", "format", -1, 0,
                 getString(R.string.welcomeTitle),
                 getString(R.string.welcomeYear), getString(R.string.app_name),

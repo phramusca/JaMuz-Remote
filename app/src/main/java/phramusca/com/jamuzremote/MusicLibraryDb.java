@@ -43,7 +43,6 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     static final String COL_COPYRIGHT = "copyright";
     static final String COL_COVER_HASH = "coverhash";
     static final String COL_MODIF_DATE = "modifDate";
-    static final String COL_LYRICS = "lyrics";
     static final String COL_COMMENT = "comment";
     static final String COL_PATH_MODIF_DATE = "pathModifDate";
     static final String COL_PATH_MB_ID = "pathMbId";
@@ -78,7 +77,6 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
             + COL_STATUS + " TEXT NOT NULL, "
             + COL_SIZE + " LONG NOT NULL, "
             + COL_LENGTH + " INTEGER NOT NULL, "
-            + COL_LYRICS + " TEXT NOT NULL, "
             + COL_PATH_MODIF_DATE + " TEXT NOT NULL, "
             + COL_PATH_MB_ID + " TEXT NOT NULL, "
             + COL_COMMENT + " TEXT NOT NULL, "

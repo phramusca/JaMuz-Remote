@@ -70,7 +70,6 @@ public class Track implements Serializable {
     private String coverHash="";
 
     /** From database
-     * @param lyrics
      * @param pathModifDate
      * @param pathMbId
      * @param comment
@@ -104,7 +103,7 @@ public class Track implements Serializable {
      * @param size -
      * @param length -
      */
-    public Track(String lyrics, Date pathModifDate, String pathMbId, String comment, int idPath,
+    public Track(Date pathModifDate, String pathMbId, String comment, int idPath,
                  String albumArtist, String year, int trackNo, int trackTotal,
                  int discNo, int discTotal, String bitRate, String format, double bpm,
                  Date modifDate, String checkedFlag, String copyRight, File getAppDataPath,
@@ -112,7 +111,6 @@ public class Track implements Serializable {
                  String artist, String coverHash, String path, String genre, Date addedDate,
                  Date lastPlayed, int playCounter, String status, long size, int length,
                  float trackGain, float albumGain) {
-        this.lyrics = lyrics;
         this.pathModifDate = pathModifDate;
         this.pathMbId = pathMbId;
         this.comment = comment;
@@ -153,7 +151,6 @@ public class Track implements Serializable {
     }
 
     /** Track to display
-     * @param lyrics
      * @param albumArtist -
      * @param year -
      * @param trackNo -
@@ -170,10 +167,9 @@ public class Track implements Serializable {
      * @param coverHash -
      * @param genre -
      */
-    public Track(String lyrics, String albumArtist, String year, int trackNo, int trackTotal, int discNo,
+    public Track(String albumArtist, String year, int trackNo, int trackTotal, int discNo,
                  int discTotal, String bitRate, String format, double bpm, double rating, String title,
                  String album, String artist, String coverHash, String genre) {
-        this.lyrics = lyrics;
         this.albumArtist = albumArtist;
         this.year = year;
         this.trackNo = trackNo;
@@ -266,7 +262,6 @@ public class Track implements Serializable {
                 copyRight = file.getString("copyRight");
                 coverHash = file.getString("coverHash");
                 modifDate = getDate(file, "modifDate");
-                lyrics = file.getString("lyrics");
                 pathModifDate = getDate(file, "pathModifDate");
                 pathMbId = file.getString("pathMbid");
                 comment = file.getString("comment");
