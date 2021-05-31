@@ -38,7 +38,6 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_REMOTE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_SERVER;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LAST_PLAYED;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LENGTH;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LYRICS;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_MODIF_DATE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PATH;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PATH_MB_ID;
@@ -380,7 +379,6 @@ public class MusicLibrary {
             values.put(COL_CHECKED_FLAG, track.getCheckedFlag());
             values.put(COL_COPYRIGHT, track.getCopyRight());
             values.put(COL_COVER_HASH, track.getCoverHash());
-            values.put(COL_LYRICS, track.getLyrics());
             values.put(COL_PATH_MODIF_DATE, HelperDateTime.formatUTCtoSqlUTC(track.getPathModifDate()));
             values.put(COL_PATH_MB_ID, track.getPathMbId());
             values.put(COL_COMMENT, track.getComment());
@@ -423,7 +421,6 @@ public class MusicLibrary {
         String checkedFlag="";
         String copyRight="";
         String coverHash="";
-        String lyrics="";
         Date pathModifDate=new Date(0);
         String pathMbid="";
         String comment="";
@@ -448,7 +445,6 @@ public class MusicLibrary {
             checkedFlag=c.getString(c.getColumnIndex(COL_CHECKED_FLAG));
             copyRight=c.getString(c.getColumnIndex(COL_COPYRIGHT));
             coverHash=c.getString(c.getColumnIndex(COL_COVER_HASH));
-            lyrics=c.getString(c.getColumnIndex(COL_LYRICS));
             pathModifDate=HelperDateTime.parseSqlUtc(
                     c.getString(c.getColumnIndex(COL_PATH_MODIF_DATE)));
             pathMbid=c.getString(c.getColumnIndex(COL_PATH_MB_ID));
@@ -464,7 +460,7 @@ public class MusicLibrary {
 //        Date tagsModifDate=c.getString(c.getColumnIndex(COL_));
 //        Date ratingModifDate=c.getString(c.getColumnIndex(COL_));
 
-        return new Track(lyrics, pathModifDate, pathMbid, comment, idPath, albumArtist, year,
+        return new Track(pathModifDate, pathMbid, comment, idPath, albumArtist, year,
                 trackNo, trackTotal, discNo, discTotal, bitRate, format, bpm, modifDate, checkedFlag,
                 copyRight, getAppDataPath, idFileRemote, idFileServer, rating, title, album, artist,
                 coverHash, path, genre, addedDate, lastPlayed, playCounter, status, size, length,
@@ -707,7 +703,6 @@ public class MusicLibrary {
                     ", " + COL_CHECKED_FLAG +
                     ", " + COL_COPYRIGHT +
                     ", " + COL_COVER_HASH +
-                    ", " + COL_LYRICS +
                     ", " + COL_PATH_MODIF_DATE +
                     ", " + COL_PATH_MB_ID +
                     ", " + COL_COMMENT +
