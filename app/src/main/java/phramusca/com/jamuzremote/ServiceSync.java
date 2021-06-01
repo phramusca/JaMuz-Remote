@@ -579,6 +579,17 @@ public class ServiceSync extends ServiceBase {
                 Request request = clientInfo.getRequestBuilder(urlBuilder).build();
                 Response response = clientDownload.newCall(request).execute();
                 if (response.isSuccessful()) {
+
+                    ///FIXME Better handle transcoded files (format, bitrate, length)
+                    String oriExt = response.header("oriExt");
+                    String destExt = response.header("destExt");
+                    if(!oriExt.equals(destExt)) {
+                        track.setPath(oriExt, destExt);
+                        destinationFile=new File(track.getPath());
+                        String size = response.header("size");
+                        track.setSize(Long.parseLong(size));
+                    }
+
                     if (destinationFile.exists()) {
                         boolean fileDeleted = destinationFile.delete();
                         Log.v("fileDeleted", fileDeleted + "");
