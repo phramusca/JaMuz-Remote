@@ -294,8 +294,12 @@ public class Track implements Serializable {
         return idFileServer;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setPath(String oriExt, String destExt) {
+        if(!oriExt.equals(destExt)) {
+            path=path.replace("."+oriExt, "."+destExt);
+            relativeFullPath=relativeFullPath.replace("."+oriExt, "."+destExt);
+            update();
+        }
     }
 
     public long getSize() {
@@ -460,6 +464,10 @@ public class Track implements Serializable {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
     }
 
     public enum Status {
