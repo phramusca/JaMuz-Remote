@@ -2295,7 +2295,7 @@ public class ActivityMain extends AppCompatActivity {
             try {
                 bitmap = BitmapFactory.decodeByteArray(art, 0, art.length);
             } catch (OutOfMemoryError ex) {
-                helperToast.toastLong("OutOfMemoryError reading cover !");
+                Log.e(TAG, "OutOfMemoryError reading cover !", ex);
             }
         }
         if (bitmap == null) {

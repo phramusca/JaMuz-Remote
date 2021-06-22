@@ -603,17 +603,21 @@ public class Track implements Serializable {
             mmr.setDataSource(path);
             art = mmr.getEmbeddedPicture();
         } catch (final RuntimeException ex) {
-            Log.e("Track", "Error reading art of "+relativeFullPath);
+            Log.e("Track", "Error reading art of "+relativeFullPath+" "+ex);
         }
         return art;
     }
 
     public Bitmap getTumb(boolean read) {
         if(thumb==null && read) {
-            byte[]art=getArt();
-            if(art!=null) {
-                thumb = BitmapFactory.decodeByteArray(art, 0, art.length);
-                thumb = Bitmap.createScaledBitmap(thumb, 120, 120, false);
+            try {
+                byte[] art = getArt();
+                if (art != null) {
+                    thumb = BitmapFactory.decodeByteArray(art, 0, art.length);
+                    thumb = Bitmap.createScaledBitmap(thumb, 120, 120, false);
+                }
+            } catch(OutOfMemoryError error) {
+                Log.e("Track", "OutOfMemoryError reading art of "+relativeFullPath);
             }
         }
         return thumb;

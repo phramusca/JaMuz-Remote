@@ -509,12 +509,14 @@ public class ServiceSync extends ServiceBase {
             if(!completed && !checkCompleted()) {
                 stopSync("Sync done but NOT complete :(", -1);
             }
-            //FIXME: checkCompleted can stop sync as downloads are complete though check info files may still run !!
+            //FIXME NOW checkCompleted can stop sync as downloads are complete though check info files may still run !!
         }
 
         private boolean startDownloads() {
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Starting download ... "));
             pool = Executors.newFixedThreadPool(5); //TODO: Make number of threads an option
+            //FIXME NOW Why not using this cache thread pool: seems promising
+            //Executors.newCachedThreadPool();
             downloadServices= new ArrayList<>();
             nbFilesTotal=0;
             nbFiles=0;
@@ -580,7 +582,8 @@ public class ServiceSync extends ServiceBase {
                 Response response = clientDownload.newCall(request).execute();
                 if (response.isSuccessful()) {
 
-                    ///FIXME Better handle transcoded files (format, bitrate, length)
+                    ///FIXME NOW Better handle transcoded files (format, bitrate, length)
+                    //For now size received from header is only used in RepoSync.checkReceivedFile
                     String oriExt = response.header("oriExt");
                     String destExt = response.header("destExt");
                     if(!oriExt.equals(destExt)) {
