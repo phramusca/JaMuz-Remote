@@ -51,7 +51,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
 
     private static final String CREATE_BDD = "CREATE TABLE " + TABLE_TRACKS + " ("
             + COL_ID_REMOTE + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + COL_ID_SERVER + " INTEGER NOT NULL, "
+            + COL_ID_SERVER + " INTEGER UNIQUE NOT NULL, "
             + COL_ID_PATH + " INTEGER NOT NULL, "
             + COL_ALBUM_ARTIST + " TEXT NOT NULL, "
             + COL_YEAR + " TEXT NOT NULL, "
