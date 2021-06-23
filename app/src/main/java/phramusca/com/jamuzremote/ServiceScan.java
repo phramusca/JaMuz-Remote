@@ -238,5 +238,4 @@ public class ServiceScan extends ServiceBase {
             Log.e(TAG, "ActivityMain onDestroy: UNEXPECTED InterruptedException", e);
         }
     }
-
 }
