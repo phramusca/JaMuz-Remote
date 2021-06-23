@@ -31,14 +31,14 @@ public class AudioPlayer {
             mediaPlayer.setDataSource(track.getPath());
             mediaPlayer.prepare();
             callback.reset();
+            String msg = applyReplayGain(mediaPlayer, track);
+            if(!msg.equals("")) {
+                helperToast.toastLong(msg);
+            }
             mediaPlayer.setOnPreparedListener(mp -> {
                 duration = mediaPlayer.getDuration();
                 mediaPlayer.start();
                 startTimer();
-                String msg = applyReplayGain(mediaPlayer, track);
-                if(!msg.equals("")) {
-                    helperToast.toastLong(msg);
-                }
                 mediaPlayer.setOnCompletionListener(mediaPlayer -> callback.onPlayBackEnd());
                 mediaPlayer.setOnSeekCompleteListener(mediaPlayer -> startTimer());
                 enableControl=true;
