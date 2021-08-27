@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 
@@ -19,7 +20,7 @@ import java.util.Locale;
 
 public abstract class AdapterTrack extends AdapterLoad {
 
-    private Context mContext;
+    private final Context mContext;
     private boolean complete;
     private boolean completeTop;
     TrackList trackList;
@@ -105,7 +106,7 @@ public abstract class AdapterTrack extends AdapterLoad {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof UserViewHolder) {
             UserViewHolder userViewHolder = (UserViewHolder) holder;
             Track track = trackList.get(position);

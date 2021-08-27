@@ -1,6 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -21,7 +22,7 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final Context mContext;
     private boolean isLoading;
     private boolean isLoadingTop;
-    private int visibleThreshold = 3;
+    private final int visibleThreshold = 3;
     private int lastVisibleItem, firstVisibleItem, totalItemCount;
 
     AdapterLoad(Context context, RecyclerView recyclerView) {
@@ -74,8 +75,9 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         isLoadingTop = false;
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == VIEW_TYPE_ITEM) {
             View view = LayoutInflater.from(mContext).inflate(R.layout.queue_item_album, parent, false);
             return new UserViewHolder(view);
@@ -87,7 +89,7 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
     }
 
@@ -97,7 +99,7 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     // "Loading item" ViewHolder
-    class LoadingViewHolder extends RecyclerView.ViewHolder {
+    static class LoadingViewHolder extends RecyclerView.ViewHolder {
         ProgressBar progressBar;
 
         LoadingViewHolder(View view) {
@@ -107,7 +109,7 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     // "Normal item" ViewHolder
-    class UserViewHolder extends RecyclerView.ViewHolder {
+    static class UserViewHolder extends RecyclerView.ViewHolder {
         public TextView item_line1;
         public TextView item_line2;
         public TextView item_line3;
@@ -126,7 +128,7 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    private ArrayList<IListenerTrackAdapter> mListListener = new ArrayList<>();
+    private final ArrayList<IListenerTrackAdapter> mListListener = new ArrayList<>();
 
     public void addListener(IListenerTrackAdapter aListener) {
         mListListener.add(aListener);
