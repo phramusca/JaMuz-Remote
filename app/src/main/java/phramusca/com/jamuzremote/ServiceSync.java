@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -127,6 +128,7 @@ public class ServiceSync extends ServiceBase {
                     i++;
                     helperNotification.notifyBar(notificationSync, "Removing deleted files", 10, i, nbTracks);
                     File file = new File(track.getPath());
+                    //noinspection ResultOfMethodCallIgnored
                     file.delete();
                     HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
                 }
@@ -174,6 +176,7 @@ public class ServiceSync extends ServiceBase {
                             else {
                                 nbFilesTreated++;
                                 if (!checkFile(file.getAbsolutePath())) {
+                                    //noinspection ResultOfMethodCallIgnored
                                     file.delete();
                                     nbFilesDeleted++;
                                 }
@@ -200,7 +203,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         private void checkFiles(Track.Status status)
-                throws InterruptedException, JSONException, ServerException, IOException {
+                throws InterruptedException, ServerException, IOException {
             int nbFilesInBatch=500;
             int nbFilesServer = getFilesCount(status);
             String msg = "Checking "+status.name().toLowerCase()+" files ...";
@@ -220,6 +223,7 @@ public class ServiceSync extends ServiceBase {
                             if(trackServer.getSize()!=trackRemote.getSize()
                                     || !trackServer.getRelativeFullPath().equals(trackRemote.getRelativeFullPath())) {
                                 File file = new File(trackRemote.getPath());
+                                //noinspection ResultOfMethodCallIgnored
                                 file.delete();
                                 trackServer.setIdFileRemote(trackRemote.getIdFileRemote());
                                 HelperLibrary.musicLibrary.updateTrack(trackServer, false);
@@ -229,6 +233,7 @@ public class ServiceSync extends ServiceBase {
                                     case INFO:
                                         if(!trackRemote.getStatus().equals(Track.Status.INFO)) {
                                             File file = new File(trackRemote.getPath());
+                                            //noinspection ResultOfMethodCallIgnored
                                             file.delete();
                                             HelperLibrary.musicLibrary.updateStatus(trackServer);
                                         }
@@ -243,6 +248,8 @@ public class ServiceSync extends ServiceBase {
                                 }
                             }
                         } else {
+                            //FIXME NOW After a database reset (deleted) transcoded files will be deleted as size in db (the flac one)
+                            // differs from the real mp3 file size
                             if(trackServer.getStatus().equals(Track.Status.NEW) && RepoSync.checkFile(trackServer)) {
                                 trackServer.setStatus(Track.Status.REC);
                             }
@@ -259,7 +266,7 @@ public class ServiceSync extends ServiceBase {
 //                    Results fromJson = gson.fromJson(response.body().string(), Results.class);
 //                    fromJson.chromaprint=chromaprint;
 
-        private Map<Integer, Track> getFiles(int idFrom, int nbFilesInBatch, Track.Status status) throws IOException, ServerException, JSONException {
+        private Map<Integer, Track> getFiles(int idFrom, int nbFilesInBatch, Track.Status status) throws IOException {
 
             //Interceptor cannot catch .body().string() network errors, so looping here instead
             //RetryInterceptor interceptor = new RetryInterceptor(5,5, helperNotification, notificationSync);
@@ -372,7 +379,7 @@ public class ServiceSync extends ServiceBase {
                         (JSONObject) filesToUpdate.get(i),
                         getAppDataPath, true);
                 fileReceived.setStatus(Track.Status.REC);
-                HelperLibrary.musicLibrary.insertOrUpdateTrack(fileReceived, true);
+                HelperLibrary.musicLibrary.updateTrack(fileReceived, true);
                 helperNotification.notifyBar(notificationSync, "Updating database with merge changes",
                         10, i+1, filesToUpdate.length());
             }
@@ -569,6 +576,7 @@ public class ServiceSync extends ServiceBase {
             try {
                 File destinationFile=new File(track.getPath());
                 File destinationPath = destinationFile.getParentFile();
+                //noinspection ResultOfMethodCallIgnored
                 destinationPath.mkdirs();
                 checkAbort();
                 if(clientDownload==null) {
@@ -586,8 +594,8 @@ public class ServiceSync extends ServiceBase {
                     //For now size received from header is only used in RepoSync.checkReceivedFile
                     String oriExt = response.header("oriExt");
                     String destExt = response.header("destExt");
-                    if(!oriExt.equals(destExt)) {
-                        track.setPath(oriExt, destExt);
+                    if(!Objects.equals(oriExt, destExt)) {
+                        track.setPath(Objects.requireNonNull(oriExt), destExt);
                         destinationFile=new File(track.getPath());
                         String size = response.header("size");
                         track.setSize(Long.parseLong(size));
@@ -600,14 +608,14 @@ public class ServiceSync extends ServiceBase {
                     boolean fileCreated = destinationFile.createNewFile();
                     Log.v("fileCreated", fileCreated + "");
                     BufferedSink sink = Okio.buffer(Okio.sink(destinationFile));
-                    sink.writeAll(response.body().source());
-                    response.body().source().close();
+                    sink.writeAll(Objects.requireNonNull(response.body()).source());
+                    Objects.requireNonNull(response.body()).source().close();
                     sink.close();
                     RepoSync.checkReceivedFile(track);
                 } else {
                     switch (response.code()) {
                         case 301:
-                            throw new ServerException(request.header("api-version")+" not supported. "+response.body().string());
+                            throw new ServerException(request.header("api-version")+" not supported. "+ Objects.requireNonNull(response.body()).string());
                         case 404: // File does not exist on server
                             HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
                             track.setStatus(Track.Status.REC); //To be ignored by current sync process
@@ -619,7 +627,7 @@ public class ServiceSync extends ServiceBase {
                 }
             } catch (InterruptedException e) {
                 Log.w(TAG, "Download interrupted for "+track.getRelativeFullPath(), e);
-            } catch (IOException e) {
+            } catch (IOException | NullPointerException e) {
                 Log.e(TAG, "Error downloading "+track.getRelativeFullPath(), e);
                 if(e.getMessage().contains("ENOSPC")) {
                     //FIXME: Stop downloads if java.io.IOException: write failed: ENOSPC (No space left on device)

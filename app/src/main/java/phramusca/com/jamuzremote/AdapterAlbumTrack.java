@@ -1,6 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public abstract class AdapterAlbumTrack extends AdapterTrack {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof UserViewHolder) {
             UserViewHolder userViewHolder = (UserViewHolder) holder;
             Track track = trackList.get(position);

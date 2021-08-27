@@ -3,7 +3,7 @@ package phramusca.com.jamuzremote;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.support.v4.content.ContextCompat;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 
 import java.util.List;
@@ -11,8 +11,8 @@ import java.util.Locale;
 
 public class AdapterAlbum extends AdapterLoad {
 
-    private List<Track> albums;
-    private Context mContext;
+    private final List<Track> albums;
+    private final Context mContext;
 
     AdapterAlbum(Context context, RecyclerView recyclerView, List<Track> albums) {
         super(context, recyclerView);
@@ -31,7 +31,7 @@ public class AdapterAlbum extends AdapterLoad {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof UserViewHolder) {
             Track track = albums.get(position);
             UserViewHolder userViewHolder = (UserViewHolder) holder;
