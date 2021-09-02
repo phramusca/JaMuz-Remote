@@ -30,7 +30,13 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         @SuppressWarnings("unchecked")
         final ArrayList<Track> tracks = (ArrayList<Track>) intent.getSerializableExtra("tracksList");
 
-        if(tracks!=null) {
+        if(tracks!=null && tracks.size()>0) {
+            Button button_queue_album = findViewById(R.id.button_queue_album);
+            button_queue_album.setOnClickListener(v -> insertAndSetResult(tracks.get(0), false));
+
+            Button button_queue_play_album = findViewById(R.id.button_queue_play_album);
+            button_queue_play_album.setOnClickListener(v -> insertAndSetResult(tracks.get(0), true));
+
             RecyclerView recyclerView = findViewById(R.id.list_album_tracks);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             trackAdapter = new AdapterAlbumTrack(this, tracks, -1, recyclerView) {
@@ -67,6 +73,17 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                 }
             };
         }
+    }
+
+    private void insertAndSetResult(Track track, boolean playNext) {
+        Playlist playlist = new Playlist(track.getAlbum(), true);
+        playlist.setAlbum(track.getAlbum());
+        PlayQueue.queue.insert(playlist);
+
+        Intent data = new Intent();
+        data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");
+        setResult(RESULT_OK, data);
+        finish();
     }
 
     private void insertAndSetResult(Track track, boolean playNext, int pos) {
