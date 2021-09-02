@@ -1506,7 +1506,7 @@ public class ActivityMain extends AppCompatActivity {
             displayedTrack.setHistory(true);
             return true;
         } else {
-            Log.d(TAG, "play(): Remove track from db:"+displayedTrack);
+            Log.d(TAG, "play(): "+displayedTrack);
             displayedTrack.delete();
             return false;
         }

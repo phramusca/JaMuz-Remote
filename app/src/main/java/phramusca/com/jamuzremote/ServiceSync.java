@@ -248,9 +248,10 @@ public class ServiceSync extends ServiceBase {
                                 }
                             }
                         } else {
-                            //FIXME NOW After a database reset (deleted) transcoded files will be deleted as size in db (the flac one)
+                            //FIXME NOW After a database reset (deleted) transcoded files will be deleted
+                            // as size in db (trackServer.getSize(), the flac one)
                             // differs from the real mp3 file size
-                            if(trackServer.getStatus().equals(Track.Status.NEW) && RepoSync.checkFile(trackServer)) {
+                            if(trackServer.getStatus().equals(Track.Status.NEW) && RepoSync.checkFile(trackServer, trackServer.getSize())) {
                                 trackServer.setStatus(Track.Status.REC);
                             }
                             HelperLibrary.musicLibrary.insertTrack(trackServer);
@@ -594,11 +595,12 @@ public class ServiceSync extends ServiceBase {
                     //For now size received from header is only used in RepoSync.checkReceivedFile
                     String oriExt = response.header("oriExt");
                     String destExt = response.header("destExt");
+                    Long size = track.getSize();
                     if(!Objects.equals(oriExt, destExt)) {
                         track.setPath(Objects.requireNonNull(oriExt), destExt);
                         destinationFile=new File(track.getPath());
-                        String size = response.header("size");
-                        track.setSize(Long.parseLong(size));
+                        String sizeHeader = response.header("size");
+                        size = Long.parseLong(sizeHeader);
                     }
 
                     if (destinationFile.exists()) {
@@ -611,7 +613,7 @@ public class ServiceSync extends ServiceBase {
                     sink.writeAll(Objects.requireNonNull(response.body()).source());
                     Objects.requireNonNull(response.body()).source().close();
                     sink.close();
-                    RepoSync.checkReceivedFile(track);
+                    RepoSync.checkReceivedFile(track, size);
                 } else {
                     switch (response.code()) {
                         case 301:
