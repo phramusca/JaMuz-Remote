@@ -38,9 +38,9 @@ public final class RepoSync {
      * @param track the one to check
      * @return true if onReceivedFile exists and length()==track.size
      */
-    public synchronized static void checkReceivedFile(Track track) {
+    public synchronized static void checkReceivedFile(Track track, long size) {
         track.setStatus(Track.Status.REC);
-        if (!checkFile(track) || !HelperLibrary.musicLibrary.updateStatus(track)) {
+        if (!checkFile(track, size) || !HelperLibrary.musicLibrary.updateStatus(track)) {
             File receivedFile = new File(track.getPath());
             Log.w(TAG, "Error with received file. Deleting " + receivedFile.getAbsolutePath());
             //noinspection ResultOfMethodCallIgnored
@@ -54,10 +54,10 @@ public final class RepoSync {
      * @param track the one to check
      * @return true if onReceivedFile exists and length()==track.size
      */
-    public synchronized static boolean checkFile(Track track) {
+    public synchronized static boolean checkFile(Track track, long size) {
         File receivedFile = new File(track.getPath());
         if(receivedFile.exists()) {
-            if (receivedFile.length() == track.getSize()) {
+            if (receivedFile.length() == size) {
                 Log.i(TAG, "Correct file size: " + receivedFile.length());
                 return true;
             } else {
