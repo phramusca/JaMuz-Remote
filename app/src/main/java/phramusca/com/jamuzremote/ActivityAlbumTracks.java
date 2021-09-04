@@ -105,7 +105,6 @@ public class ActivityAlbumTracks extends AppCompatActivity {
     }
 
     private void notifyDownload(Track track, int pos) {
-        track.getTumb(true);
         runOnUiThread(() -> trackAdapter.notifyItemChanged(pos));
     }
 }

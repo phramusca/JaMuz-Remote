@@ -91,21 +91,8 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
     private boolean addMore() {
         List<Track> newAlbums = HelperLibrary.musicLibrary.getAlbums(albums.size());
         this.albums.addAll(newAlbums);
-        readCovers(newAlbums); //FIXME: Find a way to get a cover if first album track does not have one (read from other tracks)
+        //readCovers(newAlbums); //FIXME: Find a way to get a cover if first album track does not have one (read from other tracks)
         return newAlbums.size()>0;
-    }
-
-    private void readCovers(List<Track> tracks) {
-        new Thread() {
-            @Override
-            public void run() {
-                for(Track track : tracks) {
-                    if(track.getTumb(true)!=null) {
-                        runOnUiThread(() -> adapterAlbum.notifyDataSetChanged());
-                    }
-                }
-            }
-        }.start();
     }
 
     @Override
