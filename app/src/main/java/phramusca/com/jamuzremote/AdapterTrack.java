@@ -29,7 +29,6 @@ public abstract class AdapterTrack extends AdapterLoad {
         super(context, recyclerView);
         mContext = context;
         trackList = new TrackList(tracks, positionPlaying);
-        readCovers(trackList.get());
         complete=false;
         completeTop=false;
         recyclerView.setAdapter(this);
@@ -76,23 +75,13 @@ public abstract class AdapterTrack extends AdapterLoad {
     private boolean addMore() {
         List<Track> newTracks = getMore();
         this.trackList.addBottom(newTracks);
-        readCovers(newTracks);
         return newTracks.size()>0;
     }
 
     private int addTop() {
         List<Track> newTracks = getTop();
         this.trackList.addTop(newTracks);
-        readCovers(newTracks);
         return newTracks.size();
-    }
-
-    private void readCovers(List<Track> tracks) {
-        for(Track track : tracks) {
-            if(track.getTumb(true)!=null) {
-                notifyDataSetChanged();
-            }
-        }
     }
 
     @Override
@@ -146,7 +135,7 @@ public abstract class AdapterTrack extends AdapterLoad {
         userViewHolder.item_line3.setText(line3);
         userViewHolder.item_line4.setText(line4);
 
-        Bitmap bitmap = trackList.get(position).getTumb(false);
+        Bitmap bitmap = trackList.get(position).getThumb();
         if (bitmap == null) {
             bitmap = HelperBitmap.getEmptyThumb();
         }

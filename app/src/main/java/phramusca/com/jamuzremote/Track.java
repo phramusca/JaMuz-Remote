@@ -64,7 +64,7 @@ public class Track implements Serializable {
     //=> Add a limit (FIFO) to those repos not to overload android memory
     //As it is read too many times now that there is album list
     //+ we need (by using transient) to ignore it in Intent serialization and re-read each time !
-    private transient Bitmap thumb;
+    //private transient Bitmap thumb;
     //TODO: coverHash should be changed together with thumb above.
     //    Only used for remote for now, yet retrieved from sync and stored in db
     private String coverHash="";
@@ -608,18 +608,19 @@ public class Track implements Serializable {
         return art;
     }
 
-    public Bitmap getTumb(boolean read) {
-        if(thumb==null && read) {
-            try {
-                byte[] art = getArt();
-                if (art != null) {
-                    thumb = BitmapFactory.decodeByteArray(art, 0, art.length);
-                    thumb = Bitmap.createScaledBitmap(thumb, 120, 120, false);
-                }
-            } catch(OutOfMemoryError error) {
-                Log.e("Track", "OutOfMemoryError reading art of "+relativeFullPath);
+    public Bitmap getThumb() {
+        //if(thumb==null && read) {
+        Bitmap thumb=null;
+        try {
+            byte[] art = getArt();
+            if (art != null) {
+                thumb = BitmapFactory.decodeByteArray(art, 0, art.length);
+                thumb = Bitmap.createScaledBitmap(thumb, 120, 120, false);
             }
+        } catch(OutOfMemoryError error) {
+            Log.e("Track", "OutOfMemoryError reading art of "+relativeFullPath);
         }
+        //}
         return thumb;
     }
 
