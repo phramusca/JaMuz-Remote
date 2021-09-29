@@ -19,6 +19,7 @@
 
  import android.graphics.Bitmap;
  import android.graphics.BitmapFactory;
+ import android.util.Log;
 
  import java.io.File;
  import java.io.FileOutputStream;
@@ -29,7 +30,7 @@
   * @author phramusca ( https://github.com/phramusca/JaMuz/ )
   */
 
-//FIXME Use this instead of coverMap in ActivityMain, made for remote
+//FIXME Use this instead of coverMap in ActivityMain, made for remote (Warning: make sure coverHash are thee same)
  public class IconBufferCover {
      private static final String TAG = IconBufferCover.class.getName();
 
@@ -47,14 +48,17 @@
          }
          if(readIfNotFound) {
              icon = track.getThumb();
-             try {
-                 File cacheFile = getCacheFile(track.getCoverHash());
-                 FileOutputStream fOut = new FileOutputStream(cacheFile);
-                 icon.compress(Bitmap.CompressFormat.PNG, 90, fOut);
-                 fOut.flush();
-                 fOut.close();
-             } catch (IOException e) {
-                 e.printStackTrace();
+             if(icon != null) {
+                 try {
+                     File cacheFile = getCacheFile(track.getCoverHash());
+                     FileOutputStream fOut = new FileOutputStream(cacheFile);
+                     icon.compress(Bitmap.CompressFormat.PNG, 90, fOut);
+                     fOut.flush();
+                     fOut.close();
+                 } catch (IOException e) {
+                     Log.e(TAG, "Error writing thumb to cache", e);
+                     e.printStackTrace();
+                 }
              }
          }
          return icon;
@@ -76,7 +80,8 @@
          return getFile(filename+".png", "..", "cache", "cover-icons");
      }
 
-     public static File getFile(String filename, String... args) {
+     //TODO: Move this to a generic class if to be used elsewhere
+     private static File getFile(String filename, String... args) {
          File file = ActivityMain.getAppDataPath();
          for (String subFolder : args) {
              file = new File(file, subFolder);

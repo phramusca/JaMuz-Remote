@@ -192,8 +192,6 @@ public class ActivitySettings extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-
-
     private void setConfig(String id, int value) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt(id, value);
