@@ -358,7 +358,7 @@ public class ServiceSync extends ServiceBase {
                 track.getTags(true);
             }
             OkHttpClient client = new OkHttpClient.Builder()
-                    .readTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(Math.min(Math.max(tracks.size(), 30), 600), TimeUnit.SECONDS) //Between 30s and 10min
                     .build();
             JSONObject obj = new JSONObject();
             obj.put("type", "FilesToMerge");
@@ -595,7 +595,7 @@ public class ServiceSync extends ServiceBase {
                     //For now size received from header is only used in RepoSync.checkReceivedFile
                     String oriExt = response.header("oriExt");
                     String destExt = response.header("destExt");
-                    Long size = track.getSize();
+                    long size = track.getSize();
                     if(!Objects.equals(oriExt, destExt)) {
                         track.setPath(Objects.requireNonNull(oriExt), destExt);
                         destinationFile=new File(track.getPath());
