@@ -60,13 +60,6 @@ public class Track implements Serializable {
     private long size;
     private int length;
     private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
-    //TODO Use a Repo for thumbnails
-    //=> Add a limit (FIFO) to those repos not to overload android memory
-    //As it is read too many times now that there is album list
-    //+ we need (by using transient) to ignore it in Intent serialization and re-read each time !
-    //private transient Bitmap thumb;
-    //TODO: coverHash should be changed together with thumb above.
-    //    Only used for remote for now, yet retrieved from sync and stored in db
     private String coverHash="";
 
     /** From database
@@ -223,7 +216,7 @@ public class Track implements Serializable {
             lastPlayed = getDate(file, "lastPlayed");
             JSONArray jsonTags = (JSONArray) file.get("tags");
             tags = new ArrayList<>();
-            for(int i=0; i<jsonTags.length(); i++) {
+            for(int i = 0; i < jsonTags.length(); i++) {
                 String tag = (String) jsonTags.get(i);
                 tags.add(tag);
             }
@@ -595,7 +588,6 @@ public class Track implements Serializable {
         return path;
     }
 
-    //FIXME: Use the same cache system as for remote (that is not used by the way !!)
     public byte[] getArt() {
         byte[]art=null;
         try {
@@ -609,18 +601,16 @@ public class Track implements Serializable {
     }
 
     public Bitmap getThumb() {
-        //if(thumb==null && read) {
         Bitmap thumb=null;
         try {
             byte[] art = getArt();
             if (art != null) {
-                thumb = BitmapFactory.decodeByteArray(art, 0, art.length);
-                thumb = Bitmap.createScaledBitmap(thumb, 120, 120, false);
+                Bitmap thumbFull = BitmapFactory.decodeByteArray(art, 0, art.length);
+                thumb = Bitmap.createScaledBitmap(thumbFull, 120, 120, false);
             }
         } catch(OutOfMemoryError error) {
             Log.e("Track", "OutOfMemoryError reading art of "+relativeFullPath);
         }
-        //}
         return thumb;
     }
 

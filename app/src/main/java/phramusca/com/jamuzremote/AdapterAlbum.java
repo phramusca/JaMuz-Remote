@@ -45,7 +45,7 @@ public class AdapterAlbum extends AdapterLoad {
                     track.getRating(),
                     track.getGenre()));
 
-            Bitmap bitmap = albums.get(position).getThumb();
+            Bitmap bitmap = IconBufferCover.getCoverIcon(track, true);
             if (bitmap == null) {
                 bitmap = HelperBitmap.getEmptyThumb();
             }
