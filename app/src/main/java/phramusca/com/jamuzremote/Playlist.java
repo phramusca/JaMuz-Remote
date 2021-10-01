@@ -393,6 +393,11 @@ public class Playlist implements Comparable, Serializable {
 
     private String lengthOrSize;
 
+    public void resetNbFilesAndLengthOrSize() {
+        nbFiles = 0;
+        lengthOrSize = " ";
+    }
+
     @Override
     public String toString() {
         return isLocal?
