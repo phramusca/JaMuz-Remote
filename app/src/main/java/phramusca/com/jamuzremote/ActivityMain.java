@@ -472,6 +472,7 @@ public class ActivityMain extends AppCompatActivity {
             dimOn();
             toggle(layoutPlaylist, !toggleButtonPlaylist.isChecked());
             if(toggleButtonPlaylist.isChecked()) {
+                refreshLocalPlaylistSpinner(true);
                 toggleOff(toggleButtonEditTags, layoutEditTags);
             } else {
                 toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
@@ -549,7 +550,9 @@ public class ActivityMain extends AppCompatActivity {
                 if(playlist!=null) {
                     msg.append(" ").append(getString(R.string.successfully));
                     playlist.setModified(false);
-                    setupLocalPlaylistSpinner(playlist, false);
+                    playlist.resetNbFilesAndLengthOrSize(); // Otherwise it displays values from .plli file (when last saved), then the new ones. And this is confusing
+                    applyPlaylist(playlist, false);
+                    setupLocalPlaylistSpinner(playlist);
                 } else {
                     msg.append(" ").append(getString(R.string.withErrors));
                 }
@@ -569,7 +572,7 @@ public class ActivityMain extends AppCompatActivity {
                     if(localPlaylists.size()>1) {
                         HelperFile.delete("Playlists", localSelectedPlaylist.getName() + ".plli");
                         localPlaylists.remove(localSelectedPlaylist.getName());
-                        setupLocalPlaylistSpinner(null);
+                        setupLocalPlaylistSpinner((String) null);
                     } else {
                         helperToast.toastShort(getString(R.string.cannotDeleteLastPlaylist));
                     }
@@ -731,7 +734,6 @@ public class ActivityMain extends AppCompatActivity {
         } else {
             displayedTrack.update();
             displayTrackDetails();
-            refreshLocalPlaylistSpinner(true);
         }
         ratingBar.setEnabled(true);
     }
@@ -744,7 +746,6 @@ public class ActivityMain extends AppCompatActivity {
         } else {
             displayedTrack.updateGenre(genre);
             displayTrackDetails();
-            refreshLocalPlaylistSpinner(true);
         }
         spinnerGenre.setEnabled(true);
     }
@@ -814,7 +815,6 @@ public class ActivityMain extends AppCompatActivity {
             clientRemote.send("toggleTag".concat(tag));
         } else {
             displayedTrack.toggleTag(tag);
-            refreshLocalPlaylistSpinner(true);
         }
     }
 
@@ -874,15 +874,11 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void refreshQueueAndPlaylistSpinner() {
-        refreshQueueAndPlaylistSpinner(false);
-        textViewPlaylist.setText(localSelectedPlaylist.getSummary());
-    }
-
-    private void refreshQueueAndPlaylistSpinner(final boolean refreshAll) {
         PlayQueue.queue.refresh(localSelectedPlaylist);
-        refreshLocalPlaylistSpinner(refreshAll);
+        refreshLocalPlaylistSpinner(false);
         button_save.setBackgroundResource(localSelectedPlaylist.isModified()?
                 R.drawable.ic_button_save_red:R.drawable.ic_button_save);
+        textViewPlaylist.setText(localSelectedPlaylist.getSummary());
     }
 
     //This is a trick since the following (not in listener) is not working:
@@ -923,9 +919,8 @@ public class ActivityMain extends AppCompatActivity {
             if(playNext) {
                 PlayQueue.queue.setQueue(playlist.getTracks(10, false));
                 playNext();
-            } else {
-                refreshQueueAndPlaylistSpinner(false);
             }
+            refreshQueueAndPlaylistSpinner();
         }
     }
 
@@ -1246,7 +1241,7 @@ public class ActivityMain extends AppCompatActivity {
                     for(Playlist playlist : localPlaylists.values()) {
                         if(playlist.getName().equalsIgnoreCase(arguments)) {
                             applyPlaylist(playlist, true);
-                            setupLocalPlaylistSpinner();
+                            setupPlaylistSpinner(playListArrayAdapter, localSelectedPlaylist);
                             msg = "";
                             break;
                         }
@@ -1263,7 +1258,8 @@ public class ActivityMain extends AppCompatActivity {
                     else if(HelperLibrary.musicLibrary.getArtist(arguments)) {
                         Playlist playlist =new Playlist(arguments, true);
                         playlist.setArtist(arguments);
-                        setupLocalPlaylistSpinner(playlist, true);
+                        applyPlaylist(playlist, true);
+                        setupLocalPlaylistSpinner(playlist);
                         msg = "";
                     }
                     break;
@@ -1278,7 +1274,8 @@ public class ActivityMain extends AppCompatActivity {
                     else if(HelperLibrary.musicLibrary.getAlbum(arguments)) {
                         Playlist playlist =new Playlist(arguments, true);
                         playlist.setAlbum(arguments);
-                        setupLocalPlaylistSpinner(playlist, true);
+                        applyPlaylist(playlist, true);
+                        setupLocalPlaylistSpinner(playlist);
                         msg = "";
                     }
                     break;
@@ -1494,7 +1491,6 @@ public class ActivityMain extends AppCompatActivity {
         if(file.exists()) {
             dimOn();
             localTrack = displayedTrack;
-            refreshLocalPlaylistSpinner(false);
             audioPlayer.stop(false);
             displayedTrack.setSource(
                     displayedTrack.isHistory()
@@ -1529,7 +1525,7 @@ public class ActivityMain extends AppCompatActivity {
                 playNext();
             }
         } else {
-            refreshLocalPlaylistSpinner(false);
+            //refreshLocalPlaylistSpinner(false);
             helperToast.toastLong("Empty Playlist.");
         }
     }
@@ -1690,12 +1686,6 @@ public class ActivityMain extends AppCompatActivity {
             switch (msg) {
                 case "enableSync":
                     enableSync(true);
-                    break;
-                case "refreshSpinner(true)":
-                    refreshLocalPlaylistSpinner(true);
-                    break;
-                case "connectedSync":
-                    //setConfig("connectionString", editTextConnectInfo.getText().toString());
                     break;
                 case "setupGenres":
                     setupGenres();
@@ -1974,7 +1964,7 @@ public class ActivityMain extends AppCompatActivity {
                 }
             }
         }
-        setupLocalPlaylistSpinner(null);
+        setupLocalPlaylistSpinner((String) null);
 
         //Start Scan Service
         if(!isMyServiceRunning(ServiceScan.class)) {
@@ -2006,12 +1996,11 @@ public class ActivityMain extends AppCompatActivity {
         runOnUiThread(() -> displayPlaylist(localSelectedPlaylist));
     }
 
-    private void setupLocalPlaylistSpinner(Playlist playlist, boolean playNext) {
-        applyPlaylist(playlist, playNext);
+    private void setupLocalPlaylistSpinner(Playlist playlist) {
         localPlaylists.put(playlist.getName(), playlist);
         playListArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item,
                 new ArrayList<>(localPlaylists.values()));
-        setupLocalPlaylistSpinner();
+        setupPlaylistSpinner(playListArrayAdapter, localSelectedPlaylist);
     }
 
     private void setupLocalPlaylistSpinner() {
