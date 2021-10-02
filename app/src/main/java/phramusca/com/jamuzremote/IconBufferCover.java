@@ -45,10 +45,6 @@
          }
      }
 
-     public static boolean checkCover(Track track, IconSize size) {
-         return checkIconIsOnCache(track.getCoverHash(), size);
-     }
-
      /**
       * Get cover icon from cache
       * @param track The track.
@@ -103,11 +99,6 @@
              return BitmapFactory.decodeFile(file.getAbsolutePath());
          }
          return null;
-     }
-
-     private static boolean checkIconIsOnCache(String coverHash, IconSize iconSize) {
-         File file = getCacheFile(coverHash, iconSize);
-         return file.exists();
      }
 
      private static File getCacheFile(String coverHash, IconSize iconSize) {

@@ -168,7 +168,7 @@ public abstract class AdapterTrack extends AdapterLoad {
         int margin = 15;
         Bitmap bmOverlay = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
         Canvas canvas = new Canvas(bmOverlay);
-        canvas.drawBitmap(bitmap, new Matrix(), null);
+        canvas.drawBitmap(bitmap, new Matrix(), null); //TODO: Paint in black if cover is too much white
         Bitmap playingBitmap = BitmapFactory.decodeResource(mContext.getResources(), iconId);
         int newWidth = bmOverlay.getWidth()-(margin*2);
         int newHeight = bmOverlay.getHeight()-(margin*2);

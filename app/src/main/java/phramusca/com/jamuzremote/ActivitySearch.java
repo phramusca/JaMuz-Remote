@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.List;
+import java.util.Objects;
 
 // Adapted from https://github.com/abhi5658/search-youtube
 
@@ -47,7 +48,8 @@ public class ActivitySearch extends AppCompatActivity {
                 mProgressDialog.show();
                 searchOnYoutube(v.getText().toString());
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                assert imm != null;
+                imm.hideSoftInputFromWindow(Objects.requireNonNull(getCurrentFocus()).getWindowToken(),
                         InputMethodManager.RESULT_UNCHANGED_SHOWN);
                 return false;
             }
