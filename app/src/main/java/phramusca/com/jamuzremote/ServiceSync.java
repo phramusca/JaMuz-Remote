@@ -472,10 +472,12 @@ public class ServiceSync extends ServiceBase {
         }
 
         private void notifyBarProgress(Track track) {
-            if(!track.getStatus().equals(Track.Status.REC)) {
-                nbFailed++;
-            } else {
-                nbFiles++;
+            if(track!=null) {
+                if(!track.getStatus().equals(Track.Status.REC)) {
+                    nbFailed++;
+                } else {
+                    nbFiles++;
+                }
             }
             int remaining = nbFilesTotal - nbFiles;
             //FIXME: DO NOT use getRemainingFileSize and only getTotalFileSize at startup
@@ -538,6 +540,7 @@ public class ServiceSync extends ServiceBase {
                 nbFilesTotal++;
             }
             pool.shutdown();
+            notifyBarProgress(null);
             try {
                 pool.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
                 return true;

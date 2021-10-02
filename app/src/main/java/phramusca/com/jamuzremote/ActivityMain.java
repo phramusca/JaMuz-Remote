@@ -472,8 +472,8 @@ public class ActivityMain extends AppCompatActivity {
             dimOn();
             toggle(layoutPlaylist, !toggleButtonPlaylist.isChecked());
             if(toggleButtonPlaylist.isChecked()) {
-                refreshLocalPlaylistSpinner(true);
                 toggleOff(toggleButtonEditTags, layoutEditTags);
+                refreshLocalPlaylistSpinner(true);
             } else {
                 toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
                 toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
@@ -1525,7 +1525,7 @@ public class ActivityMain extends AppCompatActivity {
                 playNext();
             }
         } else {
-            //refreshLocalPlaylistSpinner(false);
+            refreshLocalPlaylistSpinner(false);
             helperToast.toastLong("Empty Playlist.");
         }
     }
