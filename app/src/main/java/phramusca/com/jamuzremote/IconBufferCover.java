@@ -34,23 +34,54 @@
  public class IconBufferCover {
      private static final String TAG = IconBufferCover.class.getName();
 
+     enum IconSize {
+         COVER(500),
+         THUMB(120);
+
+         private final int size;
+
+         IconSize(int size) {
+             this.size = size;
+         }
+     }
+
+     public static boolean checkCover(Track track, IconSize size) {
+         return checkIconIsOnCache(track.getCoverHash(), size);
+     }
+
      /**
       * Get cover icon from cache
       * @param track The track.
-      * @param readIfNotFound Read from track metadata if not in cache ?
       * @return The cover icon.
       */
-     public static Bitmap getCoverIcon(Track track, boolean readIfNotFound) {
+     public static Bitmap getCoverIcon(Track track, IconSize size, boolean readIfNotFound) {
          Bitmap icon;
-         icon = readIconFromCache(track.getCoverHash());
+         icon = readIconFromCache(track.getCoverHash(), size);
          if(icon != null) {
              return icon;
          }
          if(readIfNotFound) {
-             icon = track.getThumb();
+             Bitmap trackCover = track.readCover();
+             Bitmap cover = writeIconToCache(track.getCoverHash(), IconSize.COVER, trackCover);
+             Bitmap thumb = writeIconToCache(track.getCoverHash(), IconSize.THUMB, cover);
+             if (size == IconSize.COVER) {
+                 icon = cover;
+             } else if (size == IconSize.THUMB) {
+                 icon = thumb;
+             }
+         }
+         return icon;
+     }
+
+     //TODO: Does this really need to be synchronized ?
+     private synchronized static Bitmap writeIconToCache(String coverHash, IconSize iconSize, Bitmap cover) {
+         Bitmap icon = null;
+         if(cover != null) {
+             //FIXME: Keep ratio for IconSize.COVER !
+             icon = Bitmap.createScaledBitmap(cover, iconSize.size, iconSize.size, false);
              if(icon != null) {
                  try {
-                     File cacheFile = getCacheFile(track.getCoverHash());
+                     File cacheFile = getCacheFile(coverHash, iconSize);
                      FileOutputStream fOut = new FileOutputStream(cacheFile);
                      icon.compress(Bitmap.CompressFormat.PNG, 90, fOut);
                      fOut.flush();
@@ -62,21 +93,25 @@
              }
          }
          return icon;
-
      }
 
      //TODO: Offer at least a cache cleanup function (better would be a smart auto cleanup)
      //Until then, can delete cache folder (or only audio)
-     private static Bitmap readIconFromCache(String coverHash) {
-         File file = getCacheFile(coverHash);
+     private static Bitmap readIconFromCache(String coverHash, IconSize iconSize) {
+         File file = getCacheFile(coverHash, iconSize);
          if(file.exists()) {
              return BitmapFactory.decodeFile(file.getAbsolutePath());
          }
          return null;
      }
 
-     private static File getCacheFile(String coverHash) {
-         String filename = coverHash.equals("")?"NA":coverHash;
+     private static boolean checkIconIsOnCache(String coverHash, IconSize iconSize) {
+         File file = getCacheFile(coverHash, iconSize);
+         return file.exists();
+     }
+
+     private static File getCacheFile(String coverHash, IconSize iconSize) {
+         String filename = coverHash.equals("")?"NA":coverHash+ iconSize.name();
          return getFile(filename+".png", "..", "cache", "cover-icons");
      }
 
