@@ -712,7 +712,7 @@ public class MusicLibrary {
                     " GROUP BY " + COL_ALBUM + " " +
                     " ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, "
                         + COL_ALBUM + ", " + COL_ARTIST + "" +
-                    " LIMIT 20 OFFSET " +
+                    " LIMIT 10 OFFSET " +
                     offset;
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[] { });

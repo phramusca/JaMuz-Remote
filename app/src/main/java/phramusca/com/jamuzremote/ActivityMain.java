@@ -102,7 +102,7 @@ public class ActivityMain extends AppCompatActivity {
 
     private static final String TAG = ActivityMain.class.getName();
     private static SharedPreferences preferences;
-    private HelperToast helperToast = new HelperToast(this);
+    private final HelperToast helperToast = new HelperToast(this);
     private ClientRemote clientRemote;
     private Track displayedTrack;
     private Track localTrack;
@@ -675,7 +675,7 @@ public class ActivityMain extends AppCompatActivity {
                 "welcomeHash", //Warning: "welcomeHash" value has a meaning
                 "---");
         displayedTrack = localTrack;
-        displayTrack(false);
+        displayTrack();
 
         //TODO: MAke this an option somehow
 
@@ -1591,7 +1591,7 @@ public class ActivityMain extends AppCompatActivity {
 
         @Override
         public void onPlayBackStart() {
-            displayTrack(false);
+            displayTrack();
         }
 
         @Override
@@ -1781,11 +1781,11 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     @SuppressLint("SetTextI18n")
-    private void enableClientRemote(final Button button, final int resId) {
+    private void enableClientRemote(final Button button) {
         runOnUiThread(() -> {
             button.setEnabled(false);
             button.setText("1");
-            button.setBackgroundResource(resId);
+            button.setBackgroundResource(R.drawable.remote_off);
             button.setEnabled(true);
         });
     }
@@ -1860,7 +1860,7 @@ public class ActivityMain extends AppCompatActivity {
                 makeButtonGenrePlaylist(-1, genre);
             }
             //Re-display track and playlist
-            displayTrack(false); //spinner genre is re-set in there
+            displayTrack(); //spinner genre is re-set in there
             displayPlaylist(localSelectedPlaylist);
         });
     }
@@ -1896,12 +1896,8 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case REQUEST: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    connectDatabase();
-                }
-            }
+        if (requestCode == REQUEST && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            connectDatabase();
         }
     }
 
@@ -2180,18 +2176,16 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void displayTrackDetails() {
-        runOnUiThread(() -> {
-            setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
-            "<html><BR/>"+
-                    (displayedTrack.getSource().equals("")?""
-                            :"<u>".concat(displayedTrack.getSource()).concat("</u>"))
-                    +""
-                    .concat(displayedTrack.toString())
-                    .concat("</html>"))));
-        });
+        runOnUiThread(() -> setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
+        "<html><BR/>"+
+                (displayedTrack.getSource().equals("")?""
+                        :"<u>".concat(displayedTrack.getSource()).concat("</u>"))
+                +""
+                .concat(displayedTrack.toString())
+                .concat("</html>")))));
     }
 
-    private void displayTrack(boolean forceReadTags) {
+    private void displayTrack() {
         if(displayedTrack!=null) {
             runOnUiThread(() -> {
                 setTextView(textViewFileInfo1, trimTrailingWhitespace(Html.fromHtml(
@@ -2212,7 +2206,7 @@ public class ActivityMain extends AppCompatActivity {
                 ratingBar.setEnabled(true);
                 setupSpinnerGenre(RepoGenres.get(), displayedTrack.getGenre());
                 //Display file tags
-                ArrayList<String> fileTags = displayedTrack.getTags(forceReadTags);
+                ArrayList<String> fileTags = displayedTrack.getTags(false);
                 if(fileTags==null) {
                     fileTags = new ArrayList<>();
                 }
@@ -2320,7 +2314,7 @@ public class ActivityMain extends AppCompatActivity {
                     case "fileInfoInt":
                         displayedTrack = new Track(jObject, new File(""), false);
                         //TODO: Display Playlist name and nbFiles
-                        displayTrack(false);
+                        displayTrack();
                         break;
                 }
             } catch (JSONException e) {
@@ -2349,7 +2343,7 @@ public class ActivityMain extends AppCompatActivity {
             stopRemote();
             setupLocalPlaylistSpinner();
             displayedTrack = localTrack;
-            displayTrack(false);
+            displayTrack();
         }
     }
 
@@ -2358,10 +2352,10 @@ public class ActivityMain extends AppCompatActivity {
             clientRemote.close();
             clientRemote=null;
         }
-        enableClientRemote(buttonRemote, R.drawable.remote_off);
+        enableClientRemote(buttonRemote);
         setupLocalPlaylistSpinner();
         displayedTrack = localTrack;
-        displayTrack(false);
+        displayTrack();
     }
 
     @Override
@@ -2492,7 +2486,6 @@ public class ActivityMain extends AppCompatActivity {
         }
     };
 
-    @SuppressWarnings("unchecked")
     public static Playlist clonePlaylist(Playlist playlist) {
         //Save to Json
         Gson gson = new Gson();
