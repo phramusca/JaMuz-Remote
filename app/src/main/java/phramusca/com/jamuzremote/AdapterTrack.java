@@ -135,7 +135,7 @@ public abstract class AdapterTrack extends AdapterLoad {
         userViewHolder.item_line3.setText(line3);
         userViewHolder.item_line4.setText(line4);
 
-        Bitmap bitmap = IconBufferCover.getCoverIcon(trackList.get(position), true);
+        Bitmap bitmap = IconBufferCover.getCoverIcon(trackList.get(position), IconBufferCover.IconSize.THUMB, true);
         if (bitmap == null) {
             bitmap = HelperBitmap.getEmptyThumb();
         }

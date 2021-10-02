@@ -2226,7 +2226,7 @@ public class ActivityMain extends AppCompatActivity {
             });
 
             if(displayedTrack.getIdFileRemote()>=0) {
-                displayImage(displayedTrack.getArt());
+                displayImage(IconBufferCover.getCoverIcon(displayedTrack, IconBufferCover.IconSize.COVER, true));
                 bluetoothNotifyChange(AVRCP_META_CHANGED);
             } else if(displayedTrack.getCoverHash().equals("welcomeHash")) {
                 displayImage(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_startup_cover_foreground));
@@ -2268,29 +2268,17 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    private void displayImage(final Bitmap finalBitmap) {
-        //final Bitmap finalBitmap = bitmap;
+    private void displayImage(Bitmap bitmap) {
+        if (bitmap == null) {
+            bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_startup_cover_foreground);
+        }
+        Bitmap finalBitmap = bitmap;
         runOnUiThread(() -> {
             imageViewCover.setImageBitmap(finalBitmap);
             BitmapDrawable bitmapDrawable = new BitmapDrawable(getApplicationContext().getResources(), finalBitmap);
             bitmapDrawable.setAlpha(50);
             layoutMain.setBackground(bitmapDrawable);
         });
-    }
-
-    private void displayImage(byte[] art) {
-        Bitmap bitmap = null;
-        if(art != null ){
-            try {
-                bitmap = BitmapFactory.decodeByteArray(art, 0, art.length);
-            } catch (OutOfMemoryError ex) {
-                Log.e(TAG, "OutOfMemoryError reading cover !", ex);
-            }
-        }
-        if (bitmap == null) {
-            bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_startup_cover_foreground);
-        }
-        displayImage(bitmap);
     }
 
     class ListenerRemote implements IListenerRemote {

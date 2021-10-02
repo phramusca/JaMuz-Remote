@@ -512,10 +512,6 @@ public class Track implements Serializable {
         return idFileRemote;
     }
 
-    public String getCoverHash() {
-        return coverHash;
-    }
-
     public double getRating() {
         return rating;
     }
@@ -588,30 +584,23 @@ public class Track implements Serializable {
         return path;
     }
 
-    public byte[] getArt() {
-        byte[]art=null;
+    public String getCoverHash() {
+        return coverHash;
+    }
+
+    public Bitmap readCover() {
+        Bitmap cover = null;
         try {
             MediaMetadataRetriever mmr = new MediaMetadataRetriever();
             mmr.setDataSource(path);
-            art = mmr.getEmbeddedPicture();
+            byte[] art = mmr.getEmbeddedPicture();
+            if (art != null) {
+                cover = BitmapFactory.decodeByteArray(art, 0, art.length);
+            }
         } catch (final RuntimeException ex) {
             Log.e("Track", "Error reading art of "+relativeFullPath+" "+ex);
         }
-        return art;
-    }
-
-    public Bitmap getThumb() {
-        Bitmap thumb=null;
-        try {
-            byte[] art = getArt();
-            if (art != null) {
-                Bitmap thumbFull = BitmapFactory.decodeByteArray(art, 0, art.length);
-                thumb = Bitmap.createScaledBitmap(thumbFull, 120, 120, false);
-            }
-        } catch(OutOfMemoryError error) {
-            Log.e("Track", "OutOfMemoryError reading art of "+relativeFullPath);
-        }
-        return thumb;
+        return cover;
     }
 
     //TODO: Do not update all, only requested fields
