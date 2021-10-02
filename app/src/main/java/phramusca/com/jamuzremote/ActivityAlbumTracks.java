@@ -99,12 +99,12 @@ public class ActivityAlbumTracks extends AppCompatActivity {
             trackAdapter.notifyItemChanged(pos);
             HelperToast helperToast = new HelperToast(getApplicationContext());
             ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
-            ServiceSync.DownloadTask downloadTask = new ServiceSync.DownloadTask(track, track1 -> notifyDownload(track, pos), clientInfo);
+            ServiceSync.DownloadTask downloadTask = new ServiceSync.DownloadTask(track, track1 -> notifyDownload(pos), clientInfo);
             downloadTask.start();
         }
     }
 
-    private void notifyDownload(Track track, int pos) {
+    private void notifyDownload(int pos) {
         runOnUiThread(() -> trackAdapter.notifyItemChanged(pos));
     }
 }
