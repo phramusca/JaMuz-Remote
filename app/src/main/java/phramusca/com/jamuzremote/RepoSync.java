@@ -36,7 +36,6 @@ public final class RepoSync {
      * Sets status to REC if track exists and has correct size.
      * Otherwise, file is deleted and status set back to NEW
      * @param track the one to check
-     * @return true if onReceivedFile exists and length()==track.size
      */
     public synchronized static void checkReceivedFile(Track track, long size) {
         track.setStatus(Track.Status.REC);
@@ -52,7 +51,7 @@ public final class RepoSync {
 
     /**
      * @param track the one to check
-     * @return true if onReceivedFile exists and length()==track.size
+     * @return true if receivedFile.length() = size
      */
     public synchronized static boolean checkFile(Track track, long size) {
         File receivedFile = new File(track.getPath());
@@ -132,11 +131,5 @@ public final class RepoSync {
             }
         }
         return trackList;
-    }
-
-    public synchronized static List<Track> getNewAndRec() {
-        ArrayList<Track> tracksRec = new ArrayList<>(RepoSync.tracks.column(Track.Status.REC).values());
-        tracksRec.addAll(RepoSync.tracks.column(Track.Status.NEW).values());
-        return tracksRec;
     }
 }
