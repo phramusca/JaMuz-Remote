@@ -133,17 +133,12 @@ public class ServiceSync extends ServiceBase {
                     HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
                 }
 
-                //TODO: This should not be needed !! Did I only needed to add this due to to bugs during dev ?
-                helperNotification.notifyBar(notificationSync, "Deleting unwanted files...");
-                newAndRec = RepoSync.getNewAndRec();
-                deleteFilesNotInDb(getAppDataPath);
-
                 runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Check complete.", 5000));
                 checkCompleted();
 
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error ProcessSync", e);
-                helperNotification.notifyBar(notificationSync, "Interrupted.");
+                helperNotification.notifyBar(notificationSync, "Interrupted: "+e.getLocalizedMessage());
                 //stopSync also stop downloads if any so not stopping and letting user stop and restart
                 //stopSync(e.getLocalizedMessage(), 5000);
             } catch (OutOfMemoryError | Exception e) {
@@ -153,53 +148,6 @@ public class ServiceSync extends ServiceBase {
                 //stopSync also stop downloads if any so not stopping and letting user stop and restart
                 //stopSync(e.getLocalizedMessage(), 5000);
             }
-        }
-
-        private List<Track> newAndRec;
-        private int nbFilesTotal=0;
-        private int nbFilesDeleted=0;
-        private int nbFilesTreated=0;
-
-        private void deleteFilesNotInDb(File path) throws InterruptedException {
-            checkAbort();
-            if (path.isDirectory()) {
-                File[] files = path.listFiles();
-                if (files != null) {
-                    if(files.length>0) {
-                        nbFilesTotal+=files.length;
-                        for (File file : files) {
-                            checkAbort();
-                            if (file.isDirectory()) {
-                                nbFilesTotal--;
-                                deleteFilesNotInDb(file);
-                            }
-                            else {
-                                nbFilesTreated++;
-                                if (!checkFile(file.getAbsolutePath())) {
-                                    //noinspection ResultOfMethodCallIgnored
-                                    file.delete();
-                                    nbFilesDeleted++;
-                                }
-                                helperNotification.notifyBar(notificationSync,
-                                        "Deleted " + nbFilesDeleted + " unwanted files",
-                                        10, nbFilesTreated, nbFilesTotal);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private boolean checkFile(String absolutePath) {
-            ListIterator<Track> trackListIterator = newAndRec.listIterator();
-            while (trackListIterator.hasNext()) {
-                Track next = trackListIterator.next();
-                if(next.getPath().equals(absolutePath)) {
-                    trackListIterator.remove();
-                    return true;
-                }
-            }
-            return false;
         }
 
         private void checkFiles(Track.Status status)
@@ -296,6 +244,7 @@ public class ServiceSync extends ServiceBase {
                         newTracks.put(fileReceived.getIdFileServer(), fileReceived);
                     }
                     break;
+                    //FIXME: Remove all OutOfMemoryError catches, should not be needed
                 } catch (OutOfMemoryError | Exception e) {
                     msg = e.getLocalizedMessage();
                     Log.d(TAG, "ERROR: "+ msg);
