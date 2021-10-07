@@ -47,11 +47,8 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
                             int loaderPos = albums.size() - 1;
                             complete=!addMore();
                             albums.remove(loaderPos);
-                            adapterAlbum.notifyDataSetChanged();
+                            adapterAlbum.notifyItemRemoved(loaderPos);
                             adapterAlbum.setLoaded();
-//                            if(complete) {
-//                                Toast.makeText(ActivityAlbums.this, "End of list", Toast.LENGTH_SHORT).show();
-//                            }
                         });
                     }
                 }

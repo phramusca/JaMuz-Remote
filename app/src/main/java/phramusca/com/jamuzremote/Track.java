@@ -287,14 +287,6 @@ public class Track implements Serializable {
         return idFileServer;
     }
 
-    public void setPath(String oriExt, String destExt) {
-        if(!oriExt.equals(destExt)) {
-            path=path.replace("."+oriExt, "."+destExt);
-            relativeFullPath=relativeFullPath.replace("."+oriExt, "."+destExt);
-            update();
-        }
-    }
-
     public long getSize() {
         return size;
     }
