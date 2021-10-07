@@ -671,7 +671,7 @@ public class MusicLibrary {
         return false;
     }
 
-    //FIXME NOW getAlbums takes too long ! Need to review the query (and probably move from Track to a new model with only minimum info)
+    //FIXME getAlbums takes too long ! Need to review the query (and probably move from Track to a new model with only minimum info)
     List<Track> getAlbums(int offset) {
         List<Track> tracks = new ArrayList<>();
         Cursor cursor = null;
