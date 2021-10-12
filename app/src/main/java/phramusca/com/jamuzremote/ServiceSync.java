@@ -137,7 +137,7 @@ public class ServiceSync extends ServiceBase {
 
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error ProcessSync", e);
-                helperNotification.notifyBar(notificationSync, "Interrupted: "+e.getLocalizedMessage());
+                helperNotification.notifyBar(notificationSync, "Interrupted ");
                 //stopSync also stop downloads if any so not stopping and letting user stop and restart
                 //stopSync(e.getLocalizedMessage(), 5000);
             } catch (OutOfMemoryError | Exception e) {
@@ -464,12 +464,12 @@ public class ServiceSync extends ServiceBase {
             if(!completed && !checkCompleted()) {
                 stopSync("Sync done but NOT complete :(", -1);
             }
-            //FIXME NOW checkCompleted can stop sync as downloads are complete though check info files may still run !!
+            //FIXME checkCompleted can stop sync as downloads are complete though check info files may still run !!
         }
 
         private boolean startDownloads() {
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Starting download ... "));
-            pool = Executors.newFixedThreadPool(5); //TODO: Make number of threads an option
+            pool = Executors.newFixedThreadPool(20); //FIXME: Make number of threads an option AND add benchmark back
             downloadServices= new ArrayList<>();
             nbFilesTotal=0;
             nbFiles=0;
@@ -485,8 +485,7 @@ public class ServiceSync extends ServiceBase {
             pool.shutdown();
             notifyBarProgress(null);
             try {
-                pool.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
-                return true;
+                return pool.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 return false;
