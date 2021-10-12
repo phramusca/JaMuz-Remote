@@ -124,7 +124,7 @@ public class ServiceScan extends ServiceBase {
                     //Scan deleted files
                     //This will remove from db files not in filesystem
                     //It IS compatible with ServiceSync
-                    //FIXME: replace includeINFO with a List<Track.Status> so that only looking for LOCAL
+                    //FIXME replace includeINFO with a List<Track.Status> so that only looking for LOCAL
                     //and leave other statuses to sync process so that it is really fully compatible
                         // REC, LOCAL => remove from db if file not found
                         // includeINFO=false : INFO & NEW not included
