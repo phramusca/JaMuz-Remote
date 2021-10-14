@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -120,11 +121,12 @@ public abstract class AdapterTrack extends AdapterLoad {
 
     void setView(int position, UserViewHolder userViewHolder,
                  String line1, String line2, String line3, String line4) {
-
         if(trackList.get(position).getStatus().equals(Track.Status.INFO)) {
             userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.colorAccent));
             userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.colorAccent));
-
+        } else if(trackList.get(position).getStatus().equals(Track.Status.ERROR)) {
+            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.lightYellow));
+            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.lightYellow));
         } else {
             userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
             userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
@@ -145,6 +147,8 @@ public abstract class AdapterTrack extends AdapterLoad {
 
         if(trackList.get(position).getStatus().equals(Track.Status.NEW)) {
             bitmap = overlayIcon(bitmap, R.drawable.ic_download);
+        } else if(trackList.get(position).getStatus().equals(Track.Status.ERROR)) {
+            bitmap = overlayIcon(bitmap, R.drawable.ic_error);
         }
 
         userViewHolder.imageViewCover.setImageBitmap(bitmap);

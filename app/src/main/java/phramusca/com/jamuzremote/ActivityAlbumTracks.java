@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ActivityAlbumTracks extends AppCompatActivity {
@@ -87,13 +88,15 @@ public class ActivityAlbumTracks extends AppCompatActivity {
     }
 
     private void insertAndSetResult(Track track, boolean playNext, int pos) {
-        if(!track.getStatus().equals(Track.Status.INFO)) {
+        if(!Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track.getStatus())) {
+            //Insert in queue
             PlayQueue.queue.insert(track);
             Intent data = new Intent();
             data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");
             setResult(RESULT_OK, data);
             finish();
         } else {
+            //Download the file
             track.getTags(true);
             track.setStatus(Track.Status.NEW);
             trackAdapter.notifyItemChanged(pos);

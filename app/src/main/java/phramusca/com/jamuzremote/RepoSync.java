@@ -71,10 +71,12 @@ public final class RepoSync {
     }
 
     public synchronized static void update(Track track) {
-        if(tracks.containsRow(track.getIdFileServer())) {
-            tracks.row(track.getIdFileServer()).clear();
+        if(tracks!=null) {
+            if(tracks.containsRow(track.getIdFileServer())) {
+                tracks.row(track.getIdFileServer()).clear();
+            }
+            tracks.put(track.getIdFileServer(), track.getStatus(), track);
         }
-        tracks.put(track.getIdFileServer(), track.getStatus(), track);
     }
 
     public synchronized static int getRemainingSize() {

@@ -279,7 +279,7 @@ public class Playlist implements Comparable, Serializable {
         String in = "WHERE "+COL_STATUS+" IN (" +
                 "\""+ Track.Status.REC.name() + "\"," +
                 "\"" + Track.Status.LOCAL.name() + "\""
-                +(includeINFO?",\"" + Track.Status.INFO.name() + "\", \"" + Track.Status.NEW.name() + "\"":"")+") " +
+                +(includeINFO?",\"" + Track.Status.INFO.name() + "\", \"" + Track.Status.NEW.name() + "\", \"" + Track.Status.ERROR.name() + "\"":"")+") " +
                 " AND rating "+getRatingString()+" ";
 
         if(limitValue>0) {
