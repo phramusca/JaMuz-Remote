@@ -550,6 +550,11 @@ public class ServiceSync extends ServiceBase {
                     switch (response.code()) {
                         case 301:
                             throw new ServerException(request.header("api-version")+" not supported. "+ Objects.requireNonNull(response.body()).string());
+                        case 410: //Gone
+                            //Transcoded file is not available
+                            track.setStatus(Track.Status.ERROR);
+                            RepoSync.update(track);
+                            break;
                         case 404: // File does not exist on server
                             HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
                             track.setStatus(Track.Status.REC); //To be ignored by current sync process

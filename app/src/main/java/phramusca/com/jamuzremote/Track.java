@@ -456,7 +456,7 @@ public class Track implements Serializable {
     }
 
     public enum Status {
-        NEW, REC, LOCAL, INFO;
+        NEW, REC, LOCAL, INFO, ERROR;
 
         Status() {
         }
