@@ -633,8 +633,7 @@ public class MusicLibrary {
     /**
      * @param getAppDataPath Application Folder to exclude from deletion
      * @param userPath User path (new one) to exclude from deletion
-     * @return the number of rows affected if a whereClause is passed in, 0 otherwise.
-     * To remove all rows and get a count pass "1" as the whereClause.
+     * @return the number of rows affected.
      */
     synchronized int deleteTrack(File getAppDataPath, String userPath){
         try {
@@ -671,7 +670,7 @@ public class MusicLibrary {
         return false;
     }
 
-    //FIXME NOW getAlbums takes too long ! Need to review the query (and probably move from Track to a new model with only minimum info)
+    //FIXME getAlbums takes too long ! Need to review the query (and probably move from Track to a new model with only minimum info)
     List<Track> getAlbums(int offset) {
         List<Track> tracks = new ArrayList<>();
         Cursor cursor = null;
