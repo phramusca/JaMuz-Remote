@@ -86,7 +86,7 @@ public class TrackQueue extends TrackList {
         sendListener();
     }
 
-    private ArrayList<IListenerQueue> mListListener = new ArrayList<>();
+    private final ArrayList<IListenerQueue> mListListener = new ArrayList<>();
 
     synchronized private void sendListener() {
         for(int i = mListListener.size()-1; i >= 0; i--) {
@@ -118,7 +118,7 @@ public class TrackQueue extends TrackList {
 
     synchronized PlayQueueRelative getActivityList() {
         if(positionPlaying >-1) {
-            int indexStart = (positionPlaying - MAX_QUEUE_PREVIOUS) > 0 ? positionPlaying - MAX_QUEUE_PREVIOUS : 0;
+            int indexStart = Math.max((positionPlaying - MAX_QUEUE_PREVIOUS), 0);
             Log.i(TAG,"getActivityList "+indexStart);
             ArrayList<Track> list = get(indexStart, positionPlaying);
             return new PlayQueueRelative(positionPlaying, indexStart, list);

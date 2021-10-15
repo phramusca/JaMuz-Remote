@@ -63,7 +63,7 @@
     <string name="confirmRemove">Remove ?</string>
     <string name="best_albums">Best Albums</string>
     <string name="play_queue">Play Queue</string>
-    <string name="syncCheckFilesOnDisk">Checking if files are already on disk ...</string>
+    <string name="syncCheckFilesOnDisk">Checking if files are already on disk …</string>
     <string name="nbTracks">track(s)</string>
     <string name="album_tracks">Album Tracks</string>
     <string name="settings">Settings</string>

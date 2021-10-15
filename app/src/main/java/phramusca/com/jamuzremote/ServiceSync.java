@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -138,7 +137,7 @@ public class ServiceSync extends ServiceBase {
 
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error ProcessSync", e);
-                helperNotification.notifyBar(notificationSync, "Interrupted: "+e.getLocalizedMessage());
+                helperNotification.notifyBar(notificationSync, "Interrupted ");
                 //stopSync also stop downloads if any so not stopping and letting user stop and restart
                 //stopSync(e.getLocalizedMessage(), 5000);
             } catch (OutOfMemoryError | Exception e) {
@@ -196,10 +195,7 @@ public class ServiceSync extends ServiceBase {
                                 }
                             }
                         } else {
-                            //FIXME NOW After a database reset (deleted) transcoded files will be deleted
-                            // as size in db (trackServer.getSize(), the flac one)
-                            // differs from the real mp3 file size
-                            if(trackServer.getStatus().equals(Track.Status.NEW) && RepoSync.checkFile(trackServer, trackServer.getSize())) {
+                            if(trackServer.getStatus().equals(Track.Status.NEW) && RepoSync.checkFile(trackServer)) {
                                 trackServer.setStatus(Track.Status.REC);
                             }
                             HelperLibrary.musicLibrary.insertTrack(trackServer);
@@ -441,7 +437,7 @@ public class ServiceSync extends ServiceBase {
 
         @Override
         public void run() {
-            boolean completed=false;
+            boolean completed = false;
             try {
                 do {
                     checkAbort();
@@ -454,28 +450,26 @@ public class ServiceSync extends ServiceBase {
                     }
                     checkAbort();
                     nbRetries++;
-                    int sleepSeconds=nbRetries*10;
+                    int sleepSeconds = nbRetries * 10;
                     runOnUiThread(() -> helperNotification.notifyBar(notificationDownload,
                             "Waiting " + sleepSeconds + "s before attempt " +
                                     (nbRetries + 1) + "/" + maxNbRetries));
                     //noinspection BusyWait
-                    sleep(sleepSeconds*1000);
+                    sleep(sleepSeconds * 1000L);
                     checkAbort();
-                } while (nbRetries<maxNbRetries-1);
+                } while (nbRetries < maxNbRetries - 1);
             } catch (InterruptedException e) {
                 Log.i(TAG, "ProcessDownload received InterruptedException");
             }
             if(!completed && !checkCompleted()) {
                 stopSync("Sync done but NOT complete :(", -1);
             }
-            //FIXME NOW checkCompleted can stop sync as downloads are complete though check info files may still run !!
+            //FIXME checkCompleted can stop sync as downloads are complete though check info files may still run !!
         }
 
         private boolean startDownloads() {
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Starting download ... "));
-            pool = Executors.newFixedThreadPool(5); //TODO: Make number of threads an option
-            //FIXME NOW Why not using this cache thread pool: seems promising
-            //Executors.newCachedThreadPool();
+            pool = Executors.newFixedThreadPool(20); //FIXME: Make number of threads an option AND add benchmark back
             downloadServices= new ArrayList<>();
             nbFilesTotal=0;
             nbFiles=0;
@@ -491,8 +485,7 @@ public class ServiceSync extends ServiceBase {
             pool.shutdown();
             notifyBarProgress(null);
             try {
-                pool.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
-                return true;
+                return pool.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 return false;
@@ -542,19 +535,6 @@ public class ServiceSync extends ServiceBase {
                 Request request = clientInfo.getRequestBuilder(urlBuilder).build();
                 Response response = clientDownload.newCall(request).execute();
                 if (response.isSuccessful()) {
-
-                    ///FIXME NOW Better handle transcoded files (format, bitrate, length)
-                    //For now size received from header is only used in RepoSync.checkReceivedFile
-                    String oriExt = response.header("oriExt");
-                    String destExt = response.header("destExt");
-                    long size = track.getSize();
-                    if(!Objects.equals(oriExt, destExt)) {
-                        track.setPath(Objects.requireNonNull(oriExt), destExt);
-                        destinationFile=new File(track.getPath());
-                        String sizeHeader = response.header("size");
-                        size = Long.parseLong(sizeHeader);
-                    }
-
                     if (destinationFile.exists()) {
                         boolean fileDeleted = destinationFile.delete();
                         Log.v("fileDeleted", fileDeleted + "");
@@ -565,11 +545,16 @@ public class ServiceSync extends ServiceBase {
                     sink.writeAll(Objects.requireNonNull(response.body()).source());
                     Objects.requireNonNull(response.body()).source().close();
                     sink.close();
-                    RepoSync.checkReceivedFile(track, size);
+                    RepoSync.checkReceivedFile(track);
                 } else {
                     switch (response.code()) {
                         case 301:
                             throw new ServerException(request.header("api-version")+" not supported. "+ Objects.requireNonNull(response.body()).string());
+                        case 410: //Gone
+                            //Transcoded file is not available
+                            track.setStatus(Track.Status.ERROR);
+                            RepoSync.update(track);
+                            break;
                         case 404: // File does not exist on server
                             HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
                             track.setStatus(Track.Status.REC); //To be ignored by current sync process
