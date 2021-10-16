@@ -393,6 +393,7 @@ public class ServiceSync extends ServiceBase {
         private long sizeTotal;
         private long sizeRemaining;
         private int nbFailed;
+        private Benchmark bench;
 
         ProcessDownload(String name, List<Track> newTracks) {
             super(name);
@@ -425,12 +426,13 @@ public class ServiceSync extends ServiceBase {
                     sizeRemaining-=track.getSize();
                     newTracks.remove(track);
                 }
+                bench.get(track.getSize());
             }
             String bigText = "-" + newTracks.size() + "/" + nbFilesStart +
                     "\n" + StringManager.humanReadableByteCount(sizeRemaining, false)
                     + "/" + StringManager.humanReadableByteCount(sizeTotal, false) + "\n" +
                     "Attempt " + (nbRetries + 1) + "/" + maxNbRetries + ". " + nbFailed + " Error(s).\n";
-            String msg = "Downloading ... ";
+            String msg =  "Downloading ... " +bench.getLast();
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, msg,
                     nbFilesStart, (nbFilesStart - newTracks.size()), false,
                     true, true,
@@ -472,6 +474,7 @@ public class ServiceSync extends ServiceBase {
 
         private boolean startDownloads() throws InterruptedException {
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Starting download ... "));
+            bench = new Benchmark(newTracks.size(), 10);
             pool = Executors.newFixedThreadPool(20); //FIXME: Make number of threads an option AND add benchmark back
             downloadServices= new ArrayList<>();
             sizeTotal=0;
