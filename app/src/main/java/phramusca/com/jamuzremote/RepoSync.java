@@ -79,37 +79,6 @@ public final class RepoSync {
         }
     }
 
-    public synchronized static int getRemainingSize() {
-        return tracks ==null?0:tracks.column(Track.Status.NEW).size();
-    }
-
-    public synchronized static int getTotalSize() {
-        return tracks==null?0:tracks.column(Track.Status.REC).size()+tracks.column(Track.Status.NEW).size();
-    }
-
-    static String totalFilesSize;
-
-    public synchronized static String getTotalFileSize() {
-        if(totalFilesSize!=null || tracks==null) {
-            return totalFilesSize;
-        }
-        long totalSize=0;
-        totalSize+=getRemainingFileSize();
-        totalFilesSize=StringManager.humanReadableByteCount(totalSize, false);
-        return totalFilesSize;
-    }
-
-    public synchronized static long getRemainingFileSize() {
-        if(tracks ==null) {
-            return 0;
-        }
-        long nbRemaining=0;
-        for(Track track : tracks.column(Track.Status.NEW).values()) {
-            nbRemaining+=track.getSize();
-        }
-        return nbRemaining;
-    }
-
     public synchronized static List<Track> getDownloadList() {
         return new ArrayList<>(tracks.column(Track.Status.NEW).values());
     }
