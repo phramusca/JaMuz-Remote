@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 /**
  * Created by raph on 17/06/17.
  */
-public class TriStateButton extends android.support.v7.widget.AppCompatButton {
+public class TriStateButton extends androidx.appcompat.widget.AppCompatButton {
 
     //private final int MAX_STATES=3;
     int state;
