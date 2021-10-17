@@ -79,19 +79,19 @@ public final class RepoSync {
         }
     }
 
+    public synchronized static Track getFile(int i) {
+        if(tracks.containsRow(i)) {
+            return tracks.row(i).values().iterator().next();
+        }
+        return null;
+    }
+
     public synchronized static List<Track> getDownloadList() {
         return new ArrayList<>(tracks.column(Track.Status.NEW).values());
     }
 
     public synchronized static List<Track> getMergeList() {
         return new ArrayList<>(tracks.column(Track.Status.REC).values());
-    }
-
-    public synchronized static Track getFile(int i) {
-        if(tracks.containsRow(i)) {
-            return tracks.row(i).values().iterator().next();
-        }
-        return null;
     }
 
     public synchronized static List<Track> getNotSyncedList() {
