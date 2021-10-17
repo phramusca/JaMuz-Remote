@@ -2,12 +2,13 @@ package phramusca.com.jamuzremote;
 
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,10 +29,9 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         TextView title = findViewById(R.id.album_tracks_title);
 
         Intent intent = getIntent();
-        @SuppressWarnings("unchecked")
-        final ArrayList<Track> tracks = (ArrayList<Track>) intent.getSerializableExtra("tracksList");
+        @SuppressWarnings("unchecked") final ArrayList<Track> tracks = (ArrayList<Track>) intent.getSerializableExtra("tracksList");
 
-        if(tracks!=null && tracks.size()>0) {
+        if (tracks != null && tracks.size() > 0) {
             Button button_queue_album = findViewById(R.id.button_queue_album);
             button_queue_album.setOnClickListener(v -> insertAndSetResult(tracks.get(0), false));
 
@@ -82,20 +82,20 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         PlayQueue.queue.insert(playlist);
 
         Intent data = new Intent();
-        data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");
+        data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue");
         setResult(RESULT_OK, data);
         finish();
     }
 
     private void insertAndSetResult(Track track, boolean playNext, int pos) {
-        if(Arrays.asList(Track.Status.REC, Track.Status.LOCAL).contains(track.getStatus())) {
+        if (Arrays.asList(Track.Status.REC, Track.Status.LOCAL).contains(track.getStatus())) {
             //Insert in queue
             PlayQueue.queue.insert(track);
             Intent data = new Intent();
-            data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");
+            data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue");
             setResult(RESULT_OK, data);
             finish();
-        } else if(Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track.getStatus())) {
+        } else if (Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track.getStatus())) {
             //Download the file
             track.getTags(true);
             track.setStatus(Track.Status.NEW);

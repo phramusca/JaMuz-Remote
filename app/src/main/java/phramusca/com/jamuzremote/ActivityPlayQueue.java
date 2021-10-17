@@ -2,11 +2,12 @@ package phramusca.com.jamuzremote;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
 
     AdapterTrack trackAdapter;
     RecyclerView recyclerView;
-    private int offset=0;
+    private int offset = 0;
     private static final int QUEUE_REQUEST_CODE = 200;
 
     //FIXME NOW Issue when list is small
@@ -33,7 +34,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
         final Playlist playlist = (Playlist) intent.getSerializableExtra("SelectedPlaylist");
 
         PlayQueueRelative playQueueRelative = PlayQueue.queue.getActivityList();
-        if(playQueueRelative.getTracks()!=null) {
+        if (playQueueRelative.getTracks() != null) {
             int position = playQueueRelative.getPosition();
             offset = playQueueRelative.getOffset();
             position = position - offset;
@@ -42,7 +43,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
             trackAdapter = new AdapterTrack(this, playQueueRelative.getTracks(), position, recyclerView) {
                 @Override
                 List<Track> getMore() {
-                    return PlayQueue.queue.getMore(trackAdapter.getItemCount()-1+offset, playlist);
+                    return PlayQueue.queue.getMore(trackAdapter.getItemCount() - 1 + offset, playlist);
                 }
 
                 @Override
@@ -51,10 +52,10 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                 }
             };
             trackAdapter.addListener(this);
-            recyclerView.getLayoutManager().scrollToPosition(position-1>=0?position-1:position);
+            recyclerView.getLayoutManager().scrollToPosition(position - 1 >= 0 ? position - 1 : position);
 
             PlayQueue.queue.addListener(positionPlaying -> {
-                trackAdapter.trackList.setPositionPlaying(positionPlaying-offset);
+                trackAdapter.trackList.setPositionPlaying(positionPlaying - offset);
                 trackAdapter.notifyDataSetChanged();
             });
 
@@ -66,7 +67,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                     underlayButtons.add(new SwipeHelper.UnderlayButton(
                             SwipeHelper.ButtonInfo.DEL,
                             position -> {
-                                PlayQueue.queue.remove(position+offset);
+                                PlayQueue.queue.remove(position + offset);
                                 trackAdapter.trackList.remove(position);
                                 trackAdapter.notifyDataSetChanged();
                             },
@@ -75,7 +76,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                     underlayButtons.add(new SwipeHelper.UnderlayButton(
                             ButtonInfo.DOWN,
                             position -> {
-                                PlayQueue.queue.moveDown(position+offset);
+                                PlayQueue.queue.moveDown(position + offset);
                                 trackAdapter.trackList.moveDown(position);
                                 trackAdapter.notifyDataSetChanged();
                             },
@@ -84,7 +85,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                     underlayButtons.add(new SwipeHelper.UnderlayButton(
                             ButtonInfo.PLAY,
                             position -> {
-                                if(PlayQueue.queue.insertNext(position+offset)) {
+                                if (PlayQueue.queue.insertNext(position + offset)) {
                                     Intent intent = new Intent();
                                     intent.putExtra("action", "playNext");
                                     setResult(RESULT_OK, intent);
@@ -96,7 +97,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                     underlayButtons.add(new SwipeHelper.UnderlayButton(
                             ButtonInfo.QUEUE,
                             position -> {
-                                PlayQueue.queue.insertNext(position+offset);
+                                PlayQueue.queue.insertNext(position + offset);
                                 trackAdapter.trackList.insertNext(position);
                                 trackAdapter.notifyDataSetChanged();
                             },

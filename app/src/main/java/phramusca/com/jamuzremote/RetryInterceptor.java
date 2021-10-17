@@ -1,15 +1,16 @@
 package phramusca.com.jamuzremote;
 
-import androidx.annotation.NonNull;
+import static java.lang.Thread.sleep;
+
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
 
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
-
-import static java.lang.Thread.sleep;
 
 public class RetryInterceptor implements Interceptor {
     private static final String TAG = RetryInterceptor.class.getName();
@@ -35,22 +36,22 @@ public class RetryInterceptor implements Interceptor {
         do {
             nbRetries++;
             try {
-                Log.d(TAG, "CALLING: "+ request.toString());
+                Log.d(TAG, "CALLING: " + request.toString());
                 response = chain.proceed(request);
                 break;
             } catch (Exception e) {
                 msg = e.getLocalizedMessage();
-                Log.d(TAG, "ERROR: "+ msg);
+                Log.d(TAG, "ERROR: " + msg);
                 helperNotification.notifyBar(notification, sleepSeconds + "s before " +
                         (nbRetries + 1) + "/" + maxNbRetries + " : " + msg);
                 try {
-                    sleep(sleepSeconds*1000);
+                    sleep(sleepSeconds * 1000);
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
                 }
             }
-        } while (nbRetries < maxNbRetries-1);
-        if(response==null) {
+        } while (nbRetries < maxNbRetries - 1);
+        if (response == null) {
             throw new IOException(msg);
         }
         return response;

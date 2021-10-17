@@ -36,12 +36,6 @@ import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.Html;
 import android.text.InputType;
 import android.text.Spanned;
@@ -67,6 +61,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.common.reflect.TypeToken;
@@ -117,7 +118,7 @@ public class ActivityMain extends AppCompatActivity {
     //private static final String DB_PATH =
     //      "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;
     public static File musicLibraryDbFile = new File(
-            Environment.getExternalStorageDirectory()+"/JaMuz/JaMuzRemote.db");
+            Environment.getExternalStorageDirectory() + "/JaMuz/JaMuzRemote.db");
 
     private Map<String, Playlist> localPlaylists = new LinkedHashMap<>();
     private ArrayAdapter<Playlist> playListArrayAdapter;
@@ -154,10 +155,10 @@ public class ActivityMain extends AppCompatActivity {
     private Spinner spinnerGenre;
     private Spinner spinnerPlaylistLimitUnit;
     private Spinner spinnerPlaylistLimitValue;
-    private static boolean spinnerPlaylistSend=false;
-    private static boolean spinnerGenreSend=false;
-    private static boolean spinnerLimitUnitSend =false;
-    private static boolean spinnerLimitValueSend=false;
+    private static boolean spinnerPlaylistSend = false;
+    private static boolean spinnerGenreSend = false;
+    private static boolean spinnerLimitUnitSend = false;
+    private static boolean spinnerLimitValueSend = false;
     private ArrayAdapter<CharSequence> playListLimitUnitArrayAdapter;
     private ArrayAdapter<Integer> playListLimitValueArrayAdapter;
     private RatingBar ratingBar;
@@ -185,15 +186,15 @@ public class ActivityMain extends AppCompatActivity {
         Log.i(TAG, "ActivityMain onCreate");
         setContentView(R.layout.activity_main);
 
-        login=Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID);
+        login = Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         BroadcastReceiver mReceiver = new ScreenReceiver();
         registerReceiver(mReceiver, filter);
 
-        textToSpeech =new TextToSpeech(getApplicationContext(), status -> {
-            if(status != TextToSpeech.ERROR) {
+        textToSpeech = new TextToSpeech(getApplicationContext(), status -> {
+            if (status != TextToSpeech.ERROR) {
                 textToSpeech.setLanguage(textToSpeech.getDefaultVoice().getLocale());
             }
         });
@@ -261,13 +262,13 @@ public class ActivityMain extends AppCompatActivity {
             dimOn();
             buttonRemote.setEnabled(false);
             buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
-            if(buttonRemote.getText().equals("1")) {
+            if (buttonRemote.getText().equals("1")) {
                 ClientInfo clientInfo = null;
-                if(checkWifiConnection()) {
+                if (checkWifiConnection()) {
                     clientInfo = getClientInfo(ClientCanal.REMOTE, helperToast);
                 }
-                if(clientInfo!=null) {
-                    clientRemote =  new ClientRemote(clientInfo, new ListenerRemote());
+                if (clientInfo != null) {
+                    clientRemote = new ClientRemote(clientInfo, new ListenerRemote());
                     new Thread() {
                         public void run() {
                             enableRemote(!clientRemote.connect());
@@ -276,8 +277,7 @@ public class ActivityMain extends AppCompatActivity {
                 } else {
                     enableRemote(true);
                 }
-            }
-            else {
+            } else {
                 enableRemote(true);
                 stopRemote();
             }
@@ -287,14 +287,14 @@ public class ActivityMain extends AppCompatActivity {
         buttonSync.setOnClickListener(v -> {
             dimOn();
             buttonSync.setBackgroundResource(R.drawable.connect_ongoing);
-            if(buttonSync.getText().equals("1")) {
+            if (buttonSync.getText().equals("1")) {
                 enableSync(false);
                 ClientInfo clientInfo = null;
-                if(checkWifiConnection()) {
+                if (checkWifiConnection()) {
                     clientInfo = getClientInfo(ClientCanal.SYNC, helperToast);
                 }
-                if(clientInfo!=null) {
-                    if(!isMyServiceRunning(ServiceSync.class)) {
+                if (clientInfo != null) {
+                    if (!isMyServiceRunning(ServiceSync.class)) {
                         Intent service = new Intent(getApplicationContext(), ServiceSync.class);
                         service.putExtra("clientInfo", clientInfo);
                         service.putExtra("getAppDataPath", getAppDataPath());
@@ -303,9 +303,8 @@ public class ActivityMain extends AppCompatActivity {
                 } else {
                     enableSync(true);
                 }
-            }
-            else {
-                Log.i(TAG, "Broadcast("+ServiceSync.USER_STOP_SERVICE_REQUEST+")");
+            } else {
+                Log.i(TAG, "Broadcast(" + ServiceSync.USER_STOP_SERVICE_REQUEST + ")");
                 sendBroadcast(new Intent(ServiceSync.USER_STOP_SERVICE_REQUEST));
                 enableSync(true);
             }
@@ -324,18 +323,18 @@ public class ActivityMain extends AppCompatActivity {
 
         ratingBar = findViewById(R.id.ratingBar);
         ratingBar.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
-            if(fromUser) { //as it is also set when server sends file info (and it can be 0)
+            if (fromUser) { //as it is also set when server sends file info (and it can be 0)
                 dimOn();
-                setRating((int)rating);
+                setRating((int) rating);
             }
         });
 
         ratingBarPlaylist = findViewById(R.id.ratingBarPlaylist);
         ratingBarPlaylist.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
-            if(fromUser) {
+            if (fromUser) {
                 dimOn();
                 ratingBarPlaylist.setEnabled(false);
-                if(localSelectedPlaylist!=null) {
+                if (localSelectedPlaylist != null) {
                     localSelectedPlaylist.setRating(Math.round(rating));
                     refreshQueueAndPlaylistSpinner();
                 }
@@ -346,7 +345,7 @@ public class ActivityMain extends AppCompatActivity {
         Button buttonClearRating = findViewById(R.id.button_clear_rating);
         buttonClearRating.setOnClickListener(v -> {
             ratingBarPlaylist.setRating(0F);
-            if(localSelectedPlaylist!=null) {
+            if (localSelectedPlaylist != null) {
                 localSelectedPlaylist.setRating(0);
                 refreshQueueAndPlaylistSpinner();
             }
@@ -354,7 +353,7 @@ public class ActivityMain extends AppCompatActivity {
 
         buttonRatingOperator = findViewById(R.id.button_rating_operator);
         buttonRatingOperator.setOnClickListener(v -> {
-            if(localSelectedPlaylist!=null) {
+            if (localSelectedPlaylist != null) {
                 buttonRatingOperator.setText(localSelectedPlaylist.setRatingOperator());
                 refreshQueueAndPlaylistSpinner();
             }
@@ -369,7 +368,7 @@ public class ActivityMain extends AppCompatActivity {
         spinnerPlaylistLimitUnit.setOnTouchListener(dimOnTouchListener);
 
         Integer[] limitValues = new Integer[100];
-        for (int i=0; i<100; i++) {
+        for (int i = 0; i < 100; i++) {
             limitValues[i] = i;
         }
         playListLimitValueArrayAdapter = new ArrayAdapter<>(
@@ -413,7 +412,7 @@ public class ActivityMain extends AppCompatActivity {
         toggleButtonTagsPanel.setOnClickListener(v -> {
             dimOn();
             toggle(layoutTagsPlaylistLayout, !toggleButtonTagsPanel.isChecked());
-            if(toggleButtonTagsPanel.isChecked()) {
+            if (toggleButtonTagsPanel.isChecked()) {
                 toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
                 toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
                 toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
@@ -424,7 +423,7 @@ public class ActivityMain extends AppCompatActivity {
         toggleButtonRatingPanel.setOnClickListener(v -> {
             dimOn();
             toggle(layoutRatingPlaylistLayout, !toggleButtonRatingPanel.isChecked());
-            if(toggleButtonRatingPanel.isChecked()) {
+            if (toggleButtonRatingPanel.isChecked()) {
                 toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
                 toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
                 toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
@@ -435,7 +434,7 @@ public class ActivityMain extends AppCompatActivity {
         toggleButtonOrderPanel.setOnClickListener(v -> {
             dimOn();
             toggle(layoutOrderPlaylistLayout, !toggleButtonOrderPanel.isChecked());
-            if(toggleButtonOrderPanel.isChecked()) {
+            if (toggleButtonOrderPanel.isChecked()) {
                 toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
                 toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
                 toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
@@ -446,7 +445,7 @@ public class ActivityMain extends AppCompatActivity {
         toggleButtonGenresPanel.setOnClickListener(v -> {
             dimOn();
             toggle(layoutGenrePlaylistLayout, !toggleButtonGenresPanel.isChecked());
-            if(toggleButtonGenresPanel.isChecked()) {
+            if (toggleButtonGenresPanel.isChecked()) {
                 toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
                 toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
                 toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
@@ -457,7 +456,7 @@ public class ActivityMain extends AppCompatActivity {
         toggleButtonEditTags.setOnClickListener(v -> {
             dimOn();
             toggle(layoutEditTags, !toggleButtonEditTags.isChecked());
-            if(toggleButtonEditTags.isChecked()) {
+            if (toggleButtonEditTags.isChecked()) {
                 toggleOff(toggleButtonPlaylist, layoutPlaylist);
 
                 toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
@@ -471,7 +470,7 @@ public class ActivityMain extends AppCompatActivity {
         toggleButtonPlaylist.setOnClickListener(v -> {
             dimOn();
             toggle(layoutPlaylist, !toggleButtonPlaylist.isChecked());
-            if(toggleButtonPlaylist.isChecked()) {
+            if (toggleButtonPlaylist.isChecked()) {
                 toggleOff(toggleButtonEditTags, layoutEditTags);
                 refreshLocalPlaylistSpinner(true);
             } else {
@@ -498,19 +497,19 @@ public class ActivityMain extends AppCompatActivity {
             builder.setView(input);
             builder.setPositiveButton(R.string.ok, (dialog, which) -> {
                 String text = input.getText().toString().trim();
-                if(!localPlaylists.containsKey(text)) {
-                    Playlist newPlaylist=null;
-                    if(localSelectedPlaylist!=null) {
+                if (!localPlaylists.containsKey(text)) {
+                    Playlist newPlaylist = null;
+                    if (localSelectedPlaylist != null) {
                         newPlaylist = clonePlaylist(localSelectedPlaylist);
                         newPlaylist.setName(text);
                     }
-                    if(newPlaylist==null) {
+                    if (newPlaylist == null) {
                         newPlaylist = new Playlist(text, true);
                     }
                     localPlaylists.put(newPlaylist.getName(), newPlaylist);
                     setupLocalPlaylistSpinner(newPlaylist.getName());
                 } else {
-                    helperToast.toastLong(getString(R.string.playlist)+" \""+text+"\" "+getString(R.string.alreadyExists));
+                    helperToast.toastLong(getString(R.string.playlist) + " \"" + text + "\" " + getString(R.string.alreadyExists));
                 }
             });
             builder.setNegativeButton(R.string.cancel, (dialog, which) -> dialog.cancel());
@@ -520,15 +519,15 @@ public class ActivityMain extends AppCompatActivity {
 
         button_save = findViewById(R.id.button_save);
         button_save.setOnClickListener(v -> {
-            if(localSelectedPlaylist!=null) {
-                StringBuilder msg= new StringBuilder().append(getString(R.string.playlist))
+            if (localSelectedPlaylist != null) {
+                StringBuilder msg = new StringBuilder().append(getString(R.string.playlist))
                         .append(" \"")
                         .append(localSelectedPlaylist.getName())
                         .append("\" ")
                         .append(getString(R.string.saved));
-                if(localSelectedPlaylist.save()) {
-                    button_save.setBackgroundResource(localSelectedPlaylist.isModified()?
-                            R.drawable.ic_button_save_red:R.drawable.ic_button_save);
+                if (localSelectedPlaylist.save()) {
+                    button_save.setBackgroundResource(localSelectedPlaylist.isModified() ?
+                            R.drawable.ic_button_save_red : R.drawable.ic_button_save);
                     msg.append(" ").append(getString(R.string.successfully));
                 } else {
                     msg.append(" ").append(getString(R.string.withErrors));
@@ -539,15 +538,15 @@ public class ActivityMain extends AppCompatActivity {
 
         Button button_restore = findViewById(R.id.button_restore);
         button_restore.setOnClickListener(v -> {
-            if(localSelectedPlaylist!=null) {
-                StringBuilder msg= new StringBuilder().append(getString(R.string.playlist))
+            if (localSelectedPlaylist != null) {
+                StringBuilder msg = new StringBuilder().append(getString(R.string.playlist))
                         .append(" \"")
                         .append(localSelectedPlaylist.getName())
                         .append("\" ")
                         .append(getString(R.string.restored));
                 HelperFile.createFolder(getString(R.string.playlistsFolder));
-                Playlist playlist = readPlaylist(localSelectedPlaylist.getName()+".plli");
-                if(playlist!=null) {
+                Playlist playlist = readPlaylist(localSelectedPlaylist.getName() + ".plli");
+                if (playlist != null) {
                     msg.append(" ").append(getString(R.string.successfully));
                     playlist.setModified(false);
                     playlist.resetNbFilesAndLengthOrSize(); // Otherwise it displays values from .plli file (when last saved), then the new ones. And this is confusing
@@ -562,23 +561,23 @@ public class ActivityMain extends AppCompatActivity {
 
         button_delete = findViewById(R.id.button_delete);
         button_delete.setOnClickListener(v -> {
-            if(localSelectedPlaylist!=null) {
+            if (localSelectedPlaylist != null) {
                 new AlertDialog.Builder(ActivityMain.this)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle(R.string.deletePlaylist)
-                .setMessage(getString(R.string.sureDelete) +
-                        " \""+localSelectedPlaylist.getName()+"\" "+getString(R.string.playlistQuestion))
-                .setPositiveButton(R.string.yes, (dialog, which) -> {
-                    if(localPlaylists.size()>1) {
-                        HelperFile.delete("Playlists", localSelectedPlaylist.getName() + ".plli");
-                        localPlaylists.remove(localSelectedPlaylist.getName());
-                        setupLocalPlaylistSpinner((String) null);
-                    } else {
-                        helperToast.toastShort(getString(R.string.cannotDeleteLastPlaylist));
-                    }
-                })
-                .setNegativeButton(R.string.no, null)
-                .show();
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.deletePlaylist)
+                        .setMessage(getString(R.string.sureDelete) +
+                                " \"" + localSelectedPlaylist.getName() + "\" " + getString(R.string.playlistQuestion))
+                        .setPositiveButton(R.string.yes, (dialog, which) -> {
+                            if (localPlaylists.size() > 1) {
+                                HelperFile.delete("Playlists", localSelectedPlaylist.getName() + ".plli");
+                                localPlaylists.remove(localSelectedPlaylist.getName());
+                                setupLocalPlaylistSpinner((String) null);
+                            } else {
+                                helperToast.toastShort(getString(R.string.cannotDeleteLastPlaylist));
+                            }
+                        })
+                        .setNegativeButton(R.string.no, null)
+                        .show();
             }
         });
 
@@ -609,6 +608,7 @@ public class ActivityMain extends AppCompatActivity {
                 }
 
             }
+
             @Override
             public void onSwipeRight() {
                 Log.v(TAG, "onSwipeRight");
@@ -618,6 +618,7 @@ public class ActivityMain extends AppCompatActivity {
                     playPrevious();
                 }
             }
+
             @Override
             public void onSwipeLeft() {
                 Log.v(TAG, "onSwipeLeft");
@@ -627,6 +628,7 @@ public class ActivityMain extends AppCompatActivity {
                     playNext();
                 }
             }
+
             @Override
             public void onSwipeBottom() {
                 Log.v(TAG, "onSwipeBottom");
@@ -636,6 +638,7 @@ public class ActivityMain extends AppCompatActivity {
                     audioPlayer.rewind();
                 }
             }
+
             @Override
             public void onTouch() {
                 dimOn();
@@ -643,18 +646,18 @@ public class ActivityMain extends AppCompatActivity {
 
             @Override
             public void onTap() {
-                if(isDimOn) {
-                    if(isRemoteConnected()) {
+                if (isDimOn) {
+                    if (isRemoteConnected()) {
                         clientRemote.send("playTrack");
-                    }
-                    else {
+                    } else {
                         audioPlayer.togglePlay();
                     }
                 }
             }
+
             @Override
             public void onDoubleTapUp() {
-                if(!isRemoteConnected() && isDimOn) {
+                if (!isRemoteConnected() && isDimOn) {
                     audioPlayer.pullUp();
                     audioPlayer.resume(); //As toggled by simple Tap
                 }
@@ -668,7 +671,7 @@ public class ActivityMain extends AppCompatActivity {
         });
 
         //TODO: Use proper values
-        localTrack =  new Track("albumArtist", "year", -1, -1,
+        localTrack = new Track("albumArtist", "year", -1, -1,
                 -1, -1, "bitRate", "format", -1, 0,
                 getString(R.string.welcomeTitle),
                 getString(R.string.welcomeYear), getString(R.string.app_name),
@@ -695,10 +698,8 @@ public class ActivityMain extends AppCompatActivity {
 
         //Start BT HeadSet connexion detection
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter != null)
-        {
-           if (audioManager.isBluetoothScoAvailableOffCall())
-            {
+        if (mBluetoothAdapter != null) {
+            if (audioManager.isBluetoothScoAvailableOffCall()) {
                 mBluetoothAdapter.getProfileProxy(this, mHeadsetProfileListener,
                         BluetoothProfile.HEADSET);
             }
@@ -708,12 +709,12 @@ public class ActivityMain extends AppCompatActivity {
         registerReceiver(receiverHeadSetPlugged,
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG));
 
-        if(isMyServiceRunning(ServiceSync.class)) {
+        if (isMyServiceRunning(ServiceSync.class)) {
             enableSync(false);
         }
 
         boolean kidsplaceOnStartup = preferences.getBoolean("kidsplaceOnStartup", false);
-        if(kidsplaceOnStartup) {
+        if (kidsplaceOnStartup) {
             KPUtility.handleKPIntegration(this, KPUtility.GOOGLE_MARKET);
         }
 
@@ -751,7 +752,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private boolean checkWifiConnection() {
-        if(!checkConnectedViaWifi())  {
+        if (!checkConnectedViaWifi()) {
             helperToast.toastLong("You must connect to WiFi network.");
             return false;
         }
@@ -761,8 +762,8 @@ public class ActivityMain extends AppCompatActivity {
     static ClientInfo getClientInfo(int canal, HelperToast helperToast) {
         String infoConnect = preferences.getString("connectionString", "192.168.0.1:2013");
         String[] split = infoConnect.split(":");  //NOI18N
-        if(split.length<2) {
-            helperToast.toastLong("Bad format:\t"+infoConnect+"" +
+        if (split.length < 2) {
+            helperToast.toastLong("Bad format:\t" + infoConnect + "" +
                     "\nExpected:\t\t<IP>:<Port>" +
                     "\nEx:\t\t\t\t\t\t\t192.168.0.11:2013");
             return null;
@@ -771,10 +772,10 @@ public class ActivityMain extends AppCompatActivity {
         int port;
         try {
             port = Integer.parseInt(split[1]);
-        } catch(NumberFormatException ex) {
-            port=2013;
+        } catch (NumberFormatException ex) {
+            port = 2013;
         }
-        return new ClientInfo(address, port, login,"tata", canal,
+        return new ClientInfo(address, port, login, "tata", canal,
                 "jamuz", getAppDataPath().getAbsolutePath());
     }
 
@@ -800,7 +801,7 @@ public class ActivityMain extends AppCompatActivity {
         ToggleButton button = getButtonTag(key, value);
         button.setOnClickListener(view -> {
             dimOn();
-            ToggleButton button1 = (ToggleButton)view;
+            ToggleButton button1 = (ToggleButton) view;
             setTagButtonTextColor(button1);
             String buttonText = button1.getText().toString();
             toggleTag(buttonText);
@@ -831,10 +832,10 @@ public class ActivityMain extends AppCompatActivity {
         setTagButtonTextColor(button, TriStateButton.STATE.ANY);
         button.setOnClickListener(view -> {
             dimOn();
-            TriStateButton button1 = (TriStateButton)view;
+            TriStateButton button1 = (TriStateButton) view;
             TriStateButton.STATE state = button1.getState();
             setTagButtonTextColor(button1, state);
-            if(localSelectedPlaylist!=null) {
+            if (localSelectedPlaylist != null) {
                 String buttonText = button1.getText().toString();
                 localSelectedPlaylist.toggleTag(buttonText, state);
                 refreshQueueAndPlaylistSpinner();
@@ -858,11 +859,11 @@ public class ActivityMain extends AppCompatActivity {
         setTagButtonTextColor(button, TriStateButton.STATE.ANY);
         button.setOnClickListener(view -> {
             dimOn();
-            TriStateButton button1 = (TriStateButton)view;
+            TriStateButton button1 = (TriStateButton) view;
             TriStateButton.STATE state = button1.getState();
             setTagButtonTextColor(button1, state);
             String buttonText = button1.getText().toString();
-            if(localSelectedPlaylist!=null) {
+            if (localSelectedPlaylist != null) {
                 localSelectedPlaylist.toggleGenre(buttonText, state);
                 refreshQueueAndPlaylistSpinner();
 
@@ -876,17 +877,17 @@ public class ActivityMain extends AppCompatActivity {
     private void refreshQueueAndPlaylistSpinner() {
         PlayQueue.queue.refresh(localSelectedPlaylist);
         refreshLocalPlaylistSpinner(false);
-        button_save.setBackgroundResource(localSelectedPlaylist.isModified()?
-                R.drawable.ic_button_save_red:R.drawable.ic_button_save);
+        button_save.setBackgroundResource(localSelectedPlaylist.isModified() ?
+                R.drawable.ic_button_save_red : R.drawable.ic_button_save);
         textViewPlaylist.setText(localSelectedPlaylist.getSummary());
     }
 
     //This is a trick since the following (not in listener) is not working:
     //button.setTextColor(ContextCompat.getColor(this, R.color.toggle_text));
     private void setTagButtonTextColor(ToggleButton b) {
-        if(b!=null) {
+        if (b != null) {
             boolean checked = b.isChecked();
-            b.setTextColor(ContextCompat.getColor(this, checked?R.color.textColor:R.color.colorPrimaryDark));
+            b.setTextColor(ContextCompat.getColor(this, checked ? R.color.textColor : R.color.colorPrimaryDark));
         }
     }
 
@@ -916,7 +917,7 @@ public class ActivityMain extends AppCompatActivity {
         } else {
             displayPlaylist(playlist);
             localSelectedPlaylist = playlist;
-            if(playNext) {
+            if (playNext) {
                 PlayQueue.queue.setQueue(playlist.getTracks(10, false));
                 playNext();
             }
@@ -927,7 +928,7 @@ public class ActivityMain extends AppCompatActivity {
     Spinner.OnItemSelectedListener spinnerPlaylistListener = new Spinner.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view,
-        int pos, long id) {
+                                   int pos, long id) {
             if (spinnerPlaylistSend) {
                 spinnerPlaylistSend = false;
                 //TODO When from another activity (ex: queue or albums)
@@ -948,12 +949,12 @@ public class ActivityMain extends AppCompatActivity {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view,
                                    int pos, long id) {
-            if(spinnerGenreSend) {
+            if (spinnerGenreSend) {
                 dimOn();
                 String genre = (String) parent.getItemAtPosition(pos);
                 setGenre(genre);
             }
-            spinnerGenreSend=true;
+            spinnerGenreSend = true;
         }
 
         @Override
@@ -965,15 +966,15 @@ public class ActivityMain extends AppCompatActivity {
     Spinner.OnItemSelectedListener spinnerLimitUnitListener = new Spinner.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-            if(spinnerLimitUnitSend) {
+            if (spinnerLimitUnitSend) {
                 dimOn();
                 String value = (String) parent.getItemAtPosition(pos);
-                if(!isRemoteConnected() && localSelectedPlaylist!=null) {
+                if (!isRemoteConnected() && localSelectedPlaylist != null) {
                     localSelectedPlaylist.setLimitUnit(value);
                     refreshQueueAndPlaylistSpinner();
                 }
             }
-            spinnerLimitUnitSend =true;
+            spinnerLimitUnitSend = true;
         }
 
         @Override
@@ -985,15 +986,15 @@ public class ActivityMain extends AppCompatActivity {
     Spinner.OnItemSelectedListener spinnerLimitValueListener = new Spinner.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-            if(spinnerLimitValueSend) {
+            if (spinnerLimitValueSend) {
                 dimOn();
                 Integer value = (Integer) parent.getItemAtPosition(pos);
-                if(!isRemoteConnected() && localSelectedPlaylist!=null) {
+                if (!isRemoteConnected() && localSelectedPlaylist != null) {
                     localSelectedPlaylist.setLimitValue(value);
                     refreshQueueAndPlaylistSpinner();
                 }
             }
-            spinnerLimitValueSend =true;
+            spinnerLimitValueSend = true;
         }
 
         @Override
@@ -1009,11 +1010,11 @@ public class ActivityMain extends AppCompatActivity {
     };
 
     private boolean isRemoteConnected() {
-        return (clientRemote!=null && clientRemote.isConnected());
+        return (clientRemote != null && clientRemote.isConnected());
     }
 
     private void setDimMode(boolean enable) {
-        if(enable) {
+        if (enable) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             isDimOn = false;
             dimOn();
@@ -1028,7 +1029,7 @@ public class ActivityMain extends AppCompatActivity {
 
     private void toggle(View view, boolean collapse) {
         //https://stackoverflow.com/questions/4946295/android-expand-collapse-animation
-        if(collapse) {
+        if (collapse) {
             collapse(view);
         } else {
             expand(view);
@@ -1043,13 +1044,12 @@ public class ActivityMain extends AppCompatActivity {
         // Older versions of android (pre API 21) cancel animations for views with a height of 0.
         v.getLayoutParams().height = 1;
         v.setVisibility(View.VISIBLE);
-        Animation a = new Animation()
-        {
+        Animation a = new Animation() {
             @Override
             protected void applyTransformation(float interpolatedTime, Transformation t) {
                 v.getLayoutParams().height = interpolatedTime == 1
                         ? WindowManager.LayoutParams.WRAP_CONTENT
-                        : (int)(targetHeight * interpolatedTime);
+                        : (int) (targetHeight * interpolatedTime);
                 v.requestLayout();
             }
 
@@ -1060,7 +1060,7 @@ public class ActivityMain extends AppCompatActivity {
         };
 
         // 1dp/ms
-        a.setDuration((int)(targetHeight / v.getContext().getResources().getDisplayMetrics().density));
+        a.setDuration((int) (targetHeight / v.getContext().getResources().getDisplayMetrics().density));
         v.startAnimation(a);
     }
 
@@ -1068,14 +1068,13 @@ public class ActivityMain extends AppCompatActivity {
     public static void collapse(final View v) {
         final int initialHeight = v.getMeasuredHeight();
 
-        Animation a = new Animation()
-        {
+        Animation a = new Animation() {
             @Override
             protected void applyTransformation(float interpolatedTime, Transformation t) {
-                if(interpolatedTime == 1){
+                if (interpolatedTime == 1) {
                     v.setVisibility(View.GONE);
-                }else{
-                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                } else {
+                    v.getLayoutParams().height = initialHeight - (int) (initialHeight * interpolatedTime);
                     v.requestLayout();
                 }
             }
@@ -1087,7 +1086,7 @@ public class ActivityMain extends AppCompatActivity {
         };
 
         // 1dp/ms
-        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+        a.setDuration((int) (initialHeight / v.getContext().getResources().getDisplayMetrics().density));
         v.startAnimation(a);
     }
 
@@ -1095,30 +1094,25 @@ public class ActivityMain extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.i(TAG, "ActivityMain onPause");
-        wasRemoteConnected=isRemoteConnected();
+        wasRemoteConnected = isRemoteConnected();
         stopRemote();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
     @Override
-    public void onWindowFocusChanged(boolean hasFocus)
-    {
-        try
-        {
-            if(hasFocus) {
+    public void onWindowFocusChanged(boolean hasFocus) {
+        try {
+            if (hasFocus) {
                 setDimMode(toggleButtonDimMode.isChecked());
-            }
-            else {
+            } else {
                 setDimMode(true);
             }
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             Log.e(TAG, "onWindowFocusChanged", ex);
         }
     }
 
-    private boolean wasRemoteConnected=false;
+    private boolean wasRemoteConnected = false;
 
     @Override
     protected void onResume() {
@@ -1126,11 +1120,11 @@ public class ActivityMain extends AppCompatActivity {
         Log.i(TAG, "ActivityMain onResume");
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-                        new IntentFilter("ServiceBase"));
+                new IntentFilter("ServiceBase"));
 
         getFromQRcode(getIntent().getDataString());
 
-        if(toggleButtonDimMode.isChecked()) {
+        if (toggleButtonDimMode.isChecked()) {
             dimOn();
         }
 
@@ -1152,11 +1146,11 @@ public class ActivityMain extends AppCompatActivity {
     private void applyKidsPlaceOptions() {
         boolean isKidsPlace = KPUtility.isKidsPlaceRunning(this);
 
-        buttonRemote.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
-        buttonSync.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
-        button_settings.setVisibility(isKidsPlace?View.GONE:View.VISIBLE);
+        buttonRemote.setVisibility(isKidsPlace ? View.GONE : View.VISIBLE);
+        buttonSync.setVisibility(isKidsPlace ? View.GONE : View.VISIBLE);
+        button_settings.setVisibility(isKidsPlace ? View.GONE : View.VISIBLE);
 
-        if(!isKidsPlace && wasRemoteConnected && !audioPlayer.isPlaying()) {
+        if (!isKidsPlace && wasRemoteConnected && !audioPlayer.isPlaying()) {
             buttonRemote.setEnabled(false);
             buttonRemote.performClick();
         }
@@ -1164,20 +1158,20 @@ public class ActivityMain extends AppCompatActivity {
         boolean kidsplaceLimit = preferences.getBoolean("kidsplaceLimit", false);
         boolean isKidsPlacEnabled = !isKidsPlace || !kidsplaceLimit;
         spinnerPlaylist.setEnabled(isKidsPlacEnabled);
-        if(!isKidsPlacEnabled) {
+        if (!isKidsPlacEnabled) {
             String selectedPlaylist = preferences.getString("kidsplaceLimitPlaylist", null);
             setupLocalPlaylistSpinner(selectedPlaylist);
         }
 
         boolean kidsplaceAllowEdition = preferences.getBoolean("kidsplaceAllowEdition", false);
         kidsplaceAllowEdition = !isKidsPlace || kidsplaceAllowEdition;
-        toggleButtonEditTags.setVisibility(kidsplaceAllowEdition?View.VISIBLE:View.GONE);
+        toggleButtonEditTags.setVisibility(kidsplaceAllowEdition ? View.VISIBLE : View.GONE);
 
         boolean kidsplaceAllowAddNewDel = preferences.getBoolean("kidsplaceAllowAddNewDel", false);
         kidsplaceAllowAddNewDel = !isKidsPlace || (kidsplaceAllowAddNewDel && !kidsplaceLimit);
-        button_delete.setVisibility(kidsplaceAllowAddNewDel?View.VISIBLE:View.GONE);
-        button_save.setVisibility(kidsplaceAllowAddNewDel?View.VISIBLE:View.GONE);
-        button_new.setVisibility(kidsplaceAllowAddNewDel?View.VISIBLE:View.GONE);
+        button_delete.setVisibility(kidsplaceAllowAddNewDel ? View.VISIBLE : View.GONE);
+        button_save.setVisibility(kidsplaceAllowAddNewDel ? View.VISIBLE : View.GONE);
+        button_new.setVisibility(kidsplaceAllowAddNewDel ? View.VISIBLE : View.GONE);
     }
 
     private void registerButtonReceiver() {
@@ -1224,7 +1218,7 @@ public class ActivityMain extends AppCompatActivity {
             String spokenText = results.get(0);
             VoiceKeyWords.KeyWord keyWord = VoiceKeyWords.get(spokenText);
             String arguments = keyWord.getKeyword();
-            String msg= getString(R.string.unknownCommand) + " \"" + spokenText + "\".";
+            String msg = getString(R.string.unknownCommand) + " \"" + spokenText + "\".";
             switch (keyWord.getCommand()) {
                 case UNKNOWN:
                     speak(msg);
@@ -1237,9 +1231,9 @@ public class ActivityMain extends AppCompatActivity {
                     askEdition(true);
                     break;
                 case PLAY_PLAYLIST:
-                    msg = getString(R.string.playlist)+" \"" + arguments + "\" "+getString(R.string.notFound);
-                    for(Playlist playlist : localPlaylists.values()) {
-                        if(playlist.getName().equalsIgnoreCase(arguments)) {
+                    msg = getString(R.string.playlist) + " \"" + arguments + "\" " + getString(R.string.notFound);
+                    for (Playlist playlist : localPlaylists.values()) {
+                        if (playlist.getName().equalsIgnoreCase(arguments)) {
                             applyPlaylist(playlist, true);
                             setupPlaylistSpinner(playListArrayAdapter, localSelectedPlaylist);
                             msg = "";
@@ -1250,13 +1244,12 @@ public class ActivityMain extends AppCompatActivity {
                 case PLAY_NEW_PLAYLIST_ARTIST_ONGOING:
                     arguments = displayedTrack.getArtist();
                 case PLAY_NEW_PLAYLIST_ARTIST:
-                    msg = getString(R.string.artist)+" \"" + arguments + "\" "+getString(R.string.notFound);
-                    if(arguments.equals("")) {
+                    msg = getString(R.string.artist) + " \"" + arguments + "\" " + getString(R.string.notFound);
+                    if (arguments.equals("")) {
                         //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
                         msg = getString(R.string.specifyArtist);
-                    }
-                    else if(HelperLibrary.musicLibrary.getArtist(arguments)) {
-                        Playlist playlist =new Playlist(arguments, true);
+                    } else if (HelperLibrary.musicLibrary.getArtist(arguments)) {
+                        Playlist playlist = new Playlist(arguments, true);
                         playlist.setArtist(arguments);
                         applyPlaylist(playlist, true);
                         setupLocalPlaylistSpinner(playlist);
@@ -1266,13 +1259,12 @@ public class ActivityMain extends AppCompatActivity {
                 case PLAY_NEW_PLAYLIST_ALBUM_ONGOING:
                     arguments = displayedTrack.getAlbum();
                 case PLAY_NEW_PLAYLIST_ALBUM:
-                    msg = getString(R.string.album)+" \"" + arguments + "\" "+getString(R.string.notFound);
-                    if(arguments.equals("")) {
+                    msg = getString(R.string.album) + " \"" + arguments + "\" " + getString(R.string.notFound);
+                    if (arguments.equals("")) {
                         //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
                         msg = getString(R.string.specifyAlbum);
-                    }
-                    else if(HelperLibrary.musicLibrary.getAlbum(arguments)) {
-                        Playlist playlist =new Playlist(arguments, true);
+                    } else if (HelperLibrary.musicLibrary.getAlbum(arguments)) {
+                        Playlist playlist = new Playlist(arguments, true);
                         playlist.setAlbum(arguments);
                         applyPlaylist(playlist, true);
                         setupLocalPlaylistSpinner(playlist);
@@ -1281,10 +1273,10 @@ public class ActivityMain extends AppCompatActivity {
                     break;
                 case SET_GENRE:
                     String genre = arguments;
-                    if(arguments.length()>1) {
+                    if (arguments.length() > 1) {
                         genre = arguments.substring(0, 1).toUpperCase() + arguments.substring(1);
                     }
-                    if(RepoGenres.get().contains(genre)) {
+                    if (RepoGenres.get().contains(genre)) {
                         setupSpinnerGenre(RepoGenres.get(), genre);
                         setGenre(genre);
                     } else {
@@ -1300,12 +1292,12 @@ public class ActivityMain extends AppCompatActivity {
                     //audioPlayer.resume();
                     break;
                 case SET_RATING:
-                    int rating=-1;
+                    int rating = -1;
                     try {
-                         rating = Integer.parseInt(arguments);
+                        rating = Integer.parseInt(arguments);
                     } catch (NumberFormatException ex) {
                     }
-                    if(rating>0 && rating<6) {
+                    if (rating > 0 && rating < 6) {
                         ratingBar.setRating(rating);
                         setRating(rating);
                     } else {
@@ -1317,16 +1309,16 @@ public class ActivityMain extends AppCompatActivity {
                         }
                     }
                     askEdition(true);
-                    msg="";
+                    msg = "";
                     //audioPlayer.resume();
                     break;
                 case SET_TAGS:
                     String[] tags = arguments.split(" ");
-                    for(String tag : tags) {
-                        if(tag.length()>1) {
+                    for (String tag : tags) {
+                        if (tag.length() > 1) {
                             String s1 = tag.substring(0, 1).toUpperCase();
                             String tagCamel = s1 + tag.substring(1).toLowerCase();
-                            if(RepoTags.get().containsValue(tagCamel)) {
+                            if (RepoTags.get().containsValue(tagCamel)) {
                                 toggleTag(tagCamel);
                             }
                         }
@@ -1334,27 +1326,27 @@ public class ActivityMain extends AppCompatActivity {
                     displayTrackDetails();
                     askEdition(true);
                     //audioPlayer.resume();
-                    msg="";
+                    msg = "";
                     break;
                 case PLAYER_NEXT:
                     playNext();
-                    msg="";
+                    msg = "";
                     break;
                 case PLAYER_PAUSE:
                     audioPlayer.pause();
-                    msg="";
+                    msg = "";
                     break;
                 case PLAYER_RESUME:
                     audioPlayer.resume();
-                    msg="";
+                    msg = "";
                     break;
                 case PLAYER_PULLUP:
                     audioPlayer.pullUp();
-                    msg="";
+                    msg = "";
                     break;
             }
 
-            if(!msg.equals("")) {
+            if (!msg.equals("")) {
                 helperToast.toastLong(msg);
                 speak(msg);
             }
@@ -1374,19 +1366,18 @@ public class ActivityMain extends AppCompatActivity {
                     break;
             }
 
-        }
-        else if(requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
+        } else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
             String action = data.getStringExtra("action");
-            if(action!=null && action.equals("checkPermissionsThenScanLibrary")) {
+            if (action != null && action.equals("checkPermissionsThenScanLibrary")) {
                 checkPermissionsThenScanLibrary();
             }
 
             //FIXME: Update volume directly from Settings activity
             // Need to move audio to a service, which is a good thing anyway !
             int value = data.getIntExtra("volume", -1);
-            if(value>=0) {
+            if (value >= 0) {
                 String msg = audioPlayer.setVolume(value, displayedTrack);
-                if(!msg.equals("")) {
+                if (!msg.equals("")) {
                     (new HelperToast(getApplicationContext())).toastLong(msg);
                 }
             }
@@ -1395,7 +1386,7 @@ public class ActivityMain extends AppCompatActivity {
 
 
             String QRcode = data.getStringExtra("QRcode");
-            if(QRcode!=null) {
+            if (QRcode != null) {
                 getFromQRcode(QRcode);
             }
         }
@@ -1403,10 +1394,10 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void getFromQRcode(String content) {
-        if(content!=null) {
-            if(!content.equals("")) {
-                content=content.substring("jamuzremote://".length());
-                content=Encryption.decrypt(content, "NOTeBrrhzrtestSecretK");
+        if (content != null) {
+            if (!content.equals("")) {
+                content = content.substring("jamuzremote://".length());
+                content = Encryption.decrypt(content, "NOTeBrrhzrtestSecretK");
 
                 buttonRemote.setEnabled(false);
                 buttonSync.setEnabled(false);
@@ -1432,7 +1423,7 @@ public class ActivityMain extends AppCompatActivity {
         unregisterReceiver(receiverHeadSetPlugged);
         try {
             unregisterReceiver(mHeadsetBroadcastReceiver);
-        } catch(IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
             //TODO: Why does this occurs in Galaxy tablet
             //TODO: Test mHeadsetBroadcastReceiver in Galaxy tablet
         }
@@ -1443,7 +1434,7 @@ public class ActivityMain extends AppCompatActivity {
 
         audioPlayer.stop(true);
 
-        if(textToSpeech != null){
+        if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
@@ -1454,9 +1445,10 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private static File[] externalFilesDir;
+
     public static File getAppDataPath() {
-        File path =  externalFilesDir[1];
-        if(!path.exists()) {
+        File path = externalFilesDir[1];
+        if (!path.exists()) {
             path.mkdirs();
         }
         return path;
@@ -1487,23 +1479,23 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private boolean play(Track track) {
-        displayedTrack=track;
+        displayedTrack = track;
         File file = new File(displayedTrack.getPath());
-        if(file.exists()) {
+        if (file.exists()) {
             dimOn();
             localTrack = displayedTrack;
             audioPlayer.stop(false);
             displayedTrack.setSource(
                     displayedTrack.isHistory()
-                            ?getString(R.string.queue_history)
-                            :displayedTrack.isLocked()
-                                ?getString(R.string.queue_user)
-                                :localSelectedPlaylist.toString());
+                            ? getString(R.string.queue_history)
+                            : displayedTrack.isLocked()
+                            ? getString(R.string.queue_user)
+                            : localSelectedPlaylist.toString());
             audioPlayer.play(displayedTrack, helperToast);
             displayedTrack.setHistory(true);
             return true;
         } else {
-            Log.d(TAG, "play(): "+displayedTrack);
+            Log.d(TAG, "play(): " + displayedTrack);
             displayedTrack.delete();
             return false;
         }
@@ -1512,9 +1504,9 @@ public class ActivityMain extends AppCompatActivity {
     private void playNext() {
         PlayQueue.queue.fill(localSelectedPlaylist);
         Track track = PlayQueue.queue.getNext();
-        if(track!=null) {
+        if (track != null) {
             //Update lastPlayed and playCounter of previous track
-            displayedTrack.setPlayCounter(displayedTrack.getPlayCounter()+1);
+            displayedTrack.setPlayCounter(displayedTrack.getPlayCounter() + 1);
             displayedTrack.setLastPlayed(new Date());
             displayedTrack.update();
 
@@ -1533,7 +1525,7 @@ public class ActivityMain extends AppCompatActivity {
 
     private void playPrevious() {
         Track track = PlayQueue.queue.getPrevious();
-        if(track!=null) {
+        if (track != null) {
             if (play(track)) {
                 PlayQueue.queue.setPrevious();
             } else {
@@ -1547,40 +1539,40 @@ public class ActivityMain extends AppCompatActivity {
 
     class ListenerPlayer implements IListenerPlayer {
 
-        private int quarterPosition=0;
+        private int quarterPosition = 0;
 
         @Override
         public void reset() {
-            quarterPosition=0;
+            quarterPosition = 0;
         }
 
         @Override
         public void onPositionChanged(int position, int duration) {
-            if(!isRemoteConnected()) {
+            if (!isRemoteConnected()) {
                 setSeekBar(position, duration);
-                int remaining=(duration - position);
-                Log.v(TAG, "onPositionChanged, remaining: "+remaining);
+                int remaining = (duration - position);
+                Log.v(TAG, "onPositionChanged, remaining: " + remaining);
                 if (remaining < 5001 && remaining > 4501) { //TODO: Why those numbers ? (can't remember ...)
                     //setBrightness(1);
-                    Log.v(TAG, "onPositionChanged: DIM ON "+remaining);
+                    Log.v(TAG, "onPositionChanged: DIM ON " + remaining);
                     dimOn();
                 }
 
-                if(remaining > 1 && quarterPosition < 4) {
-                    int quarter=duration/4;
-                    Log.v(TAG, "START: quarterPosition: "+quarterPosition);
-                    Log.v(TAG, "START: quarter: "+quarter);
-                    if(quarterPosition < 1 && (remaining < 3*quarter)) {
-                        quarterPosition=1;
+                if (remaining > 1 && quarterPosition < 4) {
+                    int quarter = duration / 4;
+                    Log.v(TAG, "START: quarterPosition: " + quarterPosition);
+                    Log.v(TAG, "START: quarter: " + quarter);
+                    if (quarterPosition < 1 && (remaining < 3 * quarter)) {
+                        quarterPosition = 1;
                         askEdition(false);
-                    } else if(quarterPosition < 2 && (remaining < 2*quarter)) {
-                        quarterPosition=2;
+                    } else if (quarterPosition < 2 && (remaining < 2 * quarter)) {
+                        quarterPosition = 2;
                         askEdition(false);
-                    } else if(quarterPosition < 3 && (remaining < quarter)) {
-                        quarterPosition=3;
+                    } else if (quarterPosition < 3 && (remaining < quarter)) {
+                        quarterPosition = 3;
                         askEdition(false);
                     }
-                    Log.v(TAG, "END: quarterPosition: "+quarterPosition);
+                    Log.v(TAG, "END: quarterPosition: " + quarterPosition);
                 }
             }
         }
@@ -1597,7 +1589,7 @@ public class ActivityMain extends AppCompatActivity {
 
         @Override
         public void onPlayBackEnd() {
-            if(!isRemoteConnected()) {
+            if (!isRemoteConnected()) {
                 playNext();
             }
         }
@@ -1619,10 +1611,10 @@ public class ActivityMain extends AppCompatActivity {
                 || displayedTrack.getRating() < 1 //no rating
                 || displayedTrack.getTags(false).size() < 1)  //no user tags
         {
-            if(ScreenReceiver.isScreenOn
+            if (ScreenReceiver.isScreenOn
                     && toggleButtonDimMode.isChecked()
                     && (!isDimOn || force)) {
-                if(!toggleButtonEditTags.isChecked()) {
+                if (!toggleButtonEditTags.isChecked()) {
                     speechPostAction = SpeechPostAction.ASK_WITH_DELAY;
                 }
                 speakAnd(getDisplayedTrackStatus(), speechPostAction);
@@ -1631,18 +1623,18 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private String getDisplayedTrackStatus() {
-        StringBuilder msg= new StringBuilder();
-        if(displayedTrack.getTags(false).size()>0) {
+        StringBuilder msg = new StringBuilder();
+        if (displayedTrack.getTags(false).size() > 0) {
             msg.append("Tags: ");
-            for(String tag : displayedTrack.getTags(false)) {
+            for (String tag : displayedTrack.getTags(false)) {
                 msg.append(" ").append(tag).append(",");
             }
         } else {
             msg.append("Pas de tags. ");
         }
 
-        if(displayedTrack.getRating()>0) {
-            msg.append(" Note: ").append((int)displayedTrack.getRating()).append(".");
+        if (displayedTrack.getRating() > 0) {
+            msg.append(" Note: ").append((int) displayedTrack.getRating()).append(".");
         } else {
             msg.append(" Pas de note. ");
         }
@@ -1654,7 +1646,7 @@ public class ActivityMain extends AppCompatActivity {
         @Override
         public void handleMessage(Message message) {
             String msg = (String) message.obj;
-            Log.i(TAG, "handleMessage("+msg+")");
+            Log.i(TAG, "handleMessage(" + msg + ")");
             switch (msg) {
                 case "play":
                     audioPlayer.play();
@@ -1683,7 +1675,7 @@ public class ActivityMain extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String msg = intent.getStringExtra("message");
-            Log.i(TAG, "Broadcast.onReceive("+msg+")");
+            Log.i(TAG, "Broadcast.onReceive(" + msg + ")");
             switch (msg) {
                 case "enableSync":
                     enableSync(true);
@@ -1699,19 +1691,21 @@ public class ActivityMain extends AppCompatActivity {
     };
 
     private void dim(final boolean on) {
-        new CountDownTimer(500,50) {
-            private float brightness=on?0:1;
+        new CountDownTimer(500, 50) {
+            private float brightness = on ? 0 : 1;
+
             @Override
             public void onTick(long millisUntilFinished_) {
-                if(on) {
-                    setBrightness(brightness+=0.1);
+                if (on) {
+                    setBrightness(brightness += 0.1);
                 } else {
-                    setBrightness(brightness-=0.1);
+                    setBrightness(brightness -= 0.1);
                 }
             }
+
             @Override
             public void onFinish() {
-                setBrightness(on?1:0);
+                setBrightness(on ? 1 : 0);
                 isDimOn = true;
             }
         }.start();
@@ -1721,7 +1715,7 @@ public class ActivityMain extends AppCompatActivity {
     private boolean isDimOn = true;
 
     private void dimOn() {
-        if(toggleButtonDimMode.isChecked()) {
+        if (toggleButtonDimMode.isChecked()) {
             if (!isDimOn) {
                 dim(true);
             }
@@ -1743,7 +1737,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void setBrightness(final float brightness) {
-        Log.v(TAG, "setBrightness("+brightness+");");
+        Log.v(TAG, "setBrightness(" + brightness + ");");
         runOnUiThread(() -> {
             WindowManager.LayoutParams params = getWindow().getAttributes();
             params.screenBrightness = brightness;
@@ -1794,7 +1788,7 @@ public class ActivityMain extends AppCompatActivity {
     private void enablePlaylistEdit(final boolean enable) {
         runOnUiThread(() -> {
             toggle(layoutPlaylistEditBar, !enable);
-            layoutPlaylistToolBar.setVisibility(enable?View.VISIBLE:View.GONE);
+            layoutPlaylistToolBar.setVisibility(enable ? View.VISIBLE : View.GONE);
         });
     }
 
@@ -1810,18 +1804,18 @@ public class ActivityMain extends AppCompatActivity {
     public void checkPermissionsThenScanLibrary() {
         if (!hasPermissions(this, PERMISSIONS)) {
 
-            String msgStr = "<html><b>"+getString(R.string.permissionMsg_1)+"</b>"+getString(R.string.permissionMsg_2)
-                    +"<BR/><BR/>" +
-                    "<i>- <u>"+getString(R.string.permissionMsg_3)+"</u></i> "+getString(R.string.permissionMsg_4)
-                    +"<BR/> " +
-                    getString(R.string.permissionMsg_5) + " (\"" + getAppDataPath() +"\")."
-                    +"<BR/>" +
+            String msgStr = "<html><b>" + getString(R.string.permissionMsg_1) + "</b>" + getString(R.string.permissionMsg_2)
+                    + "<BR/><BR/>" +
+                    "<i>- <u>" + getString(R.string.permissionMsg_3) + "</u></i> " + getString(R.string.permissionMsg_4)
+                    + "<BR/> " +
+                    getString(R.string.permissionMsg_5) + " (\"" + getAppDataPath() + "\")."
+                    + "<BR/>" +
                     getString(R.string.permissionMsg_6)
-                    +"<BR/>" +
-                    getString(R.string.permissionMsg_7) + " (\""+musicLibraryDbFile.getAbsolutePath()+"\")."
-                    +"<BR/><BR/>" +
-                    "<i>- <u>"+getString(R.string.permissionMsg_8)+"</u></i> "+getString(R.string.permissionMsg_9)
-                    +"</html>";
+                    + "<BR/>" +
+                    getString(R.string.permissionMsg_7) + " (\"" + musicLibraryDbFile.getAbsolutePath() + "\")."
+                    + "<BR/><BR/>" +
+                    "<i>- <u>" + getString(R.string.permissionMsg_8) + "</u></i> " + getString(R.string.permissionMsg_9)
+                    + "</html>";
 
             AlertDialog alertDialog = new AlertDialog.Builder(ActivityMain.this).create();
             alertDialog.setTitle(getString(R.string.warning));
@@ -1842,8 +1836,8 @@ public class ActivityMain extends AppCompatActivity {
             layoutTags.removeAllViews();
             layoutTagsPlaylist.removeAllViews();
             makeButtonTagPlaylist(Integer.MAX_VALUE, "null");
-            if(RepoTags.get()!=null) {
-                for(Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
+            if (RepoTags.get() != null) {
+                for (Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
                     makeButtonTag(tag.getKey(), tag.getValue());
                     makeButtonTagPlaylist(tag.getKey(), tag.getValue());
                 }
@@ -1857,7 +1851,7 @@ public class ActivityMain extends AppCompatActivity {
     private void setupGenres() {
         runOnUiThread(() -> {
             layoutGenrePlaylist.removeAllViews();
-            for(String genre : RepoGenres.get()) {
+            for (String genre : RepoGenres.get()) {
                 makeButtonGenrePlaylist(-1, genre);
             }
             //Re-display track and playlist
@@ -1871,16 +1865,16 @@ public class ActivityMain extends AppCompatActivity {
                 new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, genres);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         runOnUiThread(() -> {
-            spinnerGenreSend=false;
+            spinnerGenreSend = false;
             spinnerGenre.setAdapter(arrayAdapter);
-            if(!genre.equals("")) {
+            if (!genre.equals("")) {
                 spinnerGenre.setSelection(arrayAdapter.getPosition(genre));
             }
         });
     }
 
     private void askPermissions() {
-        ActivityCompat.requestPermissions(this, PERMISSIONS, REQUEST );
+        ActivityCompat.requestPermissions(this, PERMISSIONS, REQUEST);
     }
 
     private static boolean hasPermissions(Context context, String... permissions) {
@@ -1951,10 +1945,10 @@ public class ActivityMain extends AppCompatActivity {
         localPlaylists = new HashMap<>();
         File playlistFolder = HelperFile.createFolder("Playlists");
         if (playlistFolder != null) {
-            for(String file : playlistFolder.list()) {
-                if(file.endsWith(".plli")) {
+            for (String file : playlistFolder.list()) {
+                if (file.endsWith(".plli")) {
                     Playlist playlist = readPlaylist(file);
-                    if(playlist != null) {
+                    if (playlist != null) {
                         playlist.getNbFiles(false);
                         localPlaylists.put(playlist.getName(), playlist);
                     }
@@ -1964,7 +1958,7 @@ public class ActivityMain extends AppCompatActivity {
         setupLocalPlaylistSpinner((String) null);
 
         //Start Scan Service
-        if(!isMyServiceRunning(ServiceScan.class)) {
+        if (!isMyServiceRunning(ServiceScan.class)) {
             Intent service = new Intent(getApplicationContext(), ServiceScan.class);
             service.putExtra("userPath", preferences.getString("userPath", "/"));
             service.putExtra("getAppDataPath", getAppDataPath());
@@ -1978,11 +1972,11 @@ public class ActivityMain extends AppCompatActivity {
         } else {
             Playlist playlistAll = new Playlist("All", true);
             localPlaylists.put(playlistAll.getName(), playlistAll);
-            playlistName=playlistAll.getName();
+            playlistName = playlistAll.getName();
         }
 
-        if(playlistName!=null && localPlaylists.containsKey(playlistName)) {
-            localSelectedPlaylist=localPlaylists.get(playlistName);
+        if (playlistName != null && localPlaylists.containsKey(playlistName)) {
+            localSelectedPlaylist = localPlaylists.get(playlistName);
         } else {
             localSelectedPlaylist = localPlaylists.values().iterator().next();
         }
@@ -2010,18 +2004,18 @@ public class ActivityMain extends AppCompatActivity {
         runOnUiThread(() -> {
             spinnerPlaylistSend = false;
             spinnerPlaylist.setAdapter(arrayAdapter);
-            if(selectedPlaylist!=null) {
+            if (selectedPlaylist != null) {
                 spinnerPlaylist.setSelection(arrayAdapter.getPosition(selectedPlaylist));
             }
         });
     }
 
     private void refreshLocalPlaylistSpinner(final boolean refreshAll) {
-        if(localSelectedPlaylist!=null) {
+        if (localSelectedPlaylist != null) {
             new Thread() {
                 public void run() {
-                    if(refreshAll) {
-                        for(Playlist playlist : localPlaylists.values()) {
+                    if (refreshAll) {
+                        for (Playlist playlist : localPlaylists.values()) {
                             playlist.getNbFiles(false);
                         }
                     } else {
@@ -2034,43 +2028,43 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void displayPlaylist(Playlist playlist) {
-        if(playlist!=null) {
-            for(int i=0; i<layoutTagsPlaylist.getFlexItemCount();i++) {
-                TriStateButton button = (TriStateButton)layoutTagsPlaylist.getFlexItemAt(i);
-                if(button!=null) {
+        if (playlist != null) {
+            for (int i = 0; i < layoutTagsPlaylist.getFlexItemCount(); i++) {
+                TriStateButton button = (TriStateButton) layoutTagsPlaylist.getFlexItemAt(i);
+                if (button != null) {
                     button.setState(TriStateButton.STATE.ANY);
                     setTagButtonTextColor(button, TriStateButton.STATE.ANY);
                 }
             }
-            for(int i=0; i<layoutGenrePlaylist.getFlexItemCount();i++) {
-                TriStateButton button = (TriStateButton)layoutGenrePlaylist.getFlexItemAt(i);
-                if(button!=null) {
+            for (int i = 0; i < layoutGenrePlaylist.getFlexItemCount(); i++) {
+                TriStateButton button = (TriStateButton) layoutGenrePlaylist.getFlexItemAt(i);
+                if (button != null) {
                     button.setState(TriStateButton.STATE.ANY);
                     setTagButtonTextColor(button, TriStateButton.STATE.ANY);
                 }
             }
             TriStateButton nullButton = layoutTagsPlaylist.findViewWithTag("null");
-            if(nullButton!=null) {
+            if (nullButton != null) {
                 nullButton.setState(playlist.getUnTaggedState());
                 setTagButtonTextColor(nullButton, playlist.getUnTaggedState());
             }
-            for(Map.Entry<String, TriStateButton.STATE> entry : playlist.getTags()) {
+            for (Map.Entry<String, TriStateButton.STATE> entry : playlist.getTags()) {
                 TriStateButton button = layoutTagsPlaylist.findViewWithTag(entry.getKey());
-                if(button!=null) {
+                if (button != null) {
                     button.setState(entry.getValue());
                     setTagButtonTextColor(button, entry.getValue());
                 }
             }
-            for(Map.Entry<String, TriStateButton.STATE> entry : playlist.getGenres()) {
+            for (Map.Entry<String, TriStateButton.STATE> entry : playlist.getGenres()) {
                 TriStateButton button = layoutGenrePlaylist.findViewWithTag(entry.getKey());
-                if(button!=null) {
+                if (button != null) {
                     button.setState(entry.getValue());
                     setTagButtonTextColor(button, entry.getValue());
                 }
             }
             buttonRatingOperator.setText(playlist.getRatingOperator());
             ratingBarPlaylist.setRating(playlist.getRating());
-            switch(playlist.getOrder()) {
+            switch (playlist.getOrder()) {
                 case RANDOM:
                     playListOrderRadio.check(R.id.order_random);
                     break;
@@ -2087,18 +2081,19 @@ public class ActivityMain extends AppCompatActivity {
             spinnerPlaylistLimitValue.setAdapter(playListLimitValueArrayAdapter);
             spinnerPlaylistLimitValue.setSelection(playlist.getLimitValue());
             textViewPlaylist.setText(playlist.getSummary());
-            button_save.setBackgroundResource(playlist.isModified()?
-                    R.drawable.ic_button_save_red:R.drawable.ic_button_save);
+            button_save.setBackgroundResource(playlist.isModified() ?
+                    R.drawable.ic_button_save_red : R.drawable.ic_button_save);
         }
     }
 
     public Playlist readPlaylist(String filename) {
         String readJson = HelperFile.read("Playlists", filename);
-        if(!readJson.equals("")) {
+        if (!readJson.equals("")) {
             Playlist playlist = new Playlist(
                     filename.replaceFirst("[.][^.]+$", ""), true);
             Gson gson = new Gson();
-            Type mapType = new TypeToken<Playlist>(){}.getType();
+            Type mapType = new TypeToken<Playlist>() {
+            }.getType();
             try {
                 playlist = gson.fromJson(readJson, mapType);
             } catch (JsonSyntaxException ex) {
@@ -2139,8 +2134,8 @@ public class ActivityMain extends AppCompatActivity {
         dimOn();
         layoutOrderPlaylistLayout.setEnabled(false);
         boolean checked = ((RadioButton) view).isChecked();
-        if(checked && localSelectedPlaylist!=null) {
-            switch(view.getId()) {
+        if (checked && localSelectedPlaylist != null) {
+            switch (view.getId()) {
                 case R.id.order_random:
                     localSelectedPlaylist.setOrder(RANDOM);
                     break;
@@ -2178,52 +2173,52 @@ public class ActivityMain extends AppCompatActivity {
 
     private void displayTrackDetails() {
         runOnUiThread(() -> setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
-        "<html><BR/>"+
-                (displayedTrack.getSource().equals("")?""
-                        :"<u>".concat(displayedTrack.getSource()).concat("</u>"))
-                +""
-                .concat(displayedTrack.toString())
-                .concat("</html>")))));
+                "<html><BR/>" +
+                        (displayedTrack.getSource().equals("") ? ""
+                                : "<u>".concat(displayedTrack.getSource()).concat("</u>"))
+                        + ""
+                        .concat(displayedTrack.toString())
+                        .concat("</html>")))));
     }
 
     private void displayTrack() {
-        if(displayedTrack!=null) {
+        if (displayedTrack != null) {
             runOnUiThread(() -> {
                 setTextView(textViewFileInfo1, trimTrailingWhitespace(Html.fromHtml(
-                        "<html><b>"+
+                        "<html><b>" +
                                 displayedTrack.getTitle()
-                                .concat("</b></html>"))));
+                                        .concat("</b></html>"))));
                 setTextView(textViewFileInfo2, trimTrailingWhitespace(Html.fromHtml(
-                        "<html><b>"+
+                        "<html><b>" +
                                 displayedTrack.getArtist()
                                         .concat("</b></html>"))));
                 setTextView(textViewFileInfo3, trimTrailingWhitespace(Html.fromHtml(
-                        "<html>"+
+                        "<html>" +
                                 displayedTrack.getAlbum()
                                         .concat("</html>"))));
                 displayTrackDetails();
                 ratingBar.setEnabled(false);
-                ratingBar.setRating((float)displayedTrack.getRating());
+                ratingBar.setRating((float) displayedTrack.getRating());
                 ratingBar.setEnabled(true);
                 setupSpinnerGenre(RepoGenres.get(), displayedTrack.getGenre());
                 //Display file tags
                 ArrayList<String> fileTags = displayedTrack.getTags(false);
-                if(fileTags==null) {
+                if (fileTags == null) {
                     fileTags = new ArrayList<>();
                 }
-                for(Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
+                for (Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
                     ToggleButton button = layoutTags.findViewById(tag.getKey());
-                    if(button!=null && button.isChecked()!=fileTags.contains(tag.getValue())) {
+                    if (button != null && button.isChecked() != fileTags.contains(tag.getValue())) {
                         button.setChecked(fileTags.contains(tag.getValue()));
                         setTagButtonTextColor(button);
                     }
                 }
             });
 
-            if(displayedTrack.getIdFileRemote()>=0) {
+            if (displayedTrack.getIdFileRemote() >= 0) {
                 displayImage(IconBufferCover.getCoverIcon(displayedTrack, IconBufferCover.IconSize.COVER, true));
                 bluetoothNotifyChange(AVRCP_META_CHANGED);
-            } else if(displayedTrack.getCoverHash().equals("welcomeHash")) {
+            } else if (displayedTrack.getCoverHash().equals("welcomeHash")) {
                 displayImage(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_startup_cover_foreground));
             } else {
                 displayCover();
@@ -2238,7 +2233,7 @@ public class ActivityMain extends AppCompatActivity {
         Intent i = new Intent(what);
         i.putExtra("id", Long.valueOf(displayedTrack.getIdFileRemote()));
         i.putExtra("artist", displayedTrack.getArtist());
-        i.putExtra("album",displayedTrack.getAlbum());
+        i.putExtra("album", displayedTrack.getAlbum());
         i.putExtra("track", displayedTrack.getTitle());
         i.putExtra("playing", "true");
         i.putExtra("ListSize", "99");
@@ -2254,11 +2249,11 @@ public class ActivityMain extends AppCompatActivity {
             displayImage(bitmap);
         } else { //Ask cover
             int maxWidth = this.getWindow().getDecorView().getWidth();
-            if(maxWidth<=0) {
-                maxWidth=250;
+            if (maxWidth <= 0) {
+                maxWidth = 250;
             }
-            if(clientRemote!=null) {
-                clientRemote.send("sendCover"+maxWidth);
+            if (clientRemote != null) {
+                clientRemote.send("sendCover" + maxWidth);
             }
         }
     }
@@ -2285,17 +2280,17 @@ public class ActivityMain extends AppCompatActivity {
             try {
                 JSONObject jObject = new JSONObject(json);
                 String type = jObject.getString("type");
-                switch(type) {
+                switch (type) {
                     case "playlists":
                         String selectedPlaylist = jObject.getString("selectedPlaylist");
                         Playlist temp = new Playlist(selectedPlaylist, false);
                         final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists");
                         final List<Playlist> playlists = new ArrayList<>();
-                        for(int i=0; i<jsonPlaylists.length(); i++) {
+                        for (int i = 0; i < jsonPlaylists.length(); i++) {
                             String playlist = (String) jsonPlaylists.get(i);
                             Playlist playList = new Playlist(playlist, false);
-                            if(playlist.equals(selectedPlaylist)) {
-                                playList=temp;
+                            if (playlist.equals(selectedPlaylist)) {
+                                playList = temp;
                             }
                             playlists.add(playList);
                         }
@@ -2308,7 +2303,7 @@ public class ActivityMain extends AppCompatActivity {
                     case "currentPosition":
                         final int currentPosition = jObject.getInt("currentPosition");
                         final int total = jObject.getInt("total");
-                        if(isRemoteConnected()) {
+                        if (isRemoteConnected()) {
                             setSeekBar(currentPosition, total);
                         }
                         break;
@@ -2338,7 +2333,7 @@ public class ActivityMain extends AppCompatActivity {
 
         @Override
         public void onDisconnected(final String msg) {
-            if(!msg.equals("")) {
+            if (!msg.equals("")) {
                 runOnUiThread(() -> helperToast.toastShort(msg));
             }
             stopRemote();
@@ -2349,9 +2344,9 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void stopRemote() {
-        if(clientRemote!=null) {
+        if (clientRemote != null) {
             clientRemote.close();
-            clientRemote=null;
+            clientRemote = null;
         }
         enableClientRemote(buttonRemote);
         setupLocalPlaylistSpinner();
@@ -2397,7 +2392,7 @@ public class ActivityMain extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        if(intent.getAction()!=null && intent.getAction().equals("android.intent.action.VIEW")) {
+        if (intent.getAction() != null && intent.getAction().equals("android.intent.action.VIEW")) {
             getFromQRcode(intent.getDataString());
         }
     }
@@ -2409,14 +2404,12 @@ public class ActivityMain extends AppCompatActivity {
     protected BluetoothAdapter mBluetoothAdapter;
     protected BluetoothHeadset mBluetoothHeadset;
 
-    protected BluetoothProfile.ServiceListener mHeadsetProfileListener = new BluetoothProfile.ServiceListener()
-    {
+    protected BluetoothProfile.ServiceListener mHeadsetProfileListener = new BluetoothProfile.ServiceListener() {
         @Override
-        public void onServiceDisconnected(int profile)
-        {
+        public void onServiceDisconnected(int profile) {
             try {
                 unregisterReceiver(mHeadsetBroadcastReceiver);
-            } catch(IllegalArgumentException ex) {
+            } catch (IllegalArgumentException ex) {
                 //java.lang.IllegalArgumentException: Receiver not registered
                 //TODO: We don't care but why does this happen ?
             }
@@ -2424,8 +2417,7 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         @Override
-        public void onServiceConnected(int profile, BluetoothProfile proxy)
-        {
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
             mBluetoothHeadset = (BluetoothHeadset) proxy;
 
             registerReceiver(mHeadsetBroadcastReceiver,
@@ -2437,17 +2429,13 @@ public class ActivityMain extends AppCompatActivity {
         }
     };
 
-    protected BroadcastReceiver mHeadsetBroadcastReceiver = new BroadcastReceiver()
-    {
+    protected BroadcastReceiver mHeadsetBroadcastReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent)
-        {
+        public void onReceive(Context context, Intent intent) {
             if (Objects.requireNonNull(intent.getAction())
-                    .equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED))
-            {
+                    .equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED);
-                if (state == BluetoothHeadset.STATE_CONNECTED)
-                {
+                if (state == BluetoothHeadset.STATE_CONNECTED) {
                     Log.i(TAG, "BT onConnected. Waiting 4s");
                     try {
                         Thread.sleep(4000);
@@ -2455,9 +2443,7 @@ public class ActivityMain extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     audioPlayer.play();
-                }
-                else if (state == BluetoothHeadset.STATE_DISCONNECTED)
-                {
+                } else if (state == BluetoothHeadset.STATE_DISCONNECTED) {
                     Log.i(TAG, "BT DISconnected");
                     audioPlayer.pause();
 
@@ -2492,8 +2478,9 @@ public class ActivityMain extends AppCompatActivity {
         Gson gson = new Gson();
         String json = gson.toJson(playlist);
         //Create a new from json
-        Type mapType = new TypeToken<Playlist>(){}.getType();
-        Playlist newPlaylist=null;
+        Type mapType = new TypeToken<Playlist>() {
+        }.getType();
+        Playlist newPlaylist = null;
         try {
             newPlaylist = gson.fromJson(json, mapType);
         } catch (JsonSyntaxException ex) {

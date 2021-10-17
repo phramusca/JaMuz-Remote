@@ -2,14 +2,17 @@ package phramusca.com.jamuzremote;
 
 import android.content.Context;
 import android.content.Intent;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 // Adapted from https://github.com/abhi5658/search-youtube
@@ -18,7 +21,8 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
 
     private Context mContext;
     private List<YouTubeVideoItem> mVideoList;
-    public class MyViewHolder extends RecyclerView.ViewHolder{
+
+    public class MyViewHolder extends RecyclerView.ViewHolder {
 
         public ImageView thumbnail;
         public TextView video_title, video_id, video_description;
@@ -52,21 +56,21 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         final YouTubeVideoItem singleVideo = mVideoList.get(position);
-        holder.video_id.setText("Video ID : "+singleVideo.getId()+" ");
+        holder.video_id.setText("Video ID : " + singleVideo.getId() + " ");
         holder.video_title.setText(singleVideo.getTitle());
         holder.video_description.setText(singleVideo.getDescription());
 
         Picasso.with(mContext)
                 .load(singleVideo.getThumbnailURL())
-                .resize(480,270)
+                .resize(480, 270)
                 .centerCrop()
                 .into(holder.thumbnail);
 
         holder.video_view.setOnClickListener(view -> {
             Intent intent = new Intent(mContext, ActivityYouTubePlayer.class);
             intent.putExtra("VIDEO_ID", singleVideo.getId());
-            intent.putExtra("VIDEO_TITLE",singleVideo.getTitle());
-            intent.putExtra("VIDEO_DESC",singleVideo.getDescription());
+            intent.putExtra("VIDEO_TITLE", singleVideo.getTitle());
+            intent.putExtra("VIDEO_DESC", singleVideo.getDescription());
 
             //Flags define hot the activity should behave when launched
             //FLAG_ACTIVITY_NEW_TASK flag if set, the activity will become the start of a new task on this history stack.
@@ -75,6 +79,7 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
             mContext.startActivity(intent);
         });
     }
+
     @Override
     public int getItemCount() {
         return mVideoList.size();

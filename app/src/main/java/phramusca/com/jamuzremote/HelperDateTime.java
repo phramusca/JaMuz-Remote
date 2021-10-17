@@ -8,6 +8,7 @@ import java.util.TimeZone;
 
 /**
  * DateTime formatting class
+ *
  * @author phramusca ( https://github.com/phramusca/JaMuz/ )
  */
 public class HelperDateTime {
@@ -24,9 +25,10 @@ public class HelperDateTime {
         /**
          * File dateTime format ("yyyy-MM-dd--HH-mm-ss")
          */
-        FILE("yyyy-MM-dd--HH-mm-ss") ;
+        FILE("yyyy-MM-dd--HH-mm-ss");
 
         private final String pattern;
+
         DateTimeFormat(String display) {
             this.pattern = display;
         }
@@ -40,32 +42,32 @@ public class HelperDateTime {
     }
 
     /**
-     * @param date given date
-     * @param format custom format
+     * @param date    given date
+     * @param format  custom format
      * @param toLocal convert to local ?
      * @return UTC dateTime to custom format
      */
     private static String formatUTC(Date date, String format, boolean toLocal) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.ENGLISH);
-        if(!toLocal) {
+        if (!toLocal) {
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         }
         return simpleDateFormat.format(date);
     }
 
     /**
-     * @param date UTC dateTime
-     * @param format given format
+     * @param date    UTC dateTime
+     * @param format  given format
      * @param toLocal convert to local ?
-     * @return  to desired format
+     * @return to desired format
      */
     private static String formatUTC(Date date, DateTimeFormat format, boolean toLocal) {
         return formatUTC(date, format.getPattern(), toLocal);
     }
 
     /**
-     * @param date  UTC dateTime
-     * @return  to SQL format
+     * @param date UTC dateTime
+     * @return to SQL format
      */
     public static String formatUTCtoSqlUTC(Date date) {
         return formatUTC(date, DateTimeFormat.SQL, false);
@@ -95,12 +97,12 @@ public class HelperDateTime {
     }
 
     /**
-     * @param date UTC dateTime as string
+     * @param date   UTC dateTime as string
      * @param format above UTC date as string format
      * @return UTC dateTime
      */
     private static Date parseUTC(String date, DateTimeFormat format) {
-        if(date.equals("")) {
+        if (date.equals("")) {
             return new Date(0);
         }
         try {

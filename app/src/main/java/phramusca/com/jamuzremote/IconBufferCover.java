@@ -27,7 +27,6 @@
  import java.io.IOException;
 
  /**
-  *
   * @author phramusca ( https://github.com/phramusca/JaMuz/ )
   */
 
@@ -37,16 +36,17 @@
 
      /**
       * Get cover icon from cache
+      *
       * @param track The track.
       * @return The cover icon.
       */
      public static Bitmap getCoverIcon(Track track, IconSize iconSize, boolean readIfNotFound) {
          Bitmap icon;
          icon = readIconFromCache(track.getCoverHash(), iconSize);
-         if(icon != null) {
+         if (icon != null) {
              return icon;
          }
-         if(readIfNotFound) {
+         if (readIfNotFound) {
              Bitmap trackCover = track.readCover();
              Bitmap cover = writeIconToCache(track.getCoverHash(), IconSize.COVER, trackCover);
              Bitmap thumb = writeIconToCache(track.getCoverHash(), IconSize.THUMB, cover);
@@ -61,13 +61,13 @@
 
      private static Bitmap writeIconToCache(String coverHash, IconSize iconSize, Bitmap cover) {
          Bitmap icon = null;
-         if(cover != null) {
+         if (cover != null) {
              Pair<Integer, Integer> scaledSize = new Pair<>(iconSize.size, iconSize.size);
              if (iconSize == IconSize.COVER) { //Not for THUMB or need to refactor AdapterTrack.overlayIcon(...)
                  scaledSize = iconSize.getScaledSize(cover.getWidth(), cover.getHeight());
              }
              icon = Bitmap.createScaledBitmap(cover, scaledSize.first, scaledSize.second, false);
-             if(icon != null) {
+             if (icon != null) {
                  try {
                      File cacheFile = getCacheFile(coverHash, iconSize);
                      FileOutputStream fOut = new FileOutputStream(cacheFile);
@@ -87,15 +87,15 @@
      //Until then, can delete cache folder (or only audio)
      private static Bitmap readIconFromCache(String coverHash, IconSize iconSize) {
          File file = getCacheFile(coverHash, iconSize);
-         if(file.exists()) {
+         if (file.exists()) {
              return BitmapFactory.decodeFile(file.getAbsolutePath());
          }
          return null;
      }
 
      private static File getCacheFile(String coverHash, IconSize iconSize) {
-         String filename = coverHash.equals("")?"NA":coverHash+ iconSize.name();
-         return getFile(filename+".png", "..", "cache", "cover-icons");
+         String filename = coverHash.equals("") ? "NA" : coverHash + iconSize.name();
+         return getFile(filename + ".png", "..", "cache", "cover-icons");
      }
 
      //TODO: Move this to a generic class if to be used elsewhere

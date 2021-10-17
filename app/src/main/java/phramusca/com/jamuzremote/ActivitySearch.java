@@ -4,13 +4,14 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 import java.util.Objects;
@@ -40,14 +41,14 @@ public class ActivitySearch extends AppCompatActivity {
         //onEditorAction method called when user clicks ok button or any custom
         //button set on the bottom right of keyboard
         searchInput.setOnEditorActionListener((v, actionId, event) -> {
-            if(actionId == EditorInfo.IME_ACTION_SEARCH){
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
 
                 //FIXME NOW Enable search on sqlite library
                 //+ review what options offer youtube
-                mProgressDialog.setMessage("Finding videos for "+v.getText().toString());
+                mProgressDialog.setMessage("Finding videos for " + v.getText().toString());
                 mProgressDialog.show();
                 searchOnYoutube(v.getText().toString());
-                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 assert imm != null;
                 imm.hideSoftInputFromWindow(Objects.requireNonNull(getCurrentFocus()).getWindowToken(),
                         InputMethodManager.RESULT_UNCHANGED_SHOWN);
@@ -57,13 +58,13 @@ public class ActivitySearch extends AppCompatActivity {
         });
     }
 
-    private void searchOnYoutube(final String keywords){
+    private void searchOnYoutube(final String keywords) {
 
-        new Thread(){
-            public void run(){
+        new Thread() {
+            public void run() {
                 YoutubeConnector yc = new YoutubeConnector(ActivitySearch.this);
                 searchResults = yc.search(keywords);
-                if(searchResults!=null) {
+                if (searchResults != null) {
                     handler.post(() -> {
                         fillYoutubeVideos();
                         mProgressDialog.dismiss();
@@ -80,7 +81,7 @@ public class ActivitySearch extends AppCompatActivity {
         }.start();
     }
 
-    private void fillYoutubeVideos(){
+    private void fillYoutubeVideos() {
         YoutubeAdapter youtubeAdapter = new YoutubeAdapter(getApplicationContext(), searchResults);
         mRecyclerView.setAdapter(youtubeAdapter);
         youtubeAdapter.notifyDataSetChanged();

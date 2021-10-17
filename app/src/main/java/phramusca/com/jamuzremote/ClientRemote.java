@@ -8,38 +8,37 @@ package phramusca.com.jamuzremote;
 import android.graphics.Bitmap;
 
 /**
- *
  * @author phramusca
  */
 public class ClientRemote extends Client {
 
-	private final IListenerRemote callback;
-	private boolean userStop=false;
+    private final IListenerRemote callback;
+    private boolean userStop = false;
 
-	public ClientRemote(ClientInfo clientInfo, IListenerRemote callback){
-		super(clientInfo);
-		this.callback = callback;
+    public ClientRemote(ClientInfo clientInfo, IListenerRemote callback) {
+        super(clientInfo);
+        this.callback = callback;
         super.setCallback(new ListenerReception());
-	}
+    }
 
     @Override
     public boolean connect() {
-        userStop=false;
+        userStop = false;
         return super.connect();
     }
 
     @Override
     public void close() {
-        userStop=true;
+        userStop = true;
         super.close();
     }
 
     class ListenerReception implements IListenerReception {
 
-		@Override
-		public void onReceivedJson(String json) {
-			callback.onReceivedJson(json);
-		}
+        @Override
+        public void onReceivedJson(String json) {
+            callback.onReceivedJson(json);
+        }
 
         @Override
         public void onReceivedBitmap(Bitmap bitmap) {
@@ -47,14 +46,16 @@ public class ClientRemote extends Client {
         }
 
         @Override
-        public void onReceivingFile(Track fileInfoReception) {        }
+        public void onReceivingFile(Track fileInfoReception) {
+        }
 
         @Override
-        public void onReceivedFile(Track fileInfoReception) {        }
+        public void onReceivedFile(Track fileInfoReception) {
+        }
 
         @Override
-		public void onDisconnected(String msg) {
-            callback.onDisconnected(userStop?"":msg);
-		}
-	}
+        public void onDisconnected(String msg) {
+            callback.onDisconnected(userStop ? "" : msg);
+        }
+    }
 }

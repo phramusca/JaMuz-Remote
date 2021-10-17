@@ -16,7 +16,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- *
  * @author phramusca ( https://github.com/phramusca/JaMuz/ )
  */
 public class Encryption {

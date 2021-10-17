@@ -1,9 +1,6 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +8,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
@@ -38,7 +39,7 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
 
                 if (!isLoading) {
-                    if(totalItemCount <= (lastVisibleItem + visibleThreshold)) {
+                    if (totalItemCount <= (lastVisibleItem + visibleThreshold)) {
                         isLoading = true;
                         if (onLoadListener != null) {
                             onLoadListener.onLoadMore();
@@ -46,12 +47,12 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     }
                 }
 
-                if(!isLoadingTop) {
+                if (!isLoadingTop) {
                     // TODO !!! Load on top: on page init, add a load item on top
                     // and select next one (so that loader at pos 0 is hidden)
                     // So there is no need  to scroll down then scroll up to search up
                     // as no more need to check dY
-                    if(firstVisibleItem <= visibleThreshold && dy < 0) {
+                    if (firstVisibleItem <= visibleThreshold && dy < 0) {
                         isLoadingTop = true;
                         if (onLoadListener != null) {
                             onLoadListener.onLoadTop();
@@ -63,6 +64,7 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     private IListenerOnLoad onLoadListener;
+
     public void setOnLoadListener(IListenerOnLoad mOnLoadListener) {
         this.onLoadListener = mOnLoadListener;
     }
@@ -135,7 +137,7 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     void sendListener(Track item, int position) {
-        for(int i = mListListener.size()-1; i >= 0; i--) {
+        for (int i = mListListener.size() - 1; i >= 0; i--) {
             mListListener.get(i).onClick(item, position);
         }
     }

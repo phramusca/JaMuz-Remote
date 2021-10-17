@@ -1,6 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,9 +27,9 @@ public abstract class AdapterAlbumTrack extends AdapterTrack {
             setView(position, userViewHolder,
                     track.getTitle(),
                     track.getArtist(),
-                    String.format(Locale.ENGLISH,"%d/5 %s",
-                            (int)track.getRating(), track.getGenre()),
-                    String.format(Locale.ENGLISH,"%s\n%s %s",
+                    String.format(Locale.ENGLISH, "%d/5 %s",
+                            (int) track.getRating(), track.getGenre()),
+                    String.format(Locale.ENGLISH, "%s\n%s %s",
                             track.getTags(), track.getLastPlayedAgo(), track.getAddedDateAgo()));
 
         } else if (holder instanceof LoadingViewHolder) {

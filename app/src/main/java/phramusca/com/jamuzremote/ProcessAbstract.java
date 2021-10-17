@@ -19,6 +19,7 @@ package phramusca.com.jamuzremote;
 
 /**
  * A process abstract class.
+ *
  * @author phramusca
  */
 public abstract class ProcessAbstract extends Thread {
@@ -26,31 +27,32 @@ public abstract class ProcessAbstract extends Thread {
     ProcessAbstract(String name) {
         super(name);
     }
-    
-	//Process information (internal)
-	private boolean abort = false;
-    
-	/**
-	 * Abort process thread
-	 */
-	public final void abort() {
-		this.abort = true;
-	}
-	
-	/**
-	 * Clears abort flag
-	 */
-	protected final void resetAbort() {
-		this.abort = false;
-	}
-	
-	/**
-	 * Checks if user asked abortion
-	 * @throws InterruptedException to be caught in process main function
-	 */
-	synchronized void checkAbort() throws InterruptedException {
-		if( this.abort ) {
-			throw new InterruptedException();
-		} 
-	}
+
+    //Process information (internal)
+    private boolean abort = false;
+
+    /**
+     * Abort process thread
+     */
+    public final void abort() {
+        this.abort = true;
+    }
+
+    /**
+     * Clears abort flag
+     */
+    protected final void resetAbort() {
+        this.abort = false;
+    }
+
+    /**
+     * Checks if user asked abortion
+     *
+     * @throws InterruptedException to be caught in process main function
+     */
+    synchronized void checkAbort() throws InterruptedException {
+        if (this.abort) {
+            throw new InterruptedException();
+        }
+    }
 }

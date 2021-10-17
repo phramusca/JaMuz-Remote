@@ -7,6 +7,8 @@ package phramusca.com.jamuzremote;
  */
 
 
+import static phramusca.com.jamuzremote.ActivityMain.getAppDataPath;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.system.ErrnoException;
@@ -25,51 +27,46 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import static phramusca.com.jamuzremote.ActivityMain.getAppDataPath;
-
 public class ClientReception extends ProcessAbstract {
 
     private static final String TAG = ClientReception.class.getName();
-	private final BufferedReader bufferedReader;
-	private InputStream inputStream;
-	private final IListenerReception callback;
+    private final BufferedReader bufferedReader;
+    private InputStream inputStream;
+    private final IListenerReception callback;
 
-	ClientReception(InputStream inputStream, IListenerReception callback) {
-		super("Thread.Client.ClientReception");
-		this.inputStream = inputStream;
+    ClientReception(InputStream inputStream, IListenerReception callback) {
+        super("Thread.Client.ClientReception");
+        this.inputStream = inputStream;
 
-		this.callback = callback; 
-		this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-	}
-	
-	@Override
-	public void run() {
-		try {
+        this.callback = callback;
+        this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    }
+
+    @Override
+    public void run() {
+        try {
             //noinspection InfiniteLoopStatement
-            while(true) {
-				checkAbort();
-				String msg = bufferedReader.readLine();
-                if(msg==null) {
+            while (true) {
+                checkAbort();
+                String msg = bufferedReader.readLine();
+                if (msg == null) {
                     Log.d(TAG, "RECEIVED null");
                     callback.onDisconnected("Socket closed (received null)");
-                }
-                else if (msg.startsWith("JSON_")) {
+                } else if (msg.startsWith("JSON_")) {
                     callback.onReceivedJson(msg.substring(5));
-                }
-				else if (msg.equals("SENDING_COVER")) {
+                } else if (msg.equals("SENDING_COVER")) {
                     Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                     Log.d(TAG, "onReceivedBitmap");
                     Log.d(TAG, "onReceivedBitmap: calling callback");
                     callback.onReceivedBitmap(bitmap);
-                }
-				else if (msg.startsWith("SENDING_FILE")) {
+                } else if (msg.startsWith("SENDING_FILE")) {
                     Track fileInfoReception;
                     try {
                         String json = msg.substring("SENDING_FILE".length());
                         fileInfoReception = new Track(new JSONObject(json), getAppDataPath(), false);
                         File destinationPath = new File(new File(fileInfoReception.getPath()).getParent());
                         destinationPath.mkdirs();
-                        Log.i(TAG, "Start file reception: \n"+fileInfoReception);
+                        Log.i(TAG, "Start file reception: \n" + fileInfoReception);
                         DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
                         double fileSize = fileInfoReception.getSize();
                         FileOutputStream fos = new FileOutputStream(fileInfoReception.getPath());
@@ -86,17 +83,16 @@ public class ClientReception extends ProcessAbstract {
                         fos.close();
                         checkAbort();
                         callback.onReceivedFile(fileInfoReception);
-					}
-                    catch (JSONException e) {
+                    } catch (JSONException e) {
                         Log.e(TAG, "onReceivedFile", e);
                     }
-				}
-			}
-		} catch (InterruptedException ignored) {
+                }
+            }
+        } catch (InterruptedException ignored) {
         } catch (IOException ex) {
             boolean isENOSPC = false;
             if (ex.getCause() instanceof ErrnoException) {
-                int errno = ((ErrnoException)ex.getCause()).errno;
+                int errno = ((ErrnoException) ex.getCause()).errno;
                 isENOSPC = errno == OsConstants.ENOSPC;
                 //TODO: sync and merge: Manage errors like ENOENT (No such file or directory)") : SyncStatus{status=CONNECTED, nbRetries=0}
                 //Less chance to happen since "SENDING_FILE" is not more received (reaplaced by API)
@@ -116,12 +112,11 @@ public class ClientReception extends ProcessAbstract {
                 // Other IOExceptions incl. SocketException
                 callback.onDisconnected(ex.getMessage());
             }
-		}
-		finally {
-			try {
+        } finally {
+            try {
                 inputStream.close();
-			} catch (IOException ignored) {
-			}
-		}
-	}
+            } catch (IOException ignored) {
+            }
+        }
+    }
 }

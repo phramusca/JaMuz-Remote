@@ -12,15 +12,15 @@ public class TrackList {
     }
 
     synchronized public boolean insertNext(int oldPosition) {
-        if(oldPosition!=positionPlaying) {
+        if (oldPosition != positionPlaying) {
             Track track = get(oldPosition);
-            if(track!=null) {
+            if (track != null) {
                 tracks.remove(oldPosition);
-                if(oldPosition<positionPlaying) {
+                if (oldPosition < positionPlaying) {
                     positionPlaying--; //Not observed as done on both directly
                 }
                 track.setLocked(true);
-                tracks.add(positionPlaying+1, track);
+                tracks.add(positionPlaying + 1, track);
                 return true;
             }
         }
@@ -28,23 +28,23 @@ public class TrackList {
     }
 
     synchronized public Track get(int position) {
-        Track track=null;
-        if(position<tracks.size() && position>=0) {
-            track=tracks.get(position);
+        Track track = null;
+        if (position < tracks.size() && position >= 0) {
+            track = tracks.get(position);
         }
         return track;
     }
 
     synchronized public void moveDown(int oldPosition) {
-        if(oldPosition!=positionPlaying
-                && oldPosition<tracks.size()-1) {
+        if (oldPosition != positionPlaying
+                && oldPosition < tracks.size() - 1) {
             Track track = get(oldPosition);
-            if(track!=null) {
+            if (track != null) {
                 tracks.remove(oldPosition);
                 oldPosition++;
                 Track movedUpTrack = get(oldPosition);
                 movedUpTrack.setLocked(true);
-                if(oldPosition==positionPlaying) {
+                if (oldPosition == positionPlaying) {
                     positionPlaying--; //Not observed as done on both directly
                 }
                 track.setLocked(true);
@@ -54,11 +54,11 @@ public class TrackList {
     }
 
     synchronized public void remove(int position) {
-        if(position!= positionPlaying) {
+        if (position != positionPlaying) {
             Track track = tracks.get(position);
-            if(track!=null) {
+            if (track != null) {
                 tracks.remove(position);
-                if(position<positionPlaying) {
+                if (position < positionPlaying) {
                     positionPlaying--; //Not observed as done on both directly
                 }
             }
@@ -66,7 +66,7 @@ public class TrackList {
     }
 
     synchronized public void setPositionPlaying(int positionPlaying) {
-        this.positionPlaying=positionPlaying;
+        this.positionPlaying = positionPlaying;
     }
 
     synchronized public int size() {
@@ -78,13 +78,13 @@ public class TrackList {
     }
 
     synchronized public void addBottom(List<Track> newTracks) {
-        if(newTracks!=null) {
+        if (newTracks != null) {
             tracks.addAll(newTracks);
         }
     }
 
     synchronized public void addTop(List<Track> newTracks) {
-        if(newTracks!=null) {
+        if (newTracks != null) {
             tracks.addAll(1, newTracks);
         }
     }

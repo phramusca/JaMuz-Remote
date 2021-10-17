@@ -15,7 +15,7 @@ public class ServiceScan extends ServiceBase {
 
     private static final String TAG = ServiceScan.class.getName();
     private Notification notificationScan;
-    private int nbFiles=0;
+    private int nbFiles = 0;
     private int nbFilesTotal = 0;
     private ProcessAbstract scanLibrary;
     private ProcessAbstract processBrowseFS;
@@ -24,18 +24,18 @@ public class ServiceScan extends ServiceBase {
     private PowerManager.WakeLock wakeLock;
 
     @Override
-    public void onCreate(){
+    public void onCreate() {
         notificationScan = new Notification(this, NotificationId.SCAN, "Scan");
         super.onCreate();
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId){
+    public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         if (powerManager != null) {
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"jamuzremote:MyPowerWakelockTag");
-            wakeLock.acquire(24*60*60*1000); //24 hours, enough to scan a lot, if not all !
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "jamuzremote:MyPowerWakelockTag");
+            wakeLock.acquire(24 * 60 * 60 * 1000); //24 hours, enough to scan a lot, if not all !
         }
 
         userPath = intent.getStringExtra("userPath");
@@ -44,7 +44,7 @@ public class ServiceScan extends ServiceBase {
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         stop();
         wakeLock.release();
         super.onDestroy();
@@ -54,7 +54,7 @@ public class ServiceScan extends ServiceBase {
         new Thread() {
             public void run() {
                 runOnUiThread(() -> helperNotification.notifyBar(notificationScan, "Cleaning database..."));
-                if(HelperLibrary.musicLibrary!=null) {
+                if (HelperLibrary.musicLibrary != null) {
                     HelperLibrary.musicLibrary.deleteTrack(getAppDataPath, userPath);
                     //Scan user folder and cleanup library
                     File folder = new File(userPath);
@@ -75,7 +75,7 @@ public class ServiceScan extends ServiceBase {
 
     private void waitScanFolder() {
         try {
-            if(scanLibrary !=null) {
+            if (scanLibrary != null) {
                 scanLibrary.join();
             }
         } catch (InterruptedException e) {
@@ -87,7 +87,7 @@ public class ServiceScan extends ServiceBase {
         scanLibrary = new ProcessAbstract("Thread.ActivityMain.scanLibrayInThread") {
             public void run() {
                 try {
-                    if(!path.getAbsolutePath().equals("/")) {
+                    if (!path.getAbsolutePath().equals("/")) {
                         checkAbort();
                         nbFiles = 0;
                         nbFilesTotal = 0;
@@ -126,18 +126,18 @@ public class ServiceScan extends ServiceBase {
                     //It IS compatible with ServiceSync
                     //FIXME NOW replace includeINFO with a List<Track.Status> so that only looking for LOCAL
                     //and leave other statuses to sync process so that it is really fully compatible
-                        // REC, LOCAL => remove from db if file not found
-                        // includeINFO=false : INFO & NEW not included
+                    // REC, LOCAL => remove from db if file not found
+                    // includeINFO=false : INFO & NEW not included
 
                     checkAbort();
                     List<Track> tracks = new Playlist("ScanFolder", false).getTracks(false);
                     nbFilesTotal = tracks.size();
-                    nbFiles=0;
-                    for(Track track : tracks) {
+                    nbFiles = 0;
+                    for (Track track : tracks) {
                         checkAbort();
                         File file = new File(track.getPath());
-                        if(!file.exists()) {
-                            Log.d(TAG, "Remove track from db: "+track);
+                        if (!file.exists()) {
+                            Log.d(TAG, "Remove track from db: " + track);
                             track.delete();
                         }
                         notifyScan("Scanning deleted files ... ", 200);
@@ -152,14 +152,13 @@ public class ServiceScan extends ServiceBase {
                 if (path.isDirectory()) {
                     File[] files = path.listFiles();
                     if (files != null) {
-                        if(files.length>0) {
+                        if (files.length > 0) {
                             for (File file : files) {
                                 checkAbort();
                                 if (file.isDirectory()) {
                                     browseFS(file);
-                                }
-                                else {
-                                    String absolutePath=file.getAbsolutePath();
+                                } else {
+                                    String absolutePath = file.getAbsolutePath();
                                     //getAppDataPath is managed in ServiceSync
                                     if (!absolutePath.startsWith(getAppDataPath.getAbsolutePath())) {
                                         //Scanning extra local folder
@@ -167,8 +166,8 @@ public class ServiceScan extends ServiceBase {
                                         audioExtensions.add("mp3");
                                         audioExtensions.add("flac");
                                         /*audioFiles.add("ogg");*/
-                                        String ext = absolutePath.substring(absolutePath.lastIndexOf(".")+1);
-                                        if(audioExtensions.contains(ext)) {
+                                        String ext = absolutePath.substring(absolutePath.lastIndexOf(".") + 1);
+                                        if (audioExtensions.contains(ext)) {
                                             HelperLibrary.musicLibrary.insertOrUpdateTrack(absolutePath);
                                         }
                                     }
@@ -176,7 +175,7 @@ public class ServiceScan extends ServiceBase {
                                 }
                             }
                         } else {
-                            Log.i(TAG, "Deleting empty folder "+path.getAbsolutePath());
+                            Log.i(TAG, "Deleting empty folder " + path.getAbsolutePath());
                             //noinspection ResultOfMethodCallIgnored
                             path.delete();
                         }
@@ -189,13 +188,12 @@ public class ServiceScan extends ServiceBase {
                 if (path.isDirectory()) {
                     File[] files = path.listFiles();
                     if (files != null) {
-                        if(files.length>0) {
+                        if (files.length > 0) {
                             for (File file : files) {
                                 checkAbort();
                                 if (file.isDirectory()) {
                                     browseFScount(file);
-                                }
-                                else {
+                                } else {
                                     nbFilesTotal++;
                                 }
                             }
@@ -215,23 +213,23 @@ public class ServiceScan extends ServiceBase {
     private void stop() {
         //Abort and wait scanLibrayInThread is aborted
         //So it does not crash if scanLib not completed
-        if(processBrowseFS!=null) {
+        if (processBrowseFS != null) {
             processBrowseFS.abort();
         }
-        if(processBrowseFScount!=null) {
+        if (processBrowseFScount != null) {
             processBrowseFScount.abort();
         }
-        if(scanLibrary !=null) {
+        if (scanLibrary != null) {
             scanLibrary.abort();
         }
         try {
-            if(processBrowseFS!=null) {
+            if (processBrowseFS != null) {
                 processBrowseFS.join();
             }
-            if(processBrowseFScount!=null) {
+            if (processBrowseFScount != null) {
                 processBrowseFScount.join();
             }
-            if(scanLibrary !=null) {
+            if (scanLibrary != null) {
                 scanLibrary.join();
             }
         } catch (InterruptedException e) {

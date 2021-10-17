@@ -17,9 +17,9 @@ public class TrackQueue extends TrackList {
     }
 
     synchronized void refresh(Playlist playlist) {
-        for (int i=tracks.size()-1;i>positionPlaying;i--) {
+        for (int i = tracks.size() - 1; i > positionPlaying; i--) {
             Track track = tracks.get(i);
-            if(!(track.isHistory() || track.isLocked())) {
+            if (!(track.isHistory() || track.isLocked())) {
                 tracks.remove(i);
             }
         }
@@ -28,28 +28,28 @@ public class TrackQueue extends TrackList {
 
     synchronized void insert(Playlist playlist) {
         List<Track> playlistTracks = playlist.getTracks(false);
-        for(Track track : playlistTracks) {
+        for (Track track : playlistTracks) {
             track.setLocked(true);
         }
-        tracks.addAll(positionPlaying+1, playlistTracks);
+        tracks.addAll(positionPlaying + 1, playlistTracks);
     }
 
     synchronized void insert(Track track) {
         track.setLocked(true);
-        tracks.add(positionPlaying+1, track);
+        tracks.add(positionPlaying + 1, track);
     }
 
     synchronized List<Track> fill(Playlist playlist) {
         List<Integer> excluded = new ArrayList<>();
-        for(Track track : tracks) {
+        for (Track track : tracks) {
             excluded.add(track.getIdFileRemote());
         }
         return add(excluded, playlist);
     }
 
     private synchronized List<Track> add(List<Integer> excluded, Playlist playlist) {
-        List<Track> addToTracks=new ArrayList<>();
-        if(playlist!=null ) {// && nbTracksAfterPlaying<MAX_QUEUE_NEXT+1 ) {
+        List<Track> addToTracks = new ArrayList<>();
+        if (playlist != null) {// && nbTracksAfterPlaying<MAX_QUEUE_NEXT+1 ) {
             addToTracks = playlist.getTracks(MAX_QUEUE_NEXT, excluded, false);
             tracks.addAll(addToTracks);
         }
@@ -76,12 +76,12 @@ public class TrackQueue extends TrackList {
     }
 
     synchronized void removeNext() {
-        tracks.remove(positionPlaying+1);
+        tracks.remove(positionPlaying + 1);
         positionPlaying++;
     }
 
     synchronized void removePrevious() {
-        tracks.remove(positionPlaying-1);
+        tracks.remove(positionPlaying - 1);
         positionPlaying--;
     }
 
@@ -93,7 +93,7 @@ public class TrackQueue extends TrackList {
     private final ArrayList<IListenerQueue> mListListener = new ArrayList<>();
 
     synchronized private void sendListener() {
-        for(int i = mListListener.size()-1; i >= 0; i--) {
+        for (int i = mListListener.size() - 1; i >= 0; i--) {
             mListListener.get(i).onPositionChanged(positionPlaying);
         }
     }
@@ -103,27 +103,27 @@ public class TrackQueue extends TrackList {
     }
 
     synchronized List<Track> getMore(int indexStart, Playlist playlist) {
-        Log.i(TAG,"getMore "+indexStart);
+        Log.i(TAG, "getMore " + indexStart);
         ArrayList<Track> list =
-                indexStart<tracks.size()
+                indexStart < tracks.size()
                         ? get(indexStart, indexStart)
                         : new ArrayList<>();
-        if(list.size()<MAX_QUEUE_NEXT) {
+        if (list.size() < MAX_QUEUE_NEXT) {
             list.addAll(fill(playlist));
         }
         return list;
     }
 
     synchronized private ArrayList<Track> get(int indexStart, int positionPlaying) {
-        int indexEnd   = (positionPlaying + MAX_QUEUE_NEXT) < tracks.size() ? positionPlaying + MAX_QUEUE_NEXT : tracks.size() - 1;
-        Log.i(TAG,"get "+indexStart+" "+indexEnd);
+        int indexEnd = (positionPlaying + MAX_QUEUE_NEXT) < tracks.size() ? positionPlaying + MAX_QUEUE_NEXT : tracks.size() - 1;
+        Log.i(TAG, "get " + indexStart + " " + indexEnd);
         return new ArrayList<>(tracks.subList(indexStart, indexEnd + 1));
     }
 
     synchronized PlayQueueRelative getActivityList() {
-        if(positionPlaying >-1) {
+        if (positionPlaying > -1) {
             int indexStart = Math.max((positionPlaying - MAX_QUEUE_PREVIOUS), 0);
-            Log.i(TAG,"getActivityList "+indexStart);
+            Log.i(TAG, "getActivityList " + indexStart);
             ArrayList<Track> list = get(indexStart, positionPlaying);
             return new PlayQueueRelative(positionPlaying, indexStart, list);
         }

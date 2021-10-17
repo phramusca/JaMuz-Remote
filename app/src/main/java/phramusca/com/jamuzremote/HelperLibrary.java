@@ -11,20 +11,20 @@ public final class HelperLibrary {
 
     public static MusicLibrary musicLibrary;
 
-    private HelperLibrary () {
+    private HelperLibrary() {
     }
 
     public static void open(File getAppDataPath, Context context) {
-        if(musicLibrary==null || !musicLibrary.db.isOpen()) {
+        if (musicLibrary == null || !musicLibrary.db.isOpen()) {
             musicLibrary = new MusicLibrary(getAppDataPath, context);
             musicLibrary.open();
         }
     }
 
     public static void close() {
-        if(musicLibrary!=null) {
+        if (musicLibrary != null) {
             musicLibrary.close();
-            musicLibrary=null;
+            musicLibrary = null;
         }
     }
 }
