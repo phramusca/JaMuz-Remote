@@ -19,8 +19,8 @@ import java.util.List;
 
 public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHolder> {
 
-    private Context mContext;
-    private List<YouTubeVideoItem> mVideoList;
+    private final Context mContext;
+    private final List<YouTubeVideoItem> mVideoList;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 

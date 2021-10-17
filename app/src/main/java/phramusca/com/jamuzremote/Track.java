@@ -683,7 +683,7 @@ public class Track implements Serializable {
     public JSONObject toJSONObject() {
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("idFile", (int) idFileServer);
+            jsonObject.put("idFile", idFileServer);
             jsonObject.put("path", relativeFullPath);
             jsonObject.put("rating", (int) rating);
             jsonObject.put("addedDate", getFormattedAddedDate());

@@ -66,7 +66,7 @@ public class StringManager {
      */
     @NonNull
     public static String Right(String text, int length) {
-        return text.substring(text.length() - length, text.length());
+        return text.substring(text.length() - length);
     }
 
     /**

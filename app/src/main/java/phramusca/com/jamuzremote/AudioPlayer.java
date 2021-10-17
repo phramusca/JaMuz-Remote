@@ -55,8 +55,8 @@ public class AudioPlayer {
     }
 
     //TODO: Make Replaygain options.
-    private boolean mReplayGainTrackEnabled = true;
-    private boolean mReplayGainAlbumEnabled = false;
+    private final boolean mReplayGainTrackEnabled = true;
+    private final boolean mReplayGainAlbumEnabled = false;
     private float baseVolume = 0.70f;
 
     /**

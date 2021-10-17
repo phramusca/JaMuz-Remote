@@ -100,8 +100,8 @@ public class VoiceKeyWords {
     }
 
     static class KeyWord {
-        private String keyword;
-        private Command command;
+        private final String keyword;
+        private final Command command;
 
         KeyWord(String keyword, Command command) {
             this.keyword = keyword;
@@ -130,6 +130,6 @@ public class VoiceKeyWords {
         PLAYER_NEXT,
         PLAYER_PAUSE,
         PLAYER_PULLUP,
-        UNKNOWN;
+        UNKNOWN
     }
 }

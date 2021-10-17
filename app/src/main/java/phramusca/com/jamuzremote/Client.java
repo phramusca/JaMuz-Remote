@@ -33,7 +33,7 @@ public class Client {
     private IListenerReception callback;
     private BufferedReader bufferedReader;
     private OutputStream outputStream;
-    private ClientInfo clientInfo;
+    private final ClientInfo clientInfo;
 
     Client(ClientInfo clientInfo) {
         this.clientInfo = clientInfo;

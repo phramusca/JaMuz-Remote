@@ -461,10 +461,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         private boolean isCompleted() {
-            if (newTracks.size() <= 0) {
-                return true;
-            }
-            return false;
+            return newTracks.size() <= 0;
         }
 
         private boolean startDownloads() throws InterruptedException {

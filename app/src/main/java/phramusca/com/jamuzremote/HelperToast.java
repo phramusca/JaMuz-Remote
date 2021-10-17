@@ -11,7 +11,7 @@ import android.widget.Toast;
 public class HelperToast {
 
     private static final String TAG = HelperToast.class.getName();
-    private Context context;
+    private final Context context;
 
     HelperToast(Context context) {
         this.context = context;
