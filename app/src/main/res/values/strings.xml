@@ -47,7 +47,6 @@
     <string name="alreadyExists">already exist.</string>
     <string name="newFolder">New folder</string>
     <string name="newFolderName">New folder name</string>
-    <string name="title">Title</string>
     <string name="cover">Cover</string>
     <string name="scan_qr">Scan QR</string>
     <string name="permissionMsg_1">For a full JaMuz experience</string>
@@ -60,13 +59,8 @@
     <string name="permissionMsg_8">Phone calls</string>
     <string name="permissionMsg_9">: Simply to be able to pause and resume audio on phone calls.</string>
     <string name="warning">Warning!</string>
-    <string name="confirmNo">OOOOPs NO!</string>
-    <string name="confirmYes">YES</string>
-    <string name="confirmPlayNow">Play now ?</string>
-    <string name="confirmRemove">Remove ?</string>
     <string name="best_albums">Best Albums</string>
     <string name="play_queue">Play Queue</string>
-    <string name="syncCheckFilesOnDisk">Checking if files are already on disk …</string>
     <string name="nbTracks">track(s)</string>
     <string name="album_tracks">Album Tracks</string>
     <string name="settings">Settings</string>
