@@ -3,7 +3,7 @@ package phramusca.com.jamuzremote;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.os.CountDownTimer;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
 import android.util.Log;
 
 /**
