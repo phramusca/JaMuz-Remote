@@ -105,7 +105,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
                 "    'idFile' INTEGER NOT NULL,\n" +
                 "    'idTag' INTEGER NOT NULL,\n" +
                 "\tPRIMARY KEY (idFile, 'idTag'),\n" +
-                "\tFOREIGN KEY(idFile) REFERENCES "+TABLE_TRACKS+"("+ COL_ID_REMOTE +"),\n" +
+                "\tFOREIGN KEY(idFile) REFERENCES " + TABLE_TRACKS + "(" + COL_ID_REMOTE + "),\n" +
                 "\tFOREIGN KEY(idTag) REFERENCES tag(id) ON DELETE CASCADE\n" +
                 ");");
         db.execSQL("CREATE TABLE \"genre\" (\n" +

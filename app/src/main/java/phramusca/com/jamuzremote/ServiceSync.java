@@ -33,7 +33,6 @@ import okio.BufferedSink;
 import okio.Okio;
 
 /**
- *
  * @author phramusca
  */
 public class ServiceSync extends ServiceBase {
@@ -53,29 +52,29 @@ public class ServiceSync extends ServiceBase {
     protected static OkHttpClient clientDownload;
 
     @Override
-    public void onCreate(){
+    public void onCreate() {
         notificationSync = new Notification(this, NotificationId.SYNC, "Sync");
-        notificationDownload= new Notification(this, NotificationId.SYNC_DOWN, "Sync");
+        notificationDownload = new Notification(this, NotificationId.SYNC_DOWN, "Sync");
         clientDownload = new OkHttpClient.Builder()
                 .readTimeout(60, TimeUnit.SECONDS)
                 .build();
-        userStopReceiver=new UserStopServiceReceiver();
-        registerReceiver(userStopReceiver,  new IntentFilter(USER_STOP_SERVICE_REQUEST));
+        userStopReceiver = new UserStopServiceReceiver();
+        registerReceiver(userStopReceiver, new IntentFilter(USER_STOP_SERVICE_REQUEST));
         super.onCreate();
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId){
+    public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        clientInfo = (ClientInfo)intent.getSerializableExtra("clientInfo");
+        clientInfo = (ClientInfo) intent.getSerializableExtra("clientInfo");
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         if (powerManager != null) {
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-            wakeLock.acquire(24*60*60*1000); //24 hours, enough to download a lot !
+            wakeLock.acquire(24 * 60 * 60 * 1000); //24 hours, enough to download a lot !
         }
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         if (wifiManager != null) {
-            wifiLock= wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF,TAG);
+            wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, TAG);
             wifiLock.acquire();
         }
         processSync = new ProcessSync("Thread.ServiceSync.processSync");
@@ -121,8 +120,8 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationSync, "Removing deleted files...");
                 List<Track> trackList = RepoSync.getNotSyncedList();
                 int nbTracks = trackList.size();
-                int i=0;
-                for(Track track : trackList) {
+                int i = 0;
+                for (Track track : trackList) {
                     checkAbort();
                     i++;
                     helperNotification.notifyBar(notificationSync, "Removing deleted files", 10, i, nbTracks);
@@ -133,7 +132,7 @@ public class ServiceSync extends ServiceBase {
                 }
 
                 runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Check complete.", -1));
-                if(processDownload!=null) {
+                if (processDownload != null) {
                     processDownload.join();
                     processDownload.checkCompleted();
                 } else {
@@ -145,30 +144,30 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationSync, "Interrupted ");
             } catch (Exception e) {
                 Log.e(TAG, "Error ProcessSync", e);
-                helperNotification.notifyBar(notificationSync, "ERROR: "+e.getLocalizedMessage(), 0, 0, false,
-                        true, false, "ERROR: "+e.getLocalizedMessage());
+                helperNotification.notifyBar(notificationSync, "ERROR: " + e.getLocalizedMessage(), 0, 0, false,
+                        true, false, "ERROR: " + e.getLocalizedMessage());
             }
         }
 
         private void checkFiles(Track.Status status)
                 throws InterruptedException, ServerException, IOException {
-            int nbFilesInBatch=500;
+            int nbFilesInBatch = 500;
             int nbFilesServer = getFilesCount(status);
-            String msg = "Checking "+status.name().toLowerCase()+" files ...";
+            String msg = "Checking " + status.name().toLowerCase() + " files ...";
             helperNotification.notifyBar(notificationSync, msg);
-            if(nbFilesServer>0) {
-                for (int i=0; i<=nbFilesServer; i = i + nbFilesInBatch) {
+            if (nbFilesServer > 0) {
+                for (int i = 0; i <= nbFilesServer; i = i + nbFilesInBatch) {
                     checkAbort();
                     Map<Integer, Track> filesMapBatch = getFiles(i, nbFilesInBatch, status);
-                    int j =0;
-                    for (Track trackServer:filesMapBatch.values()) {
+                    int j = 0;
+                    for (Track trackServer : filesMapBatch.values()) {
                         checkAbort();
-                        helperNotification.notifyBar(notificationSync, msg, 50, i+j, nbFilesServer);
+                        helperNotification.notifyBar(notificationSync, msg, 50, i + j, nbFilesServer);
                         j++;
                         Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
-                        if(trackRemote!=null) {
+                        if (trackRemote != null) {
                             //FIXME: Update track for other changes too (format, metadata ...)
-                            if(trackServer.getSize()!=trackRemote.getSize()
+                            if (trackServer.getSize() != trackRemote.getSize()
                                     || !trackServer.getRelativeFullPath().equals(trackRemote.getRelativeFullPath())) {
                                 File file = new File(trackRemote.getPath());
                                 //noinspection ResultOfMethodCallIgnored
@@ -179,7 +178,7 @@ public class ServiceSync extends ServiceBase {
                             } else {
                                 switch (trackServer.getStatus()) {
                                     case INFO:
-                                        if(!trackRemote.getStatus().equals(Track.Status.INFO)) {
+                                        if (!trackRemote.getStatus().equals(Track.Status.INFO)) {
                                             File file = new File(trackRemote.getPath());
                                             //noinspection ResultOfMethodCallIgnored
                                             file.delete();
@@ -187,16 +186,16 @@ public class ServiceSync extends ServiceBase {
                                         }
                                         break;
                                     case NEW:
-                                        if(trackRemote.getStatus().equals(Track.Status.REC)) {
+                                        if (trackRemote.getStatus().equals(Track.Status.REC)) {
                                             trackServer.setStatus(Track.Status.REC);
-                                        } else if(!trackRemote.getStatus().equals(Track.Status.NEW)) {
+                                        } else if (!trackRemote.getStatus().equals(Track.Status.NEW)) {
                                             HelperLibrary.musicLibrary.updateStatus(trackServer);
                                         }
                                         break;
                                 }
                             }
                         } else {
-                            if(trackServer.getStatus().equals(Track.Status.NEW) && RepoSync.checkFile(trackServer)) {
+                            if (trackServer.getStatus().equals(Track.Status.NEW) && RepoSync.checkFile(trackServer)) {
                                 trackServer.setStatus(Track.Status.REC);
                             }
                             HelperLibrary.musicLibrary.insertTrack(trackServer);
@@ -218,14 +217,14 @@ public class ServiceSync extends ServiceBase {
             //RetryInterceptor interceptor = new RetryInterceptor(5,5, helperNotification, notificationSync);
             //OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
             int nbRetries = 0;
-            int sleepSeconds=5;
-            int maxNbRetries=20;
+            int sleepSeconds = 5;
+            int maxNbRetries = 20;
             Map<Integer, Track> newTracks = null;
             String msg = "";
             do {
                 nbRetries++;
                 try {
-                    HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/"+status.name());
+                    HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/" + status.name());
                     urlBuilder.addQueryParameter("idFrom", String.valueOf(idFrom));
                     urlBuilder.addQueryParameter("nbFilesInBatch", String.valueOf(nbFilesInBatch));
                     String body = clientInfo.getBodyString(urlBuilder, client);
@@ -242,27 +241,27 @@ public class ServiceSync extends ServiceBase {
                     break;
                 } catch (Exception e) {
                     msg = e.getLocalizedMessage();
-                    Log.d(TAG, "ERROR: "+ msg);
+                    Log.d(TAG, "ERROR: " + msg);
                     helperNotification.notifyBar(notificationSync, sleepSeconds + "s before " +
                             (nbRetries + 1) + "/" + maxNbRetries + " : " + msg);
                     try {
-                        sleep(sleepSeconds*1000);
+                        sleep(sleepSeconds * 1000);
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
                     }
                 }
-            } while (nbRetries < maxNbRetries-1);
-            if(newTracks==null) {
+            } while (nbRetries < maxNbRetries - 1);
+            if (newTracks == null) {
                 throw new IOException(msg);
             }
             return newTracks;
         }
 
         private Integer getFilesCount(Track.Status status) throws IOException, ServerException {
-            HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/"+status.name());
+            HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/" + status.name());
             urlBuilder.addQueryParameter("getCount", "true");
             String body = clientInfo.getBodyString(urlBuilder, client);
-            helperNotification.notifyBar(notificationSync, "Received "+status.name()+" files count ... ");
+            helperNotification.notifyBar(notificationSync, "Received " + status.name() + " files count ... ");
             return Integer.valueOf(body);
         }
 
@@ -296,9 +295,9 @@ public class ServiceSync extends ServiceBase {
         }
 
         private void requestMerge() throws JSONException, ServerException, IOException {
-            helperNotification.notifyBar(notificationSync,"Preparing statistics merge.");
+            helperNotification.notifyBar(notificationSync, "Preparing statistics merge.");
             List<Track> tracks = RepoSync.getMergeList();
-            for(Track track : tracks) {
+            for (Track track : tracks) {
                 track.getTags(true);
             }
             OkHttpClient client = new OkHttpClient.Builder()
@@ -314,9 +313,9 @@ public class ServiceSync extends ServiceBase {
             HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files");
             Request request = clientInfo.getRequestBuilder(urlBuilder)
                     .post(RequestBody.create(obj.toString(), MediaType.parse("application/json; charset=utf-8"))).build();
-            helperNotification.notifyBar(notificationSync,"Requesting statistics merge.");
+            helperNotification.notifyBar(notificationSync, "Requesting statistics merge.");
             String body = clientInfo.getBodyString(request, client);
-            helperNotification.notifyBar(notificationSync,"Updating database with merge changes ... ");
+            helperNotification.notifyBar(notificationSync, "Updating database with merge changes ... ");
             final JSONObject jObject = new JSONObject(body);
             JSONArray filesToUpdate = (JSONArray) jObject.get("files");
             for (int i = 0; i < filesToUpdate.length(); i++) {
@@ -326,14 +325,14 @@ public class ServiceSync extends ServiceBase {
                 fileReceived.setStatus(Track.Status.REC);
                 HelperLibrary.musicLibrary.updateTrack(fileReceived, true);
                 helperNotification.notifyBar(notificationSync, "Updating database with merge changes",
-                        10, i+1, filesToUpdate.length());
+                        10, i + 1, filesToUpdate.length());
             }
             helperNotification.notifyBar(notificationSync, "Merge complete.");
         }
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         unregisterReceiver(userStopReceiver);
         wakeLock.release();
         wifiLock.release();
@@ -346,18 +345,16 @@ public class ServiceSync extends ServiceBase {
         }
     }
 
-    public class UserStopServiceReceiver extends BroadcastReceiver
-    {
+    public class UserStopServiceReceiver extends BroadcastReceiver {
         @Override
-        public void onReceive(Context context, Intent intent)
-        {
+        public void onReceive(Context context, Intent intent) {
             Log.i(TAG, "UserStopServiceReceiver.onReceive()");
             stopSync("User stopped.", 1500);
         }
     }
 
     private void stopSync(String msg, long millisInFuture) {
-        if(processDownload!=null) {
+        if (processDownload != null) {
             processDownload.stopDownloads();
             processDownload = null;
         }
@@ -373,7 +370,7 @@ public class ServiceSync extends ServiceBase {
     }
 
     private void startDownloads(List<Track> newTracks) {
-        if ((processDownload==null || !processDownload.isAlive()) && newTracks.size()>0) {
+        if ((processDownload == null || !processDownload.isAlive()) && newTracks.size() > 0) {
             Log.i(TAG, "START ProcessDownload");
             processDownload = new ProcessDownload("ProcessDownload", newTracks);
             processDownload.start();
@@ -385,8 +382,8 @@ public class ServiceSync extends ServiceBase {
         private final List<Track> newTracks;
         private List<DownloadTask> downloadServices;
         private ExecutorService pool;
-        private int nbRetries=0;
-        private final int maxNbRetries=10;//TODO: Make number of retries an option eventually
+        private int nbRetries = 0;
+        private final int maxNbRetries = 10;//TODO: Make number of retries an option eventually
         private final int nbFilesStart;
         private long sizeTotal;
         private long sizeRemaining;
@@ -397,17 +394,17 @@ public class ServiceSync extends ServiceBase {
             super(name);
             this.newTracks = newTracks;
             nbFilesStart = newTracks.size();
-            downloadServices= new ArrayList<>();
+            downloadServices = new ArrayList<>();
         }
 
         private void checkCompleted() {
             int remaining = newTracks.size();
             String msg = "Sync complete.\n\n";
-            if(remaining<1) {
+            if (remaining < 1) {
                 msg = msg + "All " + nbFilesStart + " files" +
                         " have been downloaded successfully.";
             } else {
-                msg = msg + (nbFilesStart-remaining) + " files downloaded, " +
+                msg = msg + (nbFilesStart - remaining) + " files downloaded, " +
                         "but still " + remaining + " files to be downloaded.";
             }
             Log.i(TAG, msg);
@@ -417,11 +414,11 @@ public class ServiceSync extends ServiceBase {
         }
 
         private void notifyBarProgress(Track track) {
-            if(track!=null) {
-                if(!track.getStatus().equals(Track.Status.REC)) {
+            if (track != null) {
+                if (!track.getStatus().equals(Track.Status.REC)) {
                     nbFailed++;
                 } else {
-                    sizeRemaining-=track.getSize();
+                    sizeRemaining -= track.getSize();
                     newTracks.remove(track);
                 }
                 bench.get(track.getSize());
@@ -430,7 +427,7 @@ public class ServiceSync extends ServiceBase {
                     "\n" + StringManager.humanReadableByteCount(sizeRemaining, false)
                     + "/" + StringManager.humanReadableByteCount(sizeTotal, false) + "\n" +
                     "Attempt " + (nbRetries + 1) + "/" + maxNbRetries + ". " + nbFailed + " Error(s).\n";
-            String msg =  "Downloading ... " +bench.getLast();
+            String msg = "Downloading ... " + bench.getLast();
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, msg,
                     nbFilesStart, (nbFilesStart - newTracks.size()), false,
                     true, true,
@@ -442,11 +439,11 @@ public class ServiceSync extends ServiceBase {
             try {
                 do {
                     checkAbort();
-                    if(isCompleted() || !startDownloads()) {
+                    if (isCompleted() || !startDownloads()) {
                         break;
                     }
                     checkAbort();
-                    if(isCompleted()) {
+                    if (isCompleted()) {
                         break;
                     }
                     nbRetries++;
@@ -464,7 +461,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         private boolean isCompleted() {
-            if(newTracks.size()<=0) {
+            if (newTracks.size() <= 0) {
                 return true;
             }
             return false;
@@ -474,16 +471,16 @@ public class ServiceSync extends ServiceBase {
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Starting download ... "));
             bench = new Benchmark(newTracks.size(), 10);
             pool = Executors.newFixedThreadPool(20); //FIXME: Make number of threads an option AND add benchmark back
-            downloadServices= new ArrayList<>();
-            sizeTotal=0;
-            nbFailed=0;
+            downloadServices = new ArrayList<>();
+            sizeTotal = 0;
+            nbFailed = 0;
             wifiLock.acquire();
             for (Track track : newTracks) {
                 track.getTags(true);
                 DownloadTask downloadTask = new DownloadTask(track, this::notifyBarProgress, clientInfo);
                 downloadServices.add(downloadTask);
                 pool.submit(downloadTask);
-                sizeTotal+=track.getSize();
+                sizeTotal += track.getSize();
             }
             pool.shutdown();
             notifyBarProgress(null);
@@ -495,7 +492,7 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationDownload, "Stopping downloads ... "); //, 5000);
             });
             pool.shutdownNow();
-            for(DownloadTask downloadService : downloadServices) {
+            for (DownloadTask downloadService : downloadServices) {
                 downloadService.abort();
             }
             abort();
@@ -509,7 +506,7 @@ public class ServiceSync extends ServiceBase {
         private final Track track;
 
         DownloadTask(Track track, IListenerSyncDown callback, ClientInfo clientInfo) {
-            super("DownloadTask idFileServer="+track.getIdFileServer());
+            super("DownloadTask idFileServer=" + track.getIdFileServer());
             this.track = track;
             this.callback = callback;
             this.clientInfo = clientInfo;
@@ -518,12 +515,12 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void run() {
             try {
-                File destinationFile=new File(track.getPath());
+                File destinationFile = new File(track.getPath());
                 File destinationPath = destinationFile.getParentFile();
                 //noinspection ResultOfMethodCallIgnored
                 destinationPath.mkdirs();
                 checkAbort();
-                if(clientDownload==null) {
+                if (clientDownload == null) {
                     clientDownload = new OkHttpClient.Builder()
                             .readTimeout(60, TimeUnit.SECONDS)
                             .build();
@@ -547,7 +544,7 @@ public class ServiceSync extends ServiceBase {
                 } else {
                     switch (response.code()) {
                         case 301:
-                            throw new ServerException(request.header("api-version")+" not supported. "+ Objects.requireNonNull(response.body()).string());
+                            throw new ServerException(request.header("api-version") + " not supported. " + Objects.requireNonNull(response.body()).string());
                         case 410: //Gone
                             //Transcoded file is not available
                             track.setStatus(Track.Status.ERROR);
@@ -559,20 +556,19 @@ public class ServiceSync extends ServiceBase {
                             RepoSync.update(track);
                             break;
                         default:
-                            throw new ServerException(response.code()+": "+response.message());
+                            throw new ServerException(response.code() + ": " + response.message());
                     }
                 }
             } catch (InterruptedException e) {
-                Log.w(TAG, "Download interrupted for "+track.getRelativeFullPath(), e);
+                Log.w(TAG, "Download interrupted for " + track.getRelativeFullPath(), e);
             } catch (IOException | NullPointerException e) {
-                Log.e(TAG, "Error downloading "+track.getRelativeFullPath(), e);
-                if(e.getMessage().contains("ENOSPC")) {
+                Log.e(TAG, "Error downloading " + track.getRelativeFullPath(), e);
+                if (e.getMessage().contains("ENOSPC")) {
                     //FIXME: Stop downloads if java.io.IOException: write failed: ENOSPC (No space left on device)
                     // BUT only if sync check has completed as it can free some space
                 }
-            }
-            catch (Exception e) {
-                Log.e(TAG, "Error downloading "+track.getRelativeFullPath(), e);
+            } catch (Exception e) {
+                Log.e(TAG, "Error downloading " + track.getRelativeFullPath(), e);
             }
             callback.setStatus(track);
         }

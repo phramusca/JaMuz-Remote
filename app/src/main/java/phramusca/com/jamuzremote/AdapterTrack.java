@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,17 +30,17 @@ public abstract class AdapterTrack extends AdapterLoad {
         super(context, recyclerView);
         mContext = context;
         trackList = new TrackList(tracks, positionPlaying);
-        complete=false;
-        completeTop=false;
+        complete = false;
+        completeTop = false;
         recyclerView.setAdapter(this);
         setOnLoadListener(new IListenerOnLoad() {
             @Override
             public void onLoadTop() {
-                if(!completeTop) {
+                if (!completeTop) {
                     trackList.addLoaderTop();
                     notifyItemInserted(0);
                     new Handler().postDelayed(() -> {
-                        completeTop=addTop()<=0;
+                        completeTop = addTop() <= 0;
                         trackList.removeLoader(0);
                         notifyDataSetChanged();
                         setLoadedTop();
@@ -56,7 +57,7 @@ public abstract class AdapterTrack extends AdapterLoad {
                     int loaderPos = trackList.addLoader();
                     notifyItemInserted(loaderPos);
                     new Handler().post(() -> {
-                        complete=!addMore();
+                        complete = !addMore();
                         trackList.removeLoader(loaderPos);
                         notifyDataSetChanged();
                         setLoaded();
@@ -70,12 +71,13 @@ public abstract class AdapterTrack extends AdapterLoad {
     }
 
     abstract List<Track> getMore();
+
     abstract List<Track> getTop();
 
     private boolean addMore() {
         List<Track> newTracks = getMore();
         this.trackList.addBottom(newTracks);
-        return newTracks.size()>0;
+        return newTracks.size() > 0;
     }
 
     private int addTop() {
@@ -107,7 +109,7 @@ public abstract class AdapterTrack extends AdapterLoad {
                     String.format(Locale.ENGLISH,
                             "%s %d/5 %s\n%s %s",
                             track.getTags(),
-                            (int)track.getRating(),
+                            (int) track.getRating(),
                             track.getGenre(), track.getLastPlayedAgo(), track.getAddedDateAgo()
                     ));
 
@@ -120,10 +122,10 @@ public abstract class AdapterTrack extends AdapterLoad {
 
     void setView(int position, UserViewHolder userViewHolder,
                  String line1, String line2, String line3, String line4) {
-        if(trackList.get(position).getStatus().equals(Track.Status.INFO)) {
+        if (trackList.get(position).getStatus().equals(Track.Status.INFO)) {
             userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.colorAccent));
             userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.colorAccent));
-        } else if(trackList.get(position).getStatus().equals(Track.Status.ERROR)) {
+        } else if (trackList.get(position).getStatus().equals(Track.Status.ERROR)) {
             userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.lightYellow));
             userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.lightYellow));
         } else {
@@ -140,13 +142,13 @@ public abstract class AdapterTrack extends AdapterLoad {
         if (bitmap == null) {
             bitmap = HelperBitmap.getEmptyThumb();
         }
-        if(position==trackList.getPositionPlaying()) {
+        if (position == trackList.getPositionPlaying()) {
             bitmap = overlayIcon(bitmap, R.drawable.ic_playing);
         }
 
-        if(trackList.get(position).getStatus().equals(Track.Status.NEW)) {
+        if (trackList.get(position).getStatus().equals(Track.Status.NEW)) {
             bitmap = overlayIcon(bitmap, R.drawable.ic_download);
-        } else if(trackList.get(position).getStatus().equals(Track.Status.ERROR)) {
+        } else if (trackList.get(position).getStatus().equals(Track.Status.ERROR)) {
             bitmap = overlayIcon(bitmap, R.drawable.ic_error);
         }
 
@@ -162,7 +164,7 @@ public abstract class AdapterTrack extends AdapterLoad {
 
         userViewHolder.itemView.setTag(position);
         userViewHolder.itemView.setOnClickListener(view -> {
-            Integer position1 = (Integer)view.getTag();
+            Integer position1 = (Integer) view.getTag();
             sendListener(trackList.get(position1), position1);
         });
     }
@@ -173,8 +175,8 @@ public abstract class AdapterTrack extends AdapterLoad {
         Canvas canvas = new Canvas(bmOverlay);
         canvas.drawBitmap(bitmap, new Matrix(), null); //TODO: Paint in black if cover is too much white
         Bitmap playingBitmap = BitmapFactory.decodeResource(mContext.getResources(), iconId);
-        int newWidth = bmOverlay.getWidth()-(margin*2);
-        int newHeight = bmOverlay.getHeight()-(margin*2);
+        int newWidth = bmOverlay.getWidth() - (margin * 2);
+        int newHeight = bmOverlay.getHeight() - (margin * 2);
         int width = playingBitmap.getWidth();
         int height = playingBitmap.getHeight();
         float scaleWidth = ((float) newWidth) / width;

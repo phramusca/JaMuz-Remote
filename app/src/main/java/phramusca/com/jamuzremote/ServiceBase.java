@@ -12,8 +12,9 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.File;
 
@@ -26,30 +27,30 @@ public abstract class ServiceBase extends Service {
     protected HelperToast helperToast = new HelperToast(this);
 
     @Override
-    public IBinder onBind(Intent intent){
+    public IBinder onBind(Intent intent) {
         return null;
     }
 
     @Override
-    public void onCreate(){
+    public void onCreate() {
         NotificationManager mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        helperNotification= new HelperNotification(getApplicationIntent(), mNotifyManager);
+        helperNotification = new HelperNotification(getApplicationIntent(), mNotifyManager);
         super.onCreate();
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId){
-        getAppDataPath = (File)intent.getSerializableExtra("getAppDataPath");
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        getAppDataPath = (File) intent.getSerializableExtra("getAppDataPath");
         return START_REDELIVER_INTENT;
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
     }
 
     protected void sendMessage(String msg) {
-        Log.i(TAG, "Broadcast.sendMessage("+msg+")");
+        Log.i(TAG, "Broadcast.sendMessage(" + msg + ")");
         Intent intent = new Intent("ServiceBase");
         intent.putExtra("message", msg);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);

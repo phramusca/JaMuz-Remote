@@ -1,10 +1,10 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
+
 import androidx.core.app.NotificationCompat;
 
 /**
- *
  * @author phramusca ( https://github.com/phramusca/JaMuz/ )
  */
 public class Notification {
@@ -18,6 +18,6 @@ public class Notification {
                 .setContentText("Download in progress")
                 .setUsesChronometer(true)
                 .setSmallIcon(R.drawable.ic_process);
-        this.id =id;
+        this.id = id;
     }
 }

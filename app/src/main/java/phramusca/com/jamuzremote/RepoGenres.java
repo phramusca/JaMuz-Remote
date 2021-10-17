@@ -16,7 +16,7 @@ public final class RepoGenres {
     }
 
     public synchronized static List<String> get() {
-        if(HelperLibrary.musicLibrary!=null && genres.size()<=0) {
+        if (HelperLibrary.musicLibrary != null && genres.size() <= 0) {
             genres = new ArrayList<>();
             genres = HelperLibrary.musicLibrary.getGenres();
         }
@@ -24,16 +24,15 @@ public final class RepoGenres {
     }
 
     public synchronized static void set(final List<String> newGenres) {
-        for(String tag : newGenres) {
+        for (String tag : newGenres) {
             add(tag);
         }
         final Iterator<String> it = get().iterator();
-        while (it.hasNext())
-        {
+        while (it.hasNext()) {
             final String genre = it.next();
-            if(HelperLibrary.musicLibrary!=null && !newGenres.contains(genre)) {
+            if (HelperLibrary.musicLibrary != null && !newGenres.contains(genre)) {
                 int deleted = HelperLibrary.musicLibrary.deleteGenre(genre);
-                if(deleted>0) {
+                if (deleted > 0) {
                     it.remove();
                 }
             }
@@ -41,7 +40,7 @@ public final class RepoGenres {
     }
 
     private synchronized static void add(final String genre) {
-        if(HelperLibrary.musicLibrary!=null && !get().contains(genre)) {
+        if (HelperLibrary.musicLibrary != null && !get().contains(genre)) {
             if (HelperLibrary.musicLibrary.addGenre(genre)) {
                 genres.add(genre);
             }

@@ -83,12 +83,12 @@ public class VoiceKeyWords {
             ));
 
     public static KeyWord get(String spokenText) {
-        String searchValue=spokenText.toLowerCase().trim();
+        String searchValue = spokenText.toLowerCase().trim();
         Command command = Command.UNKNOWN;
-        for(KeyWord word : KEY_WORDS) {
-            if(searchValue.startsWith(word.getKeyword())) {
-                command =word.getCommand();
-                searchValue=spokenText.substring(word.getKeyword().length()).trim();
+        for (KeyWord word : KEY_WORDS) {
+            if (searchValue.startsWith(word.getKeyword())) {
+                command = word.getCommand();
+                searchValue = spokenText.substring(word.getKeyword().length()).trim();
                 break;
             }
         }

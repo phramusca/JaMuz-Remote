@@ -1,8 +1,9 @@
 package phramusca.com.jamuzremote;
 
-import androidx.annotation.NonNull;
 import android.text.SpannableString;
 import android.text.Spanned;
+
+import androidx.annotation.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,68 +27,70 @@ public class StringManager {
      * 001D, GROUP SEPARATOR
      * 001E, RECORD SEPARATOR
      * 001F, UNIT SEPARATOR
+     *
      * @return "" if source is null, otherwise string with all trailing whitespace removed
      */
     public static Spanned trimTrailingWhitespace(Spanned source) {
 
-        if(source == null)
+        if (source == null)
             return new SpannableString("");
 
         int i = source.length();
 
         // loop back to the first non-whitespace character
-        while(true) {
+        while (true) {
             if (!(--i >= 0 && Character.isWhitespace(source.charAt(i)))) break;
         }
 
-        return new SpannableString(source.subSequence(0, i+1));
+        return new SpannableString(source.subSequence(0, i + 1));
     }
 
     /**
      * Return left portion of a string
-     * @param text string
+     *
+     * @param text   string
      * @param length string lenght
      * @return left of string up to length
      */
     @NonNull
-    public static String Left(String text, int length)
-    {
+    public static String Left(String text, int length) {
         return text.substring(0, length);
     }
 
-    /** Return left portion of a string
-     * @param text string
+    /**
+     * Return left portion of a string
+     *
+     * @param text   string
      * @param length string length
      * @return right portion of a string
      */
     @NonNull
-    public static String Right(String text, int length)
-    {
+    public static String Right(String text, int length) {
         return text.substring(text.length() - length, text.length());
     }
 
     /**
      * Return portion of a string
-     * @param text string
+     *
+     * @param text  string
      * @param start where to start
-     * @param end where to end
+     * @param end   where to end
      * @return portion of a string
      */
     @NonNull
-    public static String Mid(String text, int start, int end)
-    {
+    public static String Mid(String text, int start, int end) {
         return text.substring(start, end);
     }
 
     /**
      * Return portion of a string
-     * @param text string
+     *
+     * @param text  string
      * @param start where to start
      * @return portion of a string
      */
     @NonNull
-    public static String Mid(String text, int start)
-    {
+    public static String Mid(String text, int start) {
         return text.substring(start, text.length() - start);
     }
 
@@ -97,6 +100,7 @@ public class StringManager {
      * Windows has much more that Linux but removing on both
      * systems for compatibility. Anyway, not that important characters
      * for an audio filename ...
+     *
      * @param str string
      * @return string with illegal chars replaced by "_"
      */
@@ -110,10 +114,9 @@ public class StringManager {
      * @return text or "null"
      */
     public static String getNullableText(String text) {
-        if(text==null) {
+        if (text == null) {
             return "null";
-        }
-        else {
+        } else {
             return text;
         }
     }
@@ -122,8 +125,9 @@ public class StringManager {
      * Convert number of bytes into human readable formatDisplay (Kio, Ko, ...)
      * <p>Système international (SI) | ex: 1 mégabit (Mb) 	= 106 bits 	= 1 000 kb 	= 1 000 000 bits
      * <p>Préfixes binaires | ex: 1 mébibit (Mib) 	= 220 bits 	= 1 024 kib 	= 1 048 576 bits
+     *
      * @param bits number of bits
-     * @param si Use SI (International System of Units) or not
+     * @param si   Use SI (International System of Units) or not
      * @return Human readable file size
      */
     public static String humanReadableBitCount(long bits, boolean si) {
@@ -134,8 +138,9 @@ public class StringManager {
      * Convert number of bytes into human readable formatDisplay (Kio, Ko, ...)
      * <p>Système international (SI) | ex: 1 mégaoctet (Mo) 	= 106 octets 	= 1 000 ko 	= 1 000 000 octets
      * <p>Préfixes binaires | ex: 1 mébioctet (Mio) 	= 220 octets 	= 1 024 kio 	= 1 048 576 octets
+     *
      * @param bytes number of bytes
-     * @param si Use SI (International System of Units) or not
+     * @param si    Use SI (International System of Units) or not
      * @return Human readable file size
      */
     public static String humanReadableByteCount(long bytes, boolean si) {
@@ -149,39 +154,36 @@ public class StringManager {
 
         int unit = si ? 1000 : 1024;
         if (bytes < unit) {
-            return bytes + " "+unitChar; //NOI18N
+            return bytes + " " + unitChar; //NOI18N
         }
         int exp = (int) (Math.log(bytes) / Math.log(unit));
         String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i"); //NOI18N
-        return String.format("%.1f %s"+unitChar, bytes / Math.pow(unit, exp), pre); //NOI18N
+        return String.format("%.1f %s" + unitChar, bytes / Math.pow(unit, exp), pre); //NOI18N
     }
 
     /**
-     *
      * @param seconds
      * @return MM:SS
      */
     public static String secondsToMMSS(int seconds) {
-        return String.format(Locale.ENGLISH,"%02d:%02d", //NOI18N
+        return String.format(Locale.ENGLISH, "%02d:%02d", //NOI18N
                 TimeUnit.SECONDS.toMinutes(seconds),
                 TimeUnit.SECONDS.toSeconds(seconds) - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(seconds))
         );
     }
 
     /**
-     *
      * @param seconds
      * @return
      */
     public static String secondsToHHMM(int seconds) {
-        return String.format(Locale.ENGLISH,"%02d h %02d", //NOI18N
+        return String.format(Locale.ENGLISH, "%02d h %02d", //NOI18N
                 TimeUnit.SECONDS.toHours(seconds),
                 TimeUnit.SECONDS.toMinutes(seconds) - TimeUnit.HOURS.toMinutes(TimeUnit.SECONDS.toHours(seconds))
         );
     }
 
     /**
-     *
      * @param seconds
      * @return
      */
@@ -206,11 +208,11 @@ public class StringManager {
             sb.append("d ");
         }
         if (hours > 0) {
-            sb.append(String.format(Locale.ENGLISH,"%02d", hours));
+            sb.append(String.format(Locale.ENGLISH, "%02d", hours));
             sb.append("h ");
         }
         if (minutes > 0) {
-            sb.append(String.format(Locale.ENGLISH,"%02d", minutes));
+            sb.append(String.format(Locale.ENGLISH, "%02d", minutes));
             sb.append("m");
         }
 

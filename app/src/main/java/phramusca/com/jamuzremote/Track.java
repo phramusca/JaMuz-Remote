@@ -39,9 +39,9 @@ public class Track implements Serializable {
     private Date modifDate = new Date(0);
     private String checkedFlag = "";
     private String copyRight = "";
-    private boolean isHistory=false;
-    private boolean isLocked =false;
-    private boolean isSync=false;
+    private boolean isHistory = false;
+    private boolean isLocked = false;
+    private boolean isSync = false;
     private int idFileRemote = -1;
     private int idFileServer = -1;
     private String artist = "";
@@ -56,45 +56,47 @@ public class Track implements Serializable {
     private String path = "";
     private String relativeFullPath = "";
     private ArrayList<String> tags = null;
-    private String source="";
+    private String source = "";
     private long size;
     private int length;
-    private ReplayGain.GainValues replayGain=new ReplayGain.GainValues();
-    private String coverHash="";
+    private ReplayGain.GainValues replayGain = new ReplayGain.GainValues();
+    private String coverHash = "";
 
-    /** From database
+    /**
+     * From database
+     *
      * @param pathModifDate
      * @param pathMbId
      * @param comment
-     * @param idPath -
-     * @param albumArtist -
-     * @param year -
-     * @param trackNo -
-     * @param trackTotal -
-     * @param discNo -
-     * @param discTotal -
-     * @param bitRate -
-     * @param format -
-     * @param bpm -
+     * @param idPath         -
+     * @param albumArtist    -
+     * @param year           -
+     * @param trackNo        -
+     * @param trackTotal     -
+     * @param discNo         -
+     * @param discTotal      -
+     * @param bitRate        -
+     * @param format         -
+     * @param bpm            -
      * @param modifDate
      * @param checkedFlag
      * @param copyRight
      * @param getAppDataPath
-     * @param idFileRemote -
-     * @param idFileServer -
-     * @param rating -
-     * @param title -
-     * @param album -
-     * @param artist -
+     * @param idFileRemote   -
+     * @param idFileServer   -
+     * @param rating         -
+     * @param title          -
+     * @param album          -
+     * @param artist         -
      * @param coverHash
-     * @param path -
-     * @param genre -
-     * @param addedDate -
-     * @param lastPlayed -
-     * @param playCounter -
-     * @param status -
-     * @param size -
-     * @param length -
+     * @param path           -
+     * @param genre          -
+     * @param addedDate      -
+     * @param lastPlayed     -
+     * @param playCounter    -
+     * @param status         -
+     * @param size           -
+     * @param length         -
      */
     public Track(Date pathModifDate, String pathMbId, String comment, int idPath,
                  String albumArtist, String year, int trackNo, int trackTotal,
@@ -126,13 +128,13 @@ public class Track implements Serializable {
         this.title = title;
         this.album = album;
         this.artist = artist;
-        this.genre=genre;
+        this.genre = genre;
         this.path = path;
         this.length = length;
-        if(getAppDataPath.getAbsolutePath().length()+1>path.length()) {
+        if (getAppDataPath.getAbsolutePath().length() + 1 > path.length()) {
             this.relativeFullPath = path;
         } else {
-            this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length()+1);
+            this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length() + 1);
         }
         this.addedDate = addedDate;
         this.lastPlayed = lastPlayed;
@@ -140,25 +142,27 @@ public class Track implements Serializable {
         this.status = Status.valueOf(status);
         this.size = size;
         this.coverHash = coverHash;
-        this.replayGain =new ReplayGain.GainValues(trackGain, albumGain);
+        this.replayGain = new ReplayGain.GainValues(trackGain, albumGain);
     }
 
-    /** Track to display
+    /**
+     * Track to display
+     *
      * @param albumArtist -
-     * @param year -
-     * @param trackNo -
-     * @param trackTotal -
-     * @param discNo -
-     * @param discTotal -
-     * @param bitRate -
+     * @param year        -
+     * @param trackNo     -
+     * @param trackTotal  -
+     * @param discNo      -
+     * @param discTotal   -
+     * @param bitRate     -
      * @param format
-     * @param bpm -
-     * @param rating -
-     * @param title -
-     * @param album -
-     * @param artist -
-     * @param coverHash -
-     * @param genre -
+     * @param bpm         -
+     * @param rating      -
+     * @param title       -
+     * @param album       -
+     * @param artist      -
+     * @param coverHash   -
+     * @param genre       -
      */
     public Track(String albumArtist, String year, int trackNo, int trackTotal, int discNo,
                  int discTotal, String bitRate, String format, double bpm, double rating, String title,
@@ -177,11 +181,13 @@ public class Track implements Serializable {
         this.album = album;
         this.artist = artist;
         this.coverHash = coverHash;
-        this.genre=genre;
-        this.source="Remote";
+        this.genre = genre;
+        this.source = "Remote";
     }
 
-    /** Creates a LOCAL track
+    /**
+     * Creates a LOCAL track
+     *
      * @param getAppDataPath
      * @param absolutePath
      */
@@ -190,7 +196,7 @@ public class Track implements Serializable {
         try {
             this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length() + 1);
         } catch (StringIndexOutOfBoundsException ex) {
-            Log.e(TAG, "Error getting relativeFullPath; path="+path+", getAppDataPath="+getAppDataPath, ex);
+            Log.e(TAG, "Error getting relativeFullPath; path=" + path + ", getAppDataPath=" + getAppDataPath, ex);
         }
     }
 
@@ -204,7 +210,7 @@ public class Track implements Serializable {
             genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
             return true;
         } catch (RuntimeException ex) {
-            Log.e(TAG, "Error reading file tags "+path, ex);
+            Log.e(TAG, "Error reading file tags " + path, ex);
         }
         return false;
     }
@@ -216,7 +222,7 @@ public class Track implements Serializable {
             lastPlayed = getDate(file, "lastPlayed");
             JSONArray jsonTags = (JSONArray) file.get("tags");
             tags = new ArrayList<>();
-            for(int i = 0; i < jsonTags.length(); i++) {
+            for (int i = 0; i < jsonTags.length(); i++) {
                 String tag = (String) jsonTags.get(i);
                 tags.add(tag);
             }
@@ -234,7 +240,7 @@ public class Track implements Serializable {
 //            Date tagsModifDate = getDate(file, "tagsModifDate");
 //            Date ratingModifDate = getDate(file, "ratingModifDate");
 //            //END Those are only valid during merge process
-            if(!statsOnly) {
+            if (!statsOnly) {
                 artist = file.getString("artist");
                 title = file.getString("title");
                 album = file.getString("album");
@@ -265,13 +271,13 @@ public class Track implements Serializable {
                 replayGain = replayGainServer;
             }
         } catch (JSONException ex) {
-            Log.e(TAG, "Error creating new Track "+file, ex);
+            Log.e(TAG, "Error creating new Track " + file, ex);
         }
     }
 
     /**
      * @param jsonObject the one including date to get
-     * @param id idFileRemote where to get date from file
+     * @param id         idFileRemote where to get date from file
      * @return Date from jsonObject
      */
     private Date getDate(JSONObject jsonObject, String id) {
@@ -308,7 +314,7 @@ public class Track implements Serializable {
     }
 
     public void setLocked(boolean isUser) {
-        this.isLocked =isUser;
+        this.isLocked = isUser;
     }
 
     public boolean isLocked() {
@@ -464,19 +470,19 @@ public class Track implements Serializable {
 
     @Override
     public String toString() {
-        return  "<BR/>" + getTags() + " " + (int)rating+"/5" + " " + genre + "<BR/>" +
-                getLastPlayedAgo() + getAddedDateAgo() +"<BR/>";
+        return "<BR/>" + getTags() + " " + (int) rating + "/5" + " " + genre + "<BR/>" +
+                getLastPlayedAgo() + getAddedDateAgo() + "<BR/>";
     }
 
     public String getLastPlayedAgo() {
         PrettyTime prettyTime = new PrettyTime(Locale.getDefault());
-        return playCounter<=0?"Jamais joué. "
-                : "Joué " + prettyTime.format(lastPlayed) + " ("+ playCounter + "x). ";
+        return playCounter <= 0 ? "Jamais joué. "
+                : "Joué " + prettyTime.format(lastPlayed) + " (" + playCounter + "x). ";
     }
 
     public String getAddedDateAgo() {
         PrettyTime prettyTime = new PrettyTime(Locale.getDefault());
-        return "Ajouté " + prettyTime.format(addedDate)+". ";
+        return "Ajouté " + prettyTime.format(addedDate) + ". ";
     }
 
     @Override
@@ -522,6 +528,7 @@ public class Track implements Serializable {
 
     /**
      * Get Last Played Date (utc)
+     *
      * @return date in "yyyy-MM-dd HH:mm:ss" format
      */
     public String getFormattedLastPlayed() {
@@ -529,7 +536,8 @@ public class Track implements Serializable {
     }
 
     /**
-     *  Get Last Played Date (local)
+     * Get Last Played Date (local)
+     *
      * @return date in "yyyy-MM-dd HH:mm:ss" format,
      */
     public String getLastPlayedLocalTime() {
@@ -538,6 +546,7 @@ public class Track implements Serializable {
 
     /**
      * Get Added Date (utc)
+     *
      * @return date in "yyyy-MM-dd HH:mm:ss" format
      */
     public String getFormattedAddedDate() {
@@ -546,6 +555,7 @@ public class Track implements Serializable {
 
     /**
      * Get Added Date (local)
+     *
      * @return date in "yyyy-MM-dd HH:mm:ss" format,
      */
     public String getAddedDateLocalTime() {
@@ -557,19 +567,19 @@ public class Track implements Serializable {
     }
 
     public String getTitle() {
-        return title==null?"":title;
+        return title == null ? "" : title;
     }
 
     public String getAlbum() {
-        return album==null?"":album;
+        return album == null ? "" : album;
     }
 
     public String getArtist() {
-        return artist==null?"":artist;
+        return artist == null ? "" : artist;
     }
 
     public String getGenre() {
-        return genre==null?"":genre;
+        return genre == null ? "" : genre;
     }
 
     public String getPath() {
@@ -590,7 +600,7 @@ public class Track implements Serializable {
                 cover = BitmapFactory.decodeByteArray(art, 0, art.length);
             }
         } catch (final RuntimeException ex) {
-            Log.e("Track", "Error reading art of "+relativeFullPath+" "+ex);
+            Log.e("Track", "Error reading art of " + relativeFullPath + " " + ex);
         }
         return cover;
     }
@@ -601,20 +611,19 @@ public class Track implements Serializable {
     }
 
     /**
-     *
      * @return boolean
      */
     public ArrayList<String> getTags(boolean force) {
-        if(HelperLibrary.musicLibrary!=null && idFileRemote>-1 && (force || tags==null)) {
+        if (HelperLibrary.musicLibrary != null && idFileRemote > -1 && (force || tags == null)) {
             tags = HelperLibrary.musicLibrary.getTags(idFileRemote);
         }
         return tags;
     }
 
     public String getTags() {
-        String tagsString="";
+        String tagsString = "";
         ArrayList<String> tags = getTags(false);
-        if(tags!=null) {
+        if (tags != null) {
             StringBuilder msg = new StringBuilder();
             for (String tag : tags) {
                 msg.append(tag).append(",");
@@ -631,7 +640,7 @@ public class Track implements Serializable {
      * @param value Tag value
      */
     public void toggleTag(String value) {
-        if(HelperLibrary.musicLibrary!=null) {
+        if (HelperLibrary.musicLibrary != null) {
             if (getTags(false).contains(value)) {
                 tags.remove(value);
                 HelperLibrary.musicLibrary.removeTag(idFileRemote, value);
@@ -643,7 +652,7 @@ public class Track implements Serializable {
     }
 
     public boolean updateGenre(String genre) {
-        if(HelperLibrary.musicLibrary!=null) {
+        if (HelperLibrary.musicLibrary != null) {
             setGenre(genre);
             HelperLibrary.musicLibrary.updateGenre(this);
         }
@@ -655,14 +664,14 @@ public class Track implements Serializable {
     }
 
     public ReplayGain.GainValues getReplayGain(boolean read) {
-        if(read || !replayGain.isValid()) {
-            replayGain = ReplayGain.read(new File(path), path.substring(path.lastIndexOf(".")+1));
+        if (read || !replayGain.isValid()) {
+            replayGain = ReplayGain.read(new File(path), path.substring(path.lastIndexOf(".") + 1));
         }
         return replayGain;
     }
 
     public void delete() {
-        if(HelperLibrary.musicLibrary!=null) {
+        if (HelperLibrary.musicLibrary != null) {
             HelperLibrary.musicLibrary.deleteTrack(path);
         }
     }
@@ -674,16 +683,16 @@ public class Track implements Serializable {
     public JSONObject toJSONObject() {
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("idFile", (int)idFileServer);
+            jsonObject.put("idFile", (int) idFileServer);
             jsonObject.put("path", relativeFullPath);
-            jsonObject.put("rating", (int)rating);
+            jsonObject.put("rating", (int) rating);
             jsonObject.put("addedDate", getFormattedAddedDate());
             jsonObject.put("lastPlayed", getFormattedLastPlayed());
             jsonObject.put("playCounter", playCounter);
             jsonObject.put("genre", genre);
             JSONArray tagsAsMap = new JSONArray();
             getTags(false);
-            for(String tag : tags) {
+            for (String tag : tags) {
                 tagsAsMap.put(tag);
             }
             jsonObject.put("tags", tagsAsMap);

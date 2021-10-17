@@ -2,8 +2,9 @@ package phramusca.com.jamuzremote;
 
 import android.content.Context;
 import android.os.Environment;
-import androidx.annotation.NonNull;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -22,15 +23,15 @@ import java.io.PrintWriter;
 public final class HelperFile {
 
     private static final String TAG = HelperFile.class.getName();
-    private static final String path = Environment.getExternalStorageDirectory()+"/JaMuz/";
+    private static final String path = Environment.getExternalStorageDirectory() + "/JaMuz/";
 
     private HelperFile() {
     }
 
     public static File createFolder(String folder) {
         File file = getFolder(folder);
-        if(!file.exists()) {
-            if(!file.mkdirs()) {
+        if (!file.exists()) {
+            if (!file.mkdirs()) {
                 return null;
             }
         }
@@ -39,12 +40,12 @@ public final class HelperFile {
 
     @NonNull
     private static File getFolder(String folder) {
-        return new File(path+folder+"/");
+        return new File(path + folder + "/");
     }
 
     @NonNull
     private static File getFile(String folder, String filename) {
-        return new File(path+folder+"/"+filename);
+        return new File(path + folder + "/" + filename);
     }
 
     @NonNull
@@ -59,8 +60,7 @@ public final class HelperFile {
                 text.append('\n');
             }
             br.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             Log.e(TAG, "Error reading file : " + file.getAbsolutePath(), e);
         }
         return text.toString();
@@ -76,7 +76,7 @@ public final class HelperFile {
             out.close();
             return true;
         } catch (IOException e) {
-            Log.e(TAG, "Error saving file : "+file.getAbsolutePath(), e);
+            Log.e(TAG, "Error saving file : " + file.getAbsolutePath(), e);
             return false;
         }
     }
@@ -91,7 +91,7 @@ public final class HelperFile {
         try {
             FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
             PrintWriter printWriter = new PrintWriter(fos);
-            Log.i(TAG, "Writing "+filename+"\n"+(text.length()<150?text:text.substring(0, 150))+"\n");
+            Log.i(TAG, "Writing " + filename + "\n" + (text.length() < 150 ? text : text.substring(0, 150)) + "\n");
             printWriter.write(text);
             printWriter.flush();
             printWriter.close();
@@ -106,18 +106,18 @@ public final class HelperFile {
         String ret = "";
         try {
             InputStream inputStream = context.openFileInput(filename);
-            Log.i(TAG, "Reading "+filename);
-            if ( inputStream != null ) {
+            Log.i(TAG, "Reading " + filename);
+            if (inputStream != null) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
                 String receiveString;
                 StringBuilder stringBuilder = new StringBuilder();
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                while ((receiveString = bufferedReader.readLine()) != null) {
                     stringBuilder.append(receiveString);
                 }
                 inputStream.close();
                 ret = stringBuilder.toString();
-                Log.d(TAG, "Read \n"+ret+"\n");
+                Log.d(TAG, "Read \n" + ret + "\n");
             }
         } catch (IOException e) {
             Log.e(TAG, "read" + e.toString());

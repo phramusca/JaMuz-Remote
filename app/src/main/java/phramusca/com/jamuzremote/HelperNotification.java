@@ -3,8 +3,9 @@ package phramusca.com.jamuzremote;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.os.CountDownTimer;
-import androidx.core.app.NotificationCompat;
 import android.util.Log;
+
+import androidx.core.app.NotificationCompat;
 
 /**
  * Created by raph on 10/06/17.
@@ -30,8 +31,8 @@ public class HelperNotification {
 
     public void notifyBar(Notification notification, final String action, int every,
                           int nbFiles, int nbFilesTotal) {
-        every=nbFilesTotal<every?nbFilesTotal/10:every;
-        if(((nbFiles-1) % (every>0?every:1)) == 0) { //To prevent UI from freezing
+        every = nbFilesTotal < every ? nbFilesTotal / 10 : every;
+        if (((nbFiles - 1) % (every > 0 ? every : 1)) == 0) { //To prevent UI from freezing
             String msg = nbFiles + "/" + nbFilesTotal + " " + action;
             notifyBar(notification, msg, nbFilesTotal, nbFiles, false,
                     false, false, "");
@@ -47,12 +48,12 @@ public class HelperNotification {
                           int max, int progress, boolean indeterminate, boolean setWhen,
                           boolean usesChronometer, String bigText) {
         notification.builder.setContentText(msg);
-        if(!bigText.equals("")) {
+        if (!bigText.equals("")) {
             notification.builder.setStyle(new NotificationCompat.BigTextStyle().bigText(bigText));
         } else {
             notification.builder.setStyle(null);
         }
-        if(setWhen) {
+        if (setWhen) {
             notification.builder.setWhen(System.currentTimeMillis());
         }
         notification.builder.setUsesChronometer(usesChronometer);
@@ -63,7 +64,7 @@ public class HelperNotification {
     }
 
     private void disableNotificationIn(final long millisInFuture, final int id) {
-        if(millisInFuture>0) {
+        if (millisInFuture > 0) {
             CountDownTimer timer = new CountDownTimer(millisInFuture, millisInFuture / 10) {
                 @Override
                 public void onTick(long millisUntilFinished) {

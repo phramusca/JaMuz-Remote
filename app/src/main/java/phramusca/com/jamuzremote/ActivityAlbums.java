@@ -3,11 +3,12 @@ package phramusca.com.jamuzremote;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.widget.Button;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +31,8 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
         button_exit_albums.setOnClickListener(v -> onBackPressed());
 
         albums = new ArrayList<>();
-        complete=false;
-        if(addMore()) {
+        complete = false;
+        if (addMore()) {
             recyclerView = findViewById(R.id.recycler_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             adapterAlbum = new AdapterAlbum(this, recyclerView, albums);
@@ -45,7 +46,7 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
                         adapterAlbum.notifyItemInserted(albums.size() - 1);
                         new Handler().post(() -> {
                             int loaderPos = albums.size() - 1;
-                            complete=!addMore();
+                            complete = !addMore();
                             albums.remove(loaderPos);
                             adapterAlbum.notifyItemRemoved(loaderPos);
                             adapterAlbum.setLoaded();
@@ -54,7 +55,8 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
                 }
 
                 @Override
-                public void onLoadTop() { }
+                public void onLoadTop() {
+                }
             });
         }
 
@@ -84,7 +86,7 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
     private boolean addMore() {
         List<Track> newAlbums = HelperLibrary.musicLibrary.getAlbums(albums.size());
         this.albums.addAll(newAlbums);
-        return newAlbums.size()>0;
+        return newAlbums.size() > 0;
     }
 
     @Override
@@ -103,7 +105,7 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
         PlayQueue.queue.insert(playlist);
 
         Intent data = new Intent();
-        data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");
+        data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue");
         setResult(RESULT_OK, data);
         finish();
     }

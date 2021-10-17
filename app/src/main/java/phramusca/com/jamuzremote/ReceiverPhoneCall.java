@@ -15,15 +15,15 @@ public class ReceiverPhoneCall extends PhonecallReceiver {
     private static boolean wasPlaying = false;
 
     private void pause() {
-        if(ActivityMain.audioPlayer!=null) {
+        if (ActivityMain.audioPlayer != null) {
             wasPlaying = ActivityMain.audioPlayer.isPlaying();
-            Log.i(TAG, "wasPlaying="+wasPlaying+"");
+            Log.i(TAG, "wasPlaying=" + wasPlaying + "");
             ActivityMain.audioPlayer.pause();
         }
     }
 
     private void resume() {
-        if(ActivityMain.audioPlayer!=null) {
+        if (ActivityMain.audioPlayer != null) {
             if (wasPlaying) {
                 Log.i(TAG, "wasPlaying => audioPlayer.resume");
                 ActivityMain.audioPlayer.resume();
@@ -41,37 +41,32 @@ public class ReceiverPhoneCall extends PhonecallReceiver {
     }
 
     @Override
-    protected void onIncomingCallAnswered(Context ctx, String number, Date start)
-    {
+    protected void onIncomingCallAnswered(Context ctx, String number, Date start) {
         //TODO: Pause in this case but only set volume low in onIncomingCallReceived
         Log.i(TAG, "onIncomingCallAnswered => nothing");
         //pause();
     }
 
     @Override
-    protected void onIncomingCallEnded(Context ctx, String number, Date start, Date end)
-    {
+    protected void onIncomingCallEnded(Context ctx, String number, Date start, Date end) {
         Log.i(TAG, "onIncomingCallEnded => resume");
         resume();
     }
 
     @Override
-    protected void onOutgoingCallStarted(Context ctx, String number, Date start)
-    {
+    protected void onOutgoingCallStarted(Context ctx, String number, Date start) {
         Log.i(TAG, "onOutgoingCallStarted => pause");
         pause();
     }
 
     @Override
-    protected void onOutgoingCallEnded(Context ctx, String number, Date start, Date end)
-    {
+    protected void onOutgoingCallEnded(Context ctx, String number, Date start, Date end) {
         Log.i(TAG, "onOutgoingCallEnded => resume");
         resume();
     }
 
     @Override
-    protected void onMissedCall(Context ctx, String number, Date start)
-    {
+    protected void onMissedCall(Context ctx, String number, Date start) {
         Log.i(TAG, "onMissedCall => resume");
         resume();
     }

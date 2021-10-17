@@ -51,13 +51,14 @@ public class YoutubeConnector {
             //TODO: Read only once at app start
             AssetManager am = context.getAssets();
             InputStream inputStream = am.open("keys.properties");
-            Properties properties= new Properties();;
+            Properties properties = new Properties();
+            ;
             properties.load(inputStream);
-            KEY=properties.getProperty("youtube.key");
+            KEY = properties.getProperty("youtube.key");
 
             youtube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), request -> {
                 request.getHeaders().set("X-Android-Package", PACKAGENAME);
-                request.getHeaders().set("X-Android-Cert",SHA1);
+                request.getHeaders().set("X-Android-Cert", SHA1);
             }).build();
 
             // Define the API request for retrieving search results.

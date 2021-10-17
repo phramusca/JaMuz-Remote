@@ -18,37 +18,36 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 /**
- *
  * @author phramusca
  */
 public class ClientInfo implements Serializable {
 
-	private final String address;
+    private final String address;
     private final int canal;
     private final String appId;
     private final int port;
-	private final String login;
-	private final String password;
+    private final String login;
+    private final String password;
     private final String rootPath;
 
     public ClientInfo(String address, int port, String login, String password,
-                      int canal, String appId, String rootPath){
-		this.port = port;
-		this.login = login;
-		this.password = password;
-		this.address = address;
+                      int canal, String appId, String rootPath) {
+        this.port = port;
+        this.login = login;
+        this.password = password;
+        this.address = address;
         this.canal = canal;
         this.appId = appId;
         this.rootPath = rootPath;
     }
 
     public HttpUrl.Builder getUrlBuilder(String url) {
-        return HttpUrl.parse("http://"+getAddress()+":"+(getPort()+1)+"/"+url).newBuilder();
+        return HttpUrl.parse("http://" + getAddress() + ":" + (getPort() + 1) + "/" + url).newBuilder();
     }
 
     public Request.Builder getRequestBuilder(HttpUrl.Builder urlBuilder) {
         return new Request.Builder()
-                .addHeader("login", getLogin()+"-"+getAppId())
+                .addHeader("login", getLogin() + "-" + getAppId())
                 .addHeader("api-version", "1.0")
                 .url(urlBuilder.build());
     }
@@ -73,12 +72,12 @@ public class ClientInfo implements Serializable {
 
     private ResponseBody getBody(Request request, OkHttpClient client) throws IOException, ServiceSync.ServerException {
         Response response = client.newCall(request).execute();
-        if(!response.isSuccessful()) {
+        if (!response.isSuccessful()) {
             switch (response.code()) {
                 case 301:
-                    throw new ServiceSync.ServerException(request.header("api-version")+" not supported. "+response.body().string());
+                    throw new ServiceSync.ServerException(request.header("api-version") + " not supported. " + response.body().string());
                 default:
-                    throw new ServiceSync.ServerException(response.code()+": "+response.message());
+                    throw new ServiceSync.ServerException(response.code() + ": " + response.message());
             }
         }
         return response.body();

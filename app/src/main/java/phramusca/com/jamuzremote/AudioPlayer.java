@@ -17,7 +17,7 @@ public class AudioPlayer {
     private static MediaPlayer mediaPlayer;
     private static CountDownTimer timer;
     private int duration;
-    private boolean enableControl=false;
+    private boolean enableControl = false;
 
     AudioPlayer(final IListenerPlayer callback) {
         this.callback = callback;
@@ -25,14 +25,14 @@ public class AudioPlayer {
 
     public void play(Track track, HelperToast helperToast) {
         try {
-            Log.i(TAG, "Playing "+track.getRelativeFullPath());
-            enableControl=false;
+            Log.i(TAG, "Playing " + track.getRelativeFullPath());
+            enableControl = false;
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(track.getPath());
             mediaPlayer.prepare();
             callback.reset();
             String msg = applyReplayGain(mediaPlayer, track);
-            if(!msg.equals("")) {
+            if (!msg.equals("")) {
                 helperToast.toastLong(msg);
             }
             mediaPlayer.setOnPreparedListener(mp -> {
@@ -41,10 +41,10 @@ public class AudioPlayer {
                 startTimer();
                 mediaPlayer.setOnCompletionListener(mediaPlayer -> callback.onPlayBackEnd());
                 mediaPlayer.setOnSeekCompleteListener(mediaPlayer -> startTimer());
-                enableControl=true;
+                enableControl = true;
             });
         } catch (IOException e) {
-            Log.e(TAG, "Error playing (\""+track+"\") => DELETING IT !!!!!!", e);
+            Log.e(TAG, "Error playing (\"" + track + "\") => DELETING IT !!!!!!", e);
             //TODO: Put back in RepoSync (take info from there)
             stop(false);
             File file = new File(track.getPath());
@@ -55,8 +55,8 @@ public class AudioPlayer {
     }
 
     //TODO: Make Replaygain options.
-    private boolean mReplayGainTrackEnabled=true;
-    private boolean mReplayGainAlbumEnabled=false;
+    private boolean mReplayGainTrackEnabled = true;
+    private boolean mReplayGainAlbumEnabled = false;
     private float baseVolume = 0.70f;
 
     /**
@@ -68,7 +68,7 @@ public class AudioPlayer {
         Log.i(TAG, rg.toString());
 
         float adjust = 0f;
-        if(rg.isValid()) {
+        if (rg.isValid()) {
             if (mReplayGainAlbumEnabled) {
                 adjust = (rg.getTrackGain() != 0 ? rg.getTrackGain() : adjust); /* do we have track adjustment ? */
                 adjust = (rg.getAlbumGain() != 0 ? rg.getAlbumGain() : adjust); /* ..or, even better, album adj? */
@@ -80,37 +80,37 @@ public class AudioPlayer {
             }
         }
 
-        if(!mReplayGainAlbumEnabled && !mReplayGainTrackEnabled) {
-			/* Feature is disabled: Make sure that we are going to 100% volume */
+        if (!mReplayGainAlbumEnabled && !mReplayGainTrackEnabled) {
+            /* Feature is disabled: Make sure that we are going to 100% volume */
             adjust = 0f;
         }
 
-        String msg="";
-        Log.i(TAG, "baseVolume="+ baseVolume);
+        String msg = "";
+        Log.i(TAG, "baseVolume=" + baseVolume);
         float rg_result = ((float) Math.pow(10, (adjust / 20))) * baseVolume;
-        Log.i(TAG, "rg_result="+rg_result);
+        Log.i(TAG, "rg_result=" + rg_result);
         if (rg_result > 1.0f) {
-            msg =   "Base volume too high. " +
+            msg = "Base volume too high. " +
                     "\nConsider lower it for replayGain to work properly !";
-            msg +=  "\n---------------"+
-                    "\n "+rg.toString()+
-                    "\n baseVolume="+ baseVolume +
-                    "\n adjust="+adjust+
-                    "\n setVolume="+rg_result+" (limit 1.0)";
+            msg += "\n---------------" +
+                    "\n " + rg.toString() +
+                    "\n baseVolume=" + baseVolume +
+                    "\n adjust=" + adjust +
+                    "\n setVolume=" + rg_result + " (limit 1.0)";
             rg_result = 1.0f; /* android would IGNORE the change if this is > 1
                                     and we would end up with the wrong volume */
         } else if (rg_result < 0.0f) {
             rg_result = 0.0f;
         }
-        Log.i(TAG, "mediaPlayer.setVolume("+rg_result+", "+rg_result+")");
+        Log.i(TAG, "mediaPlayer.setVolume(" + rg_result + ", " + rg_result + ")");
         mediaPlayer.setVolume(rg_result, rg_result);
 
         return msg;
     }
 
     public String setVolume(int volume, Track track) {
-        if(volume>=0) {
-            this.baseVolume = ((float)volume / 100.0f);
+        if (volume >= 0) {
+            this.baseVolume = ((float) volume / 100.0f);
             Log.i(TAG, "setVolume()");
             if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                 try {
@@ -125,10 +125,9 @@ public class AudioPlayer {
 
     public void play() {
         Log.i(TAG, "play()");
-        if(mediaPlayer==null) {
+        if (mediaPlayer == null) {
             playNext();
-        }
-        else if(!mediaPlayer.isPlaying()) {
+        } else if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
             startTimer();
         }
@@ -148,10 +147,9 @@ public class AudioPlayer {
 
     public void togglePlay() {
         Log.i(TAG, "togglePlay()");
-        if(mediaPlayer ==null) {
+        if (mediaPlayer == null) {
             playNext();
-        }
-        else if(mediaPlayer.isPlaying()) {
+        } else if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             stopTimer();
         } else {
@@ -162,7 +160,7 @@ public class AudioPlayer {
 
     public void pause() {
         Log.i(TAG, "pause()");
-        if(mediaPlayer!=null && mediaPlayer.isPlaying()) {
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             stopTimer();
         }
@@ -170,7 +168,7 @@ public class AudioPlayer {
 
     public void resume() {
         Log.i(TAG, "resume()");
-        if(mediaPlayer!=null && !mediaPlayer.isPlaying()) {
+        if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
             mediaPlayer.start();
             startTimer();
         }
@@ -179,12 +177,12 @@ public class AudioPlayer {
     public void stop(boolean release) {
         Log.i(TAG, "stop()");
         try {
-            if (mediaPlayer !=null && mediaPlayer.isPlaying()) {
-                Log.i(TAG, "mediaPlayer.stop()"+mediaPlayer.getTrackInfo().toString());
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                Log.i(TAG, "mediaPlayer.stop()" + mediaPlayer.getTrackInfo().toString());
                 mediaPlayer.stop();
-                if(release) {
+                if (release) {
                     mediaPlayer.release();
-                    mediaPlayer=null;
+                    mediaPlayer = null;
                 }
                 callback.onPositionChanged(0, 1);
             }
@@ -195,19 +193,19 @@ public class AudioPlayer {
     }
 
     public void forward() {
-        if(mediaPlayer != null && enableControl) {
-            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()+ duration/10);
+        if (mediaPlayer != null && enableControl) {
+            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + duration / 10);
         }
     }
 
     public void rewind() {
-        if(mediaPlayer != null && enableControl) {
+        if (mediaPlayer != null && enableControl) {
             mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() - duration / 10);
         }
     }
 
     public void pullUp() {
-        if(mediaPlayer != null && enableControl) {
+        if (mediaPlayer != null && enableControl) {
             mediaPlayer.seekTo(0);
         }
     }
@@ -218,13 +216,13 @@ public class AudioPlayer {
 
     private void startTimer() {
         callback.onPlayBackStart();
-        timer = new CountDownTimer(duration- mediaPlayer.getCurrentPosition()-1,500) {
+        timer = new CountDownTimer(duration - mediaPlayer.getCurrentPosition() - 1, 500) {
             @Override
             public void onTick(long millisUntilFinished_) {
-                if(mediaPlayer !=null) {
+                if (mediaPlayer != null) {
                     callback.onPositionChanged(mediaPlayer.getCurrentPosition(), duration);
                 }
-                if(!isPlaying()) {
+                if (!isPlaying()) {
                     this.cancel();
                 }
             }
@@ -236,9 +234,9 @@ public class AudioPlayer {
     }
 
     private void stopTimer() {
-        if(timer!=null) {
+        if (timer != null) {
             timer.cancel();
-            timer=null;
+            timer = null;
         }
     }
 }

@@ -26,8 +26,8 @@ public class HelperToast {
     }
 
     private void toast(final String msg, int duration) {
-        if(!msg.equals("")) {
-            Log.i(TAG, "Toast makeText "+msg);
+        if (!msg.equals("")) {
+            Log.i(TAG, "Toast makeText " + msg);
             Toast.makeText(context, msg, duration).show();
         }
     }

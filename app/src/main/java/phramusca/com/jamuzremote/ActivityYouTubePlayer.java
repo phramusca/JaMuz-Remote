@@ -1,10 +1,11 @@
 package phramusca.com.jamuzremote;
 
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
@@ -67,7 +68,7 @@ public class ActivityYouTubePlayer extends YouTubeBaseActivity implements OnInit
     @Override
     public void onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
 
-        Log.i(TAG, "onInitializationSuccess("+wasRestored+")");
+        Log.i(TAG, "onInitializationSuccess(" + wasRestored + ")");
         youTubePlayer = player;
         youTubePlayer.setOnFullscreenListener(fullscreen -> {
             Log.i(TAG, "onFullscreenListener(" + fullscreen + ") => youTubePlayer.play()");
@@ -140,8 +141,7 @@ public class ActivityYouTubePlayer extends YouTubeBaseActivity implements OnInit
         if (wasRestored) {
             Log.i(TAG, "RESTORED: cueVideo(" + videoId + "," + videoTime + ")");
             youTubePlayer.cueVideo(videoId, videoTime);
-        }
-        else {
+        } else {
             Log.i(TAG, "NOT restored: cueVideo(" + videoId + ")");
             youTubePlayer.cueVideo(videoId);
         }

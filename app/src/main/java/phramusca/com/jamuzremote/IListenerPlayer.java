@@ -5,10 +5,16 @@ package phramusca.com.jamuzremote;
  */
 public interface IListenerPlayer {
     void onPlayBackStart();
+
     void onPositionChanged(int position, int duration);
+
     void onPlayBackEnd();
+
     void doPlayPrevious();
+
     void doPlayNext();
+
     void displaySpeechRecognizer();
+
     void reset();
 }

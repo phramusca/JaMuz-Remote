@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author phramusca
  */
 public final class RepoSync {
@@ -24,17 +23,18 @@ public final class RepoSync {
         //  Otherwise tracks stats updates (except tags as re-read before merge request) are not available for merge !!!
         //   WARNING: Need to reset isSync to false too before a new sync
         //if(tracks==null) {
-            tracks = HashBasedTable.create();
-            List<Track> newTracks = HelperLibrary.musicLibrary.getTracks(true, "WHERE status!=\""+ Track.Status.LOCAL.name()+"\"", "", "", -1);
-            for(Track track : newTracks) {
-                tracks.put(track.getIdFileServer(), track.getStatus(), track);
-            }
+        tracks = HashBasedTable.create();
+        List<Track> newTracks = HelperLibrary.musicLibrary.getTracks(true, "WHERE status!=\"" + Track.Status.LOCAL.name() + "\"", "", "", -1);
+        for (Track track : newTracks) {
+            tracks.put(track.getIdFileServer(), track.getStatus(), track);
+        }
         //}
     }
 
     /**
      * Sets status to REC if track exists and has correct size.
      * Otherwise, file is deleted and status set back to NEW
+     *
      * @param track the one to check
      */
     public synchronized static void checkReceivedFile(Track track) {
@@ -55,7 +55,7 @@ public final class RepoSync {
      */
     public synchronized static boolean checkFile(Track track) {
         File receivedFile = new File(track.getPath());
-        if(receivedFile.exists()) {
+        if (receivedFile.exists()) {
             if (receivedFile.length() == track.getSize()) {
                 Log.i(TAG, "Correct file size: " + receivedFile.length());
                 return true;
@@ -65,14 +65,14 @@ public final class RepoSync {
                 receivedFile.delete();
             }
         } else {
-            Log.w(TAG, "File does not exits. "+receivedFile.getAbsolutePath());
+            Log.w(TAG, "File does not exits. " + receivedFile.getAbsolutePath());
         }
         return false;
     }
 
     public synchronized static void update(Track track) {
-        if(tracks!=null) {
-            if(tracks.containsRow(track.getIdFileServer())) {
+        if (tracks != null) {
+            if (tracks.containsRow(track.getIdFileServer())) {
                 tracks.row(track.getIdFileServer()).clear();
             }
             tracks.put(track.getIdFileServer(), track.getStatus(), track);
@@ -80,7 +80,7 @@ public final class RepoSync {
     }
 
     public synchronized static Track getFile(int i) {
-        if(tracks.containsRow(i)) {
+        if (tracks.containsRow(i)) {
             return tracks.row(i).values().iterator().next();
         }
         return null;
@@ -96,8 +96,8 @@ public final class RepoSync {
 
     public synchronized static List<Track> getNotSyncedList() {
         List<Track> trackList = new ArrayList<>();
-        for(Track track : tracks.values()) {
-            if(!track.isSync()) {
+        for (Track track : tracks.values()) {
+            if (!track.isSync()) {
                 trackList.add(track);
             }
         }

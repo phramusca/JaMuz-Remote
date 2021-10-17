@@ -17,7 +17,7 @@ public final class RepoTags {
     }
 
     public synchronized static Map<Integer, String> get() {
-        if(HelperLibrary.musicLibrary!=null && tags.size()<=0) {
+        if (HelperLibrary.musicLibrary != null && tags.size() <= 0) {
             tags = new HashMap<>();
             tags = HelperLibrary.musicLibrary.getTags();
         }
@@ -26,17 +26,16 @@ public final class RepoTags {
 
     public synchronized static void set(final List<String> newTags) {
         //Adding missing tags
-        for(String tag : newTags) {
+        for (String tag : newTags) {
             add(tag);
         }
         //Removing tags not in input list
         final Iterator<Map.Entry<Integer, String>> it = get().entrySet().iterator();
-        while (it.hasNext())
-        {
+        while (it.hasNext()) {
             final Map.Entry<Integer, String> tag = it.next();
-            if(HelperLibrary.musicLibrary!=null && !newTags.contains(tag.getValue())) {
+            if (HelperLibrary.musicLibrary != null && !newTags.contains(tag.getValue())) {
                 int deleted = HelperLibrary.musicLibrary.deleteTag(tag.getKey());
-                if(deleted>0) {
+                if (deleted > 0) {
                     it.remove();
                 }
             }
@@ -44,9 +43,9 @@ public final class RepoTags {
     }
 
     private synchronized static void add(final String tag) {
-        if(HelperLibrary.musicLibrary!=null && !get().values().contains(tag)) {
+        if (HelperLibrary.musicLibrary != null && !get().values().contains(tag)) {
             int idTag = HelperLibrary.musicLibrary.addTag(tag);
-            if(idTag>0) {
+            if (idTag > 0) {
                 tags.put(idTag, tag);
             }
         }

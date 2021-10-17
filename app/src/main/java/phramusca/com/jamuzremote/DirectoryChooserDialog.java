@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Environment;
-import androidx.annotation.NonNull;
 import android.text.Editable;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -18,6 +17,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,8 +27,7 @@ import java.util.List;
 
 //https://www.codeproject.com/Articles/547636/Android-Ready-to-use-simple-directory-chooser-dial
 //+fixes (".." button + title)
-public class DirectoryChooserDialog
-{
+public class DirectoryChooserDialog {
     private boolean m_isNewFolderEnabled = true;
     private String m_sdcardDirectory;
     private Context m_context;
@@ -55,7 +55,7 @@ public class DirectoryChooserDialog
 
     public void chooseDirectory(String dir) {
         File dirFile = new File(dir);
-        if (! dirFile.exists() || ! dirFile.isDirectory()) {
+        if (!dirFile.exists() || !dirFile.isDirectory()) {
             dir = m_sdcardDirectory;
         }
         dir = new File(dir).getAbsolutePath();
@@ -64,15 +64,15 @@ public class DirectoryChooserDialog
 
         class DirectoryOnClickListener implements DialogInterface.OnClickListener {
             public void onClick(DialogInterface dialog, int item) {
-                String subFolder = (String) ((AlertDialog) dialog).getListView() .getAdapter().getItem(item);
+                String subFolder = (String) ((AlertDialog) dialog).getListView().getAdapter().getItem(item);
                 if (subFolder.equals("..")) {
                     int lastSlash = m_dir.lastIndexOf('/');
-                    if (lastSlash>0 ){
+                    if (lastSlash > 0) {
                         m_dir = m_dir.substring(0, lastSlash);
                     } else {
                         m_dir = m_dir.substring(0, 1);
                     }
-                } else if (!m_dir.equals("/")){
+                } else if (!m_dir.equals("/")) {
                     m_dir += "/" + subFolder;
                 } else {
                     m_dir += subFolder;
@@ -95,19 +95,14 @@ public class DirectoryChooserDialog
         dirsDialog.setOnKeyListener((dialog, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
                 // Back button pressed
-                if ( m_dir.equals(m_sdcardDirectory) )
-                {  // The very top level directory, do nothing
+                if (m_dir.equals(m_sdcardDirectory)) {  // The very top level directory, do nothing
                     return false;
-                }
-                else
-                {  // Navigate back to an upper directory
+                } else {  // Navigate back to an upper directory
                     m_dir = new File(m_dir).getParent();
                     updateDirectory();
                 }
                 return true;
-            }
-            else
-            {
+            } else {
                 return false;
             }
         });
@@ -123,17 +118,16 @@ public class DirectoryChooserDialog
         List<String> dirs = new ArrayList<>();
         try {
             File dirFile = new File(dir);
-            if (! dirFile.exists() || ! dirFile.isDirectory()) {
+            if (!dirFile.exists() || !dirFile.isDirectory()) {
                 return dirs;
             }
             dirs.add("..");
             for (File file : dirFile.listFiles()) {
-                if ( file.isDirectory() ) {
-                    dirs.add( file.getName() );
+                if (file.isDirectory()) {
+                    dirs.add(file.getName());
                 }
             }
-        }
-        catch (Exception ignored) {
+        } catch (Exception ignored) {
         }
         Collections.sort(dirs, String::compareTo);
         return dirs;
@@ -160,22 +154,21 @@ public class DirectoryChooserDialog
             new AlertDialog.Builder(m_context).
                     setTitle(R.string.newFolderName).
                     setView(input).setPositiveButton(R.string.ok, (dialog, whichButton) -> {
-                        Editable newDir = input.getText();
-                        String newDirName = newDir.toString();
-                        // Create new directory
-                        if ( createSubDir(m_dir + "/" + newDirName) ) {
-                            // Navigate into the new directory
-                            m_dir += "/" + newDirName;
-                            updateDirectory();
-                        }
-                        else {
-                            Toast.makeText(
-                                    m_context, "Failed to create '" + newDirName +
-                                            "' folder", Toast.LENGTH_SHORT).show();
-                        }
-                    }).setNegativeButton(R.string.cancel, null).show();
+                Editable newDir = input.getText();
+                String newDirName = newDir.toString();
+                // Create new directory
+                if (createSubDir(m_dir + "/" + newDirName)) {
+                    // Navigate into the new directory
+                    m_dir += "/" + newDirName;
+                    updateDirectory();
+                } else {
+                    Toast.makeText(
+                            m_context, "Failed to create '" + newDirName +
+                                    "' folder", Toast.LENGTH_SHORT).show();
+                }
+            }).setNegativeButton(R.string.cancel, null).show();
         });
-        if (! m_isNewFolderEnabled) {
+        if (!m_isNewFolderEnabled) {
             newDirButton.setVisibility(View.GONE);
         }
         titleLayout.addView(m_titleView);
@@ -190,13 +183,12 @@ public class DirectoryChooserDialog
 
     private void updateDirectory() {
         m_subdirs.clear();
-        m_subdirs.addAll( getDirectories(m_dir) );
+        m_subdirs.addAll(getDirectories(m_dir));
         m_titleView.setText(m_dir);
         m_listAdapter.notifyDataSetChanged();
     }
 
-    private ArrayAdapter<String> createListAdapter(List<String> items)
-    {
+    private ArrayAdapter<String> createListAdapter(List<String> items) {
         return new ArrayAdapter<String>(m_context,
                 android.R.layout.select_dialog_item, android.R.id.text1, items) {
             @NonNull

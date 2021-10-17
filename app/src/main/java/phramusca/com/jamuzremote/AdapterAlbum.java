@@ -3,6 +3,7 @@ package phramusca.com.jamuzremote;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,10 +39,10 @@ public class AdapterAlbum extends AdapterLoad {
 
             userViewHolder.item_line1.setText(track.getAlbum());
             userViewHolder.item_line2.setText(track.getArtist());
-            userViewHolder.item_line3.setText(String.format(Locale.ENGLISH,"%d %s.",
+            userViewHolder.item_line3.setText(String.format(Locale.ENGLISH, "%d %s.",
                     track.getPlayCounter(), //Includes nb of albums
                     mContext.getString(R.string.nbTracks)));
-            userViewHolder.item_line4.setText(String.format(Locale.ENGLISH,"%.1f/5 %s",
+            userViewHolder.item_line4.setText(String.format(Locale.ENGLISH, "%.1f/5 %s",
                     track.getRating(),
                     track.getGenre()));
 
@@ -56,7 +57,7 @@ public class AdapterAlbum extends AdapterLoad {
 
             userViewHolder.itemView.setTag(position);
             userViewHolder.itemView.setOnClickListener(view -> {
-                Integer position1 = (Integer)view.getTag();
+                Integer position1 = (Integer) view.getTag();
                 sendListener(albums.get(position1), position1);
             });
 

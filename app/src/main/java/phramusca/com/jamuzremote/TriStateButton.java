@@ -18,13 +18,13 @@ public class TriStateButton extends androidx.appcompat.widget.AppCompatButton {
 
     public TriStateButton(Context context) {
         super(context);
-        this.context=context;
+        this.context = context;
 
     }
 
     public TriStateButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.context=context;
+        this.context = context;
     }
 
     @Override

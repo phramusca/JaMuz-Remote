@@ -1,11 +1,12 @@
 package phramusca.com.jamuzremote;
 
+import static phramusca.com.jamuzremote.StringManager.trimTrailingWhitespace;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
@@ -19,12 +20,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import java.util.ArrayList;
-
-import static phramusca.com.jamuzremote.StringManager.trimTrailingWhitespace;
 
 public class ActivitySettings extends AppCompatActivity {
 
@@ -58,25 +59,24 @@ public class ActivitySettings extends AppCompatActivity {
         qrScan.setRequestCode(QR_REQUEST_CODE);
         Button button_scan_QR = findViewById(R.id.button_scan_QR);
         button_scan_QR.setOnClickListener(view ->
-            qrScan.initiateScan()
+                qrScan.initiateScan()
         );
 
         textViewPath = findViewById(R.id.textViewPath);
 
         String userPath = preferences.getString("userPath", "/");
-        String display = userPath.equals("/")?
+        String display = userPath.equals("/") ?
                 getString(R.string.pathInfo)
-                :userPath;
+                : userPath;
         textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
                 .concat(display)
                 .concat("</html>"))));
         Button dirChooserButton = findViewById(R.id.button_browse);
-        dirChooserButton.setOnClickListener(new View.OnClickListener()
-        {
+        dirChooserButton.setOnClickListener(new View.OnClickListener() {
             private boolean m_newFolderEnabled = false;
+
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 DirectoryChooserDialog directoryChooserDialog =
                         new DirectoryChooserDialog(ActivitySettings.this,
                                 chosenDir -> {
@@ -100,7 +100,7 @@ public class ActivitySettings extends AppCompatActivity {
         seekBarReplayGain.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                Log.i(TAG, "seekBarReplayGain: "+progress);
+                Log.i(TAG, "seekBarReplayGain: " + progress);
                 setConfig("baseVolume", progress);
                 Intent data = new Intent();
                 data.putExtra("volume", progress);
@@ -108,9 +108,12 @@ public class ActivitySettings extends AppCompatActivity {
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
 
         CheckBox kidsplaceAllowAddNewDel = findViewById(R.id.kidsplaceAllowAddNewDel);
@@ -140,7 +143,8 @@ public class ActivitySettings extends AppCompatActivity {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) { }
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
         });
         ArrayList<Parcelable> localPlaylists = getIntent()
                 .getParcelableArrayListExtra("localPlaylists");
@@ -149,7 +153,7 @@ public class ActivitySettings extends AppCompatActivity {
         kidsplaceLimitPlaylist.setAdapter(playListArrayAdapter);
 
         String selectedPlaylist = preferences.getString("kidsplaceLimitPlaylist", null);
-        if(selectedPlaylist!=null) {
+        if (selectedPlaylist != null) {
             kidsplaceLimitPlaylist.setSelection(playListArrayAdapter.getPosition(
                     new Playlist(selectedPlaylist, true)));
         }
