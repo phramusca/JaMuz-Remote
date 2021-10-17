@@ -10,12 +10,12 @@ import java.util.Collection;
  */
 public class Benchmark {
 
-    private int size;
+    private final int size;
     private int index;
     private final long startTime;
     private long partialTime;
-    private Collection<Long> partialTimes;
-    private Collection<Long> partialSizes;
+    private final Collection<Long> partialTimes;
+    private final Collection<Long> partialSizes;
 
     Benchmark(int size, int max) {
         this.size=size;

@@ -113,7 +113,7 @@ public class ServiceSync extends ServiceBase {
                 checkFiles(Track.Status.NEW);
 
                 checkAbort();
-                startDownloads();
+                startDownloads(RepoSync.getDownloadList());
 
                 checkFiles(Track.Status.INFO);
 
@@ -132,20 +132,21 @@ public class ServiceSync extends ServiceBase {
                     HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
                 }
 
-                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Check complete.", 5000));
-                checkCompleted();
+                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Check complete.", -1));
+                if(processDownload!=null) {
+                    processDownload.join();
+                    processDownload.checkCompleted();
+                } else {
+                    stopSync("Sync Complete. No downloads.", -1);
+                }
 
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error ProcessSync", e);
                 helperNotification.notifyBar(notificationSync, "Interrupted ");
-                //stopSync also stop downloads if any so not stopping and letting user stop and restart
-                //stopSync(e.getLocalizedMessage(), 5000);
             } catch (OutOfMemoryError | Exception e) {
                 Log.e(TAG, "Error ProcessSync", e);
                 helperNotification.notifyBar(notificationSync, "ERROR: "+e.getLocalizedMessage(), 0, 0, false,
                         true, false, "ERROR: "+e.getLocalizedMessage());
-                //stopSync also stop downloads if any so not stopping and letting user stop and restart
-                //stopSync(e.getLocalizedMessage(), 5000);
             }
         }
 
@@ -224,7 +225,7 @@ public class ServiceSync extends ServiceBase {
             do {
                 nbRetries++;
                 try {
-                    HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/"+status.name().toLowerCase());
+                    HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/"+status.name());
                     urlBuilder.addQueryParameter("idFrom", String.valueOf(idFrom));
                     urlBuilder.addQueryParameter("nbFilesInBatch", String.valueOf(nbFilesInBatch));
                     //FIXME: Move this retry process to clientInfo so that it can benefit to all calls to .string() [what about .source() ?]
@@ -260,7 +261,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         private Integer getFilesCount(Track.Status status) throws IOException, ServerException {
-            HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/"+status.name().toLowerCase());
+            HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/"+status.name());
             urlBuilder.addQueryParameter("getCount", "true");
             String body = clientInfo.getBodyString(urlBuilder, client);
             helperNotification.notifyBar(notificationSync, "Received "+status.name()+" files count ... ");
@@ -373,47 +374,48 @@ public class ServiceSync extends ServiceBase {
         stopSelf();
     }
 
-    private void startDownloads() {
-        if ((processDownload==null || !processDownload.isAlive()) && RepoSync.getRemainingSize()>0) {
+    private void startDownloads(List<Track> newTracks) {
+        if ((processDownload==null || !processDownload.isAlive()) && newTracks.size()>0) {
             Log.i(TAG, "START ProcessDownload");
-            processDownload = new ProcessDownload("ProcessDownload");
+            processDownload = new ProcessDownload("ProcessDownload", newTracks);
             processDownload.start();
         }
     }
 
-    private boolean checkCompleted() {
-        if(RepoSync.getTotalSize()>0 && RepoSync.getRemainingSize()<1) {
-            final String msg = "No more files to download.";
-            final String msg2 = "All " + RepoSync.getTotalSize() + " files" +
-                    " have been retrieved successfully.";
-            Log.i(TAG, msg);
-            runOnUiThread(() -> helperToast.toastLong(msg + "\n\n" + msg2));
-            stopSync("Sync complete.", -1);
-            return true;
-        } else if (RepoSync.getTotalSize()<=0){
-            Log.i(TAG, "No files to download.");
-            runOnUiThread(() -> helperToast.toastLong("No files to download." +
-                    "\n\nYou can use JaMuz (Linux/Windows) to " +
-                    "export a list of files to retrieve, based on playlists."));
-            stopSync("No files to download.", 5000);
-            return true;
-        }
-        return false;
-    }
-
     class ProcessDownload extends ProcessAbstract {
 
+        private final List<Track> newTracks;
         private List<DownloadTask> downloadServices;
         private ExecutorService pool;
         private int nbRetries=0;
         private final int maxNbRetries=10;//TODO: Make number of retries an option eventually
-        private int nbFilesTotal;
-        private int nbFiles;
+        private final int nbFilesStart;
+        private long sizeTotal;
+        private long sizeRemaining;
         private int nbFailed;
+        private Benchmark bench;
 
-        ProcessDownload(String name) {
+        ProcessDownload(String name, List<Track> newTracks) {
             super(name);
+            this.newTracks = newTracks;
+            nbFilesStart = newTracks.size();
             downloadServices= new ArrayList<>();
+        }
+
+        private void checkCompleted() {
+            int remaining = newTracks.size();
+            String msg = "Sync complete.\n\n";
+            if(remaining<1) {
+                msg = msg + "All " + nbFilesStart + " files" +
+                        " have been downloaded successfully.";
+            } else {
+                msg = msg + (nbFilesStart-remaining) + " files downloaded, " +
+                        "but still " + remaining + " files to be downloaded.";
+            }
+            Log.i(TAG, msg);
+            String finalToastMsg = msg;
+            runOnUiThread(() -> helperToast.toastLong(finalToastMsg));
+            stopSync(msg, -1);
         }
 
         private void notifyBarProgress(Track track) {
@@ -421,34 +423,34 @@ public class ServiceSync extends ServiceBase {
                 if(!track.getStatus().equals(Track.Status.REC)) {
                     nbFailed++;
                 } else {
-                    nbFiles++;
+                    sizeRemaining-=track.getSize();
+                    newTracks.remove(track);
                 }
+                bench.get(track.getSize());
             }
-            int remaining = nbFilesTotal - nbFiles;
-            //FIXME: DO NOT use getRemainingFileSize and only getTotalFileSize at startup
-            String bigText = "-" + remaining + "/" + nbFilesTotal +
-                    "\n" + StringManager.humanReadableByteCount(RepoSync.getRemainingFileSize(), false) + "/" + RepoSync.getTotalFileSize() + "\n" +
+            String bigText = "-" + newTracks.size() + "/" + nbFilesStart +
+                    "\n" + StringManager.humanReadableByteCount(sizeRemaining, false)
+                    + "/" + StringManager.humanReadableByteCount(sizeTotal, false) + "\n" +
                     "Attempt " + (nbRetries + 1) + "/" + maxNbRetries + ". " + nbFailed + " Error(s).\n";
-            String msg = "Downloading ... ";
-            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, msg, nbFilesTotal, nbFiles, false,
+            String msg =  "Downloading ... " +bench.getLast();
+            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, msg,
+                    nbFilesStart, (nbFilesStart - newTracks.size()), false,
                     true, true,
                     msg + "\n" + bigText));
         }
 
         @Override
         public void run() {
-            boolean completed = false;
             try {
                 do {
                     checkAbort();
-                    if(!startDownloads()) {
-                        break;
-                    }
-                    if(checkCompleted()) {
-                        completed=true;
+                    if(isCompleted() || !startDownloads()) {
                         break;
                     }
                     checkAbort();
+                    if(isCompleted()) {
+                        break;
+                    }
                     nbRetries++;
                     int sleepSeconds = nbRetries * 10;
                     runOnUiThread(() -> helperNotification.notifyBar(notificationDownload,
@@ -461,35 +463,33 @@ public class ServiceSync extends ServiceBase {
             } catch (InterruptedException e) {
                 Log.i(TAG, "ProcessDownload received InterruptedException");
             }
-            if(!completed && !checkCompleted()) {
-                stopSync("Sync done but NOT complete :(", -1);
-            }
-            //FIXME checkCompleted can stop sync as downloads are complete though check info files may still run !!
         }
 
-        private boolean startDownloads() {
+        private boolean isCompleted() {
+            if(newTracks.size()<=0) {
+                return true;
+            }
+            return false;
+        }
+
+        private boolean startDownloads() throws InterruptedException {
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Starting download ... "));
+            bench = new Benchmark(newTracks.size(), 10);
             pool = Executors.newFixedThreadPool(20); //FIXME: Make number of threads an option AND add benchmark back
             downloadServices= new ArrayList<>();
-            nbFilesTotal=0;
-            nbFiles=0;
+            sizeTotal=0;
             nbFailed=0;
             wifiLock.acquire();
-            for (Track track : RepoSync.getDownloadList()) {
+            for (Track track : newTracks) {
                 track.getTags(true);
                 DownloadTask downloadTask = new DownloadTask(track, this::notifyBarProgress, clientInfo);
                 downloadServices.add(downloadTask);
                 pool.submit(downloadTask);
-                nbFilesTotal++;
+                sizeTotal+=track.getSize();
             }
             pool.shutdown();
             notifyBarProgress(null);
-            try {
-                return pool.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                return false;
-            }
+            return pool.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
         }
 
         private void stopDownloads() {
@@ -501,7 +501,7 @@ public class ServiceSync extends ServiceBase {
                 downloadService.abort();
             }
             abort();
-            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Download stopped.", 5000));
+            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Downloads stopped.", 5000));
         }
     }
 
