@@ -58,7 +58,7 @@ public class ActivitySettings extends AppCompatActivity {
         qrScan.setRequestCode(QR_REQUEST_CODE);
         Button button_scan_QR = findViewById(R.id.button_scan_QR);
         button_scan_QR.setOnClickListener(view ->
-                qrScan.initiateScan()
+            qrScan.initiateScan()
         );
 
         textViewPath = findViewById(R.id.textViewPath);
@@ -183,7 +183,6 @@ public class ActivitySettings extends AppCompatActivity {
             if (result == null || result.getContents() == null) {
                 Toast.makeText(this, "Problem reading QR code", Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(this, "QR code: "+result.getContents(), Toast.LENGTH_LONG).show();
                 data.putExtra("QRcode", result.getContents());
                 setResult(RESULT_OK, data);
                 finish();
