@@ -1,5 +1,9 @@
 package phramusca.com.jamuzremote;
 
+import static phramusca.com.jamuzremote.Playlist.Order.PLAYCOUNTER_LASTPLAYED;
+import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
+import static phramusca.com.jamuzremote.StringManager.trimTrailingWhitespace;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -64,9 +68,9 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.google.android.flexbox.FlexboxLayout;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 import com.kiddoware.kidsplace.sdk.KPUtility;
 
 import org.json.JSONArray;
@@ -87,15 +91,10 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static phramusca.com.jamuzremote.Playlist.Order.PLAYCOUNTER_LASTPLAYED;
-import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
-import static phramusca.com.jamuzremote.StringManager.trimTrailingWhitespace;
-
 //FIXME: Submit to f-droid.org
 //https://gitlab.com/fdroid/fdroiddata/blob/master/CONTRIBUTING.md
 //https://f-droid.org/
 
-// TODO: This class is far too big: move some out
 // FIXME: Move audio to a service
 // Why not using the standard android player by the way ? (less control for replaygain ?)
 public class ActivityMain extends AppCompatActivity {

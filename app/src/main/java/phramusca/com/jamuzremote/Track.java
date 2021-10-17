@@ -40,7 +40,7 @@ public class Track implements Serializable {
     private String checkedFlag = "";
     private String copyRight = "";
     private boolean isHistory=false;
-    private boolean isUser=false; //FIXME Change to isLocked and lock when inserting playlists, not only track
+    private boolean isUser=false; //FIXME NOW Change to isLocked and lock when inserting playlists, not only track
     private boolean isSync=false;
     private int idFileRemote = -1;
     private int idFileServer = -1;
