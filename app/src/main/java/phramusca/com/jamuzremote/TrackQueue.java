@@ -7,7 +7,7 @@ import java.util.List;
 
 public class TrackQueue extends TrackList {
 
-    private static final String TAG = TrackList.class.getName();
+    private static final String TAG = TrackQueue.class.getName();
 
     private static final int MAX_QUEUE_PREVIOUS = 5;
     private static final int MAX_QUEUE_NEXT = 10;
