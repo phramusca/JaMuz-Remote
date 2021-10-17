@@ -57,16 +57,10 @@ public class ClientReception extends ProcessAbstract {
                     callback.onReceivedJson(msg.substring(5));
                 }
 				else if (msg.equals("SENDING_COVER")) {
-                    Bitmap bitmap=null;
-                    try {
-                        bitmap = BitmapFactory.decodeStream(inputStream);
-                        Log.d(TAG, "onReceivedBitmap");
-                    } catch (OutOfMemoryError ignored) {
-                        //Handed in callback
-                    } finally {
-                        Log.d(TAG, "onReceivedBitmap: calling callback");
-                        callback.onReceivedBitmap(bitmap);
-                    }
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                    Log.d(TAG, "onReceivedBitmap");
+                    Log.d(TAG, "onReceivedBitmap: calling callback");
+                    callback.onReceivedBitmap(bitmap);
                 }
 				else if (msg.startsWith("SENDING_FILE")) {
                     Track fileInfoReception;
@@ -93,7 +87,7 @@ public class ClientReception extends ProcessAbstract {
                         checkAbort();
                         callback.onReceivedFile(fileInfoReception);
 					}
-                    catch (OutOfMemoryError | JSONException e) {
+                    catch (JSONException e) {
                         Log.e(TAG, "onReceivedFile", e);
                     }
 				}

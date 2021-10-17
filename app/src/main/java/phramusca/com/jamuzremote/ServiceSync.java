@@ -143,7 +143,7 @@ public class ServiceSync extends ServiceBase {
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error ProcessSync", e);
                 helperNotification.notifyBar(notificationSync, "Interrupted ");
-            } catch (OutOfMemoryError | Exception e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Error ProcessSync", e);
                 helperNotification.notifyBar(notificationSync, "ERROR: "+e.getLocalizedMessage(), 0, 0, false,
                         true, false, "ERROR: "+e.getLocalizedMessage());
@@ -228,7 +228,6 @@ public class ServiceSync extends ServiceBase {
                     HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/"+status.name());
                     urlBuilder.addQueryParameter("idFrom", String.valueOf(idFrom));
                     urlBuilder.addQueryParameter("nbFilesInBatch", String.valueOf(nbFilesInBatch));
-                    //FIXME: Move this retry process to clientInfo so that it can benefit to all calls to .string() [what about .source() ?]
                     String body = clientInfo.getBodyString(urlBuilder, client);
                     final JSONObject jObject = new JSONObject(body);
                     JSONArray files = (JSONArray) jObject.get("files");
@@ -241,8 +240,7 @@ public class ServiceSync extends ServiceBase {
                         newTracks.put(fileReceived.getIdFileServer(), fileReceived);
                     }
                     break;
-                    //FIXME: Remove all OutOfMemoryError catches, should not be needed
-                } catch (OutOfMemoryError | Exception e) {
+                } catch (Exception e) {
                     msg = e.getLocalizedMessage();
                     Log.d(TAG, "ERROR: "+ msg);
                     helperNotification.notifyBar(notificationSync, sleepSeconds + "s before " +
