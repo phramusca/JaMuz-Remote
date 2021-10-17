@@ -1671,7 +1671,7 @@ public class ActivityMain extends AppCompatActivity {
     //to handle messages from other threads or services
     //Especially for audioPlayer (some weird message back&forwarding occuring)
 
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String msg = intent.getStringExtra("message");

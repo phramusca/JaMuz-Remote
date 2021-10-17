@@ -43,7 +43,7 @@ public final class RepoTags {
     }
 
     private synchronized static void add(final String tag) {
-        if (HelperLibrary.musicLibrary != null && !get().values().contains(tag)) {
+        if (HelperLibrary.musicLibrary != null && !get().containsValue(tag)) {
             int idTag = HelperLibrary.musicLibrary.addTag(tag);
             if (idTag > 0) {
                 tags.put(idTag, tag);

@@ -3,6 +3,7 @@ package phramusca.com.jamuzremote;
 import android.util.Base64;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.MessageDigest;
@@ -48,7 +49,7 @@ public class Encryption {
     }
 
     private static Key generateKey(String secret) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        byte[] key = secret.getBytes("UTF-8");
+        byte[] key = secret.getBytes(StandardCharsets.UTF_8);
         MessageDigest sha = MessageDigest.getInstance("SHA-1");
         key = sha.digest(key);
         key = Arrays.copyOf(key, 16); // use only first 128 bit

@@ -3,9 +3,9 @@ package phramusca.com.jamuzremote;
 import java.util.ArrayList;
 
 public class PlayQueueRelative {
-    private int position;
-    private int offset;
-    private ArrayList<Track> tracks;
+    private final int position;
+    private final int offset;
+    private final ArrayList<Track> tracks;
 
     PlayQueueRelative() {
         this.position = -1;

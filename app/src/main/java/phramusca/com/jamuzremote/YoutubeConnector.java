@@ -52,7 +52,6 @@ public class YoutubeConnector {
             AssetManager am = context.getAssets();
             InputStream inputStream = am.open("keys.properties");
             Properties properties = new Properties();
-            ;
             properties.load(inputStream);
             KEY = properties.getProperty("youtube.key");
 

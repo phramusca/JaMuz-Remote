@@ -73,7 +73,7 @@ public class ActivitySettings extends AppCompatActivity {
                 .concat("</html>"))));
         Button dirChooserButton = findViewById(R.id.button_browse);
         dirChooserButton.setOnClickListener(new View.OnClickListener() {
-            private boolean m_newFolderEnabled = false;
+            private final boolean m_newFolderEnabled = false;
 
             @Override
             public void onClick(View v) {

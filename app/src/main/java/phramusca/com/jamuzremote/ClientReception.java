@@ -31,7 +31,7 @@ public class ClientReception extends ProcessAbstract {
 
     private static final String TAG = ClientReception.class.getName();
     private final BufferedReader bufferedReader;
-    private InputStream inputStream;
+    private final InputStream inputStream;
     private final IListenerReception callback;
 
     ClientReception(InputStream inputStream, IListenerReception callback) {

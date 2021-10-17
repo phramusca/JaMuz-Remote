@@ -28,13 +28,13 @@ import java.util.Queue;
 public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
     private static final int BUTTON_WIDTH = 100;
-    private RecyclerView recyclerView;
+    private final RecyclerView recyclerView;
     private List<UnderlayButton> buttons;
-    private GestureDetector gestureDetector;
+    private final GestureDetector gestureDetector;
     private int swipedPos = -1;
     private float swipeThreshold = 0.5f;
-    private SparseArray<List<UnderlayButton>> buttonsBuffer;
-    private Queue<Integer> recoverQueue;
+    private final SparseArray<List<UnderlayButton>> buttonsBuffer;
+    private final Queue<Integer> recoverQueue;
 
     SwipeHelper(Context context, RecyclerView recyclerView, int swipeDirs) {
         super(0, swipeDirs);
@@ -231,9 +231,9 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
         private int pos;
         private RectF clickRegion;
-        private UnderlayButtonClickListener clickListener;
-        private Context mContext;
-        private ButtonInfo buttonInfo;
+        private final UnderlayButtonClickListener clickListener;
+        private final Context mContext;
+        private final ButtonInfo buttonInfo;
 
         UnderlayButton(ButtonInfo buttonInfo, UnderlayButtonClickListener clickListener, Context mContext) {
             this.buttonInfo = buttonInfo;
