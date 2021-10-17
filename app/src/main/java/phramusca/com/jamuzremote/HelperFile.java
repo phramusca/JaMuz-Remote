@@ -22,7 +22,7 @@ import java.io.PrintWriter;
 public final class HelperFile {
 
     private static final String TAG = HelperFile.class.getName();
-    private static String path = Environment.getExternalStorageDirectory()+"/JaMuz/";
+    private static final String path = Environment.getExternalStorageDirectory()+"/JaMuz/";
 
     private HelperFile() {
     }

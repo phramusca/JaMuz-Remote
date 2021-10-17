@@ -21,12 +21,12 @@ public class Playlist implements Comparable, Serializable {
 
     private static final String TAG = Playlist.class.getName();
     private String name;
-    private Map<String, TriStateButton.STATE> tags = new HashMap<>();
-    private Map<String, TriStateButton.STATE> genres = new HashMap<>();
+    private final Map<String, TriStateButton.STATE> tags = new HashMap<>();
+    private final Map<String, TriStateButton.STATE> genres = new HashMap<>();
     private TriStateButton.STATE unTaggedState = TriStateButton.STATE.ANY;
     private int rating=0;
     private Operator ratingOperator = Playlist.Operator.GREATERTHAN;
-    private boolean isLocal;
+    private final boolean isLocal;
     private String artist;
     private String album;
     private Order order=Order.PLAYCOUNTER_LASTPLAYED;
@@ -168,7 +168,7 @@ public class Playlist implements Comparable, Serializable {
         this.modified = modified;
     }
 
-    private class Lists {
+    private static class Lists {
         ArrayList<String> include = new ArrayList<>();
         ArrayList<String> exclude = new ArrayList<>();
 
@@ -369,7 +369,7 @@ public class Playlist implements Comparable, Serializable {
         for(String entry : include) {
             in.append("\"").append(entry).append("\",");
         }
-        return in.toString().substring(0, in.length()-1);
+        return in.substring(0, in.length()-1);
     }
 
     private String getInClause(ArrayList<String> include, int length) {
@@ -379,7 +379,7 @@ public class Playlist implements Comparable, Serializable {
             for(String entry : include) {
                 in.append("\"").append(entry).append("\",");
             }
-            in = new StringBuilder(in.toString().substring(0, in.length()-1));
+            in = new StringBuilder(in.substring(0, in.length()-1));
             in.append(" ) then 1 else 0 end) = ").append(length);
         }  else {
             in.append(" 1 ");
