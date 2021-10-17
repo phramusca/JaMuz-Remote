@@ -38,7 +38,6 @@
     <string name="alreadyExists">existe déjà.</string>
     <string name="newFolder">Nouveau dossier</string>
     <string name="newFolderName">Nom du nouveau dossier</string>
-    <string name="title">Titre</string>
     <string name="cover">Pochette</string>
     <string name="scan_qr">Scan QR</string>
     <string name="permissionMsg_1">Pour une expérience optimale de JaMuz</string>
@@ -51,13 +50,8 @@
     <string name="permissionMsg_8">Gestion des appels</string>
     <string name="permissionMsg_9">: Simplement pour mettre pause et reprendre la lecture lors des appels.</string>
     <string name="warning">Attention !</string>
-    <string name="confirmYes">OUI</string>
-    <string name="confirmNo">OOOOPS NON !</string>
-    <string name="confirmPlayNow">Jouer maintenant ?</string>
-    <string name="confirmRemove">Enlever ?</string>
     <string name="best_albums">Meilleurs Albums</string>
     <string name="play_queue">File d\'Attente</string>
-    <string name="syncCheckFilesOnDisk">Vérification de la présence des fichiers sur le disque ...</string>
     <string name="nbTracks">piste(s)</string>
     <string name="album_tracks">Pistes de l\'album</string>
     <string name="settings">Paramètres</string>

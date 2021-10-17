@@ -47,7 +47,7 @@
                 android:paddingBottom="5dp"
                 android:background="@color/colorPrimary">
                 <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
-                <LinearLayout android:id="@+id/dummy"
+                <LinearLayout
                     android:focusable="true"
                     android:focusableInTouchMode="true"
                     android:layout_width="0dp"
