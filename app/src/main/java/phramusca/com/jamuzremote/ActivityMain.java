@@ -1496,7 +1496,7 @@ public class ActivityMain extends AppCompatActivity {
             displayedTrack.setSource(
                     displayedTrack.isHistory()
                             ?getString(R.string.queue_history)
-                            :displayedTrack.isUser()
+                            :displayedTrack.isLocked()
                                 ?getString(R.string.queue_user)
                                 :localSelectedPlaylist.toString());
             audioPlayer.play(displayedTrack, helperToast);

@@ -40,7 +40,7 @@ public class Track implements Serializable {
     private String checkedFlag = "";
     private String copyRight = "";
     private boolean isHistory=false;
-    private boolean isUser=false; //FIXME NOW Change to isLocked and lock when inserting playlists, not only track
+    private boolean isLocked =false;
     private boolean isSync=false;
     private int idFileRemote = -1;
     private int idFileServer = -1;
@@ -307,12 +307,12 @@ public class Track implements Serializable {
         this.source = source;
     }
 
-    public void setUser(boolean isUser) {
-        this.isUser=isUser;
+    public void setLocked(boolean isUser) {
+        this.isLocked =isUser;
     }
 
-    public boolean isUser() {
-        return isUser;
+    public boolean isLocked() {
+        return isLocked;
     }
 
     public int getLength() {

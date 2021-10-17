@@ -88,14 +88,14 @@ public class ActivityAlbumTracks extends AppCompatActivity {
     }
 
     private void insertAndSetResult(Track track, boolean playNext, int pos) {
-        if(!Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track.getStatus())) {
+        if(Arrays.asList(Track.Status.REC, Track.Status.LOCAL).contains(track.getStatus())) {
             //Insert in queue
             PlayQueue.queue.insert(track);
             Intent data = new Intent();
             data.putExtra("action", playNext?"playNextAndDisplayQueue":"displayQueue");
             setResult(RESULT_OK, data);
             finish();
-        } else {
+        } else if(Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track.getStatus())) {
             //Download the file
             track.getTags(true);
             track.setStatus(Track.Status.NEW);
