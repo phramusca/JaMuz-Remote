@@ -20,6 +20,7 @@
  import android.graphics.Bitmap;
  import android.graphics.BitmapFactory;
  import android.util.Log;
+ import android.util.Pair;
 
  import java.io.File;
  import java.io.FileOutputStream;
@@ -34,25 +35,14 @@
  public class IconBufferCover {
      private static final String TAG = IconBufferCover.class.getName();
 
-     enum IconSize {
-         COVER(500),
-         THUMB(120);
-
-         private final int size;
-
-         IconSize(int size) {
-             this.size = size;
-         }
-     }
-
      /**
       * Get cover icon from cache
       * @param track The track.
       * @return The cover icon.
       */
-     public static Bitmap getCoverIcon(Track track, IconSize size, boolean readIfNotFound) {
+     public static Bitmap getCoverIcon(Track track, IconSize iconSize, boolean readIfNotFound) {
          Bitmap icon;
-         icon = readIconFromCache(track.getCoverHash(), size);
+         icon = readIconFromCache(track.getCoverHash(), iconSize);
          if(icon != null) {
              return icon;
          }
@@ -60,21 +50,23 @@
              Bitmap trackCover = track.readCover();
              Bitmap cover = writeIconToCache(track.getCoverHash(), IconSize.COVER, trackCover);
              Bitmap thumb = writeIconToCache(track.getCoverHash(), IconSize.THUMB, cover);
-             if (size == IconSize.COVER) {
+             if (iconSize == IconSize.COVER) {
                  icon = cover;
-             } else if (size == IconSize.THUMB) {
+             } else if (iconSize == IconSize.THUMB) {
                  icon = thumb;
              }
          }
          return icon;
      }
 
-     //TODO: Does this really need to be synchronized ?
-     private synchronized static Bitmap writeIconToCache(String coverHash, IconSize iconSize, Bitmap cover) {
+     private static Bitmap writeIconToCache(String coverHash, IconSize iconSize, Bitmap cover) {
          Bitmap icon = null;
          if(cover != null) {
-             //FIXME NOW Keep ratio for IconSize.COVER !
-             icon = Bitmap.createScaledBitmap(cover, iconSize.size, iconSize.size, false);
+             Pair<Integer, Integer> scaledSize = new Pair<>(iconSize.size, iconSize.size);
+             if (iconSize == IconSize.COVER) { //Not for THUMB or need to refactor AdapterTrack.overlayIcon(...)
+                 scaledSize = iconSize.getScaledSize(cover.getWidth(), cover.getHeight());
+             }
+             icon = Bitmap.createScaledBitmap(cover, scaledSize.first, scaledSize.second, false);
              if(icon != null) {
                  try {
                      File cacheFile = getCacheFile(coverHash, iconSize);
@@ -116,5 +108,38 @@
          }
          file = new File(file, filename);
          return file;
+     }
+
+     enum IconSize {
+         COVER(500),
+         THUMB(120);
+
+         private final int size;
+
+         IconSize(int size) {
+             this.size = size;
+         }
+
+         private Pair<Integer, Integer> getScaledSize(int original_width, int original_height) {
+             int bound_width = size;
+             int bound_height = size;
+             int new_width = original_width;
+             int new_height = original_height;
+             // first check if we need to scale width
+             if (original_width > bound_width) {
+                 //scale width to fit
+                 new_width = bound_width;
+                 //scale height to maintain aspect ratio
+                 new_height = (new_width * original_height) / original_width;
+             }
+             // then check if we need to scale even with the new height
+             if (new_height > bound_height) {
+                 //scale height to fit instead
+                 new_height = bound_height;
+                 //scale width to maintain aspect ratio
+                 new_width = (new_height * original_width) / original_height;
+             }
+             return new Pair<>(new_width, new_height);
+         }
      }
  }
