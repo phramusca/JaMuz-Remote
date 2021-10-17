@@ -20,7 +20,7 @@ public final class RepoSync {
     private static Table<Integer, Track.Status, Track> tracks = null;
 
     protected synchronized static void read() {
-        //FIXME: Update this repo for each track change (rating, genre) to avoid reading at every sync
+        //FIXME NOW: Update this repo for each track change (rating, genre) to avoid reading at every sync
         //  Otherwise tracks stats updates (except tags as re-read before merge request) are not available for merge !!!
         //   WARNING: Need to reset isSync to false too before a new sync
         //if(tracks==null) {

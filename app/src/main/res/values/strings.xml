@@ -1,4 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!--FIXME: Translate whole project and submit to Weblate-->
+
     <string name="app_name" translatable="false">JaMuz</string>
     <string name="lt_ip_gt_lt_port_gt" translatable="false"><![CDATA[<IP>:<Port> :]]></string>
     <string name="defaultConnectionString" translatable="false">192.168.0.16:2013</string>

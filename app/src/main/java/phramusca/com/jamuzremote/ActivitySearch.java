@@ -42,7 +42,7 @@ public class ActivitySearch extends AppCompatActivity {
         searchInput.setOnEditorActionListener((v, actionId, event) -> {
             if(actionId == EditorInfo.IME_ACTION_SEARCH){
 
-                //FIXME: Enable search on sqlite library
+                //FIXME NOW Enable search on sqlite library
                 //+ review what options offer youtube
                 mProgressDialog.setMessage("Finding videos for "+v.getText().toString());
                 mProgressDialog.show();

@@ -30,7 +30,7 @@
   * @author phramusca ( https://github.com/phramusca/JaMuz/ )
   */
 
-//FIXME Use this instead of coverMap in ActivityMain, made for remote (Warning: make sure coverHash are thee same)
+//FIXME NOW Use this instead of coverMap in ActivityMain, made for remote (Warning: make sure coverHash are thee same)
  public class IconBufferCover {
      private static final String TAG = IconBufferCover.class.getName();
 
@@ -73,7 +73,7 @@
      private synchronized static Bitmap writeIconToCache(String coverHash, IconSize iconSize, Bitmap cover) {
          Bitmap icon = null;
          if(cover != null) {
-             //FIXME: Keep ratio for IconSize.COVER !
+             //FIXME NOW Keep ratio for IconSize.COVER !
              icon = Bitmap.createScaledBitmap(cover, iconSize.size, iconSize.size, false);
              if(icon != null) {
                  try {
