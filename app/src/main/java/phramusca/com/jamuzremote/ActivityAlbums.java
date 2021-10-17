@@ -66,8 +66,6 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
                         ButtonInfo.PLAY,
                         pos -> {
                             Track album = albums.get(pos);
-                            //FIXME NOW Why are next inserted are removed once we go out then back to queue activity ?
-                            // and not when only queuing (without play) ??
                             insertAndSetResult(album, true);
                         },
                         getApplicationContext()));
@@ -81,7 +79,6 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
                         getApplicationContext()));
             }
         };
-
     }
 
     private boolean addMore() {

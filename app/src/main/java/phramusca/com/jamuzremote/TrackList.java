@@ -19,7 +19,7 @@ public class TrackList {
                 if(oldPosition<positionPlaying) {
                     positionPlaying--; //Not observed as done on both directly
                 }
-                track.setUser(true);
+                track.setLocked(true);
                 tracks.add(positionPlaying+1, track);
                 return true;
             }
@@ -43,11 +43,11 @@ public class TrackList {
                 tracks.remove(oldPosition);
                 oldPosition++;
                 Track movedUpTrack = get(oldPosition);
-                movedUpTrack.setUser(true);
+                movedUpTrack.setLocked(true);
                 if(oldPosition==positionPlaying) {
                     positionPlaying--; //Not observed as done on both directly
                 }
-                track.setUser(true);
+                track.setLocked(true);
                 tracks.add(oldPosition, track);
             }
         }

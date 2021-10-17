@@ -19,7 +19,7 @@ public class TrackQueue extends TrackList {
     synchronized void refresh(Playlist playlist) {
         for (int i=tracks.size()-1;i>positionPlaying;i--) {
             Track track = tracks.get(i);
-            if(!(track.isHistory() || track.isUser())) {
+            if(!(track.isHistory() || track.isLocked())) {
                 tracks.remove(i);
             }
         }
@@ -27,11 +27,15 @@ public class TrackQueue extends TrackList {
     }
 
     synchronized void insert(Playlist playlist) {
-        List<Track> insertIntotracks = playlist.getTracks(false);
-        tracks.addAll(positionPlaying+1, insertIntotracks);
+        List<Track> playlistTracks = playlist.getTracks(false);
+        for(Track track : playlistTracks) {
+            track.setLocked(true);
+        }
+        tracks.addAll(positionPlaying+1, playlistTracks);
     }
 
     synchronized void insert(Track track) {
+        track.setLocked(true);
         tracks.add(positionPlaying+1, track);
     }
 
