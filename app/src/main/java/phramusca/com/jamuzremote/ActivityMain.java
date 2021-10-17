@@ -65,6 +65,7 @@ import android.widget.RatingBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.flexbox.FlexboxLayout;
@@ -1412,6 +1413,7 @@ public class ActivityMain extends AppCompatActivity {
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString("connectionString", content);
                 editor.apply();
+                Toast.makeText(this, "QR code read. New configuration set.", Toast.LENGTH_LONG).show();
                 buttonRemote.setEnabled(true);
                 buttonSync.setEnabled(true);
             }
