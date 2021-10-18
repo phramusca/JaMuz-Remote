@@ -19,7 +19,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
     private int offset = 0;
     private static final int QUEUE_REQUEST_CODE = 200;
 
-    //FIXME NOW Issue when list is small
+    //FIXME Issue when list is small (issue on phone BUT no issues in tablet, why ?)
     //=> need to scroll down (fake since it should not be necessary in real)
     // BEFORE swiping to make swipe to work
 

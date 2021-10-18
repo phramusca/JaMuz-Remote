@@ -34,7 +34,9 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
 
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.google.guava:guava:24.1-jre'
+    // DO NOT UPDATE guava unless changing sourceCompatibility 1.8
+    // https://stackoverflow.com/a/49619157
+    implementation 'com.google.guava:guava:23.3-android'
     implementation 'com.google.android:flexbox:0.3.0'
 
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0' //QR Code
