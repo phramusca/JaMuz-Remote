@@ -40,25 +40,28 @@ public class Playlist implements Comparable, Serializable {
         this.isLocal = isLocal;
     }
 
-    public List<Track> getTracks(boolean includeINFO) {
-        return getTracks(-1, includeINFO);
+    public List<Track> getTracks(List<Track.Status> statuses) {
+        return getTracks(-1, statuses);
     }
 
-    public List<Track> getTracks(int limit, boolean includeINFO) {
-        return getTracks(limit, new ArrayList<>(), includeINFO);
+    public List<Track> getTracks(int limit, List<Track.Status> statuses) {
+        return getTracks(limit, new ArrayList<>(), statuses);
     }
 
-    public List<Track> getTracks(int limit, List<Integer> excluded, boolean includeINFO) {
+    public List<Track> getTracks(int limit, List<Integer> excluded, List<Track.Status> statuses) {
         if (HelperLibrary.musicLibrary != null) {
-            return HelperLibrary.musicLibrary.getTracks(getWhere(excluded, includeINFO), getHaving(), order.value, limit);
+            return HelperLibrary.musicLibrary.getTracks(getWhere(excluded, statuses), getHaving(), order.value, limit);
         }
         return new ArrayList<>();
     }
 
-    public void getNbFiles(boolean includeINFO) {
-
+    public void getNbFiles() {
         if (HelperLibrary.musicLibrary != null) {
-            Triplet<Integer, Long, Long> entry = HelperLibrary.musicLibrary.getNb(getWhere(new ArrayList<>(), includeINFO), getHaving());
+            Triplet<Integer, Long, Long> entry = HelperLibrary.musicLibrary.getNb(
+                    getWhere(new ArrayList<>(), new ArrayList<Track.Status>() {
+                        { add(Track.Status.REC); }
+                        { add(Track.Status.LOCAL); }
+                    }), getHaving());
             nbFiles = entry.getFirst();
             //TODO: Offer choice to display one or the other (length OR size)
             /*lengthOrSize = StringManager.humanReadableByteCount(entry.getSecond(), false);*/
@@ -277,12 +280,12 @@ public class Playlist implements Comparable, Serializable {
         modified = true;
     }
 
-    private String getWhere(List<Integer> excluded, boolean includeINFO) {
-
-        String in = "WHERE " + COL_STATUS + " IN (" +
-                "\"" + Track.Status.REC.name() + "\"," +
-                "\"" + Track.Status.LOCAL.name() + "\""
-                + (includeINFO ? ",\"" + Track.Status.INFO.name() + "\", \"" + Track.Status.NEW.name() + "\", \"" + Track.Status.ERROR.name() + "\"" : "") + ") " +
+    private String getWhere(List<Integer> excluded, List<Track.Status> statuses) {
+        ArrayList<String> statusString = new ArrayList<>();
+        for(Track.Status status : statuses) {
+            statusString.add(status.name());
+        }
+        String in = " WHERE " + COL_STATUS + " IN ( " + getInClause(statusString) + " )" +
                 " AND rating " + getRatingString() + " ";
 
         if (limitValue > 0) {
@@ -317,21 +320,9 @@ public class Playlist implements Comparable, Serializable {
             in += "\n AND album = \"" + album + "\" ";
         }
 
-        in += getCSVlist(excluded);
+        in += getInClause(excluded);
 
         return in;
-    }
-
-    private static String getCSVlist(List<Integer> excluded) {
-        StringBuilder builder = new StringBuilder();
-        if (excluded.size() > 0) {
-            builder.append("\n AND tracks.idFileRemote NOT IN (");
-            for (int integer : excluded) {
-                builder.append(integer).append(",");
-            }
-            builder.deleteCharAt(builder.length() - 1).append(") ");
-        }
-        return builder.toString();
     }
 
     private String getHaving() {
@@ -369,6 +360,18 @@ public class Playlist implements Comparable, Serializable {
             }
         }
         return in;
+    }
+
+    private static String getInClause(List<Integer> excluded) {
+        StringBuilder builder = new StringBuilder();
+        if (excluded.size() > 0) {
+            builder.append("\n AND tracks.idFileRemote NOT IN (");
+            for (int integer : excluded) {
+                builder.append(integer).append(",");
+            }
+            builder.deleteCharAt(builder.length() - 1).append(") ");
+        }
+        return builder.toString();
     }
 
     private String getInClause(ArrayList<String> include) {

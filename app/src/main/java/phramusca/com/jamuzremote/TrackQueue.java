@@ -27,7 +27,10 @@ public class TrackQueue extends TrackList {
     }
 
     synchronized void insert(Playlist playlist) {
-        List<Track> playlistTracks = playlist.getTracks(false);
+        List<Track> playlistTracks = playlist.getTracks(new ArrayList<Track.Status>() {
+            { add(Track.Status.REC); }
+            { add(Track.Status.LOCAL); }
+        });
         for (Track track : playlistTracks) {
             track.setLocked(true);
         }
@@ -50,7 +53,10 @@ public class TrackQueue extends TrackList {
     private synchronized List<Track> add(List<Integer> excluded, Playlist playlist) {
         List<Track> addToTracks = new ArrayList<>();
         if (playlist != null) {// && nbTracksAfterPlaying<MAX_QUEUE_NEXT+1 ) {
-            addToTracks = playlist.getTracks(MAX_QUEUE_NEXT, excluded, false);
+            addToTracks = playlist.getTracks(MAX_QUEUE_NEXT, excluded, new ArrayList<Track.Status>() {
+                { add(Track.Status.REC); }
+                { add(Track.Status.LOCAL); }
+            });
             tracks.addAll(addToTracks);
         }
         return addToTracks;
