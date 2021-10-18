@@ -29,8 +29,6 @@
  /**
   * @author phramusca ( https://github.com/phramusca/JaMuz/ )
   */
-
-//FIXME NOW Use this instead of coverMap in ActivityMain, made for remote (Warning: make sure coverHash are thee same)
  public class IconBufferCover {
      private static final String TAG = IconBufferCover.class.getName();
 
@@ -59,6 +57,11 @@
          return icon;
      }
 
+     public static void writeIconToCache(String coverHash, Bitmap bitmap) {
+         Bitmap cover = writeIconToCache(coverHash, IconSize.COVER, bitmap);
+         writeIconToCache(coverHash, IconSize.THUMB, cover);
+     }
+
      private static Bitmap writeIconToCache(String coverHash, IconSize iconSize, Bitmap cover) {
          Bitmap icon = null;
          if (cover != null) {
@@ -81,6 +84,11 @@
              }
          }
          return icon;
+     }
+
+     public static boolean contains(String coverHash, IconSize iconSize) {
+         File file = getCacheFile(coverHash, iconSize);
+         return file.exists();
      }
 
      //TODO: Offer at least a cache cleanup function (better would be a smart auto cleanup)
@@ -140,6 +148,10 @@
                  new_width = (new_height * original_width) / original_height;
              }
              return new Pair<>(new_width, new_height);
+         }
+
+         public int getSize() {
+             return size;
          }
      }
  }

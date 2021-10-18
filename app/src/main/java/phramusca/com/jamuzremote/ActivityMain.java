@@ -107,7 +107,6 @@ public class ActivityMain extends AppCompatActivity {
     private ClientRemote clientRemote;
     private Track displayedTrack;
     private Track localTrack;
-    protected static Map<String, Bitmap> coverMap = new HashMap<>();
     private AudioManager audioManager;
     public static AudioPlayer audioPlayer;
     public static String login;
@@ -2247,13 +2246,13 @@ public class ActivityMain extends AppCompatActivity {
 
     //Display cover from cache or ask for it
     private void displayCover() {
-        if (coverMap.containsKey(displayedTrack.getCoverHash())) {
-            Bitmap bitmap = coverMap.get(displayedTrack.getCoverHash());
-            displayImage(bitmap);
+        Bitmap coverIcon = IconBufferCover.getCoverIcon(displayedTrack, IconBufferCover.IconSize.COVER, false);
+        if (coverIcon !=  null) {
+            displayImage(coverIcon);
         } else { //Ask cover
             int maxWidth = this.getWindow().getDecorView().getWidth();
             if (maxWidth <= 0) {
-                maxWidth = 250;
+                maxWidth = IconBufferCover.IconSize.COVER.getSize();
             }
             if (clientRemote != null) {
                 clientRemote.send("sendCover" + maxWidth);
@@ -2325,11 +2324,8 @@ public class ActivityMain extends AppCompatActivity {
         public void onReceivedBitmap(final Bitmap bitmap) {
             Log.d(TAG, "onReceivedBitmap: callback");
             Log.d(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight());
-
-            if (!coverMap.containsKey(displayedTrack.getCoverHash())) {
-                if (bitmap != null) { //Save to cache
-                    coverMap.put(displayedTrack.getCoverHash(), bitmap);
-                }
+            if(bitmap != null && !IconBufferCover.contains(displayedTrack.getCoverHash(), IconBufferCover.IconSize.COVER)) {
+                IconBufferCover.writeIconToCache(displayedTrack.getCoverHash(), bitmap);
             }
             displayCover();
         }
