@@ -55,6 +55,7 @@ public class ServiceScan extends ServiceBase {
             public void run() {
                 runOnUiThread(() -> helperNotification.notifyBar(notificationScan, "Cleaning database..."));
                 if (HelperLibrary.musicLibrary != null) {
+                    //Delete tracks from database that are from another folder than those 2
                     HelperLibrary.musicLibrary.deleteTrack(getAppDataPath, userPath);
                     //Scan user folder and cleanup library
                     File folder = new File(userPath);
@@ -123,14 +124,14 @@ public class ServiceScan extends ServiceBase {
 
                     //Scan deleted files
                     //This will remove from db files not in filesystem
-                    //It IS compatible with ServiceSync
-                    //FIXME NOW replace includeINFO with a List<Track.Status> so that only looking for LOCAL
-                    //and leave other statuses to sync process so that it is really fully compatible
-                    // REC, LOCAL => remove from db if file not found
-                    // includeINFO=false : INFO & NEW not included
-
                     checkAbort();
-                    List<Track> tracks = new Playlist("ScanFolder", false).getTracks(false);
+                    List<Track> tracks =
+                            new Playlist("ScanFolder", false)
+                                    .getTracks(new ArrayList<Track.Status>() {
+                                        {
+                                            add(Track.Status.LOCAL);
+                                        }
+                                    });
                     nbFilesTotal = tracks.size();
                     nbFiles = 0;
                     for (Track track : tracks) {

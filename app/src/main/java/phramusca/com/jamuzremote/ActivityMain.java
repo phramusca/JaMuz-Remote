@@ -918,7 +918,10 @@ public class ActivityMain extends AppCompatActivity {
             displayPlaylist(playlist);
             localSelectedPlaylist = playlist;
             if (playNext) {
-                PlayQueue.queue.setQueue(playlist.getTracks(10, false));
+                PlayQueue.queue.setQueue(playlist.getTracks(10, new ArrayList<Track.Status>() {
+                    { add(Track.Status.REC); }
+                    { add(Track.Status.LOCAL); }
+                }));
                 playNext();
             }
             refreshQueueAndPlaylistSpinner();
@@ -1945,11 +1948,11 @@ public class ActivityMain extends AppCompatActivity {
         localPlaylists = new HashMap<>();
         File playlistFolder = HelperFile.createFolder("Playlists");
         if (playlistFolder != null) {
-            for (String file : playlistFolder.list()) {
+            for (String file : Objects.requireNonNull(playlistFolder.list())) {
                 if (file.endsWith(".plli")) {
                     Playlist playlist = readPlaylist(file);
                     if (playlist != null) {
-                        playlist.getNbFiles(false);
+                        playlist.getNbFiles();
                         localPlaylists.put(playlist.getName(), playlist);
                     }
                 }
@@ -2016,10 +2019,10 @@ public class ActivityMain extends AppCompatActivity {
                 public void run() {
                     if (refreshAll) {
                         for (Playlist playlist : localPlaylists.values()) {
-                            playlist.getNbFiles(false);
+                            playlist.getNbFiles();
                         }
                     } else {
-                        localSelectedPlaylist.getNbFiles(false);
+                        localSelectedPlaylist.getNbFiles();
                     }
                     runOnUiThread(() -> playListArrayAdapter.notifyDataSetChanged());
                 }
