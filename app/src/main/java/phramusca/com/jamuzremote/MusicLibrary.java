@@ -666,6 +666,7 @@ public class MusicLibrary {
     }
 
     //FIXME NOW getAlbums takes too long ! Need to review the query (and probably move from Track to a new model with only minimum info)
+    // ===> TRY THIS : https://stackoverflow.com/questions/5457699/cursor-adapter-and-sqlite-example
     List<Track> getAlbums(int offset) {
         List<Track> tracks = new ArrayList<>();
         Cursor cursor = null;

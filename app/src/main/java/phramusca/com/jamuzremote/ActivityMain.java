@@ -2335,7 +2335,7 @@ public class ActivityMain extends AppCompatActivity {
             if (!msg.equals("")) {
                 runOnUiThread(() -> helperToast.toastShort(msg));
             }
-            stopRemote();
+            enableClientRemote(buttonRemote);
             setupLocalPlaylistSpinner();
             displayedTrack = localTrack;
             displayTrack();
@@ -2347,10 +2347,6 @@ public class ActivityMain extends AppCompatActivity {
             clientRemote.close();
             clientRemote = null;
         }
-        enableClientRemote(buttonRemote);
-        setupLocalPlaylistSpinner();
-        displayedTrack = localTrack;
-        displayTrack();
     }
 
     @Override
