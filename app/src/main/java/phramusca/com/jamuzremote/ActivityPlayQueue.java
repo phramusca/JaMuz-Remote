@@ -119,30 +119,12 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
 
     @Override
     public void onClick(final Track track, final int position) {
-
-        //Get album tracks
-        Playlist playlist = new Playlist(track.getAlbum(), true);
-        playlist.setAlbum(track.getAlbum());
-        ArrayList<Track> tracks = (ArrayList<Track>) playlist.getTracks(new ArrayList<Track.Status>() {
-            { add(Track.Status.REC); }
-            { add(Track.Status.LOCAL); }
-            { add(Track.Status.INFO); }
-            { add(Track.Status.NEW); }
-            { add(Track.Status.ERROR); }
-        });
         //Open album tracks layout
         Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
-        intent.putExtra("tracksList", tracks);
+        intent.putExtra("album", track.getAlbum());
         startActivityForResult(intent, QUEUE_REQUEST_CODE);
 
-
-        /*Intent intent = new Intent();
-        intent.putExtra("action", "openAlbum");
-        intent.putExtra("track", track);
-        setResult(RESULT_OK, intent);
-        finish();*/
-
-        //TODO Offer user a choice (and delete above code):
+        //TODO Offer user a choice:
         /*AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Make your choice");
         CharSequence[] choices = new CharSequence[4];
