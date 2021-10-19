@@ -93,7 +93,7 @@
 
      //TODO: Offer at least a cache cleanup function (better would be a smart auto cleanup)
      //Until then, can delete cache folder (or only audio)
-     private static Bitmap readIconFromCache(String coverHash, IconSize iconSize) {
+     public static Bitmap readIconFromCache(String coverHash, IconSize iconSize) {
          File file = getCacheFile(coverHash, iconSize);
          if (file.exists()) {
              return BitmapFactory.decodeFile(file.getAbsolutePath());

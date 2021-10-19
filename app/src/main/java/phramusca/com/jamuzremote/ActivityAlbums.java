@@ -1,10 +1,13 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.ViewGroup;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,7 +21,8 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
     private static final int ALBUM_TRACK_REQUEST_CODE = 100;
 
     private List<Track> albums;
-    private AdapterAlbum adapterAlbum;
+    //private AdapterAlbum adapterAlbum;
+    private CursorRecyclerViewAdapter cursorRecyclerViewAdapter;
     private boolean complete;
     RecyclerView recyclerView;
 
@@ -32,55 +36,58 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerTrackA
 
         albums = new ArrayList<>();
         complete = false;
-        if (addMore()) {
+//        if (addMore()) {
             recyclerView = findViewById(R.id.recycler_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            adapterAlbum = new AdapterAlbum(this, recyclerView, albums);
-            recyclerView.setAdapter(adapterAlbum);
-            adapterAlbum.addListener(this);
-            adapterAlbum.setOnLoadListener(new IListenerOnLoad() {
-                @Override
-                public void onLoadMore() {
-                    if (!complete) {
-                        albums.add(null);
-                        adapterAlbum.notifyItemInserted(albums.size() - 1);
-                        new Handler().post(() -> {
-                            int loaderPos = albums.size() - 1;
-                            complete = !addMore();
-                            albums.remove(loaderPos);
-                            adapterAlbum.notifyItemRemoved(loaderPos);
-                            adapterAlbum.setLoaded();
-                        });
-                    }
-                }
+            //adapterAlbum = new AdapterAlbum(this, recyclerView, albums);
+            Cursor newAlbums = HelperLibrary.musicLibrary.getAlbums();
+            cursorRecyclerViewAdapter = new MyListCursorAdapter(this, newAlbums);
+            recyclerView.setAdapter(cursorRecyclerViewAdapter);
+            //adapterAlbum.addListener(this); //FIXME NOW add back ?
+            //adapterAlbum.setOnLoadListener(new IListenerOnLoad() {
+//                @Override
+//                public void onLoadMore() {
+//                    if (!complete) {
+//                        albums.add(null);
+//                        adapterAlbum.notifyItemInserted(albums.size() - 1);
+//                        new Handler().post(() -> {
+//                            int loaderPos = albums.size() - 1;
+//                            complete = !addMore();
+//                            albums.remove(loaderPos);
+//                            adapterAlbum.notifyItemRemoved(loaderPos);
+//                            adapterAlbum.setLoaded();
+//                        });
+//                    }
+//                }
+//
+//                @Override
+//                public void onLoadTop() {
+//                }
+//            });
+//        }
 
-                @Override
-                public void onLoadTop() {
-                }
-            });
-        }
-
-        new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
-            @Override
-            public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
-
-                underlayButtons.add(new SwipeHelper.UnderlayButton(
-                        ButtonInfo.PLAY,
-                        pos -> {
-                            Track album = albums.get(pos);
-                            insertAndSetResult(album, true);
-                        },
-                        getApplicationContext()));
-
-                underlayButtons.add(new SwipeHelper.UnderlayButton(
-                        ButtonInfo.QUEUE,
-                        pos -> {
-                            Track album = albums.get(pos);
-                            insertAndSetResult(album, false);
-                        },
-                        getApplicationContext()));
-            }
-        };
+        //FIXME NOW add back !
+//        new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
+//            @Override
+//            public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
+//
+//                underlayButtons.add(new SwipeHelper.UnderlayButton(
+//                        ButtonInfo.PLAY,
+//                        pos -> {
+//                            Track album = albums.get(pos);
+//                            insertAndSetResult(album, true);
+//                        },
+//                        getApplicationContext()));
+//
+//                underlayButtons.add(new SwipeHelper.UnderlayButton(
+//                        ButtonInfo.QUEUE,
+//                        pos -> {
+//                            Track album = albums.get(pos);
+//                            insertAndSetResult(album, false);
+//                        },
+//                        getApplicationContext()));
+//            }
+//        };
     }
 
     private boolean addMore() {
