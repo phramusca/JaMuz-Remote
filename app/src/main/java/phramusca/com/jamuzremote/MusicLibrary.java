@@ -114,7 +114,18 @@ public class MusicLibrary {
     }
 
     List<Track> getTracks(boolean statsOnly, String where, String having, String order, int limit) {
-        List<Track> tracks = new ArrayList<>();
+        Cursor cursor = getTracksCursor(statsOnly, where, having, order, limit);
+        List<Track> tracks = getTracks(cursor, statsOnly);
+        if (limit > 0) {
+            Collections.shuffle(tracks);
+        }
+        if (cursor != null) {
+            cursor.close();
+        }
+        return tracks;
+    }
+
+    Cursor getTracksCursor(boolean statsOnly, String where, String having, String order, int limit) {
         Cursor cursor = null;
         try {
             String select = "GROUP_CONCAT(tag.value) AS tags, tracks.*";
@@ -134,19 +145,11 @@ public class MusicLibrary {
                     " " + (limit > 0 ? "LIMIT " + limit : "");
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[]{});
-            tracks = getTracks(cursor, statsOnly);
-            if (limit > 0) {
-                Collections.shuffle(tracks);
-            }
-            Log.i(TAG, "getTracks(" + where + "," + having + "," + order + "): " + tracks.size() + "//" + cursor.getCount());
+            Log.i(TAG, "getTracks(" + where + "," + having + "," + order + "): " + cursor.getCount());
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "getTracks(" + where + "," + having + "," + order + ")", ex);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
-        return tracks;
+        return cursor;
     }
 
     public Triplet<Integer, Long, Long> getNb(String where, String having) {
@@ -387,7 +390,7 @@ public class MusicLibrary {
         return values;
     }
 
-    private Track cursorToTrack(Cursor c, boolean statsOnly) {
+    public Track cursorToTrack(Cursor c, boolean statsOnly) {
         int idFileRemote = c.getInt(c.getColumnIndex(COL_ID_REMOTE));
         int idFileServer = c.getInt(c.getColumnIndex(COL_ID_SERVER));
         double rating = c.getDouble(c.getColumnIndex(COL_RATING));
@@ -665,10 +668,7 @@ public class MusicLibrary {
         return false;
     }
 
-    //FIXME NOW getAlbums takes too long ! Need to review the query (and probably move from Track to a new model with only minimum info)
-    // ===> TRY THIS : https://stackoverflow.com/questions/5457699/cursor-adapter-and-sqlite-example
-    List<Track> getAlbums(int offset) {
-        List<Track> tracks = new ArrayList<>();
+    Cursor getAlbums() {
         Cursor cursor = null;
         try {
             String query = "SELECT count(" + COL_ID_REMOTE + ") AS " + COL_PLAY_COUNTER + ", \n" +
@@ -676,51 +676,17 @@ public class MusicLibrary {
                     "group_concat(distinct " + COL_GENRE + ") AS " + COL_GENRE + ", \n" +
                     "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + " \n" +
                     ", " + COL_ALBUM +
-                    ", " + COL_ID_REMOTE +
-                    ", " + COL_ID_SERVER +
-                    ", " + COL_TITLE +
-                    ", " + COL_ADDED_DATE +
-                    ", " + COL_LAST_PLAYED +
-                    ", " + COL_STATUS +
-                    ", " + COL_SIZE +
-                    ", " + COL_PATH +
-                    ", " + COL_LENGTH +
-                    ", " + COL_ID_PATH +
-                    ", " + COL_ALBUM_ARTIST +
-                    ", " + COL_YEAR +
-                    ", " + COL_TRACK_NO +
-                    ", " + COL_TRACK_TOTAL +
-                    ", " + COL_DISC_NO +
-                    ", " + COL_DISC_TOTAL +
-                    ", " + COL_BITRATE +
-                    ", " + COL_FORMAT +
-                    ", " + COL_BPM +
-                    ", " + COL_MODIF_DATE +
-                    ", " + COL_CHECKED_FLAG +
-                    ", " + COL_COPYRIGHT +
                     ", " + COL_COVER_HASH +
-                    ", " + COL_PATH_MODIF_DATE +
-                    ", " + COL_PATH_MB_ID +
-                    ", " + COL_COMMENT +
-                    ", " + COL_TRACK_GAIN +
-                    ", " + COL_ALBUM_GAIN +
                     " FROM tracks \n" +
                     " GROUP BY " + COL_ALBUM + " " +
                     " ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, "
-                    + COL_ALBUM + ", " + COL_ARTIST + "" +
-                    " LIMIT 10 OFFSET " +
-                    offset;
+                    + COL_ALBUM + ", " + COL_ARTIST;
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[]{});
-            tracks = getTracks(cursor, false);
-            Log.i(TAG, "getAlbums(): " + tracks.size() + "//" + cursor.getCount());
+            Log.i(TAG, "getAlbums(): " + cursor.getCount());
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "getAlbums()", ex);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
-        return tracks;
+        return cursor;
     }
 }

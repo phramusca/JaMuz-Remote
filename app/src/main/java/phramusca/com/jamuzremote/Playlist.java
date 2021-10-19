@@ -2,6 +2,8 @@ package phramusca.com.jamuzremote;
 
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_STATUS;
 
+import android.database.Cursor;
+
 import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
@@ -55,12 +57,26 @@ public class Playlist implements Comparable, Serializable {
         return new ArrayList<>();
     }
 
+    public Cursor getTracks() {
+        return HelperLibrary.musicLibrary.getTracksCursor(false, getWhere(new ArrayList<>(), new ArrayList<Track.Status>() {
+            {
+                add(Track.Status.REC);
+                add(Track.Status.LOCAL);
+                add(Track.Status.INFO);
+                add(Track.Status.NEW);
+                add(Track.Status.ERROR);
+            }
+        }), getHaving(), order.value, -1);
+    }
+
     public void getNbFiles() {
         if (HelperLibrary.musicLibrary != null) {
             Triplet<Integer, Long, Long> entry = HelperLibrary.musicLibrary.getNb(
                     getWhere(new ArrayList<>(), new ArrayList<Track.Status>() {
-                        { add(Track.Status.REC); }
-                        { add(Track.Status.LOCAL); }
+                        {
+                            add(Track.Status.REC);
+                            add(Track.Status.LOCAL);
+                        }
                     }), getHaving());
             nbFiles = entry.getFirst();
             //TODO: Offer choice to display one or the other (length OR size)

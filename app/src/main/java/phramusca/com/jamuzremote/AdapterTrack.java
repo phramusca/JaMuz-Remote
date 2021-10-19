@@ -119,7 +119,7 @@ public abstract class AdapterTrack extends AdapterLoad {
         }
     }
 
-
+    //FIXME NOW Merge with similar code in AdapterCursorAlbumTrack
     void setView(int position, UserViewHolder userViewHolder,
                  String line1, String line2, String line3, String line4) {
         if (trackList.get(position).getStatus().equals(Track.Status.INFO)) {
@@ -143,13 +143,13 @@ public abstract class AdapterTrack extends AdapterLoad {
             bitmap = HelperBitmap.getEmptyThumb();
         }
         if (position == trackList.getPositionPlaying()) {
-            bitmap = overlayIcon(bitmap, R.drawable.ic_playing);
+            bitmap = overlayIcon(bitmap, R.drawable.ic_playing, mContext);
         }
 
         if (trackList.get(position).getStatus().equals(Track.Status.NEW)) {
-            bitmap = overlayIcon(bitmap, R.drawable.ic_download);
+            bitmap = overlayIcon(bitmap, R.drawable.ic_download, mContext);
         } else if (trackList.get(position).getStatus().equals(Track.Status.ERROR)) {
-            bitmap = overlayIcon(bitmap, R.drawable.ic_error);
+            bitmap = overlayIcon(bitmap, R.drawable.ic_error, mContext);
         }
 
         userViewHolder.imageViewCover.setImageBitmap(bitmap);
@@ -169,12 +169,12 @@ public abstract class AdapterTrack extends AdapterLoad {
         });
     }
 
-    private Bitmap overlayIcon(Bitmap bitmap, int iconId) {
+    public static Bitmap overlayIcon(Bitmap bitmap, int iconId, Context context) {
         int margin = 15;
         Bitmap bmOverlay = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
         Canvas canvas = new Canvas(bmOverlay);
         canvas.drawBitmap(bitmap, new Matrix(), null); //TODO: Paint in black if cover is too much white
-        Bitmap playingBitmap = BitmapFactory.decodeResource(mContext.getResources(), iconId);
+        Bitmap playingBitmap = BitmapFactory.decodeResource(context.getResources(), iconId);
         int newWidth = bmOverlay.getWidth() - (margin * 2);
         int newHeight = bmOverlay.getHeight() - (margin * 2);
         int width = playingBitmap.getWidth();
