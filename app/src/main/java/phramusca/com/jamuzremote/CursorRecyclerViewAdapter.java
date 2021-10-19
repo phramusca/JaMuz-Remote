@@ -21,7 +21,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -155,9 +154,9 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
     public void addListener(IListenerAlbumAdapter aListener) {
         mListListener.add(aListener);
     }
-    void sendListener(AlbumListItem albumListItem) {
+    void sendListener(AdapterListItemAlbum adapterListItemAlbum) {
         for (int i = mListListener.size() - 1; i >= 0; i--) {
-            mListListener.get(i).onClick(albumListItem);
+            mListListener.get(i).onClick(adapterListItemAlbum);
         }
     }
 }

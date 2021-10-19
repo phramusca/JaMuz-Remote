@@ -29,7 +29,7 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerAlbumA
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         Cursor newAlbums = HelperLibrary.musicLibrary.getAlbums();
-        AlbumCursorAdapter listCursorAdapter = new AlbumCursorAdapter(this, newAlbums);
+        AdapterCursorAlbum listCursorAdapter = new AdapterCursorAlbum(this, newAlbums);
         recyclerView.setAdapter(listCursorAdapter);
         listCursorAdapter.addListener(this);
 
@@ -40,16 +40,16 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerAlbumA
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
                         ButtonInfo.PLAY,
                         pos -> {
-                            AlbumListItem albumListItem = listCursorAdapter.getAlbumListItem(pos);
-                            insertAndSetResult(albumListItem.getAlbum(), true);
+                            AdapterListItemAlbum adapterListItemAlbum = listCursorAdapter.getAlbumListItem(pos);
+                            insertAndSetResult(adapterListItemAlbum.getAlbum(), true);
                         },
                         getApplicationContext()));
 
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
                         ButtonInfo.QUEUE,
                         pos -> {
-                            AlbumListItem albumListItem = listCursorAdapter.getAlbumListItem(pos);
-                            insertAndSetResult(albumListItem.getAlbum(), false);
+                            AdapterListItemAlbum adapterListItemAlbum = listCursorAdapter.getAlbumListItem(pos);
+                            insertAndSetResult(adapterListItemAlbum.getAlbum(), false);
                         },
                         getApplicationContext()));
             }
@@ -78,10 +78,10 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerAlbumA
     }
 
     @Override
-    public void onClick(AlbumListItem albumListItem) {
+    public void onClick(AdapterListItemAlbum adapterListItemAlbum) {
         //Get album tracks
-        Playlist playlist = new Playlist(albumListItem.getAlbum(), true);
-        playlist.setAlbum(albumListItem.getAlbum());
+        Playlist playlist = new Playlist(adapterListItemAlbum.getAlbum(), true);
+        playlist.setAlbum(adapterListItemAlbum.getAlbum());
         ArrayList<Track> tracks = (ArrayList<Track>) playlist.getTracks(new ArrayList<Track.Status>() {
             {
                 add(Track.Status.REC);
