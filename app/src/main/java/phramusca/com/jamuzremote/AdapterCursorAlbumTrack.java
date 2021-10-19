@@ -12,14 +12,20 @@ import androidx.core.content.ContextCompat;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLoad.UserViewHolder> {
 
     private ViewGroup parent;
 
+    // Trick to get track new status after download as cursor is not updated
+    private final Map<Integer, Track.Status> newStatuses;
+
     public AdapterCursorAlbumTrack(Context context, Cursor cursor) {
         super(context, cursor);
+        newStatuses = new HashMap<>();
     }
 
     @Override
@@ -33,16 +39,28 @@ public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLo
     public Track getTrack(int position) {
         Track track = null;
         Cursor cursor = getCursor();
-        if(cursor.moveToPosition(position)) {
+        if (cursor.moveToPosition(position)) {
             track = HelperLibrary.musicLibrary.cursorToTrack(cursor, false);
+            if(newStatuses.containsKey(position)) {
+                track.setStatus(newStatuses.get(position));
+            }
         }
         return track;
     }
 
+    public void updateStatus(Track.Status status, int position) {
+        newStatuses.put(position, status);
+        notifyItemChanged(position);
+    }
+
     @Override
-    public void onBindViewHolder(AdapterLoad.UserViewHolder viewHolder, Cursor cursor) {
+    public void onBindViewHolder(AdapterLoad.UserViewHolder viewHolder, Cursor cursor, int position) {
         Track track = HelperLibrary.musicLibrary.cursorToTrack(cursor, false);
         track.getTags(false);
+
+        if(newStatuses.containsKey(position)) {
+            track.setStatus(newStatuses.get(position));
+        }
 
         @SuppressWarnings("UnnecessaryLocalVariable")
         AdapterLoad.UserViewHolder userViewHolder = (AdapterLoad.UserViewHolder) viewHolder;

@@ -19,16 +19,13 @@ public final class RepoSync {
     private static Table<Integer, Track.Status, Track> tracks = null;
 
     protected synchronized static void read() {
-        //FIXME NOW: Update this repo for each track change (rating, genre) to avoid reading at every sync
-        //  Otherwise tracks stats updates (except tags as re-read before merge request) are not available for merge !!!
-        //   WARNING: Need to reset isSync to false too before a new sync
-        //if(tracks==null) {
+        //FIXME NOW for merge (and other as needed): Cursor to json : https://stackoverflow.com/questions/13070791/android-cursor-to-jsonarray
+        //FIXME NOW getTracks to return HashBasedTable to speed up a bit
         tracks = HashBasedTable.create();
         List<Track> newTracks = HelperLibrary.musicLibrary.getTracks(true, "WHERE status!=\"" + Track.Status.LOCAL.name() + "\"", "", "", -1);
         for (Track track : newTracks) {
             tracks.put(track.getIdFileServer(), track.getStatus(), track);
         }
-        //}
     }
 
     /**
