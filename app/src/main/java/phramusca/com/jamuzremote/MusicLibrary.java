@@ -114,7 +114,18 @@ public class MusicLibrary {
     }
 
     List<Track> getTracks(boolean statsOnly, String where, String having, String order, int limit) {
-        List<Track> tracks = new ArrayList<>();
+        Cursor cursor = getTracksCursor(statsOnly, where, having, order, limit);
+        List<Track> tracks = getTracks(cursor, statsOnly);
+        if (limit > 0) {
+            Collections.shuffle(tracks);
+        }
+        if (cursor != null) {
+            cursor.close();
+        }
+        return tracks;
+    }
+
+    Cursor getTracksCursor(boolean statsOnly, String where, String having, String order, int limit) {
         Cursor cursor = null;
         try {
             String select = "GROUP_CONCAT(tag.value) AS tags, tracks.*";
@@ -134,19 +145,11 @@ public class MusicLibrary {
                     " " + (limit > 0 ? "LIMIT " + limit : "");
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[]{});
-            tracks = getTracks(cursor, statsOnly);
-            if (limit > 0) {
-                Collections.shuffle(tracks);
-            }
-            Log.i(TAG, "getTracks(" + where + "," + having + "," + order + "): " + tracks.size() + "//" + cursor.getCount());
+            Log.i(TAG, "getTracks(" + where + "," + having + "," + order + "): " + cursor.getCount());
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "getTracks(" + where + "," + having + "," + order + ")", ex);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
-        return tracks;
+        return cursor;
     }
 
     public Triplet<Integer, Long, Long> getNb(String where, String having) {
@@ -387,7 +390,7 @@ public class MusicLibrary {
         return values;
     }
 
-    private Track cursorToTrack(Cursor c, boolean statsOnly) {
+    public Track cursorToTrack(Cursor c, boolean statsOnly) {
         int idFileRemote = c.getInt(c.getColumnIndex(COL_ID_REMOTE));
         int idFileServer = c.getInt(c.getColumnIndex(COL_ID_SERVER));
         double rating = c.getDouble(c.getColumnIndex(COL_RATING));

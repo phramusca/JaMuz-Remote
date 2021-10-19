@@ -1,6 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -10,13 +11,12 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class ActivityAlbumTracks extends AppCompatActivity {
 
-    AdapterAlbumTrack trackAdapter;
+    AdapterCursorAlbumTrack adapterCursorAlbumTrack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,51 +29,54 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         TextView title = findViewById(R.id.album_tracks_title);
 
         Intent intent = getIntent();
-        @SuppressWarnings("unchecked") final ArrayList<Track> tracks = (ArrayList<Track>) intent.getSerializableExtra("tracksList");
+        final String album = (String) intent.getSerializableExtra("album");
 
-        if (tracks != null && tracks.size() > 0) {
-            Button button_queue_album = findViewById(R.id.button_queue_album);
-            button_queue_album.setOnClickListener(v -> insertAndSetResult(tracks.get(0), false));
+        Playlist playlist = new Playlist(album, true);
+        playlist.setAlbum(album);
+        Cursor cursor = playlist.getTracks();
 
-            Button button_queue_play_album = findViewById(R.id.button_queue_play_album);
-            button_queue_play_album.setOnClickListener(v -> insertAndSetResult(tracks.get(0), true));
-
-            RecyclerView recyclerView = findViewById(R.id.list_album_tracks);
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            trackAdapter = new AdapterAlbumTrack(this, tracks, -1, recyclerView) {
-                @Override
-                List<Track> getMore() {
-                    return new ArrayList<>();
-                }
-
-                @Override
-                List<Track> getTop() {
-                    return new ArrayList<>();
-                }
-            };
-            title.setText(tracks.get(0).getAlbum());
-
-            new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
-                @Override
-                public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            ButtonInfo.PLAY,
-                            pos -> {
-                                Track track = tracks.get(pos);
-                                insertAndSetResult(track, true, pos);
-                            },
-                            getApplicationContext()));
-
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            ButtonInfo.QUEUE,
-                            pos -> {
-                                Track track = tracks.get(pos);
-                                insertAndSetResult(track, false, pos);
-                            },
-                            getApplicationContext()));
-                }
-            };
+        Track track = null;
+        if(cursor.moveToPosition(0)) {
+            track = HelperLibrary.musicLibrary.cursorToTrack(cursor, false);
         }
+        if(track==null) {
+            return;
+        }
+
+        Button button_queue_album = findViewById(R.id.button_queue_album);
+        Track finalTrack = track;
+        button_queue_album.setOnClickListener(v -> insertAndSetResult(finalTrack, false));
+
+        Button button_queue_play_album = findViewById(R.id.button_queue_play_album);
+        button_queue_play_album.setOnClickListener(v -> insertAndSetResult(finalTrack, true));
+
+        RecyclerView recyclerView = findViewById(R.id.list_album_tracks);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapterCursorAlbumTrack = new AdapterCursorAlbumTrack(this, cursor);
+        recyclerView.setAdapter(adapterCursorAlbumTrack);
+
+        title.setText(finalTrack.getAlbum());
+
+        new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
+            @Override
+            public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
+                underlayButtons.add(new SwipeHelper.UnderlayButton(
+                        ButtonInfo.PLAY,
+                        pos -> {
+                            Track track = adapterCursorAlbumTrack.getTrack(pos);
+                            insertAndSetResult(track, true, pos);
+                        },
+                        getApplicationContext()));
+
+                underlayButtons.add(new SwipeHelper.UnderlayButton(
+                        ButtonInfo.QUEUE,
+                        pos -> {
+                            Track track = adapterCursorAlbumTrack.getTrack(pos);
+                            insertAndSetResult(track, false, pos);
+                        },
+                        getApplicationContext()));
+            }
+        };
     }
 
     private void insertAndSetResult(Track track, boolean playNext) {
@@ -99,7 +102,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
             //Download the file
             track.getTags(true);
             track.setStatus(Track.Status.NEW);
-            trackAdapter.notifyItemChanged(pos);
+            adapterCursorAlbumTrack.notifyItemChanged(pos);
             HelperToast helperToast = new HelperToast(getApplicationContext());
             ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
             ServiceSync.DownloadTask downloadTask = new ServiceSync.DownloadTask(track, track1 -> notifyDownload(pos), clientInfo);
@@ -108,6 +111,6 @@ public class ActivityAlbumTracks extends AppCompatActivity {
     }
 
     private void notifyDownload(int pos) {
-        runOnUiThread(() -> trackAdapter.notifyItemChanged(pos));
+        runOnUiThread(() -> adapterCursorAlbumTrack.notifyItemChanged(pos));
     }
 }
