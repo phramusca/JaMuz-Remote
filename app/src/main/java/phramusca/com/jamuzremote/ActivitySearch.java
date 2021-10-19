@@ -42,9 +42,9 @@ public class ActivitySearch extends AppCompatActivity {
         //button set on the bottom right of keyboard
         searchInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-
-                //FIXME NOW Enable search on sqlite library
-                //+ review what options offer youtube
+                // FIXME NOW Enable search on sqlite library
+                //  Try this: https://riptutorial.com/android/example/17285/filtering-with-cursoradapter
+                //  + review what options offer youtube
                 mProgressDialog.setMessage("Finding videos for " + v.getText().toString());
                 mProgressDialog.show();
                 searchOnYoutube(v.getText().toString());

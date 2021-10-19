@@ -36,10 +36,10 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         Cursor cursor = playlist.getTracks();
 
         Track track = null;
-        if(cursor.moveToPosition(0)) {
+        if (cursor.moveToPosition(0)) {
             track = HelperLibrary.musicLibrary.cursorToTrack(cursor, false);
         }
-        if(track==null) {
+        if (track == null) {
             return;
         }
 
@@ -90,7 +90,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         finish();
     }
 
-    private void insertAndSetResult(Track track, boolean playNext, int pos) {
+    private void insertAndSetResult(Track track, boolean playNext, int position) {
         if (Arrays.asList(Track.Status.REC, Track.Status.LOCAL).contains(track.getStatus())) {
             //Insert in queue
             PlayQueue.queue.insert(track);
@@ -102,15 +102,17 @@ public class ActivityAlbumTracks extends AppCompatActivity {
             //Download the file
             track.getTags(true);
             track.setStatus(Track.Status.NEW);
-            adapterCursorAlbumTrack.notifyItemChanged(pos);
+            adapterCursorAlbumTrack.notifyItemChanged(position);
             HelperToast helperToast = new HelperToast(getApplicationContext());
             ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
-            ServiceSync.DownloadTask downloadTask = new ServiceSync.DownloadTask(track, track1 -> notifyDownload(pos), clientInfo);
+            ServiceSync.DownloadTask downloadTask = new ServiceSync.DownloadTask(track, track1 -> notifyDownload(track1.getStatus(), position), clientInfo);
             downloadTask.start();
         }
     }
 
-    private void notifyDownload(int pos) {
-        runOnUiThread(() -> adapterCursorAlbumTrack.notifyItemChanged(pos));
+    private void notifyDownload(Track.Status status, int position) {
+        runOnUiThread(() -> {
+            adapterCursorAlbumTrack.updateStatus(status, position);
+        });
     }
 }

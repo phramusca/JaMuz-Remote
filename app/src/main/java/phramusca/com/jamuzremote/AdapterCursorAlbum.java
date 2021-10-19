@@ -32,14 +32,14 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
     public AdapterListItemAlbum getAlbumListItem(int position) {
         AdapterListItemAlbum adapterListItemAlbum = null;
         Cursor cursor = getCursor();
-        if(cursor.moveToPosition(position)) {
+        if (cursor.moveToPosition(position)) {
             adapterListItemAlbum = AdapterListItemAlbum.fromCursor(cursor);
         }
         return adapterListItemAlbum;
     }
 
     @Override
-    public void onBindViewHolder(AdapterLoad.UserViewHolder viewHolder, Cursor cursor) {
+    public void onBindViewHolder(AdapterLoad.UserViewHolder viewHolder, Cursor cursor, int position) {
         AdapterListItemAlbum adapterListItemAlbum = AdapterListItemAlbum.fromCursor(cursor);
 
         @SuppressWarnings("UnnecessaryLocalVariable")
@@ -67,9 +67,11 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
     }
 
     private final ArrayList<IListenerAdapterAlbum> mListListener = new ArrayList<>();
+
     public void addListener(IListenerAdapterAlbum aListener) {
         mListListener.add(aListener);
     }
+
     void sendListener(AdapterListItemAlbum adapterListItemAlbum) {
         for (int i = mListListener.size() - 1; i >= 0; i--) {
             mListListener.get(i).onClick(adapterListItemAlbum);
