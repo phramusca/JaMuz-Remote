@@ -9,7 +9,7 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
 
 import android.database.Cursor;
 
-public class MyListItem {
+public class AlbumListItem {
     private final String album;
     private final String artist;
     private final int nbTracks;
@@ -17,7 +17,7 @@ public class MyListItem {
     private final String genre;
     private final String coverHash;
 
-    public MyListItem(String album, String artist, int nbTracks, double rating, String genre, String coverHash) {
+    public AlbumListItem(String album, String artist, int nbTracks, double rating, String genre, String coverHash) {
         this.album = album;
         this.artist = artist;
         this.nbTracks = nbTracks;
@@ -26,8 +26,8 @@ public class MyListItem {
         this.coverHash = coverHash;
     }
 
-    public static MyListItem fromCursor(Cursor c) {
-        return new MyListItem(
+    public static AlbumListItem fromCursor(Cursor c) {
+        return new AlbumListItem(
                 c.getString(c.getColumnIndex(COL_ALBUM)),
                 c.getString(c.getColumnIndex(COL_ARTIST)),
                 c.getInt(c.getColumnIndex(COL_PLAY_COUNTER)), //Ugly trick

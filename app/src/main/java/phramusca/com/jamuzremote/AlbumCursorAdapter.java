@@ -12,14 +12,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-/**
- * Created by skyfishjy on 10/31/14.
- */
-public class MyListCursorAdapter extends CursorRecyclerViewAdapter<AdapterLoad.UserViewHolder> {
+public class AlbumCursorAdapter extends CursorRecyclerViewAdapter<AdapterLoad.UserViewHolder> {
 
     private ViewGroup parent;
 
-    public MyListCursorAdapter(Context context, Cursor cursor) {
+    public AlbumCursorAdapter(Context context, Cursor cursor) {
         super(context, cursor);
     }
 
@@ -40,22 +37,31 @@ public class MyListCursorAdapter extends CursorRecyclerViewAdapter<AdapterLoad.U
         return new AdapterLoad.UserViewHolder(itemView);
     }
 
+    public AlbumListItem getAlbumListItem(int position) {
+        AlbumListItem albumListItem = null;
+        Cursor cursor = getCursor();
+        if(cursor.moveToPosition(position)) {
+            albumListItem = AlbumListItem.fromCursor(cursor);
+        }
+        return albumListItem;
+    }
+
     @Override
     public void onBindViewHolder(AdapterLoad.UserViewHolder viewHolder, Cursor cursor) {
-        MyListItem myListItem = MyListItem.fromCursor(cursor);
+        AlbumListItem albumListItem = AlbumListItem.fromCursor(cursor);
 
         AdapterLoad.UserViewHolder userViewHolder = (AdapterLoad.UserViewHolder) viewHolder;
 
-        userViewHolder.item_line1.setText(myListItem.getAlbum());
-        userViewHolder.item_line2.setText(myListItem.getArtist());
+        userViewHolder.item_line1.setText(albumListItem.getAlbum());
+        userViewHolder.item_line2.setText(albumListItem.getArtist());
         userViewHolder.item_line3.setText(String.format(Locale.ENGLISH, "%d %s.",
-                myListItem.getNbTracks(), //Includes nb of albums
+                albumListItem.getNbTracks(), //Includes nb of albums
                 parent.getContext().getString(R.string.nbTracks)));
         userViewHolder.item_line4.setText(String.format(Locale.ENGLISH, "%.1f/5 %s",
-                myListItem.getRating(),
-                myListItem.getGenre()));
+                albumListItem.getRating(),
+                albumListItem.getGenre()));
 
-        Bitmap bitmap = IconBufferCover.readIconFromCache(myListItem.getCoverHash(), IconBufferCover.IconSize.THUMB);
+        Bitmap bitmap = IconBufferCover.readIconFromCache(albumListItem.getCoverHash(), IconBufferCover.IconSize.THUMB);
         if (bitmap == null) {
             bitmap = HelperBitmap.getEmptyThumb();
         }
@@ -64,11 +70,8 @@ public class MyListCursorAdapter extends CursorRecyclerViewAdapter<AdapterLoad.U
         BitmapDrawable bitmapDrawable = new BitmapDrawable(parent.getContext().getResources(), bitmap);
         bitmapDrawable.setAlpha(50);
 
-        //FIXME NOW Add back
-//        userViewHolder.itemView.setTag(position);
-//        userViewHolder.itemView.setOnClickListener(view -> {
-//            Integer position1 = (Integer) view.getTag();
-//            sendListener(albums.get(position1), position1);
-//        });
+        userViewHolder.itemView.setOnClickListener(view -> {
+            sendListener(albumListItem);
+        });
     }
 }

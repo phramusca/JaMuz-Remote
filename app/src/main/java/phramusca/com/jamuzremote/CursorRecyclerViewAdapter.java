@@ -21,10 +21,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
 
 /**
  * Created by skyfishjy on 10/31/14.
+ * https://gist.github.com/skyfishjy/443b7448f59be978bc59
  */
 
 public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
@@ -143,6 +147,17 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
             mDataValid = false;
             notifyDataSetChanged();
             //There is no notifyDataSetInvalidated() method in RecyclerView.Adapter
+        }
+    }
+
+    //Added by phramusca 19/10/2021
+    private final ArrayList<IListenerAlbumAdapter> mListListener = new ArrayList<>();
+    public void addListener(IListenerAlbumAdapter aListener) {
+        mListListener.add(aListener);
+    }
+    void sendListener(AlbumListItem albumListItem) {
+        for (int i = mListListener.size() - 1; i >= 0; i--) {
+            mListListener.get(i).onClick(albumListItem);
         }
     }
 }
