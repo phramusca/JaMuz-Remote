@@ -10,10 +10,9 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class ActivityAlbums extends AppCompatActivity implements IListenerAlbumAdapter {
+public class ActivityAlbums extends AppCompatActivity implements IListenerAdapterAlbum {
 
     private static final int ALBUM_TRACK_REQUEST_CODE = 100;
     RecyclerView recyclerView;
@@ -28,8 +27,8 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerAlbumA
 
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        Cursor newAlbums = HelperLibrary.musicLibrary.getAlbums();
-        AdapterCursorAlbum listCursorAdapter = new AdapterCursorAlbum(this, newAlbums);
+        Cursor cursor = HelperLibrary.musicLibrary.getAlbums();
+        AdapterCursorAlbum listCursorAdapter = new AdapterCursorAlbum(this, cursor);
         recyclerView.setAdapter(listCursorAdapter);
         listCursorAdapter.addListener(this);
 
@@ -79,21 +78,9 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerAlbumA
 
     @Override
     public void onClick(AdapterListItemAlbum adapterListItemAlbum) {
-        //Get album tracks
-        Playlist playlist = new Playlist(adapterListItemAlbum.getAlbum(), true);
-        playlist.setAlbum(adapterListItemAlbum.getAlbum());
-        ArrayList<Track> tracks = (ArrayList<Track>) playlist.getTracks(new ArrayList<Track.Status>() {
-            {
-                add(Track.Status.REC);
-                add(Track.Status.LOCAL);
-                add(Track.Status.INFO);
-                add(Track.Status.NEW);
-                add(Track.Status.ERROR);
-            }
-        });
         //Open album tracks layout
         Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
-        intent.putExtra("tracksList", tracks);
+        intent.putExtra("album", adapterListItemAlbum.getAlbum());
         startActivityForResult(intent, ALBUM_TRACK_REQUEST_CODE);
     }
 }

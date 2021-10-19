@@ -1,5 +1,5 @@
 package phramusca.com.jamuzremote;
 
-public interface IListenerAlbumAdapter {
+public interface IListenerAdapterAlbum {
     void onClick(AdapterListItemAlbum adapterListItemAlbum);
 }

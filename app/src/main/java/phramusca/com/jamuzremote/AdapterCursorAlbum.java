@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.UserViewHolder> {
@@ -63,5 +64,15 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
         bitmapDrawable.setAlpha(50);
 
         userViewHolder.itemView.setOnClickListener(view -> sendListener(adapterListItemAlbum));
+    }
+
+    private final ArrayList<IListenerAdapterAlbum> mListListener = new ArrayList<>();
+    public void addListener(IListenerAdapterAlbum aListener) {
+        mListListener.add(aListener);
+    }
+    void sendListener(AdapterListItemAlbum adapterListItemAlbum) {
+        for (int i = mListListener.size() - 1; i >= 0; i--) {
+            mListListener.get(i).onClick(adapterListItemAlbum);
+        }
     }
 }
