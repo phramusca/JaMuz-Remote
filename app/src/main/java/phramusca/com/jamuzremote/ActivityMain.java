@@ -918,8 +918,10 @@ public class ActivityMain extends AppCompatActivity {
             localSelectedPlaylist = playlist;
             if (playNext) {
                 PlayQueue.queue.setQueue(playlist.getTracks(10, new ArrayList<Track.Status>() {
-                    { add(Track.Status.REC); }
-                    { add(Track.Status.LOCAL); }
+                    {
+                        add(Track.Status.REC);
+                        add(Track.Status.LOCAL);
+                    }
                 }));
                 playNext();
             }

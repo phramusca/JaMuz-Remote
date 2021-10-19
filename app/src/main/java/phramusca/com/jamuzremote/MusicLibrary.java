@@ -674,34 +674,7 @@ public class MusicLibrary {
                     "group_concat(distinct " + COL_GENRE + ") AS " + COL_GENRE + ", \n" +
                     "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + " \n" +
                     ", " + COL_ALBUM +
-//                    ", " + COL_ID_REMOTE +
-//                    ", " + COL_ID_SERVER +
-//                    ", " + COL_TITLE +
-//                    ", " + COL_ADDED_DATE +
-//                    ", " + COL_LAST_PLAYED +
-//                    ", " + COL_STATUS +
-//                    ", " + COL_SIZE +
-//                    ", " + COL_PATH +
-//                    ", " + COL_LENGTH +
-//                    ", " + COL_ID_PATH +
-//                    ", " + COL_ALBUM_ARTIST +
-//                    ", " + COL_YEAR +
-//                    ", " + COL_TRACK_NO +
-//                    ", " + COL_TRACK_TOTAL +
-//                    ", " + COL_DISC_NO +
-//                    ", " + COL_DISC_TOTAL +
-//                    ", " + COL_BITRATE +
-//                    ", " + COL_FORMAT +
-//                    ", " + COL_BPM +
-//                    ", " + COL_MODIF_DATE +
-//                    ", " + COL_CHECKED_FLAG +
-//                    ", " + COL_COPYRIGHT +
                     ", " + COL_COVER_HASH +
-//                    ", " + COL_PATH_MODIF_DATE +
-//                    ", " + COL_PATH_MB_ID +
-//                    ", " + COL_COMMENT +
-//                    ", " + COL_TRACK_GAIN +
-//                    ", " + COL_ALBUM_GAIN +
                     " FROM tracks \n" +
                     " GROUP BY " + COL_ALBUM + " " +
                     " ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, "

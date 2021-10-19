@@ -59,8 +59,10 @@ public class Playlist implements Comparable, Serializable {
         if (HelperLibrary.musicLibrary != null) {
             Triplet<Integer, Long, Long> entry = HelperLibrary.musicLibrary.getNb(
                     getWhere(new ArrayList<>(), new ArrayList<Track.Status>() {
-                        { add(Track.Status.REC); }
-                        { add(Track.Status.LOCAL); }
+                        {
+                            add(Track.Status.REC);
+                            add(Track.Status.LOCAL);
+                        }
                     }), getHaving());
             nbFiles = entry.getFirst();
             //TODO: Offer choice to display one or the other (length OR size)
