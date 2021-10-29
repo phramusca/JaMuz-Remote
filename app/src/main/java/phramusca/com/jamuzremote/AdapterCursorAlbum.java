@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -19,6 +20,7 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
 
     public AdapterCursorAlbum(Context context, Cursor cursor) {
         super(context, cursor);
+        oriCursor = cursor;
     }
 
     @Override
@@ -77,4 +79,33 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
             mListListener.get(i).onClick(adapterListItemAlbum);
         }
     }
+
+    private Cursor oriCursor;
+
+    @Override
+    public Filter getFilter() {
+        return filter;
+    }
+
+    private final Filter filter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            Cursor cursor;
+            if (constraint != null && constraint.length() != 0) {
+                 cursor = HelperLibrary.musicLibrary.getAlbums(constraint.toString().toLowerCase().trim());
+            } else {
+                cursor = oriCursor;
+            }
+            FilterResults results = new FilterResults();
+            results.values = cursor;
+            return results;
+        }
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            Cursor cursor = (Cursor) results.values;
+            if(cursor!=null) {
+                swapCursor(cursor);
+            }
+        }
+    };
 }

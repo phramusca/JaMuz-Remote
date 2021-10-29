@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
 
 import androidx.core.content.ContextCompat;
 
@@ -63,7 +64,7 @@ public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLo
         }
 
         @SuppressWarnings("UnnecessaryLocalVariable")
-        AdapterLoad.UserViewHolder userViewHolder = (AdapterLoad.UserViewHolder) viewHolder;
+        AdapterLoad.UserViewHolder userViewHolder = viewHolder;
 
         if (track.getStatus().equals(Track.Status.INFO)) {
             userViewHolder.item_line1.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.colorAccent));
@@ -103,5 +104,10 @@ public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLo
         } else {
             userViewHolder.layout_item.setBackgroundColor(ContextCompat.getColor(parent.getContext(), R.color.background_color));
         }
+    }
+
+    @Override
+    public Filter getFilter() {
+        return null; //FIXME NOW !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
 }
