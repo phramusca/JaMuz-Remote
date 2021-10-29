@@ -20,6 +20,7 @@ package phramusca.com.jamuzremote;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DataSetObserver;
+import android.widget.Filterable;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,10 +31,16 @@ import java.util.ArrayList;
  * https://gist.github.com/skyfishjy/443b7448f59be978bc59
  */
 
-public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
+public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> implements Filterable {
 
     private Context mContext;
 
+
+    // FIXME: Try converting Cursor to ContentValues)
+    //  -> it can be modified and use for db insert/update
+    //      so could be used in a RepoTrack and RepoAlbums maybe
+    //  -> no need for AdapterCursorAlbumTrack.newStatuses
+    //  https://stackoverflow.com/a/8709408/755759
     private Cursor mCursor;
 
     private boolean mDataValid;
@@ -120,7 +127,8 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
             if (mDataSetObserver != null) {
                 mCursor.registerDataSetObserver(mDataSetObserver);
             }
-            mRowIdColumn = newCursor.getColumnIndexOrThrow("_id");
+            mRowIdColumn = newCursor.getColumnIndex("_id");
+            //mRowIdColumn = mDataValid ? mCursor.getColumnIndex("_id") : -1;
             mDataValid = true;
             notifyDataSetChanged();
         } else {

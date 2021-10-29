@@ -20,7 +20,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
     private static final int QUEUE_REQUEST_CODE = 200;
 
     //TODO Issue when list is small (issue on phone BUT no issues in tablet, why ?)
-    //  No more really a problem as only in Play Queue and it is populated
+    //  No more really a problem as now only in Play Queue where it is most often populated
     //  => need to scroll down (fake since it should not be necessary in real)
     // BEFORE swiping to make swipe to work
 

@@ -669,6 +669,10 @@ public class MusicLibrary {
     }
 
     Cursor getAlbums() {
+        return getAlbums("");
+    }
+
+    Cursor getAlbums(String search) {
         Cursor cursor = null;
         try {
             String query = "SELECT count(" + COL_ID_REMOTE + ") AS " + COL_PLAY_COUNTER + ", \n" +
@@ -677,7 +681,10 @@ public class MusicLibrary {
                     "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + " \n" +
                     ", " + COL_ALBUM +
                     ", " + COL_COVER_HASH +
-                    " FROM tracks \n" +
+                    " FROM tracks \n"
+                    + (search.isEmpty()?"":" WHERE (" + COL_ALBUM + " LIKE \"%"+search+"%\" " +
+                        "OR " + COL_ARTIST + " LIKE \"%"+search+"%\" " +
+                        "OR " + COL_ALBUM_ARTIST + " LIKE \"%"+search+"%\") \n") +
                     " GROUP BY " + COL_ALBUM + " " +
                     " ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, "
                     + COL_ALBUM + ", " + COL_ARTIST;

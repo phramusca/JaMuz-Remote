@@ -3,7 +3,10 @@ package phramusca.com.jamuzremote;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -28,9 +31,28 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerAdapte
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         Cursor cursor = HelperLibrary.musicLibrary.getAlbums();
-        AdapterCursorAlbum listCursorAdapter = new AdapterCursorAlbum(this, cursor);
-        recyclerView.setAdapter(listCursorAdapter);
-        listCursorAdapter.addListener(this);
+        AdapterCursorAlbum adapterCursorAlbum = new AdapterCursorAlbum(this, cursor);
+        recyclerView.setAdapter(adapterCursorAlbum);
+        adapterCursorAlbum.addListener(this);
+
+        EditText queryText = (EditText) findViewById(R.id.filter_album);
+        queryText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapterCursorAlbum.getFilter().filter(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        queryText.setOnEditorActionListener(new DoneOnEditorActionListener());
 
         new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
             @Override
@@ -39,7 +61,7 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerAdapte
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
                         ButtonInfo.PLAY,
                         pos -> {
-                            AdapterListItemAlbum adapterListItemAlbum = listCursorAdapter.getAlbumListItem(pos);
+                            AdapterListItemAlbum adapterListItemAlbum = adapterCursorAlbum.getAlbumListItem(pos);
                             insertAndSetResult(adapterListItemAlbum.getAlbum(), true);
                         },
                         getApplicationContext()));
@@ -47,7 +69,7 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerAdapte
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
                         ButtonInfo.QUEUE,
                         pos -> {
-                            AdapterListItemAlbum adapterListItemAlbum = listCursorAdapter.getAlbumListItem(pos);
+                            AdapterListItemAlbum adapterListItemAlbum = adapterCursorAlbum.getAlbumListItem(pos);
                             insertAndSetResult(adapterListItemAlbum.getAlbum(), false);
                         },
                         getApplicationContext()));
