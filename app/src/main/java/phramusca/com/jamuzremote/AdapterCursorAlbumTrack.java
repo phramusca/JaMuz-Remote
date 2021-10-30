@@ -1,5 +1,7 @@
 package phramusca.com.jamuzremote;
 
+import static phramusca.com.jamuzremote.R.drawable.ic_info;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -68,17 +70,34 @@ public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLo
         @SuppressWarnings("UnnecessaryLocalVariable")
         AdapterLoad.UserViewHolder userViewHolder = viewHolder;
 
-        if (track.getStatus().equals(Track.Status.INFO)) {
-            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.colorAccent));
-            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.colorAccent));
+        Bitmap bitmap = IconBufferCover.getCoverIcon(track, IconBufferCover.IconSize.THUMB, true);
+        if (bitmap == null) {
+            bitmap = HelperBitmap.getEmptyThumb();
+        }
+
+        if (track.getStatus().equals(Track.Status.INFO) || track.getStatus().equals(Track.Status.NEW)) {
+            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.colorPrimaryDark));
+            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.colorPrimaryDark));
+            userViewHolder.item_line3.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.colorPrimaryDark));
+            userViewHolder.item_line4.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.colorPrimaryDark));
+            if(track.getStatus().equals(Track.Status.NEW)) {
+                bitmap = AdapterTrack.overlayIcon(bitmap, R.drawable.ic_download, parent.getContext());
+            } else {
+                bitmap = AdapterTrack.overlayIcon(bitmap, R.drawable.ic_info, parent.getContext());
+            }
         } else if (track.getStatus().equals(Track.Status.ERROR)) {
             userViewHolder.item_line1.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.lightYellow));
             userViewHolder.item_line2.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.lightYellow));
+            userViewHolder.item_line3.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.lightYellow));
+            userViewHolder.item_line4.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.lightYellow));
+            bitmap = AdapterTrack.overlayIcon(bitmap, R.drawable.ic_error, parent.getContext());
         } else {
             userViewHolder.item_line1.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
             userViewHolder.item_line2.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
+            userViewHolder.item_line3.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
+            userViewHolder.item_line4.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
         }
-
+        
         userViewHolder.item_line1.setText(track.getTitle());
         userViewHolder.item_line2.setText(track.getArtist());
         if(searchQuery!=null && !searchQuery.isEmpty()) {
@@ -96,17 +115,6 @@ public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLo
                 (int) track.getRating(), track.getGenre(), track.getYear()));
         userViewHolder.item_line4.setText(String.format(Locale.ENGLISH, "%s\n%s %s",
                 track.getTags(), track.getLastPlayedAgo(), track.getAddedDateAgo()));
-
-        Bitmap bitmap = IconBufferCover.getCoverIcon(track, IconBufferCover.IconSize.THUMB, true);
-        if (bitmap == null) {
-            bitmap = HelperBitmap.getEmptyThumb();
-        }
-
-        if (track.getStatus().equals(Track.Status.NEW)) {
-            bitmap = AdapterTrack.overlayIcon(bitmap, R.drawable.ic_download, parent.getContext());
-        } else if (track.getStatus().equals(Track.Status.ERROR)) {
-            bitmap = AdapterTrack.overlayIcon(bitmap, R.drawable.ic_error, parent.getContext());
-        }
 
         userViewHolder.imageViewCover.setImageBitmap(bitmap);
 
