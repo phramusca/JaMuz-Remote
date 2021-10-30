@@ -685,7 +685,8 @@ public class MusicLibrary {
                     " FROM tracks \n"
                     + (search.isEmpty()?"":" WHERE (" + COL_ALBUM + " LIKE \"%"+search+"%\" " +
                         "OR " + COL_ARTIST + " LIKE \"%"+search+"%\" " +
-                        "OR " + COL_ALBUM_ARTIST + " LIKE \"%"+search+"%\") \n") +
+                        "OR " + COL_ALBUM_ARTIST + " LIKE \"%"+search+"%\" " +
+                        "OR " + COL_TITLE + " LIKE \"%"+search+"%\") \n") +
                     " GROUP BY " + COL_ALBUM + " " +
                     " ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, "
                     + COL_ALBUM + ", " + COL_ARTIST;
