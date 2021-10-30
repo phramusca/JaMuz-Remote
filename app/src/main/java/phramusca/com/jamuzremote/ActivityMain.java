@@ -135,7 +135,6 @@ public class ActivityMain extends AppCompatActivity {
     private TextView textViewPlaylist;
     private Button buttonRemote;
     private Button buttonSync;
-    private Button buttonSearch;
     private Button button_settings;
     private ToggleButton toggleButtonDimMode;
     private ToggleButton toggleButtonControls;
@@ -307,13 +306,6 @@ public class ActivityMain extends AppCompatActivity {
                 sendBroadcast(new Intent(ServiceSync.USER_STOP_SERVICE_REQUEST));
                 enableSync(true);
             }
-        });
-
-        buttonSearch = findViewById(R.id.button_search);
-        buttonSearch.setOnClickListener(v -> {
-            //dimOn();
-            Intent intent = new Intent(getApplicationContext(), ActivitySearch.class);
-            startActivity(intent);
         });
 
         getFromQRcode(getIntent().getDataString());
