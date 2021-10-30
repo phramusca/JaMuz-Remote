@@ -1,5 +1,6 @@
 package phramusca.com.jamuzremote;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -15,10 +16,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class ActivityAlbums extends AppCompatActivity implements IListenerAdapterAlbum {
+public class ActivityAlbums extends AppCompatActivity {
 
     private static final int ALBUM_TRACK_REQUEST_CODE = 100;
     RecyclerView recyclerView;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,10 +32,33 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerAdapte
 
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        Cursor cursor = HelperLibrary.musicLibrary.getAlbums();
-        AdapterCursorAlbum adapterCursorAlbum = new AdapterCursorAlbum(this, cursor);
+        
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setTitle("Loading...");
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgressDialog.setMessage("Querying database.");
+        mProgressDialog.show();
+        loadItems();
+    }
+
+    private void loadItems() {
+        new Thread() {
+            public void run() {
+                Cursor cursor = HelperLibrary.musicLibrary.getAlbums();
+                runOnUiThread(() -> setupList(cursor));
+            }
+        }.start();
+    }
+
+    private void setupList(Cursor cursor) {
+        AdapterCursorAlbum adapterCursorAlbum = new AdapterCursorAlbum(getApplicationContext(), cursor);
         recyclerView.setAdapter(adapterCursorAlbum);
-        adapterCursorAlbum.addListener(this);
+        adapterCursorAlbum.addListener(adapterListItemAlbum -> {
+            //Open album tracks layout
+            Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
+            intent.putExtra("album", adapterListItemAlbum.getAlbum());
+            startActivityForResult(intent, ALBUM_TRACK_REQUEST_CODE);
+        });
 
         EditText queryText = (EditText) findViewById(R.id.filter_album);
         queryText.addTextChangedListener(new TextWatcher() {
@@ -54,7 +79,7 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerAdapte
         });
         queryText.setOnEditorActionListener(new DoneOnEditorActionListener());
 
-        new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
+        new SwipeHelper(getApplicationContext(), recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
             @Override
             public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
 
@@ -75,6 +100,7 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerAdapte
                         getApplicationContext()));
             }
         };
+        mProgressDialog.dismiss();
     }
 
     @Override
@@ -96,13 +122,5 @@ public class ActivityAlbums extends AppCompatActivity implements IListenerAdapte
         data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue");
         setResult(RESULT_OK, data);
         finish();
-    }
-
-    @Override
-    public void onClick(AdapterListItemAlbum adapterListItemAlbum) {
-        //Open album tracks layout
-        Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
-        intent.putExtra("album", adapterListItemAlbum.getAlbum());
-        startActivityForResult(intent, ALBUM_TRACK_REQUEST_CODE);
     }
 }
