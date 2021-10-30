@@ -59,7 +59,7 @@
     <string name="permissionMsg_8">Phone calls</string>
     <string name="permissionMsg_9">: Simply to be able to pause and resume audio on phone calls.</string>
     <string name="warning">Warning!</string>
-    <string name="best_albums">Best Albums</string>
+    <string name="albums">Albums</string>
     <string name="play_queue">Play Queue</string>
     <string name="nbTracks">track(s)</string>
     <string name="album_tracks">Album Tracks</string>

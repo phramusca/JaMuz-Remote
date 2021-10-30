@@ -48,6 +48,16 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         Track finalTrack = track;
         button_queue_album.setOnClickListener(v -> insertAndSetResult(finalTrack, false));
 
+        Button button_download = findViewById(R.id.button_download);
+        button_download.setOnClickListener(v -> {
+            for (int i = 0; i < adapterCursorAlbumTrack.getItemCount(); i++) {
+                Track track1 = adapterCursorAlbumTrack.getTrack(i);
+                if (Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track1.getStatus())) {
+                    downloadFile(track1, i);
+                }
+            }
+        });
+
         Button button_queue_play_album = findViewById(R.id.button_queue_play_album);
         button_queue_play_album.setOnClickListener(v -> insertAndSetResult(finalTrack, true));
 
@@ -100,15 +110,18 @@ public class ActivityAlbumTracks extends AppCompatActivity {
             setResult(RESULT_OK, data);
             finish();
         } else if (Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track.getStatus())) {
-            //Download the file
-            track.getTags(true);
-            track.setStatus(Track.Status.NEW);
-            adapterCursorAlbumTrack.updateStatus(track.getStatus(), position);
-            HelperToast helperToast = new HelperToast(getApplicationContext());
-            ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
-            ServiceSync.DownloadTask downloadTask = new ServiceSync.DownloadTask(track, track1 -> updateStatus(track1.getStatus(), position), clientInfo);
-            downloadTask.start();
+            downloadFile(track, position);
         }
+    }
+
+    private void downloadFile(Track track, int position) {
+        track.getTags(true);
+        track.setStatus(Track.Status.NEW);
+        adapterCursorAlbumTrack.updateStatus(track.getStatus(), position);
+        HelperToast helperToast = new HelperToast(getApplicationContext());
+        ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
+        ServiceSync.DownloadTask downloadTask = new ServiceSync.DownloadTask(track, track1 -> updateStatus(track1.getStatus(), position), clientInfo);
+        downloadTask.start();
     }
 
     private void updateStatus(Track.Status status, int position) {

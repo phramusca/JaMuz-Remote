@@ -119,7 +119,6 @@ public abstract class AdapterTrack extends AdapterLoad {
         }
     }
 
-    //FIXME NOW Merge with similar code in AdapterCursorAlbumTrack
     void setView(int position, UserViewHolder userViewHolder,
                  String line1, String line2, String line3, String line4) {
         if (trackList.get(position).getStatus().equals(Track.Status.INFO)) {
