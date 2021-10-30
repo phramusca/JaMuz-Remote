@@ -97,7 +97,7 @@ public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLo
             userViewHolder.item_line3.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
             userViewHolder.item_line4.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
         }
-        
+
         userViewHolder.item_line1.setText(track.getTitle());
         userViewHolder.item_line2.setText(track.getArtist());
         if(searchQuery!=null && !searchQuery.isEmpty()) {
@@ -123,10 +123,5 @@ public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLo
         } else {
             userViewHolder.layout_item.setBackgroundColor(ContextCompat.getColor(parent.getContext(), R.color.background_color));
         }
-    }
-
-    @Override
-    public Filter getFilter() {
-        return null; //FIXME NOW !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
 }

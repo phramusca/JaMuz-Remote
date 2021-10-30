@@ -31,7 +31,7 @@ import java.util.ArrayList;
  * https://gist.github.com/skyfishjy/443b7448f59be978bc59
  */
 
-public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> implements Filterable {
+public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     private Context mContext;
 
