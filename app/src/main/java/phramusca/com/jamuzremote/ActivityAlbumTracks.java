@@ -30,6 +30,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
 
         Intent intent = getIntent();
         final String album = (String) intent.getSerializableExtra("album");
+        String searchQuery = intent.getStringExtra("searchQuery");
 
         Playlist playlist = new Playlist(album, true);
         playlist.setAlbum(album);
@@ -52,7 +53,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.list_album_tracks);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapterCursorAlbumTrack = new AdapterCursorAlbumTrack(this, cursor);
+        adapterCursorAlbumTrack = new AdapterCursorAlbumTrack(this, cursor, searchQuery);
         recyclerView.setAdapter(adapterCursorAlbumTrack);
 
         title.setText(finalTrack.getAlbum());
