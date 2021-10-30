@@ -590,7 +590,7 @@ public class Track implements Serializable {
         return coverHash;
     }
 
-    public Bitmap readCover() {
+    public static Bitmap readCover(String path) {
         Bitmap cover = null;
         try {
             MediaMetadataRetriever mmr = new MediaMetadataRetriever();
@@ -600,7 +600,7 @@ public class Track implements Serializable {
                 cover = BitmapFactory.decodeByteArray(art, 0, art.length);
             }
         } catch (final RuntimeException ex) {
-            Log.e("Track", "Error reading art of " + relativeFullPath + " " + ex);
+            Log.e("Track", "Error reading art of " + path + " " + ex);
         }
         return cover;
     }

@@ -3,7 +3,8 @@ package phramusca.com.jamuzremote;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,16 +57,23 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
                 adapterListItemAlbum.getRating(),
                 adapterListItemAlbum.getGenre()));
 
-        Bitmap bitmap = IconBufferCover.readIconFromCache(adapterListItemAlbum.getCoverHash(), IconBufferCover.IconSize.THUMB);
+        Bitmap bitmap = IconBufferCover.getCoverIcon(adapterListItemAlbum.getCoverHash(), adapterListItemAlbum.getPath(), IconBufferCover.IconSize.THUMB, false);
         if (bitmap == null) {
             bitmap = HelperBitmap.getEmptyThumb();
+            readIconInThread(adapterListItemAlbum, userViewHolder);
         }
-
         userViewHolder.imageViewCover.setImageBitmap(bitmap);
-        BitmapDrawable bitmapDrawable = new BitmapDrawable(parent.getContext().getResources(), bitmap);
-        bitmapDrawable.setAlpha(50);
-
         userViewHolder.itemView.setOnClickListener(view -> sendListener(adapterListItemAlbum));
+    }
+
+    private void readIconInThread(AdapterListItemAlbum adapterListItemAlbum, AdapterLoad.UserViewHolder userViewHolder) {
+        new Thread(() -> {
+            Bitmap readBitmap = IconBufferCover.getCoverIcon(adapterListItemAlbum.getCoverHash(), adapterListItemAlbum.getPath(), IconBufferCover.IconSize.THUMB, true);
+            if (readBitmap != null) {
+                Bitmap finalReadBitmap = readBitmap;
+                new Handler(Looper.getMainLooper()).post(() -> userViewHolder.imageViewCover.setImageBitmap(finalReadBitmap));
+            }
+        }).start();
     }
 
     private final ArrayList<IListenerAdapterAlbum> mListListener = new ArrayList<>();
@@ -80,7 +88,7 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
         }
     }
 
-    private Cursor oriCursor;
+    private final Cursor oriCursor;
 
     @Override
     public Filter getFilter() {
