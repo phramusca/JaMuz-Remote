@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
+        <com.athkalia.emphasis.EmphasisTextView
             android:text="Ligne 1"
             android:id="@+id/item_line1"
             android:layout_width="wrap_content"
@@ -31,9 +31,9 @@
             android:textColor="@color/textColor"
             tools:ignore="HardcodedText"
             android:textSize="16sp">
-        </TextView>
+        </com.athkalia.emphasis.EmphasisTextView>
 
-        <TextView
+        <com.athkalia.emphasis.EmphasisTextView
             android:text="Ligne 2"
             android:id="@+id/item_line2"
             android:layout_width="wrap_content"
@@ -43,7 +43,7 @@
             android:textColor="@color/textColor"
             tools:ignore="HardcodedText"
             android:textSize="14sp">
-        </TextView>
+        </com.athkalia.emphasis.EmphasisTextView>
 
         <TextView
             android:text="Ligne 3"
