@@ -3,6 +3,7 @@ package phramusca.com.jamuzremote;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -49,10 +50,25 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
         AdapterLoad.UserViewHolder userViewHolder = (AdapterLoad.UserViewHolder) viewHolder;
 
         userViewHolder.item_line1.setText(adapterListItemAlbum.getAlbum());
+        if(!searchQuery.isEmpty()) {
+            userViewHolder.item_line1.setTextToHighlight(searchQuery);
+            userViewHolder.item_line1.setTextHighlightColor(android.R.color.holo_green_light);
+            userViewHolder.item_line1.setCaseInsensitive(true);
+            userViewHolder.item_line1.highlight();
+        }
+
         userViewHolder.item_line2.setText(adapterListItemAlbum.getArtist());
+        if(!searchQuery.isEmpty()) {
+            userViewHolder.item_line2.setTextToHighlight(searchQuery);
+            userViewHolder.item_line2.setTextHighlightColor(android.R.color.holo_green_light);
+            userViewHolder.item_line2.setCaseInsensitive(true);
+            userViewHolder.item_line2.highlight();
+        }
+
         userViewHolder.item_line3.setText(String.format(Locale.ENGLISH, "%d %s.",
                 adapterListItemAlbum.getNbTracks(), //Includes nb of albums
                 parent.getContext().getString(R.string.nbTracks)));
+
         userViewHolder.item_line4.setText(String.format(Locale.ENGLISH, "%.1f/5 %s",
                 adapterListItemAlbum.getRating(),
                 adapterListItemAlbum.getGenre()));
@@ -89,6 +105,7 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
     }
 
     private final Cursor oriCursor;
+    private String searchQuery="";
 
     @Override
     public Filter getFilter() {
@@ -113,6 +130,7 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
         protected void publishResults(CharSequence constraint, FilterResults results) {
             Cursor cursor = (Cursor) results.values;
             if(cursor!=null) {
+                searchQuery = constraint.toString().toLowerCase().trim();
                 swapCursor(cursor);
             }
         }

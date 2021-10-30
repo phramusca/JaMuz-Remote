@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.athkalia.emphasis.EmphasisTextView;
+
 import java.util.ArrayList;
 
 //http://www.devexchanges.info/2017/02/android-recyclerview-dynamically-load.html
@@ -112,8 +114,8 @@ public class AdapterLoad extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     // "Normal item" ViewHolder
     static class UserViewHolder extends RecyclerView.ViewHolder {
-        public TextView item_line1;
-        public TextView item_line2;
+        public EmphasisTextView item_line1;
+        public EmphasisTextView item_line2;
         public TextView item_line3;
         public TextView item_line4;
         public ImageView imageViewCover;
