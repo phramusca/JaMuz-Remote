@@ -54,11 +54,11 @@
 
         <Button android:id="@+id/button_albums"
             android:layout_row="0"
-            android:layout_column="5"
+            android:layout_column="4"
             android:layout_width="@dimen/button_menu_width"
             android:layout_height="@dimen/button_menu_height"
             android:gravity="center"
-            android:background="@drawable/ic_button_albums"/>
+            android:background="@drawable/ic_button_library"/>
 
         <Button android:id="@+id/button_connect"
             android:layout_row="0"
