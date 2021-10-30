@@ -10,13 +10,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
+import android.widget.Filterable;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.UserViewHolder> {
+public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.UserViewHolder> implements Filterable {
 
     private ViewGroup parent;
 
@@ -117,7 +118,6 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
         protected FilterResults performFiltering(CharSequence constraint) {
             Cursor cursor;
             if (constraint != null && constraint.length() != 0) {
-                //FIXME NOW Return tracks too with title like "%constraint%"
                  cursor = HelperLibrary.musicLibrary.getAlbums(constraint.toString().toLowerCase().trim());
             } else {
                 cursor = oriCursor;
