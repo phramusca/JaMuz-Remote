@@ -153,8 +153,6 @@ public abstract class AdapterTrack extends AdapterLoad {
         }
 
         userViewHolder.imageViewCover.setImageBitmap(bitmap);
-        BitmapDrawable bitmapDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
-        bitmapDrawable.setAlpha(50);
 
         if (trackList.get(position).isHistory()) {
             userViewHolder.layout_item.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorPrimary));

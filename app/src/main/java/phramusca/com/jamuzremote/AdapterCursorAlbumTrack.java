@@ -96,8 +96,6 @@ public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLo
         }
 
         userViewHolder.imageViewCover.setImageBitmap(bitmap);
-        BitmapDrawable bitmapDrawable = new BitmapDrawable(parent.getContext().getResources(), bitmap);
-        bitmapDrawable.setAlpha(50);
 
         if (track.isHistory()) {
             userViewHolder.layout_item.setBackgroundColor(ContextCompat.getColor(parent.getContext(), R.color.colorPrimary));

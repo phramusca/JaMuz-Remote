@@ -15,8 +15,13 @@ class HelperBitmap {
         return textAsBitmap("No cover", 500, 35, 180, 250);
     }
 
+    private static Bitmap emptyThumb;
+
     public static Bitmap getEmptyThumb() {
-        return textAsBitmap("No cover", 120, 25, 10, 70);
+        if(emptyThumb==null) {
+            emptyThumb = textAsBitmap("No cover", 120, 25, 10, 70);;
+        }
+        return emptyThumb;
     }
 
     private static Bitmap textAsBitmap(String text, int size, float textSize, int posX, int posY) {

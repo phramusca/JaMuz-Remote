@@ -39,15 +39,23 @@
       * @return The cover icon.
       */
      public static Bitmap getCoverIcon(Track track, IconSize iconSize, boolean readIfNotFound) {
+         return getCoverIcon(track.getCoverHash(), track.getPath(), iconSize, readIfNotFound);
+     }
+
+     /**
+      * Get cover icon from cache
+      * @return The cover icon.
+      */
+     public static Bitmap getCoverIcon(String coverHash, String path, IconSize iconSize, boolean readIfNotFound) {
          Bitmap icon;
-         icon = readIconFromCache(track.getCoverHash(), iconSize);
+         icon = readIconFromCache(coverHash, iconSize);
          if (icon != null) {
              return icon;
          }
          if (readIfNotFound) {
-             Bitmap trackCover = track.readCover();
-             Bitmap cover = writeIconToCache(track.getCoverHash(), IconSize.COVER, trackCover);
-             Bitmap thumb = writeIconToCache(track.getCoverHash(), IconSize.THUMB, cover);
+             Bitmap trackCover = Track.readCover(path);
+             Bitmap cover = writeIconToCache(coverHash, IconSize.COVER, trackCover);
+             Bitmap thumb = writeIconToCache(coverHash, IconSize.THUMB, cover);
              if (iconSize == IconSize.COVER) {
                  icon = cover;
              } else if (iconSize == IconSize.THUMB) {

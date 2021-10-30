@@ -681,6 +681,7 @@ public class MusicLibrary {
                     "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + " \n" +
                     ", " + COL_ALBUM +
                     ", " + COL_COVER_HASH +
+                    ", " + COL_PATH +
                     " FROM tracks \n"
                     + (search.isEmpty()?"":" WHERE (" + COL_ALBUM + " LIKE \"%"+search+"%\" " +
                         "OR " + COL_ARTIST + " LIKE \"%"+search+"%\" " +
