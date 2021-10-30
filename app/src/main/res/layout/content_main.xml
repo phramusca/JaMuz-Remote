@@ -52,14 +52,6 @@
             android:gravity="center"
             android:background="@drawable/ic_button_queue"/>
 
-        <Button android:id="@+id/button_search"
-            android:layout_row="0"
-            android:layout_column="4"
-            android:layout_width="@dimen/button_menu_width"
-            android:layout_height="@dimen/button_menu_height"
-            android:gravity="center"
-            android:background="@drawable/ic_button_search"/>
-
         <Button android:id="@+id/button_albums"
             android:layout_row="0"
             android:layout_column="5"

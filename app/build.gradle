@@ -41,26 +41,8 @@ dependencies {
 
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0' //QR Code
 
-    implementation 'com.wdullaer:swipeactionadapter:2.0.0'
-
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.3.Final'
 
-    //google client for android api dependency
-    //excluding org.apache.httpcomponents so as to resolve anonymity
-    implementation('com.google.api-client:google-api-client-android:1.23.0') {
-        exclude group: 'org.apache.httpcomponents'
-        exclude module: 'guava-jdk5'
-    }
-
-    //youtube data api v3 dependency
-    //excluding org.apache.httpcomponents so as to resolve anonymity
-    implementation('com.google.apis:google-api-services-youtube:v3-rev192-1.23.0') {
-        exclude group: 'org.apache.httpcomponents'
-        exclude module: 'guava-jdk5'
-    }
-
-    implementation 'com.squareup.picasso:picasso:2.5.2' //Picasso (hassle-free image loading)
-    
     implementation("com.squareup.okhttp3:okhttp:4.9.0")
 }
 
