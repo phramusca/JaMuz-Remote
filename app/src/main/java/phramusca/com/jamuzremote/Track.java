@@ -470,7 +470,7 @@ public class Track implements Serializable {
 
     @Override
     public String toString() {
-        return "<BR/>" + getTags() + " " + (int) rating + "/5" + " " + genre + "<BR/>" +
+        return "<BR/>" + getTags() + " " + (int) rating + "/5" + " " + genre + " " + year + "<BR/>" +
                 getLastPlayedAgo() + getAddedDateAgo() + "<BR/>";
     }
 

@@ -79,8 +79,8 @@ public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLo
 
         userViewHolder.item_line1.setText(track.getTitle());
         userViewHolder.item_line2.setText(track.getArtist());
-        userViewHolder.item_line3.setText(String.format(Locale.ENGLISH, "%d/5 %s",
-                (int) track.getRating(), track.getGenre()));
+        userViewHolder.item_line3.setText(String.format(Locale.ENGLISH, "%d/5 %s %s",
+                (int) track.getRating(), track.getGenre(), track.getYear()));
         userViewHolder.item_line4.setText(String.format(Locale.ENGLISH, "%s\n%s %s",
                 track.getTags(), track.getLastPlayedAgo(), track.getAddedDateAgo()));
 

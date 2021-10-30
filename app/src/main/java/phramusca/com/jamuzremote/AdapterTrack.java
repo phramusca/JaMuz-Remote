@@ -107,10 +107,10 @@ public abstract class AdapterTrack extends AdapterLoad {
                     track.getArtist(),
                     track.getAlbum(),
                     String.format(Locale.ENGLISH,
-                            "%s %d/5 %s\n%s %s",
+                            "%s %d/5 %s %s\n%s %s",
                             track.getTags(),
                             (int) track.getRating(),
-                            track.getGenre(), track.getLastPlayedAgo(), track.getAddedDateAgo()
+                            track.getGenre(), track.getYear(), track.getLastPlayedAgo(), track.getAddedDateAgo()
                     ));
 
         } else if (holder instanceof LoadingViewHolder) {
