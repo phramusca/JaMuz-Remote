@@ -50,7 +50,7 @@
     <string name="permissionMsg_8">Gestion des appels</string>
     <string name="permissionMsg_9">: Simplement pour mettre pause et reprendre la lecture lors des appels.</string>
     <string name="warning">Attention !</string>
-    <string name="best_albums">Meilleurs Albums</string>
+    <string name="albums">Albums</string>
     <string name="play_queue">File d\'Attente</string>
     <string name="nbTracks">piste(s)</string>
     <string name="album_tracks">Pistes de l\'album</string>

@@ -32,10 +32,19 @@
             android:layout_gravity="start|end|center_vertical"
             android:gravity="center_horizontal"
             android:layout_width="0dip"/>
+
+        <Button
+            android:id="@+id/button_download"
+            android:layout_row="0"
+            android:layout_column="2"
+            android:layout_width="45dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_download"/>
+
         <Button
             android:id="@+id/button_queue_album"
             android:layout_row="0"
-            android:layout_column="2"
+            android:layout_column="3"
             android:layout_width="45dp"
             android:layout_height="wrap_content"
             android:background="@drawable/ic_button_enqueue"/>
@@ -43,7 +52,7 @@
         <Button
             android:id="@+id/button_queue_play_album"
             android:layout_row="0"
-            android:layout_column="3"
+            android:layout_column="4"
             android:layout_width="45dp"
             android:layout_marginTop="2dp"
             android:layout_height="wrap_content"

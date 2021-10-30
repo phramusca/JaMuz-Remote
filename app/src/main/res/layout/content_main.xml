@@ -58,7 +58,7 @@
             android:layout_width="@dimen/button_menu_width"
             android:layout_height="@dimen/button_menu_height"
             android:gravity="center"
-            android:background="@drawable/ic_button_library"/>
+            android:background="@drawable/ic_button_albums"/>
 
         <Button android:id="@+id/button_connect"
             android:layout_row="0"
