@@ -100,6 +100,7 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
         protected FilterResults performFiltering(CharSequence constraint) {
             Cursor cursor;
             if (constraint != null && constraint.length() != 0) {
+                //FIXME NOW Return tracks too with title like "%constraint%"
                  cursor = HelperLibrary.musicLibrary.getAlbums(constraint.toString().toLowerCase().trim());
             } else {
                 cursor = oriCursor;
