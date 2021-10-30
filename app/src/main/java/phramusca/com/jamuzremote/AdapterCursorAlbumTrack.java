@@ -23,9 +23,11 @@ public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLo
 
     // Trick to get track new status after download as cursor is not updated
     private final Map<Integer, Track.Status> newStatuses;
+    private String searchQuery;
 
-    public AdapterCursorAlbumTrack(Context context, Cursor cursor) {
+    public AdapterCursorAlbumTrack(Context context, Cursor cursor, String searchQuery) {
         super(context, cursor);
+        this.searchQuery = searchQuery;
         newStatuses = new HashMap<>();
     }
 
@@ -79,6 +81,17 @@ public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLo
 
         userViewHolder.item_line1.setText(track.getTitle());
         userViewHolder.item_line2.setText(track.getArtist());
+        if(searchQuery!=null && !searchQuery.isEmpty()) {
+            userViewHolder.item_line1.setTextToHighlight(searchQuery);
+            userViewHolder.item_line1.setTextHighlightColor(R.color.colorAccent);
+            userViewHolder.item_line1.setCaseInsensitive(true);
+            userViewHolder.item_line1.highlight();
+            userViewHolder.item_line2.setTextToHighlight(searchQuery);
+            userViewHolder.item_line2.setTextHighlightColor(R.color.colorAccent);
+            userViewHolder.item_line2.setCaseInsensitive(true);
+            userViewHolder.item_line2.highlight();
+        }
+
         userViewHolder.item_line3.setText(String.format(Locale.ENGLISH, "%d/5 %s %s",
                 (int) track.getRating(), track.getGenre(), track.getYear()));
         userViewHolder.item_line4.setText(String.format(Locale.ENGLISH, "%s\n%s %s",

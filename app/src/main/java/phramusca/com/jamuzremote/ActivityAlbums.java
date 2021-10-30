@@ -50,6 +50,8 @@ public class ActivityAlbums extends AppCompatActivity {
         }.start();
     }
 
+    private String searchQuery="";
+
     private void setupList(Cursor cursor) {
         AdapterCursorAlbum adapterCursorAlbum = new AdapterCursorAlbum(getApplicationContext(), cursor);
         recyclerView.setAdapter(adapterCursorAlbum);
@@ -57,6 +59,7 @@ public class ActivityAlbums extends AppCompatActivity {
             //Open album tracks layout
             Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
             intent.putExtra("album", adapterListItemAlbum.getAlbum());
+            intent.putExtra("searchQuery", searchQuery);
             startActivityForResult(intent, ALBUM_TRACK_REQUEST_CODE);
         });
 
@@ -69,7 +72,9 @@ public class ActivityAlbums extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapterCursorAlbum.getFilter().filter(s.toString());
+                searchQuery = s.toString();
+                adapterCursorAlbum.getFilter().filter(searchQuery);
+
             }
 
             @Override
