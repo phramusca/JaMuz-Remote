@@ -52,7 +52,7 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
         userViewHolder.item_line1.setText(adapterListItemAlbum.getAlbum());
         if(!searchQuery.isEmpty()) {
             userViewHolder.item_line1.setTextToHighlight(searchQuery);
-            userViewHolder.item_line1.setTextHighlightColor(android.R.color.holo_green_light);
+            userViewHolder.item_line1.setTextHighlightColor(R.color.colorAccent);
             userViewHolder.item_line1.setCaseInsensitive(true);
             userViewHolder.item_line1.highlight();
         }
@@ -60,7 +60,7 @@ public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.Us
         userViewHolder.item_line2.setText(adapterListItemAlbum.getArtist());
         if(!searchQuery.isEmpty()) {
             userViewHolder.item_line2.setTextToHighlight(searchQuery);
-            userViewHolder.item_line2.setTextHighlightColor(android.R.color.holo_green_light);
+            userViewHolder.item_line2.setTextHighlightColor(R.color.colorAccent);
             userViewHolder.item_line2.setCaseInsensitive(true);
             userViewHolder.item_line2.highlight();
         }
