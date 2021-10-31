@@ -66,7 +66,7 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
         @SuppressWarnings("UnnecessaryLocalVariable")
         AdapterLoad.UserViewHolder userViewHolder = viewHolder;
 
-        Bitmap bitmap = IconBufferCover.getCoverIcon(track, IconBufferCover.IconSize.THUMB, true);
+        Bitmap bitmap = RepoCovers.getCoverIcon(track, RepoCovers.IconSize.THUMB, true);
         if (bitmap == null) {
             bitmap = HelperBitmap.getEmptyThumb();
         }

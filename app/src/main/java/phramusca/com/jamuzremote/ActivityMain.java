@@ -2213,7 +2213,7 @@ public class ActivityMain extends AppCompatActivity {
             });
 
             if (displayedTrack.getIdFileRemote() >= 0) {
-                displayImage(IconBufferCover.getCoverIcon(displayedTrack, IconBufferCover.IconSize.COVER, true));
+                displayImage(RepoCovers.getCoverIcon(displayedTrack, RepoCovers.IconSize.COVER, true));
                 bluetoothNotifyChange(AVRCP_META_CHANGED);
             } else if (displayedTrack.getCoverHash().equals("welcomeHash")) {
                 displayImage(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_startup_cover_foreground));
@@ -2241,13 +2241,13 @@ public class ActivityMain extends AppCompatActivity {
 
     //Display cover from cache or ask for it
     private void displayCover() {
-        Bitmap coverIcon = IconBufferCover.getCoverIcon(displayedTrack, IconBufferCover.IconSize.COVER, false);
+        Bitmap coverIcon = RepoCovers.getCoverIcon(displayedTrack, RepoCovers.IconSize.COVER, false);
         if (coverIcon !=  null) {
             displayImage(coverIcon);
         } else { //Ask cover
             int maxWidth = this.getWindow().getDecorView().getWidth();
             if (maxWidth <= 0) {
-                maxWidth = IconBufferCover.IconSize.COVER.getSize();
+                maxWidth = RepoCovers.IconSize.COVER.getSize();
             }
             if (clientRemote != null) {
                 clientRemote.send("sendCover" + maxWidth);
@@ -2319,8 +2319,8 @@ public class ActivityMain extends AppCompatActivity {
         public void onReceivedBitmap(final Bitmap bitmap) {
             Log.d(TAG, "onReceivedBitmap: callback");
             Log.d(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight());
-            if(bitmap != null && !IconBufferCover.contains(displayedTrack.getCoverHash(), IconBufferCover.IconSize.COVER)) {
-                IconBufferCover.writeIconToCache(displayedTrack.getCoverHash(), bitmap);
+            if(bitmap != null && !RepoCovers.contains(displayedTrack.getCoverHash(), RepoCovers.IconSize.COVER)) {
+                RepoCovers.writeIconToCache(displayedTrack.getCoverHash(), bitmap);
             }
             displayCover();
         }
