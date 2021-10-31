@@ -2,6 +2,7 @@ package phramusca.com.jamuzremote;
 
 import android.content.Context;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
@@ -12,6 +13,7 @@ class DoneOnEditorActionListener implements TextView.OnEditorActionListener {
         if (actionId == EditorInfo.IME_ACTION_SEARCH) {
             InputMethodManager imm = (InputMethodManager)v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            v.setVisibility(View.GONE);
             return true;
         }
         return false;
