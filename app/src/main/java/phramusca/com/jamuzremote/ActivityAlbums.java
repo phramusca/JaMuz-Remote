@@ -34,9 +34,9 @@ public class ActivityAlbums extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setTitle("Loading...");
+        mProgressDialog.setTitle("Loading album list...");
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgressDialog.setMessage("Querying database.");
+        mProgressDialog.setMessage("Please wait a few seconds.");
         mProgressDialog.show();
         loadItems();
     }
@@ -44,7 +44,7 @@ public class ActivityAlbums extends AppCompatActivity {
     private void loadItems() {
         new Thread() {
             public void run() {
-                Cursor cursor = HelperLibrary.musicLibrary.getAlbums();
+                Cursor cursor = RepoAlbums.get();
                 runOnUiThread(() -> setupList(cursor));
             }
         }.start();

@@ -61,7 +61,8 @@ public class ServiceScan extends ServiceBase {
                     File folder = new File(userPath);
                     scanFolder(folder);
                     waitScanFolder();
-
+                    RepoAlbums.reset();
+                    
                     //Scan complete, warn user
                     final String msg = "Database updated.";
                     runOnUiThread(() -> {
