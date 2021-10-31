@@ -53,6 +53,7 @@ public class ServiceScan extends ServiceBase {
     private void scanLibraryInThread() {
         new Thread() {
             public void run() {
+                //FIXME NOW Translate
                 runOnUiThread(() -> helperNotification.notifyBar(notificationScan, "Cleaning database..."));
                 if (HelperLibrary.musicLibrary != null) {
                     //Delete tracks from database that are from another folder than those 2
@@ -64,6 +65,7 @@ public class ServiceScan extends ServiceBase {
                     RepoAlbums.reset();
 
                     //Scan complete, warn user
+                    //FIXME NOW Translate
                     final String msg = "Database updated.";
                     runOnUiThread(() -> {
                         helperToast.toastLong(msg);

@@ -42,6 +42,7 @@ public class RetryInterceptor implements Interceptor {
             } catch (Exception e) {
                 msg = e.getLocalizedMessage();
                 Log.d(TAG, "ERROR: " + msg);
+                //FIXME NOW Translate
                 helperNotification.notifyBar(notification, sleepSeconds + "s before " +
                         (nbRetries + 1) + "/" + maxNbRetries + " : " + msg);
                 try {

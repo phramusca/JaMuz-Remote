@@ -1,54 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!--FIXME NOW Translate whole project and submit to Weblate-->
 
-    <string name="app_name" translatable="false">JaMuz</string>
-    <string name="lt_ip_gt_lt_port_gt" translatable="false"><![CDATA[<IP>:<Port> :]]></string>
-    <string name="defaultConnectionString" translatable="false">192.168.0.16:2013</string>
-    <string name="welcomeYear" translatable="false">2018</string>
-    <string name="playlistsFolder" translatable="false">Playlists</string>
+    <string name="mainWelcomeTitle">Welcome to</string>
+    <string name="applicationName" translatable="false">JaMuz</string>
+    <string name="mainWelcomeYear" translatable="false">2021</string>
+    <string name="mainDefaultPlaylistsFolderName" translatable="false">Playlists</string>
 
-    <string name="action_settings">Settings</string>
-    <string name="save">Save</string>
-    <string name="path">Path :</string>
-    <string name="choose">Choose</string>
-    <string name="exclude_the_last">Exclude the last</string>
-    <string name="played">played</string>
-    <string name="order_by">Order by:</string>
-    <string name="random">Random</string>
-    <string name="play_counter_last_played">Play counter, Last played</string>
-    <string name="replayGainBaseVolume">ReplayGain base volume :</string>
-    <string name="welcomeTitle">Welcome to</string>
-    <string name="pathInfo">Choose an additional local path as a music source. Note that it is recommended to use JaMuz though.</string>
-    <string name="queue_history">History</string>
-    <string name="queue_user">User</string>
-    <string name="unknownCommand">Unknown Command:</string>
-    <string name="playlist">Playlist</string>
-    <string name="restored">restored</string>
-    <string name="successfully">successfully.</string>
-    <string name="withErrors">with errors!</string>
-    <string name="saved">saved</string>
-    <string name="notFound">not found.</string>
-    <string name="artist">Artist</string>
-    <string name="album">Album</string>
-    <string name="specifyAlbum">Specify an album.</string>
-    <string name="specifyArtist">Specify an artist.</string>
-    <string name="readingList">Reading list …</string>
-    <string name="connecting">Connecting …</string>
-    <string name="playlistName">New playlist name</string>
-    <string name="ok">OK</string>
-    <string name="cancel">Cancel</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="cannotDeleteLastPlaylist">You cannot delete last playlist.</string>
-    <string name="playlistQuestion">playlist ?</string>
-    <string name="sureDelete">Are you sure you want to delete</string>
-    <string name="deletePlaylist">Delete playlist ?</string>
-    <string name="alreadyExists">already exist.</string>
-    <string name="newFolder">New folder</string>
-    <string name="newFolderName">New folder name</string>
-    <string name="cover">Cover</string>
-    <string name="scan_qr">Scan QR</string>
+    <string name="globalLabelOK">OK</string>
+    <string name="globalLabelCancel">Cancel</string>
+    <string name="globalLabelYes">Yes</string>
+    <string name="globalLabelNo">No</string>
+
+    <string name="settingsTitle">Settings</string>
+
+    <string name="settingsServerTitle">JaMuz Server</string>
+    <string name="settingsServerTextViewIpPort" translatable="false"><![CDATA[<IP>:<Port> :]]></string>
+    <string name="settingsServerDefaultConnectionString" translatable="false">192.168.0.16:2013</string>
+    <string name="settingsServerButonSave">Save</string>
+    <string name="settingsServerButtonScanQR">Scan QR</string>
+
+    <string name="settingsReplayGainTextViewBaseVolume">Base volume:</string>
+    
+    <string name="settingsKidsPlaceTextViewTitle">Kids Place</string>
+    <string name="settingsKidsPlaceTextViewHelp">Kids Place is a third party application that can be found in Android Play Store.</string>
+    <string name="settingsKidsPlaceCheckBoxLimit">Limit to this playlist:</string>
+    <string name="settingsKidsPlaceCheckBoxAllowDeleteSaveNew">Allow to delete, save and create a new playlist</string>
+    <string name="settingsKidsPlaceCheckBoxAllowEdition">Allow track edition</string>
+    <string name="settingsKidsPlaceCheckBoxOnStartup">Start KidsPlace with JaMuz</string>
+
+    <string name="settingsLocalFilesTextViewTitle">Local tracks</string>
+    <string name="settingsLocalFilesTextViewHelp"><html>You can add tracks to library from a local path BUT it is recommended to use JaMuz Server instead to get your tracks!<br />WARNING: Those tracks will NOT be synchronized with Jamuz Server !</html></string>
+    <string name="settingsLocalFilesTextViewPath">Path :</string>
+    <string name="settingsLocalFilesButtonChoose">Choose</string>
+    <string name="settingsDirectoryChooserButtonNewFolder">New folder</string>
+    <string name="settingsDirectoryChooserNewFolderName">New folder name</string>
+
+    <string name="playlistTextViewExcludeTheLast">Exclude the last</string>
+    <string name="playlistTextViewPlayed">played</string>
+    <string name="playlistTextViewOrderBy">Order by:</string>
+    <string name="playlistRadioButtonRandom">Random</string>
+    <string name="playlistRadioButtonOrderByPlayCounterLastPlayed">Play counter, Last played</string>
+
+    <string name="playlistLabel">Playlist</string>
+    <string name="playlistLabelHistory">History</string>
+    <string name="playlistLabelUser">User</string>
+    <string name="playlistLabelSaved">saved</string>
+    <string name="playlistLabelrestored">restored</string>
+    <string name="playlistLabelSuccessfully">successfully.</string>
+    <string name="playlistLabelWithErrors">with errors!</string>
+    <string name="playlistLabelNewName">New playlist name</string>
+    <string name="playlistLabelAlreadyExists">already exist.</string>
+    <string name="playlistLabelQuestionDeleteTitle">Delete playlist ?</string>
+    <string name="playlistLabelQuestionDelete">Are you sure you want to delete</string>
+    <string name="playlistLabelQuestionDeleteSuffix">playlist ?</string>
+    <string name="playlistLabelCannotDeleteLastPlaylist">You cannot delete last playlist.</string>
+
+    <string name="voiceUnknownCommand">Unknown Command:</string>
+    <string name="voiceNotFound">not found.</string>
+    <string name="voiceArtist">Artist</string>
+    <string name="voiceAlbum">Album</string>
+    <string name="voiceSpecifyAlbum">Specify an album.</string>
+    <string name="voiceSpecifyArtist">Specify an artist.</string>
+
+    <string name="syncLabelReadingList">Reading list …</string>
+    <string name="syncLabelConnecting">Connecting …</string>
+
+    <string name="queueItemCoverDescription">Cover</string>
+
+    <string name="permissionTitle">Warning!</string>
     <string name="permissionMsg_1">For a full JaMuz experience</string>
     <string name="permissionMsg_2">, please consider allowing permissions that you will be asked for:</string>
     <string name="permissionMsg_3">Multimedia files</string>
@@ -58,12 +79,11 @@
     <string name="permissionMsg_7">- Store database in JaMuz folder on internal SD card</string>
     <string name="permissionMsg_8">Phone calls</string>
     <string name="permissionMsg_9">: Simply to be able to pause and resume audio on phone calls.</string>
-    <string name="warning">Warning!</string>
-    <string name="albums">Albums</string>
-    <string name="play_queue">Play Queue</string>
-    <string name="nbTracks">track(s)</string>
-    <string name="album_tracks">Album Tracks</string>
-    <string name="settings">Settings</string>
+
+    <string name="contentAlbumsTitle">Albums</string>
+    <string name="contentQueueTitle">Play Queue</string>
+    <string name="adapterCursorAlbumLabelTracks">track(s)</string>
+    <string name="contentAlbumTracksTitle">Album Tracks</string>
 
     <!--FIXME NOW Translate, knowing that it is also a keyword so need to split key and value-->
     <string-array name="limitUnits" tools:ignore="MissingTranslation">

@@ -272,7 +272,7 @@
                     android:textColor="@color/textColor"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/exclude_the_last"/>
+                    android:text="@string/playlistTextViewExcludeTheLast"/>
 
                 <Spinner android:id="@+id/numberPicker_playlist_limit_value"
                     android:layout_width="wrap_content"
@@ -289,14 +289,14 @@
                     android:textColor="@color/textColor"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/played"/>
+                    android:text="@string/playlistTextViewPlayed"/>
 
             </LinearLayout>
             <TextView
                 android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:text="@string/order_by"/>
+                android:text="@string/playlistTextViewOrderBy"/>
             <RadioGroup
                 android:id="@+id/playlist_order_radio"
                 android:layout_width="fill_parent"
@@ -305,13 +305,13 @@
                 <RadioButton android:id="@+id/order_random"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/random"
+                    android:text="@string/playlistRadioButtonRandom"
                     android:onClick="onPlaylistOrderRadioButtonClicked"
                     android:textColor="@color/textColor"/>
                 <RadioButton android:id="@+id/order_playCounter_lastPlayed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/play_counter_last_played"
+                    android:text="@string/playlistRadioButtonOrderByPlayCounterLastPlayed"
                     android:onClick="onPlaylistOrderRadioButtonClicked"
                     android:textColor="@color/textColor"/>
             </RadioGroup>
