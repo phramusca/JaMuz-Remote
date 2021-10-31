@@ -1,15 +1,11 @@
 package phramusca.com.jamuzremote;
 
-import static phramusca.com.jamuzremote.R.drawable.ic_info;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
 
 import androidx.core.content.ContextCompat;
 
@@ -19,13 +15,13 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLoad.UserViewHolder> {
+public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewHolder> {
 
     private ViewGroup parent;
 
     // Trick to get track new status after download as cursor is not updated
     private final Map<Integer, Track.Status> newStatuses;
-    private String searchQuery;
+    private final String searchQuery;
 
     public AdapterCursorAlbumTrack(Context context, Cursor cursor, String searchQuery) {
         super(context, cursor);
@@ -81,16 +77,16 @@ public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLo
             userViewHolder.item_line3.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.colorPrimaryDark));
             userViewHolder.item_line4.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.colorPrimaryDark));
             if(track.getStatus().equals(Track.Status.NEW)) {
-                bitmap = AdapterTrack.overlayIcon(bitmap, R.drawable.ic_download, parent.getContext());
+                bitmap = HelperBitmap.overlayIcon(bitmap, R.drawable.ic_download, parent.getContext());
             } else {
-                bitmap = AdapterTrack.overlayIcon(bitmap, R.drawable.ic_info, parent.getContext());
+                bitmap = HelperBitmap.overlayIcon(bitmap, R.drawable.ic_info, parent.getContext());
             }
         } else if (track.getStatus().equals(Track.Status.ERROR)) {
             userViewHolder.item_line1.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.lightYellow));
             userViewHolder.item_line2.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.lightYellow));
             userViewHolder.item_line3.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.lightYellow));
             userViewHolder.item_line4.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.lightYellow));
-            bitmap = AdapterTrack.overlayIcon(bitmap, R.drawable.ic_error, parent.getContext());
+            bitmap = HelperBitmap.overlayIcon(bitmap, R.drawable.ic_error, parent.getContext());
         } else {
             userViewHolder.item_line1.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
             userViewHolder.item_line2.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));

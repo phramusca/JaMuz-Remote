@@ -3,7 +3,6 @@ package phramusca.com.jamuzremote;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -17,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class AdapterCursorAlbum extends CursorRecyclerViewAdapter<AdapterLoad.UserViewHolder> implements Filterable {
+public class AdapterCursorAlbum extends AdapterCursor<AdapterLoad.UserViewHolder> implements Filterable {
 
     private ViewGroup parent;
 

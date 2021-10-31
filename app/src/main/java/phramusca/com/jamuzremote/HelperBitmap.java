@@ -1,8 +1,11 @@
 package phramusca.com.jamuzremote;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 
 /**
@@ -10,10 +13,6 @@ import android.graphics.Paint;
  */
 
 class HelperBitmap {
-
-    public static Bitmap getEmptyCover() {
-        return textAsBitmap("No cover", 500, 35, 180, 250);
-    }
 
     private static Bitmap emptyThumb;
 
@@ -33,5 +32,24 @@ class HelperBitmap {
         canvas.drawColor(Color.rgb(64, 64, 64));
         canvas.drawText(text, posX, posY, paint);
         return image;
+    }
+
+    public static Bitmap overlayIcon(Bitmap bitmap, int iconId, Context context) {
+        int margin = 15;
+        Bitmap bmOverlay = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
+        Canvas canvas = new Canvas(bmOverlay);
+        canvas.drawBitmap(bitmap, new Matrix(), null); //TODO: Paint in black if cover is too much white
+        Bitmap playingBitmap = BitmapFactory.decodeResource(context.getResources(), iconId);
+        int newWidth = bmOverlay.getWidth() - (margin * 2);
+        int newHeight = bmOverlay.getHeight() - (margin * 2);
+        int width = playingBitmap.getWidth();
+        int height = playingBitmap.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+        matrix.postTranslate(margin, margin);
+        canvas.drawBitmap(playingBitmap, matrix, null);
+        return bmOverlay;
     }
 }
