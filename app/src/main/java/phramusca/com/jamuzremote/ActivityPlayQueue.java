@@ -14,7 +14,7 @@ import java.util.List;
 
 public class ActivityPlayQueue extends AppCompatActivity implements IListenerTrackAdapter {
 
-    AdapterTrack trackAdapter;
+    AdapterLoadQueue trackAdapter;
     RecyclerView recyclerView;
     private int offset = 0;
     private static final int QUEUE_REQUEST_CODE = 200;
@@ -41,7 +41,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
             position = position - offset;
             recyclerView = findViewById(R.id.list_queue);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            trackAdapter = new AdapterTrack(this, playQueueRelative.getTracks(), position, recyclerView) {
+            trackAdapter = new AdapterLoadQueue(this, playQueueRelative.getTracks(), position, recyclerView) {
                 @Override
                 List<Track> getMore() {
                     return PlayQueue.queue.getMore(trackAdapter.getItemCount() - 1 + offset, playlist);

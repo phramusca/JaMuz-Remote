@@ -2,10 +2,6 @@ package phramusca.com.jamuzremote;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 
 import androidx.annotation.NonNull;
@@ -19,14 +15,14 @@ import java.util.Locale;
  * Created by raph on 03/03/18.
  */
 
-public abstract class AdapterTrack extends AdapterLoad {
+public abstract class AdapterLoadQueue extends AdapterLoad {
 
     private final Context mContext;
     private boolean complete;
     private boolean completeTop;
     TrackList trackList;
 
-    AdapterTrack(Context context, List<Track> tracks, int positionPlaying, RecyclerView recyclerView) {
+    AdapterLoadQueue(Context context, List<Track> tracks, int positionPlaying, RecyclerView recyclerView) {
         super(context, recyclerView);
         mContext = context;
         trackList = new TrackList(tracks, positionPlaying);
@@ -121,16 +117,6 @@ public abstract class AdapterTrack extends AdapterLoad {
 
     void setView(int position, UserViewHolder userViewHolder,
                  String line1, String line2, String line3, String line4) {
-        if (trackList.get(position).getStatus().equals(Track.Status.INFO)) {
-            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.colorAccent));
-            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.colorAccent));
-        } else if (trackList.get(position).getStatus().equals(Track.Status.ERROR)) {
-            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.lightYellow));
-            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.lightYellow));
-        } else {
-            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
-            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
-        }
 
         userViewHolder.item_line1.setText(line1);
         userViewHolder.item_line2.setText(line2);
@@ -141,47 +127,33 @@ public abstract class AdapterTrack extends AdapterLoad {
         if (bitmap == null) {
             bitmap = HelperBitmap.getEmptyThumb();
         }
+
         if (position == trackList.getPositionPlaying()) {
-            bitmap = overlayIcon(bitmap, R.drawable.ic_playing, mContext);
-        }
-
-        if (trackList.get(position).getStatus().equals(Track.Status.NEW)) {
-            bitmap = overlayIcon(bitmap, R.drawable.ic_download, mContext);
-        } else if (trackList.get(position).getStatus().equals(Track.Status.ERROR)) {
-            bitmap = overlayIcon(bitmap, R.drawable.ic_error, mContext);
-        }
-
-        userViewHolder.imageViewCover.setImageBitmap(bitmap);
-
-        if (trackList.get(position).isHistory()) {
+            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
+            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
+            userViewHolder.item_line3.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
+            userViewHolder.item_line4.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
             userViewHolder.layout_item.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
+            bitmap = HelperBitmap.overlayIcon(bitmap, R.drawable.ic_playing, mContext);
+        } else if (trackList.get(position).isHistory()) {
+            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark));
+            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark));
+            userViewHolder.item_line3.setTextColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark));
+            userViewHolder.item_line4.setTextColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark));
+            userViewHolder.layout_item.setBackgroundColor(ContextCompat.getColor(mContext, R.color.background_color));
         } else {
+            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
+            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
+            userViewHolder.item_line3.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
+            userViewHolder.item_line4.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
             userViewHolder.layout_item.setBackgroundColor(ContextCompat.getColor(mContext, R.color.background_color));
         }
+        userViewHolder.imageViewCover.setImageBitmap(bitmap);
 
         userViewHolder.itemView.setTag(position);
         userViewHolder.itemView.setOnClickListener(view -> {
             Integer position1 = (Integer) view.getTag();
             sendListener(trackList.get(position1), position1);
         });
-    }
-
-    public static Bitmap overlayIcon(Bitmap bitmap, int iconId, Context context) {
-        int margin = 15;
-        Bitmap bmOverlay = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
-        Canvas canvas = new Canvas(bmOverlay);
-        canvas.drawBitmap(bitmap, new Matrix(), null); //TODO: Paint in black if cover is too much white
-        Bitmap playingBitmap = BitmapFactory.decodeResource(context.getResources(), iconId);
-        int newWidth = bmOverlay.getWidth() - (margin * 2);
-        int newHeight = bmOverlay.getHeight() - (margin * 2);
-        int width = playingBitmap.getWidth();
-        int height = playingBitmap.getHeight();
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-        Matrix matrix = new Matrix();
-        matrix.postScale(scaleWidth, scaleHeight);
-        matrix.postTranslate(margin, margin);
-        canvas.drawBitmap(playingBitmap, matrix, null);
-        return bmOverlay;
     }
 }
