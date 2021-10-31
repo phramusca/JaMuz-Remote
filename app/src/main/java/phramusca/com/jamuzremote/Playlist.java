@@ -58,15 +58,18 @@ public class Playlist implements Comparable, Serializable {
     }
 
     public Cursor getTracks() {
-        return HelperLibrary.musicLibrary.getTracksCursor(false, getWhere(new ArrayList<>(), new ArrayList<Track.Status>() {
-            {
-                add(Track.Status.REC);
-                add(Track.Status.LOCAL);
-                add(Track.Status.INFO);
-                add(Track.Status.NEW);
-                add(Track.Status.ERROR);
-            }
-        }), getHaving(), order.value, -1);
+        if(HelperLibrary.musicLibrary!=null) {
+            return HelperLibrary.musicLibrary.getTracksCursor(false, getWhere(new ArrayList<>(), new ArrayList<Track.Status>() {
+                {
+                    add(Track.Status.REC);
+                    add(Track.Status.LOCAL);
+                    add(Track.Status.INFO);
+                    add(Track.Status.NEW);
+                    add(Track.Status.ERROR);
+                }
+            }), getHaving(), order.value, -1);
+        }
+        return null;
     }
 
     public void getNbFiles() {
