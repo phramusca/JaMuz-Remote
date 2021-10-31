@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/ic_button_back"/>
         <TextView
-            android:text="@string/settings"
+            android:text="@string/settingsTitle"
             android:layout_row="0"
             android:layout_column="1"
             android:textColor="@color/textColor"
@@ -31,11 +31,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-            <TextView android:text="JaMuz Server"
+
+            <TextView android:text="@string/settingsServerTitle"
                 android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:gravity="center_horizontal"
+                android:gravity="left"
                 android:layout_marginTop="5dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
@@ -55,20 +56,20 @@
                     android:layout_row="0"
                     android:layout_column="0"
                     android:orientation="horizontal" />
-                <TextView android:text="@string/lt_ip_gt_lt_port_gt"
+                <TextView android:text="@string/settingsServerTextViewIpPort"
                     android:layout_row="0"
                     android:layout_column="1"
                     android:textColor="@color/textColor"/>
                 <EditText android:id="@+id/editText_info"
                     android:inputType="text"
                     android:imeOptions="actionDone"
-                    android:text="@string/defaultConnectionString"
+                    android:text="@string/settingsServerDefaultConnectionString"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:enabled="true"
                     android:layout_gravity="start|end"
                     android:gravity="center_horizontal"
-                    android:hint="@string/lt_ip_gt_lt_port_gt"
+                    android:hint="@string/settingsServerTextViewIpPort"
                     android:layout_row="0"
                     android:layout_column="2"
                     android:textColor="@color/textColor"
@@ -80,7 +81,7 @@
                     android:textColor="@color/textColor"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/save"
+                    android:text="@string/settingsServerButonSave"
                     android:id="@+id/button_save_connectionString"
                     android:layout_row="0"
                     android:layout_column="3"
@@ -92,7 +93,7 @@
                     android:textColor="@color/textColor"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/scan_qr"
+                    android:text="@string/settingsServerButtonScanQR"
                     android:id="@+id/button_scan_QR"
                     android:layout_row="0"
                     android:layout_column="4"
@@ -102,7 +103,7 @@
                 android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:gravity="center_horizontal"
+                android:gravity="left"
                 android:layout_marginTop="5dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
@@ -114,7 +115,7 @@
                 android:paddingBottom="5dp"
                 android:background="@color/colorPrimary">
                 <TextView
-                    android:text="@string/replayGainBaseVolume"
+                    android:text="@string/settingsReplayGainTextViewBaseVolume"
                     android:layout_row="0"
                     android:layout_column="1"
                     android:textColor="@color/textColor"/>
@@ -129,11 +130,11 @@
                     android:paddingTop="5dp"/>
             </GridLayout>
 
-            <TextView android:text="Kids Place"
+            <TextView android:text="@string/settingsKidsPlaceTextViewTitle"
                 android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:gravity="center_horizontal"
+                android:gravity="left"
                 android:layout_marginTop="5dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
@@ -145,16 +146,17 @@
                 android:paddingBottom="5dp"
                 android:orientation="vertical"
                 android:background="@color/colorPrimary">
-                <TextView android:text="Kids Place is a third party application that can be found in Android Play."
+
+                <TextView android:text="@string/settingsKidsPlaceTextViewHelp"
                     android:textColor="@color/textColor"
-                    android:gravity="center_horizontal"
+                    android:gravity="left"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent" />
 
-                <CheckBox android:id="@+id/kidsplaceLimit"
+                <CheckBox android:id="@+id/settingsCheckBoxKidsPlaceLimit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Limit to playlist:"
+                    android:text="@string/settingsKidsPlaceCheckBoxLimit"
                     android:textColor="@color/textColor" />
                 <Spinner android:id="@+id/kidsplaceLimitPlaylist"
                     android:layout_width="match_parent"
@@ -163,39 +165,53 @@
                     android:layout_gravity="center_vertical|start|end"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"/>
-                <CheckBox android:id="@+id/kidsplaceAllowAddNewDel"
-                    android:text="Allow playlist add/new/delete"
+                <CheckBox android:id="@+id/settingsCheckBoxKidsPlaceAllowAddNewDel"
+                    android:text="@string/settingsKidsPlaceCheckBoxAllowDeleteSaveNew"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:textColor="@color/textColor"/>
-                <CheckBox android:id="@+id/kidsplaceAllowEdition"
-                    android:text="Allow track edition"
+                <CheckBox android:id="@+id/settingsCheckBoxKidsPlaceAllowEdition"
+                    android:text="@string/settingsKidsPlaceCheckBoxAllowEdition"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:textColor="@color/textColor"/>
-                <CheckBox android:id="@+id/kidsplaceOnStartup"
-                    android:text="Start KidsPlace with JaMuz"
+                <CheckBox android:id="@+id/settingsCheckBoxKidsPlaceOnStartup"
+                    android:text="@string/settingsKidsPlaceCheckBoxOnStartup"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:textColor="@color/textColor"/>
             </LinearLayout>
-            <TextView android:text="Local files"
+            <TextView android:text="@string/settingsLocalFilesTextViewTitle"
                 android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:gravity="center_horizontal"
+                android:gravity="left"
                 android:layout_marginTop="5dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:background="@color/colorPrimaryDark"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:orientation="vertical"
+            android:background="@color/colorPrimary">
+            <TextView android:text="@string/settingsLocalFilesTextViewHelp"
+                android:textColor="@color/textColor"
+                android:gravity="left"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent" />
+
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:background="@color/colorPrimary">
+
                 <TextView
-                    android:text="@string/path"
+                    android:text="@string/settingsLocalFilesTextViewPath"
                     android:layout_row="0"
                     android:layout_column="1"
                     android:textColor="@color/textColor"/>
@@ -219,12 +235,13 @@
                     android:textColor="@color/textColor"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/choose"
+                    android:text="@string/settingsLocalFilesButtonChoose"
                     android:id="@+id/button_browse"
                     android:layout_row="0"
                     android:layout_column="3"
                     android:textAllCaps="false"/>
             </GridLayout>
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

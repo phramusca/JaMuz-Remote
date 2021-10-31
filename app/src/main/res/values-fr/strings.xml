@@ -1,45 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="action_settings">Paramètres</string>
-    <string name="save">Sauver</string>
-    <string name="path">Chemin :</string>
-    <string name="choose">Choisir</string>
-    <string name="exclude_the_last">Exclure les </string>
-    <string name="played"> derniers</string>
-    <string name="order_by">Trier par:</string>
-    <string name="random">Aléatoire</string>
-    <string name="play_counter_last_played">Nombre de lectures, Dernière lecture</string>
-    <string name="replayGainBaseVolume">Volume de base ReplayGain :</string>
-    <string name="welcomeTitle">Bienvenue dans</string>
-    <string name="pathInfo">Choisissez un chemin additionnel comme source locale de musique. A noter qu\'il est recommandé d\'utiliser JaMuz cependant.</string>
-    <string name="queue_history">Historique</string>
-    <string name="unknownCommand">Commande incomprise:</string>
-    <string name="playlist">Liste de lecture</string>
-    <string name="restored">restaurée</string>
-    <string name="successfully">avec succès.</string>
-    <string name="withErrors">avec erreurs !</string>
-    <string name="saved">sauvée</string>
-    <string name="notFound">introuvable.</string>
-    <string name="artist">Artiste</string>
-    <string name="album">Album</string>
-    <string name="specifyAlbum">Spécifiez un album.</string>
-    <string name="specifyArtist">Spécifiez un artiste.</string>
-    <string name="readingList">Lecture de la liste …</string>
-    <string name="connecting">Connexion …</string>
-    <string name="playlistName">Nom de la nouvelle liste</string>
-    <string name="ok">OK</string>
-    <string name="cancel">Annuler</string>
-    <string name="yes">Oui</string>
-    <string name="no">Non</string>
-    <string name="cannotDeleteLastPlaylist">Vous ne pouvez pas supprimer la dernière liste de lecture.</string>
-    <string name="playlistQuestion"> \?</string>
-    <string name="sureDelete">Etes vous sur de vouloir supprimer la liste de lecture</string>
-    <string name="deletePlaylist">Effacer la liste de lecture ?</string>
-    <string name="alreadyExists">existe déjà.</string>
-    <string name="newFolder">Nouveau dossier</string>
-    <string name="newFolderName">Nom du nouveau dossier</string>
-    <string name="cover">Pochette</string>
-    <string name="scan_qr">Scan QR</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!--FIXME NOW Translate whole project and submit to Weblate-->
+
+    <string name="mainWelcomeTitle">Bienvenue dans</string>
+    <!--<string name="applicationName" translatable="false">JaMuz</string>-->
+    <!--<string name="mainWelcomeYear" translatable="false">2021</string>-->
+    <!--<string name="mainDefaultPlaylistsFolderName" translatable="false">Playlists</string>-->
+
+    <string name="globalLabelOK">OK</string>
+    <string name="globalLabelCancel">Annuler</string>
+    <string name="globalLabelYes">Oui</string>
+    <string name="globalLabelNo">Non</string>
+
+    <string name="settingsTitle">Paramètres</string>
+
+    <string name="settingsServerTitle">Serveur JaMuz</string>
+    <!--<string name="settingsTextViewIpPort" translatable="false"><![CDATA[<IP>:<Port> :]]></string>-->
+    <!--<string name="settingsDefaultConnectionString" translatable="false">192.168.0.16:2013</string>-->
+    <string name="settingsServerButonSave">Sauver</string>
+    <string name="settingsServerButtonScanQR">Lire QR</string>
+
+    <string name="settingsReplayGainTextViewBaseVolume">Volume de base :</string>
+
+    <string name="settingsKidsPlaceTextViewTitle">Kids Place</string>
+    <string name="settingsKidsPlaceTextViewHelp">Kids Place est une application tierce qui peut être trouvée sur Android Play Store.</string>
+    <string name="settingsKidsPlaceCheckBoxLimit">Limiter à cette liste de lecture:</string>
+    <string name="settingsKidsPlaceCheckBoxAllowDeleteSaveNew">Autorisation de supprimer, sauver et créér une liste de lecture</string>
+    <string name="settingsKidsPlaceCheckBoxAllowEdition">Autoriser l\'édition des pistes</string>
+    <string name="settingsKidsPlaceCheckBoxOnStartup">Lancer KidsPlace avec JaMuz</string>
+
+    <string name="settingsLocalFilesTextViewTitle">Pistes locales</string>
+    <string name="settingsLocalFilesTextViewHelp"><html>Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local MAIS il est plutot recommandé d\'utiliser JaMuz Server pour télécharger vos pistes !<br />ATTENTION : Ces pistes ne seront PAS synchronisées avec JaMuz Server !</html></string>
+    <string name="settingsLocalFilesTextViewPath">Chemin :</string>
+    <string name="settingsLocalFilesButtonChoose">Choisir</string>
+    <string name="settingsDirectoryChooserButtonNewFolder">Nouveau dossier</string>
+    <string name="settingsDirectoryChooserNewFolderName">Nom du nouveau dossier</string>
+
+    <string name="playlistTextViewExcludeTheLast">Exclure les </string>
+    <string name="playlistTextViewPlayed">derniers</string>
+    <string name="playlistTextViewOrderBy">Trier par:</string>
+    <string name="playlistRadioButtonRandom">Aléatoire</string>
+    <string name="playlistRadioButtonOrderByPlayCounterLastPlayed">Nombre de lectures, Dernière lecture</string>
+
+    <string name="playlistLabel">Liste de Lecture</string>
+    <string name="playlistLabelHistory">Historique</string>
+    <string name="playlistLabelUser">Utilisateur</string>
+    <string name="playlistLabelSaved">enregistré</string>
+    <string name="playlistLabelrestored">restauré</string>
+    <string name="playlistLabelSuccessfully">avec succès.</string>
+    <string name="playlistLabelWithErrors">avec erreurs !</string>
+    <string name="playlistLabelNewName">Nom de la nouvelle liste de lecture</string>
+    <string name="playlistLabelAlreadyExists">existe déjà.</string>
+    <string name="playlistLabelQuestionDeleteTitle">Supprimer la liste de lecture ?</string>
+    <string name="playlistLabelQuestionDelete">Etes vous sur de vouloir supprimer la liste de lecture</string>
+    <string name="playlistLabelQuestionDeleteSuffix">" ?"</string>
+    <string name="playlistLabelCannotDeleteLastPlaylist">Vous ne pouvez pas supprimer la dernière liste de lecture.</string>
+
+    <string name="voiceUnknownCommand">Commande inconnue:</string>
+    <string name="voiceNotFound">introuvable.</string>
+    <string name="voiceArtist">Artiste</string>
+    <string name="voiceAlbum">Album</string>
+    <string name="voiceSpecifyAlbum">Spécifiez un album.</string>
+    <string name="voiceSpecifyArtist">Spécifiez un artiste.</string>
+
+    <string name="syncLabelReadingList">Lecture de la liste ...</string>
+    <string name="syncLabelConnecting">Connexion ...</string>
+
+    <string name="queueItemCoverDescription">Pochette</string>
+
+    <string name="permissionTitle">Attention!</string>
     <string name="permissionMsg_1">Pour une expérience optimale de JaMuz</string>
     <string name="permissionMsg_2">, merci de bien vouloir autoriser:</string>
     <string name="permissionMsg_3">Contenus multimédias</string>
@@ -49,11 +79,19 @@
     <string name="permissionMsg_7">- Enregistrer la base de données dans le répertoire JaMuz sur la carte SD interne</string>
     <string name="permissionMsg_8">Gestion des appels</string>
     <string name="permissionMsg_9">: Simplement pour mettre pause et reprendre la lecture lors des appels.</string>
-    <string name="warning">Attention !</string>
-    <string name="albums">Albums</string>
-    <string name="play_queue">File d\'Attente</string>
-    <string name="nbTracks">piste(s)</string>
-    <string name="album_tracks">Pistes de l\'album</string>
-    <string name="settings">Paramètres</string>
-    <string name="queue_user">Utilisateur</string>
+
+    <string name="contentAlbumsTitle">Albums</string>
+    <string name="contentQueueTitle">File d\'attente</string>
+    <string name="adapterCursorAlbumLabelTracks">pistes(s)</string>
+    <string name="contentAlbumTracksTitle">Pistes de l\'album</string>
+
+    <!--FIXME NOW Translate, knowing that it is also a keyword so need to split key and value-->
+    <!--<string-array name="limitUnits" tools:ignore="MissingTranslation">-->
+    <!--    <item>minutes</item>-->
+    <!--    <item>hours</item>-->
+    <!--    <item>days</item>-->
+    <!--    <item>months</item>-->
+    <!--    <item>years</item>-->
+    <!--</string-array>-->
+    
 </resources>

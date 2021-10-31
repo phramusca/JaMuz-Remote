@@ -84,11 +84,11 @@ public class DirectoryChooserDialog {
         AlertDialog.Builder dialogBuilder =
                 createDirectoryChooserDialog(dir, m_subdirs, new DirectoryOnClickListener());
 
-        dialogBuilder.setPositiveButton(R.string.ok, (dialog, which) -> {
+        dialogBuilder.setPositiveButton(R.string.globalLabelOK, (dialog, which) -> {
             if (m_chosenDirectoryListener != null) {
                 m_chosenDirectoryListener.onChosenDir(m_dir);
             }
-        }).setNegativeButton(R.string.cancel, null);
+        }).setNegativeButton(R.string.globalLabelCancel, null);
 
         final AlertDialog dirsDialog = dialogBuilder.create();
 
@@ -148,12 +148,12 @@ public class DirectoryChooserDialog {
 
         Button newDirButton = new Button(m_context);
         newDirButton.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        newDirButton.setText(R.string.newFolder);
+        newDirButton.setText(R.string.settingsDirectoryChooserButtonNewFolder);
         newDirButton.setOnClickListener(v -> {
             final EditText input = new EditText(m_context);
             new AlertDialog.Builder(m_context).
-                    setTitle(R.string.newFolderName).
-                    setView(input).setPositiveButton(R.string.ok, (dialog, whichButton) -> {
+                    setTitle(R.string.settingsDirectoryChooserNewFolderName).
+                    setView(input).setPositiveButton(R.string.globalLabelOK, (dialog, whichButton) -> {
                 Editable newDir = input.getText();
                 String newDirName = newDir.toString();
                 // Create new directory
@@ -166,7 +166,7 @@ public class DirectoryChooserDialog {
                             m_context, "Failed to create '" + newDirName +
                                     "' folder", Toast.LENGTH_SHORT).show();
                 }
-            }).setNegativeButton(R.string.cancel, null).show();
+            }).setNegativeButton(R.string.globalLabelCancel, null).show();
         });
         if (!m_isNewFolderEnabled) {
             newDirButton.setVisibility(View.GONE);

@@ -67,7 +67,7 @@ public class AdapterCursorAlbum extends AdapterCursor<AdapterLoad.UserViewHolder
 
         userViewHolder.item_line3.setText(String.format(Locale.ENGLISH, "%d %s.",
                 adapterListItemAlbum.getNbTracks(), //Includes nb of albums
-                parent.getContext().getString(R.string.nbTracks)));
+                parent.getContext().getString(R.string.adapterCursorAlbumLabelTracks)));
 
         userViewHolder.item_line4.setText(String.format(Locale.ENGLISH, "%.1f/5 %s",
                 adapterListItemAlbum.getRating(),

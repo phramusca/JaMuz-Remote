@@ -22,7 +22,7 @@
 
         <TextView
             android:id="@+id/album_tracks_title"
-            android:text="@string/album_tracks"
+            android:text="@string/contentAlbumTracksTitle"
             android:layout_row="0"
             android:layout_column="1"
             android:textColor="@color/textColor"

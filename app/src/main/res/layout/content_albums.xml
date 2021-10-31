@@ -23,7 +23,7 @@
             android:background="@drawable/ic_button_back"/>
 
         <TextView
-            android:text="@string/albums"
+            android:text="@string/contentAlbumsTitle"
             android:layout_row="0"
             android:layout_column="1"
             android:textColor="@color/textColor"

@@ -65,11 +65,8 @@ public class ActivitySettings extends AppCompatActivity {
         textViewPath = findViewById(R.id.textViewPath);
 
         String userPath = preferences.getString("userPath", "/");
-        String display = userPath.equals("/") ?
-                getString(R.string.pathInfo)
-                : userPath;
         textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
-                .concat(display)
+                .concat(userPath)
                 .concat("</html>"))));
         Button dirChooserButton = findViewById(R.id.button_browse);
         dirChooserButton.setOnClickListener(new View.OnClickListener() {
@@ -116,7 +113,7 @@ public class ActivitySettings extends AppCompatActivity {
             }
         });
 
-        CheckBox kidsplaceAllowAddNewDel = findViewById(R.id.kidsplaceAllowAddNewDel);
+        CheckBox kidsplaceAllowAddNewDel = findViewById(R.id.settingsCheckBoxKidsPlaceAllowAddNewDel);
         kidsplaceAllowAddNewDel.setOnCheckedChangeListener(
                 (buttonView, isChecked) ->
                         setConfig("kidsplaceAllowAddNewDel", isChecked)
@@ -125,7 +122,7 @@ public class ActivitySettings extends AppCompatActivity {
                 preferences.getBoolean("kidsplaceAllowAddNewDel", false));
 
         Spinner kidsplaceLimitPlaylist = findViewById(R.id.kidsplaceLimitPlaylist);
-        CheckBox kidsplaceLimit = findViewById(R.id.kidsplaceLimit);
+        CheckBox kidsplaceLimit = findViewById(R.id.settingsCheckBoxKidsPlaceLimit);
         kidsplaceLimit.setOnCheckedChangeListener(
                 (buttonView, isChecked) ->
                 {
@@ -162,7 +159,7 @@ public class ActivitySettings extends AppCompatActivity {
         kidsplaceLimit.setChecked(isKidsPlaceLimit);
         kidsplaceLimitPlaylist.setEnabled(isKidsPlaceLimit);
 
-        CheckBox kidsplaceOnStartup = findViewById(R.id.kidsplaceOnStartup);
+        CheckBox kidsplaceOnStartup = findViewById(R.id.settingsCheckBoxKidsPlaceOnStartup);
         kidsplaceOnStartup.setOnCheckedChangeListener(
                 (buttonView, isChecked) ->
                         setConfig("kidsplaceOnStartup", isChecked)
@@ -170,7 +167,7 @@ public class ActivitySettings extends AppCompatActivity {
         kidsplaceOnStartup.setChecked(
                 preferences.getBoolean("kidsplaceOnStartup", false));
 
-        CheckBox kidsplaceAllowEdition = findViewById(R.id.kidsplaceAllowEdition);
+        CheckBox kidsplaceAllowEdition = findViewById(R.id.settingsCheckBoxKidsPlaceAllowEdition);
         kidsplaceAllowEdition.setOnCheckedChangeListener(
                 (buttonView, isChecked) ->
                         setConfig("kidsplaceAllowEdition", isChecked)
