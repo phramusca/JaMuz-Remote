@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 //To export Voice Commands for documentation on wiki
-public class ExportVoiceCommands { //FIXME: Continue, split by language, export to md, ...
+public class ExportVoiceCommands { //FIXME NOW Continue, split by language, export to md, ...
 
     @Test
     public void main() {

@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!--FIXME: Translate whole project and submit to Weblate-->
+    <!--FIXME NOW Translate whole project and submit to Weblate-->
 
     <string name="app_name" translatable="false">JaMuz</string>
     <string name="lt_ip_gt_lt_port_gt" translatable="false"><![CDATA[<IP>:<Port> :]]></string>
@@ -65,7 +65,7 @@
     <string name="album_tracks">Album Tracks</string>
     <string name="settings">Settings</string>
 
-    <!--FIXME: Translate, knowing that it is also a keyword so need to split key and value-->
+    <!--FIXME NOW Translate, knowing that it is also a keyword so need to split key and value-->
     <string-array name="limitUnits" tools:ignore="MissingTranslation">
         <item>minutes</item>
         <item>hours</item>

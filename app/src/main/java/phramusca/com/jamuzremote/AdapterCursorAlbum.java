@@ -73,7 +73,7 @@ public class AdapterCursorAlbum extends AdapterCursor<AdapterLoad.UserViewHolder
                 adapterListItemAlbum.getRating(),
                 adapterListItemAlbum.getGenre()));
 
-        Bitmap bitmap = IconBufferCover.getCoverIcon(adapterListItemAlbum.getCoverHash(), adapterListItemAlbum.getPath(), IconBufferCover.IconSize.THUMB, false);
+        Bitmap bitmap = RepoCovers.getCoverIcon(adapterListItemAlbum.getCoverHash(), adapterListItemAlbum.getPath(), RepoCovers.IconSize.THUMB, false);
         if (bitmap == null) {
             bitmap = HelperBitmap.getEmptyThumb();
             readIconInThread(adapterListItemAlbum, userViewHolder);
@@ -84,11 +84,13 @@ public class AdapterCursorAlbum extends AdapterCursor<AdapterLoad.UserViewHolder
 
     private void readIconInThread(AdapterListItemAlbum adapterListItemAlbum, AdapterLoad.UserViewHolder userViewHolder) {
         new Thread(() -> {
-            Bitmap readBitmap = IconBufferCover.getCoverIcon(adapterListItemAlbum.getCoverHash(), adapterListItemAlbum.getPath(), IconBufferCover.IconSize.THUMB, true);
+            Bitmap readBitmap = RepoCovers.getCoverIcon(adapterListItemAlbum.getCoverHash(), adapterListItemAlbum.getPath(), RepoCovers.IconSize.THUMB, true);
             if (readBitmap != null) {
                 Bitmap finalReadBitmap = readBitmap;
                 new Handler(Looper.getMainLooper()).post(() -> userViewHolder.imageViewCover.setImageBitmap(finalReadBitmap));
             }
+            //FIXME NOW if readBitmap still null, get a path with status=REC
+            //  Would be better to directly have a proper path (status=REC)
         }).start();
     }
 

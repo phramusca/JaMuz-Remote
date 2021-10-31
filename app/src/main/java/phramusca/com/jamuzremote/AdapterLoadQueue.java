@@ -123,7 +123,7 @@ public abstract class AdapterLoadQueue extends AdapterLoad {
         userViewHolder.item_line3.setText(line3);
         userViewHolder.item_line4.setText(line4);
 
-        Bitmap bitmap = IconBufferCover.getCoverIcon(trackList.get(position), IconBufferCover.IconSize.THUMB, true);
+        Bitmap bitmap = RepoCovers.getCoverIcon(trackList.get(position), RepoCovers.IconSize.THUMB, true);
         if (bitmap == null) {
             bitmap = HelperBitmap.getEmptyThumb();
         }

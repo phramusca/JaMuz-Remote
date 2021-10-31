@@ -29,8 +29,8 @@
  /**
   * @author phramusca ( https://github.com/phramusca/JaMuz/ )
   */
- public class IconBufferCover {
-     private static final String TAG = IconBufferCover.class.getName();
+ public class RepoCovers {
+     private static final String TAG = RepoCovers.class.getName();
 
      /**
       * Get cover icon from cache

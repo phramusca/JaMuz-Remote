@@ -19,8 +19,8 @@ public final class RepoSync {
     private static Table<Integer, Track.Status, Track> tracks = null;
 
     protected synchronized static void read() {
-        //FIXME NOW for merge (and other as needed): Cursor to json : https://stackoverflow.com/questions/13070791/android-cursor-to-jsonarray
-        //FIXME NOW getTracks to return HashBasedTable to speed up a bit
+        //FIXME for merge (and other as needed): Cursor to json : https://stackoverflow.com/questions/13070791/android-cursor-to-jsonarray
+        //FIXME getTracks to return HashBasedTable to speed up a bit
         tracks = HashBasedTable.create();
         List<Track> newTracks = HelperLibrary.musicLibrary.getTracks(true, "WHERE status!=\"" + Track.Status.LOCAL.name() + "\"", "", "", -1);
         for (Track track : newTracks) {
