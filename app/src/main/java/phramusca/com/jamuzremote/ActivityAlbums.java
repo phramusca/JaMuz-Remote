@@ -1,11 +1,14 @@
 package phramusca.com.jamuzremote;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -63,7 +66,7 @@ public class ActivityAlbums extends AppCompatActivity {
             startActivityForResult(intent, ALBUM_TRACK_REQUEST_CODE);
         });
 
-        EditText queryText = (EditText) findViewById(R.id.filter_album);
+        EditText queryText = findViewById(R.id.filter_album);
         queryText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -83,6 +86,15 @@ public class ActivityAlbums extends AppCompatActivity {
             }
         });
         queryText.setOnEditorActionListener(new DoneOnEditorActionListener());
+
+        Button button_search = findViewById(R.id.button_search);
+        button_search.setOnClickListener(v -> {
+            queryText.setVisibility(View.VISIBLE);
+            queryText.requestFocus();
+            final InputMethodManager inputMethodManager = (InputMethodManager) getApplicationContext()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputMethodManager.showSoftInput(queryText, InputMethodManager.SHOW_IMPLICIT);
+        });
 
         new SwipeHelper(getApplicationContext(), recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
             @Override
