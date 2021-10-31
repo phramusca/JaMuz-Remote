@@ -37,7 +37,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         Cursor cursor = playlist.getTracks();
 
         Track track = null;
-        if (cursor.moveToPosition(0)) {
+        if (cursor != null && cursor.moveToPosition(0)) {
             track = HelperLibrary.musicLibrary.cursorToTrack(cursor, false);
         }
         if (track == null) {
