@@ -607,7 +607,11 @@ public class Track implements Serializable {
 
     //TODO: Do not update all, only requested fields
     public boolean update() {
-        return HelperLibrary.musicLibrary != null && HelperLibrary.musicLibrary.updateTrack(this, false);
+        boolean success =
+                HelperLibrary.musicLibrary != null
+                && HelperLibrary.musicLibrary.updateTrack(this, false);
+        RepoAlbums.reset();
+        return success;
     }
 
     /**
@@ -655,6 +659,7 @@ public class Track implements Serializable {
         if (HelperLibrary.musicLibrary != null) {
             setGenre(genre);
             HelperLibrary.musicLibrary.updateGenre(this);
+            RepoAlbums.reset();
         }
         return false;
     }

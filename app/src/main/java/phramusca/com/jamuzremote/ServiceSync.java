@@ -138,6 +138,7 @@ public class ServiceSync extends ServiceBase {
                 } else {
                     stopSync("Sync Complete. No downloads.", -1);
                 }
+                RepoAlbums.reset();
 
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error ProcessSync", e);
