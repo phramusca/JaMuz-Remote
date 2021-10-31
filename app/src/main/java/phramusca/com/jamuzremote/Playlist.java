@@ -461,6 +461,7 @@ public class Playlist implements Comparable, Serializable {
 
     public void setAlbum(String album) {
         this.album = album;
+        this.order = Order.DISC_TRACK;
     }
 
     /**
@@ -494,7 +495,8 @@ public class Playlist implements Comparable, Serializable {
 
     public enum Order {
         RANDOM("ORDER BY RANDOM()", "Random"), //NOI18N
-        PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed", "Least played first"); //NOI18N
+        PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed", "Least played first"),
+        DISC_TRACK("ORDER BY discNo, trackNo", "Track number"); //NOI18N
 
         private final String value;
         private final String display;

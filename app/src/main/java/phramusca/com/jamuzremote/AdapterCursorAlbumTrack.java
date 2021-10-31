@@ -98,7 +98,10 @@ public class AdapterCursorAlbumTrack extends CursorRecyclerViewAdapter<AdapterLo
             userViewHolder.item_line4.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
         }
 
-        userViewHolder.item_line1.setText(track.getTitle());
+        userViewHolder.item_line1.setText(String.format(Locale.ENGLISH,"%s%d %s",
+                track.getDiscTotal() > 1 ? "[" + track.getDiscNo() + "/" + track.getDiscTotal() + "] " : "",
+                track.getTrackNo(),
+                track.getTitle()));
         userViewHolder.item_line2.setText(track.getArtist());
         if(searchQuery!=null && !searchQuery.isEmpty()) {
             userViewHolder.item_line1.setTextToHighlight(searchQuery);
