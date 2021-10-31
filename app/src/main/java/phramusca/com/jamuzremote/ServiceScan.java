@@ -39,7 +39,7 @@ public class ServiceScan extends ServiceBase {
         }
 
         userPath = intent.getStringExtra("userPath");
-        scanLibrayInThread();
+        scanLibraryInThread();
         return START_REDELIVER_INTENT;
     }
 
@@ -50,7 +50,7 @@ public class ServiceScan extends ServiceBase {
         super.onDestroy();
     }
 
-    private void scanLibrayInThread() {
+    private void scanLibraryInThread() {
         new Thread() {
             public void run() {
                 runOnUiThread(() -> helperNotification.notifyBar(notificationScan, "Cleaning database..."));

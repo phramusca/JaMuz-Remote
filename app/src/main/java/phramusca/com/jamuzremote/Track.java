@@ -610,7 +610,6 @@ public class Track implements Serializable {
         boolean success =
                 HelperLibrary.musicLibrary != null
                 && HelperLibrary.musicLibrary.updateTrack(this, false);
-        RepoAlbums.reset();
         return success;
     }
 

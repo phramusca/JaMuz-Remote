@@ -726,6 +726,7 @@ public class ActivityMain extends AppCompatActivity {
         } else {
             displayedTrack.update();
             displayTrackDetails();
+            RepoAlbums.reset();
         }
         ratingBar.setEnabled(true);
     }
