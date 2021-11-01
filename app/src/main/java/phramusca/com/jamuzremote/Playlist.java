@@ -497,6 +497,7 @@ public class Playlist implements Comparable, Serializable {
     }
 
     public enum Order {
+        //FIXME NOW translate display
         RANDOM("ORDER BY RANDOM()", "Random"), //NOI18N
         PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed", "Least played first"),
         DISC_TRACK("ORDER BY discNo, trackNo", "Track number"); //NOI18N
@@ -515,11 +516,11 @@ public class Playlist implements Comparable, Serializable {
         }
     }
 
-    public boolean save() {
+    public boolean save(String folder) {
         Gson gson = new Gson();
         boolean previousModified = modified;
         modified = false; //otherwise saved as modified => non-sense
-        if (HelperFile.write("Playlists", getName() + ".plli", gson.toJson(this))) {
+        if (HelperFile.write(folder, getName() + ".plli", gson.toJson(this))) {
             return true;
         } else {
             modified = previousModified;

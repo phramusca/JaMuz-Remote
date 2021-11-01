@@ -8,8 +8,8 @@ import java.util.Arrays;
  */
 
 public class VoiceKeyWords {
-    //TODO: Translate vocal search commands
-    //TODO: Document this => help page
+    //FIXME NOW Translate vocal search commands
+    //FIXME NOW Document this => help page
     private static final ArrayList<KeyWord> KEY_WORDS = new ArrayList<>(
             Arrays.asList(
                     new KeyWord("artiste en cours", Command.PLAY_NEW_PLAYLIST_ARTIST_ONGOING),

@@ -4,9 +4,6 @@
     <!--FIXME NOW Translate whole project and submit to Weblate-->
 
     <string name="mainWelcomeTitle">Bienvenue dans</string>
-    <!--<string name="applicationName" translatable="false">JaMuz</string>-->
-    <!--<string name="mainWelcomeYear" translatable="false">2021</string>-->
-    <!--<string name="mainDefaultPlaylistsFolderName" translatable="false">Playlists</string>-->
 
     <string name="globalLabelOK">OK</string>
     <string name="globalLabelCancel">Annuler</string>
@@ -16,22 +13,20 @@
     <string name="settingsTitle">Paramètres</string>
 
     <string name="settingsServerTitle">Serveur JaMuz</string>
-    <!--<string name="settingsTextViewIpPort" translatable="false"><![CDATA[<IP>:<Port> :]]></string>-->
-    <!--<string name="settingsDefaultConnectionString" translatable="false">192.168.0.16:2013</string>-->
     <string name="settingsServerButonSave">Sauver</string>
     <string name="settingsServerButtonScanQR">Lire QR</string>
 
     <string name="settingsReplayGainTextViewBaseVolume">Volume de base :</string>
 
     <string name="settingsKidsPlaceTextViewTitle">Kids Place</string>
-    <string name="settingsKidsPlaceTextViewHelp">Kids Place est une application tierce qui peut être trouvée sur Android Play Store.</string>
+    <string name="settingsKidsPlaceTextViewHelp">Kids Place est une application tierce de kiddoware qui peut être trouvée sur l\'Android Play Store.</string>
     <string name="settingsKidsPlaceCheckBoxLimit">Limiter à cette liste de lecture:</string>
     <string name="settingsKidsPlaceCheckBoxAllowDeleteSaveNew">Autorisation de supprimer, sauver et créér une liste de lecture</string>
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Autoriser l\'édition des pistes</string>
-    <string name="settingsKidsPlaceCheckBoxOnStartup">Lancer KidsPlace avec JaMuz</string>
+    <string name="settingsKidsPlaceCheckBoxOnStartup">Lancer Kids Place avec JaMuz</string>
 
     <string name="settingsLocalFilesTextViewTitle">Pistes locales</string>
-    <string name="settingsLocalFilesTextViewHelp"><html>Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local MAIS il est plutot recommandé d\'utiliser JaMuz Server pour télécharger vos pistes !<br />ATTENTION : Ces pistes ne seront PAS synchronisées avec JaMuz Server !</html></string>
+    <string name="settingsLocalFilesTextViewHelp"><html>Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local.<br />ATTENTION : Les pistes locales ne seront PAS synchronisées avec JaMuz Server ! Il est fortement recommandé d\'utiliser plutôt JaMuz Server pour télécharger vos pistes !</html></string>
     <string name="settingsLocalFilesTextViewPath">Chemin :</string>
     <string name="settingsLocalFilesButtonChoose">Choisir</string>
     <string name="settingsDirectoryChooserButtonNewFolder">Nouveau dossier</string>
@@ -43,13 +38,13 @@
     <string name="playlistRadioButtonRandom">Aléatoire</string>
     <string name="playlistRadioButtonOrderByPlayCounterLastPlayed">Nombre de lectures, Dernière lecture</string>
 
-    <string name="playlistLabel">Liste de Lecture</string>
+    <string name="playlistLabel">La liste de Lecture</string>
     <string name="playlistLabelHistory">Historique</string>
     <string name="playlistLabelUser">Utilisateur</string>
-    <string name="playlistLabelSaved">enregistré</string>
-    <string name="playlistLabelrestored">restauré</string>
+    <string name="playlistLabelSaved">a été enregistrée</string>
+    <string name="playlistLabelrestored">a été restaurée</string>
     <string name="playlistLabelSuccessfully">avec succès.</string>
-    <string name="playlistLabelWithErrors">avec erreurs !</string>
+    <string name="playlistLabelWithErrors">avec des erreurs !</string>
     <string name="playlistLabelNewName">Nom de la nouvelle liste de lecture</string>
     <string name="playlistLabelAlreadyExists">existe déjà.</string>
     <string name="playlistLabelQuestionDeleteTitle">Supprimer la liste de lecture ?</string>
@@ -57,12 +52,12 @@
     <string name="playlistLabelQuestionDeleteSuffix">" ?"</string>
     <string name="playlistLabelCannotDeleteLastPlaylist">Vous ne pouvez pas supprimer la dernière liste de lecture.</string>
 
-    <string name="voiceUnknownCommand">Commande inconnue:</string>
-    <string name="voiceNotFound">introuvable.</string>
-    <string name="voiceArtist">Artiste</string>
-    <string name="voiceAlbum">Album</string>
-    <string name="voiceSpecifyAlbum">Spécifiez un album.</string>
-    <string name="voiceSpecifyArtist">Spécifiez un artiste.</string>
+    <string name="speakUnknownCommand">Commande inconnue:</string>
+    <string name="speakNotFound">est introuvable.</string>
+    <string name="speakArtist">L\'artiste</string>
+    <string name="speakAlbum">L\'album</string>
+    <string name="speakSpecifyAlbum">Spécifiez un album.</string>
+    <string name="speakSpecifyArtist">Spécifiez un artiste.</string>
 
     <string name="syncLabelReadingList">Lecture de la liste ...</string>
     <string name="syncLabelConnecting">Connexion ...</string>
@@ -84,14 +79,30 @@
     <string name="contentQueueTitle">File d\'attente</string>
     <string name="adapterCursorAlbumLabelTracks">pistes(s)</string>
     <string name="contentAlbumTracksTitle">Pistes de l\'album</string>
+    <string name="mainToastClientInfoBadFormat">Mauvais format:</string>
+    <string name="mainToastClientInfoExpected">Attendu:</string>
+    <string name="mainToastClientInfoIP">IP</string>
+    <string name="mainToastClientInfoPort">Port</string>
+    <string name="mainToastClientInfoEx">Ex:</string>
+    <string name="mainToastCheckWifiConnection">Vous devez vous connecter au réseau WiFi.</string>
+    <string name="mainToastQRread">QR code lu. Nouvelle configuration appliquée.</string>
+    <string name="mainToastEmptyPlaylist">Liste de lecture vide.</string>
+    <string name="mainToastNoTracksBeyond">Pas de piste précédente.</string>
+    <string name="mainToastNotImplemented">Non implémenté.</string>
+    <string name="mainAlertDialogClosingApplicationTitle">Fermeture de JaMuz</string>
+    <string name="mainAlertDialogClosingApplicationMessage">Etes vous sûr de vouloir quitter et arrêter la lecture ?</string>
+    <string name="settingsServerToastProblemQR">Problème pour lire le QR code.</string>
+    <string name="playlistDefaultAllPlaylistName">Tous</string>
+    <string name="voicePromptCommand">Dites une commande.\n  ex: \"Note 4\", \"Suivant\" ...</string>
+    <string name="speakYourTurn">A vous</string>
+    <string name="speakGenre">Genre</string>
+    <string name="speakUnknown">inconnu.</string>
+    <string name="speakRating">Note</string>
+    <string name="speakRatingIncorrect">incorrecte.</string>
+    <string name="speakTags">Tags</string>
+    <string name="speakTagsNone">Pas de tags.</string>
+    <string name="speakRatingNone">Pas de note.</string>
+    <string name="activityAlbumsLoading">Chargement de la liste des albums</string>
+    <string name="activityAlbumsLoadingPleaseWait">Merci de bien vouloir patienter quelques secondes.</string>
 
-    <!--FIXME NOW Translate, knowing that it is also a keyword so need to split key and value-->
-    <!--<string-array name="limitUnits" tools:ignore="MissingTranslation">-->
-    <!--    <item>minutes</item>-->
-    <!--    <item>hours</item>-->
-    <!--    <item>days</item>-->
-    <!--    <item>months</item>-->
-    <!--    <item>years</item>-->
-    <!--</string-array>-->
-    
 </resources>

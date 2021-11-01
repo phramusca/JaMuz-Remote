@@ -15,6 +15,7 @@ public class Notification {
     Notification(Context context, int id, String title) {
         builder = new NotificationCompat.Builder(context, "MyNotificationChannelId");
         builder.setContentTitle(title)
+                //FIXME NOW translate
                 .setContentText("Download in progress")
                 .setUsesChronometer(true)
                 .setSmallIcon(R.drawable.ic_process);

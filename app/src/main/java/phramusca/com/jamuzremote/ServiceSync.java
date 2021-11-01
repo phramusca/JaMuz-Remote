@@ -53,7 +53,9 @@ public class ServiceSync extends ServiceBase {
 
     @Override
     public void onCreate() {
+        //FIXME NOW translate
         notificationSync = new Notification(this, NotificationId.SYNC, "Sync");
+        //FIXME NOW translate
         notificationDownload = new Notification(this, NotificationId.SYNC_DOWN, "Sync");
         clientDownload = new OkHttpClient.Builder()
                 .readTimeout(60, TimeUnit.SECONDS)
@@ -139,6 +141,7 @@ public class ServiceSync extends ServiceBase {
                     processDownload.join();
                     processDownload.checkCompleted();
                 } else {
+                    //FIXME NOW translate
                     stopSync("Sync Complete. No downloads.", -1);
                 }
                 RepoAlbums.reset();
@@ -363,6 +366,7 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i(TAG, "UserStopServiceReceiver.onReceive()");
+            //FIXME NOW translate
             stopSync("User stopped.", 1500);
         }
     }
@@ -413,11 +417,14 @@ public class ServiceSync extends ServiceBase {
 
         private void checkCompleted() {
             int remaining = newTracks.size();
+            //FIXME NOW translate
             String msg = "Sync complete.\n\n";
             if (remaining < 1) {
+                //FIXME NOW translate
                 msg = msg + "All " + nbFilesStart + " files" +
                         " have been downloaded successfully.";
             } else {
+                //FIXME NOW translate
                 msg = msg + (nbFilesStart - remaining) + " files downloaded, " +
                         "but still " + remaining + " files to be downloaded.";
             }

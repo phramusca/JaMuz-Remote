@@ -182,7 +182,7 @@ public class ActivitySettings extends AppCompatActivity {
             //https://www.simplifiedcoding.net/android-qr-code-scanner-tutorial/
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
             if (result == null || result.getContents() == null) {
-                Toast.makeText(this, "Problem reading QR code", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.settingsServerToastProblemQR), Toast.LENGTH_LONG).show();
             } else {
                 data.putExtra("QRcode", result.getContents());
                 setResult(RESULT_OK, data);

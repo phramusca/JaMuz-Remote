@@ -29,7 +29,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         TextView title = findViewById(R.id.album_tracks_title);
 
         Intent intent = getIntent();
-        final String album = (String) intent.getSerializableExtra("album");
+        final String album = (String) intent.getSerializableExtra("album"); //NON-NLS
         String searchQuery = intent.getStringExtra("searchQuery");
 
         Playlist playlist = new Playlist(album, true);

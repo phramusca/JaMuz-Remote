@@ -38,9 +38,9 @@ public class ActivityAlbums extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setTitle("Loading album list...");
+        mProgressDialog.setTitle(getString(R.string.activityAlbumsLoading));
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgressDialog.setMessage("Please wait a few seconds.");
+        mProgressDialog.setMessage(getString(R.string.activityAlbumsLoadingPleaseWait));
         mProgressDialog.show();
         loadItems();
     }
@@ -62,7 +62,7 @@ public class ActivityAlbums extends AppCompatActivity {
         adapterCursorAlbum.addListener(adapterListItemAlbum -> {
             //Open album tracks layout
             Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
-            intent.putExtra("album", adapterListItemAlbum.getAlbum());
+            intent.putExtra("album", adapterListItemAlbum.getAlbum()); //NON-NLS
             intent.putExtra("searchQuery", searchQuery);
             startActivityForResult(intent, ALBUM_TRACK_REQUEST_CODE);
         });
@@ -141,7 +141,7 @@ public class ActivityAlbums extends AppCompatActivity {
         PlayQueue.queue.insert(playlist);
 
         Intent data = new Intent();
-        data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue");
+        data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue"); //NON-NLS
         setResult(RESULT_OK, data);
         finish();
     }
