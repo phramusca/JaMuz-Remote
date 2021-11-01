@@ -53,8 +53,7 @@ public class ServiceScan extends ServiceBase {
     private void scanLibraryInThread() {
         new Thread() {
             public void run() {
-                //FIXME NOW Translate
-                runOnUiThread(() -> helperNotification.notifyBar(notificationScan, "Cleaning database..."));
+                runOnUiThread(() -> helperNotification.notifyBar(notificationScan, getString(R.string.serviceScanNotifyCleaningDatabase)));
                 if (HelperLibrary.musicLibrary != null) {
                     //Delete tracks from database that are from another folder than those 2
                     HelperLibrary.musicLibrary.deleteTrack(getAppDataPath, userPath);
@@ -65,8 +64,7 @@ public class ServiceScan extends ServiceBase {
                     RepoAlbums.reset();
 
                     //Scan complete, warn user
-                    //FIXME NOW Translate
-                    final String msg = "Database updated.";
+                    final String msg = getString(R.string.serviceScanNotifyDatabaseUpdated);
                     runOnUiThread(() -> {
                         helperToast.toastLong(msg);
                         helperNotification.notifyBar(notificationScan, msg, 5000);
@@ -144,8 +142,7 @@ public class ServiceScan extends ServiceBase {
                             Log.d(TAG, "Remove track from db: " + track);
                             track.delete();
                         }
-                        //FIXME NOW translate
-                        notifyScan("Scanning deleted files ... ", 200);
+                        notifyScan(getString(R.string.serviceScanNotifyScanningDeleted), 200);
                     }
                 } catch (InterruptedException e) {
                     Log.w(TAG, "Thread.ActivityMain.scanLibrayInThread InterruptedException");

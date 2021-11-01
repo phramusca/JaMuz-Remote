@@ -477,8 +477,8 @@ public class Track implements Serializable {
     public String getLastPlayedAgo() {
         PrettyTime prettyTime = new PrettyTime(Locale.getDefault());
         //FIXME NOW translate
-        return playCounter <= 0 ? "Jamais joué. "
-                : "Joué " + prettyTime.format(lastPlayed) + " (" + playCounter + "x). ";
+        return playCounter <= 0 ? "Jamais joué."+" "
+                : "Joué"+" " + prettyTime.format(lastPlayed) + " (" + playCounter + "x). ";
     }
 
     public String getAddedDateAgo() {

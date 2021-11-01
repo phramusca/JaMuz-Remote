@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!--FIXME NOW Translate whole project and submit to Weblate-->
-
     <string name="mainWelcomeTitle">Bienvenue dans</string>
 
     <string name="globalLabelOK">OK</string>
@@ -104,5 +102,13 @@
     <string name="speakRatingNone">Pas de note.</string>
     <string name="activityAlbumsLoading">Chargement de la liste des albums</string>
     <string name="activityAlbumsLoadingPleaseWait">Merci de bien vouloir patienter quelques secondes.</string>
+    <string name="settingsDirectoryChooserFailedToCreate">Erreur à la création du dossier</string>
+    <string name="settingsDirectoryChooserFailedToCreateSuffix">" ."</string>
+    <string name="audioPlayerToastRgBaseVolTooHigh">Volume de base trop haut.</string>
+    <string name="audioPlayerToastRgConsiderLower">Si vous voyez ce message trop souvent, veuillez considérer de le baisser dans les paramètres ! (Il s\'agit peut être d\'un problème isolé)</string>
+    <string name="retryInterceptorLabelBefore">avant</string>
+    <string name="serviceScanNotifyCleaningDatabase">Nettoyage de la base de données...</string>
+    <string name="serviceScanNotifyDatabaseUpdated">Base de données à jour.</string>
+    <string name="serviceScanNotifyScanningDeleted">Recherche de fichiers supprimés ...</string>
 
 </resources>

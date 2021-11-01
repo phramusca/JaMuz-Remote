@@ -163,9 +163,11 @@ public class DirectoryChooserDialog {
                     updateDirectory();
                 } else {
                     Toast.makeText(
-                            //FIXME NOW translate
-                            m_context, "Failed to create '" + newDirName +
-                                    "' folder", Toast.LENGTH_SHORT).show();
+                            m_context, String.format("%s \"%s\" %s",
+                                    m_context.getString(R.string.settingsDirectoryChooserFailedToCreate),
+                                    newDirName,
+                                    m_context.getString(R.string.settingsDirectoryChooserFailedToCreateSuffix)),
+                            Toast.LENGTH_SHORT).show();
                 }
             }).setNegativeButton(R.string.globalLabelCancel, null).show();
         });
