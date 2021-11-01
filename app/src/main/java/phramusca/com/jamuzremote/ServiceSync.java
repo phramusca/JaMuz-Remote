@@ -53,10 +53,8 @@ public class ServiceSync extends ServiceBase {
 
     @Override
     public void onCreate() {
-        //FIXME NOW translate
-        notificationSync = new Notification(this, NotificationId.SYNC, "Sync");
-        //FIXME NOW translate
-        notificationDownload = new Notification(this, NotificationId.SYNC_DOWN, "Sync");
+        notificationSync = new Notification(this, NotificationId.SYNC, getString(R.string.serviceSyncNotifySyncTitle));
+        notificationDownload = new Notification(this, NotificationId.SYNC_DOWN, getString(R.string.serviceSyncNotifyDownloadTitle));
         clientDownload = new OkHttpClient.Builder()
                 .readTimeout(60, TimeUnit.SECONDS)
                 .build();
@@ -119,36 +117,32 @@ public class ServiceSync extends ServiceBase {
                 checkFiles(Track.Status.INFO);
 
                 //Remove files in db but not received from server
-                //FIXME NOW Translate
-                helperNotification.notifyBar(notificationSync, "Removing deleted files...");
+                helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRemovingDeleted));
                 List<Track> trackList = RepoSync.getNotSyncedList();
                 int nbTracks = trackList.size();
                 int i = 0;
                 for (Track track : trackList) {
                     checkAbort();
                     i++;
-                    //FIXME NOW Translate
-                    helperNotification.notifyBar(notificationSync, "Removing deleted files", 10, i, nbTracks);
+                    helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRemovingDeleted), 10, i, nbTracks);
                     File file = new File(track.getPath());
                     //noinspection ResultOfMethodCallIgnored
                     file.delete();
                     HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
                 }
 
-                //FIXME NOW Translate
-                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, "Check complete.", -1));
+                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncCheckComplete), -1));
                 if (processDownload != null) {
                     processDownload.join();
                     processDownload.checkCompleted();
                 } else {
-                    //FIXME NOW translate
-                    stopSync("Sync Complete. No downloads.", -1);
+                    stopSync(getString(R.string.serviceSyncNotifySyncCompleteNoDownloads), -1);
                 }
                 RepoAlbums.reset();
 
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error ProcessSync", e);
-                helperNotification.notifyBar(notificationSync, "Interrupted ");
+                helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncInterrupted));
             } catch (Exception e) {
                 Log.e(TAG, "Error ProcessSync", e);
                 helperNotification.notifyBar(notificationSync, "ERROR: " + e.getLocalizedMessage(), 0, 0, false,
@@ -160,8 +154,11 @@ public class ServiceSync extends ServiceBase {
                 throws InterruptedException, ServerException, IOException {
             int nbFilesInBatch = 500;
             int nbFilesServer = getFilesCount(status);
-            //FIXME NOW Translate
-            String msg = "Checking " + status.name().toLowerCase() + " files ...";
+            String msg = String.format(
+                    "%s %s %s",
+                    getString(R.string.serviceSyncNotifySyncChecking),
+                    status.name().toLowerCase(),
+                    getString(R.string.serviceSyncNotifySyncCheckingSuffix));
             helperNotification.notifyBar(notificationSync, msg);
             if (nbFilesServer > 0) {
                 for (int i = 0; i <= nbFilesServer; i = i + nbFilesInBatch) {
@@ -250,9 +247,13 @@ public class ServiceSync extends ServiceBase {
                 } catch (Exception e) {
                     msg = e.getLocalizedMessage();
                     Log.d(TAG, "ERROR: " + msg);
-                    //FIXME NOW Translate
-                    helperNotification.notifyBar(notificationSync, sleepSeconds + "s before " +
-                            (nbRetries + 1) + "/" + maxNbRetries + " : " + msg);
+                    helperNotification.notifyBar(notificationSync, String.format(
+                            "%ds %s %d/%d : %s",
+                            sleepSeconds,
+                            getString(R.string.globalLabelBefore),
+                            nbRetries + 1,
+                            maxNbRetries,
+                            msg));
                     try {
                         sleep(sleepSeconds * 1000);
                     } catch (InterruptedException ex) {
@@ -270,15 +271,17 @@ public class ServiceSync extends ServiceBase {
             HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/" + status.name());
             urlBuilder.addQueryParameter("getCount", "true");
             String body = clientInfo.getBodyString(urlBuilder, client);
-            //FIXME NOW Translate
-            helperNotification.notifyBar(notificationSync, "Received " + status.name() + " files count ... ");
+            helperNotification.notifyBar(notificationSync, String.format(
+                    "%s %s %s",
+                    getString(R.string.serviceSyncNotifySyncReceived),
+                    status.name(),
+                    getString(R.string.serviceSyncNotifySyncReceivedSuffix)));
             return Integer.valueOf(body);
         }
 
         private void getTags() throws IOException, ServerException, JSONException {
             String body = clientInfo.getBodyString("tags", client);
-            //FIXME NOW Translate
-            helperNotification.notifyBar(notificationSync, "Received tags ... ");
+            helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncReceivedTags));
             final JSONObject jObject = new JSONObject(body);
             //FIXME: Get tags list with their respective number of files, for sorting
             //TODO: Then add a "x/y" button to display pages x/y (# of tags per page to be defined/optional)
@@ -293,8 +296,7 @@ public class ServiceSync extends ServiceBase {
 
         private void getGenres() throws IOException, ServerException, JSONException {
             String body = clientInfo.getBodyString("genres", client);
-            //FIXME NOW Translate
-            helperNotification.notifyBar(notificationSync, "Received genres ... ");
+            helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncReceivedGenres));
             final JSONObject jObject = new JSONObject(body);
             final JSONArray jsonGenres = (JSONArray) jObject.get("genres");
             final List<String> newGenres = new ArrayList<>();
@@ -307,8 +309,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         private void requestMerge() throws JSONException, ServerException, IOException {
-            //FIXME NOW Translate
-            helperNotification.notifyBar(notificationSync, "Preparing statistics merge.");
+            helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncPreparingMerge));
             List<Track> tracks = RepoSync.getMergeList();
             for (Track track : tracks) {
                 track.getTags(true);
@@ -326,11 +327,9 @@ public class ServiceSync extends ServiceBase {
             HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files");
             Request request = clientInfo.getRequestBuilder(urlBuilder)
                     .post(RequestBody.create(obj.toString(), MediaType.parse("application/json; charset=utf-8"))).build();
-            //FIXME NOW Translate
-            helperNotification.notifyBar(notificationSync, "Requesting statistics merge.");
+            helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRequestingMerge));
             String body = clientInfo.getBodyString(request, client);
-            //FIXME NOW Translate
-            helperNotification.notifyBar(notificationSync, "Updating database with merge changes ... ");
+            helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncUpdateDatabase));
             final JSONObject jObject = new JSONObject(body);
             JSONArray filesToUpdate = (JSONArray) jObject.get("files");
             for (int i = 0; i < filesToUpdate.length(); i++) {
@@ -339,12 +338,10 @@ public class ServiceSync extends ServiceBase {
                         getAppDataPath, true);
                 fileReceived.setStatus(Track.Status.REC);
                 HelperLibrary.musicLibrary.updateTrack(fileReceived, true);
-                //FIXME NOW Translate
-                helperNotification.notifyBar(notificationSync, "Updating database with merge changes",
+                helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncUpdateDatabase),
                         10, i + 1, filesToUpdate.length());
             }
-            //FIXME NOW Translate
-            helperNotification.notifyBar(notificationSync, "Merge complete.");
+            helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncMergeComplete));
         }
     }
 
@@ -366,8 +363,7 @@ public class ServiceSync extends ServiceBase {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i(TAG, "UserStopServiceReceiver.onReceive()");
-            //FIXME NOW translate
-            stopSync("User stopped.", 1500);
+            stopSync(getString(R.string.serviceSyncNotifySyncUserStopped), 1500);
         }
     }
 
@@ -417,21 +413,22 @@ public class ServiceSync extends ServiceBase {
 
         private void checkCompleted() {
             int remaining = newTracks.size();
-            //FIXME NOW translate
-            String msg = "Sync complete.\n\n";
+            StringBuilder builder = new StringBuilder()
+                    .append(getString(R.string.serviceSyncNotifySyncComplete)).append("\n\n");
             if (remaining < 1) {
-                //FIXME NOW translate
-                msg = msg + "All " + nbFilesStart + " files" +
-                        " have been downloaded successfully.";
+                builder.append(getString(R.string.serviceSyncNotifySyncAll))
+                        .append(" ").append(nbFilesStart).append(" ")
+                        .append(getString(R.string.serviceSyncNotifySyncSuccess));
             } else {
-                //FIXME NOW translate
-                msg = msg + (nbFilesStart - remaining) + " files downloaded, " +
-                        "but still " + remaining + " files to be downloaded.";
+                builder.append(getString(R.string.serviceSyncNotifySyncDownloaded))
+                        .append(" ").append(nbFilesStart - remaining).append(". ")
+                        .append(getString(R.string.serviceSyncNotifySyncRemaning))
+                        .append(" ").append(remaining).append(".");
             }
-            Log.i(TAG, msg);
-            String finalToastMsg = msg;
+            String finalToastMsg = builder.toString();
+            Log.i(TAG, finalToastMsg);
             runOnUiThread(() -> helperToast.toastLong(finalToastMsg));
-            stopSync(msg, -1);
+            stopSync(finalToastMsg, -1);
         }
 
         private void notifyBarProgress(Track track) {
@@ -444,12 +441,23 @@ public class ServiceSync extends ServiceBase {
                 }
                 bench.get(track.getSize());
             }
-            //FIXME NOW Translate
-            String bigText = "-" + newTracks.size() + "/" + nbFilesStart +
-                    "\n" + StringManager.humanReadableByteCount(sizeRemaining, false)
-                    + "/" + StringManager.humanReadableByteCount(sizeTotal, false) + "\n" +
-                    "Attempt " + (nbRetries + 1) + "/" + maxNbRetries + ". " + nbFailed + " Error(s).\n";
-            String msg = "Downloading ... " + bench.getLast();
+            String bigText = String.format(
+                    "-%d/%d\n%s/%s\n%s %d/%d. %d %s\n",
+                    newTracks.size(),
+                    nbFilesStart,
+                    StringManager.humanReadableByteCount(sizeRemaining, false),
+                    StringManager.humanReadableByteCount(sizeTotal, false),
+                    getString(R.string.serviceSyncNotifyDownloadAttempt),
+                    nbRetries + 1,
+                    maxNbRetries,
+                    nbFailed,
+                    getString(R.string.serviceSyncNotifyDownloadErrors));
+
+            String msg = String.format(
+                    "%s %s",
+                    getString(R.string.serviceSyncNotifyDownloading),
+                    bench.getLast());
+
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, msg,
                     nbFilesStart, (nbFilesStart - newTracks.size()), false,
                     true, true,
@@ -470,10 +478,14 @@ public class ServiceSync extends ServiceBase {
                     }
                     nbRetries++;
                     int sleepSeconds = nbRetries * 10;
-                    //FIXME NOW Translate
                     runOnUiThread(() -> helperNotification.notifyBar(notificationDownload,
-                            "Waiting " + sleepSeconds + "s before attempt " +
-                                    (nbRetries + 1) + "/" + maxNbRetries));
+                            String.format(
+                                    "%s %ds %s %d/%d",
+                                    getString(R.string.serviceSyncNotifyDownloadWaiting),
+                                    sleepSeconds,
+                                    getString(R.string.serviceSyncNotifyDownloadBeforeAttempt),
+                                    nbRetries + 1,
+                                    maxNbRetries)));
                     //noinspection BusyWait
                     sleep(sleepSeconds * 1000L);
                     checkAbort();
@@ -488,8 +500,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         private boolean startDownloads() throws InterruptedException {
-            //FIXME NOW Translate
-            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Starting download ... "));
+            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, getString(R.string.serviceSyncNotifyDownloadStarting)));
             bench = new Benchmark(newTracks.size(), 10);
             pool = Executors.newFixedThreadPool(20); //FIXME: Make number of threads an option AND add benchmark back
             downloadServices = new ArrayList<>();
@@ -510,16 +521,14 @@ public class ServiceSync extends ServiceBase {
 
         private void stopDownloads() {
             runOnUiThread(() -> {
-                //FIXME NOW Translate
-                helperNotification.notifyBar(notificationDownload, "Stopping downloads ... "); //, 5000);
+                helperNotification.notifyBar(notificationDownload, getString(R.string.serviceSyncNotifyDownloadStopping)); //, 5000);
             });
             pool.shutdownNow();
             for (DownloadTask downloadService : downloadServices) {
                 downloadService.abort();
             }
             abort();
-            //FIXME NOW Translate
-            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, "Downloads stopped.", 5000));
+            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, getString(R.string.serviceSyncNotifyDownloadStopped), 5000));
         }
     }
 
