@@ -497,22 +497,14 @@ public class Playlist implements Comparable, Serializable {
     }
 
     public enum Order {
-        //FIXME NOW translate display
-        RANDOM("ORDER BY RANDOM()", "Random"), //NOI18N
-        PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed", "Least played first"),
-        DISC_TRACK("ORDER BY discNo, trackNo", "Track number"); //NOI18N
+        RANDOM("ORDER BY RANDOM()"), //NOI18N
+        PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed"),
+        DISC_TRACK("ORDER BY discNo, trackNo"); //NOI18N
 
         private final String value;
-        private final String display;
 
-        Order(String value, String display) {
+        Order(String value) {
             this.value = value;
-            this.display = display;
-        }
-
-        @Override
-        public String toString() {
-            return display;
         }
     }
 

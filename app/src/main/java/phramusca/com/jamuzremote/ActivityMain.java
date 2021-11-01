@@ -683,7 +683,7 @@ public class ActivityMain extends AppCompatActivity {
         checkPermissionsThenScanLibrary();
 
         ListenerPlayer callBackPlayer = new ListenerPlayer();
-        audioPlayer = new AudioPlayer(callBackPlayer);
+        audioPlayer = new AudioPlayer(this, callBackPlayer);
         audioPlayer.setVolume(preferences.getInt("baseVolume", 70), displayedTrack);
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);

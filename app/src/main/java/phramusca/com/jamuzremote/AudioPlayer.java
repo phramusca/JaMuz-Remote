@@ -1,5 +1,6 @@
 package phramusca.com.jamuzremote;
 
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -12,6 +13,7 @@ import java.io.IOException;
  */
 public class AudioPlayer {
 
+    private Context mContext;
     private final IListenerPlayer callback;
     private static final String TAG = AudioPlayer.class.getName();
     private static MediaPlayer mediaPlayer;
@@ -19,7 +21,8 @@ public class AudioPlayer {
     private int duration;
     private boolean enableControl = false;
 
-    AudioPlayer(final IListenerPlayer callback) {
+    AudioPlayer(Context context, final IListenerPlayer callback) {
+        mContext = context;
         this.callback = callback;
     }
 
@@ -90,14 +93,14 @@ public class AudioPlayer {
         float rg_result = ((float) Math.pow(10, (adjust / 20))) * baseVolume;
         Log.i(TAG, "rg_result=" + rg_result);
         if (rg_result > 1.0f) {
-            //FIXME NOW translate
-            msg = "Base volume too high. " +
-                    "\nConsider lower it for replayGain to work properly !";
-            msg += "\n---------------" +
-                    "\n " + rg.toString() +
-                    "\n baseVolume=" + baseVolume +
-                    "\n adjust=" + adjust +
-                    "\n setVolume=" + rg_result + " (limit 1.0)";
+            msg = String.format(
+                    "%s \n%s\n---------------\n %s\n Base Volume=%s\n Adjust=%s\n Set Volume=%s (limit 1.0)",
+                    mContext.getString(R.string.audioPlayerToastRgBaseVolTooHigh),
+                    mContext.getString(R.string.audioPlayerToastRgConsiderLower),
+                    rg.toString(),
+                    baseVolume,
+                    adjust,
+                    rg_result);
             rg_result = 1.0f; /* android would IGNORE the change if this is > 1
                                     and we would end up with the wrong volume */
         } else if (rg_result < 0.0f) {

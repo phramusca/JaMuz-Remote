@@ -51,8 +51,11 @@
     <string name="settingsLocalFilesTextViewHelp"><html>You can add tracks to library from a local path.<br />WARNING: Those local tracks will NOT be synchronized with Jamuz Server ! It is highly recommended to use JaMuz Server instead to get your tracks!</html></string>
     <string name="settingsLocalFilesTextViewPath">Path :</string>
     <string name="settingsLocalFilesButtonChoose">Choose</string>
+
     <string name="settingsDirectoryChooserButtonNewFolder">New folder</string>
     <string name="settingsDirectoryChooserNewFolderName">New folder name</string>
+    <string name="settingsDirectoryChooserFailedToCreate">Failed to create</string>
+    <string name="settingsDirectoryChooserFailedToCreateSuffix">folder.</string>
 
     <string name="playlistTextViewExcludeTheLast">Exclude the last</string>
     <string name="playlistTextViewPlayed">played</string>
@@ -85,6 +88,12 @@
     <string name="speakSpecifyArtist">Specify an artist.</string>
     <string name="speakGenre">Genre</string>
     <string name="speakTags">Tags</string>
+    <string name="speakYourTurn">Your turn</string>
+    <string name="speakUnknown">unknown.</string>
+    <string name="speakRating">Rating</string>
+    <string name="speakRatingIncorrect">incorrect.</string>
+    <string name="speakTagsNone">No tags.</string>
+    <string name="speakRatingNone">No rating.</string>
 
     <string name="syncLabelReadingList">Reading list …</string>
     <string name="syncLabelConnecting">Connecting …</string>
@@ -120,11 +129,11 @@
         <item>years</item>
     </string-array>
 
-    <string name="speakYourTurn">Your turn</string>
-    <string name="speakUnknown">unknown.</string>
-    <string name="speakRating">Rating</string>
-    <string name="speakRatingIncorrect">incorrect.</string>
-    <string name="speakTagsNone">No tags.</string>
-    <string name="speakRatingNone">No rating.</string>
+    <string name="audioPlayerToastRgBaseVolTooHigh">Base volume too high.</string>
+    <string name="audioPlayerToastRgConsiderLower">If you see this message too often, please consider lower it in settings ! (It maybe is a single file issue)</string>
+    <string name="retryInterceptorLabelBefore">before</string>
+    <string name="serviceScanNotifyCleaningDatabase">Cleaning database...</string>
+    <string name="serviceScanNotifyDatabaseUpdated">Database updated.</string>
+    <string name="serviceScanNotifyScanningDeleted">Scanning deleted files ...</string>
 
 </resources>

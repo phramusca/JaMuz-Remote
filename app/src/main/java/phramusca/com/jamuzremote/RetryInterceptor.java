@@ -2,11 +2,13 @@ package phramusca.com.jamuzremote;
 
 import static java.lang.Thread.sleep;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
+import java.net.ContentHandler;
 
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -16,10 +18,12 @@ public class RetryInterceptor implements Interceptor {
     private static final String TAG = RetryInterceptor.class.getName();
     protected HelperNotification helperNotification;
     private final Notification notification;
+    private Context mContext;
     private final int sleepSeconds;
     private final int maxNbRetries;
 
-    RetryInterceptor(int sleepSeconds, int maxNbRetries, HelperNotification helperNotification, Notification notification) {
+    RetryInterceptor(Context context, int sleepSeconds, int maxNbRetries, HelperNotification helperNotification, Notification notification) {
+        mContext = context;
         this.sleepSeconds = sleepSeconds;
         this.maxNbRetries = maxNbRetries;
         this.helperNotification = helperNotification;
@@ -42,9 +46,13 @@ public class RetryInterceptor implements Interceptor {
             } catch (Exception e) {
                 msg = e.getLocalizedMessage();
                 Log.d(TAG, "ERROR: " + msg);
-                //FIXME NOW Translate
-                helperNotification.notifyBar(notification, sleepSeconds + "s before " +
-                        (nbRetries + 1) + "/" + maxNbRetries + " : " + msg);
+                helperNotification.notifyBar(notification, String.format(
+                        "%ds %s %d/%d : %s",
+                        sleepSeconds,
+                        mContext.getString(R.string.retryInterceptorLabelBefore),
+                        nbRetries + 1,
+                        maxNbRetries,
+                        msg));
                 try {
                     sleep(sleepSeconds * 1000);
                 } catch (InterruptedException ex) {
