@@ -48,7 +48,7 @@
     <string name="settingsKidsPlaceCheckBoxOnStartup">Start Kids Place with JaMuz</string>
 
     <string name="settingsLocalFilesTextViewTitle">Local tracks</string>
-    <string name="settingsLocalFilesTextViewHelp"><html>You can add tracks to library from a local path.<br />WARNING: Those local tracks will NOT be synchronized with Jamuz Server ! It is highly recommended to use JaMuz Server instead to get your tracks!</html></string>
+    <string name="settingsLocalFilesTextViewHelp"><html>You can add tracks to library from a local path. <br/> WARNING: Those local tracks will NOT be synchronized with Jamuz Server ! It is highly recommended to use JaMuz Server instead to get your tracks!</html></string>
     <string name="settingsLocalFilesTextViewPath">Path :</string>
     <string name="settingsLocalFilesButtonChoose">Choose</string>
 
@@ -131,9 +131,39 @@
 
     <string name="audioPlayerToastRgBaseVolTooHigh">Base volume too high.</string>
     <string name="audioPlayerToastRgConsiderLower">If you see this message too often, please consider lower it in settings ! (It maybe is a single file issue)</string>
-    <string name="retryInterceptorLabelBefore">before</string>
+    <string name="globalLabelBefore">before</string>
     <string name="serviceScanNotifyCleaningDatabase">Cleaning database...</string>
     <string name="serviceScanNotifyDatabaseUpdated">Database updated.</string>
     <string name="serviceScanNotifyScanningDeleted">Scanning deleted files ...</string>
+    <string name="serviceSyncNotifySyncTitle">Sync</string>
+    <string name="serviceSyncNotifyDownloadTitle">Download</string>
+    <string name="serviceSyncNotifySyncComplete">Sync complete.</string>
+    <string name="serviceSyncNotifySyncAll">All</string>
+    <string name="serviceSyncNotifySyncSuccess">files have been downloaded successfully.</string>
+    <string name="serviceSyncNotifySyncDownloaded">Downloaded:</string>
+    <string name="serviceSyncNotifySyncRemaning">Remaning:</string>
+    <string name="serviceSyncNotifySyncCompleteNoDownloads">Sync Complete. No downloads.</string>
+    <string name="serviceSyncNotifySyncUserStopped">User stopped.</string>
+    <string name="serviceSyncNotifySyncRemovingDeleted">Removing deleted files...</string>
+    <string name="serviceSyncNotifySyncCheckComplete">Check complete.</string>
+    <string name="serviceSyncNotifySyncInterrupted">Interrupted.</string>
+    <string name="serviceSyncNotifySyncChecking">Checking</string>
+    <string name="serviceSyncNotifySyncCheckingSuffix">files ...</string>
+    <string name="serviceSyncNotifySyncReceived">Received</string>
+    <string name="serviceSyncNotifySyncReceivedSuffix">files count ...</string>
+    <string name="serviceSyncNotifySyncReceivedTags">Received tags ...</string>
+    <string name="serviceSyncNotifySyncReceivedGenres">Received genres ...</string>
+    <string name="serviceSyncNotifySyncPreparingMerge">Preparing statistics merge.</string>
+    <string name="serviceSyncNotifySyncRequestingMerge">Requesting statistics merge.</string>
+    <string name="serviceSyncNotifySyncUpdateDatabase">Updating database with merge changes ...</string>
+    <string name="serviceSyncNotifySyncMergeComplete">Merge complete.</string>
+    <string name="serviceSyncNotifyDownloading">Downloading ...</string>
+    <string name="serviceSyncNotifyDownloadAttempt">Attempt</string>
+    <string name="serviceSyncNotifyDownloadErrors">Error(s).</string>
+    <string name="serviceSyncNotifyDownloadStarting">Starting download ...</string>
+    <string name="serviceSyncNotifyDownloadStopping">Stopping downloads ...</string>
+    <string name="serviceSyncNotifyDownloadStopped">Downloads stopped.</string>
+    <string name="serviceSyncNotifyDownloadWaiting">Waiting</string>
+    <string name="serviceSyncNotifyDownloadBeforeAttempt">before attempt</string>
 
 </resources>

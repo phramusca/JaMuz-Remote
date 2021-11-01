@@ -8,7 +8,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
-import java.net.ContentHandler;
 
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -49,7 +48,7 @@ public class RetryInterceptor implements Interceptor {
                 helperNotification.notifyBar(notification, String.format(
                         "%ds %s %d/%d : %s",
                         sleepSeconds,
-                        mContext.getString(R.string.retryInterceptorLabelBefore),
+                        mContext.getString(R.string.globalLabelBefore),
                         nbRetries + 1,
                         maxNbRetries,
                         msg));
