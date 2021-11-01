@@ -155,7 +155,7 @@ public class ServiceSync extends ServiceBase {
             int nbFilesInBatch = 500;
             int nbFilesServer = getFilesCount(status);
             String msg = String.format(
-                    "%s %s %s",
+                    "%s \"%s\" %s",
                     getString(R.string.serviceSyncNotifySyncChecking),
                     status.name().toLowerCase(),
                     getString(R.string.serviceSyncNotifySyncCheckingSuffix));
@@ -272,7 +272,7 @@ public class ServiceSync extends ServiceBase {
             urlBuilder.addQueryParameter("getCount", "true");
             String body = clientInfo.getBodyString(urlBuilder, client);
             helperNotification.notifyBar(notificationSync, String.format(
-                    "%s %s %s",
+                    "%s \"%s\" %s",
                     getString(R.string.serviceSyncNotifySyncReceived),
                     status.name(),
                     getString(R.string.serviceSyncNotifySyncReceivedSuffix)));
@@ -453,15 +453,10 @@ public class ServiceSync extends ServiceBase {
                     nbFailed,
                     getString(R.string.serviceSyncNotifyDownloadErrors));
 
-            String msg = String.format(
-                    "%s %s",
-                    getString(R.string.serviceSyncNotifyDownloading),
-                    bench.getLast());
-
-            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, msg,
+            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, bench.getLast(),
                     nbFilesStart, (nbFilesStart - newTracks.size()), false,
                     true, true,
-                    msg + "\n" + bigText));
+                    bench.getLast() + "\n" + bigText));
         }
 
         @Override
@@ -502,7 +497,7 @@ public class ServiceSync extends ServiceBase {
         private boolean startDownloads() throws InterruptedException {
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, getString(R.string.serviceSyncNotifyDownloadStarting)));
             bench = new Benchmark(newTracks.size(), 10);
-            pool = Executors.newFixedThreadPool(20); //FIXME: Make number of threads an option AND add benchmark back
+            pool = Executors.newFixedThreadPool(20); //FIXME: Make number of threads an option
             downloadServices = new ArrayList<>();
             sizeTotal = 0;
             nbFailed = 0;

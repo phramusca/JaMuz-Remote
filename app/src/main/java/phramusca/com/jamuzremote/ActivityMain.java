@@ -1560,17 +1560,12 @@ public class ActivityMain extends AppCompatActivity {
             if (!isRemoteConnected()) {
                 setSeekBar(position, duration);
                 int remaining = (duration - position);
-                Log.v(TAG, "onPositionChanged, remaining: " + remaining);
                 if (remaining < 5001 && remaining > 4501) { //TODO: Why those numbers ? (can't remember ...)
-                    //setBrightness(1);
-                    Log.v(TAG, "onPositionChanged: DIM ON " + remaining);
                     dimOn();
                 }
 
                 if (remaining > 1 && quarterPosition < 4) {
                     int quarter = duration / 4;
-                    Log.v(TAG, "START: quarterPosition: " + quarterPosition);
-                    Log.v(TAG, "START: quarter: " + quarter);
                     if (quarterPosition < 1 && (remaining < 3 * quarter)) {
                         quarterPosition = 1;
                         askEdition(false);
@@ -1581,7 +1576,6 @@ public class ActivityMain extends AppCompatActivity {
                         quarterPosition = 3;
                         askEdition(false);
                     }
-                    Log.v(TAG, "END: quarterPosition: " + quarterPosition);
                 }
             }
         }

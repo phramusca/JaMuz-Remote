@@ -110,7 +110,6 @@
     <string name="serviceScanNotifyCleaningDatabase">Nettoyage de la base de données...</string>
     <string name="serviceScanNotifyDatabaseUpdated">Base de données à jour.</string>
     <string name="serviceScanNotifyScanningDeleted">Recherche de fichiers supprimés ...</string>
-    <string name="serviceSyncNotifySyncTitle">Synchro</string>
     <string name="serviceSyncNotifyDownloadTitle">Téléchargement</string>
     <string name="serviceSyncNotifySyncComplete">Synchonisation complète.</string>
     <string name="serviceSyncNotifySyncAll">Tout les</string>
@@ -122,23 +121,23 @@
     <string name="serviceSyncNotifySyncRemovingDeleted">Suppression des fichiers effacés...</string>
     <string name="serviceSyncNotifySyncCheckComplete">Vérification complète.</string>
     <string name="serviceSyncNotifySyncInterrupted">Interrompu.</string>
-    <string name="serviceSyncNotifySyncChecking">Vérification de</string>
-    <string name="serviceSyncNotifySyncCheckingSuffix">fichiers...</string>
-    <string name="serviceSyncNotifySyncReceived">Reçu</string>
-    <string name="serviceSyncNotifySyncReceivedSuffix">comme nombre de fichiers...</string>
+    <string name="serviceSyncNotifySyncChecking">Vérification des fichiers</string>
+    <string name="serviceSyncNotifySyncCheckingSuffix">...</string>
+    <string name="serviceSyncNotifySyncReceived">Reçu le nombre de fichiers</string>
+    <string name="serviceSyncNotifySyncReceivedSuffix">...</string>
     <string name="serviceSyncNotifySyncReceivedTags">Reçu les tags ...</string>
     <string name="serviceSyncNotifySyncReceivedGenres">Reçu les genres ...</string>
     <string name="serviceSyncNotifySyncPreparingMerge">Préparation de la fusion des statistiques.</string>
     <string name="serviceSyncNotifySyncRequestingMerge">Demande de fusion des statistiques.</string>
-    <string name="serviceSyncNotifySyncUpdateDatabase">Mise à jour de la base de donnée ....</string>
+    <string name="serviceSyncNotifySyncUpdateDatabase">Mise à jour de la base de données ....</string>
     <string name="serviceSyncNotifySyncMergeComplete">Fusion complète.</string>
-    <string name="serviceSyncNotifyDownloading">Téléchargement ....</string>
     <string name="serviceSyncNotifyDownloadAttempt">Essai</string>
-    <string name="serviceSyncNotifyDownloadErrors">Erreur(s).</string>
+    <string name="serviceSyncNotifyDownloadErrors">erreur(s).</string>
     <string name="serviceSyncNotifyDownloadStarting">Démarrage des téléchargements...</string>
     <string name="serviceSyncNotifyDownloadStopping">Arrêt des téléchargements ...</string>
     <string name="serviceSyncNotifyDownloadStopped">Téléchargements arrêtés.</string>
     <string name="serviceSyncNotifyDownloadWaiting">Attente de</string>
     <string name="serviceSyncNotifyDownloadBeforeAttempt">avant essai</string>
+    <string name="serviceSyncNotifySyncTitle">Sync</string>
 
 </resources>
