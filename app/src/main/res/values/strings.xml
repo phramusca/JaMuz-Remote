@@ -137,12 +137,12 @@
     <string name="serviceScanNotifyScanningDeleted">Scanning deleted files ...</string>
     <string name="serviceSyncNotifySyncTitle">Sync</string>
     <string name="serviceSyncNotifyDownloadTitle">Download</string>
-    <string name="serviceSyncNotifySyncComplete">Sync complete.</string>
+    <string name="serviceSyncNotifySyncComplete">Synchronization complete.</string>
     <string name="serviceSyncNotifySyncAll">All</string>
     <string name="serviceSyncNotifySyncSuccess">files have been downloaded successfully.</string>
     <string name="serviceSyncNotifySyncDownloaded">Downloaded:</string>
     <string name="serviceSyncNotifySyncRemaning">Remaning:</string>
-    <string name="serviceSyncNotifySyncCompleteNoDownloads">Sync Complete. No downloads.</string>
+    <string name="serviceSyncNotifySyncCompleteNoDownloads">Synchronization complete. No downloads.</string>
     <string name="serviceSyncNotifySyncUserStopped">User stopped.</string>
     <string name="serviceSyncNotifySyncRemovingDeleted">Removing deleted files...</string>
     <string name="serviceSyncNotifySyncCheckComplete">Check complete.</string>
@@ -157,9 +157,8 @@
     <string name="serviceSyncNotifySyncRequestingMerge">Requesting statistics merge.</string>
     <string name="serviceSyncNotifySyncUpdateDatabase">Updating database with merge changes ...</string>
     <string name="serviceSyncNotifySyncMergeComplete">Merge complete.</string>
-    <string name="serviceSyncNotifyDownloading">Downloading ...</string>
     <string name="serviceSyncNotifyDownloadAttempt">Attempt</string>
-    <string name="serviceSyncNotifyDownloadErrors">Error(s).</string>
+    <string name="serviceSyncNotifyDownloadErrors">error(s).</string>
     <string name="serviceSyncNotifyDownloadStarting">Starting download ...</string>
     <string name="serviceSyncNotifyDownloadStopping">Stopping downloads ...</string>
     <string name="serviceSyncNotifyDownloadStopped">Downloads stopped.</string>
