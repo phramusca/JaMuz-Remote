@@ -127,6 +127,8 @@ public class ActivityMain extends AppCompatActivity {
     private static final int LISTS_REQUEST_CODE = 60568;
     private static final int SETTINGS_REQUEST_CODE = 23548;
 
+    private static Context mContext;
+    
     // GUI elements
     private TextView textViewFileInfo1;
     private TextView textViewFileInfo2;
@@ -182,6 +184,7 @@ public class ActivityMain extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "ActivityMain onCreate");
+        mContext = this;
         setContentView(R.layout.activity_main);
 
         login = Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -213,7 +216,7 @@ public class ActivityMain extends AppCompatActivity {
                             public void run() {
                                 try {
                                     Thread.sleep(3 * 1000);
-                                    runOnUiThread(() -> speak("A vous"));
+                                    runOnUiThread(() -> speak(getString(R.string.speakYourTurn)));
                                     speechRecognizer();
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
@@ -516,7 +519,7 @@ public class ActivityMain extends AppCompatActivity {
                         .append(localSelectedPlaylist.getName())
                         .append("\" ")
                         .append(getString(R.string.playlistLabelSaved));
-                if (localSelectedPlaylist.save()) {
+                if (localSelectedPlaylist.save(getString(R.string.mainDefaultPlaylistsFolderName))) {
                     button_save.setBackgroundResource(localSelectedPlaylist.isModified() ?
                             R.drawable.ic_button_save_red : R.drawable.ic_button_save);
                     msg.append(" ").append(getString(R.string.playlistLabelSuccessfully));
@@ -560,7 +563,7 @@ public class ActivityMain extends AppCompatActivity {
                                 " \"" + localSelectedPlaylist.getName() + "\" " + getString(R.string.playlistLabelQuestionDeleteSuffix))
                         .setPositiveButton(R.string.globalLabelYes, (dialog, which) -> {
                             if (localPlaylists.size() > 1) {
-                                HelperFile.delete("Playlists", localSelectedPlaylist.getName() + ".plli");
+                                HelperFile.delete(getString(R.string.mainDefaultPlaylistsFolderName), localSelectedPlaylist.getName() + ".plli");
                                 localPlaylists.remove(localSelectedPlaylist.getName());
                                 setupLocalPlaylistSpinner((String) null);
                             } else {
@@ -662,7 +665,7 @@ public class ActivityMain extends AppCompatActivity {
         });
 
         //TODO: Use proper values
-        localTrack = new Track("albumArtist", "year", -1, -1,
+        localTrack = new Track("albumArtist", getString(R.string.mainWelcomeYear), -1, -1,
                 -1, -1, "bitRate", "format", -1, 0,
                 getString(R.string.mainWelcomeTitle),
                 getString(R.string.mainWelcomeYear), getString(R.string.applicationName),
@@ -745,19 +748,27 @@ public class ActivityMain extends AppCompatActivity {
 
     private boolean checkWifiConnection() {
         if (!checkConnectedViaWifi()) {
-            helperToast.toastLong("You must connect to WiFi network.");
+            helperToast.toastLong(getString(R.string.mainToastCheckWifiConnection));
             return false;
         }
         return true;
     }
 
     static ClientInfo getClientInfo(int canal, HelperToast helperToast) {
-        String infoConnect = preferences.getString("connectionString", "192.168.0.1:2013");
+        String infoConnect = preferences.getString(
+                "connectionString",
+                mContext.getString(R.string.settingsServerDefaultConnectionString));
         String[] split = infoConnect.split(":");  //NOI18N
         if (split.length < 2) {
-            helperToast.toastLong("Bad format:\t" + infoConnect + "" +
-                    "\nExpected:\t\t<IP>:<Port>" +
-                    "\nEx:\t\t\t\t\t\t\t192.168.0.11:2013");
+            helperToast.toastLong(
+                    String.format("%s %s\n%s <%s>:<%s>\n%s %s",
+                            mContext.getString(R.string.mainToastClientInfoBadFormat),
+                            infoConnect,
+                            mContext.getString(R.string.mainToastClientInfoExpected),
+                            mContext.getString(R.string.mainToastClientInfoIP),
+                            mContext.getString(R.string.mainToastClientInfoPort),
+                            mContext.getString(R.string.mainToastClientInfoEx),
+                            mContext.getString(R.string.settingsServerDefaultConnectionString)));
             return null;
         }
         String address = split[0];
@@ -767,6 +778,7 @@ public class ActivityMain extends AppCompatActivity {
         } catch (NumberFormatException ex) {
             port = 2013;
         }
+        //FIXME: Use a real password, from QR code
         return new ClientInfo(address, port, login, "tata", canal,
                 "jamuz", getAppDataPath().getAbsolutePath());
     }
@@ -1196,7 +1208,7 @@ public class ActivityMain extends AppCompatActivity {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Dites une commande.\n  ex: \"Note 4\", \"Suivant\" ...");
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.voicePromptCommand));
         startActivityForResult(intent, SPEECH_REQUEST_CODE);
 
         //FIXME: Use a custom speech recognition:
@@ -1215,7 +1227,7 @@ public class ActivityMain extends AppCompatActivity {
             String spokenText = results.get(0);
             VoiceKeyWords.KeyWord keyWord = VoiceKeyWords.get(spokenText);
             String arguments = keyWord.getKeyword();
-            String msg = getString(R.string.voiceUnknownCommand) + " \"" + spokenText + "\".";
+            String msg = getString(R.string.speakUnknownCommand) + " \"" + spokenText + "\".";
             switch (keyWord.getCommand()) {
                 case UNKNOWN:
                     speak(msg);
@@ -1228,7 +1240,7 @@ public class ActivityMain extends AppCompatActivity {
                     askEdition(true);
                     break;
                 case PLAY_PLAYLIST:
-                    msg = getString(R.string.playlistLabel) + " \"" + arguments + "\" " + getString(R.string.voiceNotFound);
+                    msg = getString(R.string.playlistLabel) + " \"" + arguments + "\" " + getString(R.string.speakNotFound);
                     for (Playlist playlist : localPlaylists.values()) {
                         if (playlist.getName().equalsIgnoreCase(arguments)) {
                             applyPlaylist(playlist, true);
@@ -1241,10 +1253,10 @@ public class ActivityMain extends AppCompatActivity {
                 case PLAY_NEW_PLAYLIST_ARTIST_ONGOING:
                     arguments = displayedTrack.getArtist();
                 case PLAY_NEW_PLAYLIST_ARTIST:
-                    msg = getString(R.string.voiceArtist) + " \"" + arguments + "\" " + getString(R.string.voiceNotFound);
+                    msg = getString(R.string.speakArtist) + " \"" + arguments + "\" " + getString(R.string.speakNotFound);
                     if (arguments.equals("")) {
                         //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
-                        msg = getString(R.string.voiceSpecifyArtist);
+                        msg = getString(R.string.speakSpecifyArtist);
                     } else if (HelperLibrary.musicLibrary.getArtist(arguments)) {
                         Playlist playlist = new Playlist(arguments, true);
                         playlist.setArtist(arguments);
@@ -1256,10 +1268,10 @@ public class ActivityMain extends AppCompatActivity {
                 case PLAY_NEW_PLAYLIST_ALBUM_ONGOING:
                     arguments = displayedTrack.getAlbum();
                 case PLAY_NEW_PLAYLIST_ALBUM:
-                    msg = getString(R.string.voiceAlbum) + " \"" + arguments + "\" " + getString(R.string.voiceNotFound);
+                    msg = getString(R.string.speakAlbum) + " \"" + arguments + "\" " + getString(R.string.speakNotFound);
                     if (arguments.equals("")) {
                         //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
-                        msg = getString(R.string.voiceSpecifyAlbum);
+                        msg = getString(R.string.speakSpecifyAlbum);
                     } else if (HelperLibrary.musicLibrary.getAlbum(arguments)) {
                         Playlist playlist = new Playlist(arguments, true);
                         playlist.setAlbum(arguments);
@@ -1277,7 +1289,7 @@ public class ActivityMain extends AppCompatActivity {
                         setupSpinnerGenre(RepoGenres.get(), genre);
                         setGenre(genre);
                     } else {
-                        speak("Genre ".concat(genre).concat(" inconnu."));
+                        speak(getString(R.string.speakGenre).concat(" ").concat(genre).concat(" ").concat(getString(R.string.speakUnknown)));
                         try {
                             Thread.sleep(2000); //TODO: Can't we wait for speak to complete instead of sleeping ?
                         } catch (InterruptedException e) {
@@ -1298,7 +1310,7 @@ public class ActivityMain extends AppCompatActivity {
                         ratingBar.setRating(rating);
                         setRating(rating);
                     } else {
-                        speak("Note ".concat(arguments).concat(" incorrecte."));
+                        speak(getString(R.string.speakRating).concat(" ").concat(arguments).concat(" ").concat(getString(R.string.speakRatingIncorrect)));
                         try {
                             Thread.sleep(2000); //TODO: Can't we wait for speak to complete instead of sleeping ?
                         } catch (InterruptedException e) {
@@ -1401,7 +1413,7 @@ public class ActivityMain extends AppCompatActivity {
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString("connectionString", content);
                 editor.apply();
-                Toast.makeText(this, "QR code read. New configuration set.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.mainToastQRread, Toast.LENGTH_LONG).show();
                 buttonRemote.setEnabled(true);
                 buttonSync.setEnabled(true);
             }
@@ -1516,7 +1528,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         } else {
             refreshLocalPlaylistSpinner(false);
-            helperToast.toastLong("Empty Playlist.");
+            helperToast.toastLong(getString(R.string.mainToastEmptyPlaylist));
         }
     }
 
@@ -1530,7 +1542,7 @@ public class ActivityMain extends AppCompatActivity {
                 playPrevious();
             }
         } else {
-            helperToast.toastLong("No tracks beyond.");
+            helperToast.toastLong(getString(R.string.mainToastNoTracksBeyond));
         }
     }
 
@@ -1622,20 +1634,22 @@ public class ActivityMain extends AppCompatActivity {
     private String getDisplayedTrackStatus() {
         StringBuilder msg = new StringBuilder();
         if (displayedTrack.getTags(false).size() > 0) {
-            msg.append("Tags: ");
+            msg.append(getString(R.string.speakTags)).append(": ");
             for (String tag : displayedTrack.getTags(false)) {
                 msg.append(" ").append(tag).append(",");
             }
         } else {
-            msg.append("Pas de tags. ");
+            msg.append(getString(R.string.speakTagsNone)).append(" ");
         }
 
         if (displayedTrack.getRating() > 0) {
-            msg.append(" Note: ").append((int) displayedTrack.getRating()).append(".");
+            String string = getString(R.string.speakRating);
+            msg.append(string).append(": ").append((int) displayedTrack.getRating()).append(".");
         } else {
-            msg.append(" Pas de note. ");
+            msg.append(getString(R.string.speakRatingNone)).append(" ");
         }
-        msg.append(" Genre: ").append(displayedTrack.getGenre()).append(".");
+        String string = getString(R.string.speakGenre);
+        msg.append(string).append(": ").append(displayedTrack.getGenre()).append(".");
         return msg.toString();
     }
 
@@ -1932,7 +1946,7 @@ public class ActivityMain extends AppCompatActivity {
                     break;
                 default:
                     //Popup("Error", "Not implemented");
-                    helperToast.toastLong("Not implemented");
+                    helperToast.toastLong(getString(R.string.mainToastNotImplemented));
                     break;
             }
         }
@@ -1940,7 +1954,7 @@ public class ActivityMain extends AppCompatActivity {
 
     private void setupLocalPlaylistsThenStartServiceScan() {
         localPlaylists = new HashMap<>();
-        File playlistFolder = HelperFile.createFolder("Playlists");
+        File playlistFolder = HelperFile.createFolder(getString(R.string.mainDefaultPlaylistsFolderName));
         if (playlistFolder != null) {
             for (String file : Objects.requireNonNull(playlistFolder.list())) {
                 if (file.endsWith(".plli")) {
@@ -1967,7 +1981,7 @@ public class ActivityMain extends AppCompatActivity {
         if (localPlaylists.size() > 0) {
             localPlaylists = sortHashMapByValues(localPlaylists);
         } else {
-            Playlist playlistAll = new Playlist("All", true);
+            Playlist playlistAll = new Playlist(getString(R.string.playlistDefaultAllPlaylistName), true);
             localPlaylists.put(playlistAll.getName(), playlistAll);
             playlistName = playlistAll.getName();
         }
@@ -2084,7 +2098,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     public Playlist readPlaylist(String filename) {
-        String readJson = HelperFile.read("Playlists", filename);
+        String readJson = HelperFile.read(getString(R.string.mainDefaultPlaylistsFolderName), filename);
         if (!readJson.equals("")) {
             Playlist playlist = new Playlist(
                     filename.replaceFirst("[.][^.]+$", ""), true);
@@ -2373,10 +2387,10 @@ public class ActivityMain extends AppCompatActivity {
         Log.i(TAG, "ActivityMain onBackPressed");
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle("Closing JaMuz")
-                .setMessage("Are you sure you want to exit and stop playback ?")
-                .setPositiveButton("Yes", (dialog, which) -> finish())
-                .setNegativeButton("No", null)
+                .setTitle(R.string.mainAlertDialogClosingApplicationTitle)
+                .setMessage(R.string.mainAlertDialogClosingApplicationMessage)
+                .setPositiveButton(R.string.globalLabelYes, (dialog, which) -> finish())
+                .setNegativeButton(R.string.globalLabelNo, null)
                 .show();
     }
 

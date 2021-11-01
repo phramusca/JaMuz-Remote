@@ -163,6 +163,7 @@ public class DirectoryChooserDialog {
                     updateDirectory();
                 } else {
                     Toast.makeText(
+                            //FIXME NOW translate
                             m_context, "Failed to create '" + newDirName +
                                     "' folder", Toast.LENGTH_SHORT).show();
                 }

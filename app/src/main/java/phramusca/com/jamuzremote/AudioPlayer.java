@@ -90,6 +90,7 @@ public class AudioPlayer {
         float rg_result = ((float) Math.pow(10, (adjust / 20))) * baseVolume;
         Log.i(TAG, "rg_result=" + rg_result);
         if (rg_result > 1.0f) {
+            //FIXME NOW translate
             msg = "Base volume too high. " +
                     "\nConsider lower it for replayGain to work properly !";
             msg += "\n---------------" +

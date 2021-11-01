@@ -144,6 +144,7 @@ public class ServiceScan extends ServiceBase {
                             Log.d(TAG, "Remove track from db: " + track);
                             track.delete();
                         }
+                        //FIXME NOW translate
                         notifyScan("Scanning deleted files ... ", 200);
                     }
                 } catch (InterruptedException e) {

@@ -88,7 +88,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                             position -> {
                                 if (PlayQueue.queue.insertNext(position + offset)) {
                                     Intent intent = new Intent();
-                                    intent.putExtra("action", "playNext");
+                                    intent.putExtra("action", "playNext"); //NON-NLS
                                     setResult(RESULT_OK, intent);
                                     finish();
                                 }
@@ -122,7 +122,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
     public void onClick(final Track track, final int position) {
         //Open album tracks layout
         Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
-        intent.putExtra("album", track.getAlbum());
+        intent.putExtra("album", track.getAlbum()); //NON-NLS
         startActivityForResult(intent, QUEUE_REQUEST_CODE);
 
         //TODO Offer user a choice:
