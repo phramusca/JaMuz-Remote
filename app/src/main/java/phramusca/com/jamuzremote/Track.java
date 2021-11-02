@@ -461,6 +461,14 @@ public class Track implements Serializable {
         this.size = size;
     }
 
+    public Date getAddedDate() {
+        return addedDate;
+    }
+
+    public Date getLastPlayed() {
+        return lastPlayed;
+    }
+
     public enum Status {
         NEW, REC, LOCAL, INFO, ERROR;
 
@@ -470,21 +478,7 @@ public class Track implements Serializable {
 
     @Override
     public String toString() {
-        return "<BR/>" + getTags() + " " + (int) rating + "/5" + " " + genre + " " + year + "<BR/>" +
-                getLastPlayedAgo() + getAddedDateAgo() + "<BR/>";
-    }
-
-    public String getLastPlayedAgo() {
-        PrettyTime prettyTime = new PrettyTime(Locale.getDefault());
-        //FIXME NOW translate
-        return playCounter <= 0 ? "Jamais joué."+" "
-                : "Joué"+" " + prettyTime.format(lastPlayed) + " (" + playCounter + "x). ";
-    }
-
-    public String getAddedDateAgo() {
-        PrettyTime prettyTime = new PrettyTime(Locale.getDefault());
-        //FIXME NOW translate
-        return "Ajouté " + prettyTime.format(addedDate) + ". ";
+        return path;
     }
 
     @Override

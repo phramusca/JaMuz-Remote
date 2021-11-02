@@ -106,7 +106,10 @@ public abstract class AdapterLoadQueue extends AdapterLoad {
                             "%s %d/5 %s %s\n%s %s",
                             track.getTags(),
                             (int) track.getRating(),
-                            track.getGenre(), track.getYear(), track.getLastPlayedAgo(), track.getAddedDateAgo()
+                            track.getGenre(),
+                            track.getYear(),
+                            ActivityMain.getLastPlayedAgo(track),
+                            ActivityMain.getAddedDateAgo(track)
                     ));
 
         } else if (holder instanceof LoadingViewHolder) {

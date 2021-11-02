@@ -139,5 +139,8 @@
     <string name="serviceSyncNotifyDownloadWaiting">Attente de</string>
     <string name="serviceSyncNotifyDownloadBeforeAttempt">avant essai</string>
     <string name="serviceSyncNotifySyncTitle">Sync</string>
+    <string name="trackNeverPlayed">Jamais joué.</string>
+    <string name="trackPlayed">Joué</string>
+    <string name="trackAdded">Ajouté</string>
 
 </resources>

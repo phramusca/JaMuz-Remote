@@ -78,6 +78,9 @@ import com.kiddoware.kidsplace.sdk.KPUtility;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.ocpsoft.prettytime.PrettyTime;
+import org.ocpsoft.prettytime.TimeUnit;
+import org.ocpsoft.prettytime.impl.ResourcesTimeUnit;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -88,6 +91,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
@@ -128,6 +132,7 @@ public class ActivityMain extends AppCompatActivity {
     private static final int SETTINGS_REQUEST_CODE = 23548;
 
     private static Context mContext;
+    private static PrettyTime prettyTime;
     
     // GUI elements
     private TextView textViewFileInfo1;
@@ -186,6 +191,9 @@ public class ActivityMain extends AppCompatActivity {
         Log.i(TAG, "ActivityMain onCreate");
         mContext = this;
         setContentView(R.layout.activity_main);
+
+        prettyTime = new PrettyTime(Locale.getDefault());
+        prettyTime.removeUnit(org.ocpsoft.prettytime.units.Decade.class);
 
         login = Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -809,6 +817,7 @@ public class ActivityMain extends AppCompatActivity {
             setTagButtonTextColor(button1);
             String buttonText = button1.getText().toString();
             toggleTag(buttonText);
+            displayTrackDetails();
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
                 ActionBar.LayoutParams.WRAP_CONTENT);
@@ -2178,12 +2187,33 @@ public class ActivityMain extends AppCompatActivity {
 
     private void displayTrackDetails() {
         runOnUiThread(() -> setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
-                "<html><BR/>" +
-                        (displayedTrack.getSource().equals("") ? ""
-                                : "<u>".concat(displayedTrack.getSource()).concat("</u>"))
-                        + ""
-                        .concat(displayedTrack.toString())
-                        .concat("</html>")))));
+                String.format("<html><BR/>%s<BR/>%s %d/5 %s %s<BR/>%s%s<BR/></html>",
+                        displayedTrack.getSource().equals("")
+                                ? ""
+                                : "<u>".concat(displayedTrack.getSource()).concat("</u>"),
+                        displayedTrack.getTags(),
+                        (int) displayedTrack.getRating(),
+                        displayedTrack.getGenre(),
+                        displayedTrack.getYear(),
+                        getLastPlayedAgo(displayedTrack),
+                        getAddedDateAgo(displayedTrack))))));
+    }
+
+    public static String getLastPlayedAgo(Track track) {
+        return track.getPlayCounter() <= 0
+                ? mContext.getString(R.string.trackNeverPlayed)
+                : String.format(
+                        "%s %s (%dx). ",
+                        mContext.getString(R.string.trackPlayed),
+                        prettyTime.format(track.getLastPlayed()),
+                        track.getPlayCounter());
+    }
+
+    public static String getAddedDateAgo(Track track) {
+        return String.format(
+                "%s %s.",
+                mContext.getString(R.string.trackAdded),
+                prettyTime.format(track.getAddedDate()));
     }
 
     private void displayTrack() {
