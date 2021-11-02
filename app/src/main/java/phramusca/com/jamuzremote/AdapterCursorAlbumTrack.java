@@ -110,10 +110,16 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
             userViewHolder.item_line2.highlight();
         }
 
-        userViewHolder.item_line3.setText(String.format(Locale.ENGLISH, "%d/5 %s %s",
-                (int) track.getRating(), track.getGenre(), track.getYear()));
-        userViewHolder.item_line4.setText(String.format(Locale.ENGLISH, "%s\n%s %s",
-                track.getTags(), track.getLastPlayedAgo(), track.getAddedDateAgo()));
+        userViewHolder.item_line3.setText(String.format(Locale.ENGLISH,
+                "%d/5 %s %s",
+                (int) track.getRating(),
+                track.getGenre(),
+                track.getYear()));
+        userViewHolder.item_line4.setText(String.format(Locale.ENGLISH,
+                "%s\n%s %s",
+                track.getTags(),
+                ActivityMain.getLastPlayedAgo(track),
+                ActivityMain.getAddedDateAgo(track)));
 
         userViewHolder.imageViewCover.setImageBitmap(bitmap);
 

@@ -164,5 +164,8 @@
     <string name="serviceSyncNotifyDownloadStopped">Downloads stopped.</string>
     <string name="serviceSyncNotifyDownloadWaiting">Waiting</string>
     <string name="serviceSyncNotifyDownloadBeforeAttempt">before attempt</string>
+    <string name="trackNeverPlayed">Never played.</string>
+    <string name="trackPlayed">Played</string>
+    <string name="trackAdded">Added</string>
 
 </resources>
