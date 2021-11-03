@@ -31,7 +31,13 @@
     <string name="settingsDirectoryChooserNewFolderName">Nom du nouveau dossier</string>
 
     <string name="playlistTextViewExcludeTheLast">Exclure les </string>
-    <string name="playlistTextViewPlayed">derniers</string>
+    <string-array name="limitUnits">
+        <item>dernières minutes</item>
+        <item>dernières heures</item>
+        <item>derniers jours</item>
+        <item>derniers mois</item>
+        <item>dernières années</item>
+    </string-array>
     <string name="playlistTextViewOrderBy">Trier par:</string>
 
     <string name="playlistLabel">La liste de Lecture</string>

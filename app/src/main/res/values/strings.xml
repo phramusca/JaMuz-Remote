@@ -57,8 +57,14 @@
     <string name="settingsDirectoryChooserFailedToCreate">Failed to create</string>
     <string name="settingsDirectoryChooserFailedToCreateSuffix">folder.</string>
 
-    <string name="playlistTextViewExcludeTheLast">Exclude the last</string>
-    <string name="playlistTextViewPlayed">played</string>
+    <string name="playlistTextViewExcludeTheLast">Exclude the last </string>
+    <string-array name="limitUnits">
+        <item>minutes</item>
+        <item>hours</item>
+        <item>days</item>
+        <item>months</item>
+        <item>years</item>
+    </string-array>
     <string name="playlistTextViewOrderBy">Order by:</string>
 
     <string name="playlistLabel">Playlist</string>
@@ -117,15 +123,6 @@
 
     <string name="activityAlbumsLoading">Loading album list...</string>
     <string name="activityAlbumsLoadingPleaseWait">Please wait a few seconds.</string>
-
-    <!--FIXME NOW Translate, knowing that it is also a keyword so need to split key and value-->
-    <string-array name="limitUnits" tools:ignore="MissingTranslation">
-        <item>minutes</item>
-        <item>hours</item>
-        <item>days</item>
-        <item>months</item>
-        <item>years</item>
-    </string-array>
 
     <string name="audioPlayerToastRgBaseVolTooHigh">Base volume too high.</string>
     <string name="audioPlayerToastRgConsiderLower">If you see this message too often, please consider lower it in settings ! (It maybe is a single file issue)</string>
