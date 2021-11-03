@@ -8,14 +8,18 @@ import android.database.Cursor;
 import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by raph on 11/06/17.
@@ -34,7 +38,7 @@ public class Playlist implements Comparable, Serializable {
     private String album;
     private Order order = Order.PLAYCOUNTER_LASTPLAYED;
     private int limitValue = 0;
-    private String limitUnit = "minutes";
+    private LimitUnit limitUnit = LimitUnit.MINUTES;
     private boolean modified = false;
     private int nbFiles = -1;
 
@@ -152,7 +156,7 @@ public class Playlist implements Comparable, Serializable {
         }
 
         in += " | " + order.getDisplay(context);
-        in += " | " + (limitValue > 0 ? limitValue + " " + limitUnit : "");
+        in += " | " + (limitValue > 0 ? limitValue + " " + limitUnit.getDisplay(context) : "");
 
         return in;
     }
@@ -161,12 +165,12 @@ public class Playlist implements Comparable, Serializable {
         return genres.entrySet();
     }
 
-    public void setLimitUnit(String limitUnit) {
+    public void setLimitUnit(LimitUnit limitUnit) {
         this.limitUnit = limitUnit;
         modified = true;
     }
 
-    public String getLimitUnit() {
+    public LimitUnit getLimitUnit() {
         return limitUnit;
     }
 
@@ -309,7 +313,7 @@ public class Playlist implements Comparable, Serializable {
                 " AND rating " + getRatingString() + " ";
 
         if (limitValue > 0) {
-            in += "\n AND lastPlayed < datetime(datetime('now'), '-" + limitValue + " " + limitUnit + "')";
+            in += "\n AND lastPlayed < datetime(datetime('now'), '-" + limitValue + " " + limitUnit.value + "')";
         }
 
         ArrayList<String> include = new ArrayList<>();
@@ -495,6 +499,31 @@ public class Playlist implements Comparable, Serializable {
     public void setOrder(Order order) {
         this.order = order;
         modified = true;
+    }
+
+    public enum LimitUnit {
+        @SerializedName("minutes")
+        MINUTES("minutes", 0), //NOI18N
+        @SerializedName("hours")
+        HOURS("hours", 1), //NOI18N
+        @SerializedName("days")
+        DAYS("days", 2), //NOI18N
+        @SerializedName("months")
+        MONTHS("months", 3), //NOI18N
+        @SerializedName("years")
+        YEARS("years", 4); //NOI18N
+
+        private final String value;
+        private final int index;
+
+        LimitUnit(String value, int index) {
+            this.value = value;
+            this.index = index;
+        }
+
+        public String getDisplay(Context context) {
+            return context.getResources().getStringArray(R.array.limitUnits)[index];
+        }
     }
 
     public enum Order {

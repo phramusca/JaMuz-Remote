@@ -85,6 +85,7 @@ import org.ocpsoft.prettytime.impl.ResourcesTimeUnit;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -94,8 +95,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 //FIXME: Submit to f-droid.org
 //https://gitlab.com/fdroid/fdroiddata/blob/master/CONTRIBUTING.md
@@ -988,7 +992,14 @@ public class ActivityMain extends AppCompatActivity {
                 dimOn();
                 String value = (String) parent.getItemAtPosition(pos);
                 if (!isRemoteConnected() && localSelectedPlaylist != null) {
-                    localSelectedPlaylist.setLimitUnit(value);
+                    Playlist.LimitUnit limitUnit1 = null;
+                    for (Playlist.LimitUnit limitUnit : Playlist.LimitUnit.values()) {
+                        if(limitUnit.getDisplay(mContext).equals(value)) {
+                            limitUnit1=limitUnit;
+                            break;
+                        }
+                    }
+                    localSelectedPlaylist.setLimitUnit(limitUnit1);
                     refreshQueueAndPlaylistSpinner();
                 }
             }
@@ -2089,7 +2100,7 @@ public class ActivityMain extends AppCompatActivity {
 
             spinnerLimitUnitSend = false;
             spinnerPlaylistLimitUnit.setAdapter(playListLimitUnitArrayAdapter);
-            spinnerPlaylistLimitUnit.setSelection(playListLimitUnitArrayAdapter.getPosition(playlist.getLimitUnit()));
+            spinnerPlaylistLimitUnit.setSelection(playListLimitUnitArrayAdapter.getPosition(playlist.getLimitUnit().getDisplay(mContext)));
 
             spinnerLimitValueSend = false;
             spinnerPlaylistLimitValue.setAdapter(playListLimitValueArrayAdapter);
