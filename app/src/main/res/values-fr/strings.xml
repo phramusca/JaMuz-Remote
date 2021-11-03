@@ -33,8 +33,6 @@
     <string name="playlistTextViewExcludeTheLast">Exclure les </string>
     <string name="playlistTextViewPlayed">derniers</string>
     <string name="playlistTextViewOrderBy">Trier par:</string>
-    <string name="playlistRadioButtonRandom">Aléatoire</string>
-    <string name="playlistRadioButtonOrderByPlayCounterLastPlayed">Nombre de lectures, Dernière lecture</string>
 
     <string name="playlistLabel">La liste de Lecture</string>
     <string name="playlistLabelHistory">Historique</string>
@@ -142,5 +140,8 @@
     <string name="trackNeverPlayed">Jamais joué.</string>
     <string name="trackPlayed">Joué</string>
     <string name="trackAdded">Ajouté</string>
+    <string name="playlistOrderRandom">Aléatoire</string>
+    <string name="playlistOrderPlayCounter">Nombre de lectures, Dernière lecture</string>
+    <string name="playlistOrderTrackNb">Numéro de piste</string>
 
 </resources>

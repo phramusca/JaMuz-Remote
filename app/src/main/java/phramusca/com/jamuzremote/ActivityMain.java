@@ -892,7 +892,7 @@ public class ActivityMain extends AppCompatActivity {
         refreshLocalPlaylistSpinner(false);
         button_save.setBackgroundResource(localSelectedPlaylist.isModified() ?
                 R.drawable.ic_button_save_red : R.drawable.ic_button_save);
-        textViewPlaylist.setText(localSelectedPlaylist.getSummary());
+        textViewPlaylist.setText(localSelectedPlaylist.getSummary(this));
     }
 
     //This is a trick since the following (not in listener) is not working:
@@ -2094,7 +2094,7 @@ public class ActivityMain extends AppCompatActivity {
             spinnerLimitValueSend = false;
             spinnerPlaylistLimitValue.setAdapter(playListLimitValueArrayAdapter);
             spinnerPlaylistLimitValue.setSelection(playlist.getLimitValue());
-            textViewPlaylist.setText(playlist.getSummary());
+            textViewPlaylist.setText(playlist.getSummary(this));
             button_save.setBackgroundResource(playlist.isModified() ?
                     R.drawable.ic_button_save_red : R.drawable.ic_button_save);
         }
