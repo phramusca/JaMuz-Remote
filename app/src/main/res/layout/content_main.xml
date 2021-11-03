@@ -305,13 +305,13 @@
                 <RadioButton android:id="@+id/order_random"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/playlistRadioButtonRandom"
+                    android:text="@string/playlistOrderRandom"
                     android:onClick="onPlaylistOrderRadioButtonClicked"
                     android:textColor="@color/textColor"/>
                 <RadioButton android:id="@+id/order_playCounter_lastPlayed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/playlistRadioButtonOrderByPlayCounterLastPlayed"
+                    android:text="@string/playlistOrderPlayCounter"
                     android:onClick="onPlaylistOrderRadioButtonClicked"
                     android:textColor="@color/textColor"/>
             </RadioGroup>

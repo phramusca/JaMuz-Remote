@@ -2,6 +2,7 @@ package phramusca.com.jamuzremote;
 
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_STATUS;
 
+import android.content.Context;
 import android.database.Cursor;
 
 import androidx.annotation.NonNull;
@@ -109,7 +110,7 @@ public class Playlist implements Comparable, Serializable {
         return in;
     }
 
-    public String getSummary() {
+    public String getSummary(Context context) {
         String in = " ";
         in += getRatingString();
         Lists tagsLists = new Lists();
@@ -150,7 +151,7 @@ public class Playlist implements Comparable, Serializable {
             in += " | Excl.: " + getString(excluded, max);
         }
 
-        in += " | " + order.toString();
+        in += " | " + order.getDisplay(context);
         in += " | " + (limitValue > 0 ? limitValue + " " + limitUnit : "");
 
         return in;
@@ -497,14 +498,20 @@ public class Playlist implements Comparable, Serializable {
     }
 
     public enum Order {
-        RANDOM("ORDER BY RANDOM()"), //NOI18N
-        PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed"),
-        DISC_TRACK("ORDER BY discNo, trackNo"); //NOI18N
+        RANDOM("ORDER BY RANDOM()", R.string.playlistOrderRandom), //NOI18N
+        PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed", R.string.playlistOrderPlayCounter),
+        DISC_TRACK("ORDER BY discNo, trackNo", R.string.playlistOrderTrackNb); //NOI18N
 
         private final String value;
+        private final int resId;
 
-        Order(String value) {
+        Order(String value, int resId) {
             this.value = value;
+            this.resId = resId;
+        }
+
+        public String getDisplay(Context context) {
+            return context.getString(resId);
         }
     }
 
