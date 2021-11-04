@@ -150,4 +150,79 @@
     <string name="playlistOrderPlayCounter">Nombre de lectures, Dernière lecture</string>
     <string name="playlistOrderTrackNb">Numéro de piste</string>
 
+    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ARTIST_ONGOING">
+        <item>artiste en cours</item>
+        <item>artist en cours</item>
+        <item>artiste courant</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ALBUM_ONGOING">
+        <item>album en cours</item>
+        <item>album courant</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ARTIST">
+        <item>artiste</item>
+        <item>artist</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ALBUM">
+        <item>album</item>
+    </string-array>
+
+    //It is also the default
+    <string-array name="voiceCommands_PLAY_PLAYLIST">
+        <item>liste</item>
+        <item>list</item>
+        <item>playliste</item>
+        <item>playlist</item>
+    </string-array>
+
+    <string-array name="voiceCommands_SET_RATING">
+        <item>noter</item>
+        <item>note</item>
+    </string-array>
+
+    <string-array name="voiceCommands_SET_TAGS">
+        <item>taguer</item>
+        <item>tag</item>
+    </string-array>
+
+    <string-array name="voiceCommands_SET_GENRE">
+        <item>genre</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAYER_RESUME">
+        <item>continuer</item>
+        <item>continue</item>
+        <item>reprendre</item>
+        <item>lire</item>
+        <item>lecture</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAYER_NEXT">
+        <item>prochaine</item>
+        <item>prochain</item>
+        <item>suivante</item>
+        <item>suivant</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAYER_PAUSE">
+        <item>pause</item>
+        <item>stop</item>
+        <item>arret</item>
+        <item>arrêt</item>
+        <item>arreter</item>
+        <item>arrêter</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAYER_PULLUP">
+        <item>pullup</item>
+        <item>pull up</item>
+        <item>pull-up</item>
+        <item>poulpe</item>
+        <item>recommencer</item>
+        <item>rejouer</item>
+    </string-array>
+    <string name="mainVoiceToastNeedToInstall">Vous devez installer le moteur de reconnaissance vocale de Google pour utilser cette fonctionalité.</string>
 </resources>
