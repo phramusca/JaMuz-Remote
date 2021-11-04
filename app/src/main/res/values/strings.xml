@@ -165,5 +165,73 @@
     <string name="playlistOrderRandom">Random</string>
     <string name="playlistOrderPlayCounter">Play counter, Last played</string>
     <string name="playlistOrderTrackNb">Track number</string>
+    <string name="mainVoiceToastNeedToInstall">You need to install speech recognition engine from Google if you want to use this feature.</string>
 
+    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ARTIST_ONGOING">
+        <item>ongoing artist</item>
+        <item>current artist</item>
+        <item>on going artist</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ALBUM_ONGOING">
+        <item>on going album</item>
+        <item>current album</item>
+        <item>ongoing album</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ARTIST">
+        <item>artist</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ALBUM">
+        <item>album</item>
+    </string-array>
+
+    //It is also the default
+    <string-array name="voiceCommands_PLAY_PLAYLIST">
+        <item>list</item>
+        <item>playliste</item>
+        <item>playlist</item>
+    </string-array>
+
+    <string-array name="voiceCommands_SET_RATING">
+        <item>rate it</item>
+        <item>rate</item>
+    </string-array>
+
+    <string-array name="voiceCommands_SET_TAGS">
+        <item>tag it</item>
+        <item>tag</item>
+    </string-array>
+
+    <string-array name="voiceCommands_SET_GENRE">
+        <item>genre</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAYER_RESUME">
+        <item>resume</item>
+        <item>play</item>
+        <item>continue</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAYER_NEXT">
+        <item>play next track</item>
+        <item>play next</item>
+        <item>next track</item>
+        <item>next</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAYER_PAUSE">
+        <item>pause</item>
+        <item>stop</item>
+        <item>break</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAYER_PULLUP">
+        <item>pullup</item>
+        <item>pull up</item>
+        <item>pull-up</item>
+        <item>replay</item>
+        <item>restart</item>
+    </string-array>
 </resources>

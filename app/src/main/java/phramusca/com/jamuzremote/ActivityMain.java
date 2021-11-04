@@ -10,6 +10,7 @@ import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -195,6 +197,8 @@ public class ActivityMain extends AppCompatActivity {
         Log.i(TAG, "ActivityMain onCreate");
         mContext = this;
         setContentView(R.layout.activity_main);
+
+        VoiceKeyWords.set(mContext);
 
         prettyTime = new PrettyTime(Locale.getDefault());
         prettyTime.removeUnit(org.ocpsoft.prettytime.units.Decade.class);
@@ -1225,11 +1229,22 @@ public class ActivityMain extends AppCompatActivity {
 
     private void speechRecognizer() {
         //audioPlayer.pause(); //FIXME: Make pause/resume an option, another option being lowerVolume/resumeVolume
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.voicePromptCommand));
-        startActivityForResult(intent, SPEECH_REQUEST_CODE);
+
+        try {
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.voicePromptCommand));
+            startActivityForResult(intent, SPEECH_REQUEST_CODE);
+        } catch(ActivityNotFoundException e) {
+            helperToast.toastLong(getString(R.string.mainVoiceToastNeedToInstall));
+            String appPackageName = "com.google.android.googlequicksearchbox";
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+            } catch (android.content.ActivityNotFoundException anfe) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+            }
+        }
 
         //FIXME: Use a custom speech recognition:
         // - to avoid google ui
@@ -1295,6 +1310,8 @@ public class ActivityMain extends AppCompatActivity {
                     } else if (HelperLibrary.musicLibrary.getAlbum(arguments)) {
                         Playlist playlist = new Playlist(arguments, true);
                         playlist.setAlbum(arguments);
+
+                        //FIXME NOW : DO NOT CREATE THE PLAYLIST IN LIST !!! (same for others)
                         applyPlaylist(playlist, true);
                         setupLocalPlaylistSpinner(playlist);
                         msg = "";
