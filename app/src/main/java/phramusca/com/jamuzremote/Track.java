@@ -182,7 +182,7 @@ public class Track implements Serializable {
         this.artist = artist;
         this.coverHash = coverHash;
         this.genre = genre;
-        this.source = "Remote";
+        this.source = "Remote"; //NON-NLS
     }
 
     /**
@@ -196,7 +196,7 @@ public class Track implements Serializable {
         try {
             this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length() + 1);
         } catch (StringIndexOutOfBoundsException ex) {
-            Log.e(TAG, "Error getting relativeFullPath; path=" + path + ", getAppDataPath=" + getAppDataPath, ex);
+            Log.e(TAG, "Error getting relativeFullPath; path=" + path + ", getAppDataPath=" + getAppDataPath, ex); //NON-NLS //NON-NLS
         }
     }
 
@@ -210,7 +210,7 @@ public class Track implements Serializable {
             genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
             return true;
         } catch (RuntimeException ex) {
-            Log.e(TAG, "Error reading file tags " + path, ex);
+            Log.e(TAG, "Error reading file tags " + path, ex); //NON-NLS
         }
         return false;
     }
@@ -218,19 +218,19 @@ public class Track implements Serializable {
     Track(JSONObject file, File getAppDataPath, boolean statsOnly) {
         try {
             addedDate = getDate(file, "addedDate");
-            rating = file.getInt("rating");
+            rating = file.getInt("rating"); //NON-NLS
             lastPlayed = getDate(file, "lastPlayed");
-            JSONArray jsonTags = (JSONArray) file.get("tags");
+            JSONArray jsonTags = (JSONArray) file.get("tags"); //NON-NLS
             tags = new ArrayList<>();
             for (int i = 0; i < jsonTags.length(); i++) {
                 String tag = (String) jsonTags.get(i);
                 tags.add(tag);
             }
-            relativeFullPath = file.getString("path");
+            relativeFullPath = file.getString("path"); //NON-NLS
             path = new File(getAppDataPath, relativeFullPath)
                     .getAbsolutePath();
             idFileServer = file.getInt("idFile");
-            genre = file.getString("genre");
+            genre = file.getString("genre"); //NON-NLS
             playCounter = file.getInt("playCounter");
             //FIXME: Use those below, to improve sync and/or merge
 //            boolean deleted = file.getBoolean("deleted");
@@ -241,37 +241,37 @@ public class Track implements Serializable {
 //            Date ratingModifDate = getDate(file, "ratingModifDate");
 //            //END Those are only valid during merge process
             if (!statsOnly) {
-                artist = file.getString("artist");
-                title = file.getString("title");
-                album = file.getString("album");
-                length = file.getInt("length");
-                size = file.getLong("size");
-                status = Status.valueOf(file.getString("status"));
-                idPath = file.getInt("idPath");
+                artist = file.getString("artist"); //NON-NLS //NON-NLS
+                title = file.getString("title"); //NON-NLS
+                album = file.getString("album"); //NON-NLS //NON-NLS
+                length = file.getInt("length"); //NON-NLS
+                size = file.getLong("size"); //NON-NLS
+                status = Status.valueOf(file.getString("status")); //NON-NLS
+                idPath = file.getInt("idPath"); //NON-NLS
                 albumArtist = file.getString("albumArtist");
-                year = file.getString("year");
+                year = file.getString("year"); //NON-NLS
                 trackNo = file.getInt("trackNo");
                 trackTotal = file.getInt("trackTotal");
                 discNo = file.getInt("discNo");
-                discTotal = file.getInt("discTotal");
+                discTotal = file.getInt("discTotal"); //NON-NLS
                 bitRate = file.getString("bitRate");
-                format = file.getString("format");
+                format = file.getString("format"); //NON-NLS
                 BPM = file.getDouble("BPM");
                 checkedFlag = file.getString("checkedFlag");
                 copyRight = file.getString("copyRight");
                 coverHash = file.getString("coverHash");
                 modifDate = getDate(file, "modifDate");
                 pathModifDate = getDate(file, "pathModifDate");
-                pathMbId = file.getString("pathMbid");
-                comment = file.getString("comment");
-                JSONObject replayGainJsonObject = file.getJSONObject("replaygain");
+                pathMbId = file.getString("pathMbid"); //NON-NLS
+                comment = file.getString("comment"); //NON-NLS
+                JSONObject replayGainJsonObject = file.getJSONObject("replaygain"); //NON-NLS
                 ReplayGain.GainValues replayGainServer = new ReplayGain.GainValues();
                 replayGainServer.setTrackGain((float) replayGainJsonObject.getDouble("trackGain"));
                 replayGainServer.setAlbumGain((float) replayGainJsonObject.getDouble("albumGain"));
                 replayGain = replayGainServer;
             }
         } catch (JSONException ex) {
-            Log.e(TAG, "Error creating new Track " + file, ex);
+            Log.e(TAG, "Error creating new Track " + file, ex); //NON-NLS
         }
     }
 
@@ -593,10 +593,10 @@ public class Track implements Serializable {
             mmr.setDataSource(path);
             byte[] art = mmr.getEmbeddedPicture();
             if (art != null) {
-                cover = BitmapFactory.decodeByteArray(art, 0, art.length);
-            }
-        } catch (final RuntimeException ex) {
-            Log.e("Track", "Error reading art of " + path + " " + ex);
+                cover = BitmapFactory.decodeByteArray(art, 0, art.length); //NON-NLS
+            } //NON-NLS
+        } catch (final RuntimeException ex) { //NON-NLS
+            Log.e("Track", "Error reading art of " + path + " " + ex); //NON-NLS
         }
         return cover;
     }
@@ -683,19 +683,19 @@ public class Track implements Serializable {
     public JSONObject toJSONObject() {
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("idFile", idFileServer);
-            jsonObject.put("path", relativeFullPath);
-            jsonObject.put("rating", (int) rating);
+            jsonObject.put("idFile", idFileServer); //NON-NLS
+            jsonObject.put("path", relativeFullPath); //NON-NLS
+            jsonObject.put("rating", (int) rating); //NON-NLS
             jsonObject.put("addedDate", getFormattedAddedDate());
-            jsonObject.put("lastPlayed", getFormattedLastPlayed());
-            jsonObject.put("playCounter", playCounter);
-            jsonObject.put("genre", genre);
+            jsonObject.put("lastPlayed", getFormattedLastPlayed()); //NON-NLS
+            jsonObject.put("playCounter", playCounter); //NON-NLS
+            jsonObject.put("genre", genre); //NON-NLS
             JSONArray tagsAsMap = new JSONArray();
             getTags(false);
-            for (String tag : tags) {
+            for (String tag : tags) { //NON-NLS
                 tagsAsMap.put(tag);
             }
-            jsonObject.put("tags", tagsAsMap);
+            jsonObject.put("tags", tagsAsMap); //NON-NLS
         } catch (JSONException e) {
         }
         return jsonObject;

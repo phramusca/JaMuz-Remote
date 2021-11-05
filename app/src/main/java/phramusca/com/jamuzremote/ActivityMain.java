@@ -127,7 +127,7 @@ public class ActivityMain extends AppCompatActivity {
     //private static final String DB_PATH =
     //      "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;
     public static File musicLibraryDbFile = new File(
-            Environment.getExternalStorageDirectory() + "/JaMuz/JaMuzRemote.db");
+            Environment.getExternalStorageDirectory() + "/JaMuz/JaMuzRemote.db"); //NON-NLS
 
     private Map<String, Playlist> localPlaylists = new LinkedHashMap<>();
     private ArrayAdapter<Playlist> playListArrayAdapter;
@@ -194,7 +194,7 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG, "ActivityMain onCreate");
+        Log.i(TAG, "ActivityMain onCreate"); //NON-NLS
         mContext = this;
         setContentView(R.layout.activity_main);
 
@@ -321,7 +321,7 @@ public class ActivityMain extends AppCompatActivity {
                     enableSync(true);
                 }
             } else {
-                Log.i(TAG, "Broadcast(" + ServiceSync.USER_STOP_SERVICE_REQUEST + ")");
+                Log.i(TAG, "Broadcast(" + ServiceSync.USER_STOP_SERVICE_REQUEST + ")"); //NON-NLS
                 sendBroadcast(new Intent(ServiceSync.USER_STOP_SERVICE_REQUEST));
                 enableSync(true);
             }
@@ -400,14 +400,14 @@ public class ActivityMain extends AppCompatActivity {
         spinnerGenre.setOnItemSelectedListener(spinnerGenreListener);
         spinnerGenre.setOnTouchListener(dimOnTouchListener);
 
-        setupButton(R.id.button_previous, "previousTrack");
-        setupButton(R.id.button_play, "playTrack");
-        setupButton(R.id.button_next, "nextTrack");
-        setupButton(R.id.button_rewind, "rewind");
-        setupButton(R.id.button_pullup, "pullup");
-        setupButton(R.id.button_forward, "forward");
-        setupButton(R.id.button_volUp, "volUp");
-        setupButton(R.id.button_volDown, "volDown");
+        setupButton(R.id.button_previous, "previousTrack"); //NON-NLS
+        setupButton(R.id.button_play, "playTrack"); //NON-NLS
+        setupButton(R.id.button_next, "nextTrack"); //NON-NLS
+        setupButton(R.id.button_rewind, "rewind"); //NON-NLS
+        setupButton(R.id.button_pullup, "pullup"); //NON-NLS
+        setupButton(R.id.button_forward, "forward"); //NON-NLS
+        setupButton(R.id.button_volUp, "volUp"); //NON-NLS
+        setupButton(R.id.button_volDown, "volDown"); //NON-NLS
 
         toggleButtonDimMode = findViewById(R.id.button_dim_mode);
         toggleButtonDimMode.setOnClickListener(v -> setDimMode(toggleButtonDimMode.isChecked()));
@@ -612,7 +612,7 @@ public class ActivityMain extends AppCompatActivity {
             public void onSwipeTop() {
                 Log.v(TAG, "onSwipeTop");
                 if (isRemoteConnected()) {
-                    clientRemote.send("forward");
+                    clientRemote.send("forward"); //NON-NLS
                 } else {
                     audioPlayer.forward();
                 }
@@ -643,7 +643,7 @@ public class ActivityMain extends AppCompatActivity {
             public void onSwipeBottom() {
                 Log.v(TAG, "onSwipeBottom");
                 if (isRemoteConnected()) {
-                    clientRemote.send("rewind");
+                    clientRemote.send("rewind"); //NON-NLS
                 } else {
                     audioPlayer.rewind();
                 }
@@ -682,7 +682,7 @@ public class ActivityMain extends AppCompatActivity {
 
         //TODO: Use proper values
         localTrack = new Track("albumArtist", getString(R.string.mainWelcomeYear), -1, -1,
-                -1, -1, "bitRate", "format", -1, 0,
+                -1, -1, "bitRate", "format", -1, 0, //NON-NLS
                 getString(R.string.mainWelcomeTitle),
                 getString(R.string.mainWelcomeYear), getString(R.string.applicationName),
                 "welcomeHash", //Warning: "welcomeHash" value has a meaning
@@ -777,7 +777,7 @@ public class ActivityMain extends AppCompatActivity {
         String[] split = infoConnect.split(":");  //NOI18N
         if (split.length < 2) {
             helperToast.toastLong(
-                    String.format("%s %s\n%s <%s>:<%s>\n%s %s",
+                    String.format("%s %s\n%s <%s>:<%s>\n%s %s", //NON-NLS
                             mContext.getString(R.string.mainToastClientInfoBadFormat),
                             infoConnect,
                             mContext.getString(R.string.mainToastClientInfoExpected),
@@ -795,8 +795,8 @@ public class ActivityMain extends AppCompatActivity {
             port = 2013;
         }
         //FIXME: Use a real password, from QR code
-        return new ClientInfo(address, port, login, "tata", canal,
-                "jamuz", getAppDataPath().getAbsolutePath());
+        return new ClientInfo(address, port, login, "tata", canal, //NON-NLS
+                "jamuz", getAppDataPath().getAbsolutePath()); //NON-NLS
     }
 
     private void toggleOff(ToggleButton button, View layout) {
@@ -1126,7 +1126,7 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        Log.i(TAG, "ActivityMain onPause");
+        Log.i(TAG, "ActivityMain onPause"); //NON-NLS
         wasRemoteConnected = isRemoteConnected();
         stopRemote();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
@@ -1150,7 +1150,7 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i(TAG, "ActivityMain onResume");
+        Log.i(TAG, "ActivityMain onResume"); //NON-NLS
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("ServiceBase"));
@@ -1240,9 +1240,9 @@ public class ActivityMain extends AppCompatActivity {
             helperToast.toastLong(getString(R.string.mainVoiceToastNeedToInstall));
             String appPackageName = "com.google.android.googlequicksearchbox";
             try {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName))); //NON-NLS
             } catch (android.content.ActivityNotFoundException anfe) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName))); //NON-NLS
             }
         }
 
@@ -1398,29 +1398,29 @@ public class ActivityMain extends AppCompatActivity {
             }
 
         } else if (requestCode == LISTS_REQUEST_CODE && resultCode == RESULT_OK) {
-            String action = data.getStringExtra("action");
+            String action = data.getStringExtra("action"); //NON-NLS
             switch (action) {
-                case "playNextAndDisplayQueue":
+                case "playNextAndDisplayQueue": //NON-NLS
                     playNext();
                     displayQueue();
                     break;
-                case "playNext":
+                case "playNext": //NON-NLS
                     playNext();
                     break;
-                case "displayQueue":
+                case "displayQueue": //NON-NLS
                     displayQueue();
                     break;
             }
 
         } else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
-            String action = data.getStringExtra("action");
-            if (action != null && action.equals("checkPermissionsThenScanLibrary")) {
+            String action = data.getStringExtra("action"); //NON-NLS
+            if (action != null && action.equals("checkPermissionsThenScanLibrary")) { //NON-NLS
                 checkPermissionsThenScanLibrary();
             }
 
             //FIXME: Update volume directly from Settings activity
             // Need to move audio to a service, which is a good thing anyway !
-            int value = data.getIntExtra("volume", -1);
+            int value = data.getIntExtra("volume", -1); //NON-NLS
             if (value >= 0) {
                 String msg = audioPlayer.setVolume(value, displayedTrack);
                 if (!msg.equals("")) {
@@ -1462,7 +1462,7 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "ActivityMain onDestroy");
+        Log.i(TAG, "ActivityMain onDestroy"); //NON-NLS
         stopRemote();
 
         //Better unregister as it does not trigger anyway + raises exceptions if not
@@ -1541,7 +1541,7 @@ public class ActivityMain extends AppCompatActivity {
             displayedTrack.setHistory(true);
             return true;
         } else {
-            Log.d(TAG, "play(): " + displayedTrack);
+            Log.d(TAG, "play(): " + displayedTrack); //NON-NLS
             displayedTrack.delete();
             return false;
         }
@@ -1684,25 +1684,26 @@ public class ActivityMain extends AppCompatActivity {
         return msg.toString();
     }
 
+    @NonNls
     public static Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message message) {
             String msg = (String) message.obj;
-            Log.i(TAG, "handleMessage(" + msg + ")");
+            Log.i(TAG, "handleMessage(" + msg + ")"); //NON-NLS
             switch (msg) {
-                case "play":
+                case "play": //NON-NLS
                     audioPlayer.play();
                     break;
-                case "pause":
+                case "pause": //NON-NLS
                     audioPlayer.pause();
                     break;
-                case "togglePlay":
+                case "togglePlay": //NON-NLS
                     audioPlayer.togglePlay();
                     break;
-                case "playNext":
+                case "playNext": //NON-NLS
                     audioPlayer.playNext();
                     break;
-                case "playPrevious":
+                case "playPrevious": //NON-NLS
                     audioPlayer.playPrevious();
                     break;
             }
@@ -1716,8 +1717,8 @@ public class ActivityMain extends AppCompatActivity {
     private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String msg = intent.getStringExtra("message");
-            Log.i(TAG, "Broadcast.onReceive(" + msg + ")");
+            String msg = intent.getStringExtra("message"); //NON-NLS
+            Log.i(TAG, "Broadcast.onReceive(" + msg + ")"); //NON-NLS
             switch (msg) {
                 case "enableSync":
                     enableSync(true);
@@ -1763,23 +1764,23 @@ public class ActivityMain extends AppCompatActivity {
             }
             timer.cancel();
             timer.purge();
-            Log.v(TAG, "timerTask cancelled");
+            Log.v(TAG, "timerTask cancelled"); //NON-NLS
             timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    Log.v(TAG, "timerTask performed");
+                    Log.v(TAG, "timerTask performed"); //NON-NLS
                     setBrightness(0);
                     //dim(false);
                     isDimOn = false;
                 }
             }, 5 * 1000);
-            Log.v(TAG, "timerTask scheduled");
+            Log.v(TAG, "timerTask scheduled"); //NON-NLS
         }
     }
 
     private void setBrightness(final float brightness) {
-        Log.v(TAG, "setBrightness(" + brightness + ");");
+        Log.v(TAG, "setBrightness(" + brightness + ");"); //NON-NLS
         runOnUiThread(() -> {
             WindowManager.LayoutParams params = getWindow().getAttributes();
             params.screenBrightness = brightness;
@@ -1848,15 +1849,15 @@ public class ActivityMain extends AppCompatActivity {
 
             String msgStr = "<html><b>" + getString(R.string.permissionMsg_1) + "</b>" + getString(R.string.permissionMsg_2)
                     + "<BR/><BR/>" +
-                    "<i>- <u>" + getString(R.string.permissionMsg_3) + "</u></i> " + getString(R.string.permissionMsg_4)
-                    + "<BR/> " +
+                    "<i>- <u>" + getString(R.string.permissionMsg_3) + "</u></i> " + getString(R.string.permissionMsg_4) //NON-NLS //NON-NLS //NON-NLS
+                    + "<BR/> " + //NON-NLS
                     getString(R.string.permissionMsg_5) + " (\"" + getAppDataPath() + "\")."
                     + "<BR/>" +
                     getString(R.string.permissionMsg_6)
                     + "<BR/>" +
                     getString(R.string.permissionMsg_7) + " (\"" + musicLibraryDbFile.getAbsolutePath() + "\")."
                     + "<BR/><BR/>" +
-                    "<i>- <u>" + getString(R.string.permissionMsg_8) + "</u></i> " + getString(R.string.permissionMsg_9)
+                    "<i>- <u>" + getString(R.string.permissionMsg_8) + "</u></i> " + getString(R.string.permissionMsg_9) //NON-NLS //NON-NLS
                     + "</html>";
 
             AlertDialog alertDialog = new AlertDialog.Builder(ActivityMain.this).create();
@@ -1876,8 +1877,8 @@ public class ActivityMain extends AppCompatActivity {
     private void setupTags() {
         runOnUiThread(() -> {
             layoutTags.removeAllViews();
-            layoutTagsPlaylist.removeAllViews();
-            makeButtonTagPlaylist(Integer.MAX_VALUE, "null");
+            layoutTagsPlaylist.removeAllViews(); //NON-NLS //NON-NLS
+            makeButtonTagPlaylist(Integer.MAX_VALUE, "null"); //NON-NLS
             if (RepoTags.get() != null) {
                 for (Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
                     makeButtonTag(tag.getKey(), tag.getValue());
@@ -1956,15 +1957,15 @@ public class ActivityMain extends AppCompatActivity {
                     playNext();
                     break;
                 case "playTrack":
-                    audioPlayer.togglePlay();
+                    audioPlayer.togglePlay(); //NON-NLS
                     break;
-                case "pullup":
+                case "pullup": //NON-NLS
                     audioPlayer.pullUp();
+                    break; //NON-NLS
+                case "rewind": //NON-NLS
+                    audioPlayer.rewind(); //NON-NLS
                     break;
-                case "rewind":
-                    audioPlayer.rewind();
-                    break;
-                case "forward":
+                case "forward": //NON-NLS
                     audioPlayer.forward();
                     break;
                 case "volUp":
@@ -2085,7 +2086,7 @@ public class ActivityMain extends AppCompatActivity {
                     setTagButtonTextColor(button, TriStateButton.STATE.ANY);
                 }
             }
-            TriStateButton nullButton = layoutTagsPlaylist.findViewWithTag("null");
+            TriStateButton nullButton = layoutTagsPlaylist.findViewWithTag("null"); //NON-NLS
             if (nullButton != null) {
                 nullButton.setState(playlist.getUnTaggedState());
                 setTagButtonTextColor(nullButton, playlist.getUnTaggedState());
@@ -2214,11 +2215,11 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void displayTrackDetails() {
-        runOnUiThread(() -> setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
-                String.format("<html><BR/>%s<BR/>%s %d/5 %s %s<BR/>%s%s<BR/></html>",
-                        displayedTrack.getSource().equals("")
-                                ? ""
-                                : "<u>".concat(displayedTrack.getSource()).concat("</u>"),
+        runOnUiThread(() -> setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml( //NON-NLS //NON-NLS
+                String.format("<html><BR/>%s<BR/>%s %d/5 %s %s<BR/>%s%s<BR/></html>", //NON-NLS
+                        displayedTrack.getSource().equals("") //NON-NLS
+                                ? "" //NON-NLS
+                                : "<u>".concat(displayedTrack.getSource()).concat("</u>"), //NON-NLS
                         displayedTrack.getTags(),
                         (int) displayedTrack.getRating(),
                         displayedTrack.getGenre(),
@@ -2230,16 +2231,16 @@ public class ActivityMain extends AppCompatActivity {
     public static String getLastPlayedAgo(Track track) {
         return track.getPlayCounter() <= 0
                 ? mContext.getString(R.string.trackNeverPlayed)
-                : String.format(
-                        "%s %s (%dx). ",
+                : String.format( //NON-NLS
+                        "%s %s (%dx). ", //NON-NLS
                         mContext.getString(R.string.trackPlayed),
                         prettyTime.format(track.getLastPlayed()),
                         track.getPlayCounter());
     }
 
-    public static String getAddedDateAgo(Track track) {
+    public static String getAddedDateAgo(Track track) { //NON-NLS
         return String.format(
-                "%s %s.",
+                "%s %s.", //NON-NLS
                 mContext.getString(R.string.trackAdded),
                 prettyTime.format(track.getAddedDate()));
     }
@@ -2294,14 +2295,14 @@ public class ActivityMain extends AppCompatActivity {
 
     private void bluetoothNotifyChange(String what) {
         Intent i = new Intent(what);
-        i.putExtra("id", Long.valueOf(displayedTrack.getIdFileRemote()));
-        i.putExtra("artist", displayedTrack.getArtist());
-        i.putExtra("album", displayedTrack.getAlbum());
-        i.putExtra("track", displayedTrack.getTitle());
-        i.putExtra("playing", "true");
+        i.putExtra("id", Long.valueOf(displayedTrack.getIdFileRemote())); //NON-NLS
+        i.putExtra("artist", displayedTrack.getArtist()); //NON-NLS //NON-NLS //NON-NLS //NON-NLS //NON-NLS
+        i.putExtra("album", displayedTrack.getAlbum()); //NON-NLS
+        i.putExtra("track", displayedTrack.getTitle()); //NON-NLS
+        i.putExtra("playing", "true"); //NON-NLS
         i.putExtra("ListSize", "99");
-        i.putExtra("duration", "20");
-        i.putExtra("position", "0");
+        i.putExtra("duration", "20"); //NON-NLS
+        i.putExtra("position", "0"); //NON-NLS
         sendBroadcast(i);
     }
 
@@ -2342,12 +2343,12 @@ public class ActivityMain extends AppCompatActivity {
         public void onReceivedJson(final String json) {
             try {
                 JSONObject jObject = new JSONObject(json);
-                String type = jObject.getString("type");
+                String type = jObject.getString("type"); //NON-NLS //NON-NLS
                 switch (type) {
-                    case "playlists":
-                        String selectedPlaylist = jObject.getString("selectedPlaylist");
+                    case "playlists": //NON-NLS
+                        String selectedPlaylist = jObject.getString("selectedPlaylist"); //NON-NLS
                         Playlist temp = new Playlist(selectedPlaylist, false);
-                        final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists");
+                        final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists"); //NON-NLS
                         final List<Playlist> playlists = new ArrayList<>();
                         for (int i = 0; i < jsonPlaylists.length(); i++) {
                             String playlist = (String) jsonPlaylists.get(i);
@@ -2364,8 +2365,8 @@ public class ActivityMain extends AppCompatActivity {
                         enablePlaylistEdit(false);
                         break;
                     case "currentPosition":
-                        final int currentPosition = jObject.getInt("currentPosition");
-                        final int total = jObject.getInt("total");
+                        final int currentPosition = jObject.getInt("currentPosition"); //NON-NLS
+                        final int total = jObject.getInt("total"); //NON-NLS
                         if (isRemoteConnected()) {
                             setSeekBar(currentPosition, total);
                         }
@@ -2382,9 +2383,9 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         @Override
-        public void onReceivedBitmap(final Bitmap bitmap) {
-            Log.d(TAG, "onReceivedBitmap: callback");
-            Log.d(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight());
+        public void onReceivedBitmap(final Bitmap bitmap) { //NON-NLS
+            Log.d(TAG, "onReceivedBitmap: callback"); //NON-NLS //NON-NLS
+            Log.d(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight()); //NON-NLS //NON-NLS
             if(bitmap != null && !RepoCovers.contains(displayedTrack.getCoverHash(), RepoCovers.IconSize.COVER)) {
                 RepoCovers.writeIconToCache(displayedTrack.getCoverHash(), bitmap);
             }
@@ -2403,7 +2404,7 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    private void stopRemote() {
+    private void stopRemote() { //NON-NLS
         if (clientRemote != null) {
             clientRemote.close();
             clientRemote = null;
@@ -2412,7 +2413,7 @@ public class ActivityMain extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Log.i(TAG, "ActivityMain onCreateOptionsMenu");
+        Log.i(TAG, "ActivityMain onCreateOptionsMenu"); //NON-NLS
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
@@ -2421,22 +2422,22 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
+        // automatically handle clicks on the Home/Up button, so long //NON-NLS
         // as you specify a parent activity in AndroidManifest.xml.
-        Log.i(TAG, "ActivityMain onOptionsItemSelected");
+        Log.i(TAG, "ActivityMain onOptionsItemSelected"); //NON-NLS
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            return true; //NON-NLS
         }
 
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onBackPressed() {
-        Log.i(TAG, "ActivityMain onBackPressed");
+    public void onBackPressed() { //NON-NLS
+        Log.i(TAG, "ActivityMain onBackPressed"); //NON-NLS
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle(R.string.mainAlertDialogClosingApplicationTitle)
@@ -2492,16 +2493,16 @@ public class ActivityMain extends AppCompatActivity {
             if (Objects.requireNonNull(intent.getAction())
                     .equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED);
-                if (state == BluetoothHeadset.STATE_CONNECTED) {
-                    Log.i(TAG, "BT onConnected. Waiting 4s");
+                if (state == BluetoothHeadset.STATE_CONNECTED) { //NON-NLS
+                    Log.i(TAG, "BT onConnected. Waiting 4s"); //NON-NLS
                     try {
                         Thread.sleep(4000);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        e.printStackTrace(); //NON-NLS
                     }
-                    audioPlayer.play();
+                    audioPlayer.play(); //NON-NLS
                 } else if (state == BluetoothHeadset.STATE_DISCONNECTED) {
-                    Log.i(TAG, "BT DISconnected");
+                    Log.i(TAG, "BT DISconnected"); //NON-NLS
                     audioPlayer.pause();
 
                     //Somehow, this situation (at least) (can) endup with other receivers (headsethook at least)

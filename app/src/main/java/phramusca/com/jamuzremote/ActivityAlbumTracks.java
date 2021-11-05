@@ -96,7 +96,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         PlayQueue.queue.insert(playlist);
 
         Intent data = new Intent();
-        data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue");
+        data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue"); //NON-NLS
         setResult(RESULT_OK, data);
         finish();
     }
@@ -106,7 +106,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
             //Insert in queue
             PlayQueue.queue.insert(track);
             Intent data = new Intent();
-            data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue");
+            data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue"); //NON-NLS
             setResult(RESULT_OK, data);
             finish();
         } else if (Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track.getStatus())) {

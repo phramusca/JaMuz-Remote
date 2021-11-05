@@ -211,10 +211,10 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
     public abstract void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons);
 
     public enum ButtonInfo {
-        PLAY("", R.drawable.ic_slide_queue_play, Color.parseColor("#1e8449")), //NOI18N
-        QUEUE("", R.drawable.ic_slide_queue_add, Color.parseColor("#82e0aa")), //NOI18N
-        DOWN("", R.drawable.ic_slide_down, Color.parseColor("#f7dc6f")), //NOI18N
-        DEL("", R.drawable.ic_slide_remove, Color.parseColor("#c0392b")); //NOI18N
+        PLAY("", R.drawable.ic_slide_queue_play, Color.parseColor("#1e8449")), //NOI18N NON-NLS
+        QUEUE("", R.drawable.ic_slide_queue_add, Color.parseColor("#82e0aa")), //NOI18N NON-NLS
+        DOWN("", R.drawable.ic_slide_down, Color.parseColor("#f7dc6f")), //NOI18N NON-NLS
+        DEL("", R.drawable.ic_slide_remove, Color.parseColor("#c0392b")); //NOI18N NON-NLS
 
         public String text;
         public int imageResId;

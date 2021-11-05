@@ -18,7 +18,7 @@ class HelperBitmap {
 
     public static Bitmap getEmptyThumb() {
         if(emptyThumb==null) {
-            emptyThumb = textAsBitmap("No cover", 120, 25, 10, 70);;
+            emptyThumb = textAsBitmap("No cover", 120, 25, 10, 70); //FIXME NOW Translate
         }
         return emptyThumb;
     }

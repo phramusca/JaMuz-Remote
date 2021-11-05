@@ -82,7 +82,7 @@ public class ActivitySettings extends AppCompatActivity {
                                             .concat("</html>"))));
                                     setConfig("userPath", chosenDir);
                                     Intent data = new Intent();
-                                    data.putExtra("action", "checkPermissionsThenScanLibrary");
+                                    data.putExtra("action", "checkPermissionsThenScanLibrary"); //NON-NLS
                                     setResult(RESULT_OK, data);
                                     finish();
                                 });
@@ -97,10 +97,10 @@ public class ActivitySettings extends AppCompatActivity {
         seekBarReplayGain.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                Log.i(TAG, "seekBarReplayGain: " + progress);
+                Log.i(TAG, "seekBarReplayGain: " + progress); //NON-NLS
                 setConfig("baseVolume", progress);
                 Intent data = new Intent();
-                data.putExtra("volume", progress);
+                data.putExtra("volume", progress); //NON-NLS
                 setResult(RESULT_OK, data);
             }
 

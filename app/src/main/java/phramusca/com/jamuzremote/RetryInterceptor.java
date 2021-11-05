@@ -39,14 +39,14 @@ public class RetryInterceptor implements Interceptor {
         do {
             nbRetries++;
             try {
-                Log.d(TAG, "CALLING: " + request.toString());
+                Log.d(TAG, "CALLING: " + request.toString()); //NON-NLS
                 response = chain.proceed(request);
                 break;
             } catch (Exception e) {
                 msg = e.getLocalizedMessage();
-                Log.d(TAG, "ERROR: " + msg);
+                Log.d(TAG, "ERROR: " + msg); //NON-NLS
                 helperNotification.notifyBar(notification, String.format(
-                        "%ds %s %d/%d : %s",
+                        "%ds %s %d/%d : %s", //NON-NLS
                         sleepSeconds,
                         mContext.getString(R.string.globalLabelBefore),
                         nbRetries + 1,

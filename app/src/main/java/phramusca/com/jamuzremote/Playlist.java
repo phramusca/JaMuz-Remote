@@ -123,14 +123,14 @@ public class Playlist implements Comparable, Serializable {
         String nullStatus = "";
         switch (unTaggedState) {
             case TRUE:
-                nullStatus = "null only";
+                nullStatus = "null only"; //FIXME NOW Translate
                 break;
             case FALSE:
-                nullStatus = "null excl.";
+                nullStatus = "null excl."; //FIXME NOW Translate
                 tagsLists = new Lists(tags);
                 break;
             case ANY:
-                nullStatus = "null incl.";
+                nullStatus = "null incl."; //FIXME NOW Translate
                 tagsLists = new Lists(tags);
                 break;
         }
@@ -143,7 +143,7 @@ public class Playlist implements Comparable, Serializable {
                 included.addAll(tagsLists.getIncluded());
             }
             included.addAll(genresLists.getIncluded());
-            in += " | Incl.: " + getString(included, max);
+            in += " | Incl.: " + getString(included, max); //FIXME NOW Translate
         }
 
         if (tagsLists.hasExcluded() || genresLists.hasExcluded()) {
@@ -152,7 +152,7 @@ public class Playlist implements Comparable, Serializable {
                 excluded.addAll(tagsLists.getExcluded());
             }
             excluded.addAll(genresLists.getExcluded());
-            in += " | Excl.: " + getString(excluded, max);
+            in += " | Excl.: " + getString(excluded, max); //FIXME NOW Translate
         }
 
         in += " | " + order.getDisplay(context);
@@ -264,7 +264,7 @@ public class Playlist implements Comparable, Serializable {
     }
 
     public void toggleTag(String value, TriStateButton.STATE state) {
-        if (value.equals("null")) {
+        if (value.equals("null")) {  //FIXME NOW Translate ??
             unTaggedState = state;
         } else {
             tags.put(value, state);
@@ -309,11 +309,11 @@ public class Playlist implements Comparable, Serializable {
         for(Track.Status status : statuses) {
             statusString.add(status.name());
         }
-        String in = " WHERE " + COL_STATUS + " IN ( " + getInClause(statusString) + " )" +
-                " AND rating " + getRatingString() + " ";
+        String in = " WHERE " + COL_STATUS + " IN ( " + getInClause(statusString) + " )" + //NON-NLS
+                " AND rating " + getRatingString() + " "; //NON-NLS
 
         if (limitValue > 0) {
-            in += "\n AND lastPlayed < datetime(datetime('now'), '-" + limitValue + " " + limitUnit.value + "')";
+            in += "\n AND lastPlayed < datetime(datetime('now'), '-" + limitValue + " " + limitUnit.value + "')"; //NON-NLS
         }
 
         ArrayList<String> include = new ArrayList<>();
@@ -330,18 +330,18 @@ public class Playlist implements Comparable, Serializable {
         }
 
         if (include.size() > 0) {
-            in += "\n AND genre IN (" + getInClause(include) + ") ";
+            in += "\n AND genre IN (" + getInClause(include) + ") "; //NON-NLS
         }
         if (exclude.size() > 0) {
-            in += "\n AND genre NOT IN (" + getInClause(exclude) + ") ";
+            in += "\n AND genre NOT IN (" + getInClause(exclude) + ") "; //NON-NLS
         }
 
         if (artist != null) {
-            in += "\n AND artist LIKE \"%" + artist + "%\" ";
+            in += "\n AND artist LIKE \"%" + artist + "%\" "; //NON-NLS
         }
 
         if (album != null) {
-            in += "\n AND album = \"" + album + "\" ";
+            in += "\n AND album = \"" + album + "\" "; //NON-NLS
         }
 
         in += getInClause(excluded);
@@ -353,10 +353,10 @@ public class Playlist implements Comparable, Serializable {
         //FILTER by TAGS
         String in;
         if (unTaggedState.equals(TriStateButton.STATE.TRUE)) {
-            in = " HAVING tag.value IS NULL ";
+            in = " HAVING tag.value IS NULL "; //NON-NLS
         } else {
             //Include or exclude tags according to states
-            in = " HAVING ( ";
+            in = " HAVING ( "; //NON-NLS
             if (tags.size() > 0) {
                 ArrayList<String> include = new ArrayList<>();
                 ArrayList<String> exclude = new ArrayList<>();
@@ -371,16 +371,16 @@ public class Playlist implements Comparable, Serializable {
                     }
                 }
                 in += getInClause(include, include.size());
-                in += "\n AND " + getInClause(exclude, 0);
+                in += "\n AND " + getInClause(exclude, 0); //NON-NLS
             } else {
-                in += " 1 ";
+                in += " 1 "; //NON-NLS
             }
-            in += " ) ";
+            in += " ) "; //NON-NLS
             //Include or exclude untagged
             if (unTaggedState.equals(TriStateButton.STATE.ANY)) {
-                in += "\n OR tag.value IS NULL ";
+                in += "\n OR tag.value IS NULL "; //NON-NLS
             } else if (unTaggedState.equals(TriStateButton.STATE.FALSE)) {
-                in += "\n AND tag.value IS NOT NULL ";
+                in += "\n AND tag.value IS NOT NULL "; //NON-NLS
             }
         }
         return in;
@@ -389,7 +389,7 @@ public class Playlist implements Comparable, Serializable {
     private static String getInClause(List<Integer> excluded) {
         StringBuilder builder = new StringBuilder();
         if (excluded.size() > 0) {
-            builder.append("\n AND tracks.idFileRemote NOT IN (");
+            builder.append("\n AND tracks.idFileRemote NOT IN ("); //NON-NLS
             for (int integer : excluded) {
                 builder.append(integer).append(",");
             }
@@ -409,14 +409,14 @@ public class Playlist implements Comparable, Serializable {
     private String getInClause(ArrayList<String> include, int length) {
         StringBuilder in = new StringBuilder();
         if (include.size() > 0) {
-            in.append(" sum(case when tag.value IN (");
+            in.append(" sum(case when tag.value IN ("); //NON-NLS
             for (String entry : include) {
-                in.append("\"").append(entry).append("\",");
+                in.append("\"").append(entry).append("\","); //NON-NLS
             }
             in = new StringBuilder(in.substring(0, in.length() - 1));
-            in.append(" ) then 1 else 0 end) = ").append(length);
+            in.append(" ) then 1 else 0 end) = ").append(length); //NON-NLS
         } else {
-            in.append(" 1 ");
+            in.append(" 1 "); //NON-NLS
         }
         return in.toString();
     }
@@ -502,16 +502,16 @@ public class Playlist implements Comparable, Serializable {
     }
 
     public enum LimitUnit {
-        @SerializedName("minutes")
-        MINUTES("minutes", 0), //NOI18N
-        @SerializedName("hours")
-        HOURS("hours", 1), //NOI18N
-        @SerializedName("days")
-        DAYS("days", 2), //NOI18N
-        @SerializedName("months")
-        MONTHS("months", 3), //NOI18N
-        @SerializedName("years")
-        YEARS("years", 4); //NOI18N
+        @SerializedName("minutes") //NON-NLS
+        MINUTES("minutes", 0), //NON-NLS
+        @SerializedName("hours") //NON-NLS
+        HOURS("hours", 1), //NON-NLS
+        @SerializedName("days") //NON-NLS
+        DAYS("days", 2), //NON-NLS
+        @SerializedName("months") //NON-NLS
+        MONTHS("months", 3), //NON-NLS
+        @SerializedName("years") //NON-NLS
+        YEARS("years", 4); //NON-NLS
 
         private final String value;
         private final int index;
@@ -527,9 +527,9 @@ public class Playlist implements Comparable, Serializable {
     }
 
     public enum Order {
-        RANDOM("ORDER BY RANDOM()", R.string.playlistOrderRandom), //NOI18N
-        PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed", R.string.playlistOrderPlayCounter),
-        DISC_TRACK("ORDER BY discNo, trackNo", R.string.playlistOrderTrackNb); //NOI18N
+        RANDOM("ORDER BY RANDOM()", R.string.playlistOrderRandom),  //NON-NLS
+        PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed", R.string.playlistOrderPlayCounter), //NON-NLS
+        DISC_TRACK("ORDER BY discNo, trackNo", R.string.playlistOrderTrackNb);  //NON-NLS
 
         private final String value;
         private final int resId;

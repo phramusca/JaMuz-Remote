@@ -103,7 +103,7 @@ public abstract class AdapterLoadQueue extends AdapterLoad {
                     track.getArtist(),
                     track.getAlbum(),
                     String.format(Locale.ENGLISH,
-                            "%s %d/5 %s %s\n%s %s",
+                            "%s %d/5 %s %s\n%s %s", //NON-NLS
                             track.getTags(),
                             (int) track.getRating(),
                             track.getGenre(),

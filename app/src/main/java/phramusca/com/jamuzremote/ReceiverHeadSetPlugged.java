@@ -14,14 +14,14 @@ public class ReceiverHeadSetPlugged extends BroadcastReceiver {
     private boolean headsetConnected = false;
 
     public void onReceive(Context context, Intent intent) {
-        if (intent.hasExtra("state")) {
-            if (headsetConnected && intent.getIntExtra("state", 0) == 0) {
+        if (intent.hasExtra("state")) { //NON-NLS
+            if (headsetConnected && intent.getIntExtra("state", 0) == 0) { //NON-NLS
                 headsetConnected = false;
-                Log.i(TAG, "headset NOT Connected => pause");
+                Log.i(TAG, "headset NOT Connected => pause"); //NON-NLS
                 ActivityMain.audioPlayer.pause();
-            } else if (!headsetConnected && intent.getIntExtra("state", 0) == 1) {
+            } else if (!headsetConnected && intent.getIntExtra("state", 0) == 1) { //NON-NLS
                 headsetConnected = true;
-                Log.i(TAG, "headset IS Connected => resume");
+                Log.i(TAG, "headset IS Connected => resume"); //NON-NLS
                 ActivityMain.audioPlayer.resume();
             }
         }

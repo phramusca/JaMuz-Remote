@@ -163,7 +163,7 @@ public class DirectoryChooserDialog {
                     updateDirectory();
                 } else {
                     Toast.makeText(
-                            m_context, String.format("%s \"%s\" %s",
+                            m_context, String.format("%s \"%s\" %s", //NON-NLS
                                     m_context.getString(R.string.settingsDirectoryChooserFailedToCreate),
                                     newDirName,
                                     m_context.getString(R.string.settingsDirectoryChooserFailedToCreateSuffix)),
