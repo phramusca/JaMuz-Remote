@@ -65,11 +65,11 @@ public class AdapterCursorAlbum extends AdapterCursor<AdapterLoad.UserViewHolder
             userViewHolder.item_line2.highlight();
         }
 
-        userViewHolder.item_line3.setText(String.format(Locale.ENGLISH, "%d %s.",
+        userViewHolder.item_line3.setText(String.format(Locale.ENGLISH, "%d %s.", //NON-NLS
                 adapterListItemAlbum.getNbTracks(), //Includes nb of albums
                 parent.getContext().getString(R.string.adapterCursorAlbumLabelTracks)));
 
-        userViewHolder.item_line4.setText(String.format(Locale.ENGLISH, "%.1f/5 %s",
+        userViewHolder.item_line4.setText(String.format(Locale.ENGLISH, "%.1f/5 %s", //NON-NLS
                 adapterListItemAlbum.getRating(),
                 adapterListItemAlbum.getGenre()));
 

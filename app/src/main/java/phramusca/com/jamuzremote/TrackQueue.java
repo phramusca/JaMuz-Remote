@@ -113,7 +113,7 @@ public class TrackQueue extends TrackList {
     }
 
     synchronized List<Track> getMore(int indexStart, Playlist playlist) {
-        Log.i(TAG, "getMore " + indexStart);
+        Log.i(TAG, "getMore " + indexStart); //NON-NLS
         ArrayList<Track> list =
                 indexStart < tracks.size()
                         ? get(indexStart, indexStart)
@@ -126,14 +126,14 @@ public class TrackQueue extends TrackList {
 
     synchronized private ArrayList<Track> get(int indexStart, int positionPlaying) {
         int indexEnd = (positionPlaying + MAX_QUEUE_NEXT) < tracks.size() ? positionPlaying + MAX_QUEUE_NEXT : tracks.size() - 1;
-        Log.i(TAG, "get " + indexStart + " " + indexEnd);
+        Log.i(TAG, "get " + indexStart + " " + indexEnd); //NON-NLS
         return new ArrayList<>(tracks.subList(indexStart, indexEnd + 1));
     }
 
     synchronized PlayQueueRelative getActivityList() {
         if (positionPlaying > -1) {
             int indexStart = Math.max((positionPlaying - MAX_QUEUE_PREVIOUS), 0);
-            Log.i(TAG, "getActivityList " + indexStart);
+            Log.i(TAG, "getActivityList " + indexStart); //NON-NLS
             ArrayList<Track> list = get(indexStart, positionPlaying);
             return new PlayQueueRelative(positionPlaying, indexStart, list);
         }

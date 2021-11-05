@@ -86,7 +86,7 @@
                      fOut.flush();
                      fOut.close();
                  } catch (IOException e) {
-                     Log.e(TAG, "Error writing thumb to cache", e);
+                     Log.e(TAG, "Error writing thumb to cache", e); //NON-NLS
                      e.printStackTrace();
                  }
              }
@@ -111,7 +111,7 @@
 
      private static File getCacheFile(String coverHash, IconSize iconSize) {
          String filename = coverHash.equals("") ? "NA" : coverHash + iconSize.name();
-         return getFile(filename + ".png", "..", "cache", "cover-icons");
+         return getFile(filename + ".png", "..", "cache", "cover-icons"); //NON-NLS
      }
 
      //TODO: Move this to a generic class if to be used elsewhere

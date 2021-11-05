@@ -22,7 +22,7 @@ public final class RepoSync {
         //FIXME for merge (and other as needed): Cursor to json : https://stackoverflow.com/questions/13070791/android-cursor-to-jsonarray
         //FIXME getTracks to return HashBasedTable to speed up a bit
         tracks = HashBasedTable.create();
-        List<Track> newTracks = HelperLibrary.musicLibrary.getTracks(true, "WHERE status!=\"" + Track.Status.LOCAL.name() + "\"", "", "", -1);
+        List<Track> newTracks = HelperLibrary.musicLibrary.getTracks(true, "WHERE status!=\"" + Track.Status.LOCAL.name() + "\"", "", "", -1); //NON-NLS
         for (Track track : newTracks) {
             tracks.put(track.getIdFileServer(), track.getStatus(), track);
         }
@@ -38,7 +38,7 @@ public final class RepoSync {
         track.setStatus(Track.Status.REC);
         if (!checkFile(track) || !HelperLibrary.musicLibrary.updateStatus(track)) {
             File receivedFile = new File(track.getPath());
-            Log.w(TAG, "Error with received file. Deleting " + receivedFile.getAbsolutePath());
+            Log.w(TAG, "Error with received file. Deleting " + receivedFile.getAbsolutePath()); //NON-NLS
             //noinspection ResultOfMethodCallIgnored
             receivedFile.delete();
             track.setStatus(Track.Status.NEW);
@@ -54,15 +54,15 @@ public final class RepoSync {
         File receivedFile = new File(track.getPath());
         if (receivedFile.exists()) {
             if (receivedFile.length() == track.getSize()) {
-                Log.i(TAG, "Correct file size: " + receivedFile.length());
+                Log.i(TAG, "Correct file size: " + receivedFile.length()); //NON-NLS
                 return true;
             } else {
-                Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath());
+                Log.w(TAG, "File has wrong size. Deleting " + receivedFile.getAbsolutePath()); //NON-NLS
                 //noinspection ResultOfMethodCallIgnored
                 receivedFile.delete();
             }
         } else {
-            Log.w(TAG, "File does not exits. " + receivedFile.getAbsolutePath());
+            Log.w(TAG, "File does not exits. " + receivedFile.getAbsolutePath()); //NON-NLS
         }
         return false;
     }

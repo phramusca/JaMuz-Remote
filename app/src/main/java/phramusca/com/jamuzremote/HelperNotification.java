@@ -60,7 +60,7 @@ public class HelperNotification {
         notification.builder.setProgress(max, progress, indeterminate);
         notification.builder.setContentIntent(pendingIntent);
         notificationManager.notify(notification.id, notification.builder.build());
-        Log.i(TAG, "NOTIFICATION " + notification.id + ": " + msg);
+        Log.i(TAG, "NOTIFICATION " + notification.id + ": " + msg); //NON-NLS
     }
 
     private void disableNotificationIn(final long millisInFuture, final int id) {
@@ -68,8 +68,8 @@ public class HelperNotification {
             CountDownTimer timer = new CountDownTimer(millisInFuture, millisInFuture / 10) {
                 @Override
                 public void onTick(long millisUntilFinished) {
-                    Log.d(TAG, (millisUntilFinished / 1000) + "s remaining before " +
-                            "disabling notification");
+                    Log.d(TAG, (millisUntilFinished / 1000) + "s remaining before " + //NON-NLS
+                            "disabling notification"); //NON-NLS
                 }
 
                 @Override

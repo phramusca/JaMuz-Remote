@@ -17,15 +17,15 @@ public class HelperDateTime {
         /**
          * SQL dateTime format ("yyyy-MM-dd HH:mm:ss")
          */
-        SQL("yyyy-MM-dd HH:mm:ss"),
+        SQL("yyyy-MM-dd HH:mm:ss"), //NON-NLS
         /**
          * Human dateTime format ("dd/MM/yyyy HH:mm:ss")
          */
-        HUMAN("dd/MM/yyyy HH:mm:ss"),
+        HUMAN("dd/MM/yyyy HH:mm:ss"), //NON-NLS
         /**
          * File dateTime format ("yyyy-MM-dd--HH-mm-ss")
          */
-        FILE("yyyy-MM-dd--HH-mm-ss");
+        FILE("yyyy-MM-dd--HH-mm-ss"); //NON-NLS
 
         private final String pattern;
 

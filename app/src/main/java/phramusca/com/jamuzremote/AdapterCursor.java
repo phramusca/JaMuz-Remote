@@ -50,7 +50,7 @@ public abstract class AdapterCursor<VH extends RecyclerView.ViewHolder> extends 
         mContext = context;
         mCursor = cursor;
         mDataValid = cursor != null;
-        mRowIdColumn = mDataValid ? mCursor.getColumnIndex("_id") : -1;
+        mRowIdColumn = mDataValid ? mCursor.getColumnIndex("_id") : -1; //NON-NLS
         mDataSetObserver = new NotifyingDataSetObserver();
         if (mCursor != null) {
             mCursor.registerDataSetObserver(mDataSetObserver);
@@ -124,7 +124,7 @@ public abstract class AdapterCursor<VH extends RecyclerView.ViewHolder> extends 
             if (mDataSetObserver != null) {
                 mCursor.registerDataSetObserver(mDataSetObserver);
             }
-            mRowIdColumn = newCursor.getColumnIndex("_id");
+            mRowIdColumn = newCursor.getColumnIndex("_id"); //NON-NLS
             //mRowIdColumn = mDataValid ? mCursor.getColumnIndex("_id") : -1;
             mDataValid = true;
             notifyDataSetChanged();

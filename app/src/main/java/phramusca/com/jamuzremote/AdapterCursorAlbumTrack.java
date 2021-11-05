@@ -94,7 +94,7 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
             userViewHolder.item_line4.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
         }
 
-        userViewHolder.item_line1.setText(String.format(Locale.ENGLISH,"%s%d %s",
+        userViewHolder.item_line1.setText(String.format(Locale.ENGLISH,"%s%d %s", //NON-NLS
                 track.getDiscTotal() > 1 ? "[" + track.getDiscNo() + "/" + track.getDiscTotal() + "] " : "",
                 track.getTrackNo(),
                 track.getTitle()));
@@ -111,12 +111,12 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
         }
 
         userViewHolder.item_line3.setText(String.format(Locale.ENGLISH,
-                "%d/5 %s %s",
+                "%d/5 %s %s", //NON-NLS
                 (int) track.getRating(),
                 track.getGenre(),
                 track.getYear()));
         userViewHolder.item_line4.setText(String.format(Locale.ENGLISH,
-                "%s\n%s %s",
+                "%s\n%s %s", //NON-NLS
                 track.getTags(),
                 ActivityMain.getLastPlayedAgo(track),
                 ActivityMain.getAddedDateAgo(track)));

@@ -50,9 +50,9 @@ public abstract class ServiceBase extends Service {
     }
 
     protected void sendMessage(String msg) {
-        Log.i(TAG, "Broadcast.sendMessage(" + msg + ")");
+        Log.i(TAG, "Broadcast.sendMessage(" + msg + ")"); //NON-NLS
         Intent intent = new Intent("ServiceBase");
-        intent.putExtra("message", msg);
+        intent.putExtra("message", msg); //NON-NLS
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 

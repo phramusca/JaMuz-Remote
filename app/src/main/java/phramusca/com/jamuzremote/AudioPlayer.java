@@ -28,7 +28,7 @@ public class AudioPlayer {
 
     public void play(Track track, HelperToast helperToast) {
         try {
-            Log.i(TAG, "Playing " + track.getRelativeFullPath());
+            Log.i(TAG, "Playing " + track.getRelativeFullPath()); //NON-NLS
             enableControl = false;
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(track.getPath());
@@ -47,7 +47,7 @@ public class AudioPlayer {
                 enableControl = true;
             });
         } catch (IOException e) {
-            Log.e(TAG, "Error playing (\"" + track + "\") => DELETING IT !!!!!!", e);
+            Log.e(TAG, "Error playing (\"" + track + "\") => DELETING IT !!!!!!", e); //NON-NLS
             //TODO: Put back in RepoSync (take info from there)
             stop(false);
             File file = new File(track.getPath());
@@ -89,12 +89,12 @@ public class AudioPlayer {
         }
 
         String msg = "";
-        Log.i(TAG, "baseVolume=" + baseVolume);
+        Log.i(TAG, "baseVolume=" + baseVolume); //NON-NLS
         float rg_result = ((float) Math.pow(10, (adjust / 20))) * baseVolume;
-        Log.i(TAG, "rg_result=" + rg_result);
+        Log.i(TAG, "rg_result=" + rg_result); //NON-NLS
         if (rg_result > 1.0f) {
             msg = String.format(
-                    "%s \n%s\n---------------\n %s\n Base Volume=%s\n Adjust=%s\n Set Volume=%s (limit 1.0)",
+                    "%s \n%s\n---------------\n %s\n Base Volume=%s\n Adjust=%s\n Set Volume=%s (limit 1.0)", //NON-NLS
                     mContext.getString(R.string.audioPlayerToastRgBaseVolTooHigh),
                     mContext.getString(R.string.audioPlayerToastRgConsiderLower),
                     rg.toString(),
@@ -106,7 +106,7 @@ public class AudioPlayer {
         } else if (rg_result < 0.0f) {
             rg_result = 0.0f;
         }
-        Log.i(TAG, "mediaPlayer.setVolume(" + rg_result + ", " + rg_result + ")");
+        Log.i(TAG, "mediaPlayer.setVolume(" + rg_result + ", " + rg_result + ")"); //NON-NLS
         mediaPlayer.setVolume(rg_result, rg_result);
 
         return msg;
@@ -115,12 +115,12 @@ public class AudioPlayer {
     public String setVolume(int volume, Track track) {
         if (volume >= 0) {
             this.baseVolume = ((float) volume / 100.0f);
-            Log.i(TAG, "setVolume()");
+            Log.i(TAG, "setVolume()"); //NON-NLS
             if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                 try {
                     return applyReplayGain(mediaPlayer, track);
                 } catch (Exception e) {
-                    Log.w(TAG, "Failed to set volume");
+                    Log.w(TAG, "Failed to set volume"); //NON-NLS
                 }
             }
         }
@@ -128,7 +128,7 @@ public class AudioPlayer {
     }
 
     public void play() {
-        Log.i(TAG, "play()");
+        Log.i(TAG, "play()"); //NON-NLS
         if (mediaPlayer == null) {
             playNext();
         } else if (!mediaPlayer.isPlaying()) {
@@ -149,8 +149,8 @@ public class AudioPlayer {
         callback.doPlayPrevious();
     }
 
-    public void togglePlay() {
-        Log.i(TAG, "togglePlay()");
+    public void togglePlay() { //NON-NLS
+        Log.i(TAG, "togglePlay()"); //NON-NLS
         if (mediaPlayer == null) {
             playNext();
         } else if (mediaPlayer.isPlaying()) {
@@ -163,26 +163,26 @@ public class AudioPlayer {
     }
 
     public void pause() {
-        Log.i(TAG, "pause()");
+        Log.i(TAG, "pause()"); //NON-NLS
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             stopTimer();
         }
-    }
+    } //NON-NLS
 
     public void resume() {
-        Log.i(TAG, "resume()");
+        Log.i(TAG, "resume()"); //NON-NLS
         if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
             mediaPlayer.start();
             startTimer();
-        }
+        } //NON-NLS
     }
 
     public void stop(boolean release) {
-        Log.i(TAG, "stop()");
+        Log.i(TAG, "stop()"); //NON-NLS
         try {
             if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                Log.i(TAG, "mediaPlayer.stop()" + mediaPlayer.getTrackInfo().toString());
+                Log.i(TAG, "mediaPlayer.stop()" + mediaPlayer.getTrackInfo().toString()); //NON-NLS
                 mediaPlayer.stop();
                 if (release) {
                     mediaPlayer.release();
@@ -191,8 +191,8 @@ public class AudioPlayer {
                 callback.onPositionChanged(0, 1);
             }
             stopTimer();
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to stop");
+        } catch (Exception e) { //NON-NLS //NON-NLS
+            Log.w(TAG, "Failed to stop"); //NON-NLS
         }
     }
 
