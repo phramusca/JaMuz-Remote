@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!--FIXME NOW Translate whole project and submit to Weblate-->
+    <!--FIXME NOW Submit to Weblate-->
 
     <string name="mainWelcomeTitle">Welcome to</string>
     <string name="applicationName" translatable="false">JaMuz</string>
@@ -166,6 +166,17 @@
     <string name="playlistOrderPlayCounter">Play counter, Last played</string>
     <string name="playlistOrderTrackNb">Track number</string>
     <string name="mainVoiceToastNeedToInstall">You need to install speech recognition engine from Google if you want to use this feature.</string>
+    <string name="clientToastAuthenticationFailed">Authentication failed.</string>
+    <string name="clientREceptionToastSocketClosed">Socket closed (received null)</string>
+    <string name="coverEmptyText_MAX_8_chars">No cover</string>
+
+    <string name="playlistSummaryNullOnly">null only</string>
+    <string name="playlistSummaryNullExcluded">null excl.</string>
+    <string name="playlistSummaryNullIncluded">null incl.</string>
+    <string name="playlistSummaryIncluded">Incl.</string>
+    <string name="playlistSummaryExcluded">Excl.</string>
+    <string name="scanNotifyScanning">\"Scanning files ... \"</string>
+    <string name="scanTitle">Scan</string>
 
     <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ARTIST_ONGOING">
         <item>ongoing artist</item>

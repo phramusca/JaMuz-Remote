@@ -123,14 +123,14 @@ public class Playlist implements Comparable, Serializable {
         String nullStatus = "";
         switch (unTaggedState) {
             case TRUE:
-                nullStatus = "null only"; //FIXME NOW Translate
+                nullStatus = context.getString(R.string.playlistSummaryNullOnly);
                 break;
             case FALSE:
-                nullStatus = "null excl."; //FIXME NOW Translate
+                nullStatus = context.getString(R.string.playlistSummaryNullExcluded);
                 tagsLists = new Lists(tags);
                 break;
             case ANY:
-                nullStatus = "null incl."; //FIXME NOW Translate
+                nullStatus = context.getString(R.string.playlistSummaryNullIncluded);
                 tagsLists = new Lists(tags);
                 break;
         }
@@ -143,7 +143,7 @@ public class Playlist implements Comparable, Serializable {
                 included.addAll(tagsLists.getIncluded());
             }
             included.addAll(genresLists.getIncluded());
-            in += " | Incl.: " + getString(included, max); //FIXME NOW Translate
+            in += " | " + context.getString(R.string.playlistSummaryIncluded) + ": " + getString(included, max);
         }
 
         if (tagsLists.hasExcluded() || genresLists.hasExcluded()) {
@@ -152,7 +152,7 @@ public class Playlist implements Comparable, Serializable {
                 excluded.addAll(tagsLists.getExcluded());
             }
             excluded.addAll(genresLists.getExcluded());
-            in += " | Excl.: " + getString(excluded, max); //FIXME NOW Translate
+            in += " | " + context.getString(R.string.playlistSummaryExcluded) + ": " + getString(excluded, max);
         }
 
         in += " | " + order.getDisplay(context);
@@ -264,7 +264,7 @@ public class Playlist implements Comparable, Serializable {
     }
 
     public void toggleTag(String value, TriStateButton.STATE state) {
-        if (value.equals("null")) {  //FIXME NOW Translate ??
+        if (value.equals("null")) { //NON-NLS
             unTaggedState = state;
         } else {
             tags.put(value, state);

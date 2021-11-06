@@ -5,6 +5,7 @@
  */
 package phramusca.com.jamuzremote;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.BufferedOutputStream;
@@ -34,9 +35,11 @@ public class Client {
     private BufferedReader bufferedReader;
     private OutputStream outputStream;
     private final ClientInfo clientInfo;
+    private Context mContext;
 
-    Client(ClientInfo clientInfo) {
+    Client(ClientInfo clientInfo, Context context) {
         this.clientInfo = clientInfo;
+        mContext = context;
     }
 
     void setCallback(IListenerReception callback) {
@@ -62,12 +65,12 @@ public class Client {
             if (waitPrompt("MSG_AUTHENTICATE")) { //NON-NLS
                 send(clientInfo.toJSONObject().toString());
                 if (waitPrompt("MSG_CONNECTED")) { //NON-NLS
-                    reception = new ClientReception(inputStream, callback);
+                    reception = new ClientReception(inputStream, callback, mContext);
                     reception.start();
                     return true;
                 }
             }
-            callback.onDisconnected("Authentication failed."); //FIXME NOW Translate
+            callback.onDisconnected(mContext.getString(R.string.clientToastAuthenticationFailed));
             return false;
         } catch (IOException ex) {
             //Includes SocketException
@@ -80,7 +83,6 @@ public class Client {
     public boolean isConnected() {
         return socket != null && socket.isConnected();
     }
-
 
     public void close() {
         try {
@@ -134,7 +136,7 @@ public class Client {
                     dos.writeByte(read);
                 }
                 dos.flush();
-                Log.i(TAG, "File successfully sent!"); //FIXME NOW Translate
+                Log.i(TAG, "File successfully sent!"); //NON-NLS
             } catch (IOException ex) {
                 //This includes SocketException
                 Log.e(TAG, "", ex);

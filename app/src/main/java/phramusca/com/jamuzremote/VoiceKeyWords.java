@@ -10,6 +10,10 @@ import java.util.stream.Collectors;
  * Created by raph on 18/03/18.
  */
 
+//FIXME NOW Complete export to md (c# project)
+// - git
+// - release process
+
 public class VoiceKeyWords {
     private static final ArrayList<KeyWord> KEY_WORDS = new ArrayList<>();
 

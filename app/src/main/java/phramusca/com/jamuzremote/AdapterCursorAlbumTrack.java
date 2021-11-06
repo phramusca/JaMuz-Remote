@@ -68,7 +68,7 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
 
         Bitmap bitmap = RepoCovers.getCoverIcon(track, RepoCovers.IconSize.THUMB, true);
         if (bitmap == null) {
-            bitmap = HelperBitmap.getEmptyThumb();
+            bitmap = HelperBitmap.getEmptyThumb(parent.getContext());
         }
 
         if (track.getStatus().equals(Track.Status.INFO) || track.getStatus().equals(Track.Status.NEW)) {

@@ -285,7 +285,7 @@ public class ActivityMain extends AppCompatActivity {
                     clientInfo = getClientInfo(ClientCanal.REMOTE, helperToast);
                 }
                 if (clientInfo != null) {
-                    clientRemote = new ClientRemote(clientInfo, new ListenerRemote());
+                    clientRemote = new ClientRemote(clientInfo, new ListenerRemote(), mContext);
                     new Thread() {
                         public void run() {
                             enableRemote(!clientRemote.connect());
@@ -1684,7 +1684,6 @@ public class ActivityMain extends AppCompatActivity {
         return msg.toString();
     }
 
-    @NonNls
     public static Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message message) {

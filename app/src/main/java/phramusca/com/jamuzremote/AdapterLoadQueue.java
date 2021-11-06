@@ -128,7 +128,7 @@ public abstract class AdapterLoadQueue extends AdapterLoad {
 
         Bitmap bitmap = RepoCovers.getCoverIcon(trackList.get(position), RepoCovers.IconSize.THUMB, true);
         if (bitmap == null) {
-            bitmap = HelperBitmap.getEmptyThumb();
+            bitmap = HelperBitmap.getEmptyThumb(mContext);
         }
 
         if (position == trackList.getPositionPlaying()) {
