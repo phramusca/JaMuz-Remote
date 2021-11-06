@@ -163,8 +163,11 @@ public class DirectoryChooserDialog {
                     updateDirectory();
                 } else {
                     Toast.makeText(
-                            m_context, "Failed to create '" + newDirName +
-                                    "' folder", Toast.LENGTH_SHORT).show();
+                            m_context, String.format("%s \"%s\" %s", //NON-NLS
+                                    m_context.getString(R.string.settingsDirectoryChooserFailedToCreate),
+                                    newDirName,
+                                    m_context.getString(R.string.settingsDirectoryChooserFailedToCreateSuffix)),
+                            Toast.LENGTH_SHORT).show();
                 }
             }).setNegativeButton(R.string.globalLabelCancel, null).show();
         });

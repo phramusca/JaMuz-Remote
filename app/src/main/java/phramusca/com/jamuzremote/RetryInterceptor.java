@@ -2,6 +2,7 @@ package phramusca.com.jamuzremote;
 
 import static java.lang.Thread.sleep;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -16,10 +17,12 @@ public class RetryInterceptor implements Interceptor {
     private static final String TAG = RetryInterceptor.class.getName();
     protected HelperNotification helperNotification;
     private final Notification notification;
+    private Context mContext;
     private final int sleepSeconds;
     private final int maxNbRetries;
 
-    RetryInterceptor(int sleepSeconds, int maxNbRetries, HelperNotification helperNotification, Notification notification) {
+    RetryInterceptor(Context context, int sleepSeconds, int maxNbRetries, HelperNotification helperNotification, Notification notification) {
+        mContext = context;
         this.sleepSeconds = sleepSeconds;
         this.maxNbRetries = maxNbRetries;
         this.helperNotification = helperNotification;
@@ -36,15 +39,19 @@ public class RetryInterceptor implements Interceptor {
         do {
             nbRetries++;
             try {
-                Log.d(TAG, "CALLING: " + request.toString());
+                Log.d(TAG, "CALLING: " + request.toString()); //NON-NLS
                 response = chain.proceed(request);
                 break;
             } catch (Exception e) {
                 msg = e.getLocalizedMessage();
-                Log.d(TAG, "ERROR: " + msg);
-                //FIXME NOW Translate
-                helperNotification.notifyBar(notification, sleepSeconds + "s before " +
-                        (nbRetries + 1) + "/" + maxNbRetries + " : " + msg);
+                Log.d(TAG, "ERROR: " + msg); //NON-NLS
+                helperNotification.notifyBar(notification, String.format(
+                        "%ds %s %d/%d : %s", //NON-NLS
+                        sleepSeconds,
+                        mContext.getString(R.string.globalLabelBefore),
+                        nbRetries + 1,
+                        maxNbRetries,
+                        msg));
                 try {
                     sleep(sleepSeconds * 1000);
                 } catch (InterruptedException ex) {

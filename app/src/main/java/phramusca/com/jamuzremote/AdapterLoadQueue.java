@@ -103,10 +103,13 @@ public abstract class AdapterLoadQueue extends AdapterLoad {
                     track.getArtist(),
                     track.getAlbum(),
                     String.format(Locale.ENGLISH,
-                            "%s %d/5 %s %s\n%s %s",
+                            "%s %d/5 %s %s\n%s %s", //NON-NLS
                             track.getTags(),
                             (int) track.getRating(),
-                            track.getGenre(), track.getYear(), track.getLastPlayedAgo(), track.getAddedDateAgo()
+                            track.getGenre(),
+                            track.getYear(),
+                            ActivityMain.getLastPlayedAgo(track),
+                            ActivityMain.getAddedDateAgo(track)
                     ));
 
         } else if (holder instanceof LoadingViewHolder) {
@@ -125,7 +128,7 @@ public abstract class AdapterLoadQueue extends AdapterLoad {
 
         Bitmap bitmap = RepoCovers.getCoverIcon(trackList.get(position), RepoCovers.IconSize.THUMB, true);
         if (bitmap == null) {
-            bitmap = HelperBitmap.getEmptyThumb();
+            bitmap = HelperBitmap.getEmptyThumb(mContext);
         }
 
         if (position == trackList.getPositionPlaying()) {

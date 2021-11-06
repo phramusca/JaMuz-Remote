@@ -9,6 +9,7 @@ package phramusca.com.jamuzremote;
 
 import static phramusca.com.jamuzremote.ActivityMain.getAppDataPath;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.system.ErrnoException;
@@ -26,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.CallableStatement;
 
 public class ClientReception extends ProcessAbstract {
 
@@ -33,13 +35,15 @@ public class ClientReception extends ProcessAbstract {
     private final BufferedReader bufferedReader;
     private final InputStream inputStream;
     private final IListenerReception callback;
+    private Context mContext;
 
-    ClientReception(InputStream inputStream, IListenerReception callback) {
+    ClientReception(InputStream inputStream, IListenerReception callback, Context context) {
         super("Thread.Client.ClientReception");
         this.inputStream = inputStream;
 
         this.callback = callback;
         this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        mContext = context;
     }
 
     @Override
@@ -50,23 +54,23 @@ public class ClientReception extends ProcessAbstract {
                 checkAbort();
                 String msg = bufferedReader.readLine();
                 if (msg == null) {
-                    Log.d(TAG, "RECEIVED null");
-                    callback.onDisconnected("Socket closed (received null)");
-                } else if (msg.startsWith("JSON_")) {
+                    Log.d(TAG, "RECEIVED null"); //NON-NLS
+                    callback.onDisconnected(mContext.getString(R.string.clientREceptionToastSocketClosed));
+                } else if (msg.startsWith("JSON_")) { //NON-NLS
                     callback.onReceivedJson(msg.substring(5));
-                } else if (msg.equals("SENDING_COVER")) {
+                } else if (msg.equals("SENDING_COVER")) { //NON-NLS
                     Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                    Log.d(TAG, "onReceivedBitmap");
-                    Log.d(TAG, "onReceivedBitmap: calling callback");
+                    Log.d(TAG, "onReceivedBitmap"); //NON-NLS
+                    Log.d(TAG, "onReceivedBitmap: calling callback"); //NON-NLS
                     callback.onReceivedBitmap(bitmap);
-                } else if (msg.startsWith("SENDING_FILE")) {
+                } else if (msg.startsWith("SENDING_FILE")) { //NON-NLS
                     Track fileInfoReception;
                     try {
-                        String json = msg.substring("SENDING_FILE".length());
+                        String json = msg.substring("SENDING_FILE".length()); //NON-NLS
                         fileInfoReception = new Track(new JSONObject(json), getAppDataPath(), false);
                         File destinationPath = new File(new File(fileInfoReception.getPath()).getParent());
                         destinationPath.mkdirs();
-                        Log.i(TAG, "Start file reception: \n" + fileInfoReception);
+                        Log.i(TAG, "Start file reception: \n" + fileInfoReception); //NON-NLS
                         DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
                         double fileSize = fileInfoReception.getSize();
                         FileOutputStream fos = new FileOutputStream(fileInfoReception.getPath());

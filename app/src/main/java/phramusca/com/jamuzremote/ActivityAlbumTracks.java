@@ -29,7 +29,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         TextView title = findViewById(R.id.album_tracks_title);
 
         Intent intent = getIntent();
-        final String album = (String) intent.getSerializableExtra("album");
+        final String album = (String) intent.getSerializableExtra("album"); //NON-NLS
         String searchQuery = intent.getStringExtra("searchQuery");
 
         Playlist playlist = new Playlist(album, true);
@@ -96,7 +96,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         PlayQueue.queue.insert(playlist);
 
         Intent data = new Intent();
-        data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue");
+        data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue"); //NON-NLS
         setResult(RESULT_OK, data);
         finish();
     }
@@ -106,7 +106,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
             //Insert in queue
             PlayQueue.queue.insert(track);
             Intent data = new Intent();
-            data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue");
+            data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue"); //NON-NLS
             setResult(RESULT_OK, data);
             finish();
         } else if (Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track.getStatus())) {

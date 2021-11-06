@@ -49,7 +49,7 @@ public class ReplayGain {
     public static GainValues read(File path, String ext) {
         GainValues gainValues = new GainValues();
         switch (ext) {
-            case "mp3":
+            case "mp3": //NON-NLS
                 //First try reading from APE tags (default mp3gain storage)
                 gainValues = readReplayGainFromAPE(path);
                 if (!gainValues.isValid()) {
@@ -57,11 +57,11 @@ public class ReplayGain {
                     gainValues = readReplayGainFromID3(path);
                 }
                 break;
-            case "flac":
+            case "flac": //NON-NLS
                 //http://www.bobulous.org.uk/misc/Replay-Gain-in-Linux.html#flac-and-metaflac
                 gainValues = readReplayGainFromFlac(path);
                 break;
-            case "ogg":
+            case "ogg": //NON-NLS
                 //http://www.bobulous.org.uk/misc/Replay-Gain-in-Linux.html#vorbisgain
                 //TODO: Support ReplayGain for Ogg Vorbis
             default:
@@ -90,7 +90,7 @@ public class ReplayGain {
 
         @Override
         public String toString() {
-            return "albumGain=" + albumGain + ", trackGain=" + trackGain;
+            return "albumGain=" + albumGain + ", trackGain=" + trackGain; //NON-NLS //NON-NLS
         }
 
         public boolean isValid() {
@@ -121,11 +121,11 @@ public class ReplayGain {
             FlacTag tag = (FlacTag) f.getTag();
             VorbisCommentTag vcTag = tag.getVorbisCommentTag();
 
-            gv.REPLAYGAIN_REFERENCE_LOUDNESS = vcTag.getFirst("REPLAYGAIN_REFERENCE_LOUDNESS");
-            gv.trackGain = getFloatFromString(vcTag.getFirst("REPLAYGAIN_TRACK_GAIN"));
-            gv.albumGain = getFloatFromString(vcTag.getFirst("REPLAYGAIN_ALBUM_GAIN"));
-            gv.albumPeak = getFloatFromString(vcTag.getFirst("REPLAYGAIN_ALBUM_PEAK"));
-            gv.trackPeak = getFloatFromString(vcTag.getFirst("REPLAYGAIN_TRACK_PEAK"));
+            gv.REPLAYGAIN_REFERENCE_LOUDNESS = vcTag.getFirst("REPLAYGAIN_REFERENCE_LOUDNESS"); //NON-NLS
+            gv.trackGain = getFloatFromString(vcTag.getFirst("REPLAYGAIN_TRACK_GAIN")); //NON-NLS
+            gv.albumGain = getFloatFromString(vcTag.getFirst("REPLAYGAIN_ALBUM_GAIN")); //NON-NLS
+            gv.albumPeak = getFloatFromString(vcTag.getFirst("REPLAYGAIN_ALBUM_PEAK")); //NON-NLS
+            gv.trackPeak = getFloatFromString(vcTag.getFirst("REPLAYGAIN_TRACK_PEAK")); //NON-NLS
         } catch (NoSuchMethodError | CannotReadException | IOException | TagException |
                 ReadOnlyFileException | InvalidAudioFrameException ex) {
             Logger.getLogger(ReplayGain.class.getName()).log(Level.SEVERE, null, ex);
@@ -152,26 +152,26 @@ public class ReplayGain {
 //				System.out.println(apeTag);
                 for (APEItem item : apeTag.getItems()) {
                     if (item.isValueText()) {
-                        switch (item.getKey().toUpperCase()) {
-                            case "REPLAYGAIN_TRACK_GAIN":
+                        switch (item.getKey().toUpperCase()) { //NON-NLS
+                            case "REPLAYGAIN_TRACK_GAIN": //NON-NLS
                                 gv.trackGain = getFloatFromString(item.getTextValue());
                                 break;
-                            case "REPLAYGAIN_ALBUM_GAIN":
-                                gv.albumGain = getFloatFromString(item.getTextValue());
+                            case "REPLAYGAIN_ALBUM_GAIN": //NON-NLS
+                                gv.albumGain = getFloatFromString(item.getTextValue()); //NON-NLS
                                 break;
-                            case "REPLAYGAIN_ALBUM_PEAK":
+                            case "REPLAYGAIN_ALBUM_PEAK": //NON-NLS
                                 gv.albumPeak = getFloatFromString(item.getTextValue());
-                                break;
-                            case "REPLAYGAIN_TRACK_PEAK":
+                                break; //NON-NLS
+                            case "REPLAYGAIN_TRACK_PEAK": //NON-NLS
                                 gv.trackPeak = getFloatFromString(item.getTextValue());
                                 break;
-                            case "MP3GAIN_MINMAX":
+                            case "MP3GAIN_MINMAX": //NON-NLS
                                 gv.MP3GAIN_MINMAX = item.getTextValue();
                                 break;
-                            case "MP3GAIN_ALBUM_MINMAX":
-                                gv.MP3GAIN_ALBUM_MINMAX = item.getTextValue();
+                            case "MP3GAIN_ALBUM_MINMAX": //NON-NLS
+                                gv.MP3GAIN_ALBUM_MINMAX = item.getTextValue(); //NON-NLS
                                 break;
-                            case "MP3GAIN_UNDO":
+                            case "MP3GAIN_UNDO": //NON-NLS
                                 gv.MP3GAIN_UNDO = item.getTextValue();
                                 break;
                             default:
@@ -218,27 +218,27 @@ public class ReplayGain {
                 if (obj instanceof AbstractID3v2Frame) {
                     AbstractTagFrameBody af = ((AbstractID3v2Frame) obj).getBody();
                     if (af instanceof FrameBodyTXXX) {
-                        FrameBodyTXXX fb = (FrameBodyTXXX) af;
+                        FrameBodyTXXX fb = (FrameBodyTXXX) af; //NON-NLS
                         switch (fb.getDescription().toUpperCase()) {
-                            case "REPLAYGAIN_TRACK_GAIN":
+                            case "REPLAYGAIN_TRACK_GAIN": //NON-NLS
                                 gv.trackGain = getFloatFromString(fb.getTextWithoutTrailingNulls());
-                                break;
-                            case "REPLAYGAIN_ALBUM_GAIN":
+                                break; //NON-NLS
+                            case "REPLAYGAIN_ALBUM_GAIN": //NON-NLS
                                 gv.albumGain = getFloatFromString(fb.getTextWithoutTrailingNulls());
+                                break; //NON-NLS
+                            case "REPLAYGAIN_ALBUM_PEAK": //NON-NLS
+                                gv.albumPeak = getFloatFromString(fb.getTextWithoutTrailingNulls()); //NON-NLS
+                                break; //NON-NLS
+                            case "REPLAYGAIN_TRACK_PEAK": //NON-NLS
+                                gv.trackPeak = getFloatFromString(fb.getTextWithoutTrailingNulls()); //NON-NLS
                                 break;
-                            case "REPLAYGAIN_ALBUM_PEAK":
-                                gv.albumPeak = getFloatFromString(fb.getTextWithoutTrailingNulls());
-                                break;
-                            case "REPLAYGAIN_TRACK_PEAK":
-                                gv.trackPeak = getFloatFromString(fb.getTextWithoutTrailingNulls());
-                                break;
-                            case "MP3GAIN_MINMAX":
+                            case "MP3GAIN_MINMAX": //NON-NLS
                                 gv.MP3GAIN_MINMAX = fb.getTextWithoutTrailingNulls();
-                                break;
-                            case "MP3GAIN_ALBUM_MINMAX":
+                                break; //NON-NLS
+                            case "MP3GAIN_ALBUM_MINMAX": //NON-NLS
                                 gv.MP3GAIN_ALBUM_MINMAX = fb.getTextWithoutTrailingNulls();
-                                break;
-                            case "MP3GAIN_UNDO":
+                                break; //NON-NLS
+                            case "MP3GAIN_UNDO": //NON-NLS
                                 gv.MP3GAIN_UNDO = fb.getTextWithoutTrailingNulls();
                                 break;
                             default:

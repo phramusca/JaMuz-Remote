@@ -115,7 +115,7 @@ public class StringManager {
      */
     public static String getNullableText(String text) {
         if (text == null) {
-            return "null";
+            return "null"; //NON-NLS
         } else {
             return text;
         }
@@ -131,7 +131,7 @@ public class StringManager {
      * @return Human readable file size
      */
     public static String humanReadableBitCount(long bits, boolean si) {
-        return humanReadableByteCount(bits, si, "b");
+        return humanReadableByteCount(bits, si, "b"); //NON-NLS
     }
 
     /**
@@ -144,7 +144,7 @@ public class StringManager {
      * @return Human readable file size
      */
     public static String humanReadableByteCount(long bytes, boolean si) {
-        return humanReadableByteCount(bytes, si, "o");
+        return humanReadableByteCount(bytes, si, "o"); //NON-NLS
     }
 
     private static String humanReadableByteCount(long bytes, boolean si, String unitChar) {
@@ -157,8 +157,8 @@ public class StringManager {
             return bytes + " " + unitChar; //NOI18N
         }
         int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i"); //NOI18N
-        return String.format("%.1f %s" + unitChar, bytes / Math.pow(unit, exp), pre); //NOI18N
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i"); //NOI18N //NON-NLS //NON-NLS
+        return String.format("%.1f %s" + unitChar, bytes / Math.pow(unit, exp), pre); //NOI18N NON-NLS
     }
 
     /**
@@ -166,7 +166,7 @@ public class StringManager {
      * @return MM:SS
      */
     public static String secondsToMMSS(int seconds) {
-        return String.format(Locale.ENGLISH, "%02d:%02d", //NOI18N
+        return String.format(Locale.ENGLISH, "%02d:%02d", //NOI18N //NON-NLS
                 TimeUnit.SECONDS.toMinutes(seconds),
                 TimeUnit.SECONDS.toSeconds(seconds) - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(seconds))
         );
@@ -176,8 +176,8 @@ public class StringManager {
      * @param seconds
      * @return
      */
-    public static String secondsToHHMM(int seconds) {
-        return String.format(Locale.ENGLISH, "%02d h %02d", //NOI18N
+    public static String secondsToHHMM(int seconds) { //NON-NLS
+        return String.format(Locale.ENGLISH, "%02d h %02d", //NOI18N NON-NLS
                 TimeUnit.SECONDS.toHours(seconds),
                 TimeUnit.SECONDS.toMinutes(seconds) - TimeUnit.HOURS.toMinutes(TimeUnit.SECONDS.toHours(seconds))
         );
@@ -192,7 +192,7 @@ public class StringManager {
         if (seconds <= 0) {
             return "-";
         } else if (seconds <= 59) {
-            return "<1m";
+            return "<1m"; //NON-NLS
         }
 
         final long days = TimeUnit.SECONDS.toDays(seconds);
@@ -205,15 +205,15 @@ public class StringManager {
         sb.append(sign);
         if (days > 0) {
             sb.append(days);
-            sb.append("d ");
+            sb.append("d "); //NON-NLS
         }
         if (hours > 0) {
-            sb.append(String.format(Locale.ENGLISH, "%02d", hours));
-            sb.append("h ");
+            sb.append(String.format(Locale.ENGLISH, "%02d", hours)); //NON-NLS //NON-NLS
+            sb.append("h "); //NON-NLS
         }
         if (minutes > 0) {
-            sb.append(String.format(Locale.ENGLISH, "%02d", minutes));
-            sb.append("m");
+            sb.append(String.format(Locale.ENGLISH, "%02d", minutes)); //NON-NLS //NON-NLS
+            sb.append("m"); //NON-NLS
         }
 
         return sb.toString();

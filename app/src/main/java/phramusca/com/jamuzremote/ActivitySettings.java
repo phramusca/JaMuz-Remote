@@ -82,7 +82,7 @@ public class ActivitySettings extends AppCompatActivity {
                                             .concat("</html>"))));
                                     setConfig("userPath", chosenDir);
                                     Intent data = new Intent();
-                                    data.putExtra("action", "checkPermissionsThenScanLibrary");
+                                    data.putExtra("action", "checkPermissionsThenScanLibrary"); //NON-NLS
                                     setResult(RESULT_OK, data);
                                     finish();
                                 });
@@ -97,10 +97,10 @@ public class ActivitySettings extends AppCompatActivity {
         seekBarReplayGain.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                Log.i(TAG, "seekBarReplayGain: " + progress);
+                Log.i(TAG, "seekBarReplayGain: " + progress); //NON-NLS
                 setConfig("baseVolume", progress);
                 Intent data = new Intent();
-                data.putExtra("volume", progress);
+                data.putExtra("volume", progress); //NON-NLS
                 setResult(RESULT_OK, data);
             }
 
@@ -182,7 +182,7 @@ public class ActivitySettings extends AppCompatActivity {
             //https://www.simplifiedcoding.net/android-qr-code-scanner-tutorial/
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
             if (result == null || result.getContents() == null) {
-                Toast.makeText(this, "Problem reading QR code", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.settingsServerToastProblemQR), Toast.LENGTH_LONG).show();
             } else {
                 data.putExtra("QRcode", result.getContents());
                 setResult(RESULT_OK, data);

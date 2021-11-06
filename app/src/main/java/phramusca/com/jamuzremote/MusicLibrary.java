@@ -80,7 +80,7 @@ public class MusicLibrary {
     private synchronized int getTrackIdFileRemote(String path) {
         try (Cursor cursor = db.query(TABLE_TRACKS,
                 new String[]{COL_ID_REMOTE},
-                COL_PATH + " LIKE \"" + path + "\"",
+                COL_PATH + " LIKE \"" + path + "\"", //NON-NLS
                 null, null, null, null)) {
             if (cursor.getCount() == 0) {
                 return -1;
@@ -88,7 +88,7 @@ public class MusicLibrary {
             cursor.moveToFirst();
             return cursor.getInt(cursor.getColumnIndex(COL_ID_REMOTE));
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getTrackIdFileRemote(" + path + ")", ex);
+            Log.e(TAG, "getTrackIdFileRemote(" + path + ")", ex); //NON-NLS
         }
         return -1;
     }
@@ -104,7 +104,7 @@ public class MusicLibrary {
             cursor.moveToFirst();
             return cursor.getInt(cursor.getColumnIndex(COL_ID_REMOTE));
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getTrackIdFileRemote(" + idFileServer + ")", ex);
+            Log.e(TAG, "getTrackIdFileRemote(" + idFileServer + ")", ex); //NON-NLS
         }
         return -1;
     }
@@ -128,39 +128,39 @@ public class MusicLibrary {
     Cursor getTracksCursor(boolean statsOnly, String where, String having, String order, int limit) {
         Cursor cursor = null;
         try {
-            String select = "GROUP_CONCAT(tag.value) AS tags, tracks.*";
+            String select = "GROUP_CONCAT(tag.value) AS tags, tracks.*"; //NON-NLS
             if (statsOnly) {
-                select = " tracks.idFileRemote, tracks.idFileServer, tracks.rating, tracks.addedDate, " +
-                        " tracks.lastPlayed, tracks.playCounter, tracks.genre, tracks.path, tracks.size," +
-                        " tracks.status, tracks.length, tracks.idPath";
-            }
-            String query = "SELECT " + select + " \n" +
-                    " FROM tracks \n" +
-                    " LEFT JOIN tagfile ON tracks.idFileRemote=tagfile.idFile \n" +
-                    " LEFT JOIN tag ON tag.id=tagfile.idTag \n" +
+                select = " tracks.idFileRemote, tracks.idFileServer, tracks.rating, tracks.addedDate, " + //NON-NLS
+                        " tracks.lastPlayed, tracks.playCounter, tracks.genre, tracks.path, tracks.size," + //NON-NLS
+                        " tracks.status, tracks.length, tracks.idPath"; //NON-NLS
+            } //NON-NLS
+            String query = "SELECT " + select + " \n" + //NON-NLS
+                    " FROM tracks \n" + //NON-NLS
+                    " LEFT JOIN tagfile ON tracks.idFileRemote=tagfile.idFile \n" + //NON-NLS //NON-NLS
+                    " LEFT JOIN tag ON tag.id=tagfile.idTag \n" + //NON-NLS
                     " " + where + " \n" +
-                    " GROUP BY tracks.idFileRemote \n" +
+                    " GROUP BY tracks.idFileRemote \n" + //NON-NLS
                     " " + having + " \n" +
-                    " " + order + " \n" +
-                    " " + (limit > 0 ? "LIMIT " + limit : "");
+                    " " + order + " \n" + //NON-NLS
+                    " " + (limit > 0 ? "LIMIT " + limit : ""); //NON-NLS
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[]{});
-            Log.i(TAG, "getTracks(" + where + "," + having + "," + order + "): " + cursor.getCount());
+            Log.i(TAG, "getTracks(" + where + "," + having + "," + order + "): " + cursor.getCount()); //NON-NLS //NON-NLS
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getTracks(" + where + "," + having + "," + order + ")", ex);
+            Log.e(TAG, "getTracks(" + where + "," + having + "," + order + ")", ex); //NON-NLS
         }
         return cursor;
     }
 
     public Triplet<Integer, Long, Long> getNb(String where, String having) {
         Cursor cursor = null;
-        try {
-            String query = "SELECT count(*), SUM(size) AS sizeTotal, SUM(length) AS lengthTotal \n" +
-                    " FROM (SELECT size, length FROM tracks \n" +
-                    " LEFT JOIN tagfile ON tracks.idFileRemote=tagfile.idFile \n" +
-                    " LEFT JOIN tag ON tag.id=tagfile.idTag \n" +
-                    " " + where + " \n" +
-                    " GROUP BY tracks.idFileRemote \n" +
+        try { //NON-NLS
+            String query = "SELECT count(*), SUM(size) AS sizeTotal, SUM(length) AS lengthTotal \n" + //NON-NLS //NON-NLS
+                    " FROM (SELECT size, length FROM tracks \n" + //NON-NLS
+                    " LEFT JOIN tagfile ON tracks.idFileRemote=tagfile.idFile \n" + //NON-NLS
+                    " LEFT JOIN tag ON tag.id=tagfile.idTag \n" + //NON-NLS
+                    " " + where + " \n" + //NON-NLS
+                    " GROUP BY tracks.idFileRemote \n" + //NON-NLS
                     " " + having + ")";
             cursor = db.rawQuery(query, new String[]{});
             if (cursor != null && cursor.moveToNext()) {
@@ -169,8 +169,8 @@ public class MusicLibrary {
                 long lengthTotal = cursor.getLong(2);
                 return new Triplet<>(count, sizeTotal, lengthTotal);
             }
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getNb(" + where + "," + having + ")", ex);
+        } catch (SQLiteException | IllegalStateException ex) { //NON-NLS
+            Log.e(TAG, "getNb(" + where + "," + having + ")", ex); //NON-NLS
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -192,52 +192,52 @@ public class MusicLibrary {
         boolean result;
         if (idFileRemote >= 0) {
             track.setIdFileRemote(idFileRemote);
-            //TODO, for user path only: update only if file is modified:
-            //based on lastModificationDate and/or size (not on content as longer than updateTrack)
-            Log.d(TAG, "updateTrack " + track.getPath());
+            //TODO, for user path only: update only if file is modified: //NON-NLS
+            //based on lastModificationDate and/or size (not on content as longer than updateTrack) //NON-NLS
+            Log.d(TAG, "updateTrack " + track.getPath()); //NON-NLS
             result = updateTrack(track, statsOnly);
         } else {
-            Log.d(TAG, "insertTrack " + track.getPath());
+            Log.d(TAG, "insertTrack " + track.getPath()); //NON-NLS
             result = insertTrack(track);
         }
         return result;
-    }
+    } //NON-NLS
 
     synchronized boolean insertTrack(Track track) {
-        try {
-            Log.d(TAG, "insertTrack " + track.getPath());
+        try { //NON-NLS
+            Log.d(TAG, "insertTrack " + track.getPath()); //NON-NLS
             int id = (int) db.insert(TABLE_TRACKS, null, TrackToValues(track, false));
             if (id > 0) {
                 track.setIdFileRemote(id);
                 for (String tag : track.getTags(false)) {
                     if (!addTag(id, tag)) {
                         return false;
-                    }
+                    } //NON-NLS
                 }
                 return true;
             }
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "insertTrack(" + track + ")", ex);
+            Log.e(TAG, "insertTrack(" + track + ")", ex); //NON-NLS
         }
         return false;
     }
 
-    synchronized boolean insertTrackOrUpdateStatus(Collection<Track> tracks) {
+    synchronized boolean insertTrackOrUpdateStatus(Collection<Track> tracks) { //NON-NLS
         db.beginTransaction();
         try {
-            String sqlTracks = "INSERT OR IGNORE INTO " + TABLE_TRACKS + " ("
+            String sqlTracks = "INSERT OR IGNORE INTO " + TABLE_TRACKS + " (" //NON-NLS
                     + COL_TITLE + ", " + COL_ALBUM + ", "
                     + COL_ARTIST + ", " + COL_STATUS + ", "
                     + COL_GENRE + ", " + COL_PATH + ", "
                     + COL_RATING + ", " + COL_ADDED_DATE + ", "
                     + COL_LAST_PLAYED + ", " + COL_PLAY_COUNTER + ", "
-                    + COL_ID_SERVER + ", " + COL_SIZE + ", " + COL_LENGTH + ") " +
-                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            String sqlUpdateStatus = "UPDATE " + TABLE_TRACKS + " " +
-                    "SET " + COL_STATUS + "=?, " + COL_PATH + "=? WHERE " + COL_ID_SERVER + "=?";
-            String sqlTagsDelete = "DELETE FROM tagFile WHERE idFile=?";
-            String sqlTags = "INSERT OR REPLACE INTO tagfile (idFile, idTag) " +
-                    "VALUES (?, (SELECT id FROM tag WHERE value=?))";
+                    + COL_ID_SERVER + ", " + COL_SIZE + ", " + COL_LENGTH + ") " + //NON-NLS //NON-NLS
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //NON-NLS
+            String sqlUpdateStatus = "UPDATE " + TABLE_TRACKS + " " + //NON-NLS
+                    "SET " + COL_STATUS + "=?, " + COL_PATH + "=? WHERE " + COL_ID_SERVER + "=?"; //NON-NLS
+            String sqlTagsDelete = "DELETE FROM tagFile WHERE idFile=?"; //NON-NLS //NON-NLS
+            String sqlTags = "INSERT OR REPLACE INTO tagfile (idFile, idTag) " + //NON-NLS
+                    "VALUES (?, (SELECT id FROM tag WHERE value=?))"; //NON-NLS
             SQLiteStatement stmtTracks = db.compileStatement(sqlTracks);
             SQLiteStatement stmtStatus = db.compileStatement(sqlUpdateStatus);
             SQLiteStatement stmtTags = db.compileStatement(sqlTags);
@@ -275,12 +275,12 @@ public class MusicLibrary {
                     stmtTags.bindString(2, tag);
                     stmtTags.execute();
                     stmtTags.clearBindings();
-                }
+                } //NON-NLS
             }
             db.setTransactionSuccessful();
             return true;
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "insertTrackOrUpdateStatus(" + tracks + ")", ex);
+            Log.e(TAG, "insertTrackOrUpdateStatus(" + tracks + ")", ex); //NON-NLS
             return false;
         } finally {
             db.endTransaction();
@@ -293,12 +293,12 @@ public class MusicLibrary {
             if (idTag > 0) {
                 ContentValues values = new ContentValues();
                 values.put("idFile", idFile);
-                values.put("idTag", idTag);
-                db.insertWithOnConflict("tagfile", BaseColumns._ID, values, SQLiteDatabase.CONFLICT_IGNORE);
+                values.put("idTag", idTag); //NON-NLS
+                db.insertWithOnConflict("tagfile", BaseColumns._ID, values, SQLiteDatabase.CONFLICT_IGNORE); //NON-NLS
                 return true;
             }
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "addTag(" + idFile + "," + tag + ")", ex);
+            Log.e(TAG, "addTag(" + idFile + "," + tag + ")", ex); //NON-NLS
         }
         return false;
     }
@@ -309,23 +309,23 @@ public class MusicLibrary {
                     COL_ID_REMOTE + " = " + track.getIdFileRemote(), null) == 1) {
                 removeTags(track.getIdFileRemote());
                 for (String tag : track.getTags(false)) {
-                    if (!addTag(track.getIdFileRemote(), tag)) {
+                    if (!addTag(track.getIdFileRemote(), tag)) { //NON-NLS
                         return false;
                     }
                 }
                 return true;
             }
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "updateTrack(" + track.getIdFileRemote() + "," + track + ")", ex);
+            Log.e(TAG, "updateTrack(" + track.getIdFileRemote() + "," + track + ")", ex); //NON-NLS
         }
         return false;
     }
 
     synchronized int deleteTrack(String path) {
         try {
-            return db.delete(TABLE_TRACKS, COL_PATH + " = \"" + path + "\"", null);
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "deleteTrack(" + path + ")", ex);
+            return db.delete(TABLE_TRACKS, COL_PATH + " = \"" + path + "\"", null); //NON-NLS
+        } catch (SQLiteException | IllegalStateException ex) { //NON-NLS //NON-NLS
+            Log.e(TAG, "deleteTrack(" + path + ")", ex); //NON-NLS
         }
         return -1;
     }
@@ -333,8 +333,8 @@ public class MusicLibrary {
     synchronized int deleteTrack(int idFileServer) {
         try {
             return db.delete(TABLE_TRACKS, COL_ID_SERVER + " = " + idFileServer, null);
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "deleteTrack(" + idFileServer + ")", ex);
+        } catch (SQLiteException | IllegalStateException ex) { //NON-NLS //NON-NLS
+            Log.e(TAG, "deleteTrack(" + idFileServer + ")", ex); //NON-NLS
         }
         return -1;
     }
@@ -464,13 +464,13 @@ public class MusicLibrary {
         return new Track(pathModifDate, pathMbid, comment, idPath, albumArtist, year,
                 trackNo, trackTotal, discNo, discTotal, bitRate, format, bpm, modifDate, checkedFlag,
                 copyRight, getAppDataPath, idFileRemote, idFileServer, rating, title, album, artist,
-                coverHash, path, genre, addedDate, lastPlayed, playCounter, status, size, length,
+                coverHash, path, genre, addedDate, lastPlayed, playCounter, status, size, length, //NON-NLS
                 trackGain, albumGain);
     }
 
     List<String> getGenres() {
         List<String> genres = new ArrayList<>();
-        Cursor cursor = db.rawQuery("SELECT id, value FROM genre ORDER BY value", new String[]{});
+        Cursor cursor = db.rawQuery("SELECT id, value FROM genre ORDER BY value", new String[]{}); //NON-NLS
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 //int id = cursor.getInt(0);
@@ -485,30 +485,30 @@ public class MusicLibrary {
 
     public Map<Integer, String> getTags() {
         Map<Integer, String> tags = new LinkedHashMap<>();
-        Cursor cursor = db.rawQuery("SELECT id, value FROM tag ORDER BY value", new String[]{});
+        Cursor cursor = db.rawQuery("SELECT id, value FROM tag ORDER BY value", new String[]{}); //NON-NLS
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 tags.put(cursor.getInt(0), cursor.getString(1));
             } while (cursor.moveToNext());
-        }
+        } //NON-NLS
         if (cursor != null) {
-            cursor.close();
+            cursor.close(); //NON-NLS
         }
         return tags;
     }
 
     ArrayList<String> getTags(int idFile) {
         ArrayList<String> tags = new ArrayList<>();
-        Cursor cursor = db.rawQuery("SELECT value FROM tag T " +
-                "JOIN tagFile F ON T.id=F.idTag " +
-                "WHERE F.idFile=? " +
-                "ORDER BY value", new String[]{String.valueOf(idFile)});
+        Cursor cursor = db.rawQuery("SELECT value FROM tag T " + //NON-NLS //NON-NLS //NON-NLS //NON-NLS //NON-NLS
+                "JOIN tagFile F ON T.id=F.idTag " + //NON-NLS
+                "WHERE F.idFile=? " + //NON-NLS
+                "ORDER BY value", new String[]{String.valueOf(idFile)}); //NON-NLS
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 tags.add(cursor.getString(0));
             } while (cursor.moveToNext());
-        }
+        } //NON-NLS
         if (cursor != null) {
             cursor.close();
         }
@@ -519,21 +519,21 @@ public class MusicLibrary {
         int idTag = -1;
         try {
             //Add the tag in db if it does not exist
-            ContentValues values = new ContentValues();
-            values.put("value", tag);
-            idTag = (int) db.insertWithOnConflict("tag", BaseColumns._ID, values,
+            ContentValues values = new ContentValues(); //NON-NLS //NON-NLS //NON-NLS //NON-NLS //NON-NLS
+            values.put("value", tag); //NON-NLS
+            idTag = (int) db.insertWithOnConflict("tag", BaseColumns._ID, values, //NON-NLS
                     SQLiteDatabase.CONFLICT_IGNORE);
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "addTag(" + tag + ")", ex);
+        } catch (SQLiteException | IllegalStateException ex) { //NON-NLS //NON-NLS
+            Log.e(TAG, "addTag(" + tag + ")", ex); //NON-NLS
         }
-        return idTag;
+        return idTag; //NON-NLS
     }
 
-    synchronized int deleteTag(int idTag) {
+    synchronized int deleteTag(int idTag) { //NON-NLS
         try {
-            return db.delete("tag", "id = \"" + idTag + "\"", null);
+            return db.delete("tag", "id = \"" + idTag + "\"", null); //NON-NLS
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "deleteTag(" + idTag + ")", ex);
+            Log.e(TAG, "deleteTag(" + idTag + ")", ex); //NON-NLS //NON-NLS
         }
         return -1;
     }
@@ -541,45 +541,45 @@ public class MusicLibrary {
     synchronized boolean removeTag(int idFile, String tag) {
         try {
             int idTag = getIdTag(tag);
-            if (idTag > 0) {
-                db.delete("tagfile", "idFile=? AND idTag=?",
+            if (idTag > 0) { //NON-NLS
+                db.delete("tagfile", "idFile=? AND idTag=?", //NON-NLS
                         new String[]{String.valueOf(idFile), String.valueOf(idTag)});
             }
-            return true;
+            return true; //NON-NLS //NON-NLS
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "removeTag(" + idFile + "," + tag + ")", ex);
+            Log.e(TAG, "removeTag(" + idFile + "," + tag + ")", ex); //NON-NLS
         }
         return false;
     }
 
-    private synchronized boolean removeTags(int idFile) {
+    private synchronized boolean removeTags(int idFile) { //NON-NLS
         try {
-            db.delete("tagfile", "idFile=?",
+            db.delete("tagfile", "idFile=?", //NON-NLS
                     new String[]{String.valueOf(idFile)});
             return true;
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "removeTags(" + idFile + ")", ex);
+        } catch (SQLiteException | IllegalStateException ex) { //NON-NLS //NON-NLS
+            Log.e(TAG, "removeTags(" + idFile + ")", ex); //NON-NLS
         }
         return false;
     }
-
-    private synchronized int getIdTag(String tag) {
+ //NON-NLS
+    private synchronized int getIdTag(String tag) { //NON-NLS
         int idTag = -1;
-        try (Cursor cursor = db.query("tag", null, "value=?",
+        try (Cursor cursor = db.query("tag", null, "value=?", //NON-NLS //NON-NLS
                 new String[]{tag}, "", "", "")) {
-            if (cursor.getCount() > 0) {
+            if (cursor.getCount() > 0) { //NON-NLS
                 cursor.moveToFirst();
                 idTag = cursor.getInt(0);
             }
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getIdTag(" + tag + ")", ex);
+        } catch (SQLiteException | IllegalStateException ex) { //NON-NLS //NON-NLS //NON-NLS //NON-NLS
+            Log.e(TAG, "getIdTag(" + tag + ")", ex); //NON-NLS
         }
-        return idTag;
+        return idTag; //NON-NLS
     }
 
     synchronized boolean updateStatus(Track track) {
         try {
-            Log.d(TAG, "updateStatus(" + track.getIdFileServer() + "): " + track.getStatus());
+            Log.d(TAG, "updateStatus(" + track.getIdFileServer() + "): " + track.getStatus()); //NON-NLS
             ContentValues values = new ContentValues();
             values.put(COL_STATUS, track.getStatus().name());
             db.update(TABLE_TRACKS,
@@ -587,7 +587,7 @@ public class MusicLibrary {
                     COL_ID_SERVER + " = " + track.getIdFileServer(), null);
             return true;
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "updateStatus(" + track.getIdFileServer() + "): " + track.getStatus(), ex);
+            Log.e(TAG, "updateStatus(" + track.getIdFileServer() + "): " + track.getStatus(), ex); //NON-NLS
         }
         return false;
     }
@@ -596,105 +596,105 @@ public class MusicLibrary {
         try {
             ContentValues values = new ContentValues();
             values.put(COL_GENRE, track.getGenre());
-            return db.update(TABLE_TRACKS,
+            return db.update(TABLE_TRACKS, //NON-NLS
                     values,
                     COL_ID_REMOTE + " = " + track.getIdFileRemote(), null);
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "updateGenre(" + track.getIdFileRemote() + ")", ex);
+            Log.e(TAG, "updateGenre(" + track.getIdFileRemote() + ")", ex); //NON-NLS //NON-NLS
         }
         return -1;
     }
 
-    synchronized boolean addGenre(String genre) {
+    synchronized boolean addGenre(String genre) { //NON-NLS
         try {
-            //Add the genre in db if it does not exist
-            ContentValues values = new ContentValues();
-            values.put("value", genre);
-            db.insertWithOnConflict("genre", BaseColumns._ID, values,
+            //Add the genre in db if it does not exist //NON-NLS //NON-NLS //NON-NLS
+            ContentValues values = new ContentValues(); //NON-NLS //NON-NLS
+            values.put("value", genre); //NON-NLS
+            db.insertWithOnConflict("genre", BaseColumns._ID, values, //NON-NLS
                     SQLiteDatabase.CONFLICT_IGNORE);
-            return true;
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "addGenre(" + genre + ")", ex);
-            return false;
+            return true; //NON-NLS //NON-NLS
+        } catch (SQLiteException | IllegalStateException ex) { //NON-NLS //NON-NLS
+            Log.e(TAG, "addGenre(" + genre + ")", ex); //NON-NLS
+            return false; //NON-NLS
         }
     }
 
-    synchronized int deleteGenre(String genre) {
+    synchronized int deleteGenre(String genre) { //NON-NLS //NON-NLS //NON-NLS
         try {
-            return db.delete("genre", "value = \"" + genre + "\"", null);
+            return db.delete("genre", "value = \"" + genre + "\"", null); //NON-NLS //NON-NLS
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "deleteGenre(" + genre + ")", ex);
+            Log.e(TAG, "deleteGenre(" + genre + ")", ex); //NON-NLS //NON-NLS //NON-NLS
         }
         return -1;
     }
 
     /**
      * @param getAppDataPath Application Folder to exclude from deletion
-     * @param userPath       User path (new one) to exclude from deletion
+     * @param userPath       User path (new one) to exclude from deletion //NON-NLS
      * @return the number of rows affected.
      */
-    synchronized int deleteTrack(File getAppDataPath, String userPath) {
+    synchronized int deleteTrack(File getAppDataPath, String userPath) { //NON-NLS //NON-NLS
         try {
             return db.delete(TABLE_TRACKS,
-                    COL_PATH + " NOT LIKE \"" + getAppDataPath.getAbsolutePath() + "%\" " +
-                            "AND " + COL_PATH + " NOT LIKE \"" + userPath + "%\"", null);
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "deleteTrack(" + getAppDataPath.getAbsolutePath() + "\", \"" + userPath + "\")", ex);
+                    COL_PATH + " NOT LIKE \"" + getAppDataPath.getAbsolutePath() + "%\" " + //NON-NLS
+                            "AND " + COL_PATH + " NOT LIKE \"" + userPath + "%\"", null); //NON-NLS
+        } catch (SQLiteException | IllegalStateException ex) { //NON-NLS
+            Log.e(TAG, "deleteTrack(" + getAppDataPath.getAbsolutePath() + "\", \"" + userPath + "\")", ex); //NON-NLS
         }
         return -1;
     }
 
     boolean getArtist(String artist) {
-        try (Cursor cursor = db.query("tracks", null, "artist=?",
-                new String[]{artist}, "", "", "")) {
-            if (cursor.getCount() > 0) {
-                return true;
+        try (Cursor cursor = db.query("tracks", null, "artist=?", //NON-NLS
+                new String[]{artist}, "", "", "")) { //NON-NLS
+            if (cursor.getCount() > 0) { //NON-NLS
+                return true; //NON-NLS
             }
         } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getArtist(" + artist + ")", ex);
+            Log.e(TAG, "getArtist(" + artist + ")", ex); //NON-NLS
         }
         return false;
-    }
+    } //NON-NLS
 
-    boolean getAlbum(String album) {
-        try (Cursor cursor = db.query("tracks", null, "album=?",
+    boolean getAlbum(String album) { //NON-NLS
+        try (Cursor cursor = db.query("tracks", null, "album=?", //NON-NLS
                 new String[]{album}, "", "", "")) {
             if (cursor.getCount() > 0) {
                 return true;
             }
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getAlbum(" + album + ")", ex);
+        } catch (SQLiteException | IllegalStateException ex) { //NON-NLS
+            Log.e(TAG, "getAlbum(" + album + ")", ex); //NON-NLS
         }
-        return false;
+        return false; //NON-NLS
     }
 
     Cursor getAlbums() {
-        return getAlbums("");
+        return getAlbums(""); //NON-NLS
     }
 
     Cursor getAlbums(String search) {
         Cursor cursor = null;
         try {
-            String query = "SELECT count(" + COL_ID_REMOTE + ") AS " + COL_PLAY_COUNTER + ", \n" +
-                    "round(avg(" + COL_RATING + "), 2) AS " + COL_RATING + ", \n" +
-                    "group_concat(distinct " + COL_GENRE + ") AS " + COL_GENRE + ", \n" +
-                    "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + " \n" +
-                    ", " + COL_ALBUM +
-                    ", " + COL_COVER_HASH +
-                    ", " + COL_PATH +
-                    " FROM tracks \n"
-                    + (search.isEmpty()?"":" WHERE (" + COL_ALBUM + " LIKE \"%"+search+"%\" " +
-                        "OR " + COL_ARTIST + " LIKE \"%"+search+"%\" " +
-                        "OR " + COL_ALBUM_ARTIST + " LIKE \"%"+search+"%\" " +
-                        "OR " + COL_TITLE + " LIKE \"%"+search+"%\") \n") +
-                    " GROUP BY " + COL_ALBUM + " " +
-                    " ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, "
+            String query = "SELECT count(" + COL_ID_REMOTE + ") AS " + COL_PLAY_COUNTER + ", \n" + //NON-NLS //NON-NLS //NON-NLS
+                    "round(avg(" + COL_RATING + "), 2) AS " + COL_RATING + ", \n" + //NON-NLS //NON-NLS //NON-NLS
+                    "group_concat(distinct " + COL_GENRE + ") AS " + COL_GENRE + ", \n" + //NON-NLS //NON-NLS //NON-NLS //NON-NLS
+                    "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + " \n" + //NON-NLS //NON-NLS
+                    ", " + COL_ALBUM + //NON-NLS
+                    ", " + COL_COVER_HASH + //NON-NLS
+                    ", " + COL_PATH + //NON-NLS //NON-NLS //NON-NLS
+                    " FROM tracks \n" //NON-NLS
+                    + (search.isEmpty()?"":" WHERE (" + COL_ALBUM + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS //NON-NLS
+                        "OR " + COL_ARTIST + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS
+                        "OR " + COL_ALBUM_ARTIST + " LIKE \"%"+search+"%\" " + //NON-NLS
+                        "OR " + COL_TITLE + " LIKE \"%"+search+"%\") \n") + //NON-NLS
+                    " GROUP BY " + COL_ALBUM + " " + //NON-NLS //NON-NLS
+                    " ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, " //NON-NLS
                     + COL_ALBUM + ", " + COL_ARTIST;
             Log.i(TAG, query);
-            cursor = db.rawQuery(query, new String[]{});
-            Log.i(TAG, "getAlbums(): " + cursor.getCount());
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getAlbums()", ex);
+            cursor = db.rawQuery(query, new String[]{}); //NON-NLS
+            Log.i(TAG, "getAlbums(): " + cursor.getCount()); //NON-NLS //NON-NLS
+        } catch (SQLiteException | IllegalStateException ex) { //NON-NLS
+            Log.e(TAG, "getAlbums()", ex); //NON-NLS
         }
         return cursor;
     }

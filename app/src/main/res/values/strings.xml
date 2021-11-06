@@ -1,12 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!--FIXME NOW Translate whole project and submit to Weblate-->
+    <!--FIXME NOW Submit to Weblate-->
 
     <string name="mainWelcomeTitle">Welcome to</string>
     <string name="applicationName" translatable="false">JaMuz</string>
     <string name="mainWelcomeYear" translatable="false">2021</string>
+
     <string name="mainDefaultPlaylistsFolderName" translatable="false">Playlists</string>
+
+    <string name="mainToastClientInfoBadFormat">Bad format:</string>
+    <string name="mainToastClientInfoExpected">Expected:</string>
+    <string name="mainToastClientInfoIP">IP</string>
+    <string name="mainToastClientInfoPort">Port</string>
+    <string name="mainToastClientInfoEx">Ex:</string>
+
+    <string name="mainToastCheckWifiConnection">You must connect to WiFi network.</string>
+    <string name="mainToastQRread">QR code read. New configuration set.</string>
+    <string name="mainToastEmptyPlaylist">Empty Playlist.</string>
+    <string name="mainToastNoTracksBeyond">No tracks beyond.</string>
+    <string name="mainToastNotImplemented">Not implemented.</string>
+
+    <string name="mainAlertDialogClosingApplicationTitle">Closing JaMuz</string>
+    <string name="mainAlertDialogClosingApplicationMessage">Are you sure you want to exit and stop playback ?</string>
 
     <string name="globalLabelOK">OK</string>
     <string name="globalLabelCancel">Cancel</string>
@@ -20,28 +36,36 @@
     <string name="settingsServerDefaultConnectionString" translatable="false">192.168.0.16:2013</string>
     <string name="settingsServerButonSave">Save</string>
     <string name="settingsServerButtonScanQR">Scan QR</string>
+    <string name="settingsServerToastProblemQR">Problem reading QR code.</string>
 
     <string name="settingsReplayGainTextViewBaseVolume">Base volume:</string>
-    
+
     <string name="settingsKidsPlaceTextViewTitle">Kids Place</string>
-    <string name="settingsKidsPlaceTextViewHelp">Kids Place is a third party application that can be found in Android Play Store.</string>
+    <string name="settingsKidsPlaceTextViewHelp">Kids Place is a third party application from kiddoware that can be found in Android Play Store.</string>
     <string name="settingsKidsPlaceCheckBoxLimit">Limit to this playlist:</string>
     <string name="settingsKidsPlaceCheckBoxAllowDeleteSaveNew">Allow to delete, save and create a new playlist</string>
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Allow track edition</string>
-    <string name="settingsKidsPlaceCheckBoxOnStartup">Start KidsPlace with JaMuz</string>
+    <string name="settingsKidsPlaceCheckBoxOnStartup">Start Kids Place with JaMuz</string>
 
     <string name="settingsLocalFilesTextViewTitle">Local tracks</string>
-    <string name="settingsLocalFilesTextViewHelp"><html>You can add tracks to library from a local path BUT it is recommended to use JaMuz Server instead to get your tracks!<br />WARNING: Those tracks will NOT be synchronized with Jamuz Server !</html></string>
+    <string name="settingsLocalFilesTextViewHelp"><html>You can add tracks to library from a local path. <br/> WARNING: Those local tracks will NOT be synchronized with Jamuz Server ! It is highly recommended to use JaMuz Server instead to get your tracks!</html></string>
     <string name="settingsLocalFilesTextViewPath">Path :</string>
     <string name="settingsLocalFilesButtonChoose">Choose</string>
+
     <string name="settingsDirectoryChooserButtonNewFolder">New folder</string>
     <string name="settingsDirectoryChooserNewFolderName">New folder name</string>
+    <string name="settingsDirectoryChooserFailedToCreate">Failed to create</string>
+    <string name="settingsDirectoryChooserFailedToCreateSuffix">folder.</string>
 
-    <string name="playlistTextViewExcludeTheLast">Exclude the last</string>
-    <string name="playlistTextViewPlayed">played</string>
+    <string name="playlistTextViewExcludeTheLast">Exclude the last </string>
+    <string-array name="limitUnits">
+        <item>minutes</item>
+        <item>hours</item>
+        <item>days</item>
+        <item>months</item>
+        <item>years</item>
+    </string-array>
     <string name="playlistTextViewOrderBy">Order by:</string>
-    <string name="playlistRadioButtonRandom">Random</string>
-    <string name="playlistRadioButtonOrderByPlayCounterLastPlayed">Play counter, Last played</string>
 
     <string name="playlistLabel">Playlist</string>
     <string name="playlistLabelHistory">History</string>
@@ -56,13 +80,24 @@
     <string name="playlistLabelQuestionDelete">Are you sure you want to delete</string>
     <string name="playlistLabelQuestionDeleteSuffix">playlist ?</string>
     <string name="playlistLabelCannotDeleteLastPlaylist">You cannot delete last playlist.</string>
+    <string name="playlistDefaultAllPlaylistName">All</string>
 
-    <string name="voiceUnknownCommand">Unknown Command:</string>
-    <string name="voiceNotFound">not found.</string>
-    <string name="voiceArtist">Artist</string>
-    <string name="voiceAlbum">Album</string>
-    <string name="voiceSpecifyAlbum">Specify an album.</string>
-    <string name="voiceSpecifyArtist">Specify an artist.</string>
+    <string name="voicePromptCommand">Say a command.\n  ex: \"Rating 4\", \"Next\" ...</string>
+
+    <string name="speakUnknownCommand">Unknown Command:</string>
+    <string name="speakArtist">Artist</string>
+    <string name="speakAlbum">Album</string>
+    <string name="speakNotFound">not found.</string>
+    <string name="speakSpecifyAlbum">Specify an album.</string>
+    <string name="speakSpecifyArtist">Specify an artist.</string>
+    <string name="speakGenre">Genre</string>
+    <string name="speakTags">Tags</string>
+    <string name="speakYourTurn">Your turn</string>
+    <string name="speakUnknown">unknown.</string>
+    <string name="speakRating">Rating</string>
+    <string name="speakRatingIncorrect">incorrect.</string>
+    <string name="speakTagsNone">No tags.</string>
+    <string name="speakRatingNone">No rating.</string>
 
     <string name="syncLabelReadingList">Reading list …</string>
     <string name="syncLabelConnecting">Connecting …</string>
@@ -82,16 +117,132 @@
 
     <string name="contentAlbumsTitle">Albums</string>
     <string name="contentQueueTitle">Play Queue</string>
-    <string name="adapterCursorAlbumLabelTracks">track(s)</string>
     <string name="contentAlbumTracksTitle">Album Tracks</string>
 
-    <!--FIXME NOW Translate, knowing that it is also a keyword so need to split key and value-->
-    <string-array name="limitUnits" tools:ignore="MissingTranslation">
-        <item>minutes</item>
-        <item>hours</item>
-        <item>days</item>
-        <item>months</item>
-        <item>years</item>
+    <string name="adapterCursorAlbumLabelTracks">track(s)</string>
+
+    <string name="activityAlbumsLoading">Loading album list...</string>
+    <string name="activityAlbumsLoadingPleaseWait">Please wait a few seconds.</string>
+
+    <string name="audioPlayerToastRgBaseVolTooHigh">Base volume too high.</string>
+    <string name="audioPlayerToastRgConsiderLower">If you see this message too often, please consider lower it in settings ! (It maybe is a single file issue)</string>
+    <string name="globalLabelBefore">before</string>
+    <string name="serviceScanNotifyCleaningDatabase">Cleaning database...</string>
+    <string name="serviceScanNotifyDatabaseUpdated">Database updated.</string>
+    <string name="serviceScanNotifyScanningDeleted">Scanning deleted files ...</string>
+    <string name="serviceSyncNotifySyncTitle">Sync</string>
+    <string name="serviceSyncNotifyDownloadTitle">Download</string>
+    <string name="serviceSyncNotifySyncComplete">Synchronization complete.</string>
+    <string name="serviceSyncNotifySyncAll">All</string>
+    <string name="serviceSyncNotifySyncSuccess">files have been downloaded successfully.</string>
+    <string name="serviceSyncNotifySyncDownloaded">Downloaded:</string>
+    <string name="serviceSyncNotifySyncRemaning">Remaning:</string>
+    <string name="serviceSyncNotifySyncCompleteNoDownloads">Synchronization complete. No downloads.</string>
+    <string name="serviceSyncNotifySyncUserStopped">User stopped.</string>
+    <string name="serviceSyncNotifySyncRemovingDeleted">Removing deleted files...</string>
+    <string name="serviceSyncNotifySyncCheckComplete">Check complete.</string>
+    <string name="serviceSyncNotifySyncInterrupted">Interrupted.</string>
+    <string name="serviceSyncNotifySyncChecking">Checking</string>
+    <string name="serviceSyncNotifySyncCheckingSuffix">files ...</string>
+    <string name="serviceSyncNotifySyncReceived">Received</string>
+    <string name="serviceSyncNotifySyncReceivedSuffix">files count ...</string>
+    <string name="serviceSyncNotifySyncReceivedTags">Received tags ...</string>
+    <string name="serviceSyncNotifySyncReceivedGenres">Received genres ...</string>
+    <string name="serviceSyncNotifySyncPreparingMerge">Preparing statistics merge.</string>
+    <string name="serviceSyncNotifySyncRequestingMerge">Requesting statistics merge.</string>
+    <string name="serviceSyncNotifySyncUpdateDatabase">Updating database with merge changes ...</string>
+    <string name="serviceSyncNotifySyncMergeComplete">Merge complete.</string>
+    <string name="serviceSyncNotifyDownloadAttempt">Attempt</string>
+    <string name="serviceSyncNotifyDownloadErrors">error(s).</string>
+    <string name="serviceSyncNotifyDownloadStarting">Starting download ...</string>
+    <string name="serviceSyncNotifyDownloadStopping">Stopping downloads ...</string>
+    <string name="serviceSyncNotifyDownloadStopped">Downloads stopped.</string>
+    <string name="serviceSyncNotifyDownloadWaiting">Waiting</string>
+    <string name="serviceSyncNotifyDownloadBeforeAttempt">before attempt</string>
+    <string name="trackNeverPlayed">Never played.</string>
+    <string name="trackPlayed">Played</string>
+    <string name="trackAdded">Added</string>
+    <string name="playlistOrderRandom">Random</string>
+    <string name="playlistOrderPlayCounter">Play counter, Last played</string>
+    <string name="playlistOrderTrackNb">Track number</string>
+    <string name="mainVoiceToastNeedToInstall">You need to install speech recognition engine from Google if you want to use this feature.</string>
+    <string name="clientToastAuthenticationFailed">Authentication failed.</string>
+    <string name="clientREceptionToastSocketClosed">Socket closed (received null)</string>
+    <string name="coverEmptyText_MAX_8_chars">No cover</string>
+
+    <string name="playlistSummaryNullOnly">null only</string>
+    <string name="playlistSummaryNullExcluded">null excl.</string>
+    <string name="playlistSummaryNullIncluded">null incl.</string>
+    <string name="playlistSummaryIncluded">Incl.</string>
+    <string name="playlistSummaryExcluded">Excl.</string>
+    <string name="scanNotifyScanning">\"Scanning files ... \"</string>
+    <string name="scanTitle">Scan</string>
+
+    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ARTIST_ONGOING">
+        <item>ongoing artist</item>
+        <item>current artist</item>
+        <item>on going artist</item>
     </string-array>
 
+    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ALBUM_ONGOING">
+        <item>on going album</item>
+        <item>current album</item>
+        <item>ongoing album</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ARTIST">
+        <item>artist</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ALBUM">
+        <item>album</item>
+    </string-array>
+
+    //It is also the default
+    <string-array name="voiceCommands_PLAY_PLAYLIST">
+        <item>list</item>
+        <item>playliste</item>
+        <item>playlist</item>
+    </string-array>
+
+    <string-array name="voiceCommands_SET_RATING">
+        <item>rate it</item>
+        <item>rate</item>
+    </string-array>
+
+    <string-array name="voiceCommands_SET_TAGS">
+        <item>tag it</item>
+        <item>tag</item>
+    </string-array>
+
+    <string-array name="voiceCommands_SET_GENRE">
+        <item>genre</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAYER_RESUME">
+        <item>resume</item>
+        <item>play</item>
+        <item>continue</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAYER_NEXT">
+        <item>play next track</item>
+        <item>play next</item>
+        <item>next track</item>
+        <item>next</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAYER_PAUSE">
+        <item>pause</item>
+        <item>stop</item>
+        <item>break</item>
+    </string-array>
+
+    <string-array name="voiceCommands_PLAYER_PULLUP">
+        <item>pullup</item>
+        <item>pull up</item>
+        <item>pull-up</item>
+        <item>replay</item>
+        <item>restart</item>
+    </string-array>
 </resources>

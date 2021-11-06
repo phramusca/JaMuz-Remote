@@ -50,7 +50,7 @@ public class Encryption {
 
     private static Key generateKey(String secret) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         byte[] key = secret.getBytes(StandardCharsets.UTF_8);
-        MessageDigest sha = MessageDigest.getInstance("SHA-1");
+        MessageDigest sha = MessageDigest.getInstance("SHA-1"); //NON-NLS
         key = sha.digest(key);
         key = Arrays.copyOf(key, 16); // use only first 128 bit
         return new SecretKeySpec(key, ALGO);
