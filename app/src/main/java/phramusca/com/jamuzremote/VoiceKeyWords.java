@@ -63,21 +63,24 @@ public class VoiceKeyWords {
     }
 
     enum Command {
+
+        //FIXME NOW For those 4, do as in ActivityAlbumTracks as for now it sets current playlist so weird
+        PLAY_NEW_PLAYLIST_ARTIST_ONGOING(R.array.voiceCommands_PLAY_NEW_PLAYLIST_ARTIST_ONGOING),
+        PLAY_NEW_PLAYLIST_ALBUM_ONGOING(R.array.voiceCommands_PLAY_NEW_PLAYLIST_ALBUM_ONGOING),
+        PLAY_NEW_PLAYLIST_ARTIST(R.array.voiceCommands_PLAY_NEW_PLAYLIST_ARTIST),
+        PLAY_NEW_PLAYLIST_ALBUM(R.array.voiceCommands_PLAY_NEW_PLAYLIST_ALBUM),
+
         PLAY_PLAYLIST(R.array.voiceCommands_PLAY_PLAYLIST), //Also the default
 
-        //FIXME NOW: Rename and DO NOT create playlist file (and not add to combobox)
-        PLAY_NEW_PLAYLIST_ARTIST(R.array.voiceCommands_PLAY_NEW_PLAYLIST_ARTIST),
-        PLAY_NEW_PLAYLIST_ARTIST_ONGOING(R.array.voiceCommands_PLAY_NEW_PLAYLIST_ARTIST_ONGOING),
-        PLAY_NEW_PLAYLIST_ALBUM(R.array.voiceCommands_PLAY_NEW_PLAYLIST_ALBUM),
-        PLAY_NEW_PLAYLIST_ALBUM_ONGOING(R.array.voiceCommands_PLAY_NEW_PLAYLIST_ALBUM_ONGOING),
-
-        SET_GENRE(R.array.voiceCommands_SET_GENRE),
         SET_RATING(R.array.voiceCommands_SET_RATING),
         SET_TAGS(R.array.voiceCommands_SET_TAGS),
+        SET_GENRE(R.array.voiceCommands_SET_GENRE),
+
         PLAYER_RESUME(R.array.voiceCommands_PLAYER_RESUME),
         PLAYER_NEXT(R.array.voiceCommands_PLAYER_NEXT),
         PLAYER_PAUSE(R.array.voiceCommands_PLAYER_PAUSE),
         PLAYER_PULLUP(R.array.voiceCommands_PLAYER_PULLUP),
+
         UNKNOWN(-1);
 
         private final int resId;

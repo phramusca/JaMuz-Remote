@@ -1296,7 +1296,6 @@ public class ActivityMain extends AppCompatActivity {
                         Playlist playlist = new Playlist(arguments, true);
                         playlist.setArtist(arguments);
                         applyPlaylist(playlist, true);
-                        setupLocalPlaylistSpinner(playlist);
                         msg = "";
                     }
                     break;
@@ -1310,10 +1309,7 @@ public class ActivityMain extends AppCompatActivity {
                     } else if (HelperLibrary.musicLibrary.getAlbum(arguments)) {
                         Playlist playlist = new Playlist(arguments, true);
                         playlist.setAlbum(arguments);
-
-                        //FIXME NOW : DO NOT CREATE THE PLAYLIST IN LIST !!! (same for others)
                         applyPlaylist(playlist, true);
-                        setupLocalPlaylistSpinner(playlist);
                         msg = "";
                     }
                     break;
