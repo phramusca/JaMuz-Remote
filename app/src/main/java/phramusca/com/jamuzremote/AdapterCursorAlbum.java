@@ -75,7 +75,7 @@ public class AdapterCursorAlbum extends AdapterCursor<AdapterLoad.UserViewHolder
 
         Bitmap bitmap = RepoCovers.getCoverIcon(adapterListItemAlbum.getCoverHash(), adapterListItemAlbum.getPath(), RepoCovers.IconSize.THUMB, false);
         if (bitmap == null) {
-            bitmap = HelperBitmap.getEmptyThumb();
+            bitmap = HelperBitmap.getEmptyThumb(parent.getContext());
             readIconInThread(adapterListItemAlbum, userViewHolder);
         }
         userViewHolder.imageViewCover.setImageBitmap(bitmap);

@@ -25,7 +25,7 @@ public class ServiceScan extends ServiceBase {
 
     @Override
     public void onCreate() {
-        notificationScan = new Notification(this, NotificationId.SCAN, "Scan"); //FIXME NOW Translate
+        notificationScan = new Notification(this, NotificationId.SCAN, getString(R.string.scanTitle));
         super.onCreate();
     }
 
@@ -173,7 +173,7 @@ public class ServiceScan extends ServiceBase {
                                             HelperLibrary.musicLibrary.insertOrUpdateTrack(absolutePath);
                                         }
                                     }
-                                    notifyScan("Scanning files ... ", 13); //FIXME NOW Translate
+                                    notifyScan(getString(R.string.scanNotifyScanning), 13);
                                 }
                             }
                         } else {

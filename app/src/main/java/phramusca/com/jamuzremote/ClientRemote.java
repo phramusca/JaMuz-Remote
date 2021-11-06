@@ -5,6 +5,7 @@
  */
 package phramusca.com.jamuzremote;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 
 /**
@@ -15,8 +16,8 @@ public class ClientRemote extends Client {
     private final IListenerRemote callback;
     private boolean userStop = false;
 
-    public ClientRemote(ClientInfo clientInfo, IListenerRemote callback) {
-        super(clientInfo);
+    public ClientRemote(ClientInfo clientInfo, IListenerRemote callback, Context context) {
+        super(clientInfo, context);
         this.callback = callback;
         super.setCallback(new ListenerReception());
     }
