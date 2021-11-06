@@ -25,7 +25,7 @@ public class ServiceScan extends ServiceBase {
 
     @Override
     public void onCreate() {
-        notificationScan = new Notification(this, NotificationId.SCAN, "Scan");
+        notificationScan = new Notification(this, NotificationId.SCAN, getString(R.string.scanTitle));
         super.onCreate();
     }
 
@@ -34,7 +34,7 @@ public class ServiceScan extends ServiceBase {
         super.onStartCommand(intent, flags, startId);
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         if (powerManager != null) {
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "jamuzremote:MyPowerWakelockTag");
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "jamuzremote:MyPowerWakelockTag"); //NON-NLS
             wakeLock.acquire(24 * 60 * 60 * 1000); //24 hours, enough to scan a lot, if not all !
         }
 
@@ -53,8 +53,7 @@ public class ServiceScan extends ServiceBase {
     private void scanLibraryInThread() {
         new Thread() {
             public void run() {
-                //FIXME NOW Translate
-                runOnUiThread(() -> helperNotification.notifyBar(notificationScan, "Cleaning database..."));
+                runOnUiThread(() -> helperNotification.notifyBar(notificationScan, getString(R.string.serviceScanNotifyCleaningDatabase)));
                 if (HelperLibrary.musicLibrary != null) {
                     //Delete tracks from database that are from another folder than those 2
                     HelperLibrary.musicLibrary.deleteTrack(getAppDataPath, userPath);
@@ -65,8 +64,7 @@ public class ServiceScan extends ServiceBase {
                     RepoAlbums.reset();
 
                     //Scan complete, warn user
-                    //FIXME NOW Translate
-                    final String msg = "Database updated.";
+                    final String msg = getString(R.string.serviceScanNotifyDatabaseUpdated);
                     runOnUiThread(() -> {
                         helperToast.toastLong(msg);
                         helperNotification.notifyBar(notificationScan, msg, 5000);
@@ -83,38 +81,38 @@ public class ServiceScan extends ServiceBase {
                 scanLibrary.join();
             }
         } catch (InterruptedException e) {
-            Log.e(TAG, "ActivityMain onDestroy: UNEXPECTED InterruptedException", e);
+            Log.e(TAG, "ActivityMain onDestroy: UNEXPECTED InterruptedException", e); //NON-NLS
         }
     }
 
     private void scanFolder(final File path) {
-        scanLibrary = new ProcessAbstract("Thread.ActivityMain.scanLibrayInThread") {
+        scanLibrary = new ProcessAbstract("Thread.ActivityMain.scanLibrayInThread") { //NON-NLS
             public void run() {
                 try {
-                    if (!path.getAbsolutePath().equals("/")) {
+                    if (!path.getAbsolutePath().equals("/")) { //NON-NLS
                         checkAbort();
                         nbFiles = 0;
                         nbFilesTotal = 0;
                         checkAbort();
                         //Scan android filesystem for files
-                        processBrowseFS = new ProcessAbstract("Thread.ActivityMain.browseFS") {
+                        processBrowseFS = new ProcessAbstract("Thread.ActivityMain.browseFS") { //NON-NLS
                             public void run() {
                                 try {
                                     browseFS(path);
                                 } catch (IllegalStateException | InterruptedException e) {
-                                    Log.w(TAG, "Thread.ActivityMain.browseFS InterruptedException");
+                                    Log.w(TAG, "Thread.ActivityMain.browseFS InterruptedException"); //NON-NLS
                                     scanLibrary.abort();
                                 }
                             }
                         };
                         processBrowseFS.start();
                         //Get total number of files
-                        processBrowseFScount = new ProcessAbstract("Thread.ActivityMain.browseFScount") {
+                        processBrowseFScount = new ProcessAbstract("Thread.ActivityMain.browseFScount") { //NON-NLS
                             public void run() {
                                 try {
                                     browseFScount(path);
                                 } catch (InterruptedException e) {
-                                    Log.w(TAG, "Thread.ActivityMain.browseFScount InterruptedException");
+                                    Log.w(TAG, "Thread.ActivityMain.browseFScount InterruptedException"); //NON-NLS
                                     scanLibrary.abort();
                                 }
                             }
@@ -129,7 +127,7 @@ public class ServiceScan extends ServiceBase {
                     //This will remove from db files not in filesystem
                     checkAbort();
                     List<Track> tracks =
-                            new Playlist("ScanFolder", false)
+                            new Playlist("ScanFolder", false) //NON-NLS
                                     .getTracks(new ArrayList<Track.Status>() {
                                         {
                                             add(Track.Status.LOCAL);
@@ -141,13 +139,13 @@ public class ServiceScan extends ServiceBase {
                         checkAbort();
                         File file = new File(track.getPath());
                         if (!file.exists()) {
-                            Log.d(TAG, "Remove track from db: " + track);
+                            Log.d(TAG, "Remove track from db: " + track); //NON-NLS
                             track.delete();
                         }
-                        notifyScan("Scanning deleted files ... ", 200);
+                        notifyScan(getString(R.string.serviceScanNotifyScanningDeleted), 200);
                     }
                 } catch (InterruptedException e) {
-                    Log.w(TAG, "Thread.ActivityMain.scanLibrayInThread InterruptedException");
+                    Log.w(TAG, "Thread.ActivityMain.scanLibrayInThread InterruptedException"); //NON-NLS
                 }
             }
 
@@ -167,19 +165,19 @@ public class ServiceScan extends ServiceBase {
                                     if (!absolutePath.startsWith(getAppDataPath.getAbsolutePath())) {
                                         //Scanning extra local folder
                                         List<String> audioExtensions = new ArrayList<>();
-                                        audioExtensions.add("mp3");
-                                        audioExtensions.add("flac");
+                                        audioExtensions.add("mp3"); //NON-NLS
+                                        audioExtensions.add("flac"); //NON-NLS
                                         /*audioFiles.add("ogg");*/
-                                        String ext = absolutePath.substring(absolutePath.lastIndexOf(".") + 1);
+                                        String ext = absolutePath.substring(absolutePath.lastIndexOf(".") + 1); //NON-NLS
                                         if (audioExtensions.contains(ext)) {
                                             HelperLibrary.musicLibrary.insertOrUpdateTrack(absolutePath);
                                         }
                                     }
-                                    notifyScan("Scanning files ... ", 13);
+                                    notifyScan(getString(R.string.scanNotifyScanning), 13);
                                 }
                             }
                         } else {
-                            Log.i(TAG, "Deleting empty folder " + path.getAbsolutePath());
+                            Log.i(TAG, "Deleting empty folder " + path.getAbsolutePath()); //NON-NLS
                             //noinspection ResultOfMethodCallIgnored
                             path.delete();
                         }
@@ -237,7 +235,7 @@ public class ServiceScan extends ServiceBase {
                 scanLibrary.join();
             }
         } catch (InterruptedException e) {
-            Log.e(TAG, "ActivityMain onDestroy: UNEXPECTED InterruptedException", e);
+            Log.e(TAG, "ActivityMain onDestroy: UNEXPECTED InterruptedException", e); //NON-NLS
         }
     }
 }

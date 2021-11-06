@@ -5,6 +5,7 @@
  */
 package phramusca.com.jamuzremote;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.BufferedOutputStream;
@@ -34,9 +35,11 @@ public class Client {
     private BufferedReader bufferedReader;
     private OutputStream outputStream;
     private final ClientInfo clientInfo;
+    private Context mContext;
 
-    Client(ClientInfo clientInfo) {
+    Client(ClientInfo clientInfo, Context context) {
         this.clientInfo = clientInfo;
+        mContext = context;
     }
 
     void setCallback(IListenerReception callback) {
@@ -59,15 +62,15 @@ public class Client {
             emission.start();
 
             //Authenticating
-            if (waitPrompt("MSG_AUTHENTICATE")) {
+            if (waitPrompt("MSG_AUTHENTICATE")) { //NON-NLS
                 send(clientInfo.toJSONObject().toString());
-                if (waitPrompt("MSG_CONNECTED")) {
-                    reception = new ClientReception(inputStream, callback);
+                if (waitPrompt("MSG_CONNECTED")) { //NON-NLS
+                    reception = new ClientReception(inputStream, callback, mContext);
                     reception.start();
                     return true;
                 }
             }
-            callback.onDisconnected("Authentication failed.");
+            callback.onDisconnected(mContext.getString(R.string.clientToastAuthenticationFailed));
             return false;
         } catch (IOException ex) {
             //Includes SocketException
@@ -80,7 +83,6 @@ public class Client {
     public boolean isConnected() {
         return socket != null && socket.isConnected();
     }
-
 
     public void close() {
         try {
@@ -104,7 +106,7 @@ public class Client {
                 String received = bufferedReader.readLine();
                 if (received.equals(prompt)) {
                     return true;
-                } else if (received.startsWith("MSG_ERROR")) {
+                } else if (received.startsWith("MSG_ERROR")) { //NON-NLS
                     return false;
                 }
             }
@@ -117,7 +119,7 @@ public class Client {
 
     public void send(String msg) {
         if (emission != null) {
-            Log.i(TAG, "SENDING " + msg);
+            Log.i(TAG, "SENDING " + msg); //NON-NLS
             emission.send(msg);
         }
     }
@@ -126,15 +128,15 @@ public class Client {
         DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(outputStream));
         if (file.exists() && file.isFile()) {
             try (FileInputStream input = new FileInputStream(file)) {
-                Log.i(TAG, "Sending : " + file.getAbsolutePath());
-                Log.i(TAG, "Size : " + file.length());
+                Log.i(TAG, "Sending : " + file.getAbsolutePath()); //NON-NLS
+                Log.i(TAG, "Size : " + file.length()); //NON-NLS
                 dos.writeLong(file.length());
                 int read;
                 while ((read = input.read()) != -1) {
                     dos.writeByte(read);
                 }
                 dos.flush();
-                Log.i(TAG, "File successfully sent!");
+                Log.i(TAG, "File successfully sent!"); //NON-NLS
             } catch (IOException ex) {
                 //This includes SocketException
                 Log.e(TAG, "", ex);

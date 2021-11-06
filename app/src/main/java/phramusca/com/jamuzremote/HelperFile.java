@@ -23,7 +23,7 @@ import java.io.PrintWriter;
 public final class HelperFile {
 
     private static final String TAG = HelperFile.class.getName();
-    private static final String path = Environment.getExternalStorageDirectory() + "/JaMuz/";
+    private static final String path = Environment.getExternalStorageDirectory() + "/JaMuz/"; //NON-NLS
 
     private HelperFile() {
     }
@@ -61,7 +61,7 @@ public final class HelperFile {
             }
             br.close();
         } catch (IOException e) {
-            Log.e(TAG, "Error reading file : " + file.getAbsolutePath(), e);
+            Log.e(TAG, "Error reading file : " + file.getAbsolutePath(), e); //NON-NLS
         }
         return text.toString();
     }
@@ -76,7 +76,7 @@ public final class HelperFile {
             out.close();
             return true;
         } catch (IOException e) {
-            Log.e(TAG, "Error saving file : " + file.getAbsolutePath(), e);
+            Log.e(TAG, "Error saving file : " + file.getAbsolutePath(), e); //NON-NLS
             return false;
         }
     }
@@ -91,13 +91,13 @@ public final class HelperFile {
         try {
             FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
             PrintWriter printWriter = new PrintWriter(fos);
-            Log.i(TAG, "Writing " + filename + "\n" + (text.length() < 150 ? text : text.substring(0, 150)) + "\n");
+            Log.i(TAG, "Writing " + filename + "\n" + (text.length() < 150 ? text : text.substring(0, 150)) + "\n"); //NON-NLS
             printWriter.write(text);
             printWriter.flush();
             printWriter.close();
             fos.close();
         } catch (IOException e) {
-            Log.e(TAG, "write", e);
+            Log.e(TAG, "write", e); //NON-NLS
         }
     }
 
@@ -106,7 +106,7 @@ public final class HelperFile {
         String ret = "";
         try {
             InputStream inputStream = context.openFileInput(filename);
-            Log.i(TAG, "Reading " + filename);
+            Log.i(TAG, "Reading " + filename); //NON-NLS
             if (inputStream != null) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -117,10 +117,10 @@ public final class HelperFile {
                 }
                 inputStream.close();
                 ret = stringBuilder.toString();
-                Log.d(TAG, "Read \n" + ret + "\n");
+                Log.d(TAG, "Read \n" + ret + "\n"); //NON-NLS
             }
         } catch (IOException e) {
-            Log.e(TAG, "read" + e.toString());
+            Log.e(TAG, "read" + e.toString()); //NON-NLS
         }
         return ret;
     }

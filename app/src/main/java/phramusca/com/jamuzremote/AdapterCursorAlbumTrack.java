@@ -68,7 +68,7 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
 
         Bitmap bitmap = RepoCovers.getCoverIcon(track, RepoCovers.IconSize.THUMB, true);
         if (bitmap == null) {
-            bitmap = HelperBitmap.getEmptyThumb();
+            bitmap = HelperBitmap.getEmptyThumb(parent.getContext());
         }
 
         if (track.getStatus().equals(Track.Status.INFO) || track.getStatus().equals(Track.Status.NEW)) {
@@ -94,7 +94,7 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
             userViewHolder.item_line4.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
         }
 
-        userViewHolder.item_line1.setText(String.format(Locale.ENGLISH,"%s%d %s",
+        userViewHolder.item_line1.setText(String.format(Locale.ENGLISH,"%s%d %s", //NON-NLS
                 track.getDiscTotal() > 1 ? "[" + track.getDiscNo() + "/" + track.getDiscTotal() + "] " : "",
                 track.getTrackNo(),
                 track.getTitle()));
@@ -110,10 +110,16 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
             userViewHolder.item_line2.highlight();
         }
 
-        userViewHolder.item_line3.setText(String.format(Locale.ENGLISH, "%d/5 %s %s",
-                (int) track.getRating(), track.getGenre(), track.getYear()));
-        userViewHolder.item_line4.setText(String.format(Locale.ENGLISH, "%s\n%s %s",
-                track.getTags(), track.getLastPlayedAgo(), track.getAddedDateAgo()));
+        userViewHolder.item_line3.setText(String.format(Locale.ENGLISH,
+                "%d/5 %s %s", //NON-NLS
+                (int) track.getRating(),
+                track.getGenre(),
+                track.getYear()));
+        userViewHolder.item_line4.setText(String.format(Locale.ENGLISH,
+                "%s\n%s %s", //NON-NLS
+                track.getTags(),
+                ActivityMain.getLastPlayedAgo(track),
+                ActivityMain.getAddedDateAgo(track)));
 
         userViewHolder.imageViewCover.setImageBitmap(bitmap);
 

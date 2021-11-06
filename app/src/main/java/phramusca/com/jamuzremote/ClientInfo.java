@@ -42,13 +42,13 @@ public class ClientInfo implements Serializable {
     }
 
     public HttpUrl.Builder getUrlBuilder(String url) {
-        return HttpUrl.parse("http://" + getAddress() + ":" + (getPort() + 1) + "/" + url).newBuilder();
+        return HttpUrl.parse("http://" + getAddress() + ":" + (getPort() + 1) + "/" + url).newBuilder(); //NON-NLS
     }
 
     public Request.Builder getRequestBuilder(HttpUrl.Builder urlBuilder) {
         return new Request.Builder()
-                .addHeader("login", getLogin() + "-" + getAppId())
-                .addHeader("api-version", "1.0")
+                .addHeader("login", getLogin() + "-" + getAppId()) //NON-NLS
+                .addHeader("api-version", "1.0") //NON-NLS
                 .url(urlBuilder.build());
     }
 
@@ -75,7 +75,7 @@ public class ClientInfo implements Serializable {
         if (!response.isSuccessful()) {
             switch (response.code()) {
                 case 301:
-                    throw new ServiceSync.ServerException(request.header("api-version") + " not supported. " + response.body().string());
+                    throw new ServiceSync.ServerException(request.header("api-version") + " not supported. " + response.body().string()); //NON-NLS
                 default:
                     throw new ServiceSync.ServerException(response.code() + ": " + response.message());
             }
@@ -102,9 +102,9 @@ public class ClientInfo implements Serializable {
     public JSONObject toJSONObject() {
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("login", login);
-            jsonObject.put("password", password);
-            jsonObject.put("canal", canal);
+            jsonObject.put("login", login); //NON-NLS
+            jsonObject.put("password", password); //NON-NLS
+            jsonObject.put("canal", canal); //NON-NLS
             jsonObject.put("appId", appId);
             jsonObject.put("rootPath", rootPath);
         } catch (JSONException e) {

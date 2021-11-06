@@ -2,19 +2,24 @@ package phramusca.com.jamuzremote;
 
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_STATUS;
 
+import android.content.Context;
 import android.database.Cursor;
 
 import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by raph on 11/06/17.
@@ -33,7 +38,7 @@ public class Playlist implements Comparable, Serializable {
     private String album;
     private Order order = Order.PLAYCOUNTER_LASTPLAYED;
     private int limitValue = 0;
-    private String limitUnit = "minutes";
+    private LimitUnit limitUnit = LimitUnit.MINUTES;
     private boolean modified = false;
     private int nbFiles = -1;
 
@@ -109,7 +114,7 @@ public class Playlist implements Comparable, Serializable {
         return in;
     }
 
-    public String getSummary() {
+    public String getSummary(Context context) {
         String in = " ";
         in += getRatingString();
         Lists tagsLists = new Lists();
@@ -118,14 +123,14 @@ public class Playlist implements Comparable, Serializable {
         String nullStatus = "";
         switch (unTaggedState) {
             case TRUE:
-                nullStatus = "null only";
+                nullStatus = context.getString(R.string.playlistSummaryNullOnly);
                 break;
             case FALSE:
-                nullStatus = "null excl.";
+                nullStatus = context.getString(R.string.playlistSummaryNullExcluded);
                 tagsLists = new Lists(tags);
                 break;
             case ANY:
-                nullStatus = "null incl.";
+                nullStatus = context.getString(R.string.playlistSummaryNullIncluded);
                 tagsLists = new Lists(tags);
                 break;
         }
@@ -138,7 +143,7 @@ public class Playlist implements Comparable, Serializable {
                 included.addAll(tagsLists.getIncluded());
             }
             included.addAll(genresLists.getIncluded());
-            in += " | Incl.: " + getString(included, max);
+            in += " | " + context.getString(R.string.playlistSummaryIncluded) + ": " + getString(included, max);
         }
 
         if (tagsLists.hasExcluded() || genresLists.hasExcluded()) {
@@ -147,11 +152,11 @@ public class Playlist implements Comparable, Serializable {
                 excluded.addAll(tagsLists.getExcluded());
             }
             excluded.addAll(genresLists.getExcluded());
-            in += " | Excl.: " + getString(excluded, max);
+            in += " | " + context.getString(R.string.playlistSummaryExcluded) + ": " + getString(excluded, max);
         }
 
-        in += " | " + order.toString();
-        in += " | " + (limitValue > 0 ? limitValue + " " + limitUnit : "");
+        in += " | " + order.getDisplay(context);
+        in += " | " + (limitValue > 0 ? limitValue + " " + limitUnit.getDisplay(context) : "");
 
         return in;
     }
@@ -160,12 +165,12 @@ public class Playlist implements Comparable, Serializable {
         return genres.entrySet();
     }
 
-    public void setLimitUnit(String limitUnit) {
+    public void setLimitUnit(LimitUnit limitUnit) {
         this.limitUnit = limitUnit;
         modified = true;
     }
 
-    public String getLimitUnit() {
+    public LimitUnit getLimitUnit() {
         return limitUnit;
     }
 
@@ -259,7 +264,7 @@ public class Playlist implements Comparable, Serializable {
     }
 
     public void toggleTag(String value, TriStateButton.STATE state) {
-        if (value.equals("null")) {
+        if (value.equals("null")) { //NON-NLS
             unTaggedState = state;
         } else {
             tags.put(value, state);
@@ -304,11 +309,11 @@ public class Playlist implements Comparable, Serializable {
         for(Track.Status status : statuses) {
             statusString.add(status.name());
         }
-        String in = " WHERE " + COL_STATUS + " IN ( " + getInClause(statusString) + " )" +
-                " AND rating " + getRatingString() + " ";
+        String in = " WHERE " + COL_STATUS + " IN ( " + getInClause(statusString) + " )" + //NON-NLS
+                " AND rating " + getRatingString() + " "; //NON-NLS
 
         if (limitValue > 0) {
-            in += "\n AND lastPlayed < datetime(datetime('now'), '-" + limitValue + " " + limitUnit + "')";
+            in += "\n AND lastPlayed < datetime(datetime('now'), '-" + limitValue + " " + limitUnit.value + "')"; //NON-NLS
         }
 
         ArrayList<String> include = new ArrayList<>();
@@ -325,18 +330,18 @@ public class Playlist implements Comparable, Serializable {
         }
 
         if (include.size() > 0) {
-            in += "\n AND genre IN (" + getInClause(include) + ") ";
+            in += "\n AND genre IN (" + getInClause(include) + ") "; //NON-NLS
         }
         if (exclude.size() > 0) {
-            in += "\n AND genre NOT IN (" + getInClause(exclude) + ") ";
+            in += "\n AND genre NOT IN (" + getInClause(exclude) + ") "; //NON-NLS
         }
 
         if (artist != null) {
-            in += "\n AND artist LIKE \"%" + artist + "%\" ";
+            in += "\n AND artist LIKE \"%" + artist + "%\" "; //NON-NLS
         }
 
         if (album != null) {
-            in += "\n AND album = \"" + album + "\" ";
+            in += "\n AND album = \"" + album + "\" "; //NON-NLS
         }
 
         in += getInClause(excluded);
@@ -348,10 +353,10 @@ public class Playlist implements Comparable, Serializable {
         //FILTER by TAGS
         String in;
         if (unTaggedState.equals(TriStateButton.STATE.TRUE)) {
-            in = " HAVING tag.value IS NULL ";
+            in = " HAVING tag.value IS NULL "; //NON-NLS
         } else {
             //Include or exclude tags according to states
-            in = " HAVING ( ";
+            in = " HAVING ( "; //NON-NLS
             if (tags.size() > 0) {
                 ArrayList<String> include = new ArrayList<>();
                 ArrayList<String> exclude = new ArrayList<>();
@@ -366,16 +371,16 @@ public class Playlist implements Comparable, Serializable {
                     }
                 }
                 in += getInClause(include, include.size());
-                in += "\n AND " + getInClause(exclude, 0);
+                in += "\n AND " + getInClause(exclude, 0); //NON-NLS
             } else {
-                in += " 1 ";
+                in += " 1 "; //NON-NLS
             }
-            in += " ) ";
+            in += " ) "; //NON-NLS
             //Include or exclude untagged
             if (unTaggedState.equals(TriStateButton.STATE.ANY)) {
-                in += "\n OR tag.value IS NULL ";
+                in += "\n OR tag.value IS NULL "; //NON-NLS
             } else if (unTaggedState.equals(TriStateButton.STATE.FALSE)) {
-                in += "\n AND tag.value IS NOT NULL ";
+                in += "\n AND tag.value IS NOT NULL "; //NON-NLS
             }
         }
         return in;
@@ -384,7 +389,7 @@ public class Playlist implements Comparable, Serializable {
     private static String getInClause(List<Integer> excluded) {
         StringBuilder builder = new StringBuilder();
         if (excluded.size() > 0) {
-            builder.append("\n AND tracks.idFileRemote NOT IN (");
+            builder.append("\n AND tracks.idFileRemote NOT IN ("); //NON-NLS
             for (int integer : excluded) {
                 builder.append(integer).append(",");
             }
@@ -404,14 +409,14 @@ public class Playlist implements Comparable, Serializable {
     private String getInClause(ArrayList<String> include, int length) {
         StringBuilder in = new StringBuilder();
         if (include.size() > 0) {
-            in.append(" sum(case when tag.value IN (");
+            in.append(" sum(case when tag.value IN ("); //NON-NLS
             for (String entry : include) {
-                in.append("\"").append(entry).append("\",");
+                in.append("\"").append(entry).append("\","); //NON-NLS
             }
             in = new StringBuilder(in.substring(0, in.length() - 1));
-            in.append(" ) then 1 else 0 end) = ").append(length);
+            in.append(" ) then 1 else 0 end) = ").append(length); //NON-NLS
         } else {
-            in.append(" 1 ");
+            in.append(" 1 "); //NON-NLS
         }
         return in.toString();
     }
@@ -496,30 +501,54 @@ public class Playlist implements Comparable, Serializable {
         modified = true;
     }
 
-    public enum Order {
-        RANDOM("ORDER BY RANDOM()", "Random"), //NOI18N
-        PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed", "Least played first"),
-        DISC_TRACK("ORDER BY discNo, trackNo", "Track number"); //NOI18N
+    public enum LimitUnit {
+        @SerializedName("minutes") //NON-NLS
+        MINUTES("minutes", 0), //NON-NLS
+        @SerializedName("hours") //NON-NLS
+        HOURS("hours", 1), //NON-NLS
+        @SerializedName("days") //NON-NLS
+        DAYS("days", 2), //NON-NLS
+        @SerializedName("months") //NON-NLS
+        MONTHS("months", 3), //NON-NLS
+        @SerializedName("years") //NON-NLS
+        YEARS("years", 4); //NON-NLS
 
         private final String value;
-        private final String display;
+        private final int index;
 
-        Order(String value, String display) {
+        LimitUnit(String value, int index) {
             this.value = value;
-            this.display = display;
+            this.index = index;
         }
 
-        @Override
-        public String toString() {
-            return display;
+        public String getDisplay(Context context) {
+            return context.getResources().getStringArray(R.array.limitUnits)[index];
         }
     }
 
-    public boolean save() {
+    public enum Order {
+        RANDOM("ORDER BY RANDOM()", R.string.playlistOrderRandom),  //NON-NLS
+        PLAYCOUNTER_LASTPLAYED("ORDER BY playCounter, lastPlayed", R.string.playlistOrderPlayCounter), //NON-NLS
+        DISC_TRACK("ORDER BY discNo, trackNo", R.string.playlistOrderTrackNb);  //NON-NLS
+
+        private final String value;
+        private final int resId;
+
+        Order(String value, int resId) {
+            this.value = value;
+            this.resId = resId;
+        }
+
+        public String getDisplay(Context context) {
+            return context.getString(resId);
+        }
+    }
+
+    public boolean save(String folder) {
         Gson gson = new Gson();
         boolean previousModified = modified;
         modified = false; //otherwise saved as modified => non-sense
-        if (HelperFile.write("Playlists", getName() + ".plli", gson.toJson(this))) {
+        if (HelperFile.write(folder, getName() + ".plli", gson.toJson(this))) {
             return true;
         } else {
             modified = previousModified;
