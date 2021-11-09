@@ -1,6 +1,6 @@
 # JaMuz Remote Voice Commands
 
-[[_TOC_]]
+[[TOC]]
 
 ## English
 
