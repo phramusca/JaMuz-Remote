@@ -6,6 +6,7 @@ ________________________________________________________________________________
     * Tag editor (user tags, rating and genre)
     * Replaygain support (MP3 only, FLAC on its way)
     * One finger control
+    * [Voice commands](../data/voiceCommands.md)
   * ***Merge your statistics with JaMuz***
     * And so with all players JaMuz can merge with (Mixxx, Kodi, guayadeque,...)
   * ***Sync files from JaMuz over WiFi***
