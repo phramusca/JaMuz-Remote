@@ -1,0 +1,102 @@
+# JaMuz Remote Voice Commands
+
+[[_TOC_]]
+
+## English
+
+- PLAY_ARTIST_ONGOING
+  - current artist
+  - ongoing artist
+  - on going artist
+- PLAY_ALBUM_ONGOING
+  - current album
+  - ongoing album
+  - on going album
+- PLAY_ARTIST
+  - artist
+- PLAY_ALBUM
+  - album
+- PLAY_PLAYLIST
+  - list
+  - play list
+  - playlist
+- SET_RATING
+  - rate it
+  - rate
+- SET_TAGS
+  - tag it
+  - tag
+- SET_GENRE
+  - genre
+- PLAYER_RESUME
+  - resume
+  - play
+  - continue
+- PLAYER_NEXT
+  - play next track
+  - play next
+  - next track
+  - next
+- PLAYER_PAUSE
+  - pause
+  - stop
+  - break
+- PLAYER_PULLUP
+  - pullup
+  - pull up
+  - pull-up
+  - replay
+  - restart
+
+## Français
+
+- PLAY_ARTIST_ONGOING
+  - artiste en cours
+  - artist en cours
+  - artiste courant
+- PLAY_ALBUM_ONGOING
+  - album en cours
+  - album courant
+- PLAY_ARTIST
+  - artiste
+  - artist
+- PLAY_ALBUM
+  - album
+- PLAY_PLAYLIST
+  - liste
+  - list
+  - playliste
+  - playlist
+- SET_RATING
+  - noter
+  - note
+- SET_TAGS
+  - taguer
+  - tag
+- SET_GENRE
+  - genre
+- PLAYER_RESUME
+  - continuer
+  - continue
+  - reprendre
+  - reprends
+  - lire
+  - lis
+  - lecture
+- PLAYER_NEXT
+  - prochaine
+  - prochain
+  - suivante
+  - suivant
+- PLAYER_PAUSE
+  - pause
+  - stop
+  - arrêt
+  - arrêter
+- PLAYER_PULLUP
+  - rejouer
+  - redémarrer
+  - recommencer
+  - poule up
+  - poulpe
+

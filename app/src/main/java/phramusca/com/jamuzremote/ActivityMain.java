@@ -81,13 +81,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
-import org.ocpsoft.prettytime.TimeUnit;
-import org.ocpsoft.prettytime.impl.ResourcesTimeUnit;
 
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -97,11 +94,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 //FIXME: Submit to f-droid.org
 //https://gitlab.com/fdroid/fdroiddata/blob/master/CONTRIBUTING.md
@@ -1285,32 +1279,38 @@ public class ActivityMain extends AppCompatActivity {
                         }
                     }
                     break;
-                case PLAY_NEW_PLAYLIST_ARTIST_ONGOING:
+                case PLAY_ARTIST_ONGOING:
                     arguments = displayedTrack.getArtist();
-                case PLAY_NEW_PLAYLIST_ARTIST:
+                case PLAY_ARTIST:
                     msg = getString(R.string.speakArtist) + " \"" + arguments + "\" " + getString(R.string.speakNotFound);
                     if (arguments.equals("")) {
-                        //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
                         msg = getString(R.string.speakSpecifyArtist);
-                    } else if (HelperLibrary.musicLibrary.getArtist(arguments)) {
+                    } else {
+                        arguments = keyWord.getCommand().equals(VoiceKeyWords.Command.PLAY_ARTIST)
+                                ? "%" + arguments + "%" : arguments;
                         Playlist playlist = new Playlist(arguments, true);
                         playlist.setArtist(arguments);
-                        applyPlaylist(playlist, true);
-                        msg = "";
+                        if(PlayQueue.queue.insert(playlist)>0) {
+                            playNext();
+                            msg = "";
+                        }
                     }
                     break;
-                case PLAY_NEW_PLAYLIST_ALBUM_ONGOING:
+                case PLAY_ALBUM_ONGOING:
                     arguments = displayedTrack.getAlbum();
-                case PLAY_NEW_PLAYLIST_ALBUM:
+                case PLAY_ALBUM:
                     msg = getString(R.string.speakAlbum) + " \"" + arguments + "\" " + getString(R.string.speakNotFound);
                     if (arguments.equals("")) {
-                        //TODO: Actually it can happen, but needs to change playlist query (like "%blaBla%" curently)
                         msg = getString(R.string.speakSpecifyAlbum);
-                    } else if (HelperLibrary.musicLibrary.getAlbum(arguments)) {
+                    } else {
+                        arguments = keyWord.getCommand().equals(VoiceKeyWords.Command.PLAY_ALBUM)
+                                ? "%" + arguments + "%" : arguments;
                         Playlist playlist = new Playlist(arguments, true);
                         playlist.setAlbum(arguments);
-                        applyPlaylist(playlist, true);
-                        msg = "";
+                        if(PlayQueue.queue.insert(playlist)>0) {
+                            playNext();
+                            msg = "";
+                        }
                     }
                     break;
                 case SET_GENRE:
