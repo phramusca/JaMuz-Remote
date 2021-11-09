@@ -94,4 +94,5 @@
     <string name="serviceSyncNotifySyncCheckingSuffix">filer …</string>
     <string name="serviceSyncNotifySyncReceived">Mottatt</string>
     <string name="serviceSyncNotifySyncReceivedSuffix">filantall …</string>
+    <string name="serviceSyncNotifySyncReceivedTags">Mottatte etiketter …</string>
 </resources>
