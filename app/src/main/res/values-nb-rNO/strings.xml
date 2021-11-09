@@ -139,4 +139,5 @@
     <string name="clientREceptionToastSocketClosed">Socket lukket (mottok null)</string>
     <string name="serviceSyncNotifyDownloadStopping">Stopper nedlastinger …</string>
     <string name="serviceSyncNotifyDownloadStarting">Starter nedlasting …</string>
+    <string name="audioPlayerToastRgConsiderLower">Hvis du ser denne meldingen for ofte kan du overveie å senke den i innstillingene. (Kanskje det er en feil med én fil).</string>
 </resources>
