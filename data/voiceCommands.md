@@ -1,8 +1,9 @@
 # JaMuz Remote Voice Commands
 
-[[TOC]]
+- [English](#English)
+- [Français](#Français)
 
-## English
+## <a id="English"></a> English
 
 - PLAY_ARTIST_ONGOING
   - current artist
@@ -48,7 +49,7 @@
   - replay
   - restart
 
-## Français
+## <a id="Français"></a> Français
 
 - PLAY_ARTIST_ONGOING
   - artiste en cours
