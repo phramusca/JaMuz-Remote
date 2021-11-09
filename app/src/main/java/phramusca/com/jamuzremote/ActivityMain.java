@@ -722,6 +722,15 @@ public class ActivityMain extends AppCompatActivity {
             KPUtility.handleKPIntegration(this, KPUtility.GOOGLE_MARKET);
         }
 
+        //TODO: Fix startup glitch issue: need to wait for layouts to be loaded before toggling off
+        toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
+        toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
+        toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
+        toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
+        toggleOff(toggleButtonPlaylist, layoutPlaylist);
+        toggleOff(toggleButtonEditTags, layoutEditTags);
+        toggleOff(toggleButtonControls, layoutControls);
+
         setDimMode(toggleButtonDimMode.isChecked());
     }
 
@@ -1154,15 +1163,6 @@ public class ActivityMain extends AppCompatActivity {
         if (toggleButtonDimMode.isChecked()) {
             dimOn();
         }
-
-        toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
-        toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
-        toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
-        toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
-        toggleOff(toggleButtonControls, layoutControls);
-        toggleOff(toggleButtonEditTags, layoutEditTags);
-        toggle(layoutPlaylist, audioPlayer.isPlaying());
-        toggleButtonPlaylist.setChecked(!audioPlayer.isPlaying());
 
         applyKidsPlaceOptions();
 
