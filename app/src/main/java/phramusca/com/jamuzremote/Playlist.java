@@ -337,11 +337,11 @@ public class Playlist implements Comparable, Serializable {
         }
 
         if (artist != null) {
-            in += "\n AND artist LIKE \"%" + artist + "%\" "; //NON-NLS
+            in += "\n AND artist LIKE \"" + artist + "\" "; //NON-NLS
         }
 
         if (album != null) {
-            in += "\n AND album = \"" + album + "\" "; //NON-NLS
+            in += "\n AND album LIKE \"" + album + "\" "; //NON-NLS
         }
 
         in += getInClause(excluded);

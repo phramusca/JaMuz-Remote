@@ -150,23 +150,23 @@
     <string name="playlistOrderPlayCounter">Nombre de lectures, Dernière lecture</string>
     <string name="playlistOrderTrackNb">Numéro de piste</string>
 
-    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ARTIST_ONGOING">
+    <string-array name="voiceCommands_PLAY_ARTIST_ONGOING">
         <item>artiste en cours</item>
         <item>artist en cours</item>
         <item>artiste courant</item>
     </string-array>
 
-    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ALBUM_ONGOING">
+    <string-array name="voiceCommands_PLAY_ALBUM_ONGOING">
         <item>album en cours</item>
         <item>album courant</item>
     </string-array>
 
-    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ARTIST">
+    <string-array name="voiceCommands_PLAY_ARTIST">
         <item>artiste</item>
         <item>artist</item>
     </string-array>
 
-    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ALBUM">
+    <string-array name="voiceCommands_PLAY_ALBUM">
         <item>album</item>
     </string-array>
 
@@ -196,7 +196,9 @@
         <item>continuer</item>
         <item>continue</item>
         <item>reprendre</item>
+        <item>reprends</item>
         <item>lire</item>
+        <item>lis</item>
         <item>lecture</item>
     </string-array>
 
@@ -210,19 +212,16 @@
     <string-array name="voiceCommands_PLAYER_PAUSE">
         <item>pause</item>
         <item>stop</item>
-        <item>arret</item>
         <item>arrêt</item>
-        <item>arreter</item>
         <item>arrêter</item>
     </string-array>
 
     <string-array name="voiceCommands_PLAYER_PULLUP">
-        <item>pullup</item>
-        <item>pull up</item>
-        <item>pull-up</item>
-        <item>poulpe</item>
-        <item>recommencer</item>
         <item>rejouer</item>
+        <item>redémarrer</item>
+        <item>recommencer</item>
+        <item>poule up</item>
+        <item>poulpe</item>
     </string-array>
     <string name="mainVoiceToastNeedToInstall">Vous devez installer le moteur de reconnaissance vocale de Google pour utilser cette fonctionalité.</string>
 </resources>

@@ -10,9 +10,7 @@ import java.util.stream.Collectors;
  * Created by raph on 18/03/18.
  */
 
-//FIXME NOW Complete export to md (c# project)
-// - git
-// - release process
+//TODO: Make keywords configurable in application
 
 public class VoiceKeyWords {
     private static final ArrayList<KeyWord> KEY_WORDS = new ArrayList<>();
@@ -63,12 +61,10 @@ public class VoiceKeyWords {
     }
 
     enum Command {
-
-        //FIXME NOW For those 4, do as in ActivityAlbumTracks as for now it sets current playlist so weird
-        PLAY_NEW_PLAYLIST_ARTIST_ONGOING(R.array.voiceCommands_PLAY_NEW_PLAYLIST_ARTIST_ONGOING),
-        PLAY_NEW_PLAYLIST_ALBUM_ONGOING(R.array.voiceCommands_PLAY_NEW_PLAYLIST_ALBUM_ONGOING),
-        PLAY_NEW_PLAYLIST_ARTIST(R.array.voiceCommands_PLAY_NEW_PLAYLIST_ARTIST),
-        PLAY_NEW_PLAYLIST_ALBUM(R.array.voiceCommands_PLAY_NEW_PLAYLIST_ALBUM),
+        PLAY_ARTIST_ONGOING(R.array.voiceCommands_PLAY_ARTIST_ONGOING),
+        PLAY_ALBUM_ONGOING(R.array.voiceCommands_PLAY_ALBUM_ONGOING),
+        PLAY_ARTIST(R.array.voiceCommands_PLAY_ARTIST),
+        PLAY_ALBUM(R.array.voiceCommands_PLAY_ALBUM),
 
         PLAY_PLAYLIST(R.array.voiceCommands_PLAY_PLAYLIST), //Also the default
 

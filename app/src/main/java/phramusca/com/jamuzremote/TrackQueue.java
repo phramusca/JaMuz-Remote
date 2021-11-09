@@ -26,7 +26,7 @@ public class TrackQueue extends TrackList {
         add(new ArrayList<>(), playlist);
     }
 
-    synchronized void insert(Playlist playlist) {
+    synchronized int insert(Playlist playlist) {
         List<Track> playlistTracks = playlist.getTracks(new ArrayList<Track.Status>() {
             {
                 add(Track.Status.REC);
@@ -37,6 +37,7 @@ public class TrackQueue extends TrackList {
             track.setLocked(true);
         }
         tracks.addAll(positionPlaying + 1, playlistTracks);
+        return playlistTracks.size();
     }
 
     synchronized void insert(Track track) {

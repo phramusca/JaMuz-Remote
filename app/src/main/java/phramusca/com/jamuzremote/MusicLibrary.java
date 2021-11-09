@@ -644,30 +644,6 @@ public class MusicLibrary {
         return -1;
     }
 
-    boolean getArtist(String artist) {
-        try (Cursor cursor = db.query("tracks", null, "artist=?", //NON-NLS
-                new String[]{artist}, "", "", "")) { //NON-NLS
-            if (cursor.getCount() > 0) { //NON-NLS
-                return true; //NON-NLS
-            }
-        } catch (SQLiteException | IllegalStateException ex) {
-            Log.e(TAG, "getArtist(" + artist + ")", ex); //NON-NLS
-        }
-        return false;
-    } //NON-NLS
-
-    boolean getAlbum(String album) { //NON-NLS
-        try (Cursor cursor = db.query("tracks", null, "album=?", //NON-NLS
-                new String[]{album}, "", "", "")) {
-            if (cursor.getCount() > 0) {
-                return true;
-            }
-        } catch (SQLiteException | IllegalStateException ex) { //NON-NLS
-            Log.e(TAG, "getAlbum(" + album + ")", ex); //NON-NLS
-        }
-        return false; //NON-NLS
-    }
-
     Cursor getAlbums() {
         return getAlbums(""); //NON-NLS
     }

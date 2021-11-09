@@ -178,30 +178,30 @@
     <string name="scanNotifyScanning">\"Scanning files ... \"</string>
     <string name="scanTitle">Scan</string>
 
-    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ARTIST_ONGOING">
-        <item>ongoing artist</item>
+    <string-array name="voiceCommands_PLAY_ARTIST_ONGOING">
         <item>current artist</item>
+        <item>ongoing artist</item>
         <item>on going artist</item>
     </string-array>
 
-    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ALBUM_ONGOING">
-        <item>on going album</item>
+    <string-array name="voiceCommands_PLAY_ALBUM_ONGOING">
         <item>current album</item>
         <item>ongoing album</item>
+        <item>on going album</item>
     </string-array>
 
-    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ARTIST">
+    <string-array name="voiceCommands_PLAY_ARTIST">
         <item>artist</item>
     </string-array>
 
-    <string-array name="voiceCommands_PLAY_NEW_PLAYLIST_ALBUM">
+    <string-array name="voiceCommands_PLAY_ALBUM">
         <item>album</item>
     </string-array>
 
     //It is also the default
     <string-array name="voiceCommands_PLAY_PLAYLIST">
         <item>list</item>
-        <item>playliste</item>
+        <item>play list</item>
         <item>playlist</item>
     </string-array>
 
