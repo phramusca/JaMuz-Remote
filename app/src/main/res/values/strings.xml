@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!--FIXME NOW Submit to Weblate-->
     <string name="mainWelcomeTitle">Welcome to</string>
     <string name="applicationName" translatable="false">JaMuz</string>
     <string name="mainWelcomeYear" translatable="false">2021</string>
