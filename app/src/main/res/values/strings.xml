@@ -24,7 +24,7 @@
     <string name="globalLabelNo">No</string>
     <string name="settingsTitle">Settings</string>
     <string name="settingsServerTitle">JaMuz Server</string>
-    <string name="settingsServerTextViewIpPort" translatable="false"><![CDATA[<IP>:<Port> :]]></string>
+    <string name="settingsServerTextViewIpPort" translatable="false"><![CDATA[<IP>:<Port>:]]></string>
     <string name="settingsServerDefaultConnectionString" translatable="false">192.168.0.16:2013</string>
     <string name="settingsServerButtonSave">Save</string>
     <string name="settingsServerButtonScanQR">Scan QR</string>
@@ -38,7 +38,7 @@
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Allow track edition</string>
     <string name="settingsKidsPlaceCheckBoxOnStartup">Start Kids Place with JaMuz</string>
     <string name="settingsLocalFilesTextViewTitle">Local tracks</string>
-    <string name="settingsLocalFilesTextViewHelp"><html>You can add tracks to library from a local path. <br/> Warning: Those local tracks will NOT be synced with Jamuz Server! It is highly recommended to instead use JaMuz Server to get your tracks!</html></string>
+    <string name="settingsLocalFilesTextViewHelp"><html>You can add tracks to library from a local path.<br/>Warning: Those local tracks will NOT be synced with the JaMuz Server, so instead using that to get your tracks is highly recommended!</html></string>
     <string name="settingsLocalFilesTextViewPath">Path:</string>
     <string name="settingsLocalFilesButtonChoose">Choose</string>
     <string name="settingsDirectoryChooserButtonNewFolder">New folder</string>
@@ -96,7 +96,7 @@
     <string name="permissionMsg_2">, please consider allowing permissions that you will be asked for:</string>
     <string name="permissionMsg_3">Multimedia files</string>
     <string name="permissionMsg_4">: Allows the app to:</string>
-    <string name="permissionMsg_5">- Write files received from JaMuz to an app folder on an external SD card</string>
+    <string name="permissionMsg_5">- Write files received from JaMuz to an app folder on an external SD card.</string>
     <string name="permissionMsg_6">- Read-only user selected folder on an external SD card.</string>
     <string name="permissionMsg_7">- Store database in JaMuz folder on the internal SD card</string>
     <string name="permissionMsg_8">Phone calls</string>
@@ -108,9 +108,10 @@
     <string name="adapterCursorAlbumLabelTracks">track(s)</string>
 
     <string name="activityAlbumsLoading">Loading album list…</string>
-    <string name="activityAlbumsLoadingPleaseWait">Please wait a few seconds.</string>
+    <string name="activityAlbumsLoadingPleaseWait">Please wait a few seconds…</string>
+
     <string name="audioPlayerToastRgBaseVolTooHigh">Base volume too high.</string>
-    <string name="audioPlayerToastRgConsiderLower">If you see this message too often, please consider lower it in the settings! (It may be is a single file issue)</string>
+    <string name="audioPlayerToastRgConsiderLower">If you see this message too often you can lower it in the settings. (One file may be the problem.)</string>
     <string name="globalLabelBefore">before</string>
     <string name="serviceScanNotifyCleaningDatabase">Cleaning database…</string>
     <string name="serviceScanNotifyDatabaseUpdated">Database updated.</string>
@@ -122,7 +123,7 @@
     <string name="serviceSyncNotifySyncDownloaded">Downloaded:</string>
     <string name="serviceSyncNotifySyncRemaning">Remaning:</string>
     <string name="serviceSyncNotifySyncCompleteNoDownloads">Synced. No downloads.</string>
-    <string name="serviceSyncNotifySyncUserStopped">User stopped.</string>
+    <string name="serviceSyncNotifySyncUserStopped">User stopped playback.</string>
     <string name="serviceSyncNotifySyncRemovingDeleted">Removing deleted files…</string>
     <string name="serviceSyncNotifySyncCheckComplete">Check complete.</string>
     <string name="serviceSyncNotifySyncInterrupted">Interrupted.</string>
