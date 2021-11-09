@@ -90,4 +90,8 @@
     <string name="serviceSyncNotifySyncUserStopped">Bruker stoppet.</string>
     <string name="serviceSyncNotifySyncRemovingDeleted">Fjerner slettede filer …</string>
     <string name="serviceSyncNotifySyncRemaning">Gjenstår:</string>
+    <string name="serviceSyncNotifySyncChecking">Sjekker</string>
+    <string name="serviceSyncNotifySyncCheckingSuffix">filer …</string>
+    <string name="serviceSyncNotifySyncReceived">Mottatt</string>
+    <string name="serviceSyncNotifySyncReceivedSuffix">filantall …</string>
 </resources>
