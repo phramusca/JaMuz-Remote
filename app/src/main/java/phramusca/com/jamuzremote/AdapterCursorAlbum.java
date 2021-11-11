@@ -43,11 +43,8 @@ public class AdapterCursorAlbum extends AdapterCursor<AdapterLoad.UserViewHolder
     }
 
     @Override
-    public void onBindViewHolder(AdapterLoad.UserViewHolder viewHolder, Cursor cursor, int position) {
+    public void onBindViewHolder(AdapterLoad.UserViewHolder userViewHolder, Cursor cursor, int position) {
         AdapterListItemAlbum adapterListItemAlbum = AdapterListItemAlbum.fromCursor(cursor);
-
-        @SuppressWarnings("UnnecessaryLocalVariable")
-        AdapterLoad.UserViewHolder userViewHolder = (AdapterLoad.UserViewHolder) viewHolder;
 
         userViewHolder.item_line1.setText(adapterListItemAlbum.getAlbum());
         if(!searchQuery.isEmpty()) {
@@ -86,11 +83,8 @@ public class AdapterCursorAlbum extends AdapterCursor<AdapterLoad.UserViewHolder
         new Thread(() -> {
             Bitmap readBitmap = RepoCovers.getCoverIcon(adapterListItemAlbum.getCoverHash(), adapterListItemAlbum.getPath(), RepoCovers.IconSize.THUMB, true);
             if (readBitmap != null) {
-                Bitmap finalReadBitmap = readBitmap;
-                new Handler(Looper.getMainLooper()).post(() -> userViewHolder.imageViewCover.setImageBitmap(finalReadBitmap));
+                new Handler(Looper.getMainLooper()).post(() -> userViewHolder.imageViewCover.setImageBitmap(readBitmap));
             }
-            //FIXME NOW if readBitmap still null, get a path with status=REC
-            //  Would be better to directly have a proper path (status=REC)
         }).start();
     }
 
