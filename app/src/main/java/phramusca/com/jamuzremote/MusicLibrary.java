@@ -651,14 +651,17 @@ public class MusicLibrary {
     Cursor getAlbums(String search) {
         Cursor cursor = null;
         try {
-            String query = "SELECT count(" + COL_ID_REMOTE + ") AS " + COL_PLAY_COUNTER + ", \n" + //NON-NLS //NON-NLS //NON-NLS
+            String query = "SELECT status, count(" + COL_ID_REMOTE + ") AS " + COL_PLAY_COUNTER + ", \n" + //NON-NLS //NON-NLS //NON-NLS
                     "round(avg(" + COL_RATING + "), 2) AS " + COL_RATING + ", \n" + //NON-NLS //NON-NLS //NON-NLS
                     "group_concat(distinct " + COL_GENRE + ") AS " + COL_GENRE + ", \n" + //NON-NLS //NON-NLS //NON-NLS //NON-NLS
                     "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + " \n" + //NON-NLS //NON-NLS
                     ", " + COL_ALBUM + //NON-NLS
                     ", " + COL_COVER_HASH + //NON-NLS
                     ", " + COL_PATH + //NON-NLS //NON-NLS //NON-NLS
-                    " FROM tracks \n" //NON-NLS
+                            //FIXME This works in DB Browser (sqlite 3.31.1) but not in android (there it takes the last track of each album)
+                    //https://stackoverflow.com/questions/2421189/version-of-sqlite-used-in-android
+                    //select sqlite_version()
+                    " FROM (SELECT * FROM tracks ORDER BY status DESC) \n" //NON-NLS
                     + (search.isEmpty()?"":" WHERE (" + COL_ALBUM + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS //NON-NLS
                         "OR " + COL_ARTIST + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS
                         "OR " + COL_ALBUM_ARTIST + " LIKE \"%"+search+"%\" " + //NON-NLS
