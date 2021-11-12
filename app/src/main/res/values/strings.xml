@@ -10,7 +10,7 @@
     <string name="mainToastClientInfoPort">Port</string>
     <string name="mainToastClientInfoEx">Ex:</string>
     <string name="mainToastCheckWifiConnection">You must connect to WiFi network.</string>
-    <string name="mainToastQRread">QR code read. New configuration set.</string>
+    <string name="mainToastQR">QR code read.\nNew configuration set.</string>
     <string name="mainToastEmptyPlaylist">Empty Playlist.</string>
     <string name="mainToastNoTracksBeyond">No tracks beyond.</string>
     <string name="mainToastNotImplemented">Not implemented.</string>
@@ -24,7 +24,7 @@
     <string name="settingsServerTitle">JaMuz Server</string>
     <string name="settingsServerTextViewIpPort" translatable="false"><![CDATA[<IP>:<Port> :]]></string>
     <string name="settingsServerDefaultConnectionString" translatable="false">192.168.0.16:2013</string>
-    <string name="settingsServerButonSave">Save</string>
+    <string name="settingsServerButtonSave">Save</string>
     <string name="settingsServerButtonScanQR">Scan QR</string>
     <string name="settingsServerToastProblemQR">Problem reading QR code.</string>
     <string name="settingsReplayGainTextViewBaseVolume">Base volume:</string>
@@ -55,7 +55,7 @@
     <string name="playlistLabelHistory">History</string>
     <string name="playlistLabelUser">User</string>
     <string name="playlistLabelSaved">saved</string>
-    <string name="playlistLabelrestored">restored</string>
+    <string name="playlistLabelRestored">restored</string>
     <string name="playlistLabelSuccessfully">successfully.</string>
     <string name="playlistLabelWithErrors">with errors!</string>
     <string name="playlistLabelNewName">New playlist name</string>
@@ -111,7 +111,7 @@
     <string name="serviceSyncNotifySyncAll">All</string>
     <string name="serviceSyncNotifySyncSuccess">files have been downloaded successfully.</string>
     <string name="serviceSyncNotifySyncDownloaded">Downloaded:</string>
-    <string name="serviceSyncNotifySyncRemaning">Remaning:</string>
+    <string name="serviceSyncNotifySyncRemaining">Remaining:</string>
     <string name="serviceSyncNotifySyncCompleteNoDownloads">Synchronization complete. No downloads.</string>
     <string name="serviceSyncNotifySyncUserStopped">User stopped.</string>
     <string name="serviceSyncNotifySyncRemovingDeleted">Removing deleted files…</string>

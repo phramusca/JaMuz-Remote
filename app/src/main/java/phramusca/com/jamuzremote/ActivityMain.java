@@ -548,7 +548,7 @@ public class ActivityMain extends AppCompatActivity {
                         .append(" \"")
                         .append(localSelectedPlaylist.getName())
                         .append("\" ")
-                        .append(getString(R.string.playlistLabelrestored));
+                        .append(getString(R.string.playlistLabelRestored));
                 HelperFile.createFolder(getString(R.string.mainDefaultPlaylistsFolderName));
                 Playlist playlist = readPlaylist(localSelectedPlaylist.getName() + ".plli");
                 if (playlist != null) {
@@ -1455,7 +1455,7 @@ public class ActivityMain extends AppCompatActivity {
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString("connectionString", content);
                 editor.apply();
-                Toast.makeText(this, R.string.mainToastQRread, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.mainToastQR, Toast.LENGTH_LONG).show();
                 buttonRemote.setEnabled(true);
                 buttonSync.setEnabled(true);
             }

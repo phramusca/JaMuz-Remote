@@ -65,12 +65,12 @@
     <string name="serviceSyncNotifySyncCheckComplete">Sjekk fullført.</string>
     <string name="playlistLabelUser">Bruker</string>
     <string name="playlistLabelWithErrors">med feil.</string>
-    <string name="settingsServerButonSave">Lagre</string>
+    <string name="settingsServerButtonSave">Lagre</string>
     <string name="serviceSyncNotifySyncAll">Alle</string>
     <string name="globalLabelCancel">Avbryt</string>
     <string name="settingsLocalFilesTextViewTitle">Lokale spor</string>
     <string name="playlistLabelSaved">lagret</string>
-    <string name="playlistLabelrestored">gjenopprettet.</string>
+    <string name="playlistLabelRestored">gjenopprettet.</string>
     <string name="globalLabelOK">OK</string>
     <string name="globalLabelNo">Nei</string>
     <string name="playlistLabelSuccessfully">.</string>
@@ -88,7 +88,7 @@
     <string name="serviceSyncNotifySyncTitle">Synkroniser</string>
     <string name="serviceSyncNotifySyncUserStopped">Bruker stoppet.</string>
     <string name="serviceSyncNotifySyncRemovingDeleted">Fjerner slettede filer …</string>
-    <string name="serviceSyncNotifySyncRemaning">Gjenstår:</string>
+    <string name="serviceSyncNotifySyncRemaining">Gjenstår:</string>
     <string name="serviceSyncNotifySyncChecking">Sjekker</string>
     <string name="serviceSyncNotifySyncCheckingSuffix">filer …</string>
     <string name="serviceSyncNotifySyncReceived">Mottatt</string>
@@ -101,7 +101,7 @@
     <string name="mainToastClientInfoPort">Port</string>
     <string name="mainToastClientInfoEx">Eks:</string>
     <string name="mainToastCheckWifiConnection">Du må koble til et Wi-Fi-nettverk.</string>
-    <string name="mainToastQRread">QR-kode lest. Nytt oppsett satt.</string>
+    <string name="mainToastQR">QR-kode lest.\nNytt oppsett satt.</string>
     <string name="mainToastEmptyPlaylist">Tom spilleliste.</string>
     <string name="mainToastNoTracksBeyond">Ingen flere spor.</string>
     <string name="mainToastNotImplemented">Ikke implementert.</string>

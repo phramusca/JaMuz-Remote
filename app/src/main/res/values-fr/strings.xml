@@ -7,7 +7,7 @@
     <string name="globalLabelNo">Non</string>
     <string name="settingsTitle">Paramètres</string>
     <string name="settingsServerTitle">Serveur JaMuz</string>
-    <string name="settingsServerButonSave">Enregistrer</string>
+    <string name="settingsServerButtonSave">Enregistrer</string>
     <string name="settingsServerButtonScanQR">Lire QR</string>
     <string name="settingsReplayGainTextViewBaseVolume">Volume de base :</string>
     <string name="settingsKidsPlaceTextViewTitle">Kids Place</string>
@@ -35,7 +35,7 @@
     <string name="playlistLabelHistory">Historique</string>
     <string name="playlistLabelUser">Utilisateur</string>
     <string name="playlistLabelSaved">a été enregistrée</string>
-    <string name="playlistLabelrestored">a été restaurée</string>
+    <string name="playlistLabelRestored">a été restaurée</string>
     <string name="playlistLabelSuccessfully">avec succès.</string>
     <string name="playlistLabelWithErrors">avec des erreurs !</string>
     <string name="playlistLabelNewName">Nom de la nouvelle liste de lecture</string>
@@ -73,7 +73,7 @@
     <string name="mainToastClientInfoPort">Port</string>
     <string name="mainToastClientInfoEx">Ex :</string>
     <string name="mainToastCheckWifiConnection">Vous devez vous connecter au réseau Wi-Fi.</string>
-    <string name="mainToastQRread">Code QR lu. Nouvelle configuration appliquée.</string>
+    <string name="mainToastQR">Code QR lu\nNouvelle configuration appliquée.</string>
     <string name="mainToastEmptyPlaylist">Liste de lecture vide.</string>
     <string name="mainToastNoTracksBeyond">Pas de piste précédente.</string>
     <string name="mainToastNotImplemented">Non implémenté.</string>
@@ -105,7 +105,7 @@
     <string name="serviceSyncNotifySyncAll">Tous les</string>
     <string name="serviceSyncNotifySyncSuccess">fichiers ont été téléchargés avec succès.</string>
     <string name="serviceSyncNotifySyncDownloaded">Téléchargé :</string>
-    <string name="serviceSyncNotifySyncRemaning">Restant :</string>
+    <string name="serviceSyncNotifySyncRemaining">Restant :</string>
     <string name="serviceSyncNotifySyncCompleteNoDownloads">Synchronisation complète. Pas de téléchargements.</string>
     <string name="serviceSyncNotifySyncUserStopped">Arrêt Utilisateur.</string>
     <string name="serviceSyncNotifySyncRemovingDeleted">Suppression des fichiers effacés…</string>
