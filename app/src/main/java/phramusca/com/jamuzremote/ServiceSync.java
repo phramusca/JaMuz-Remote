@@ -434,7 +434,7 @@ public class ServiceSync extends ServiceBase {
             } else {
                 builder.append(getString(R.string.serviceSyncNotifySyncDownloaded))
                         .append(" ").append(nbFilesStart - remaining).append(". ")
-                        .append(getString(R.string.serviceSyncNotifySyncRemaning))
+                        .append(getString(R.string.serviceSyncNotifySyncRemaining))
                         .append(" ").append(remaining).append(".");
             }
             String finalToastMsg = builder.toString();
