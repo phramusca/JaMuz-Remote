@@ -136,6 +136,14 @@ public class ServiceSync extends ServiceBase {
 //                2021-11-12 21:20:01.443  RepoSync.getNotSyncedList() :2034 ms                   20s
 //                2021-11-12 21:20:01.444  TOTAL Sync :335265 ms                                  5 minutes 35s
 
+//                2021-11-12 22:21:17.157  RepoSync.read() :44403 ms                              44s
+//                2021-11-12 22:22:03.572  requestMerge() :46110 ms                               46s
+//                2021-11-12 22:22:45.949  checkFiles(Track.Status.NEW) :42377 ms                 42s
+//                2021-11-12 22:22:46.061  startDownloads(RepoSync.getDownloadList()) :           112 ms
+//                2021-11-12 22:25:38.526  checkFiles(Track.Status.INFO) :172464 ms               2 minutes 52s
+//                2021-11-12 22:25:40.360  RepoSync.getNotSyncedList() :1833 ms                   2s
+//                2021-11-12 22:25:40.361  TOTAL Sync :307609 ms                                  5 minutes 8s
+
                 startTime = System.currentTimeMillis();
                 checkAbort();
                 requestMerge();
