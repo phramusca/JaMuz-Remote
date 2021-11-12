@@ -115,6 +115,27 @@ public class ServiceSync extends ServiceBase {
                 checkAbort();
                 getGenres();
 
+//                ---------------------------------------------------------------------------------------------
+//                        feature/speed-up-sync
+//                ---------------------------------------------------------------------------------------------
+//                2021-11-12 21:31:25.445  RepoSync.read() :16813 ms                              17s
+//                2021-11-12 21:32:07.889  requestMerge() :42220 ms                               42s
+//                2021-11-12 21:52:23.436  checkFiles(Track.Status.NEW) :1215547 ms               20 minutes    !!!!!!!!!!!!!!!
+//                2021-11-12 21:52:25.186  startDownloads(RepoSync.getDownloadList()) :1749 ms    2s
+//                2021-11-12 22:00:52.341  checkFiles(Track.Status.INFO) :507155 ms               8 minutes 27s !!!!!!!!!!!!!!!
+//                + getNotSyncedList is wrong since none are isSync (not updated in RepoSync.tracks)            !!!!!!!!!!!!!!!
+//
+//                ---------------------------------------------------------------------------------------------
+//                master
+//                ---------------------------------------------------------------------------------------------
+//                2021-11-12 21:15:11.725  RepoSync.read() :45542 ms                              45s
+//                2021-11-12 21:15:59.721  requestMerge() :47707 ms                               47s
+//                2021-11-12 21:16:42.914  checkFiles(Track.Status.NEW) :43192 ms                 43s
+//                2021-11-12 21:16:42.995  startDownloads(RepoSync.getDownloadList()) :           81 ms
+//                2021-11-12 21:19:59.409  checkFiles(Track.Status.INFO) :196413 ms               3 minutes 16s
+//                2021-11-12 21:20:01.443  RepoSync.getNotSyncedList() :2034 ms                   20s
+//                2021-11-12 21:20:01.444  TOTAL Sync :335265 ms                                  5 minutes 35s
+
                 startTime = System.currentTimeMillis();
                 checkAbort();
                 requestMerge();
