@@ -14,6 +14,9 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.COL_SIZE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_STATUS;
 
 import android.database.Cursor;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -56,6 +59,31 @@ public final class RepoSync {
                 tracks.put(idFileServer, Track.Status.valueOf(status), tracksCursor.getPosition());
             } while (tracksCursor.moveToNext());
         }
+
+        // DO NOT FIXME: Try converting Cursor to ContentValues)
+        // => TAKES WAY TOO LONG AND MEMORY LEAK
+        //  -> it can be modified and use for db insert/update
+        //      so could be used in a RepoTrack and RepoAlbums maybe
+        //  -> no need for AdapterCursorAlbumTrack.newStatuses
+        //  https://stackoverflow.com/a/8709408/755759
+
+//        java.lang.OutOfMemoryError: Failed to allocate a 44 byte allocation with 2952456 free bytes and 2MB until OOM; failed due to fragmentation (required continguous free 4096 bytes for a new buffer where largest contiguous free 0 bytes)
+//        at java.util.HashMap.inflateTable(HashMap.java:287)
+//        at java.util.HashMap.put(HashMap.java:419)
+//        at android.content.ContentValues.put(ContentValues.java:96)
+//        at android.database.DatabaseUtils.cursorRowToContentValues(DatabaseUtils.java:740)
+//        at phramusca.com.jamuzremote.RepoSync.read(RepoSync.java:32)
+        Cursor c = HelperLibrary.musicLibrary.getTracksCursor(true, "WHERE status!=\"" + Track.Status.LOCAL.name() + "\"", "", "", -1);
+        ArrayList<ContentValues> retVal = new ArrayList<ContentValues>();
+        ContentValues map;
+        if(c.moveToFirst()) {
+            do {
+                map = new ContentValues();
+                DatabaseUtils.cursorRowToContentValues(c, map);
+                retVal.add(map);
+            } while(c.moveToNext());
+        }
+        c.close();
     }
 
     /**
