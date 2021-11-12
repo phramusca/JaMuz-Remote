@@ -27,7 +27,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.CallableStatement;
 
 public class ClientReception extends ProcessAbstract {
 
@@ -55,7 +54,7 @@ public class ClientReception extends ProcessAbstract {
                 String msg = bufferedReader.readLine();
                 if (msg == null) {
                     Log.d(TAG, "RECEIVED null"); //NON-NLS
-                    callback.onDisconnected(mContext.getString(R.string.clientREceptionToastSocketClosed));
+                    callback.onDisconnected(mContext.getString(R.string.clientReceptionToastSocketClosed));
                 } else if (msg.startsWith("JSON_")) { //NON-NLS
                     callback.onReceivedJson(msg.substring(5));
                 } else if (msg.equals("SENDING_COVER")) { //NON-NLS

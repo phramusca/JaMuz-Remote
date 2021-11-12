@@ -121,7 +121,7 @@ public class ActivitySettings extends AppCompatActivity {
         kidsplaceAllowAddNewDel.setChecked(
                 preferences.getBoolean("kidsplaceAllowAddNewDel", false));
 
-        Spinner kidsplaceLimitPlaylist = findViewById(R.id.kidsplaceLimitPlaylist);
+        Spinner kidsplaceLimitPlaylist = findViewById(R.id.kidsPlaceLimitPlaylist);
         CheckBox kidsplaceLimit = findViewById(R.id.settingsCheckBoxKidsPlaceLimit);
         kidsplaceLimit.setOnCheckedChangeListener(
                 (buttonView, isChecked) ->
