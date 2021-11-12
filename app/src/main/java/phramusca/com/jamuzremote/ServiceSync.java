@@ -325,9 +325,6 @@ public class ServiceSync extends ServiceBase {
         private void requestMerge() throws JSONException, ServerException, IOException {
             helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncPreparingMerge));
             List<Track> tracks = RepoSync.getMergeList();
-            for (Track track : tracks) {
-                track.getTags(true);
-            }
             OkHttpClient client = new OkHttpClient.Builder()
                     .readTimeout(Math.min(Math.max(tracks.size(), 30), 600), TimeUnit.SECONDS) //Between 30s and 10min
                     .build();
@@ -335,6 +332,7 @@ public class ServiceSync extends ServiceBase {
             obj.put("type", "FilesToMerge");
             JSONArray filesToMerge = new JSONArray();
             for (Track track : tracks) {
+                track.getTags(true);
                 filesToMerge.put(track.toJSONObject());
             }
             obj.put("files", filesToMerge); //NON-NLS

@@ -44,6 +44,9 @@ import android.database.sqlite.SQLiteStatement;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -118,6 +121,21 @@ public class MusicLibrary {
         List<Track> tracks = getTracks(cursor, statsOnly);
         if (limit > 0) {
             Collections.shuffle(tracks);
+        }
+        if (cursor != null) {
+            cursor.close();
+        }
+        return tracks;
+    }
+
+    Table<Integer, Track.Status, Track> getTracksTable(String where) {
+        Cursor cursor = getTracksCursor(true, where, "", "", -1);
+        Table<Integer, Track.Status, Track> tracks = HashBasedTable.create();
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                Track track = cursorToTrack(cursor, true);
+                tracks.put(track.getIdFileServer(), track.getStatus(), track);
+            } while (cursor.moveToNext());
         }
         if (cursor != null) {
             cursor.close();
