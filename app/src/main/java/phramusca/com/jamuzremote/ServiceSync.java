@@ -1,12 +1,19 @@
 package phramusca.com.jamuzremote;
 
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_REMOTE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PATH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_SIZE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_STATUS;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.wifi.WifiManager;
 import android.os.PowerManager;
 import android.util.Log;
+import android.util.Pair;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -310,23 +317,13 @@ public class ServiceSync extends ServiceBase {
 
         private void requestMerge() throws JSONException, ServerException, IOException {
             helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncPreparingMerge));
-            List<Track> tracks = RepoSync.getMergeList();
-            for (Track track : tracks) {
-                track.getTags(true);
-            }
+            Pair<Integer, String> pair = RepoSync.getMergeList(getAppDataPath);
             OkHttpClient client = new OkHttpClient.Builder()
-                    .readTimeout(Math.min(Math.max(tracks.size(), 30), 600), TimeUnit.SECONDS) //Between 30s and 10min
+                    .readTimeout(Math.min(Math.max(pair.first, 30), 600), TimeUnit.SECONDS) //Between 30s and 10min
                     .build();
-            JSONObject obj = new JSONObject();
-            obj.put("type", "FilesToMerge");
-            JSONArray filesToMerge = new JSONArray();
-            for (Track track : tracks) {
-                filesToMerge.put(track.toJSONObject());
-            }
-            obj.put("files", filesToMerge); //NON-NLS
             HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files"); //NON-NLS
             Request request = clientInfo.getRequestBuilder(urlBuilder) //NON-NLS
-                    .post(RequestBody.create(obj.toString(), MediaType.parse("application/json; charset=utf-8"))).build(); //NON-NLS
+                    .post(RequestBody.create(pair.second, MediaType.parse("application/json; charset=utf-8"))).build(); //NON-NLS
             helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRequestingMerge));
             String body = clientInfo.getBodyString(request, client);
             helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncUpdateDatabase)); //NON-NLS

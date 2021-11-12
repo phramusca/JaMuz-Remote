@@ -1,18 +1,37 @@
 package phramusca.com.jamuzremote;
 
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ADDED_DATE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_GENRE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_PATH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_REMOTE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_SERVER;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LAST_PLAYED;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LENGTH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PATH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PLAY_COUNTER;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_SIZE;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_STATUS;
 
 import android.database.Cursor;
 import android.util.Log;
+import android.util.Pair;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 
 /**
  * @author phramusca
@@ -109,12 +128,33 @@ public final class RepoSync {
         return list;
     }
 
-    public synchronized static List<Track> getMergeList() {
-        List<Track> list = new ArrayList<>();
+    public synchronized static Pair<Integer, String> getMergeList() throws JSONException {
+        Collection<Integer> mergeList = tracks.column(Track.Status.REC).values();
+        JSONArray filesToMerge = new JSONArray();
         for(int position : tracks.column(Track.Status.REC).values()) {
-            list.add(getTrack(position));
+            if (tracksCursor.moveToPosition(position)) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("idFile", tracksCursor.getInt(tracksCursor.getColumnIndex(COL_ID_SERVER))); //NON-NLS
+                jsonObject.put("path", tracksCursor.getString(tracksCursor.getColumnIndex(COL_PATH)).substring(getAppDataPath.getAbsolutePath().length() + 1)); //NON-NLS
+                jsonObject.put("rating", (int) tracksCursor.getDouble(tracksCursor.getColumnIndex(COL_RATING))); //NON-NLS
+                jsonObject.put("addedDate", tracksCursor.getString(tracksCursor.getColumnIndex(COL_ADDED_DATE)));
+                jsonObject.put("lastPlayed", tracksCursor.getString(tracksCursor.getColumnIndex(COL_LAST_PLAYED))); //NON-NLS
+                jsonObject.put("playCounter", tracksCursor.getInt(tracksCursor.getColumnIndex(COL_PLAY_COUNTER))); //NON-NLS
+                jsonObject.put("genre", tracksCursor.getString(tracksCursor.getColumnIndex(COL_GENRE))); //NON-NLS
+                JSONArray tagsAsMap = new JSONArray();
+                //FIXME: Get tags in tracksCursor (csv group_concat(tag) => List<String>) to avoid another db query
+                List<String> tags = HelperLibrary.musicLibrary.getTags(tracksCursor.getInt(tracksCursor.getColumnIndex(COL_ID_REMOTE)));
+                for (String tag : tags) { //NON-NLS
+                    tagsAsMap.put(tag);
+                }
+                jsonObject.put("tags", tagsAsMap); //NON-NLS
+                filesToMerge.put(jsonObject);
+            }
         }
-        return list;
+        JSONObject obj = new JSONObject();
+        obj.put("type", "FilesToMerge");
+        obj.put("files", filesToMerge); //NON-NLS
+        return new Pair<>(mergeList.size(), obj.toString());
     }
 
     public synchronized static List<Track> getNotSyncedList() {
