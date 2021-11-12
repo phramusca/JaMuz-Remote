@@ -658,9 +658,8 @@ public class MusicLibrary {
                     ", " + COL_ALBUM + //NON-NLS
                     ", " + COL_COVER_HASH + //NON-NLS
                     ", " + COL_PATH + //NON-NLS //NON-NLS //NON-NLS
-                            //FIXME This works in DB Browser (sqlite 3.31.1) but not in android (there it takes the last track of each album)
-                    //https://stackoverflow.com/questions/2421189/version-of-sqlite-used-in-android
-                    //select sqlite_version()
+                    // FIXME This works in DB Browser (sqlite 3.31.1) but not in android (there it takes the last track of each album)
+                    //  https://stackoverflow.com/questions/69943141/sqlite-group-by-and-order
                     " FROM (SELECT * FROM tracks ORDER BY status DESC) \n" //NON-NLS
                     + (search.isEmpty()?"":" WHERE (" + COL_ALBUM + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS //NON-NLS
                         "OR " + COL_ARTIST + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS

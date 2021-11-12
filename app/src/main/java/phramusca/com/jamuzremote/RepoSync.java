@@ -1,5 +1,10 @@
 package phramusca.com.jamuzremote;
 
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_SERVER;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_STATUS;
+
+import android.database.Cursor;
 import android.util.Log;
 
 import com.google.common.collect.HashBasedTable;
@@ -13,19 +18,33 @@ import java.util.List;
  * @author phramusca
  */
 public final class RepoSync {
-
     private static final String TAG = RepoSync.class.getName();
 
-    private static Table<Integer, Track.Status, Track> tracks = null;
+    private static Table<Integer, Track.Status, Integer> tracks = null;
+    private static Cursor tracksCursor;
 
     protected synchronized static void read() {
-        //FIXME for merge (and other as needed): Cursor to json : https://stackoverflow.com/questions/13070791/android-cursor-to-jsonarray
-        //FIXME getTracks to return HashBasedTable to speed up a bit
         tracks = HashBasedTable.create();
-        List<Track> newTracks = HelperLibrary.musicLibrary.getTracks(true, "WHERE status!=\"" + Track.Status.LOCAL.name() + "\"", "", "", -1); //NON-NLS
-        for (Track track : newTracks) {
-            tracks.put(track.getIdFileServer(), track.getStatus(), track);
+        tracksCursor = HelperLibrary.musicLibrary.getTracksCursor(true,
+                "WHERE status!=\"" + Track.Status.LOCAL.name() + "\"",
+                "",
+                "",
+                -1);
+        if (tracksCursor != null && tracksCursor.moveToFirst()) {
+            do {
+                int idFileServer = tracksCursor.getInt(tracksCursor.getColumnIndex(COL_ID_SERVER));
+                String status = tracksCursor.getString(tracksCursor.getColumnIndex(COL_STATUS));
+                tracks.put(idFileServer, Track.Status.valueOf(status), tracksCursor.getPosition());
+            } while (tracksCursor.moveToNext());
         }
+    }
+
+    public static Track getTrack(int position) {
+        Track track = null;
+        if (tracksCursor.moveToPosition(position)) {
+            track = HelperLibrary.musicLibrary.cursorToTrack(tracksCursor, true);
+        }
+        return track;
     }
 
     /**
@@ -68,32 +87,40 @@ public final class RepoSync {
     }
 
     public synchronized static void update(Track track) {
-        if (tracks != null) {
-            if (tracks.containsRow(track.getIdFileServer())) {
-                tracks.row(track.getIdFileServer()).clear();
-            }
-            tracks.put(track.getIdFileServer(), track.getStatus(), track);
+        if (tracks != null && tracks.containsRow(track.getIdFileServer())) {
+            int position = tracks.row(track.getIdFileServer()).values().iterator().next();
+            tracks.row(track.getIdFileServer()).clear();
+            tracks.put(track.getIdFileServer(), track.getStatus(), position);
         }
     }
 
     public synchronized static Track getFile(int i) {
         if (tracks.containsRow(i)) {
-            return tracks.row(i).values().iterator().next();
+            return getTrack(tracks.row(i).values().iterator().next());
         }
         return null;
     }
 
     public synchronized static List<Track> getDownloadList() {
-        return new ArrayList<>(tracks.column(Track.Status.NEW).values());
+        List<Track> list = new ArrayList<>();
+        for(int position : tracks.column(Track.Status.NEW).values()) {
+            list.add(getTrack(position));
+        }
+        return list;
     }
 
     public synchronized static List<Track> getMergeList() {
-        return new ArrayList<>(tracks.column(Track.Status.REC).values());
+        List<Track> list = new ArrayList<>();
+        for(int position : tracks.column(Track.Status.REC).values()) {
+            list.add(getTrack(position));
+        }
+        return list;
     }
 
     public synchronized static List<Track> getNotSyncedList() {
         List<Track> trackList = new ArrayList<>();
-        for (Track track : tracks.values()) {
+        for (int position : tracks.values()) {
+            Track track = getTrack(position);
             if (!track.isSync()) {
                 trackList.add(track);
             }
