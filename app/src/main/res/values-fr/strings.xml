@@ -1,35 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-
     <string name="mainWelcomeTitle">Bienvenue dans</string>
-
     <string name="globalLabelOK">OK</string>
     <string name="globalLabelCancel">Annuler</string>
     <string name="globalLabelYes">Oui</string>
     <string name="globalLabelNo">Non</string>
-
     <string name="settingsTitle">Paramètres</string>
-
     <string name="settingsServerTitle">Serveur JaMuz</string>
-    <string name="settingsServerButonSave">Sauver</string>
+    <string name="settingsServerButonSave">Enregistrer</string>
     <string name="settingsServerButtonScanQR">Lire QR</string>
-
-    <string name="settingsReplayGainTextViewBaseVolume">Volume de base :</string>
-
+    <string name="settingsReplayGainTextViewBaseVolume">Volume de base :</string>
     <string name="settingsKidsPlaceTextViewTitle">Kids Place</string>
     <string name="settingsKidsPlaceTextViewHelp">Kids Place est une application tierce de kiddoware qui peut être trouvée sur l\'Android Play Store.</string>
-    <string name="settingsKidsPlaceCheckBoxLimit">Limiter à cette liste de lecture:</string>
+    <string name="settingsKidsPlaceCheckBoxLimit">Limiter à cette liste de lecture :</string>
     <string name="settingsKidsPlaceCheckBoxAllowDeleteSaveNew">Autorisation de supprimer, sauver et créér une liste de lecture</string>
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Autoriser l\'édition des pistes</string>
     <string name="settingsKidsPlaceCheckBoxOnStartup">Lancer Kids Place avec JaMuz</string>
-
     <string name="settingsLocalFilesTextViewTitle">Pistes locales</string>
-    <string name="settingsLocalFilesTextViewHelp"><html>Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local.<br />ATTENTION : Les pistes locales ne seront PAS synchronisées avec JaMuz Server ! Il est fortement recommandé d\'utiliser plutôt JaMuz Server pour télécharger vos pistes !</html></string>
-    <string name="settingsLocalFilesTextViewPath">Chemin :</string>
+    <string name="settingsLocalFilesTextViewHelp"><html>Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local.<br/>ATTENTION : Les pistes locales ne seront PAS synchronisées avec JaMuz Server ! Il est fortement recommandé d\'utiliser plutôt JaMuz Server pour télécharger vos pistes !</html></string>
+    <string name="settingsLocalFilesTextViewPath">Chemin :</string>
     <string name="settingsLocalFilesButtonChoose">Choisir</string>
     <string name="settingsDirectoryChooserButtonNewFolder">Nouveau dossier</string>
     <string name="settingsDirectoryChooserNewFolderName">Nom du nouveau dossier</string>
-
     <string name="playlistTextViewExcludeTheLast">Exclure les </string>
     <string-array name="limitUnits">
         <item>dernières minutes</item>
@@ -38,8 +30,7 @@
         <item>derniers mois</item>
         <item>dernières années</item>
     </string-array>
-    <string name="playlistTextViewOrderBy">Trier par:</string>
-
+    <string name="playlistTextViewOrderBy">Trier par :</string>
     <string name="playlistLabel">La liste de Lecture</string>
     <string name="playlistLabelHistory">Historique</string>
     <string name="playlistLabelUser">Utilisateur</string>
@@ -50,122 +41,114 @@
     <string name="playlistLabelNewName">Nom de la nouvelle liste de lecture</string>
     <string name="playlistLabelAlreadyExists">existe déjà.</string>
     <string name="playlistLabelQuestionDeleteTitle">Supprimer la liste de lecture ?</string>
-    <string name="playlistLabelQuestionDelete">Etes vous sur de vouloir supprimer la liste de lecture</string>
-    <string name="playlistLabelQuestionDeleteSuffix">" ?"</string>
+    <string name="playlistLabelQuestionDelete">Êtes-vous sûr(e) de vouloir supprimer la liste</string>
+    <string name="playlistLabelQuestionDeleteSuffix">de lecture \?</string>
     <string name="playlistLabelCannotDeleteLastPlaylist">Vous ne pouvez pas supprimer la dernière liste de lecture.</string>
-
-    <string name="speakUnknownCommand">Commande inconnue:</string>
+    <string name="speakUnknownCommand">Commande inconnue :</string>
     <string name="speakNotFound">est introuvable.</string>
     <string name="speakArtist">L\'artiste</string>
     <string name="speakAlbum">L\'album</string>
     <string name="speakSpecifyAlbum">Spécifiez un album.</string>
     <string name="speakSpecifyArtist">Spécifiez un artiste.</string>
-
-    <string name="syncLabelReadingList">Lecture de la liste ...</string>
-    <string name="syncLabelConnecting">Connexion ...</string>
-
+    <string name="syncLabelReadingList">Lecture de la liste…</string>
+    <string name="syncLabelConnecting">Connexion…</string>
     <string name="queueItemCoverDescription">Pochette</string>
-
-    <string name="permissionTitle">Attention!</string>
+    <string name="permissionTitle">Attention !</string>
     <string name="permissionMsg_1">Pour une expérience optimale de JaMuz</string>
-    <string name="permissionMsg_2">, merci de bien vouloir autoriser:</string>
+    <string name="permissionMsg_2">, merci de bien vouloir autoriser :</string>
     <string name="permissionMsg_3">Contenus multimédias</string>
-    <string name="permissionMsg_4">: Permet à l\'application de:</string>
+    <string name="permissionMsg_4">: Permet à l\'application de :</string>
     <string name="permissionMsg_5">- Enregistrer les fichiers reçus depuis JaMuz vers la carte SD externe</string>
     <string name="permissionMsg_6">- Lecture seule du répertoire local choisi sur la carte SD externe.</string>
     <string name="permissionMsg_7">- Enregistrer la base de données dans le répertoire JaMuz sur la carte SD interne</string>
     <string name="permissionMsg_8">Gestion des appels</string>
     <string name="permissionMsg_9">: Simplement pour mettre pause et reprendre la lecture lors des appels.</string>
-
     <string name="contentAlbumsTitle">Albums</string>
     <string name="contentQueueTitle">File d\'attente</string>
     <string name="adapterCursorAlbumLabelTracks">pistes(s)</string>
     <string name="contentAlbumTracksTitle">Pistes de l\'album</string>
-    <string name="mainToastClientInfoBadFormat">Mauvais format:</string>
-    <string name="mainToastClientInfoExpected">Attendu:</string>
+    <string name="mainToastClientInfoBadFormat">Mauvais format :</string>
+    <string name="mainToastClientInfoExpected">Attendu :</string>
     <string name="mainToastClientInfoIP">IP</string>
     <string name="mainToastClientInfoPort">Port</string>
-    <string name="mainToastClientInfoEx">Ex:</string>
-    <string name="mainToastCheckWifiConnection">Vous devez vous connecter au réseau WiFi.</string>
-    <string name="mainToastQRread">QR code lu. Nouvelle configuration appliquée.</string>
+    <string name="mainToastClientInfoEx">Ex :</string>
+    <string name="mainToastCheckWifiConnection">Vous devez vous connecter au réseau Wi-Fi.</string>
+    <string name="mainToastQRread">Code QR lu. Nouvelle configuration appliquée.</string>
     <string name="mainToastEmptyPlaylist">Liste de lecture vide.</string>
     <string name="mainToastNoTracksBeyond">Pas de piste précédente.</string>
     <string name="mainToastNotImplemented">Non implémenté.</string>
     <string name="mainAlertDialogClosingApplicationTitle">Fermeture de JaMuz</string>
-    <string name="mainAlertDialogClosingApplicationMessage">Etes vous sûr de vouloir quitter et arrêter la lecture ?</string>
-    <string name="settingsServerToastProblemQR">Problème pour lire le QR code.</string>
+    <string name="mainAlertDialogClosingApplicationMessage">Êtes vous sûr(e) de vouloir quitter et arrêter la lecture \?</string>
+    <string name="settingsServerToastProblemQR">Problème pour lire le code QR.</string>
     <string name="playlistDefaultAllPlaylistName">Tous</string>
-    <string name="voicePromptCommand">Dites une commande.\n  ex: \"Note 4\", \"Suivant\" ...</string>
-    <string name="speakYourTurn">A vous</string>
+    <string name="voicePromptCommand">Dites une commande.
+\nex : « Note 4 », « Suivant »…</string>
+    <string name="speakYourTurn">À vous</string>
     <string name="speakGenre">Genre</string>
     <string name="speakUnknown">inconnu.</string>
     <string name="speakRating">Note</string>
     <string name="speakRatingIncorrect">incorrecte.</string>
-    <string name="speakTags">Tags</string>
-    <string name="speakTagsNone">Pas de tags.</string>
-    <string name="speakRatingNone">Pas de note.</string>
-    <string name="activityAlbumsLoading">Chargement de la liste des albums</string>
+    <string name="speakTags">Étiquettes</string>
+    <string name="speakTagsNone">Aucune étiquette.</string>
+    <string name="speakRatingNone">Aucune note.</string>
+    <string name="activityAlbumsLoading">Chargement de la liste des albums…</string>
     <string name="activityAlbumsLoadingPleaseWait">Merci de bien vouloir patienter quelques secondes.</string>
     <string name="settingsDirectoryChooserFailedToCreate">Erreur à la création du dossier</string>
-    <string name="settingsDirectoryChooserFailedToCreateSuffix">" ."</string>
+    <string name="settingsDirectoryChooserFailedToCreateSuffix">dossier.</string>
     <string name="audioPlayerToastRgBaseVolTooHigh">Volume de base trop haut.</string>
     <string name="audioPlayerToastRgConsiderLower">Si vous voyez ce message trop souvent, veuillez considérer de le baisser dans les paramètres ! (Il s\'agit peut être d\'un problème isolé)</string>
     <string name="globalLabelBefore">avant</string>
-    <string name="serviceScanNotifyCleaningDatabase">Nettoyage de la base de données...</string>
+    <string name="serviceScanNotifyCleaningDatabase">Nettoyage de la base de données…</string>
     <string name="serviceScanNotifyDatabaseUpdated">Base de données à jour.</string>
-    <string name="serviceScanNotifyScanningDeleted">Recherche de fichiers supprimés ...</string>
+    <string name="serviceScanNotifyScanningDeleted">Recherche de fichiers supprimés…</string>
     <string name="serviceSyncNotifyDownloadTitle">Téléchargement</string>
     <string name="serviceSyncNotifySyncComplete">Synchonisation complète.</string>
-    <string name="serviceSyncNotifySyncAll">Tout les</string>
+    <string name="serviceSyncNotifySyncAll">Tous les</string>
     <string name="serviceSyncNotifySyncSuccess">fichiers ont été téléchargés avec succès.</string>
-    <string name="serviceSyncNotifySyncDownloaded">Téléchargé:</string>
-    <string name="serviceSyncNotifySyncRemaning">Restant:</string>
+    <string name="serviceSyncNotifySyncDownloaded">Téléchargé :</string>
+    <string name="serviceSyncNotifySyncRemaning">Restant :</string>
     <string name="serviceSyncNotifySyncCompleteNoDownloads">Synchronisation complète. Pas de téléchargements.</string>
     <string name="serviceSyncNotifySyncUserStopped">Arrêt Utilisateur.</string>
-    <string name="serviceSyncNotifySyncRemovingDeleted">Suppression des fichiers effacés...</string>
-    <string name="serviceSyncNotifySyncCheckComplete">Vérification complète.</string>
+    <string name="serviceSyncNotifySyncRemovingDeleted">Suppression des fichiers effacés…</string>
+    <string name="serviceSyncNotifySyncCheckComplete">Vérification terminée.</string>
     <string name="serviceSyncNotifySyncInterrupted">Interrompu.</string>
     <string name="serviceSyncNotifySyncChecking">Vérification des fichiers</string>
-    <string name="serviceSyncNotifySyncCheckingSuffix">...</string>
+    <string name="serviceSyncNotifySyncCheckingSuffix">fichiers…</string>
     <string name="serviceSyncNotifySyncReceived">Reçu le nombre de fichiers</string>
-    <string name="serviceSyncNotifySyncReceivedSuffix">...</string>
-    <string name="serviceSyncNotifySyncReceivedTags">Reçu les tags ...</string>
-    <string name="serviceSyncNotifySyncReceivedGenres">Reçu les genres ...</string>
+    <string name="serviceSyncNotifySyncReceivedSuffix">nombre de fichiers…</string>
+    <string name="serviceSyncNotifySyncReceivedTags">Réceptions des étiquettes…</string>
+    <string name="serviceSyncNotifySyncReceivedGenres">Réceptions des genres…</string>
     <string name="serviceSyncNotifySyncPreparingMerge">Préparation de la fusion des statistiques.</string>
     <string name="serviceSyncNotifySyncRequestingMerge">Demande de fusion des statistiques.</string>
-    <string name="serviceSyncNotifySyncUpdateDatabase">Mise à jour de la base de données ....</string>
-    <string name="serviceSyncNotifySyncMergeComplete">Fusion complète.</string>
+    <string name="serviceSyncNotifySyncUpdateDatabase">Mise à jour de la base de données…</string>
+    <string name="serviceSyncNotifySyncMergeComplete">Fusion terminée.</string>
     <string name="serviceSyncNotifyDownloadAttempt">Essai</string>
     <string name="serviceSyncNotifyDownloadErrors">erreur(s).</string>
-    <string name="serviceSyncNotifyDownloadStarting">Démarrage des téléchargements...</string>
-    <string name="serviceSyncNotifyDownloadStopping">Arrêt des téléchargements ...</string>
+    <string name="serviceSyncNotifyDownloadStarting">Démarrage des téléchargements…</string>
+    <string name="serviceSyncNotifyDownloadStopping">Arrêt des téléchargements…</string>
     <string name="serviceSyncNotifyDownloadStopped">Téléchargements arrêtés.</string>
     <string name="serviceSyncNotifyDownloadWaiting">Attente de</string>
     <string name="serviceSyncNotifyDownloadBeforeAttempt">avant essai</string>
-    <string name="serviceSyncNotifySyncTitle">Sync</string>
+    <string name="serviceSyncNotifySyncTitle">Synchronisation</string>
     <string name="trackNeverPlayed">Jamais joué.</string>
     <string name="trackPlayed">Joué</string>
     <string name="trackAdded">Ajouté</string>
     <string name="playlistOrderRandom">Aléatoire</string>
     <string name="playlistOrderPlayCounter">Nombre de lectures, Dernière lecture</string>
     <string name="playlistOrderTrackNb">Numéro de piste</string>
-
     <string-array name="voiceCommands_PLAY_ARTIST_ONGOING">
         <item>artiste en cours</item>
         <item>artist en cours</item>
         <item>artiste courant</item>
     </string-array>
-
     <string-array name="voiceCommands_PLAY_ALBUM_ONGOING">
         <item>album en cours</item>
         <item>album courant</item>
     </string-array>
-
     <string-array name="voiceCommands_PLAY_ARTIST">
         <item>artiste</item>
         <item>artist</item>
     </string-array>
-
     <string-array name="voiceCommands_PLAY_ALBUM">
         <item>album</item>
     </string-array>
@@ -177,21 +160,17 @@
         <item>playliste</item>
         <item>playlist</item>
     </string-array>
-
     <string-array name="voiceCommands_SET_RATING">
         <item>noter</item>
         <item>note</item>
     </string-array>
-
     <string-array name="voiceCommands_SET_TAGS">
         <item>taguer</item>
         <item>tag</item>
     </string-array>
-
     <string-array name="voiceCommands_SET_GENRE">
         <item>genre</item>
     </string-array>
-
     <string-array name="voiceCommands_PLAYER_RESUME">
         <item>continuer</item>
         <item>continue</item>
@@ -201,21 +180,18 @@
         <item>lis</item>
         <item>lecture</item>
     </string-array>
-
     <string-array name="voiceCommands_PLAYER_NEXT">
         <item>prochaine</item>
         <item>prochain</item>
         <item>suivante</item>
         <item>suivant</item>
     </string-array>
-
     <string-array name="voiceCommands_PLAYER_PAUSE">
         <item>pause</item>
         <item>stop</item>
         <item>arrêt</item>
         <item>arrêter</item>
     </string-array>
-
     <string-array name="voiceCommands_PLAYER_PULLUP">
         <item>rejouer</item>
         <item>redémarrer</item>
@@ -224,4 +200,14 @@
         <item>poulpe</item>
     </string-array>
     <string name="mainVoiceToastNeedToInstall">Vous devez installer le moteur de reconnaissance vocale de Google pour utilser cette fonctionalité.</string>
+    <string name="clientToastAuthenticationFailed">Échec de l’authentification.</string>
+    <string name="playlistSummaryIncluded">Incl.</string>
+    <string name="coverEmptyText_MAX_8_chars">Pas de couverture</string>
+    <string name="playlistSummaryNullExcluded">nul excl.</string>
+    <string name="playlistSummaryNullIncluded">nul incl.</string>
+    <string name="clientREceptionToastSocketClosed">Socket fermé (reçu nul)</string>
+    <string name="playlistSummaryNullOnly">nul seulement</string>
+    <string name="scanNotifyScanning">« Analyse des fichiers… »</string>
+    <string name="scanTitle">Analyse</string>
+    <string name="playlistSummaryExcluded">Excl.</string>
 </resources>
