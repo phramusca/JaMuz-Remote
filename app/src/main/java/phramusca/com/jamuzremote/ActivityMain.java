@@ -17,6 +17,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -674,9 +675,17 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
+        String version = "version";
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            version = pInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
         //TODO: Use proper values
-        localTrack = new Track("albumArtist", getString(R.string.mainWelcomeYear), -1, -1,
-                -1, -1, "bitRate", "format", -1, 0, //NON-NLS
+        localTrack = new Track("albumArtist", "v"+version, -1, -1,
+                -1, -1, "bitRate", "format", -1, 5, //NON-NLS
                 getString(R.string.mainWelcomeTitle),
                 getString(R.string.mainWelcomeYear), getString(R.string.applicationName),
                 "welcomeHash", //Warning: "welcomeHash" value has a meaning
