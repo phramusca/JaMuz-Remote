@@ -174,33 +174,36 @@ public class ServiceSync extends ServiceBase {
                     int j = 0;
                     for (Track trackServer : filesMapBatch.values()) {
                         checkAbort();
-                        helperNotification.notifyBar(notificationSync, msg, 50, i + j, nbFilesServer);
+                        helperNotification.notifyBar(notificationSync, msg, 250, i + j, nbFilesServer);
                         j++;
-                        Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
-                        if (trackRemote != null) {
+                        Cursor trackCursor = RepoSync.getTrackCursor(trackServer.getIdFileServer());
+                        if (trackCursor != null) {
+                            Track.Status trackRemoteStatus = Track.Status.valueOf(trackCursor.getString(trackCursor.getColumnIndex(COL_STATUS)));
+                            String path = trackCursor.getString(trackCursor.getColumnIndex(COL_PATH));
+                            String relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length() + 1);
+
                             //FIXME: Update track for other changes too (format, metadata ...)
-                            if (trackServer.getSize() != trackRemote.getSize()
-                                    || !trackServer.getRelativeFullPath().equals(trackRemote.getRelativeFullPath())) {
-                                File file = new File(trackRemote.getPath());
+                            if (trackServer.getSize() != trackCursor.getLong(trackCursor.getColumnIndex(COL_SIZE))
+                                    || !trackServer.getRelativeFullPath().equals(relativeFullPath)) {
+                                File file = new File(path);
                                 //noinspection ResultOfMethodCallIgnored
                                 file.delete();
-                                trackServer.setIdFileRemote(trackRemote.getIdFileRemote());
+                                trackServer.setIdFileRemote(trackCursor.getInt(trackCursor.getColumnIndex(COL_ID_REMOTE)));
                                 HelperLibrary.musicLibrary.updateTrack(trackServer, false);
-
                             } else {
                                 switch (trackServer.getStatus()) {
                                     case INFO:
-                                        if (!trackRemote.getStatus().equals(Track.Status.INFO)) {
-                                            File file = new File(trackRemote.getPath());
+                                        if (!trackRemoteStatus.equals(Track.Status.INFO)) {
+                                            File file = new File(path);
                                             //noinspection ResultOfMethodCallIgnored
                                             file.delete();
                                             HelperLibrary.musicLibrary.updateStatus(trackServer);
                                         }
                                         break;
                                     case NEW:
-                                        if (trackRemote.getStatus().equals(Track.Status.REC)) {
+                                        if (trackRemoteStatus.equals(Track.Status.REC)) {
                                             trackServer.setStatus(Track.Status.REC);
-                                        } else if (!trackRemote.getStatus().equals(Track.Status.NEW)) {
+                                        } else if (!trackRemoteStatus.equals(Track.Status.NEW)) {
                                             HelperLibrary.musicLibrary.updateStatus(trackServer);
                                         }
                                         break;

@@ -58,14 +58,6 @@ public final class RepoSync {
         }
     }
 
-    public static Track getTrack(int position) {
-        Track track = null;
-        if (tracksCursor.moveToPosition(position)) {
-            track = HelperLibrary.musicLibrary.cursorToTrack(tracksCursor, true);
-        }
-        return track;
-    }
-
     /**
      * Sets status to REC if track exists and has correct size.
      * Otherwise, file is deleted and status set back to NEW
@@ -113,22 +105,17 @@ public final class RepoSync {
         }
     }
 
-    public synchronized static Track getFile(int i) {
-        if (tracks.containsRow(i)) {
-            return getTrack(tracks.row(i).values().iterator().next());
+    public synchronized static Cursor getTrackCursor(int idFileServer) {
+        if (tracks.containsRow(idFileServer)) {
+            int position = tracks.row(idFileServer).values().iterator().next();
+            if (tracksCursor.moveToPosition(position)) {
+                return tracksCursor;
+            }
         }
         return null;
     }
 
-    public synchronized static List<Track> getDownloadList() {
-        List<Track> list = new ArrayList<>();
-        for(int position : tracks.column(Track.Status.NEW).values()) {
-            list.add(getTrack(position));
-        }
-        return list;
-    }
-
-    public synchronized static Pair<Integer, String> getMergeList() throws JSONException {
+    public synchronized static Pair<Integer, String> getMergeList(File getAppDataPath) throws JSONException {
         Collection<Integer> mergeList = tracks.column(Track.Status.REC).values();
         JSONArray filesToMerge = new JSONArray();
         for(int position : tracks.column(Track.Status.REC).values()) {
@@ -157,6 +144,14 @@ public final class RepoSync {
         return new Pair<>(mergeList.size(), obj.toString());
     }
 
+    public synchronized static List<Track> getDownloadList() {
+        List<Track> list = new ArrayList<>();
+        for(int position : tracks.column(Track.Status.NEW).values()) {
+            list.add(getTrack(position));
+        }
+        return list;
+    }
+
     public synchronized static List<Track> getNotSyncedList() {
         List<Track> trackList = new ArrayList<>();
         for (int position : tracks.values()) {
@@ -166,5 +161,14 @@ public final class RepoSync {
             }
         }
         return trackList;
+    }
+
+    //FIXME NOW Remove this one
+    private static Track getTrack(int position) {
+        Track track = null;
+        if (tracksCursor.moveToPosition(position)) {
+            track = HelperLibrary.musicLibrary.cursorToTrack(tracksCursor, true);
+        }
+        return track;
     }
 }
