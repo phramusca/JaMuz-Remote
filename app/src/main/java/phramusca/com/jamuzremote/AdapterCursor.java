@@ -32,18 +32,9 @@ import androidx.recyclerview.widget.RecyclerView;
 public abstract class AdapterCursor<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     private final Context mContext;
-
-    // FIXME: Try converting Cursor to ContentValues)
-    //  -> it can be modified and use for db insert/update
-    //      so could be used in a RepoTrack and RepoAlbums maybe
-    //  -> no need for AdapterCursorAlbumTrack.newStatuses
-    //  https://stackoverflow.com/a/8709408/755759
     private Cursor mCursor;
-
     private boolean mDataValid;
-
     private int mRowIdColumn;
-
     private final DataSetObserver mDataSetObserver;
 
     public AdapterCursor(Context context, Cursor cursor) {
