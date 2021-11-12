@@ -102,9 +102,12 @@ public class ServiceSync extends ServiceBase {
                 checkAbort();
                 clientInfo.getBodyString("connect", client); //NON-NLS
 
+                long startTime = System.currentTimeMillis();
+                long startTimeTotal = startTime;
                 helperNotification.notifyBar(notificationSync, getString(R.string.syncLabelReadingList));
                 checkAbort();
                 RepoSync.read();
+                Log.w(TAG, "RepoSync.read() :"+(System.currentTimeMillis() - startTime)+" ms");
 
                 checkAbort();
                 getTags();
@@ -112,20 +115,30 @@ public class ServiceSync extends ServiceBase {
                 checkAbort();
                 getGenres();
 
+                startTime = System.currentTimeMillis();
                 checkAbort();
                 requestMerge();
+                Log.w(TAG, "requestMerge() :"+(System.currentTimeMillis() - startTime)+" ms");
 
+                startTime = System.currentTimeMillis();
                 checkAbort();
                 checkFiles(Track.Status.NEW);
+                Log.w(TAG, "checkFiles(Track.Status.NEW) :"+(System.currentTimeMillis() - startTime)+" ms");
 
+                startTime = System.currentTimeMillis();
                 checkAbort();
                 startDownloads(RepoSync.getDownloadList());
+                Log.w(TAG, "startDownloads(RepoSync.getDownloadList()) :"+(System.currentTimeMillis() - startTime)+" ms");
 
+                startTime = System.currentTimeMillis();
                 checkFiles(Track.Status.INFO);
+                Log.w(TAG, "checkFiles(Track.Status.INFO) :"+(System.currentTimeMillis() - startTime)+" ms");
 
+                startTime = System.currentTimeMillis();
                 //Remove files in db but not received from server
                 helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRemovingDeleted));
                 List<Track> trackList = RepoSync.getNotSyncedList();
+                Log.w(TAG, "RepoSync.getNotSyncedList() :"+(System.currentTimeMillis() - startTime)+" ms");
                 int nbTracks = trackList.size();
                 int i = 0;
                 for (Track track : trackList) {
@@ -137,6 +150,7 @@ public class ServiceSync extends ServiceBase {
                     file.delete();
                     HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
                 }
+                Log.w(TAG, "TOTAL Sync :"+(System.currentTimeMillis() - startTimeTotal)+" ms");
 
                 runOnUiThread(() -> helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncCheckComplete), -1));
                 if (processDownload != null) {
