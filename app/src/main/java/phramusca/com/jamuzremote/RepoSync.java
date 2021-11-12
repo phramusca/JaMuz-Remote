@@ -2,7 +2,6 @@ package phramusca.com.jamuzremote;
 
 import android.util.Log;
 
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 import java.io.File;
@@ -19,13 +18,7 @@ public final class RepoSync {
     private static Table<Integer, Track.Status, Track> tracks = null;
 
     protected synchronized static void read() {
-        //FIXME for merge (and other as needed): Cursor to json : https://stackoverflow.com/questions/13070791/android-cursor-to-jsonarray
-        //FIXME getTracks to return HashBasedTable to speed up a bit
-        tracks = HashBasedTable.create();
-        List<Track> newTracks = HelperLibrary.musicLibrary.getTracks(true, "WHERE status!=\"" + Track.Status.LOCAL.name() + "\"", "", "", -1); //NON-NLS
-        for (Track track : newTracks) {
-            tracks.put(track.getIdFileServer(), track.getStatus(), track);
-        }
+        tracks = HelperLibrary.musicLibrary.getTracksTable("WHERE status!=\"" + Track.Status.LOCAL.name() + "\""); //NON-NLS
     }
 
     /**
