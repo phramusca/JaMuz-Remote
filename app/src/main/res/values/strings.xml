@@ -35,7 +35,7 @@
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Allow track edition</string>
     <string name="settingsKidsPlaceCheckBoxOnStartup">Start Kids Place with JaMuz</string>
     <string name="settingsLocalFilesTextViewTitle">Local tracks</string>
-    <string name="settingsLocalFilesTextViewHelp"><html>You can add tracks to library from a local path. <br/> WARNING: Those local tracks will NOT be synchronized with Jamuz Server ! It is highly recommended to use JaMuz Server instead to get your tracks!</html></string>
+    <string name="settingsLocalFilesTextViewHelp">You can add tracks to library from a local path.\nWARNING: Those local tracks will NOT be synchronized with Jamuz Server ! It is highly recommended to use JaMuz Server instead to get your tracks!</string>
     <string name="settingsLocalFilesTextViewPath">Path :</string>
     <string name="settingsLocalFilesButtonChoose">Choose</string>
     <string name="settingsDirectoryChooserButtonNewFolder">New folder</string>
@@ -65,8 +65,7 @@
     <string name="playlistLabelQuestionDeleteSuffix">playlist ?</string>
     <string name="playlistLabelCannotDeleteLastPlaylist">You cannot delete last playlist.</string>
     <string name="playlistDefaultAllPlaylistName">All</string>
-    <string name="voicePromptCommand">Say a command.
-\nex: \"Rating 4\", \"Next\"…</string>
+    <string name="voicePromptCommand">Say a command.\nex: \"Rating 4\", \"Next\"…</string>
     <string name="speakUnknownCommand">Unknown Command:</string>
     <string name="speakArtist">Artist</string>
     <string name="speakAlbum">Album</string>
@@ -143,26 +142,25 @@
     <string name="playlistOrderTrackNb">Track number</string>
     <string name="mainVoiceToastNeedToInstall">You need to install speech recognition engine from Google if you want to use this feature.</string>
     <string name="clientToastAuthenticationFailed">Authentication failed.</string>
-    <string name="clientREceptionToastSocketClosed">Socket closed (received null)</string>
-    <string name="coverEmptyText_MAX_8_chars">No cover</string>
+    <string name="clientReceptionToastSocketClosed">Socket closed (received null)</string>
     <string name="playlistSummaryNullOnly">null only</string>
     <string name="playlistSummaryNullExcluded">null excl.</string>
     <string name="playlistSummaryNullIncluded">null incl.</string>
     <string name="playlistSummaryIncluded">Incl.</string>
     <string name="playlistSummaryExcluded">Excl.</string>
-    <string name="scanNotifyScanning">\"Scanning files…\"</string>
+    <string name="scanNotifyScanning">Scanning files…</string>
     <string name="scanTitle">Scan</string>
     <string-array name="voiceCommands_PLAY_ARTIST_ONGOING">
         <item>current artist</item>
         <item>ongoing artist</item>
         <item>on going artist</item>
     </string-array>
-    <string-array name="voiceCommands_PLAY_ALBUM_ONGOING">
+    <string-array name="voiceCommands_PLAY_ALBUM_ONGOING" tools:ignore="InconsistentArrays">
         <item>current album</item>
         <item>ongoing album</item>
         <item>on going album</item>
     </string-array>
-    <string-array name="voiceCommands_PLAY_ARTIST">
+    <string-array name="voiceCommands_PLAY_ARTIST" tools:ignore="InconsistentArrays">
         <item>artist</item>
     </string-array>
     <string-array name="voiceCommands_PLAY_ALBUM">
@@ -170,7 +168,7 @@
     </string-array>
 
     //It is also the default
-    <string-array name="voiceCommands_PLAY_PLAYLIST">
+    <string-array name="voiceCommands_PLAY_PLAYLIST" tools:ignore="InconsistentArrays">
         <item>list</item>
         <item>play list</item>
         <item>playlist</item>
@@ -186,7 +184,7 @@
     <string-array name="voiceCommands_SET_GENRE">
         <item>genre</item>
     </string-array>
-    <string-array name="voiceCommands_PLAYER_RESUME">
+    <string-array name="voiceCommands_PLAYER_RESUME" tools:ignore="InconsistentArrays">
         <item>resume</item>
         <item>play</item>
         <item>continue</item>
@@ -197,7 +195,7 @@
         <item>next track</item>
         <item>next</item>
     </string-array>
-    <string-array name="voiceCommands_PLAYER_PAUSE">
+    <string-array name="voiceCommands_PLAYER_PAUSE" tools:ignore="InconsistentArrays">
         <item>pause</item>
         <item>stop</item>
         <item>break</item>

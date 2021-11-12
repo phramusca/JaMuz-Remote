@@ -17,7 +17,7 @@
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Autoriser l\'édition des pistes</string>
     <string name="settingsKidsPlaceCheckBoxOnStartup">Lancer Kids Place avec JaMuz</string>
     <string name="settingsLocalFilesTextViewTitle">Pistes locales</string>
-    <string name="settingsLocalFilesTextViewHelp"><html>Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local.<br/>ATTENTION : Les pistes locales ne seront PAS synchronisées avec JaMuz Server ! Il est fortement recommandé d\'utiliser plutôt JaMuz Server pour télécharger vos pistes !</html></string>
+    <string name="settingsLocalFilesTextViewHelp">Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local.\nATTENTION : Les pistes locales ne seront PAS synchronisées avec JaMuz Server ! Il est fortement recommandé d\'utiliser plutôt JaMuz Server pour télécharger vos pistes !</string>
     <string name="settingsLocalFilesTextViewPath">Chemin :</string>
     <string name="settingsLocalFilesButtonChoose">Choisir</string>
     <string name="settingsDirectoryChooserButtonNewFolder">Nouveau dossier</string>
@@ -81,8 +81,7 @@
     <string name="mainAlertDialogClosingApplicationMessage">Êtes vous sûr(e) de vouloir quitter et arrêter la lecture \?</string>
     <string name="settingsServerToastProblemQR">Problème pour lire le code QR.</string>
     <string name="playlistDefaultAllPlaylistName">Tous</string>
-    <string name="voicePromptCommand">Dites une commande.
-\nex : « Note 4 », « Suivant »…</string>
+    <string name="voicePromptCommand">Dites une commande.\nex : « Note 4 », « Suivant »…</string>
     <string name="speakYourTurn">À vous</string>
     <string name="speakGenre">Genre</string>
     <string name="speakUnknown">inconnu.</string>
@@ -141,11 +140,11 @@
         <item>artist en cours</item>
         <item>artiste courant</item>
     </string-array>
-    <string-array name="voiceCommands_PLAY_ALBUM_ONGOING">
+    <string-array name="voiceCommands_PLAY_ALBUM_ONGOING" tools:ignore="InconsistentArrays">
         <item>album en cours</item>
         <item>album courant</item>
     </string-array>
-    <string-array name="voiceCommands_PLAY_ARTIST">
+    <string-array name="voiceCommands_PLAY_ARTIST" tools:ignore="InconsistentArrays">
         <item>artiste</item>
         <item>artist</item>
     </string-array>
@@ -154,7 +153,7 @@
     </string-array>
 
     //It is also the default
-    <string-array name="voiceCommands_PLAY_PLAYLIST">
+    <string-array name="voiceCommands_PLAY_PLAYLIST" tools:ignore="InconsistentArrays">
         <item>liste</item>
         <item>list</item>
         <item>playliste</item>
@@ -171,7 +170,7 @@
     <string-array name="voiceCommands_SET_GENRE">
         <item>genre</item>
     </string-array>
-    <string-array name="voiceCommands_PLAYER_RESUME">
+    <string-array name="voiceCommands_PLAYER_RESUME" tools:ignore="InconsistentArrays">
         <item>continuer</item>
         <item>continue</item>
         <item>reprendre</item>
@@ -186,7 +185,7 @@
         <item>suivante</item>
         <item>suivant</item>
     </string-array>
-    <string-array name="voiceCommands_PLAYER_PAUSE">
+    <string-array name="voiceCommands_PLAYER_PAUSE" tools:ignore="InconsistentArrays">
         <item>pause</item>
         <item>stop</item>
         <item>arrêt</item>
@@ -202,12 +201,11 @@
     <string name="mainVoiceToastNeedToInstall">Vous devez installer le moteur de reconnaissance vocale de Google pour utilser cette fonctionalité.</string>
     <string name="clientToastAuthenticationFailed">Échec de l’authentification.</string>
     <string name="playlistSummaryIncluded">Incl.</string>
-    <string name="coverEmptyText_MAX_8_chars">Pas de couverture</string>
-    <string name="playlistSummaryNullExcluded">nul excl.</string>
-    <string name="playlistSummaryNullIncluded">nul incl.</string>
-    <string name="clientREceptionToastSocketClosed">Socket fermé (reçu nul)</string>
-    <string name="playlistSummaryNullOnly">nul seulement</string>
-    <string name="scanNotifyScanning">« Analyse des fichiers… »</string>
+    <string name="playlistSummaryNullExcluded">null excl.</string>
+    <string name="playlistSummaryNullIncluded">null incl.</string>
+    <string name="clientReceptionToastSocketClosed">Socket fermé (reçu null)</string>
+    <string name="playlistSummaryNullOnly">null seulement</string>
+    <string name="scanNotifyScanning">Analyse des fichiers…</string>
     <string name="scanTitle">Analyse</string>
     <string name="playlistSummaryExcluded">Excl.</string>
 </resources>

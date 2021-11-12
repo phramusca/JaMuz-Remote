@@ -27,8 +27,7 @@
     <string name="playlistLabelQuestionDeleteSuffix">spillelisten\?</string>
     <string name="playlistLabelCannotDeleteLastPlaylist">Du kan ikke slette siste spilleliste</string>
     <string name="playlistDefaultAllPlaylistName">Alle</string>
-    <string name="voicePromptCommand">Si en komando.
-\nF.eks. «Vurdering på 4», «Neste»…</string>
+    <string name="voicePromptCommand">Si en komando.\nF.eks. «Vurdering på 4», «Neste»…</string>
     <string name="speakUnknownCommand">Ukjent kommando:</string>
     <string name="speakArtist">Artist</string>
     <string name="speakAlbum">Album</string>
@@ -108,7 +107,7 @@
     <string name="mainToastNotImplemented">Ikke implementert.</string>
     <string name="mainAlertDialogClosingApplicationTitle">Lukker JaMuz</string>
     <string name="mainAlertDialogClosingApplicationMessage">Stopp avspilling og avslutt programmet\?</string>
-    <string name="settingsLocalFilesTextViewHelp"><html>Du kan legge til spor i biblioteket fra lokal sti. <br/>Advarsel: Disse lokale sporene vil IKKE synkroniseres med JaMuz-tjeneren. Det anbefales sterkt å istedenfor bruke JaMuz-tjener for å hente sporene dine.</html></string>
+    <string name="settingsLocalFilesTextViewHelp">Du kan legge til spor i biblioteket fra lokal sti.\nAdvarsel: Disse lokale sporene vil IKKE synkroniseres med JaMuz-tjeneren. Det anbefales sterkt å istedenfor bruke JaMuz-tjener for å hente sporene dine.</string>
     <string name="serviceSyncNotifySyncReceivedGenres">Mottatte sjangere …</string>
     <string name="serviceSyncNotifySyncPreparingMerge">Forbereder fletting av statistikk.</string>
     <string name="serviceSyncNotifySyncRequestingMerge">Forespør fletting av statistikk.</string>
@@ -125,18 +124,17 @@
     <string name="playlistOrderRandom">Tilfeldig</string>
     <string name="playlistOrderPlayCounter">Spillingsteller, sist avspilt</string>
     <string name="playlistOrderTrackNb">Spornummer</string>
-    <string name="coverEmptyText_MAX_8_chars">Mangler omslag</string>
     <string name="playlistSummaryNullOnly">kun null</string>
     <string name="playlistSummaryNullExcluded">null unntatt.</string>
     <string name="playlistSummaryNullIncluded">null inkl.</string>
     <string name="playlistSummaryIncluded">Inkl.</string>
     <string name="playlistSummaryExcluded">Eks.</string>
-    <string name="scanNotifyScanning">«Skanner filer …»</string>
+    <string name="scanNotifyScanning">Skanner filer …</string>
     <string name="scanTitle">Skann</string>
     <string name="serviceSyncNotifySyncInterrupted">Forstyrret.</string>
     <string name="mainVoiceToastNeedToInstall">Du må installere en talegjenkjennelsesmotor fra Google hvis du vil bruke denne funksjonen.</string>
     <string name="clientToastAuthenticationFailed">Identitetsbekreftelse mislyktes</string>
-    <string name="clientREceptionToastSocketClosed">Socket lukket (mottok null)</string>
+    <string name="clientReceptionToastSocketClosed">Socket lukket (mottok null)</string>
     <string name="serviceSyncNotifyDownloadStopping">Stopper nedlastinger …</string>
     <string name="serviceSyncNotifyDownloadStarting">Starter nedlasting …</string>
     <string name="audioPlayerToastRgConsiderLower">Hvis du ser denne meldingen for ofte kan du overveie å senke den i innstillingene. (Kanskje det er en feil med én fil).</string>
