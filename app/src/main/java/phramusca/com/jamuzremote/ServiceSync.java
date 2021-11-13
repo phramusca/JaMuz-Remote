@@ -185,7 +185,7 @@ public class ServiceSync extends ServiceBase {
                         j++;
                         Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
                         if (trackRemote != null) {
-                            //FIXME: Update track for other changes too (format, metadata ...)
+                            //FIXME NOW Update track for other changes too (format, metadata ...)
                             if (trackServer.getSize() != trackRemote.getSize()
                                     || !trackServer.getRelativeFullPath().equals(trackRemote.getRelativeFullPath())) {
                                 File file = new File(trackRemote.getPath());
@@ -297,7 +297,7 @@ public class ServiceSync extends ServiceBase {
             String body = clientInfo.getBodyString("tags", client); //NON-NLS
             helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncReceivedTags));
             final JSONObject jObject = new JSONObject(body);
-            //FIXME: Get tags list with their respective number of files, for sorting
+            //FIXME NOW Get tags list with their respective number of files, for sorting
             //TODO: Then add a "x/y" button to display pages x/y (# of tags per page to be defined/optional)
             final JSONArray jsonTags = (JSONArray) jObject.get("tags"); //NON-NLS
             final List<String> newTags = new ArrayList<>();
@@ -603,7 +603,7 @@ public class ServiceSync extends ServiceBase {
             } catch (IOException | NullPointerException e) {
                 Log.e(TAG, "Error downloading " + track.getRelativeFullPath(), e); //NON-NLS
                 if (e.getMessage().contains("ENOSPC")) { //NON-NLS
-                    //FIXME: Stop downloads if java.io.IOException: write failed: ENOSPC (No space left on device)
+                    //FIXME NOW Stop downloads if java.io.IOException: write failed: ENOSPC (No space left on device)
                     // BUT only if sync check has completed as it can free some space
                 }
             } catch (Exception e) {
