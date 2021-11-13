@@ -18,7 +18,7 @@ class HelperBitmap {
 
     public static Bitmap getEmptyThumb(Context context) {
         if(emptyThumb==null) {
-            emptyThumb = textAsBitmap("¯\\_(ツ)_/¯", 120, 25, 10, 70);
+            emptyThumb = textAsBitmap("¯\\_(ツ)_/¯", 120, 25, 5, 70);
         }
         return emptyThumb;
     }
