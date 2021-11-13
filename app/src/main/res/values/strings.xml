@@ -105,7 +105,7 @@
     <string name="serviceScanNotifyCleaningDatabase">Cleaning database…</string>
     <string name="serviceScanNotifyDatabaseUpdated">Database updated.</string>
     <string name="serviceScanNotifyScanningDeleted">Scanning deleted files …</string>
-    <string name="serviceSyncNotifySyncTitle">Sync</string>
+    <string name="serviceSyncNotifySyncTitle">Sync.</string>
     <string name="serviceSyncNotifyDownloadTitle">Download</string>
     <string name="serviceSyncNotifySyncComplete">Synchronization complete.</string>
     <string name="serviceSyncNotifySyncAll">All</string>
@@ -117,8 +117,7 @@
     <string name="serviceSyncNotifySyncRemovingDeleted">Removing deleted files…</string>
     <string name="serviceSyncNotifySyncCheckComplete">Check complete.</string>
     <string name="serviceSyncNotifySyncInterrupted">Interrupted.</string>
-    <string name="serviceSyncNotifySyncChecking">Checking</string>
-    <string name="serviceSyncNotifySyncCheckingSuffix">files…</string>
+    <string name="serviceSyncNotifySyncChecking">Checking files</string>
     <string name="serviceSyncNotifySyncReceived">Received</string>
     <string name="serviceSyncNotifySyncReceivedSuffix">files count…</string>
     <string name="serviceSyncNotifySyncReceivedTags">Received tags…</string>
