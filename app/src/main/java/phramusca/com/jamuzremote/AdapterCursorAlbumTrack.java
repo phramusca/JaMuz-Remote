@@ -49,9 +49,12 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
         return track;
     }
 
-    public void updateStatus(Track.Status status, int position) {
+    public void updateStatus(Track.Status status, int position, String msg) {
         newStatuses.put(position, status);
         notifyItemChanged(position);
+        if(!msg.equals("")) {
+            new HelperToast(parent.getContext()).toastLong(msg);
+        }
     }
 
     @Override

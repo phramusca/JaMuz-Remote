@@ -427,55 +427,6 @@ public class ServiceSync extends ServiceBase {
             downloadServices = new ArrayList<>();
         }
 
-        private void checkCompleted() {
-            int remaining = newTracks.size();
-            StringBuilder builder = new StringBuilder()
-                    .append(getString(R.string.serviceSyncNotifySyncComplete)).append("\n\n");
-            if (remaining < 1) {
-                builder.append(getString(R.string.serviceSyncNotifySyncAll))
-                        .append(" ").append(nbFilesStart).append(" ")
-                        .append(getString(R.string.serviceSyncNotifySyncSuccess));
-            } else {
-                builder.append(getString(R.string.serviceSyncNotifySyncDownloaded))
-                        .append(" ").append(nbFilesStart - remaining).append(". ")
-                        .append(getString(R.string.serviceSyncNotifySyncRemaining))
-                        .append(" ").append(remaining).append(".");
-            }
-            String finalToastMsg = builder.toString();
-            Log.i(TAG, finalToastMsg);
-            runOnUiThread(() -> helperToast.toastLong(finalToastMsg));
-            stopSync(finalToastMsg, -1);
-        }
-
-        private void notifyBarProgress(Track track) {
-            if (track != null) {
-                if (!track.getStatus().equals(Track.Status.REC)) {
-                    nbFailed++;
-                } else {
-                    sizeRemaining -= track.getSize();
-                    newTracks.remove(track);
-                }
-                bench.get(track.getSize());
-            } //NON-NLS
-            String bigText = String.format(
-                    Locale.getDefault(),
-                    "-%d/%d\n%s/%s\n%s %d/%d. %d %s\n", //NON-NLS
-                    newTracks.size(),
-                    nbFilesStart,
-                    StringManager.humanReadableByteCount(sizeRemaining, false),
-                    StringManager.humanReadableByteCount(sizeTotal, false),
-                    getString(R.string.serviceSyncNotifyDownloadAttempt),
-                    nbRetries + 1,
-                    maxNbRetries,
-                    nbFailed,
-                    getString(R.string.serviceSyncNotifyDownloadErrors));
-
-            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, bench.getLast(),
-                    nbFilesStart, (nbFilesStart - newTracks.size()), false,
-                    true, true,
-                    bench.getLast() + "\n" + bigText));
-        }
-
         @Override
         public void run() {
             try {
@@ -528,8 +479,41 @@ public class ServiceSync extends ServiceBase {
                 sizeTotal += track.getSize();
             }
             pool.shutdown();
-            notifyBarProgress(null);
+            notifyBarProgress(null, "");
             return pool.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
+        }
+
+        private void notifyBarProgress(Track track, String msg) {
+            if (track != null) {
+                if (!track.getStatus().equals(Track.Status.REC)) {
+                    nbFailed++;
+                    if(!msg.equals("")) {
+                        runOnUiThread(() -> helperToast.toastLong(msg));
+                        stopDownloads();
+                    }
+                } else {
+                    sizeRemaining -= track.getSize();
+                    newTracks.remove(track);
+                }
+                bench.get(track.getSize());
+            } //NON-NLS
+            String bigText = String.format(
+                    Locale.getDefault(),
+                    "-%d/%d\n%s/%s\n%s %d/%d. %d %s\n", //NON-NLS
+                    newTracks.size(),
+                    nbFilesStart,
+                    StringManager.humanReadableByteCount(sizeRemaining, false),
+                    StringManager.humanReadableByteCount(sizeTotal, false),
+                    getString(R.string.serviceSyncNotifyDownloadAttempt),
+                    nbRetries + 1,
+                    maxNbRetries,
+                    nbFailed,
+                    getString(R.string.serviceSyncNotifyDownloadErrors));
+
+            runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, bench.getLast(),
+                    nbFilesStart, (nbFilesStart - newTracks.size()), false,
+                    true, true,
+                    bench.getLast() + "\n" + bigText));
         }
 
         private void stopDownloads() {
@@ -542,6 +526,26 @@ public class ServiceSync extends ServiceBase {
             }
             abort();
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, getString(R.string.serviceSyncNotifyDownloadStopped), 5000));
+        }
+
+        private void checkCompleted() {
+            int remaining = newTracks.size();
+            StringBuilder builder = new StringBuilder()
+                    .append(getString(R.string.serviceSyncNotifySyncComplete)).append("\n\n");
+            if (remaining < 1) {
+                builder.append(getString(R.string.serviceSyncNotifySyncAll))
+                        .append(" ").append(nbFilesStart).append(" ")
+                        .append(getString(R.string.serviceSyncNotifySyncSuccess));
+            } else {
+                builder.append(getString(R.string.serviceSyncNotifySyncDownloaded))
+                        .append(" ").append(nbFilesStart - remaining).append(". ")
+                        .append(getString(R.string.serviceSyncNotifySyncRemaining))
+                        .append(" ").append(remaining).append(".");
+            }
+            String finalToastMsg = builder.toString();
+            Log.i(TAG, finalToastMsg);
+            runOnUiThread(() -> helperToast.toastLong(finalToastMsg));
+            stopSync(finalToastMsg, -1);
         }
     }
 
@@ -559,6 +563,7 @@ public class ServiceSync extends ServiceBase {
 
         @Override
         public void run() {
+            String msg = "";
             try {
                 File destinationFile = new File(track.getPath());
                 File destinationPath = destinationFile.getParentFile();
@@ -609,13 +614,14 @@ public class ServiceSync extends ServiceBase {
             } catch (IOException | NullPointerException e) {
                 Log.e(TAG, "Error downloading " + track.getRelativeFullPath(), e); //NON-NLS
                 if (Objects.requireNonNull(e.getMessage()).contains("ENOSPC")) { //NON-NLS
-                    //FIXME NOW Stop downloads if java.io.IOException: write failed: ENOSPC (No space left on device)
-                    // BUT only if sync check has completed as it can free some space
+                    Log.w(TAG, "ENOSPC for " + track.getRelativeFullPath(), e); //NON-NLS
+                    track.setStatus(Track.Status.ERROR);
+                    msg = "No space left on device.";
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error downloading " + track.getRelativeFullPath(), e); //NON-NLS
             }
-            callback.setStatus(track);
+            callback.setStatus(track, msg);
         }
     }
 }
