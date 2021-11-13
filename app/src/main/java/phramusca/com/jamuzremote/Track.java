@@ -232,7 +232,7 @@ public class Track implements Serializable {
             idFileServer = file.getInt("idFile");
             genre = file.getString("genre"); //NON-NLS
             playCounter = file.getInt("playCounter");
-            //FIXME: Use those below, to improve sync and/or merge
+            //TODO Use those below, to improve sync and/or merge
 //            boolean deleted = file.getBoolean("deleted");
 //            //Those are only valid during merge process
 //            int previousPlayCounter = file.getInt("previousPlayCounter");

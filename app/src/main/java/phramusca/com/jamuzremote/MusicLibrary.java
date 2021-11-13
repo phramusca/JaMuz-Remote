@@ -472,7 +472,7 @@ public class MusicLibrary {
             albumGain = c.getFloat(c.getColumnIndex(COL_ALBUM_GAIN));
         }
 
-        //FIXME: Use below in sync or merge processes (DO NOT store in db, or values from remote)
+        //TODO Use below in sync or merge processes (DO NOT store in db, or values from remote)
 //        boolean deleted=c.getString(c.getColumnIndex(COL_));
 //        int previousPlayCounter=c.getInt(c.getColumnIndex(COL_));
 //        Date genreModifDate=c.getString(c.getColumnIndex(COL_));
@@ -672,21 +672,16 @@ public class MusicLibrary {
             String query = "SELECT status, count(" + COL_ID_REMOTE + ") AS " + COL_PLAY_COUNTER + ", \n" + //NON-NLS //NON-NLS //NON-NLS
                     "round(avg(" + COL_RATING + "), 2) AS " + COL_RATING + ", \n" + //NON-NLS //NON-NLS //NON-NLS
                     "group_concat(distinct " + COL_GENRE + ") AS " + COL_GENRE + ", \n" + //NON-NLS //NON-NLS //NON-NLS //NON-NLS
-                    "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + " \n" + //NON-NLS //NON-NLS
-                    ", " + COL_ALBUM + //NON-NLS
-                    ", " + COL_COVER_HASH + //NON-NLS
-                    ", " + COL_PATH + //NON-NLS //NON-NLS //NON-NLS
-                            //FIXME This works in DB Browser (sqlite 3.31.1) but not in android (there it takes the last track of each album)
-                    //https://stackoverflow.com/questions/2421189/version-of-sqlite-used-in-android
-                    //select sqlite_version()
-                    " FROM (SELECT * FROM tracks ORDER BY status DESC) \n" //NON-NLS
+                    "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + ", \n" + //NON-NLS //NON-NLS
+                    COL_ALBUM + ", " +COL_COVER_HASH + ", " + COL_PATH + " \n"+ //NON-NLS
+                    "FROM tracks \n" //NON-NLS
                     + (search.isEmpty()?"":" WHERE (" + COL_ALBUM + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS //NON-NLS
                         "OR " + COL_ARTIST + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS
                         "OR " + COL_ALBUM_ARTIST + " LIKE \"%"+search+"%\" " + //NON-NLS
                         "OR " + COL_TITLE + " LIKE \"%"+search+"%\") \n") + //NON-NLS
-                    " GROUP BY " + COL_ALBUM + " " + //NON-NLS //NON-NLS
-                    " ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, " //NON-NLS
-                    + COL_ALBUM + ", " + COL_ARTIST;
+                    "GROUP BY " + COL_ALBUM + " \n" + //NON-NLS //NON-NLS
+                    "HAVING MIN(CASE status WHEN 'REC' THEN 1 WHEN 'LOCAL' THEN 2 ELSE 3 END) \n" +
+                    "ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, " + COL_ALBUM + ", " + COL_ARTIST; //NON-NLS
             Log.i(TAG, query);
             cursor = db.rawQuery(query, new String[]{}); //NON-NLS
             Log.i(TAG, "getAlbums(): " + cursor.getCount()); //NON-NLS //NON-NLS
