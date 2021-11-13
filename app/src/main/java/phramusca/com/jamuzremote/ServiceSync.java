@@ -185,15 +185,18 @@ public class ServiceSync extends ServiceBase {
                         j++;
                         Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
                         if (trackRemote != null) {
-                            //FIXME NOW Update track for other changes too (format, metadata ...)
+                            //Only path, length and size can be compared.
+                            // Other available fields are for merge usage
+                            // Other metadata changes done in JaMuz should result in a file save (so changes getModifDate)
                             if (trackServer.getSize() != trackRemote.getSize()
+                                    || trackServer.getLength() != trackRemote.getLength()
+                                    || !trackServer.getModifDate().equals(trackRemote.getModifDate())
                                     || !trackServer.getRelativeFullPath().equals(trackRemote.getRelativeFullPath())) {
                                 File file = new File(trackRemote.getPath());
                                 //noinspection ResultOfMethodCallIgnored
                                 file.delete();
                                 trackServer.setIdFileRemote(trackRemote.getIdFileRemote());
                                 HelperLibrary.musicLibrary.updateTrack(trackServer, false);
-
                             } else {
                                 switch (trackServer.getStatus()) {
                                     case INFO:

@@ -150,7 +150,7 @@ public class MusicLibrary {
             if (statsOnly) {
                 select = " tracks.idFileRemote, tracks.idFileServer, tracks.rating, tracks.addedDate, " + //NON-NLS
                         " tracks.lastPlayed, tracks.playCounter, tracks.genre, tracks.path, tracks.size," + //NON-NLS
-                        " tracks.status, tracks.length, tracks.idPath"; //NON-NLS
+                        " tracks.status, tracks.length, tracks.idPath, tracks.modifDate"; //NON-NLS
             } //NON-NLS
             String query = "SELECT " + select + " \n" + //NON-NLS
                     " FROM tracks \n" + //NON-NLS
@@ -423,6 +423,8 @@ public class MusicLibrary {
                 c.getString(c.getColumnIndex(COL_LAST_PLAYED)));
         int playCounter = c.getInt(c.getColumnIndex(COL_PLAY_COUNTER));
         int idPath = c.getInt(c.getColumnIndex(COL_ID_PATH));
+        Date modifDate = HelperDateTime.parseSqlUtc(
+                c.getString(c.getColumnIndex(COL_MODIF_DATE)));
 
         String title = "";
         String album = "";
@@ -436,7 +438,6 @@ public class MusicLibrary {
         String bitRate = "";
         String format = "";
         double bpm = -1;
-        Date modifDate = new Date(0);
         String checkedFlag = "";
         String copyRight = "";
         String coverHash = "";
@@ -459,8 +460,6 @@ public class MusicLibrary {
             bitRate = c.getString(c.getColumnIndex(COL_BITRATE));
             format = c.getString(c.getColumnIndex(COL_FORMAT));
             bpm = c.getDouble(c.getColumnIndex(COL_BPM));
-            modifDate = HelperDateTime.parseSqlUtc(
-                    c.getString(c.getColumnIndex(COL_MODIF_DATE)));
             checkedFlag = c.getString(c.getColumnIndex(COL_CHECKED_FLAG));
             copyRight = c.getString(c.getColumnIndex(COL_COPYRIGHT));
             coverHash = c.getString(c.getColumnIndex(COL_COVER_HASH));
