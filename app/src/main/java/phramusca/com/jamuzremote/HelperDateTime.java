@@ -61,7 +61,7 @@ public class HelperDateTime {
      * @param toLocal convert to local ?
      * @return to desired format
      */
-    private static String formatUTC(Date date, DateTimeFormat format, boolean toLocal) {
+    public static String formatUTC(Date date, DateTimeFormat format, boolean toLocal) {
         return formatUTC(date, format.getPattern(), toLocal);
     }
 

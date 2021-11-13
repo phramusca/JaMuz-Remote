@@ -184,6 +184,8 @@ public class ActivityMain extends AppCompatActivity {
     private LinearLayout layoutPlaylist;
     private LinearLayout layoutPlaylistEditBar;
     private GridLayout layoutPlaylistToolBar;
+    private TextView textFileInfo_seekBefore;
+    private TextView textFileInfo_seekAfter;
 
     @SuppressLint({"HardwareIds", "ClickableViewAccessibility"})
     @Override
@@ -266,6 +268,9 @@ public class ActivityMain extends AppCompatActivity {
         textViewFileInfo2 = findViewById(R.id.textFileInfo_line2);
         textViewFileInfo3 = findViewById(R.id.textFileInfo_line3);
         textViewFileInfo4 = findViewById(R.id.textFileInfo_line4);
+
+        textFileInfo_seekBefore = findViewById(R.id.textFileInfo_seekBefore);
+        textFileInfo_seekAfter = findViewById(R.id.textFileInfo_seekAfter);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -2215,12 +2220,17 @@ public class ActivityMain extends AppCompatActivity {
         runOnUiThread(() -> {
             seekBarPosition.setMax(total);
             seekBarPosition.setProgress(currentPosition);
+            textFileInfo_seekBefore.setText(StringManager.secondsToMMSS(currentPosition/1000));
+            textFileInfo_seekAfter.setText(String.format(
+                    "- %s / %s",
+                    StringManager.secondsToMMSS((total - currentPosition) / 1000),
+                    StringManager.secondsToMMSS(total / 1000)));
         });
     }
 
     private void displayTrackDetails() {
-        runOnUiThread(() -> setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml( //NON-NLS //NON-NLS
-                String.format("<html><BR/>%s<BR/>%s %d/5 %s %s<BR/>%s%s<BR/></html>", //NON-NLS
+        runOnUiThread(() -> setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
+                String.format(Locale.getDefault(), "<html><BR/>%s<BR/>%s %d/5 %s %s<BR/>%s%s<BR/></html>", //NON-NLS
                         displayedTrack.getSource().equals("") //NON-NLS
                                 ? "" //NON-NLS
                                 : "<u>".concat(displayedTrack.getSource()).concat("</u>"), //NON-NLS
@@ -2235,7 +2245,7 @@ public class ActivityMain extends AppCompatActivity {
     public static String getLastPlayedAgo(Track track) {
         return track.getPlayCounter() <= 0
                 ? mContext.getString(R.string.trackNeverPlayed)
-                : String.format( //NON-NLS
+                : String.format(Locale.getDefault(),
                         "%s %s (%dx). ", //NON-NLS
                         mContext.getString(R.string.trackPlayed),
                         prettyTime.format(track.getLastPlayed()),
