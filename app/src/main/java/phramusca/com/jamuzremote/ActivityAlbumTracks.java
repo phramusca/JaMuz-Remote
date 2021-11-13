@@ -117,16 +117,16 @@ public class ActivityAlbumTracks extends AppCompatActivity {
     private void downloadFile(Track track, int position) {
         track.getTags(true);
         track.setStatus(Track.Status.NEW);
-        adapterCursorAlbumTrack.updateStatus(track.getStatus(), position);
+        adapterCursorAlbumTrack.updateStatus(track.getStatus(), position, "");
         HelperToast helperToast = new HelperToast(getApplicationContext());
         ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
-        ServiceSync.DownloadTask downloadTask = new ServiceSync.DownloadTask(track, track1 -> updateStatus(track1.getStatus(), position), clientInfo);
+        ServiceSync.DownloadTask downloadTask = new ServiceSync.DownloadTask(track, (track1, msg) -> updateStatus(track1.getStatus(), position, msg), clientInfo);
         downloadTask.start();
     }
 
-    private void updateStatus(Track.Status status, int position) {
+    private void updateStatus(Track.Status status, int position, String msg) {
         runOnUiThread(() -> {
-            adapterCursorAlbumTrack.updateStatus(status, position);
+            adapterCursorAlbumTrack.updateStatus(status, position, msg);
         });
     }
 }
