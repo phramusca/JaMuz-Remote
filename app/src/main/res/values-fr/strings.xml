@@ -112,7 +112,6 @@
     <string name="serviceSyncNotifySyncCheckComplete">Vérification terminée.</string>
     <string name="serviceSyncNotifySyncInterrupted">Interrompu.</string>
     <string name="serviceSyncNotifySyncChecking">Vérification des fichiers</string>
-    <string name="serviceSyncNotifySyncCheckingSuffix">fichiers…</string>
     <string name="serviceSyncNotifySyncReceived">Reçu le nombre de fichiers</string>
     <string name="serviceSyncNotifySyncReceivedSuffix">nombre de fichiers…</string>
     <string name="serviceSyncNotifySyncReceivedTags">Réceptions des étiquettes…</string>
@@ -128,7 +127,7 @@
     <string name="serviceSyncNotifyDownloadStopped">Téléchargements arrêtés.</string>
     <string name="serviceSyncNotifyDownloadWaiting">Attente de</string>
     <string name="serviceSyncNotifyDownloadBeforeAttempt">avant essai</string>
-    <string name="serviceSyncNotifySyncTitle">Synchronisation</string>
+    <string name="serviceSyncNotifySyncTitle">Sync.</string>
     <string name="trackNeverPlayed">Jamais joué.</string>
     <string name="trackPlayed">Joué</string>
     <string name="trackAdded">Ajouté</string>

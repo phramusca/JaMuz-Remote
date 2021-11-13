@@ -481,19 +481,6 @@ public class Track implements Serializable {
         return path;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Track that = (Track) o;
-        return Objects.equals(relativeFullPath, that.relativeFullPath);
-    }
-
-    @Override
-    public int hashCode() {
-        return relativeFullPath != null ? relativeFullPath.hashCode() : 0;
-    }
-
     public boolean isHistory() {
         return isHistory;
     }

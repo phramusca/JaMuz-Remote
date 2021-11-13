@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -169,10 +170,9 @@ public class ServiceSync extends ServiceBase {
             int nbFilesInBatch = 500;
             int nbFilesServer = getFilesCount(status);
             String msg = String.format(
-                    "%s \"%s\" %s", //NON-NLS
+                    "%s \"%s\"...", //NON-NLS
                     getString(R.string.serviceSyncNotifySyncChecking),
-                    status.name().toLowerCase(),
-                    getString(R.string.serviceSyncNotifySyncCheckingSuffix));
+                    status.name().toLowerCase());
             helperNotification.notifyBar(notificationSync, msg);
             if (nbFilesServer > 0) {
                 for (int i = 0; i <= nbFilesServer; i = i + nbFilesInBatch) {
@@ -262,6 +262,7 @@ public class ServiceSync extends ServiceBase {
                     msg = e.getLocalizedMessage();
                     Log.d(TAG, "ERROR: " + msg); //NON-NLS
                     helperNotification.notifyBar(notificationSync, String.format(
+                            Locale.getDefault(),
                             "%ds %s %d/%d : %s", //NON-NLS
                             sleepSeconds,
                             getString(R.string.globalLabelBefore),
@@ -454,6 +455,7 @@ public class ServiceSync extends ServiceBase {
                 bench.get(track.getSize());
             } //NON-NLS
             String bigText = String.format(
+                    Locale.getDefault(),
                     "-%d/%d\n%s/%s\n%s %d/%d. %d %s\n", //NON-NLS
                     newTracks.size(),
                     nbFilesStart,
@@ -487,6 +489,7 @@ public class ServiceSync extends ServiceBase {
                     int sleepSeconds = nbRetries * 10;
                     runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, //NON-NLS
                             String.format(
+                                    Locale.getDefault(),
                                     "%s %ds %s %d/%d", //NON-NLS
                                     getString(R.string.serviceSyncNotifyDownloadWaiting),
                                     sleepSeconds,
@@ -557,7 +560,7 @@ public class ServiceSync extends ServiceBase {
                 File destinationFile = new File(track.getPath());
                 File destinationPath = destinationFile.getParentFile();
                 //noinspection ResultOfMethodCallIgnored
-                destinationPath.mkdirs();
+                Objects.requireNonNull(destinationPath).mkdirs();
                 checkAbort();
                 if (clientDownload == null) {
                     clientDownload = new OkHttpClient.Builder() //NON-NLS
@@ -602,7 +605,7 @@ public class ServiceSync extends ServiceBase {
                 Log.w(TAG, "Download interrupted for " + track.getRelativeFullPath(), e); //NON-NLS
             } catch (IOException | NullPointerException e) {
                 Log.e(TAG, "Error downloading " + track.getRelativeFullPath(), e); //NON-NLS
-                if (e.getMessage().contains("ENOSPC")) { //NON-NLS
+                if (Objects.requireNonNull(e.getMessage()).contains("ENOSPC")) { //NON-NLS
                     //FIXME NOW Stop downloads if java.io.IOException: write failed: ENOSPC (No space left on device)
                     // BUT only if sync check has completed as it can free some space
                 }

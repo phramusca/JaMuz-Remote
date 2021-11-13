@@ -85,12 +85,11 @@
     <string name="permissionMsg_4">: Tillater programmet å</string>
     <string name="serviceSyncNotifyDownloadTitle">Last ned</string>
     <string name="serviceSyncNotifySyncComplete">Synkronisering fullført.</string>
-    <string name="serviceSyncNotifySyncTitle">Synkroniser</string>
+    <string name="serviceSyncNotifySyncTitle">Synk.</string>
     <string name="serviceSyncNotifySyncUserStopped">Bruker stoppet.</string>
     <string name="serviceSyncNotifySyncRemovingDeleted">Fjerner slettede filer …</string>
     <string name="serviceSyncNotifySyncRemaining">Gjenstår:</string>
-    <string name="serviceSyncNotifySyncChecking">Sjekker</string>
-    <string name="serviceSyncNotifySyncCheckingSuffix">filer …</string>
+    <string name="serviceSyncNotifySyncChecking">Sjekker filer</string>
     <string name="serviceSyncNotifySyncReceived">Mottatt</string>
     <string name="serviceSyncNotifySyncReceivedSuffix">filantall …</string>
     <string name="serviceSyncNotifySyncReceivedTags">Mottatte etiketter …</string>
