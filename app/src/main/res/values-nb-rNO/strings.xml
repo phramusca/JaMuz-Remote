@@ -84,7 +84,7 @@
     <string name="permissionMsg_3">Multimediafiler</string>
     <string name="permissionMsg_4">: Tillater programmet å</string>
     <string name="serviceSyncNotifyDownloadTitle">Last ned</string>
-    <string name="serviceSyncNotifySyncComplete">Synkronisering fullført.</string>
+    <string name="serviceSyncNotifySyncComplete">Fullført.</string>
     <string name="serviceSyncNotifySyncTitle">Synk.</string>
     <string name="serviceSyncNotifySyncUserStopped">Bruker stoppet.</string>
     <string name="serviceSyncNotifySyncRemovingDeleted">Fjerner slettede filer …</string>

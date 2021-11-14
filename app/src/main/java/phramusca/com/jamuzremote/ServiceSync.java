@@ -302,7 +302,7 @@ public class ServiceSync extends ServiceBase {
             helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncReceivedTags));
             final JSONObject jObject = new JSONObject(body);
             //FIXME NOW Get tags list with their respective number of files, for sorting
-            //TODO: Then add a "x/y" button to display pages x/y (# of tags per page to be defined/optional)
+            //  Then add a "x/y" button to display pages x/y (# of tags per page to be defined/optional)
             final JSONArray jsonTags = (JSONArray) jObject.get("tags"); //NON-NLS
             final List<String> newTags = new ArrayList<>();
             for (int i = 0; i < jsonTags.length(); i++) {
@@ -466,7 +466,7 @@ public class ServiceSync extends ServiceBase {
         private boolean startDownloads() throws InterruptedException {
             runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, getString(R.string.serviceSyncNotifyDownloadStarting)));
             bench = new Benchmark(newTracks.size(), 10);
-            pool = Executors.newFixedThreadPool(20); //FIXME: Make number of threads an option
+            pool = Executors.newFixedThreadPool(20); //TODO Make number of threads an option
             downloadServices = new ArrayList<>();
             sizeTotal = 0;
             nbFailed = 0;

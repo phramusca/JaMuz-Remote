@@ -39,7 +39,7 @@ public class Benchmark {
         String elapsed = StringManager.humanReadableSeconds(elapsedTime / 1000, "+");
         String remaining = StringManager.humanReadableSeconds(remainingTime / 1000, "-");
         String speed = StringManager.humanReadableBitCount((sum(partialSizes) * 8) / ((elapseSum < 1 ? 1 : elapseSum) / 1000), true);
-        lastMsg = MessageFormat.format("{1}@{2}ps ({0})", elapsed, remaining, speed); //NOI18N NON-NLS
+        lastMsg = MessageFormat.format("{1} @ {2}ps ({0})", elapsed, remaining, speed); //NOI18N NON-NLS
         return lastMsg;
     }
 
