@@ -102,7 +102,7 @@ import java.util.TimerTask;
 //https://gitlab.com/fdroid/fdroiddata/blob/master/CONTRIBUTING.md
 //https://f-droid.org/
 
-// FIXME: Move audio to a service
+// TODO: Move audio to a service
 // Why not using the standard android player by the way ? (less control for replaygain ?)
 public class ActivityMain extends AppCompatActivity {
 
@@ -671,7 +671,7 @@ public class ActivityMain extends AppCompatActivity {
                     audioPlayer.pullUp();
                     audioPlayer.resume(); //As toggled by simple Tap
                 }
-                //TODO: Do the same for remote when fixed on JaMuz
+                //FIXME NOW Do the same for remote when fixed on JaMuz
             }
 
             @Override
@@ -688,7 +688,6 @@ public class ActivityMain extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        //TODO: Use proper values
         localTrack = new Track("albumArtist", "v"+version, -1, -1,
                 -1, -1, "bitRate", "format", -1, 5, //NON-NLS
                 getString(R.string.mainWelcomeTitle),
@@ -974,8 +973,8 @@ public class ActivityMain extends AppCompatActivity {
                                    int pos, long id) {
             if (spinnerPlaylistSend) {
                 spinnerPlaylistSend = false;
-                //TODO When from another activity (ex: queue or albums)
-                //This can be triggered if Filter button is pressed too quickly
+                //TODO: When from another activity (ex: queue or albums)
+                //  This can be triggered if Filter button is pressed too quickly
                 Playlist playlist = (Playlist) parent.getItemAtPosition(pos);
                 applyPlaylist(playlist, false);
             }
@@ -1254,7 +1253,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         }
 
-        //FIXME: Use a custom speech recognition:
+        //TODO: Use a custom speech recognition:
         // - to avoid google ui
         // - to handle errors and so being able to ask user again
         // - to avoid issue selecting wrongly Playlist subActivity with "Suivant" vocal command
@@ -1428,7 +1427,7 @@ public class ActivityMain extends AppCompatActivity {
                 checkPermissionsThenScanLibrary();
             }
 
-            //FIXME: Update volume directly from Settings activity
+            //TODO: Update volume directly from Settings activity
             // Need to move audio to a service, which is a good thing anyway !
             int value = data.getIntExtra("volume", -1); //NON-NLS
             if (value >= 0) {
@@ -1438,7 +1437,7 @@ public class ActivityMain extends AppCompatActivity {
                 }
             }
 
-            //FIXME: New Feature: read CD barcode, get album info from musicbrainz and display album
+            //TODO New Feature: read CD barcode, get album info from musicbrainz and display album
 
 
             String QRcode = data.getStringExtra("QRcode");

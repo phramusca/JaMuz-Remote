@@ -101,12 +101,12 @@
     <string name="serviceScanNotifyDatabaseUpdated">Base de données à jour.</string>
     <string name="serviceScanNotifyScanningDeleted">Recherche de fichiers supprimés…</string>
     <string name="serviceSyncNotifyDownloadTitle">Téléchargement</string>
-    <string name="serviceSyncNotifySyncComplete">Synchonisation complète.</string>
+    <string name="serviceSyncNotifySyncComplete">Terminé.</string>
     <string name="serviceSyncNotifySyncAll">Tous les</string>
     <string name="serviceSyncNotifySyncSuccess">fichiers ont été téléchargés avec succès.</string>
     <string name="serviceSyncNotifySyncDownloaded">Téléchargé :</string>
     <string name="serviceSyncNotifySyncRemaining">Restant :</string>
-    <string name="serviceSyncNotifySyncCompleteNoDownloads">Synchronisation complète. Pas de téléchargements.</string>
+    <string name="serviceSyncNotifySyncCompleteNoDownloads">Synchronisation terminée. Pas de téléchargements.</string>
     <string name="serviceSyncNotifySyncUserStopped">Arrêt Utilisateur.</string>
     <string name="serviceSyncNotifySyncRemovingDeleted">Suppression des fichiers effacés…</string>
     <string name="serviceSyncNotifySyncCheckComplete">Vérification terminée.</string>
@@ -114,8 +114,8 @@
     <string name="serviceSyncNotifySyncChecking">Vérification des fichiers</string>
     <string name="serviceSyncNotifySyncReceived">Reçu le nombre de fichiers</string>
     <string name="serviceSyncNotifySyncReceivedSuffix">nombre de fichiers…</string>
-    <string name="serviceSyncNotifySyncReceivedTags">Réceptions des étiquettes…</string>
-    <string name="serviceSyncNotifySyncReceivedGenres">Réceptions des genres…</string>
+    <string name="serviceSyncNotifySyncReceivedTags">Etiquettes reçues…</string>
+    <string name="serviceSyncNotifySyncReceivedGenres">Genres reçus…</string>
     <string name="serviceSyncNotifySyncPreparingMerge">Préparation de la fusion des statistiques.</string>
     <string name="serviceSyncNotifySyncRequestingMerge">Demande de fusion des statistiques.</string>
     <string name="serviceSyncNotifySyncUpdateDatabase">Mise à jour de la base de données…</string>

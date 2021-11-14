@@ -107,7 +107,7 @@
     <string name="serviceScanNotifyScanningDeleted">Scanning deleted files …</string>
     <string name="serviceSyncNotifySyncTitle">Sync.</string>
     <string name="serviceSyncNotifyDownloadTitle">Download</string>
-    <string name="serviceSyncNotifySyncComplete">Synchronization complete.</string>
+    <string name="serviceSyncNotifySyncComplete">Completed.</string>
     <string name="serviceSyncNotifySyncAll">All</string>
     <string name="serviceSyncNotifySyncSuccess">files have been downloaded successfully.</string>
     <string name="serviceSyncNotifySyncDownloaded">Downloaded:</string>
