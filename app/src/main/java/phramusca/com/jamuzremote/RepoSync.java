@@ -1,7 +1,9 @@
 package phramusca.com.jamuzremote;
 
+import android.database.Cursor;
 import android.util.Log;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 import java.io.File;
@@ -18,7 +20,19 @@ public final class RepoSync {
     private static Table<Integer, Track.Status, Track> tracks = null;
 
     protected synchronized static void read() {
-        tracks = HelperLibrary.musicLibrary.getTracksTable("WHERE status!=\"" + Track.Status.LOCAL.name() + "\""); //NON-NLS
+        tracks = HashBasedTable.create();
+        Cursor cursor = HelperLibrary.musicLibrary.getTracksCursor(true,
+                "WHERE status!=\"" + Track.Status.LOCAL.name() + "\"",  //NON-NLS
+                "", "", -1); //NON-NLS
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                Track track = HelperLibrary.musicLibrary.cursorToTrack(cursor, true);
+                tracks.put(track.getIdFileServer(), track.getStatus(), track);
+            } while (cursor.moveToNext());
+        }
+        if (cursor != null) {
+            cursor.close();
+        }
     }
 
     /**
