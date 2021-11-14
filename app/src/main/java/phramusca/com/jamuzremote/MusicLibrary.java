@@ -128,21 +128,6 @@ public class MusicLibrary {
         return tracks;
     }
 
-    Table<Integer, Track.Status, Track> getTracksTable(String where) {
-        Cursor cursor = getTracksCursor(true, where, "", "", -1);
-        Table<Integer, Track.Status, Track> tracks = HashBasedTable.create();
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                Track track = cursorToTrack(cursor, true);
-                tracks.put(track.getIdFileServer(), track.getStatus(), track);
-            } while (cursor.moveToNext());
-        }
-        if (cursor != null) {
-            cursor.close();
-        }
-        return tracks;
-    }
-
     Cursor getTracksCursor(boolean statsOnly, String where, String having, String order, int limit) {
         Cursor cursor = null;
         try {
