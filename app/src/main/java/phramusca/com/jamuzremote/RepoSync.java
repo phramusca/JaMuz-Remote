@@ -83,9 +83,9 @@ public final class RepoSync {
         }
     }
 
-    public synchronized static Track getFile(int i) {
-        if (tracks.containsRow(i)) {
-            return tracks.row(i).values().iterator().next();
+    public synchronized static Track getFile(int idFileServer) {
+        if (tracks.containsRow(idFileServer)) {
+            return tracks.row(idFileServer).values().iterator().next();
         }
         return null;
     }

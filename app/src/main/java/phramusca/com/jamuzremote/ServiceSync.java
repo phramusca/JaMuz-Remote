@@ -235,9 +235,7 @@ public class ServiceSync extends ServiceBase {
 
         private Map<Integer, Track> getFiles(int idFrom, int nbFilesInBatch, Track.Status status) throws IOException {
 
-            //Interceptor cannot catch .body().string() network errors, so looping here instead
-            //RetryInterceptor interceptor = new RetryInterceptor(5,5, helperNotification, notificationSync);
-            //OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+            //RetryInterceptor cannot catch .body().string() network errors, so looping here instead
             int nbRetries = 0;
             int sleepSeconds = 5;
             int maxNbRetries = 20;
@@ -349,11 +347,15 @@ public class ServiceSync extends ServiceBase {
             final JSONObject jObject = new JSONObject(body);
             JSONArray filesToUpdate = (JSONArray) jObject.get("files"); //NON-NLS
             for (int i = 0; i < filesToUpdate.length(); i++) {
-                Track fileReceived = new Track(
+                Track trackServer = new Track(
                         (JSONObject) filesToUpdate.get(i),
                         getAppDataPath, true);
-                fileReceived.setStatus(Track.Status.REC);
-                HelperLibrary.musicLibrary.updateTrack(fileReceived, true);
+                trackServer.setStatus(Track.Status.REC);
+                Track trackRemote = RepoSync.getFile(trackServer.getIdFileServer());
+                if (trackRemote != null) {
+                    trackServer.setIdFileRemote(trackRemote.getIdFileRemote());
+                    HelperLibrary.musicLibrary.updateTrack(trackServer, true);
+                }
                 helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncUpdateDatabase),
                         10, i + 1, filesToUpdate.length());
             }

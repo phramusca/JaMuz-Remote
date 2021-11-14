@@ -44,9 +44,6 @@ import android.database.sqlite.SQLiteStatement;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -185,12 +182,12 @@ public class MusicLibrary {
     synchronized boolean insertOrUpdateTrack(String absolutePath) {
         Track track = new Track(getAppDataPath, absolutePath);
         if (track.readMetadata()) {
-            return insertOrUpdateTrack(track, false);
+            return insertOrUpdateTrack(track);
         }
         return false;
     }
 
-    synchronized boolean insertOrUpdateTrack(Track track, boolean statsOnly) {
+    synchronized boolean insertOrUpdateTrack(Track track) {
         int idFileRemote = getTrackIdFileRemote(track.getPath());
         boolean result;
         if (idFileRemote >= 0) {
@@ -198,7 +195,7 @@ public class MusicLibrary {
             //TODO, for user path only: update only if file is modified: //NON-NLS
             //based on lastModificationDate and/or size (not on content as longer than updateTrack) //NON-NLS
             Log.d(TAG, "updateTrack " + track.getPath()); //NON-NLS
-            result = updateTrack(track, statsOnly);
+            result = updateTrack(track, false);
         } else {
             Log.d(TAG, "insertTrack " + track.getPath()); //NON-NLS
             result = insertTrack(track);
