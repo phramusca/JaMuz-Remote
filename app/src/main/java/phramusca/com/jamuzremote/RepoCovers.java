@@ -22,9 +22,12 @@
  import android.util.Log;
  import android.util.Pair;
 
+ import java.io.ByteArrayOutputStream;
  import java.io.File;
  import java.io.FileOutputStream;
  import java.io.IOException;
+ import java.security.MessageDigest;
+ import java.security.NoSuchAlgorithmException;
 
  /**
   * @author phramusca ( https://github.com/phramusca/JaMuz/ )
@@ -53,14 +56,38 @@
              return icon;
          }
          if (readIfNotFound) {
-             Bitmap trackCover = Track.readCover(path);
-             Bitmap cover = writeIconToCache(coverHash, IconSize.COVER, trackCover);
-             Bitmap thumb = writeIconToCache(coverHash, IconSize.THUMB, cover);
-             if (iconSize == IconSize.COVER) {
-                 icon = cover;
-             } else if (iconSize == IconSize.THUMB) {
-                 icon = thumb;
-             }
+            Bitmap trackCover = Track.readCover(path);
+            icon = writeIconsToCache(coverHash, trackCover, iconSize);
+         }
+         return icon;
+     }
+
+     public static String readCoverHash(Bitmap bitmap) throws NoSuchAlgorithmException {
+         ByteArrayOutputStream stream = new ByteArrayOutputStream();
+         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+         byte[] data = stream.toByteArray();
+         MessageDigest md = MessageDigest.getInstance("MD5"); //NOI18N
+         md.update(data);
+         byte[] hash = md.digest();
+         return returnHex(hash);
+     }
+
+     private static String returnHex(byte[] inBytes) {
+         StringBuilder builder = new StringBuilder();
+         for (int i = 0; i < inBytes.length; i++) { //for loop ID:1
+             builder.append(Integer.toString((inBytes[i] & 0xff) + 0x100, 16).substring(1));
+         }                                   // Belongs to for loop ID:1
+         return builder.toString();
+     }
+
+     public static Bitmap writeIconsToCache(String coverHash, Bitmap trackCover, IconSize iconSize) {
+         Bitmap icon = null;
+         Bitmap cover = writeIconToCache(coverHash, IconSize.COVER, trackCover);
+         Bitmap thumb = writeIconToCache(coverHash, IconSize.THUMB, cover);
+         if (iconSize == IconSize.COVER) {
+             icon = cover;
+         } else if (iconSize == IconSize.THUMB) {
+             icon = thumb;
          }
          return icon;
      }

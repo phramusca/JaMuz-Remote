@@ -179,8 +179,8 @@ public class MusicLibrary {
         return new Triplet<>(-1, (long) -1, (long) -1);
     }
 
-    synchronized boolean insertOrUpdateTrack(String absolutePath) {
-        Track track = new Track(getAppDataPath, absolutePath);
+    synchronized boolean insertOrUpdateTrack(String absolutePath, File rootPath) {
+        Track track = new Track(rootPath, absolutePath);
         if (track.readMetadata()) {
             return insertOrUpdateTrack(track);
         }

@@ -85,11 +85,11 @@ public class ServiceScan extends ServiceBase {
         }
     }
 
-    private void scanFolder(final File path) {
+    private void scanFolder(final File pathToScan) {
         scanLibrary = new ProcessAbstract("Thread.ActivityMain.scanLibrayInThread") { //NON-NLS
             public void run() {
                 try {
-                    if (!path.getAbsolutePath().equals("/")) { //NON-NLS
+                    if (!pathToScan.getAbsolutePath().equals("/")) { //NON-NLS
                         checkAbort();
                         nbFiles = 0;
                         nbFilesTotal = 0;
@@ -98,7 +98,7 @@ public class ServiceScan extends ServiceBase {
                         processBrowseFS = new ProcessAbstract("Thread.ActivityMain.browseFS") { //NON-NLS
                             public void run() {
                                 try {
-                                    browseFS(path);
+                                    browseFS(pathToScan);
                                 } catch (IllegalStateException | InterruptedException e) {
                                     Log.w(TAG, "Thread.ActivityMain.browseFS InterruptedException"); //NON-NLS
                                     scanLibrary.abort();
@@ -110,7 +110,7 @@ public class ServiceScan extends ServiceBase {
                         processBrowseFScount = new ProcessAbstract("Thread.ActivityMain.browseFScount") { //NON-NLS
                             public void run() {
                                 try {
-                                    browseFScount(path);
+                                    browseFScount(pathToScan);
                                 } catch (InterruptedException e) {
                                     Log.w(TAG, "Thread.ActivityMain.browseFScount InterruptedException"); //NON-NLS
                                     scanLibrary.abort();
@@ -170,7 +170,7 @@ public class ServiceScan extends ServiceBase {
                                         /*audioFiles.add("ogg");*/
                                         String ext = absolutePath.substring(absolutePath.lastIndexOf(".") + 1); //NON-NLS
                                         if (audioExtensions.contains(ext)) {
-                                            HelperLibrary.musicLibrary.insertOrUpdateTrack(absolutePath);
+                                            HelperLibrary.musicLibrary.insertOrUpdateTrack(absolutePath, pathToScan);
                                         }
                                     }
                                     notifyScan(getString(R.string.scanNotifyScanning), 13);

@@ -2,7 +2,10 @@ package phramusca.com.jamuzremote;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaExtractor;
+import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
+import android.os.Build;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -11,7 +14,11 @@ import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
@@ -34,7 +41,7 @@ public class Track implements Serializable {
     private int discNo = -1;
     private int discTotal = -1;
     private String bitRate = "";
-    private String format;
+    private String format = "";
     private double BPM = -1;
     private Date modifDate = new Date(0);
     private String checkedFlag = "";
@@ -188,28 +195,73 @@ public class Track implements Serializable {
     /**
      * Creates a LOCAL track
      *
-     * @param getAppDataPath
-     * @param absolutePath
+     * @param rootPath Track root path.
+     * @param absolutePath Track absolute path.
      */
-    public Track(File getAppDataPath, String absolutePath) {
+    public Track(File rootPath, String absolutePath) {
         this.path = absolutePath;
         try {
-            this.relativeFullPath = path.substring(getAppDataPath.getAbsolutePath().length() + 1);
+            this.relativeFullPath = path.substring(rootPath.getAbsolutePath().length() + 1);
         } catch (StringIndexOutOfBoundsException ex) {
-            Log.e(TAG, "Error getting relativeFullPath; path=" + path + ", getAppDataPath=" + getAppDataPath, ex); //NON-NLS //NON-NLS
+            Log.e(TAG, "Error getting relativeFullPath; path=" + path + ", getAppDataPath=" + rootPath, ex); //NON-NLS //NON-NLS
         }
     }
 
     public boolean readMetadata() {
         try {
+            File file = new File(path);
+            size=file.length();
+            addedDate=new Date();
+            modifDate=new Date(file.lastModified());
+
+            MediaExtractor mex = new MediaExtractor();
+            mex.setDataSource(path);
+            MediaFormat mf = mex.getTrackFormat(0);
+            String bitrate = mf.getString(MediaFormat.KEY_BIT_RATE);
+            if(bitrate!=null) { //TODO: Why is bitrate always null ? :(
+                bitRate = bitrate;
+            }
+            length = (int) mf.getLong(MediaFormat.KEY_DURATION);
+            format = mf.getString(MediaFormat.KEY_MIME);
+
             MediaMetadataRetriever mmr = new MediaMetadataRetriever();
             mmr.setDataSource(path);
             album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
             artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
             title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
             genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
+
+            albumArtist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST);
+            year = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR);
+            String trackNumber = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER);
+            if(trackNumber.contains("/")) {
+                String[] split = trackNumber.split("/");
+                trackNo = Integer.parseInt(split[0]);
+                trackTotal = Integer.parseInt(split[1]);
+            } else {
+                trackNo = Integer.parseInt(trackNumber);
+                trackTotal = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS));
+            }
+            discNo = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER));
+
+            //TODO: Get discTotal and comment
+
+            Bitmap bitmap = readCover(path);
+            if(bitmap != null) {
+                coverHash = RepoCovers.readCoverHash(bitmap);
+                if(!RepoCovers.contains(coverHash, RepoCovers.IconSize.COVER)) {
+                    RepoCovers.writeIconsToCache(coverHash, bitmap, RepoCovers.IconSize.COVER);
+                }
+            }
+
+            File folder = file.getParentFile();
+            pathModifDate=new Date(Objects.requireNonNull(folder).lastModified());
+            //FIXME NOW LOCAL idPath (so it can be used instead of album)
+            //idPath=-1
+            //pathMbId=
+
             return true;
-        } catch (RuntimeException ex) {
+        } catch (RuntimeException | IOException | NoSuchAlgorithmException ex) {
             Log.e(TAG, "Error reading file tags " + path, ex); //NON-NLS
         }
         return false;
