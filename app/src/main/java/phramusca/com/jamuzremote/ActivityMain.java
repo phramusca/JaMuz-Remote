@@ -671,7 +671,7 @@ public class ActivityMain extends AppCompatActivity {
                     audioPlayer.pullUp();
                     audioPlayer.resume(); //As toggled by simple Tap
                 }
-                //FIXME NOW Do the same for remote when fixed on JaMuz
+                //TODO Send "pullup" to server if isRemoteConnected() && pullup is added back on JaMuz
             }
 
             @Override
@@ -810,7 +810,7 @@ public class ActivityMain extends AppCompatActivity {
         } catch (NumberFormatException ex) {
             port = 2013;
         }
-        //FIXME: Use a real password, from QR code
+        //TODO Use a real password, from QR code
         return new ClientInfo(address, port, login, "tata", canal, //NON-NLS
                 "jamuz", getAppDataPath().getAbsolutePath()); //NON-NLS
     }

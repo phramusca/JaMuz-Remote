@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class MusicLibraryDb extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 6;
+    private static final int DB_VERSION = 7;
 
     static final String TABLE_TRACKS = "tracks"; //NON-NLS
 
@@ -51,7 +51,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
 
     private static final String CREATE_BDD = "CREATE TABLE " + TABLE_TRACKS + " (" //NON-NLS //NON-NLS
             + COL_ID_REMOTE + " INTEGER PRIMARY KEY AUTOINCREMENT, " //NON-NLS //NON-NLS
-            + COL_ID_SERVER + " INTEGER UNIQUE NOT NULL, " //NON-NLS
+            + COL_ID_SERVER + " INTEGER NOT NULL, " //NON-NLS
             + COL_ID_PATH + " INTEGER NOT NULL, " //NON-NLS
             + COL_ALBUM_ARTIST + " TEXT NOT NULL, " //NON-NLS //NON-NLS //NON-NLS
             + COL_YEAR + " TEXT NOT NULL, " //NON-NLS
