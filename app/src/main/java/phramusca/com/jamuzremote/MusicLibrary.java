@@ -181,7 +181,8 @@ public class MusicLibrary {
 
     synchronized boolean insertOrUpdateTrack(String absolutePath, File rootPath) {
         Track track = new Track(rootPath, absolutePath);
-        if (track.readMetadata()) {
+        //TODO: Do not read if file has not changed (takes time to read cover and other)
+        if (track.read()) {
             return insertOrUpdateTrack(track);
         }
         return false;
@@ -192,8 +193,8 @@ public class MusicLibrary {
         boolean result;
         if (idFileRemote >= 0) {
             track.setIdFileRemote(idFileRemote);
-            //TODO, for user path only: update only if file is modified: //NON-NLS
-            //based on lastModificationDate and/or size (not on content as longer than updateTrack) //NON-NLS
+            //TODO, for LOCAL tracks only: update only if file is modified:
+            //based on lastModificationDate and/or size (not on content as longer than updateTrack)
             Log.d(TAG, "updateTrack " + track.getPath()); //NON-NLS
             result = updateTrack(track, false);
         } else {

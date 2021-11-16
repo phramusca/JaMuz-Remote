@@ -697,9 +697,7 @@ public class ActivityMain extends AppCompatActivity {
         displayedTrack = localTrack;
         displayTrack();
 
-        //TODO: MAke this an option somehow
-
-        //The following call creates default application folder
+         //The following call creates default application folder
         // - in "external" card, the emulated one : /storage/emulated/0/Android//com.phramusca.jamuz/files
         // - and in real removable sd card : /storage/xxxx-xxxx/Android/com.phramusca.jamuz/files
         externalFilesDir = getExternalFilesDirs(null);
@@ -1717,10 +1715,6 @@ public class ActivityMain extends AppCompatActivity {
             }
         }
     };
-
-    //TODO: Use BroadcastReceiver (same or new ones)
-    //to handle messages from other threads or services
-    //Especially for audioPlayer (some weird message back&forwarding occuring)
 
     private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override

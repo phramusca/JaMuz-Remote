@@ -207,7 +207,7 @@ public class Track implements Serializable {
         }
     }
 
-    public boolean readMetadata() {
+    public boolean read() {
         try {
             File file = new File(path);
             size=file.length();
@@ -221,7 +221,7 @@ public class Track implements Serializable {
             if(bitrate!=null) { //TODO: Why is bitrate always null ? :(
                 bitRate = bitrate;
             }
-            length = (int) mf.getLong(MediaFormat.KEY_DURATION);
+            length = (int) Math.round(mf.getLong(MediaFormat.KEY_DURATION)/1000.0/1000.0);
             format = mf.getString(MediaFormat.KEY_MIME);
 
             MediaMetadataRetriever mmr = new MediaMetadataRetriever();
@@ -256,7 +256,7 @@ public class Track implements Serializable {
 
             File folder = file.getParentFile();
             pathModifDate=new Date(Objects.requireNonNull(folder).lastModified());
-            //FIXME NOW LOCAL idPath (so it can be used instead of album)
+            //FIXME LOCAL idPath (so it can be used instead of album)
             //idPath=-1
             //pathMbId=
 
