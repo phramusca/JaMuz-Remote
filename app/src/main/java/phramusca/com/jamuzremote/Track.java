@@ -33,7 +33,7 @@ public class Track implements Serializable {
     private Date pathModifDate = new Date(0);
     private String pathMbId = "";
     private String comment = "";
-    private int idPath = -1;
+    private String idPath = "";
     private String albumArtist = "";
     private String year = "";
     private int trackNo = -1;
@@ -105,7 +105,7 @@ public class Track implements Serializable {
      * @param size           -
      * @param length         -
      */
-    public Track(Date pathModifDate, String pathMbId, String comment, int idPath,
+    public Track(Date pathModifDate, String pathMbId, String comment, String idPath,
                  String albumArtist, String year, int trackNo, int trackTotal,
                  int discNo, int discTotal, String bitRate, String format, double bpm,
                  Date modifDate, String checkedFlag, String copyRight, File getAppDataPath,
@@ -256,9 +256,7 @@ public class Track implements Serializable {
 
             File folder = file.getParentFile();
             pathModifDate=new Date(Objects.requireNonNull(folder).lastModified());
-            //FIXME LOCAL idPath (so it can be used instead of album)
-            //idPath=-1
-            //pathMbId=
+            idPath=folder.getAbsolutePath();
 
             return true;
         } catch (RuntimeException | IOException | NoSuchAlgorithmException ex) {
@@ -299,7 +297,7 @@ public class Track implements Serializable {
                 length = file.getInt("length"); //NON-NLS
                 size = file.getLong("size"); //NON-NLS
                 status = Status.valueOf(file.getString("status")); //NON-NLS
-                idPath = file.getInt("idPath"); //NON-NLS
+                idPath = file.getString("idPath"); //NON-NLS
                 albumArtist = file.getString("albumArtist");
                 year = file.getString("year"); //NON-NLS
                 trackNo = file.getInt("trackNo");
@@ -377,12 +375,8 @@ public class Track implements Serializable {
         return length;
     }
 
-    public Integer getIdPath() {
+    public String getIdPath() {
         return idPath;
-    }
-
-    public void setIdPath(Integer idPath) {
-        this.idPath = idPath;
     }
 
     public String getAlbumArtist() {

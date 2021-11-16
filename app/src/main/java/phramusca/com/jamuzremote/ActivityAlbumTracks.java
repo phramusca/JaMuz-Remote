@@ -29,11 +29,11 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         TextView title = findViewById(R.id.album_tracks_title);
 
         Intent intent = getIntent();
-        final String album = (String) intent.getSerializableExtra("album"); //NON-NLS
+        final String idPath = (String) intent.getSerializableExtra("idPath"); //NON-NLS
         String searchQuery = intent.getStringExtra("searchQuery");
 
-        Playlist playlist = new Playlist(album, true);
-        playlist.setAlbum(album);
+        Playlist playlist = new Playlist(idPath, true);
+        playlist.setIdPath(idPath);
         Cursor cursor = playlist.getTracks();
 
         Track track = null;
@@ -92,7 +92,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
 
     private void insertAndSetResult(Track track, boolean playNext) {
         Playlist playlist = new Playlist(track.getAlbum(), true);
-        playlist.setAlbum(track.getAlbum());
+        playlist.setIdPath(track.getIdPath());
         PlayQueue.queue.insert(playlist);
 
         Intent data = new Intent();

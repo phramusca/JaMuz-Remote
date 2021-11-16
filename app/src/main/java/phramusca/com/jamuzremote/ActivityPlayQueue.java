@@ -122,7 +122,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
     public void onClick(final Track track, final int position) {
         //Open album tracks layout
         Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
-        intent.putExtra("album", track.getAlbum()); //NON-NLS
+        intent.putExtra("idPath", track.getIdPath()); //NON-NLS
         startActivityForResult(intent, QUEUE_REQUEST_CODE);
 
         //TODO Offer user a choice:

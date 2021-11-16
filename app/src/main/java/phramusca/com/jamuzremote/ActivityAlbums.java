@@ -62,7 +62,7 @@ public class ActivityAlbums extends AppCompatActivity {
         adapterCursorAlbum.addListener(adapterListItemAlbum -> {
             //Open album tracks layout
             Intent intent = new Intent(getApplicationContext(), ActivityAlbumTracks.class);
-            intent.putExtra("album", adapterListItemAlbum.getAlbum()); //NON-NLS
+            intent.putExtra("idPath", adapterListItemAlbum.getIdPath()); //NON-NLS
             intent.putExtra("searchQuery", searchQuery);
             startActivityForResult(intent, ALBUM_TRACK_REQUEST_CODE);
         });
@@ -109,7 +109,7 @@ public class ActivityAlbums extends AppCompatActivity {
                         ButtonInfo.PLAY,
                         pos -> {
                             AdapterListItemAlbum adapterListItemAlbum = adapterCursorAlbum.getAlbumListItem(pos);
-                            insertAndSetResult(adapterListItemAlbum.getAlbum(), true);
+                            insertAndSetResult(adapterListItemAlbum.getIdPath(), true);
                         },
                         getApplicationContext()));
 
@@ -117,7 +117,7 @@ public class ActivityAlbums extends AppCompatActivity {
                         ButtonInfo.QUEUE,
                         pos -> {
                             AdapterListItemAlbum adapterListItemAlbum = adapterCursorAlbum.getAlbumListItem(pos);
-                            insertAndSetResult(adapterListItemAlbum.getAlbum(), false);
+                            insertAndSetResult(adapterListItemAlbum.getIdPath(), false);
                         },
                         getApplicationContext()));
             }
@@ -135,9 +135,9 @@ public class ActivityAlbums extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void insertAndSetResult(String album, boolean playNext) {
-        Playlist playlist = new Playlist(album, true);
-        playlist.setAlbum(album);
+    private void insertAndSetResult(String idPath, boolean playNext) {
+        Playlist playlist = new Playlist(idPath, true);
+        playlist.setIdPath(idPath);
         PlayQueue.queue.insert(playlist);
 
         Intent data = new Intent();

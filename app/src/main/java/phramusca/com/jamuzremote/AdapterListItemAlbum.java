@@ -4,6 +4,7 @@ import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ALBUM;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ARTIST;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_COVER_HASH;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_GENRE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_PATH;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PATH;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PLAY_COUNTER;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
@@ -18,8 +19,9 @@ public class AdapterListItemAlbum {
     private final String genre;
     private final String coverHash;
     private final String path;
+    private final String idPath;
 
-    public AdapterListItemAlbum(String album, String artist, int nbTracks, double rating, String genre, String coverHash, String path) {
+    public AdapterListItemAlbum(String album, String artist, int nbTracks, double rating, String genre, String coverHash, String path, String idPath) {
         this.album = album;
         this.artist = artist;
         this.nbTracks = nbTracks;
@@ -27,6 +29,7 @@ public class AdapterListItemAlbum {
         this.genre = genre;
         this.coverHash = coverHash;
         this.path = path;
+        this.idPath = idPath;
     }
 
     public static AdapterListItemAlbum fromCursor(Cursor c) {
@@ -37,7 +40,8 @@ public class AdapterListItemAlbum {
                 c.getDouble(c.getColumnIndex(COL_RATING)),
                 c.getString(c.getColumnIndex(COL_GENRE)),
                 c.getString(c.getColumnIndex(COL_COVER_HASH)),
-                c.getString(c.getColumnIndex(COL_PATH)));
+                c.getString(c.getColumnIndex(COL_PATH)),
+                c.getString(c.getColumnIndex(COL_ID_PATH)));
     }
 
     public String getAlbum() {
@@ -66,5 +70,9 @@ public class AdapterListItemAlbum {
 
     public String getPath() {
         return path;
+    }
+
+    public String getIdPath() {
+        return idPath;
     }
 }

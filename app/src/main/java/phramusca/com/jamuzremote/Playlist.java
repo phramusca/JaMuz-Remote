@@ -41,6 +41,7 @@ public class Playlist implements Comparable, Serializable {
     private LimitUnit limitUnit = LimitUnit.MINUTES;
     private boolean modified = false;
     private int nbFiles = -1;
+    private String idPath;
 
     Playlist(String name, boolean isLocal) {
         this.name = name;
@@ -344,6 +345,10 @@ public class Playlist implements Comparable, Serializable {
             in += "\n AND album LIKE \"" + album + "\" "; //NON-NLS
         }
 
+        if (idPath != null) {
+            in += "\n AND idPath = \"" + idPath + "\" "; //NON-NLS
+        }
+
         in += getInClause(excluded);
 
         return in;
@@ -469,6 +474,11 @@ public class Playlist implements Comparable, Serializable {
 
     public void setAlbum(String album) {
         this.album = album;
+        this.order = Order.DISC_TRACK;
+    }
+
+    public void setIdPath(String idPath) {
+        this.idPath = idPath;
         this.order = Order.DISC_TRACK;
     }
 

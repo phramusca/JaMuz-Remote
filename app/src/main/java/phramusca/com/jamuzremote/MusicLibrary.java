@@ -405,7 +405,7 @@ public class MusicLibrary {
         Date lastPlayed = HelperDateTime.parseSqlUtc(
                 c.getString(c.getColumnIndex(COL_LAST_PLAYED)));
         int playCounter = c.getInt(c.getColumnIndex(COL_PLAY_COUNTER));
-        int idPath = c.getInt(c.getColumnIndex(COL_ID_PATH));
+        String idPath = c.getString(c.getColumnIndex(COL_ID_PATH));
         Date modifDate = HelperDateTime.parseSqlUtc(
                 c.getString(c.getColumnIndex(COL_MODIF_DATE)));
 
@@ -655,13 +655,13 @@ public class MusicLibrary {
                     "round(avg(" + COL_RATING + "), 2) AS " + COL_RATING + ", \n" + //NON-NLS //NON-NLS //NON-NLS
                     "group_concat(distinct " + COL_GENRE + ") AS " + COL_GENRE + ", \n" + //NON-NLS //NON-NLS //NON-NLS //NON-NLS
                     "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + ", \n" + //NON-NLS //NON-NLS
-                    COL_ALBUM + ", " +COL_COVER_HASH + ", " + COL_PATH + " \n"+ //NON-NLS
+                    COL_ALBUM + ", " +COL_COVER_HASH + ", " + COL_PATH + ", " + COL_ID_PATH + " \n"+ //NON-NLS
                     "FROM tracks \n" //NON-NLS
                     + (search.isEmpty()?"":" WHERE (" + COL_ALBUM + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS //NON-NLS
                         "OR " + COL_ARTIST + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS
                         "OR " + COL_ALBUM_ARTIST + " LIKE \"%"+search+"%\" " + //NON-NLS
                         "OR " + COL_TITLE + " LIKE \"%"+search+"%\") \n") + //NON-NLS
-                    "GROUP BY " + COL_ALBUM + " \n" + //NON-NLS //NON-NLS
+                    "GROUP BY " + COL_ID_PATH + " \n" + //NON-NLS //NON-NLS
                     "HAVING MIN(CASE status WHEN 'REC' THEN 1 WHEN 'LOCAL' THEN 2 ELSE 3 END) \n" +
                     "ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, " + COL_ALBUM + ", " + COL_ARTIST; //NON-NLS
             Log.i(TAG, query);
