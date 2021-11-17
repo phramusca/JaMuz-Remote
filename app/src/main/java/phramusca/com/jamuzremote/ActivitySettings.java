@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -174,6 +175,39 @@ public class ActivitySettings extends AppCompatActivity {
         );
         kidsplaceAllowEdition.setChecked(
                 preferences.getBoolean("kidsplaceAllowEdition", false));
+
+        ActivityMain.SpeechFlavor speechFavor = ActivityMain.SpeechFlavor.valueOf(preferences.getString("speechFavor", ActivityMain.SpeechFlavor.PAUSE.name()));
+        switch (speechFavor) {
+            case NONE:
+                ((RadioButton)findViewById(R.id.settingsRadioSpeechNone)).setChecked(true);
+                break;
+            case LOWER_VOLUME:
+                ((RadioButton)findViewById(R.id.settingsRadioSpeechLowerVolume)).setChecked(true);
+                break;
+            case PAUSE:
+                ((RadioButton)findViewById(R.id.settingsRadioSpeechPause)).setChecked(true);
+                break;
+        }
+    }
+
+    public void onRadioButtonClicked(View view) {
+        boolean checked = ((RadioButton) view).isChecked();
+        ActivityMain.SpeechFlavor speechFlavor = ActivityMain.SpeechFlavor.PAUSE;
+        switch(view.getId()) {
+            case R.id.settingsRadioSpeechLowerVolume:
+                if(checked)
+                    speechFlavor= ActivityMain.SpeechFlavor.LOWER_VOLUME;
+                break;
+            case R.id.settingsRadioSpeechPause:
+                if(checked)
+                    speechFlavor= ActivityMain.SpeechFlavor.PAUSE;
+                break;
+            case R.id.settingsRadioSpeechNone:
+                if(checked)
+                    speechFlavor= ActivityMain.SpeechFlavor.NONE;
+                break;
+        }
+        setConfig("speechFavor", speechFlavor.name());
     }
 
     @Override
