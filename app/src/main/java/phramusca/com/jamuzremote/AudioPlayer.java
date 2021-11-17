@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 public class AudioPlayer {
 
-    private Context mContext;
+    private final Context mContext;
     private final IListenerPlayer callback;
     private static final String TAG = AudioPlayer.class.getName();
     private static MediaPlayer mediaPlayer;

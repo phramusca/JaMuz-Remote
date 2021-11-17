@@ -134,7 +134,51 @@
                     android:indeterminate="false"
                     android:paddingTop="5dp"/>
             </GridLayout>
-
+            <TextView android:text="@string/settingsSpeechTextViewTitle"
+                android:textColor="@color/textColor"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:gravity="start"
+                android:layout_marginTop="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="@color/colorPrimaryDark"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:orientation="vertical"
+                android:background="@color/colorPrimary">
+                <TextView android:text="@string/settingsSpeechTitle"
+                    android:textColor="@color/textColor"
+                    android:gravity="start"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent" />
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/settingsRadioSpeech">
+                    <RadioButton android:id="@+id/settingsRadioSpeechPause"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settingsRadioSpeechPause"
+                        android:textColor="@color/textColor"
+                        android:onClick="onRadioButtonClicked"/>
+                    <RadioButton android:id="@+id/settingsRadioSpeechLowerVolume"
+                        android:text="@string/settingsRadioSpeechLowerVolume"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:textColor="@color/textColor"
+                        android:onClick="onRadioButtonClicked"/>
+                    <RadioButton android:id="@+id/settingsRadioSpeechNone"
+                        android:text="@string/settingsRadioSpeechNone"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:textColor="@color/textColor"
+                        android:onClick="onRadioButtonClicked"/>
+                </RadioGroup>
+            </LinearLayout>
             <TextView android:text="@string/settingsKidsPlaceTextViewTitle"
                 android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
@@ -151,13 +195,11 @@
                 android:paddingBottom="5dp"
                 android:orientation="vertical"
                 android:background="@color/colorPrimary">
-
                 <TextView android:text="@string/settingsKidsPlaceTextViewHelp"
                     android:textColor="@color/textColor"
                     android:gravity="start"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent" />
-
                 <CheckBox android:id="@+id/settingsCheckBoxKidsPlaceLimit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -207,14 +249,12 @@
                 android:gravity="start"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent" />
-
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:background="@color/colorPrimary">
-
                 <TextView
                     android:text="@string/settingsLocalFilesTextViewPath"
                     android:layout_row="0"

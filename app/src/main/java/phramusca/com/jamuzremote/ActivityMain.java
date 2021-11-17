@@ -1233,8 +1233,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void speechRecognizer() {
-        //audioPlayer.pause(); //FIXME: Make pause/resume an option, another option being lowerVolume/resumeVolume
-
+        speechFavor(true);
         try {
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -1256,6 +1255,34 @@ public class ActivityMain extends AppCompatActivity {
         // - to handle errors and so being able to ask user again
         // - to avoid issue selecting wrongly Playlist subActivity with "Suivant" vocal command
         //https://www.truiton.com/2014/06/android-speech-recognition-without-dialog-custom-activity/
+    }
+
+    enum SpeechFlavor {
+        PAUSE,
+        LOWER_VOLUME,
+        NONE
+    }
+
+    private void speechFavor(boolean favor) {
+        SpeechFlavor speechFavor = SpeechFlavor.valueOf(preferences.getString("speechFavor", SpeechFlavor.PAUSE.name()));
+        switch (speechFavor) {
+            case PAUSE:
+                if(favor) {
+                    audioPlayer.pause();
+                } else {
+                    audioPlayer.resume();
+                }
+                break;
+            case LOWER_VOLUME:
+                if(favor) {
+                    audioPlayer.setVolume(20, displayedTrack);
+                } else {
+                    audioPlayer.setVolume(preferences.getInt("baseVolume", 70), displayedTrack);
+                }
+                break;
+            case NONE:
+                break;
+        }
     }
 
     @Override
@@ -1342,13 +1369,14 @@ public class ActivityMain extends AppCompatActivity {
                     }
                     askEdition(true);
                     msg = "";
-                    //audioPlayer.resume();
+                    speechFavor(false);
                     break;
                 case SET_RATING:
-                    int rating = -1;
+                    int rating;
                     try {
                         rating = Integer.parseInt(arguments);
                     } catch (NumberFormatException ex) {
+                        rating = -1;
                     }
                     if (rating > 0 && rating < 6) {
                         ratingBar.setRating(rating);
@@ -1363,7 +1391,7 @@ public class ActivityMain extends AppCompatActivity {
                     }
                     askEdition(true);
                     msg = "";
-                    //audioPlayer.resume();
+                    speechFavor(false);
                     break;
                 case SET_TAGS:
                     String[] tags = arguments.split(" ");
@@ -1378,7 +1406,7 @@ public class ActivityMain extends AppCompatActivity {
                     }
                     displayTrackDetails();
                     askEdition(true);
-                    //audioPlayer.resume();
+                    speechFavor(false);
                     msg = "";
                     break;
                 case PLAYER_NEXT:
@@ -1436,8 +1464,6 @@ public class ActivityMain extends AppCompatActivity {
             }
 
             //TODO New Feature: read CD barcode, get album info from musicbrainz and display album
-
-
             String QRcode = data.getStringExtra("QRcode");
             if (QRcode != null) {
                 getFromQRcode(QRcode);
