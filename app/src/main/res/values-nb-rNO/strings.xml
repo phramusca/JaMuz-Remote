@@ -37,8 +37,8 @@
     <string name="speakGenre">Sjanger</string>
     <string name="speakTags">Etiketter</string>
     <string name="speakYourTurn">Din tur</string>
-    <string name="speakTagsNone">Ingen etiketter.</string>
-    <string name="speakRatingNone">Ingen vurdering.</string>
+    <string name="speakTagsNone">Ingen etiketter</string>
+    <string name="speakRatingNone">Ingen vurdering</string>
     <string name="syncLabelReadingList">Leser listen …</string>
     <string name="syncLabelConnecting">Kobler til …</string>
     <string name="queueItemCoverDescription">Omslag</string>

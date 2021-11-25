@@ -1401,6 +1401,7 @@ public class ActivityMain extends AppCompatActivity {
                                 }
                             }
                         }
+                        displayTrackTags();
                         displayTrackDetails();
                         askEdition(true);
                         msg = "";
@@ -1695,20 +1696,22 @@ public class ActivityMain extends AppCompatActivity {
 
     private String getDisplayedTrackStatus() {
         StringBuilder msg = new StringBuilder();
-        if (displayedTrack.getTags(false).size() > 0) {
+        ArrayList<String> trackTags = displayedTrack.getTags(false);
+        if (trackTags.size() > 0) {
             msg.append(getString(R.string.speakTags)).append(": ");
-            for (String tag : displayedTrack.getTags(false)) {
-                msg.append(" ").append(tag).append(",");
+            for (String tag : trackTags) {
+                msg.append(tag).append(", ");
             }
+            msg.delete(msg.lastIndexOf(", "), msg.length()).append(". ");
         } else {
-            msg.append(getString(R.string.speakTagsNone)).append(" ");
+            msg.append(getString(R.string.speakTagsNone)).append(". ");
         }
 
         if (displayedTrack.getRating() > 0) {
             String string = getString(R.string.speakRating);
-            msg.append(string).append(": ").append((int) displayedTrack.getRating()).append(".");
+            msg.append(string).append(": ").append((int) displayedTrack.getRating()).append(". ");
         } else {
-            msg.append(getString(R.string.speakRatingNone)).append(" ");
+            msg.append(getString(R.string.speakRatingNone)).append(". ");
         }
         String string = getString(R.string.speakGenre);
         msg.append(string).append(": ").append(displayedTrack.getGenre()).append(".");
@@ -2296,18 +2299,7 @@ public class ActivityMain extends AppCompatActivity {
                 ratingBar.setRating((float) displayedTrack.getRating());
                 ratingBar.setEnabled(true);
                 setupSpinnerGenre(RepoGenres.get(), displayedTrack.getGenre());
-                //Display file tags
-                ArrayList<String> fileTags = displayedTrack.getTags(false);
-                if (fileTags == null) {
-                    fileTags = new ArrayList<>();
-                }
-                for (Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
-                    ToggleButton button = layoutTags.findViewById(tag.getKey());
-                    if (button != null && button.isChecked() != fileTags.contains(tag.getValue())) {
-                        button.setChecked(fileTags.contains(tag.getValue()));
-                        setTagButtonTextColor(button);
-                    }
-                }
+                displayTrackTags();
             });
 
             if (displayedTrack.getIdFileRemote() >= 0) {
@@ -2317,6 +2309,20 @@ public class ActivityMain extends AppCompatActivity {
                 displayImage(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_startup_cover_foreground));
             } else {
                 displayCover();
+            }
+        }
+    }
+
+    private void displayTrackTags() {
+        ArrayList<String> fileTags = displayedTrack.getTags(false);
+        if (fileTags == null) {
+            fileTags = new ArrayList<>();
+        }
+        for (Map.Entry<Integer, String> tag : RepoTags.get().entrySet()) {
+            ToggleButton button = layoutTags.findViewById(tag.getKey());
+            if (button != null && button.isChecked() != fileTags.contains(tag.getValue())) {
+                button.setChecked(fileTags.contains(tag.getValue()));
+                setTagButtonTextColor(button);
             }
         }
     }
