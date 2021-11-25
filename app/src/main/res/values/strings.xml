@@ -78,8 +78,8 @@
     <string name="speakUnknown">unknown.</string>
     <string name="speakRating">Rating</string>
     <string name="speakRatingIncorrect">incorrect.</string>
-    <string name="speakTagsNone">No tags.</string>
-    <string name="speakRatingNone">No rating.</string>
+    <string name="speakTagsNone">No tags</string>
+    <string name="speakRatingNone">No rating</string>
     <string name="syncLabelReadingList">Reading list…</string>
     <string name="syncLabelConnecting">Connecting…</string>
     <string name="queueItemCoverDescription">Cover</string>

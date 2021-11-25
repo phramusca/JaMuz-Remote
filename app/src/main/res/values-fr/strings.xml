@@ -88,8 +88,8 @@
     <string name="speakRating">Note</string>
     <string name="speakRatingIncorrect">incorrecte.</string>
     <string name="speakTags">Étiquettes</string>
-    <string name="speakTagsNone">Aucune étiquette.</string>
-    <string name="speakRatingNone">Aucune note.</string>
+    <string name="speakTagsNone">Aucune étiquette</string>
+    <string name="speakRatingNone">Aucune note</string>
     <string name="activityAlbumsLoading">Chargement de la liste des albums…</string>
     <string name="activityAlbumsLoadingPleaseWait">Merci de bien vouloir patienter quelques secondes.</string>
     <string name="settingsDirectoryChooserFailedToCreate">Erreur à la création du dossier</string>
