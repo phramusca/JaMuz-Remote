@@ -134,7 +134,7 @@ public class ActivityMain extends AppCompatActivity {
 
     private static Context mContext;
     private static PrettyTime prettyTime;
-    
+
     // GUI elements
     private TextView textViewFileInfo1;
     private TextView textViewFileInfo2;
@@ -688,7 +688,7 @@ public class ActivityMain extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        localTrack = new Track("albumArtist", "v"+version, -1, -1,
+        localTrack = new Track("albumArtist", "v" + version, -1, -1,
                 -1, -1, "bitRate", "format", -1, 5, //NON-NLS
                 getString(R.string.mainWelcomeTitle),
                 getString(R.string.mainWelcomeYear), getString(R.string.applicationName),
@@ -697,7 +697,7 @@ public class ActivityMain extends AppCompatActivity {
         displayedTrack = localTrack;
         displayTrack();
 
-         //The following call creates default application folder
+        //The following call creates default application folder
         // - in "external" card, the emulated one : /storage/emulated/0/Android//com.phramusca.jamuz/files
         // - and in real removable sd card : /storage/xxxx-xxxx/Android/com.phramusca.jamuz/files
         externalFilesDir = getExternalFilesDirs(null);
@@ -1012,8 +1012,8 @@ public class ActivityMain extends AppCompatActivity {
                 if (!isRemoteConnected() && localSelectedPlaylist != null) {
                     Playlist.LimitUnit limitUnit1 = null;
                     for (Playlist.LimitUnit limitUnit : Playlist.LimitUnit.values()) {
-                        if(limitUnit.getDisplay(mContext).equals(value)) {
-                            limitUnit1=limitUnit;
+                        if (limitUnit.getDisplay(mContext).equals(value)) {
+                            limitUnit1 = limitUnit;
                             break;
                         }
                     }
@@ -1240,7 +1240,7 @@ public class ActivityMain extends AppCompatActivity {
                     RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.voicePromptCommand));
             startActivityForResult(intent, SPEECH_REQUEST_CODE);
-        } catch(ActivityNotFoundException e) {
+        } catch (ActivityNotFoundException e) {
             helperToast.toastLong(getString(R.string.mainVoiceToastNeedToInstall));
             String appPackageName = "com.google.android.googlequicksearchbox";
             try {
@@ -1267,14 +1267,14 @@ public class ActivityMain extends AppCompatActivity {
         SpeechFlavor speechFavor = SpeechFlavor.valueOf(preferences.getString("speechFavor", SpeechFlavor.PAUSE.name()));
         switch (speechFavor) {
             case PAUSE:
-                if(favor) {
+                if (favor) {
                     audioPlayer.pause();
                 } else {
                     audioPlayer.resume();
                 }
                 break;
             case LOWER_VOLUME:
-                if(favor) {
+                if (favor) {
                     audioPlayer.setVolume(20, displayedTrack);
                 } else {
                     audioPlayer.setVolume(preferences.getInt("baseVolume", 70), displayedTrack);
@@ -1287,152 +1287,149 @@ public class ActivityMain extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
-            List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-
-            //VoiceKeyWords
-            String spokenText = results.get(0);
-            VoiceKeyWords.KeyWord keyWord = VoiceKeyWords.get(spokenText);
-            String arguments = keyWord.getKeyword();
-            String msg = getString(R.string.speakUnknownCommand) + " \"" + spokenText + "\".";
-            switch (keyWord.getCommand()) {
-                case UNKNOWN:
-                    speak(msg);
-                    try {
-                        Thread.sleep(2000); //TODO: Can't we wait for speak to complete instead of sleeping ?
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    msg = "";
-                    askEdition(true);
-                    break;
-                case PLAY_PLAYLIST:
-                    msg = getString(R.string.playlistLabel) + " \"" + arguments + "\" " + getString(R.string.speakNotFound);
-                    for (Playlist playlist : localPlaylists.values()) {
-                        if (playlist.getName().equalsIgnoreCase(arguments)) {
-                            applyPlaylist(playlist, true);
-                            setupPlaylistSpinner(playListArrayAdapter, localSelectedPlaylist);
-                            msg = "";
-                            break;
-                        }
-                    }
-                    break;
-                case PLAY_ARTIST_ONGOING:
-                    arguments = displayedTrack.getArtist();
-                case PLAY_ARTIST:
-                    msg = getString(R.string.speakArtist) + " \"" + arguments + "\" " + getString(R.string.speakNotFound);
-                    if (arguments.equals("")) {
-                        msg = getString(R.string.speakSpecifyArtist);
-                    } else {
-                        arguments = keyWord.getCommand().equals(VoiceKeyWords.Command.PLAY_ARTIST)
-                                ? "%" + arguments + "%" : arguments;
-                        Playlist playlist = new Playlist(arguments, true);
-                        playlist.setArtist(arguments);
-                        if(PlayQueue.queue.insert(playlist)>0) {
-                            playNext();
-                            msg = "";
-                        }
-                    }
-                    break;
-                case PLAY_ALBUM_ONGOING:
-                    arguments = displayedTrack.getAlbum();
-                case PLAY_ALBUM:
-                    msg = getString(R.string.speakAlbum) + " \"" + arguments + "\" " + getString(R.string.speakNotFound);
-                    if (arguments.equals("")) {
-                        msg = getString(R.string.speakSpecifyAlbum);
-                    } else {
-                        arguments = keyWord.getCommand().equals(VoiceKeyWords.Command.PLAY_ALBUM)
-                                ? "%" + arguments + "%" : arguments;
-                        Playlist playlist = new Playlist(arguments, true);
-                        playlist.setAlbum(arguments);
-                        if(PlayQueue.queue.insert(playlist)>0) {
-                            playNext();
-                            msg = "";
-                        }
-                    }
-                    break;
-                case SET_GENRE:
-                    String genre = arguments;
-                    if (arguments.length() > 1) {
-                        genre = arguments.substring(0, 1).toUpperCase() + arguments.substring(1);
-                    }
-                    if (RepoGenres.get().contains(genre)) {
-                        setupSpinnerGenre(RepoGenres.get(), genre);
-                        setGenre(genre);
-                    } else {
-                        speak(getString(R.string.speakGenre).concat(" ").concat(genre).concat(" ").concat(getString(R.string.speakUnknown)));
+        if (requestCode == SPEECH_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                String spokenText = results.get(0);
+                VoiceKeyWords.KeyWord keyWord = VoiceKeyWords.get(spokenText);
+                String arguments = keyWord.getKeyword();
+                String msg = getString(R.string.speakUnknownCommand) + " \"" + spokenText + "\".";
+                switch (keyWord.getCommand()) {
+                    case UNKNOWN:
+                        speak(msg);
                         try {
                             Thread.sleep(2000); //TODO: Can't we wait for speak to complete instead of sleeping ?
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                    }
-                    askEdition(true);
-                    msg = "";
-                    speechFavor(false);
-                    break;
-                case SET_RATING:
-                    int rating;
-                    try {
-                        rating = Integer.parseInt(arguments);
-                    } catch (NumberFormatException ex) {
-                        rating = -1;
-                    }
-                    if (rating > 0 && rating < 6) {
-                        ratingBar.setRating(rating);
-                        setRating(rating);
-                    } else {
-                        speak(getString(R.string.speakRating).concat(" ").concat(arguments).concat(" ").concat(getString(R.string.speakRatingIncorrect)));
-                        try {
-                            Thread.sleep(2000); //TODO: Can't we wait for speak to complete instead of sleeping ?
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    askEdition(true);
-                    msg = "";
-                    speechFavor(false);
-                    break;
-                case SET_TAGS:
-                    String[] tags = arguments.split(" ");
-                    for (String tag : tags) {
-                        if (tag.length() > 1) {
-                            String s1 = tag.substring(0, 1).toUpperCase();
-                            String tagCamel = s1 + tag.substring(1).toLowerCase();
-                            if (RepoTags.get().containsValue(tagCamel)) {
-                                toggleTag(tagCamel);
+                        msg = "";
+                        askEdition(true);
+                        break;
+                    case PLAY_PLAYLIST:
+                        msg = getString(R.string.playlistLabel) + " \"" + arguments + "\" " + getString(R.string.speakNotFound);
+                        for (Playlist playlist : localPlaylists.values()) {
+                            if (playlist.getName().equalsIgnoreCase(arguments)) {
+                                applyPlaylist(playlist, true);
+                                setupPlaylistSpinner(playListArrayAdapter, localSelectedPlaylist);
+                                msg = "";
+                                break;
                             }
                         }
-                    }
-                    displayTrackDetails();
-                    askEdition(true);
-                    speechFavor(false);
-                    msg = "";
-                    break;
-                case PLAYER_NEXT:
-                    playNext();
-                    msg = "";
-                    break;
-                case PLAYER_PAUSE:
-                    audioPlayer.pause();
-                    msg = "";
-                    break;
-                case PLAYER_RESUME:
-                    audioPlayer.resume();
-                    msg = "";
-                    break;
-                case PLAYER_PULLUP:
-                    audioPlayer.pullUp();
-                    msg = "";
-                    break;
+                        break;
+                    case PLAY_ARTIST_ONGOING:
+                        arguments = displayedTrack.getArtist();
+                    case PLAY_ARTIST:
+                        msg = getString(R.string.speakArtist) + " \"" + arguments + "\" " + getString(R.string.speakNotFound);
+                        if (arguments.equals("")) {
+                            msg = getString(R.string.speakSpecifyArtist);
+                        } else {
+                            arguments = keyWord.getCommand().equals(VoiceKeyWords.Command.PLAY_ARTIST)
+                                    ? "%" + arguments + "%" : arguments;
+                            Playlist playlist = new Playlist(arguments, true);
+                            playlist.setArtist(arguments);
+                            if (PlayQueue.queue.insert(playlist) > 0) {
+                                playNext();
+                                msg = "";
+                            }
+                        }
+                        break;
+                    case PLAY_ALBUM_ONGOING:
+                        arguments = displayedTrack.getAlbum();
+                    case PLAY_ALBUM:
+                        msg = getString(R.string.speakAlbum) + " \"" + arguments + "\" " + getString(R.string.speakNotFound);
+                        if (arguments.equals("")) {
+                            msg = getString(R.string.speakSpecifyAlbum);
+                        } else {
+                            arguments = keyWord.getCommand().equals(VoiceKeyWords.Command.PLAY_ALBUM)
+                                    ? "%" + arguments + "%" : arguments;
+                            Playlist playlist = new Playlist(arguments, true);
+                            playlist.setAlbum(arguments);
+                            if (PlayQueue.queue.insert(playlist) > 0) {
+                                playNext();
+                                msg = "";
+                            }
+                        }
+                        break;
+                    case SET_GENRE:
+                        String genre = arguments;
+                        if (arguments.length() > 1) {
+                            genre = arguments.substring(0, 1).toUpperCase() + arguments.substring(1);
+                        }
+                        if (RepoGenres.get().contains(genre)) {
+                            setupSpinnerGenre(RepoGenres.get(), genre);
+                            setGenre(genre);
+                        } else {
+                            speak(getString(R.string.speakGenre).concat(" ").concat(genre).concat(" ").concat(getString(R.string.speakUnknown)));
+                            try {
+                                Thread.sleep(2000); //TODO: Can't we wait for speak to complete instead of sleeping ?
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        askEdition(true);
+                        msg = "";
+                        break;
+                    case SET_RATING:
+                        int rating;
+                        try {
+                            rating = Integer.parseInt(arguments);
+                        } catch (NumberFormatException ex) {
+                            rating = -1;
+                        }
+                        if (rating > 0 && rating < 6) {
+                            ratingBar.setRating(rating);
+                            setRating(rating);
+                        } else {
+                            speak(getString(R.string.speakRating).concat(" ").concat(arguments).concat(" ").concat(getString(R.string.speakRatingIncorrect)));
+                            try {
+                                Thread.sleep(2000); //TODO: Can't we wait for speak to complete instead of sleeping ?
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        askEdition(true);
+                        msg = "";
+                        break;
+                    case SET_TAGS:
+                        String[] tags = arguments.split(" ");
+                        for (String tag : tags) {
+                            if (tag.length() > 1) {
+                                String s1 = tag.substring(0, 1).toUpperCase();
+                                String tagCamel = s1 + tag.substring(1).toLowerCase();
+                                if (RepoTags.get().containsValue(tagCamel)) {
+                                    toggleTag(tagCamel);
+                                }
+                            }
+                        }
+                        displayTrackDetails();
+                        askEdition(true);
+                        msg = "";
+                        break;
+                    case PLAYER_NEXT:
+                        playNext();
+                        msg = "";
+                        break;
+                    case PLAYER_PAUSE:
+                        audioPlayer.pause();
+                        msg = "";
+                        break;
+                    case PLAYER_RESUME:
+                        audioPlayer.resume();
+                        msg = "";
+                        break;
+                    case PLAYER_PULLUP:
+                        audioPlayer.pullUp();
+                        msg = "";
+                        break;
+                }
+                if (!msg.equals("")) {
+                    helperToast.toastLong(msg);
+                    speak(msg);
+                }
             }
-
-            if (!msg.equals("")) {
-                helperToast.toastLong(msg);
-                speak(msg);
-            }
-
-        } else if (requestCode == LISTS_REQUEST_CODE && resultCode == RESULT_OK) {
+            speechFavor(false);
+        }
+        else if (requestCode == LISTS_REQUEST_CODE && resultCode == RESULT_OK) {
             String action = data.getStringExtra("action"); //NON-NLS
             switch (action) {
                 case "playNextAndDisplayQueue": //NON-NLS
@@ -1447,7 +1444,8 @@ public class ActivityMain extends AppCompatActivity {
                     break;
             }
 
-        } else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
+        }
+        else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
             String action = data.getStringExtra("action"); //NON-NLS
             if (action != null && action.equals("checkPermissionsThenScanLibrary")) { //NON-NLS
                 checkPermissionsThenScanLibrary();
@@ -2239,7 +2237,7 @@ public class ActivityMain extends AppCompatActivity {
         runOnUiThread(() -> {
             seekBarPosition.setMax(total);
             seekBarPosition.setProgress(currentPosition);
-            textFileInfo_seekBefore.setText(StringManager.secondsToMMSS(currentPosition/1000));
+            textFileInfo_seekBefore.setText(StringManager.secondsToMMSS(currentPosition / 1000));
             textFileInfo_seekAfter.setText(String.format(
                     "- %s / %s",
                     StringManager.secondsToMMSS((total - currentPosition) / 1000),
@@ -2265,10 +2263,10 @@ public class ActivityMain extends AppCompatActivity {
         return track.getPlayCounter() <= 0
                 ? mContext.getString(R.string.trackNeverPlayed)
                 : String.format(Locale.getDefault(),
-                        "%s %s (%dx). ", //NON-NLS
-                        mContext.getString(R.string.trackPlayed),
-                        prettyTime.format(track.getLastPlayed()),
-                        track.getPlayCounter());
+                "%s %s (%dx). ", //NON-NLS
+                mContext.getString(R.string.trackPlayed),
+                prettyTime.format(track.getLastPlayed()),
+                track.getPlayCounter());
     }
 
     public static String getAddedDateAgo(Track track) { //NON-NLS
@@ -2342,7 +2340,7 @@ public class ActivityMain extends AppCompatActivity {
     //Display cover from cache or ask for it
     private void displayCover() {
         Bitmap coverIcon = RepoCovers.getCoverIcon(displayedTrack, RepoCovers.IconSize.COVER, false);
-        if (coverIcon !=  null) {
+        if (coverIcon != null) {
             displayImage(coverIcon);
         } else { //Ask cover
             int maxWidth = this.getWindow().getDecorView().getWidth();
@@ -2419,7 +2417,7 @@ public class ActivityMain extends AppCompatActivity {
         public void onReceivedBitmap(final Bitmap bitmap) { //NON-NLS
             Log.d(TAG, "onReceivedBitmap: callback"); //NON-NLS //NON-NLS
             Log.d(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight()); //NON-NLS //NON-NLS
-            if(bitmap != null && !RepoCovers.contains(displayedTrack.getCoverHash(), RepoCovers.IconSize.COVER)) {
+            if (bitmap != null && !RepoCovers.contains(displayedTrack.getCoverHash(), RepoCovers.IconSize.COVER)) {
                 RepoCovers.writeIconToCache(displayedTrack.getCoverHash(), bitmap);
             }
             displayCover();
