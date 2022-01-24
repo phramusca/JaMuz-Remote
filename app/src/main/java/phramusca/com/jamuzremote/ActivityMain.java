@@ -1291,6 +1291,16 @@ public class ActivityMain extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                 String spokenText = results.get(0);
+
+                //FIXME: speech recognition:
+                //
+                // Mot a trouver | Mot à dire
+                // ------------- | -----------
+                // Dub           | deben
+                // Electro       | électro
+                // Ska Punk      | ska punk
+                // Trip Hop      | trip hop
+
                 VoiceKeyWords.KeyWord keyWord = VoiceKeyWords.get(spokenText);
                 String arguments = keyWord.getKeyword();
                 String msg = getString(R.string.speakUnknownCommand) + " \"" + spokenText + "\".";

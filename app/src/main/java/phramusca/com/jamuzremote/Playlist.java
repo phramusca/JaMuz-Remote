@@ -88,7 +88,7 @@ public class Playlist implements Comparable, Serializable {
                         }
                     }), getHaving());
             nbFiles = entry.getFirst();
-            //TODO: Offer choice to display one or the other (length OR size)
+            //TODO: Offer choice to display one or the other (length OR size) OR both
             /*lengthOrSize = StringManager.humanReadableByteCount(entry.getSecond(), false);*/
             lengthOrSize = StringManager.humanReadableSeconds(entry.getThird(), "");
         }

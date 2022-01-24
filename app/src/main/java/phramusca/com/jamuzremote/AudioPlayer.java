@@ -48,7 +48,6 @@ public class AudioPlayer {
             });
         } catch (IOException e) {
             Log.e(TAG, "Error playing (\"" + track + "\") => DELETING IT !!!!!!", e); //NON-NLS
-            //TODO: Put back in RepoSync (take info from there)
             stop(false);
             File file = new File(track.getPath());
             //noinspection ResultOfMethodCallIgnored

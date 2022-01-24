@@ -456,6 +456,8 @@ public class ServiceSync extends ServiceBase {
                     sleep(sleepSeconds * 1000L);
                     checkAbort();
                 } while (nbRetries < maxNbRetries - 1);
+                runOnUiThread(() -> helperNotification.notifyBar(notificationDownload, //NON-NLS
+                        getString(R.string.serviceSyncNotifySyncComplete), 5000));
             } catch (InterruptedException e) {
                 Log.i(TAG, "ProcessDownload received InterruptedException"); //NON-NLS
             }
