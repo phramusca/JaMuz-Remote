@@ -1292,7 +1292,7 @@ public class ActivityMain extends AppCompatActivity {
                 List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                 String spokenText = results.get(0);
 
-                //FIXME: speech recognition:
+                //TODO: speech recognition:
                 //
                 // Mot a trouver | Mot à dire
                 // ------------- | -----------

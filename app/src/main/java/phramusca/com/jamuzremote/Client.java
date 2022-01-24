@@ -35,7 +35,7 @@ public class Client {
     private BufferedReader bufferedReader;
     private OutputStream outputStream;
     private final ClientInfo clientInfo;
-    private Context mContext;
+    private final Context mContext;
 
     Client(ClientInfo clientInfo, Context context) {
         this.clientInfo = clientInfo;
