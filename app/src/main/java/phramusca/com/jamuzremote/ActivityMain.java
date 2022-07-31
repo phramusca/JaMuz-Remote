@@ -1421,6 +1421,10 @@ public class ActivityMain extends AppCompatActivity {
                         playNext();
                         msg = "";
                         break;
+                    case PLAYER_PREVIOUS:
+                        playPrevious();
+                        msg = "";
+                        break;
                     case PLAYER_PAUSE:
                         audioPlayer.pause();
                         msg = "";
