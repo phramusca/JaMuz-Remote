@@ -73,7 +73,8 @@ public class VoiceKeyWords {
         SET_GENRE(R.array.voiceCommands_SET_GENRE),
 
         PLAYER_RESUME(R.array.voiceCommands_PLAYER_RESUME),
-        PLAYER_NEXT(R.array.voiceCommands_PLAYER_NEXT), //FIXME: Add a PLAYER_PREVIOUS voice command
+        PLAYER_NEXT(R.array.voiceCommands_PLAYER_NEXT),
+        PLAYER_PREVIOUS(R.array.voiceCommands_PLAYER_PREVIOUS),
         PLAYER_PAUSE(R.array.voiceCommands_PLAYER_PAUSE),
         PLAYER_PULLUP(R.array.voiceCommands_PLAYER_PULLUP),
 

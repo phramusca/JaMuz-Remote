@@ -184,6 +184,10 @@
         <item>suivante</item>
         <item>suivant</item>
     </string-array>
+    <string-array name="voiceCommands_PLAYER_PREVIOUS" tools:ignore="InconsistentArrays">
+        <item>précédente</item>
+        <item>précédent</item>
+    </string-array>
     <string-array name="voiceCommands_PLAYER_PAUSE" tools:ignore="InconsistentArrays">
         <item>pause</item>
         <item>stop</item>

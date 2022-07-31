@@ -199,6 +199,12 @@
         <item>next track</item>
         <item>next</item>
     </string-array>
+    <string-array name="voiceCommands_PLAYER_PREVIOUS" tools:ignore="InconsistentArrays">
+        <item>play previous track</item>
+        <item>play previous</item>
+        <item>previous track</item>
+        <item>previous</item>
+    </string-array>
     <string-array name="voiceCommands_PLAYER_PAUSE" tools:ignore="InconsistentArrays">
         <item>pause</item>
         <item>stop</item>
