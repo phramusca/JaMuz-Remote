@@ -960,8 +960,9 @@ public class ActivityMain extends AppCompatActivity {
                     }
                 }));
                 playNext();
+            } else {
+                refreshQueueAndPlaylistSpinner();
             }
-            refreshQueueAndPlaylistSpinner();
         }
     }
 
@@ -1593,6 +1594,10 @@ public class ActivityMain extends AppCompatActivity {
         PlayQueue.queue.fill(localSelectedPlaylist);
         Track track = PlayQueue.queue.getNext();
         if (track != null) {
+            if(!track.isHistory() && !track.isLocked()) {
+                refreshLocalPlaylistSpinner(false);
+            }
+
             //Update lastPlayed and playCounter of previous track
             displayedTrack.setPlayCounter(displayedTrack.getPlayCounter() + 1);
             displayedTrack.setLastPlayed(new Date());
