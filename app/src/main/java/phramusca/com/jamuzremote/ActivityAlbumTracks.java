@@ -1,5 +1,8 @@
 package phramusca.com.jamuzremote;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -11,8 +14,12 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 
 public class ActivityAlbumTracks extends AppCompatActivity {
 
@@ -50,12 +57,18 @@ public class ActivityAlbumTracks extends AppCompatActivity {
 
         Button button_download = findViewById(R.id.button_download);
         button_download.setOnClickListener(v -> {
+            List<Track> newTracks = new ArrayList<>();
+            List<Track.Status> statuses = Arrays.asList(Track.Status.INFO, Track.Status.ERROR);
             for (int i = 0; i < adapterCursorAlbumTrack.getItemCount(); i++) {
                 Track track1 = adapterCursorAlbumTrack.getTrack(i);
-                if (Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track1.getStatus())) {
-                    downloadFile(track1, i);
+                if (statuses.contains(track1.getStatus())) {
+                    track1.getTags(true);
+                    track1.setStatus(Track.Status.NEW);
+                    adapterCursorAlbumTrack.updateStatus(track1.getStatus(), i, "");
+                    newTracks.add(track1);
                 }
             }
+            startDownloads(newTracks);
         });
 
         Button button_queue_play_album = findViewById(R.id.button_queue_play_album);
@@ -90,6 +103,23 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         };
     }
 
+    private ProcessDownload processDownload;
+
+    private void startDownloads(List<Track> newTracks) {
+        if ((processDownload == null || !processDownload.isAlive()) && newTracks.size() > 0) {
+            //Log.i(TAG, "START ProcessDownload"); //NON-NLS
+            OkHttpClient clientDownload = new OkHttpClient.Builder()
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .build();
+            NotificationManager mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            HelperNotification helperNotification = new HelperNotification(PendingIntent.getActivity(getApplicationContext(), 1, getIntent(), PendingIntent.FLAG_UPDATE_CURRENT), mNotifyManager);
+            HelperToast helperToast = new HelperToast(getApplicationContext());
+            ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
+            processDownload = new ProcessDownload("ActivityAlbumTracks.ProcessDownload", newTracks, getApplicationContext(), helperNotification, clientInfo, clientDownload);
+            processDownload.start();
+        }
+    }
+
     private void insertAndSetResult(Track track, boolean playNext) {
         Playlist playlist = new Playlist(track.getAlbum(), true);
         playlist.setIdPath(track.getIdPath());
@@ -110,18 +140,10 @@ public class ActivityAlbumTracks extends AppCompatActivity {
             setResult(RESULT_OK, data);
             finish();
         } else if (Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track.getStatus())) {
-            downloadFile(track, position);
+            List<Track> list = new ArrayList<>();
+            list.add(track);
+            startDownloads(list);
         }
-    }
-
-    private void downloadFile(Track track, int position) {
-        track.getTags(true);
-        track.setStatus(Track.Status.NEW);
-        adapterCursorAlbumTrack.updateStatus(track.getStatus(), position, "");
-        HelperToast helperToast = new HelperToast(getApplicationContext());
-        ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
-        ServiceSync.DownloadTask downloadTask = new ServiceSync.DownloadTask(track, (track1, msg) -> updateStatus(track1.getStatus(), position, msg), clientInfo);
-        downloadTask.start();
     }
 
     private void updateStatus(Track.Status status, int position, String msg) {
