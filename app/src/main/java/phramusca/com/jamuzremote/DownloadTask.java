@@ -16,14 +16,16 @@ import okio.Okio;
 
 public class DownloadTask extends ProcessAbstract implements Runnable {
     private static final String TAG = DownloadTask.class.getName();
+    private int position;
     private final IListenerSyncDown callback; //NON-NLS
     private final ClientInfo clientInfo;
     private final Track track;
     protected OkHttpClient clientDownload;
 
-    DownloadTask(Track track, IListenerSyncDown callback, ClientInfo clientInfo, OkHttpClient clientDownload) {
+    DownloadTask(Track track, int position, IListenerSyncDown callback, ClientInfo clientInfo, OkHttpClient clientDownload) {
         super("DownloadTask idFileServer=" + track.getIdFileServer()); //NON-NLS
         this.track = track;
+        this.position = position;
         this.callback = callback;
         this.clientInfo = clientInfo;
         this.clientDownload = clientDownload;
@@ -89,6 +91,6 @@ public class DownloadTask extends ProcessAbstract implements Runnable {
         } catch (Exception e) {
             Log.e(TAG, "Error downloading " + track.getRelativeFullPath(), e); //NON-NLS
         }
-        callback.setStatus(track, msg);
+        callback.setStatus(track, msg, position);
     }
 }
