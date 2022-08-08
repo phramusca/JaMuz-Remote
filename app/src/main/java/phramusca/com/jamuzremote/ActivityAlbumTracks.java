@@ -108,7 +108,9 @@ public class ActivityAlbumTracks extends AppCompatActivity {
 
     private void startDownloads(Map<Track, Integer> newTracks, String title) {
         if ((processDownload == null || !processDownload.isAlive()) && newTracks.size() > 0) {
-            //Log.i(TAG, "START ProcessDownload"); //NON-NLS
+            for (Track track : newTracks.keySet()) {
+                HelperLibrary.musicLibrary.updateStatus(track);
+            }
             OkHttpClient clientDownload = new OkHttpClient.Builder()
                     .readTimeout(60, TimeUnit.SECONDS)
                     .build();
@@ -135,13 +137,13 @@ public class ActivityAlbumTracks extends AppCompatActivity {
 
     private void insertAndSetResult(Track track, boolean playNext, int position) {
         if (Arrays.asList(Track.Status.REC, Track.Status.LOCAL).contains(track.getStatus())) {
-            //Insert in queue
             PlayQueue.queue.insert(track);
             Intent data = new Intent();
             data.putExtra("action", playNext ? "playNextAndDisplayQueue" : "displayQueue"); //NON-NLS
             setResult(RESULT_OK, data);
             finish();
         } else if (Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track.getStatus())) {
+            track.setStatus(Track.Status.NEW);
             Map<Track, Integer> list = new HashMap<>();
             list.put(track, position);
             startDownloads(list, track.getTitle() + " (" + track.getArtist() + ")");
