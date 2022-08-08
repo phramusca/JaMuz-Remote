@@ -733,7 +733,7 @@ public class ActivityMain extends AppCompatActivity {
             KPUtility.handleKPIntegration(this, KPUtility.GOOGLE_MARKET);
         }
 
-        //TODO: Fix startup glitch issue: need to wait for layouts to be loaded before toggling off
+        //FIXME: Fix startup glitch issue: need to wait for layouts to be loaded before toggling off
         toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
         toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
         toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);

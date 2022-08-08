@@ -213,10 +213,6 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
     public enum ButtonInfo {
         PLAY("", R.drawable.ic_slide_queue_play, Color.parseColor("#1e8449")), //NOI18N NON-NLS
         QUEUE("", R.drawable.ic_slide_queue_add, Color.parseColor("#82e0aa")), //NOI18N NON-NLS
-
-        // FIXME: Save DOWN in db so that displayed when back to given album
-        // FIXME: download albums using a ServiceSync.ProcessDownload
-
         DOWN("", R.drawable.ic_slide_down, Color.parseColor("#f7dc6f")), //NOI18N NON-NLS
         DEL("", R.drawable.ic_slide_remove, Color.parseColor("#c0392b")); //NOI18N NON-NLS
 
