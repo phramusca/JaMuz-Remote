@@ -25,7 +25,7 @@ public class ServiceScan extends ServiceBase {
 
     @Override
     public void onCreate() {
-        notificationScan = new Notification(this, NotificationId.SCAN, getString(R.string.scanTitle));
+        notificationScan = new Notification(this, NotificationId.get(), getString(R.string.scanTitle));
         super.onCreate();
     }
 

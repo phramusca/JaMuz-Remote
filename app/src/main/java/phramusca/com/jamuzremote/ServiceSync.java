@@ -35,7 +35,7 @@ public class ServiceSync extends ServiceBase {
     private static final String TAG = ServiceSync.class.getName();
     public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE_SCAN_REMOTE"; //NON-NLS
 
-    private ProcessDownload processDownload;
+    private DownloadProcess processDownload;
     private ClientInfo clientInfo;
     private Notification notificationSync;
     private BroadcastReceiver userStopReceiver;
@@ -48,7 +48,7 @@ public class ServiceSync extends ServiceBase {
 
     @Override
     public void onCreate() {
-        notificationSync = new Notification(this, NotificationId.SYNC, getString(R.string.serviceSyncNotifySyncTitle));
+        notificationSync = new Notification(this, NotificationId.get(), getString(R.string.serviceSyncNotifySyncTitle));
         clientDownload = new OkHttpClient.Builder()
                 .readTimeout(60, TimeUnit.SECONDS)
                 .build();
@@ -398,7 +398,7 @@ public class ServiceSync extends ServiceBase {
     private void startDownloads(List<Track> newTracks) {
         if ((processDownload == null || !processDownload.isAlive()) && newTracks.size() > 0) {
             Log.i(TAG, "START ProcessDownload"); //NON-NLS
-            processDownload = new ProcessDownload("ProcessDownload", newTracks, this, helperNotification, clientInfo, clientDownload);
+            processDownload = new DownloadProcess("ProcessDownload", newTracks, this, helperNotification, clientInfo, clientDownload, getString(R.string.serviceSyncNotifyDownloadTitle));
             processDownload.start();
         }
     }
