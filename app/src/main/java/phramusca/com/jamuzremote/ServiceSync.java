@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -114,7 +115,12 @@ public class ServiceSync extends ServiceBase {
 
                 startTime = System.currentTimeMillis();
                 checkAbort();
-                startDownloads(RepoSync.getDownloadList());
+
+                Map<Track, Integer> map = new HashMap<>();
+                for (Track track : RepoSync.getDownloadList()) {
+                    map.put(track, -1);
+                }
+                startDownloads(map);
                 Log.w(TAG, "startDownloads(RepoSync.getDownloadList()) :"+(System.currentTimeMillis() - startTime)+" ms");
 
                 startTime = System.currentTimeMillis();
@@ -395,10 +401,10 @@ public class ServiceSync extends ServiceBase {
         stopSelf();
     } //NON-NLS
 
-    private void startDownloads(List<Track> newTracks) {
+    private void startDownloads(Map<Track, Integer> newTracks) {
         if ((processDownload == null || !processDownload.isAlive()) && newTracks.size() > 0) {
             Log.i(TAG, "START ProcessDownload"); //NON-NLS
-            processDownload = new DownloadProcess("ProcessDownload", newTracks, this, helperNotification, clientInfo, clientDownload, getString(R.string.serviceSyncNotifyDownloadTitle));
+            processDownload = new DownloadProcess("ProcessDownload", newTracks, this, helperNotification, clientInfo, clientDownload, getString(R.string.serviceSyncNotifyDownloadTitle), null);
             processDownload.start();
         }
     }

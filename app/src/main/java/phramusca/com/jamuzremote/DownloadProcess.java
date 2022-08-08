@@ -6,8 +6,10 @@ import android.os.Looper;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +19,7 @@ import okhttp3.OkHttpClient;
 public class DownloadProcess extends ProcessAbstract {
 
     private static final String TAG = DownloadProcess.class.getName();
-    private final List<Track> newTracks;
+    private final Map<Track, Integer> newTracks;
     private List<DownloadTask> downloadServices;
     private ExecutorService pool;
     private int nbRetries = 0;
@@ -34,12 +36,14 @@ public class DownloadProcess extends ProcessAbstract {
     private final Notification notificationDownload;
     protected HelperToast helperToast;
     private final OkHttpClient clientDownload;
+    private IListenerSyncDown callback;
 
-    DownloadProcess(String name, List<Track> newTracks, Context context, HelperNotification helperNotification, ClientInfo clientInfo, OkHttpClient clientDownload, String title) {
+    DownloadProcess(String name, Map<Track, Integer> newTracks, Context context, HelperNotification helperNotification, ClientInfo clientInfo, OkHttpClient clientDownload, String title, IListenerSyncDown callback) {
         super(name);
         mContext = context;
         this.clientInfo = clientInfo;
         this.clientDownload = clientDownload;
+        this.callback = callback;
         helperToast = new HelperToast(mContext);
         this.helperNotification = helperNotification;
         notificationDownload = new Notification(mContext, NotificationId.get(), title);
@@ -93,19 +97,20 @@ public class DownloadProcess extends ProcessAbstract {
         downloadServices = new ArrayList<>();
         sizeTotal = 0;
         nbFailed = 0;
-        for (Track track : newTracks) {
+        for (Map.Entry<Track, Integer> entry : newTracks.entrySet()) {
+            Track track = entry.getKey();
             track.getTags(true);
-            DownloadTask downloadTask = new DownloadTask(track, this::notifyBarProgress, clientInfo, clientDownload);
+            DownloadTask downloadTask = new DownloadTask(track, entry.getValue(), this::notifyBarProgress, clientInfo, clientDownload);
             downloadServices.add(downloadTask);
             pool.submit(downloadTask);
             sizeTotal += track.getSize();
         }
         pool.shutdown();
-        notifyBarProgress(null, "");
+        notifyBarProgress(null, "", -1);
         return pool.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
     }
 
-    private void notifyBarProgress(Track track, String msg) {
+    private void notifyBarProgress(Track track, String msg, Integer position) {
         if (track != null) {
             if (!track.getStatus().equals(Track.Status.REC)) {
                 nbFailed++;
@@ -136,6 +141,10 @@ public class DownloadProcess extends ProcessAbstract {
                 nbFilesStart, (nbFilesStart - newTracks.size()), false,
                 true, true,
                 bench.getLast() + "\n" + bigText));
+
+        if(position>-1 && callback!=null) {
+            callback.setStatus(track, msg, position);
+        }
     }
 
     void stopDownloads() {

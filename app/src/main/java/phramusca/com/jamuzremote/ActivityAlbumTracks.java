@@ -14,9 +14,10 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -57,7 +58,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
 
         Button button_download = findViewById(R.id.button_download);
         button_download.setOnClickListener(v -> {
-            List<Track> newTracks = new ArrayList<>();
+            Map<Track, Integer> newTracks = new HashMap<>();
             List<Track.Status> statuses = Arrays.asList(Track.Status.INFO, Track.Status.ERROR);
             for (int i = 0; i < adapterCursorAlbumTrack.getItemCount(); i++) {
                 Track track1 = adapterCursorAlbumTrack.getTrack(i);
@@ -65,7 +66,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                     track1.getTags(true);
                     track1.setStatus(Track.Status.NEW);
                     adapterCursorAlbumTrack.updateStatus(track1.getStatus(), i, "");
-                    newTracks.add(track1);
+                    newTracks.put(track1, i);
                 }
             }
             startDownloads(newTracks, finalTrack.getAlbum() + " (" + finalTrack.getArtist() + ")");
@@ -105,7 +106,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
 
     private DownloadProcess processDownload;
 
-    private void startDownloads(List<Track> newTracks, String title) {
+    private void startDownloads(Map<Track, Integer> newTracks, String title) {
         if ((processDownload == null || !processDownload.isAlive()) && newTracks.size() > 0) {
             //Log.i(TAG, "START ProcessDownload"); //NON-NLS
             OkHttpClient clientDownload = new OkHttpClient.Builder()
@@ -115,7 +116,8 @@ public class ActivityAlbumTracks extends AppCompatActivity {
             HelperNotification helperNotification = new HelperNotification(PendingIntent.getActivity(getApplicationContext(), 1, getIntent(), PendingIntent.FLAG_UPDATE_CURRENT), mNotifyManager);
             HelperToast helperToast = new HelperToast(getApplicationContext());
             ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
-            processDownload = new DownloadProcess("ActivityAlbumTracks.ProcessDownload", newTracks, getApplicationContext(), helperNotification, clientInfo, clientDownload, title);
+            processDownload = new DownloadProcess("ActivityAlbumTracks.ProcessDownload", newTracks, getApplicationContext(), helperNotification, clientInfo, clientDownload, title,
+                    this::updateStatus);
             processDownload.start();
         }
     }
@@ -140,15 +142,15 @@ public class ActivityAlbumTracks extends AppCompatActivity {
             setResult(RESULT_OK, data);
             finish();
         } else if (Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track.getStatus())) {
-            List<Track> list = new ArrayList<>();
-            list.add(track);
+            Map<Track, Integer> list = new HashMap<>();
+            list.put(track, position);
             startDownloads(list, track.getTitle() + " (" + track.getArtist() + ")");
         }
     }
 
-    private void updateStatus(Track.Status status, int position, String msg) {
+    private void updateStatus(Track track, String msg, int position) {
         runOnUiThread(() -> {
-            adapterCursorAlbumTrack.updateStatus(status, position, msg);
+            adapterCursorAlbumTrack.updateStatus(track.getStatus(), position, msg);
         });
     }
 }
