@@ -14,9 +14,9 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 
-public class ProcessDownload extends ProcessAbstract {
+public class DownloadProcess extends ProcessAbstract {
 
-    private static final String TAG = ProcessDownload.class.getName();
+    private static final String TAG = DownloadProcess.class.getName();
     private final List<Track> newTracks;
     private List<DownloadTask> downloadServices;
     private ExecutorService pool;
@@ -35,14 +35,14 @@ public class ProcessDownload extends ProcessAbstract {
     protected HelperToast helperToast;
     private final OkHttpClient clientDownload;
 
-    ProcessDownload(String name, List<Track> newTracks, Context context, HelperNotification helperNotification, ClientInfo clientInfo, OkHttpClient clientDownload) {
+    DownloadProcess(String name, List<Track> newTracks, Context context, HelperNotification helperNotification, ClientInfo clientInfo, OkHttpClient clientDownload, String title) {
         super(name);
         mContext = context;
         this.clientInfo = clientInfo;
         this.clientDownload = clientDownload;
         helperToast = new HelperToast(mContext);
         this.helperNotification = helperNotification;
-        notificationDownload = new Notification(mContext, NotificationId.SYNC_DOWN, mContext.getString(R.string.serviceSyncNotifyDownloadTitle));
+        notificationDownload = new Notification(mContext, NotificationId.get(), title);
         this.newTracks = newTracks;
         nbFilesStart = newTracks.size();
         downloadServices = new ArrayList<>();

@@ -68,7 +68,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                     newTracks.add(track1);
                 }
             }
-            startDownloads(newTracks);
+            startDownloads(newTracks, finalTrack.getAlbum() + " (" + finalTrack.getArtist() + ")");
         });
 
         Button button_queue_play_album = findViewById(R.id.button_queue_play_album);
@@ -103,9 +103,9 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         };
     }
 
-    private ProcessDownload processDownload;
+    private DownloadProcess processDownload;
 
-    private void startDownloads(List<Track> newTracks) {
+    private void startDownloads(List<Track> newTracks, String title) {
         if ((processDownload == null || !processDownload.isAlive()) && newTracks.size() > 0) {
             //Log.i(TAG, "START ProcessDownload"); //NON-NLS
             OkHttpClient clientDownload = new OkHttpClient.Builder()
@@ -115,7 +115,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
             HelperNotification helperNotification = new HelperNotification(PendingIntent.getActivity(getApplicationContext(), 1, getIntent(), PendingIntent.FLAG_UPDATE_CURRENT), mNotifyManager);
             HelperToast helperToast = new HelperToast(getApplicationContext());
             ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
-            processDownload = new ProcessDownload("ActivityAlbumTracks.ProcessDownload", newTracks, getApplicationContext(), helperNotification, clientInfo, clientDownload);
+            processDownload = new DownloadProcess("ActivityAlbumTracks.ProcessDownload", newTracks, getApplicationContext(), helperNotification, clientInfo, clientDownload, title);
             processDownload.start();
         }
     }
@@ -142,7 +142,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         } else if (Arrays.asList(Track.Status.INFO, Track.Status.ERROR).contains(track.getStatus())) {
             List<Track> list = new ArrayList<>();
             list.add(track);
-            startDownloads(list);
+            startDownloads(list, track.getTitle() + " (" + track.getArtist() + ")");
         }
     }
 
