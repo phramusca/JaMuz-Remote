@@ -17,7 +17,8 @@
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Autoriser l\'édition des pistes</string>
     <string name="settingsKidsPlaceCheckBoxOnStartup">Lancer Kids Place avec JaMuz</string>
     <string name="settingsLocalFilesTextViewTitle">Pistes locales</string>
-    <string name="settingsLocalFilesTextViewHelp">Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local.\nATTENTION : Les pistes locales ne seront PAS synchronisées avec JaMuz Server ! Il est fortement recommandé d\'utiliser plutôt JaMuz Server pour télécharger vos pistes !</string>
+    <string name="settingsLocalFilesTextViewHelp">Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local.
+\nATTENTION : Les pistes locales ne seront PAS synchronisées avec JaMuz Server ! Il est fortement recommandé d\'utiliser plutôt JaMuz Server pour télécharger vos pistes !</string>
     <string name="settingsLocalFilesTextViewPath">Chemin :</string>
     <string name="settingsLocalFilesButtonChoose">Choisir</string>
     <string name="settingsDirectoryChooserButtonNewFolder">Nouveau dossier</string>
