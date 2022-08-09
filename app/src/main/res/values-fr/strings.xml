@@ -102,8 +102,7 @@
     <string name="serviceScanNotifyScanningDeleted">Recherche de fichiers supprimés…</string>
     <string name="serviceSyncNotifyDownloadTitle">Téléchargement</string>
     <string name="serviceSyncNotifySyncComplete">Terminé.</string>
-    <string name="serviceSyncNotifySyncAll">Tous les</string>
-    <string name="serviceSyncNotifySyncSuccess">fichiers ont été téléchargés avec succès.</string>
+    <string name="serviceSyncNotifySyncSuccess">fichiers téléchargés avec succès.</string>
     <string name="serviceSyncNotifySyncDownloaded">Téléchargé :</string>
     <string name="serviceSyncNotifySyncRemaining">Restant :</string>
     <string name="serviceSyncNotifySyncCompleteNoDownloads">Synchronisation terminée. Pas de téléchargements.</string>
