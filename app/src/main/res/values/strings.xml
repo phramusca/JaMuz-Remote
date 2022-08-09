@@ -35,7 +35,8 @@
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Allow track edition</string>
     <string name="settingsKidsPlaceCheckBoxOnStartup">Start Kids Place with JaMuz</string>
     <string name="settingsLocalFilesTextViewTitle">Local tracks</string>
-    <string name="settingsLocalFilesTextViewHelp">You can add tracks to library from a local path.\nWARNING: Those local tracks will NOT be synchronized with Jamuz Server ! It is highly recommended to use JaMuz Server instead to get your tracks!</string>
+    <string name="settingsLocalFilesTextViewHelp">You can add tracks to library from a local path.
+\nWARNING: Those local tracks will NOT be synchronized with Jamuz Server! It is highly recommended to use JaMuz Server instead to get your tracks!</string>
     <string name="settingsLocalFilesTextViewPath">Path :</string>
     <string name="settingsLocalFilesButtonChoose">Choose</string>
     <string name="settingsDirectoryChooserButtonNewFolder">New folder</string>
