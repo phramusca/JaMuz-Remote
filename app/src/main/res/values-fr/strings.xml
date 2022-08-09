@@ -65,7 +65,7 @@
     <string name="permissionMsg_9">: Simplement pour mettre pause et reprendre la lecture lors des appels.</string>
     <string name="contentAlbumsTitle">Albums</string>
     <string name="contentQueueTitle">File d\'attente</string>
-    <string name="adapterCursorAlbumLabelTracks">pistes(s)</string>
+    <string name="adapterCursorAlbumLabelTracks">piste(s)</string>
     <string name="contentAlbumTracksTitle">Pistes de l\'album</string>
     <string name="mainToastClientInfoBadFormat">Mauvais format :</string>
     <string name="mainToastClientInfoExpected">Attendu :</string>
