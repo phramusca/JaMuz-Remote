@@ -113,7 +113,7 @@ public class ActivityMain extends AppCompatActivity {
     private Track displayedTrack;
     private Track localTrack;
     private AudioManager audioManager;
-    public static AudioPlayer audioPlayer;
+    public static AudioPlayer audioPlayer; //TODO: Remove static
     public static String login;
 
     //In internal SD emulated storage:
@@ -132,7 +132,7 @@ public class ActivityMain extends AppCompatActivity {
     private static final int LISTS_REQUEST_CODE = 60568;
     private static final int SETTINGS_REQUEST_CODE = 23548;
 
-    private static Context mContext;
+    private static Context mContext; //TODO: Remove static
     private static PrettyTime prettyTime;
 
     // GUI elements
@@ -194,12 +194,17 @@ public class ActivityMain extends AppCompatActivity {
         Log.i(TAG, "ActivityMain onCreate"); //NON-NLS
         mContext = this;
         setContentView(R.layout.activity_main);
+        layoutMain = findViewById(R.id.panel_main);
+        layoutMain.setEnabled(false); //TODO: This does not seem to really disable all buttons and all
+
+        //The following call creates default application folder
+        // - in "external" card, the emulated one : /storage/emulated/0/Android//com.phramusca.jamuz/files
+        // - and in real removable sd card : /storage/xxxx-xxxx/Android/com.phramusca.jamuz/files
+        externalFilesDir = getExternalFilesDirs(null);
 
         VoiceKeyWords.set(mContext);
-
         prettyTime = new PrettyTime(Locale.getDefault());
         prettyTime.removeUnit(org.ocpsoft.prettytime.units.Decade.class);
-
         login = Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
@@ -604,7 +609,6 @@ public class ActivityMain extends AppCompatActivity {
         button_speech.setOnClickListener(v -> speechRecognizer());
 
         imageViewCover = findViewById(R.id.imageView);
-        layoutMain = findViewById(R.id.panel_main);
 
         LinearLayout layoutTrackInfo = findViewById(R.id.trackInfo);
         layoutTrackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
@@ -697,12 +701,6 @@ public class ActivityMain extends AppCompatActivity {
         displayedTrack = localTrack;
         displayTrack();
 
-        //The following call creates default application folder
-        // - in "external" card, the emulated one : /storage/emulated/0/Android//com.phramusca.jamuz/files
-        // - and in real removable sd card : /storage/xxxx-xxxx/Android/com.phramusca.jamuz/files
-        externalFilesDir = getExternalFilesDirs(null);
-        checkPermissionsThenScanLibrary();
-
         ListenerPlayer callBackPlayer = new ListenerPlayer();
         audioPlayer = new AudioPlayer(this, callBackPlayer);
         audioPlayer.setVolume(preferences.getInt("baseVolume", 70), displayedTrack);
@@ -733,16 +731,8 @@ public class ActivityMain extends AppCompatActivity {
             KPUtility.handleKPIntegration(this, KPUtility.GOOGLE_MARKET);
         }
 
-        //FIXME: Fix startup glitch issue: need to wait for layouts to be loaded before toggling off
-        toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
-        toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
-        toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
-        toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
-        toggleOff(toggleButtonPlaylist, layoutPlaylist);
-        toggleOff(toggleButtonEditTags, layoutEditTags);
-        toggleOff(toggleButtonControls, layoutControls);
-
         setDimMode(toggleButtonDimMode.isChecked());
+        checkPermissionsThenScanLibrary();
     }
 
     private void displayQueue() {
@@ -1195,9 +1185,9 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         boolean kidsplaceLimit = preferences.getBoolean("kidsplaceLimit", false);
-        boolean isKidsPlacEnabled = !isKidsPlace || !kidsplaceLimit;
-        spinnerPlaylist.setEnabled(isKidsPlacEnabled);
-        if (!isKidsPlacEnabled) {
+        boolean iskidsplacenabled = !isKidsPlace || !kidsplaceLimit;
+        spinnerPlaylist.setEnabled(iskidsplacenabled);
+        if (!iskidsplacenabled) {
             String selectedPlaylist = preferences.getString("kidsplaceLimitPlaylist", null);
             setupLocalPlaylistSpinner(selectedPlaylist);
         }
@@ -2040,13 +2030,27 @@ public class ActivityMain extends AppCompatActivity {
                 if (file.endsWith(".plli")) {
                     Playlist playlist = readPlaylist(file);
                     if (playlist != null) {
-                        playlist.getNbFiles();
                         localPlaylists.put(playlist.getName(), playlist);
                     }
                 }
             }
         }
         setupLocalPlaylistSpinner((String) null);
+
+        mHandler.postDelayed(() -> {
+            toggleOff(toggleButtonGenresPanel, layoutGenrePlaylistLayout);
+            toggleOff(toggleButtonRatingPanel, layoutRatingPlaylistLayout);
+            toggleOff(toggleButtonOrderPanel, layoutOrderPlaylistLayout);
+            toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
+            toggleOff(toggleButtonPlaylist, layoutPlaylist);
+            toggleOff(toggleButtonEditTags, layoutEditTags);
+            toggleOff(toggleButtonControls, layoutControls);
+            layoutMain.setEnabled(true);
+        }, 500);
+
+        mHandler.postDelayed(() -> {
+            refreshLocalPlaylistSpinner(true);
+        }, 5000);
 
         //Start Scan Service
         if (!isMyServiceRunning(ServiceScan.class)) {
