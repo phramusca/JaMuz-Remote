@@ -8,7 +8,7 @@
     <string name="settingsReplayGainTextViewBaseVolume">Grunnlydstyrke:</string>
     <string name="settingsKidsPlaceTextViewTitle">Barnerommet</string>
     <string name="settingsKidsPlaceTextViewHelp">Barnerommet er et tredjepartsprogram fra Play-butikken.</string>
-    <string name="settingsKidsPlaceCheckBoxLimit">Begrens til denne spillelisten.</string>
+    <string name="settingsKidsPlaceCheckBoxLimit">Begrens til denne spillelisten:</string>
     <string name="settingsKidsPlaceCheckBoxAllowDeleteSaveNew">Tillat sletting, lagring og opprettelse av en ny spilleliste</string>
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Tillat endring av spor</string>
     <string name="settingsKidsPlaceCheckBoxOnStartup">Start Barnerommet med JaMuz</string>
@@ -68,7 +68,7 @@
     <string name="globalLabelCancel">Avbryt</string>
     <string name="settingsLocalFilesTextViewTitle">Lokale spor</string>
     <string name="playlistLabelSaved">lagret</string>
-    <string name="playlistLabelRestored">gjenopprettet.</string>
+    <string name="playlistLabelRestored">gjenopprettet</string>
     <string name="globalLabelOK">OK</string>
     <string name="globalLabelNo">Nei</string>
     <string name="playlistLabelSuccessfully">.</string>
