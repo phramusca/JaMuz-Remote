@@ -195,7 +195,10 @@ public class ActivityMain extends AppCompatActivity {
         mContext = this;
         setContentView(R.layout.activity_main);
         layoutMain = findViewById(R.id.panel_main);
-        layoutMain.setEnabled(false); //TODO: This does not seem to really disable all buttons and all
+
+        //TODO: Disable touch events while loading until panels are toggled off.
+        //setEnabled does not seem enough (need to disable inner views too?) + some widgets are disabled/enabled during onCreate
+        //layoutMain.setEnabled(false);
 
         //The following call creates default application folder
         // - in "external" card, the emulated one : /storage/emulated/0/Android//com.phramusca.jamuz/files
@@ -2045,7 +2048,6 @@ public class ActivityMain extends AppCompatActivity {
             toggleOff(toggleButtonPlaylist, layoutPlaylist);
             toggleOff(toggleButtonEditTags, layoutEditTags);
             toggleOff(toggleButtonControls, layoutControls);
-            layoutMain.setEnabled(true);
         }, 500);
 
         mHandler.postDelayed(() -> {

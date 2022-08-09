@@ -164,8 +164,7 @@ public class DownloadProcess extends ProcessAbstract {
         StringBuilder builder = new StringBuilder()
                 .append(mContext.getString(R.string.serviceSyncNotifySyncComplete)).append("\n\n");
         if (remaining < 1) {
-            builder.append(mContext.getString(R.string.serviceSyncNotifySyncAll))
-                    .append(" ").append(nbFilesStart).append(" ")
+            builder.append(nbFilesStart).append(" ")
                     .append(mContext.getString(R.string.serviceSyncNotifySyncSuccess));
         } else {
             builder.append(mContext.getString(R.string.serviceSyncNotifySyncDownloaded))

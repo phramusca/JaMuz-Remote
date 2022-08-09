@@ -108,8 +108,7 @@
     <string name="serviceSyncNotifySyncTitle">Sync.</string>
     <string name="serviceSyncNotifyDownloadTitle">Download</string>
     <string name="serviceSyncNotifySyncComplete">Completed.</string>
-    <string name="serviceSyncNotifySyncAll">All</string>
-    <string name="serviceSyncNotifySyncSuccess">files have been downloaded successfully.</string>
+    <string name="serviceSyncNotifySyncSuccess">files successfully downloaded.</string>
     <string name="serviceSyncNotifySyncDownloaded">Downloaded:</string>
     <string name="serviceSyncNotifySyncRemaining">Remaining:</string>
     <string name="serviceSyncNotifySyncCompleteNoDownloads">Synchronization complete. No downloads.</string>
