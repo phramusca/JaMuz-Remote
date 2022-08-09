@@ -203,11 +203,16 @@
     <string name="mainVoiceToastNeedToInstall">Vous devez installer le moteur de reconnaissance vocale de Google pour utilser cette fonctionalité.</string>
     <string name="clientToastAuthenticationFailed">Échec de l’authentification.</string>
     <string name="playlistSummaryIncluded">Incl.</string>
-    <string name="playlistSummaryNullExcluded">null excl.</string>
-    <string name="playlistSummaryNullIncluded">null incl.</string>
+    <string name="playlistSummaryNullExcluded">zéro excl.</string>
+    <string name="playlistSummaryNullIncluded">zéro incl.</string>
     <string name="clientReceptionToastSocketClosed">Socket fermé (reçu null)</string>
     <string name="playlistSummaryNullOnly">null seulement</string>
     <string name="scanNotifyScanning">Analyse des fichiers…</string>
     <string name="scanTitle">Analyse</string>
     <string name="playlistSummaryExcluded">Excl.</string>
+    <string name="settingsSpeechTextViewTitle">Commandes vocales</string>
+    <string name="settingsRadioSpeechPause">Mettre le lecteur en pause.</string>
+    <string name="settingsRadioSpeechLowerVolume">Baisser le volume.</string>
+    <string name="settingsRadioSpeechNone">Ne rien faire de spécial.</string>
+    <string name="settingsSpeechTitle">Lors d\'une commande vocale :</string>
 </resources>
