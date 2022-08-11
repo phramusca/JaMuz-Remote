@@ -1,12 +1,12 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -36,14 +36,16 @@ public class DownloadProcess extends ProcessAbstract {
     private final Notification notificationDownload;
     protected HelperToast helperToast;
     private final OkHttpClient clientDownload;
-    private IListenerSyncDown callback;
+    private final IListenerSyncDown callback;
+    private WifiManager.WifiLock wifiLock;
 
-    DownloadProcess(String name, Map<Track, Integer> newTracks, Context context, HelperNotification helperNotification, ClientInfo clientInfo, OkHttpClient clientDownload, String title, IListenerSyncDown callback) {
+    DownloadProcess(String name, Map<Track, Integer> newTracks, Context context, HelperNotification helperNotification, ClientInfo clientInfo, OkHttpClient clientDownload, String title, IListenerSyncDown callback, WifiManager.WifiLock wifiLock) {
         super(name);
         mContext = context;
         this.clientInfo = clientInfo;
         this.clientDownload = clientDownload;
         this.callback = callback;
+        this.wifiLock = wifiLock;
         helperToast = new HelperToast(mContext);
         this.helperNotification = helperNotification;
         notificationDownload = new Notification(mContext, NotificationId.get(), title);
@@ -97,10 +99,13 @@ public class DownloadProcess extends ProcessAbstract {
         downloadServices = new ArrayList<>();
         sizeTotal = 0;
         nbFailed = 0;
+        if(wifiLock!=null && !wifiLock.isHeld()) {
+            wifiLock.acquire();
+        }
         for (Map.Entry<Track, Integer> entry : newTracks.entrySet()) {
             Track track = entry.getKey();
             track.getTags(true);
-            DownloadTask downloadTask = new DownloadTask(track, entry.getValue(), this::notifyBarProgress, clientInfo, clientDownload);
+            DownloadTask downloadTask = new DownloadTask(track, entry.getValue(), this::notifyBarProgress, clientInfo, clientDownload, wifiLock);
             downloadServices.add(downloadTask);
             pool.submit(downloadTask);
             sizeTotal += track.getSize();
