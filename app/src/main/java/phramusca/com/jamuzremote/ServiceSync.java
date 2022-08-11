@@ -70,7 +70,9 @@ public class ServiceSync extends ServiceBase {
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         if (wifiManager != null) {
             wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, TAG);
-            wifiLock.acquire();
+            if(wifiLock!=null && !wifiLock.isHeld()) {
+                wifiLock.acquire();
+            }
         }
         processSync = new ProcessSync("Thread.ServiceSync.processSync");
         processSync.start();
@@ -404,7 +406,16 @@ public class ServiceSync extends ServiceBase {
     private void startDownloads(Map<Track, Integer> newTracks) {
         if ((processDownload == null || !processDownload.isAlive()) && newTracks.size() > 0) {
             Log.i(TAG, "START ProcessDownload"); //NON-NLS
-            processDownload = new DownloadProcess("ProcessDownload", newTracks, this, helperNotification, clientInfo, clientDownload, getString(R.string.serviceSyncNotifyDownloadTitle), null);
+            processDownload = new DownloadProcess(
+                    "ProcessDownload",
+                    newTracks,
+                    this,
+                    helperNotification,
+                    clientInfo,
+                    clientDownload,
+                    getString(R.string.serviceSyncNotifyDownloadTitle),
+                    null,
+                    wifiLock);
             processDownload.start();
         }
     }

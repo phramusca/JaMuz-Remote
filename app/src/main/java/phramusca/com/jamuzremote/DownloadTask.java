@@ -1,5 +1,6 @@
 package phramusca.com.jamuzremote;
 
+import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import java.io.File;
@@ -21,14 +22,16 @@ public class DownloadTask extends ProcessAbstract implements Runnable {
     private final ClientInfo clientInfo;
     private final Track track;
     protected OkHttpClient clientDownload;
+    private WifiManager.WifiLock wifiLock;
 
-    DownloadTask(Track track, int position, IListenerSyncDown callback, ClientInfo clientInfo, OkHttpClient clientDownload) {
+    DownloadTask(Track track, int position, IListenerSyncDown callback, ClientInfo clientInfo, OkHttpClient clientDownload, WifiManager.WifiLock wifiLock) {
         super("DownloadTask idFileServer=" + track.getIdFileServer()); //NON-NLS
         this.track = track;
         this.position = position;
         this.callback = callback;
         this.clientInfo = clientInfo;
         this.clientDownload = clientDownload;
+        this.wifiLock = wifiLock;
     }
 
     @Override
@@ -48,6 +51,9 @@ public class DownloadTask extends ProcessAbstract implements Runnable {
             HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("download"); //NON-NLS
             urlBuilder.addQueryParameter("id", String.valueOf(track.getIdFileServer()));
             Request request = clientInfo.getRequestBuilder(urlBuilder).build();
+            if(wifiLock!=null && !wifiLock.isHeld()) {
+                wifiLock.acquire();
+            }
             Response response = clientDownload.newCall(request).execute();
             if (response.isSuccessful()) {
                 if (destinationFile.exists()) {

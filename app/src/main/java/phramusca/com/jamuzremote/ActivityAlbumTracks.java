@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -24,6 +25,7 @@ import okhttp3.OkHttpClient;
 
 public class ActivityAlbumTracks extends AppCompatActivity {
 
+    private static final String TAG = ActivityAlbumTracks.class.getName();
     AdapterCursorAlbumTrack adapterCursorAlbumTrack;
 
     @Override
@@ -115,11 +117,25 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                     .readTimeout(60, TimeUnit.SECONDS)
                     .build();
             NotificationManager mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            HelperNotification helperNotification = new HelperNotification(PendingIntent.getActivity(getApplicationContext(), 1, getIntent(), PendingIntent.FLAG_UPDATE_CURRENT), mNotifyManager);
+            HelperNotification helperNotification = new HelperNotification(
+                    PendingIntent.getActivity(getApplicationContext(),
+                            1,
+                            getIntent(),
+                            PendingIntent.FLAG_UPDATE_CURRENT),
+                    mNotifyManager);
             HelperToast helperToast = new HelperToast(getApplicationContext());
             ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
-            processDownload = new DownloadProcess("ActivityAlbumTracks.ProcessDownload", newTracks, getApplicationContext(), helperNotification, clientInfo, clientDownload, title,
-                    this::updateStatus);
+            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+              processDownload = new DownloadProcess(
+                      "ActivityAlbumTracks.ProcessDownload",
+                      newTracks,
+                      getApplicationContext(),
+                      helperNotification,
+                      clientInfo,
+                      clientDownload,
+                      title,
+                      this::updateStatus,
+                      null);
             processDownload.start();
         }
     }
