@@ -98,10 +98,6 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-//FIXME: Submit to f-droid.org
-//https://gitlab.com/fdroid/fdroiddata/blob/master/CONTRIBUTING.md
-//https://f-droid.org/
-
 // TODO: Move audio to a service
 // Why not using the standard android player by the way ? (less control for replaygain ?)
 public class ActivityMain extends AppCompatActivity {
@@ -119,8 +115,7 @@ public class ActivityMain extends AppCompatActivity {
     //In internal SD emulated storage:
     //TODO: Possibly, change database location to external SD as we now have rights
     //In external SD. Does not seem to work !
-    //private static final String DB_PATH =
-    //      "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID;
+    // DB_PATH = "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID
     public static File musicLibraryDbFile = new File(
             Environment.getExternalStorageDirectory() + "/JaMuz/JaMuzRemote.db"); //NON-NLS
 

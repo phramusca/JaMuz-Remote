@@ -44,7 +44,6 @@ public class ServiceSync extends ServiceBase {
     private WifiManager.WifiLock wifiLock;
     private ProcessSync processSync;
     protected static OkHttpClient client = new OkHttpClient();
-
     protected static OkHttpClient clientDownload;
 
     @Override

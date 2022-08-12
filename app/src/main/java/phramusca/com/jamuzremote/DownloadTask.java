@@ -17,12 +17,12 @@ import okio.Okio;
 
 public class DownloadTask extends ProcessAbstract implements Runnable {
     private static final String TAG = DownloadTask.class.getName();
-    private int position;
+    private final int position;
     private final IListenerSyncDown callback; //NON-NLS
     private final ClientInfo clientInfo;
     private final Track track;
     protected OkHttpClient clientDownload;
-    private WifiManager.WifiLock wifiLock;
+    private final WifiManager.WifiLock wifiLock;
 
     DownloadTask(Track track, int position, IListenerSyncDown callback, ClientInfo clientInfo, OkHttpClient clientDownload, WifiManager.WifiLock wifiLock) {
         super("DownloadTask idFileServer=" + track.getIdFileServer()); //NON-NLS
