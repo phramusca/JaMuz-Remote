@@ -16,10 +16,9 @@ import java.util.List;
 public final class RepoSync {
 
     private static final String TAG = RepoSync.class.getName();
-
     private static Table<Integer, Track.Status, Track> tracks = null;
 
-    protected synchronized static void read() {
+    public synchronized static void read() {
         tracks = HashBasedTable.create();
         Cursor cursor = HelperLibrary.musicLibrary.getTracksCursor(true,
                 "WHERE status!=\"" + Track.Status.LOCAL.name() + "\"",  //NON-NLS
@@ -27,6 +26,17 @@ public final class RepoSync {
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 Track track = HelperLibrary.musicLibrary.cursorToTrack(cursor, true);
+                if(track.getStatus().equals(Track.Status.NEW)) {
+                    // Assuming it is INFO and not NEW to avoid downloading files that moved to INFO on server
+                    // Not an issue as:
+                    // merge list only takes REC files
+                    // then we will get an up-to-date list of NEW from server
+                    // And finally file will be deleted during checkFiles(INFO) step, so downloaded/checked for nothing
+                    // TODO: But, what about files that have been downloaded manually ?
+                    // => Offer a way to keep those on sync (and so a cleanup option)
+                    // May be easier to create a new Track.Status for that purpose ?
+                    track.setStatus(Track.Status.INFO);
+                }
                 tracks.put(track.getIdFileServer(), track.getStatus(), track);
             } while (cursor.moveToNext());
         }
@@ -37,18 +47,19 @@ public final class RepoSync {
 
     /**
      * Sets status to REC if track exists and has correct size.
-     * Otherwise, file is deleted and status set back to NEW
+     * Otherwise, file is deleted and status set back to its original value.
      *
      * @param track the one to check
      */
     public synchronized static void checkReceivedFile(Track track) {
+        Track.Status trackStatus = track.getStatus();
         track.setStatus(Track.Status.REC);
         if (!checkFile(track) || !HelperLibrary.musicLibrary.updateStatus(track)) {
             File receivedFile = new File(track.getPath());
             Log.w(TAG, "Error with received file. Deleting " + receivedFile.getAbsolutePath()); //NON-NLS
             //noinspection ResultOfMethodCallIgnored
             receivedFile.delete();
-            track.setStatus(Track.Status.NEW);
+            track.setStatus(trackStatus);
         }
         update(track);
     }
