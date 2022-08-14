@@ -63,6 +63,18 @@ Please submit to the `master` branch.
     ```
 
 1. Commit (named vx.y.z-dev) & PUSH
-1. If any change to any of the following, export modified vocal commands to md :
-    - VoiceKeyWords
-    - `strings*.xml : string arrays voiceCommands_*`
+1. Update [voiceCommands.md](https://github.com/phramusca/JaMuz-Remote/blob/master/data/voiceCommands.md)
+
+    -If any of the following changed :
+      - in `VoiceKeyWords.java`,
+      - or in `res/values/strings.xml` files :
+
+    ```xml
+    <string-array name="voiceCommands_XXXXXX>
+    ```
+
+    - Then, [export vocal commands](../../ReposSides/JaMuz-Remote/VoiceKeyWordsExport) to [voiceCommands.md](https://github.com/phramusca/JaMuz-Remote/edit/master/data/voiceCommands.md)
+
+    ```bash
+    cd ../../ReposSides/JaMuz-Remote/VoiceKeyWordsExport/ && dotnet run Program.cs
+    ```
