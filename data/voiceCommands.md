@@ -38,6 +38,11 @@
   - play next
   - next track
   - next
+- PLAYER_PREVIOUS
+  - play previous track
+  - play previous
+  - previous track
+  - previous
 - PLAYER_PAUSE
   - pause
   - stop
@@ -89,6 +94,9 @@
   - prochain
   - suivante
   - suivant
+- PLAYER_PREVIOUS
+  - précédente
+  - précédent
 - PLAYER_PAUSE
   - pause
   - stop
@@ -100,4 +108,3 @@
   - recommencer
   - poule up
   - poulpe
-
