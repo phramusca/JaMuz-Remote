@@ -54,7 +54,7 @@ Please submit to the `master` branch.
 1. Commit (named vx.y.z) & PUSH
 1. [Create release on github](https://github.com/phramusca/JaMuz-Remote/releases/new) based on [previous ones](https://github.com/phramusca/JaMuz-Remote/releases)
     - Drop APK built earlier
-    - Update gh-pages with link to new release
+    - [Edit gh-pages](https://github.com/phramusca/JaMuz/edit/gh-pages/index.md) with link to new release
 
 1. Update app/build.gradle
 
