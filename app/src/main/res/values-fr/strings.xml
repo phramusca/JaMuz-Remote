@@ -17,8 +17,7 @@
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Autoriser l\'édition des pistes</string>
     <string name="settingsKidsPlaceCheckBoxOnStartup">Lancer Kids Place avec JaMuz</string>
     <string name="settingsLocalFilesTextViewTitle">Pistes locales</string>
-    <string name="settingsLocalFilesTextViewHelp">Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local.
-\nATTENTION : Les pistes locales ne seront PAS synchronisées avec JaMuz Server ! Il est fortement recommandé d\'utiliser plutôt JaMuz Server pour télécharger vos pistes !</string>
+    <string name="settingsLocalFilesTextViewHelp"><html>Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local.<br/>ATTENTION : Les pistes locales ne seront PAS synchronisées avec JaMuz Server ! Il est fortement recommandé d\'utiliser plutôt JaMuz Server pour télécharger vos pistes !</html></string>
     <string name="settingsLocalFilesTextViewPath">Chemin :</string>
     <string name="settingsLocalFilesButtonChoose">Choisir</string>
     <string name="settingsDirectoryChooserButtonNewFolder">Nouveau dossier</string>
@@ -59,7 +58,7 @@
     <string name="permissionMsg_2">, merci de bien vouloir autoriser :</string>
     <string name="permissionMsg_3">Contenus multimédias</string>
     <string name="permissionMsg_4">: Permet à l\'application de :</string>
-    <string name="permissionMsg_5">- Enregistrer les fichiers reçus depuis JaMuz vers la carte SD externe</string>
+    <string name="permissionMsg_5">- Enregistrer les fichiers reçus depuis JaMuz Server sur une carte SD externe (dans un répertoire dédié à l\'application).</string>
     <string name="permissionMsg_6">- Lecture seule du répertoire local choisi sur la carte SD externe.</string>
     <string name="permissionMsg_7">- Enregistrer la base de données dans le répertoire JaMuz sur la carte SD interne</string>
     <string name="permissionMsg_8">Gestion des appels</string>
@@ -89,10 +88,10 @@
     <string name="speakRating">Note</string>
     <string name="speakRatingIncorrect">incorrecte.</string>
     <string name="speakTags">Étiquettes</string>
-    <string name="speakTagsNone">Aucune étiquette</string>
-    <string name="speakRatingNone">Aucune note</string>
+    <string name="speakTagsNone">Aucunes étiquettes.</string>
+    <string name="speakRatingNone">Aucune note.</string>
     <string name="activityAlbumsLoading">Chargement de la liste des albums…</string>
-    <string name="activityAlbumsLoadingPleaseWait">Merci de bien vouloir patienter quelques secondes.</string>
+    <string name="activityAlbumsLoadingPleaseWait">Merci de bien vouloir patienter quelques secondes…</string>
     <string name="settingsDirectoryChooserFailedToCreate">Erreur à la création du dossier</string>
     <string name="settingsDirectoryChooserFailedToCreateSuffix">dossier.</string>
     <string name="audioPlayerToastRgBaseVolTooHigh">Volume de base trop haut.</string>
@@ -116,7 +115,7 @@
     <string name="serviceSyncNotifySyncReceivedSuffix">nombre de fichiers…</string>
     <string name="serviceSyncNotifySyncReceivedTags">Etiquettes reçues…</string>
     <string name="serviceSyncNotifySyncReceivedGenres">Genres reçus…</string>
-    <string name="serviceSyncNotifySyncPreparingMerge">Préparation de la fusion des statistiques.</string>
+    <string name="serviceSyncNotifySyncPreparingMerge">Préparation de la fusion des statistiques…</string>
     <string name="serviceSyncNotifySyncRequestingMerge">Demande de fusion des statistiques.</string>
     <string name="serviceSyncNotifySyncUpdateDatabase">Mise à jour de la base de données…</string>
     <string name="serviceSyncNotifySyncMergeComplete">Fusion terminée.</string>
