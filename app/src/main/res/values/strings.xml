@@ -9,7 +9,6 @@
     <string name="mainToastClientInfoIP">IP</string>
     <string name="mainToastClientInfoPort">Port</string>
     <string name="mainToastClientInfoEx">Ex:</string>
-
     <string name="mainToastCheckWifiConnection">You must connect to a Wi-Fi network first.</string>
     <string name="mainToastQRread">QR code read. New configuration in use.</string>
     <string name="mainToastEmptyPlaylist">Empty Playlist.</string>
@@ -17,7 +16,6 @@
     <string name="mainToastNotImplemented">Not implemented.</string>
     <string name="mainAlertDialogClosingApplicationTitle">Closing JaMuz</string>
     <string name="mainAlertDialogClosingApplicationMessage">Stop playback and exit the app?</string>
-
     <string name="globalLabelOK">OK</string>
     <string name="globalLabelCancel">Cancel</string>
     <string name="globalLabelYes">Yes</string>
@@ -29,7 +27,6 @@
     <string name="settingsServerButtonSave">Save</string>
     <string name="settingsServerButtonScanQR">Scan QR</string>
     <string name="settingsServerToastProblemQR">Could not read the QR code.</string>
-
     <string name="settingsReplayGainTextViewBaseVolume">Base volume:</string>
     <string name="settingsKidsPlaceTextViewTitle">Kids Place</string>
     <string name="settingsKidsPlaceTextViewHelp">\"Kids Place\" is a third-party kiddoware app from the Play store.</string>
@@ -45,7 +42,6 @@
     <string name="settingsDirectoryChooserNewFolderName">New folder name</string>
     <string name="settingsDirectoryChooserFailedToCreate">Could not create</string>
     <string name="settingsDirectoryChooserFailedToCreateSuffix">the folder.</string>
-
     <string name="playlistTextViewExcludeTheLast">Exclude the last </string>
     <string-array name="limitUnits">
         <item>minutes</item>
@@ -69,9 +65,7 @@
     <string name="playlistLabelQuestionDeleteSuffix">the playlist?</string>
     <string name="playlistLabelCannotDeleteLastPlaylist">You cannot delete the last playlist.</string>
     <string name="playlistDefaultAllPlaylistName">All</string>
-
     <string name="voicePromptCommand">Say a command.\n  ex: \"Rating 4\", \"Next\"…</string>
-
     <string name="speakUnknownCommand">Unknown Command:</string>
     <string name="speakArtist">Artist</string>
     <string name="speakAlbum">Album</string>
@@ -86,30 +80,25 @@
     <string name="speakRatingIncorrect">incorrect.</string>
     <string name="speakTagsNone">No tags.</string>
     <string name="speakRatingNone">No rating.</string>
-
     <string name="syncLabelReadingList">Reading list…</string>
     <string name="syncLabelConnecting">Connecting…</string>
-
     <string name="queueItemCoverDescription">Cover</string>
     <string name="permissionTitle">Warning!</string>
     <string name="permissionMsg_1">For a full JaMuz experience</string>
     <string name="permissionMsg_2">, please consider allowing permissions that you will be asked for:</string>
     <string name="permissionMsg_3">Multimedia files</string>
     <string name="permissionMsg_4">: Allows the app to:</string>
-    <string name="permissionMsg_5">- Write files received from JaMuz to an app folder on an external SD card.</string>
+    <string name="permissionMsg_5">- Write files received from JaMuz Server on an external SD card (in an application dedicated folder).</string>
     <string name="permissionMsg_6">- Read-only user selected folder on an external SD card.</string>
     <string name="permissionMsg_7">- Store database in JaMuz folder on the internal SD card</string>
     <string name="permissionMsg_8">Phone calls</string>
     <string name="permissionMsg_9">: To pause and resume audio during phone calls.</string>
-
     <string name="contentAlbumsTitle">Albums</string>
     <string name="contentQueueTitle">Play Queue</string>
     <string name="contentAlbumTracksTitle">Album Tracks</string>
     <string name="adapterCursorAlbumLabelTracks">track(s)</string>
-
     <string name="activityAlbumsLoading">Loading album list…</string>
     <string name="activityAlbumsLoadingPleaseWait">Please wait a few seconds…</string>
-
     <string name="audioPlayerToastRgBaseVolTooHigh">Base volume too high.</string>
     <string name="audioPlayerToastRgConsiderLower">If you see this message too often you can lower it in the settings. (One file may be the problem.)</string>
     <string name="globalLabelBefore">before</string>
@@ -139,7 +128,7 @@
     <string name="serviceSyncNotifyDownloadAttempt">Attempt</string>
     <string name="serviceSyncNotifyDownloadErrors">error(s).</string>
     <string name="serviceSyncNotifyDownloadStarting">Starting download…</string>
-    <string name="serviceSyncNotifyDownloadStopping">Stopping downloading.</string>
+    <string name="serviceSyncNotifyDownloadStopping">Stopping downloading…</string>
     <string name="serviceSyncNotifyDownloadStopped">Downloads stopped.</string>
     <string name="serviceSyncNotifyDownloadWaiting">Waiting</string>
     <string name="serviceSyncNotifyDownloadBeforeAttempt">before attempt</string>
@@ -157,7 +146,7 @@
     <string name="playlistSummaryNullIncluded">null incl.</string>
     <string name="playlistSummaryIncluded">Incl.</string>
     <string name="playlistSummaryExcluded">Excl.</string>
-    <string name="scanNotifyScanning">\"Scanning files…\"</string>
+    <string name="scanNotifyScanning">Scanning files…</string>
     <string name="scanTitle">Scan</string>
     <string name="settingsSpeechTextViewTitle">Voice commands</string>
     <string name="settingsRadioSpeechPause">Pause player.</string>
