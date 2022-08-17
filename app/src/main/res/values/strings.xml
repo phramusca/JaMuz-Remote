@@ -223,8 +223,8 @@
         <item>replay</item>
         <item>restart</item>
     </string-array>
-    <string name="playlistLabelRestored">Socket closed (received null)</string>
+    <string name="playlistLabelRestored">restored</string>
     <string name="serviceSyncNotifySyncRemaining">Remaning:</string>
-    <string name="clientReceptionToastSocketClosed">Remaning:</string>
-    <string name="mainToastQR">Remaning:</string>
+    <string name="clientReceptionToastSocketClosed">Socket closed (received null)</string>
+    <string name="mainToastQR">QR code read. New configuration in use.</string>
 </resources>
