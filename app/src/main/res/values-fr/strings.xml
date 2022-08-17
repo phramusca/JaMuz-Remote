@@ -11,14 +11,13 @@
     <string name="settingsServerButtonScanQR">Lire QR</string>
     <string name="settingsReplayGainTextViewBaseVolume">Volume de base :</string>
     <string name="settingsKidsPlaceTextViewTitle">Kids Place</string>
-    <string name="settingsKidsPlaceTextViewHelp">Kids Place est une application tierce de kiddoware qui peut être trouvée sur l\'Android Play Store.</string>
+    <string name="settingsKidsPlaceTextViewHelp">\"Kids Place\" est une application tierce de kiddoware qui peut être trouvée sur l\'Android Play Store.</string>
     <string name="settingsKidsPlaceCheckBoxLimit">Limiter à cette liste de lecture :</string>
-    <string name="settingsKidsPlaceCheckBoxAllowDeleteSaveNew">Autorisation de supprimer, sauver et créér une liste de lecture</string>
+    <string name="settingsKidsPlaceCheckBoxAllowDeleteSaveNew">Autorisation de supprimer, sauver et créer une liste de lecture</string>
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Autoriser l\'édition des pistes</string>
     <string name="settingsKidsPlaceCheckBoxOnStartup">Lancer Kids Place avec JaMuz</string>
     <string name="settingsLocalFilesTextViewTitle">Pistes locales</string>
-    <string name="settingsLocalFilesTextViewHelp">Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local.
-\nATTENTION : Les pistes locales ne seront PAS synchronisées avec JaMuz Server ! Il est fortement recommandé d\'utiliser plutôt JaMuz Server pour télécharger vos pistes !</string>
+    <string name="settingsLocalFilesTextViewHelp"><html>Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local.<br/>ATTENTION : Les pistes locales ne seront PAS synchronisées avec JaMuz Server ! Il est fortement recommandé d\'utiliser plutôt JaMuz Server pour télécharger vos pistes !</html></string>
     <string name="settingsLocalFilesTextViewPath">Chemin :</string>
     <string name="settingsLocalFilesButtonChoose">Choisir</string>
     <string name="settingsDirectoryChooserButtonNewFolder">Nouveau dossier</string>
@@ -37,7 +36,7 @@
     <string name="playlistLabelUser">Utilisateur</string>
     <string name="playlistLabelSaved">a été enregistrée</string>
     <string name="playlistLabelRestored">a été restaurée</string>
-    <string name="playlistLabelSuccessfully">avec succès.</string>
+    <string name="playlistLabelSuccessfully">.</string>
     <string name="playlistLabelWithErrors">avec des erreurs !</string>
     <string name="playlistLabelNewName">Nom de la nouvelle liste de lecture</string>
     <string name="playlistLabelAlreadyExists">existe déjà.</string>
@@ -59,7 +58,7 @@
     <string name="permissionMsg_2">, merci de bien vouloir autoriser :</string>
     <string name="permissionMsg_3">Contenus multimédias</string>
     <string name="permissionMsg_4">: Permet à l\'application de :</string>
-    <string name="permissionMsg_5">- Enregistrer les fichiers reçus depuis JaMuz vers la carte SD externe</string>
+    <string name="permissionMsg_5">- Enregistrer les fichiers reçus depuis JaMuz Server sur une carte SD externe (dans un répertoire dédié à l\'application).</string>
     <string name="permissionMsg_6">- Lecture seule du répertoire local choisi sur la carte SD externe.</string>
     <string name="permissionMsg_7">- Enregistrer la base de données dans le répertoire JaMuz sur la carte SD interne</string>
     <string name="permissionMsg_8">Gestion des appels</string>
@@ -74,7 +73,7 @@
     <string name="mainToastClientInfoPort">Port</string>
     <string name="mainToastClientInfoEx">Ex :</string>
     <string name="mainToastCheckWifiConnection">Vous devez vous connecter au réseau Wi-Fi.</string>
-    <string name="mainToastQR">Code QR lu\nNouvelle configuration appliquée.</string>
+    <string name="mainToastQR">Code QR lu. Nouvelle configuration appliquée.</string>
     <string name="mainToastEmptyPlaylist">Liste de lecture vide.</string>
     <string name="mainToastNoTracksBeyond">Pas de piste précédente.</string>
     <string name="mainToastNotImplemented">Non implémenté.</string>
@@ -82,17 +81,18 @@
     <string name="mainAlertDialogClosingApplicationMessage">Êtes vous sûr(e) de vouloir quitter et arrêter la lecture \?</string>
     <string name="settingsServerToastProblemQR">Problème pour lire le code QR.</string>
     <string name="playlistDefaultAllPlaylistName">Tous</string>
-    <string name="voicePromptCommand">Dites une commande.\nex : « Note 4 », « Suivant »…</string>
+    <string name="voicePromptCommand">Dites une commande.
+\n ex : « Note 4 », « Suivant »…</string>
     <string name="speakYourTurn">À vous</string>
     <string name="speakGenre">Genre</string>
     <string name="speakUnknown">inconnu.</string>
     <string name="speakRating">Note</string>
     <string name="speakRatingIncorrect">incorrecte.</string>
     <string name="speakTags">Étiquettes</string>
-    <string name="speakTagsNone">Aucune étiquette</string>
-    <string name="speakRatingNone">Aucune note</string>
+    <string name="speakTagsNone">Aucunes étiquettes.</string>
+    <string name="speakRatingNone">Aucune note.</string>
     <string name="activityAlbumsLoading">Chargement de la liste des albums…</string>
-    <string name="activityAlbumsLoadingPleaseWait">Merci de bien vouloir patienter quelques secondes.</string>
+    <string name="activityAlbumsLoadingPleaseWait">Merci de bien vouloir patienter quelques secondes…</string>
     <string name="settingsDirectoryChooserFailedToCreate">Erreur à la création du dossier</string>
     <string name="settingsDirectoryChooserFailedToCreateSuffix">dossier.</string>
     <string name="audioPlayerToastRgBaseVolTooHigh">Volume de base trop haut.</string>
@@ -116,7 +116,7 @@
     <string name="serviceSyncNotifySyncReceivedSuffix">nombre de fichiers…</string>
     <string name="serviceSyncNotifySyncReceivedTags">Etiquettes reçues…</string>
     <string name="serviceSyncNotifySyncReceivedGenres">Genres reçus…</string>
-    <string name="serviceSyncNotifySyncPreparingMerge">Préparation de la fusion des statistiques.</string>
+    <string name="serviceSyncNotifySyncPreparingMerge">Préparation de la fusion des statistiques…</string>
     <string name="serviceSyncNotifySyncRequestingMerge">Demande de fusion des statistiques.</string>
     <string name="serviceSyncNotifySyncUpdateDatabase">Mise à jour de la base de données…</string>
     <string name="serviceSyncNotifySyncMergeComplete">Fusion terminée.</string>
@@ -201,7 +201,7 @@
         <item>poule up</item>
         <item>poulpe</item>
     </string-array>
-    <string name="mainVoiceToastNeedToInstall">Vous devez installer le moteur de reconnaissance vocale de Google pour utilser cette fonctionalité.</string>
+    <string name="mainVoiceToastNeedToInstall">Vous devez installer le moteur de reconnaissance vocale de Google pour utiliser cette fonctionnalité.</string>
     <string name="clientToastAuthenticationFailed">Échec de l’authentification.</string>
     <string name="playlistSummaryIncluded">Incl.</string>
     <string name="playlistSummaryNullExcluded">null excl.</string>
