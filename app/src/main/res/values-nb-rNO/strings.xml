@@ -98,7 +98,7 @@
     <string name="mainToastClientInfoPort">Port</string>
     <string name="mainToastClientInfoEx">Eks:</string>
     <string name="mainToastCheckWifiConnection">Du må koble til et Wi-Fi-nettverk.</string>
-    <string name="mainToastQR">QR-kode lest.\nNytt oppsett satt.</string>
+    <string name="mainToastQR">QR-kode lest. Nytt oppsett satt.</string>
     <string name="mainToastEmptyPlaylist">Tom spilleliste.</string>
     <string name="mainToastNoTracksBeyond">Ingen flere spor.</string>
     <string name="mainToastNotImplemented">Ikke implementert.</string>
