@@ -22,8 +22,8 @@
     <string name="playlistLabel">Spilleliste</string>
     <string name="playlistLabelHistory">Historikk</string>
     <string name="playlistLabelQuestionDeleteTitle">Slett spilleliste\?</string>
-    <string name="playlistLabelQuestionDelete">Vil du slette</string>
-    <string name="playlistLabelQuestionDeleteSuffix">spillelisten\?</string>
+    <string name="playlistLabelQuestionDelete">Vil du slette spillelisten</string>
+    <string name="playlistLabelQuestionDeleteSuffix">\?</string>
     <string name="playlistLabelCannotDeleteLastPlaylist">Du kan ikke slette siste spilleliste.</string>
     <string name="playlistDefaultAllPlaylistName">Alle</string>
     <string name="voicePromptCommand">Si en komando.\nF.eks. «Vurdering på 4», «Neste»…</string>
