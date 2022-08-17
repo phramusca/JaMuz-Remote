@@ -11,7 +11,6 @@
     <string name="mainToastClientInfoEx">Ex:</string>
 
     <string name="mainToastCheckWifiConnection">You must connect to a Wi-Fi network first.</string>
-    <string name="mainToastQRread">QR code read. New configuration in use.</string>
     <string name="mainToastEmptyPlaylist">Empty Playlist.</string>
     <string name="mainToastNoTracksBeyond">No further tracks.</string>
     <string name="mainToastNotImplemented">Not implemented.</string>
@@ -59,7 +58,6 @@
     <string name="playlistLabelHistory">History</string>
     <string name="playlistLabelUser">User</string>
     <string name="playlistLabelSaved">saved</string>
-    <string name="playlistLabelrestored">restored</string>
     <string name="playlistLabelSuccessfully">.</string>
     <string name="playlistLabelWithErrors">with errors!</string>
     <string name="playlistLabelNewName">New playlist name</string>
@@ -121,7 +119,6 @@
     <string name="serviceSyncNotifySyncComplete">Synced.</string>
     <string name="serviceSyncNotifySyncSuccess">files have been downloaded.</string>
     <string name="serviceSyncNotifySyncDownloaded">Downloaded:</string>
-    <string name="serviceSyncNotifySyncRemaning">Remaning:</string>
     <string name="serviceSyncNotifySyncCompleteNoDownloads">Synced. No downloads.</string>
     <string name="serviceSyncNotifySyncUserStopped">User stopped playback.</string>
     <string name="serviceSyncNotifySyncRemovingDeleted">Removing deleted files…</string>
@@ -151,7 +148,6 @@
     <string name="playlistOrderTrackNb">Track number</string>
     <string name="mainVoiceToastNeedToInstall">Install a speech recognition engine from Google if you want to use this feature.</string>
     <string name="clientToastAuthenticationFailed">Could not authenticate.</string>
-    <string name="clientREceptionToastSocketClosed">Socket closed (received null)</string>
     <string name="playlistSummaryNullOnly">null only</string>
     <string name="playlistSummaryNullExcluded">null excl.</string>
     <string name="playlistSummaryNullIncluded">null incl.</string>
@@ -227,4 +223,8 @@
         <item>replay</item>
         <item>restart</item>
     </string-array>
+    <string name="playlistLabelRestored">Socket closed (received null)</string>
+    <string name="serviceSyncNotifySyncRemaining">Remaning:</string>
+    <string name="clientReceptionToastSocketClosed">Remaning:</string>
+    <string name="mainToastQR">Remaning:</string>
 </resources>
