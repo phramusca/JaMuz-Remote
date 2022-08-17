@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kpsdk_enter_pin_desc">Please enter pin to continue</string>
+    <string name="kpsdk_e_invalid_pin">Invalid pin please try again</string>
+</resources>
