@@ -22,7 +22,8 @@
             android:label="@string/applicationName"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -35,17 +36,20 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".ReceiverMediaButton">
+        <receiver android:name=".ReceiverMediaButton"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".ReceiverHeadSetPlugged">
+        <receiver android:name=".ReceiverHeadSetPlugged"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.HEADSET_PLUG" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".ReceiverPhoneCall">
+        <receiver android:name=".ReceiverPhoneCall"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
