@@ -30,7 +30,7 @@
     <string name="settingsKidsPlaceTextViewTitle">Kids Place</string>
     <string name="settingsKidsPlaceTextViewHelp">\"Kids Place\" is a third-party kiddoware app from the Play store.</string>
     <string name="settingsKidsPlaceCheckBoxLimit">Limit to this playlist:</string>
-    <string name="settingsKidsPlaceCheckBoxAllowDeleteSaveNew">Allow deleting, savving and creating a new playlist</string>
+    <string name="settingsKidsPlaceCheckBoxAllowDeleteSaveNew">Allow deleting, saving and creating a new playlist</string>
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Allow track edition</string>
     <string name="settingsKidsPlaceCheckBoxOnStartup">Start Kids Place with JaMuz</string>
     <string name="settingsLocalFilesTextViewTitle">Local tracks</string>
@@ -39,8 +39,8 @@
     <string name="settingsLocalFilesButtonChoose">Choose</string>
     <string name="settingsDirectoryChooserButtonNewFolder">New folder</string>
     <string name="settingsDirectoryChooserNewFolderName">New folder name</string>
-    <string name="settingsDirectoryChooserFailedToCreate">Could not create</string>
-    <string name="settingsDirectoryChooserFailedToCreateSuffix">the folder.</string>
+    <string name="settingsDirectoryChooserFailedToCreate">Error creating folder</string>
+    <string name="settingsDirectoryChooserFailedToCreateSuffix">folder.</string>
     <string name="playlistTextViewExcludeTheLast">Exclude the last </string>
     <string-array name="limitUnits">
         <item>minutes</item>
@@ -59,7 +59,7 @@
     <string name="playlistLabelNewName">New playlist name</string>
     <string name="playlistLabelAlreadyExists">already exist.</string>
     <string name="playlistLabelQuestionDeleteTitle">Delete the playlist?</string>
-    <string name="playlistLabelQuestionDelete">Delete</string>
+    <string name="playlistLabelQuestionDelete">Are you sure you want to delete playlist</string>
     <string name="playlistLabelQuestionDeleteSuffix">the playlist?</string>
     <string name="playlistLabelCannotDeleteLastPlaylist">You cannot delete the last playlist.</string>
     <string name="playlistDefaultAllPlaylistName">All</string>
@@ -109,7 +109,7 @@
     <string name="serviceSyncNotifySyncSuccess">files have been downloaded.</string>
     <string name="serviceSyncNotifySyncDownloaded">Downloaded:</string>
     <string name="serviceSyncNotifySyncCompleteNoDownloads">Synced. No downloads.</string>
-    <string name="serviceSyncNotifySyncUserStopped">User stopped playback.</string>
+    <string name="serviceSyncNotifySyncUserStopped">User stopped.</string>
     <string name="serviceSyncNotifySyncRemovingDeleted">Removing deleted files…</string>
     <string name="serviceSyncNotifySyncCheckComplete">Check complete.</string>
     <string name="serviceSyncNotifySyncInterrupted">Interrupted.</string>
