@@ -64,7 +64,7 @@
     <string name="playlistLabelAlreadyExists">already exist.</string>
     <string name="playlistLabelQuestionDeleteTitle">Delete the playlist?</string>
     <string name="playlistLabelQuestionDelete">Delete</string>
-    <string name="playlistLabelQuestionDeleteSuffix">the playlist?</string>
+    <string name="playlistLabelQuestionDeleteSuffix">playlist?</string>
     <string name="playlistLabelCannotDeleteLastPlaylist">You cannot delete the last playlist.</string>
     <string name="playlistDefaultAllPlaylistName">All</string>
 

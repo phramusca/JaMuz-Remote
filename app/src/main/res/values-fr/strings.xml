@@ -42,8 +42,8 @@
     <string name="playlistLabelNewName">Nom de la nouvelle liste de lecture</string>
     <string name="playlistLabelAlreadyExists">existe déjà.</string>
     <string name="playlistLabelQuestionDeleteTitle">Supprimer la liste de lecture ?</string>
-    <string name="playlistLabelQuestionDelete">Êtes-vous sûr(e) de vouloir supprimer la liste</string>
-    <string name="playlistLabelQuestionDeleteSuffix">de lecture \?</string>
+    <string name="playlistLabelQuestionDelete">Supprimer la liste de lecture</string>
+    <string name="playlistLabelQuestionDeleteSuffix">\?</string>
     <string name="playlistLabelCannotDeleteLastPlaylist">Vous ne pouvez pas supprimer la dernière liste de lecture.</string>
     <string name="speakUnknownCommand">Commande inconnue :</string>
     <string name="speakNotFound">est introuvable.</string>
