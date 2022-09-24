@@ -35,7 +35,8 @@ import com.beaglebuddy.id3.enums.EventType;
  */
 public class EventCode
 {
-   // data members   private EventType eventType;
+   // data members
+   private EventType eventType;
    private int       timeStamp;
 
    /**

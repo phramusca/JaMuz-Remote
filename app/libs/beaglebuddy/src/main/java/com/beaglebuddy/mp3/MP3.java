@@ -607,8 +607,8 @@ public class MP3 extends MP3Base
     * languages defined by the {@link com.beaglebuddy.id3.enums.Language ISO-639-2} standard, in practice this is never done, and as such, the MP3 class only supports
     * storing one comment in an .mp3 file.
     * <br/><br/><b>Example:</b><code><pre class="beaglebuddy">
-    *     // load the song "Pas Plus de Seize Ans" from Voie de Fait's "Ange ou Démon" album.
-    *     MP3 mp3 = new MP3("c:/mp3/voie de fait/ange ou démon/pas plus de seize ans.mp3");
+    *     // load the song "Pas Plus de Seize Ans" from Voie de Fait's "Ange ou Dï¿½mon" album.
+    *     MP3 mp3 = new MP3("c:/mp3/voie de fait/ange ou dï¿½mon/pas plus de seize ans.mp3");
     *     if (mp3.getComments() == null)
     *        System.out.println("the song " + mp3.getTitle() + " does not have any comments");
     *     else
@@ -628,11 +628,11 @@ public class MP3 extends MP3Base
     * languages defined by the {@link com.beaglebuddy.id3.enums.Language ISO-639-2} standard, in practice this is never done, and as such, the MP3 class only supports
     * storing one comment in an .mp3 file.
     * <br/><br/><b>Example:</b><code><pre class="beaglebuddy">
-    *     // load the song "Pas Plus de Seize Ans" from Voie de Fait's "Ange ou Démon" album.
-    *     MP3 mp3 = new MP3("c:/mp3/voie de fait/ange ou démon/pas plus de seize ans.mp3");
+    *     // load the song "Pas Plus de Seize Ans" from Voie de Fait's "Ange ou Dï¿½mon" album.
+    *     MP3 mp3 = new MP3("c:/mp3/voie de fait/ange ou dï¿½mon/pas plus de seize ans.mp3");
     *     mp3.setComments("I like this song");            // write a comment in english
-    *     mp3.setComments("Das Lied gefällt mir");        // write a comment in german  - overwrites the previous english comment
-    *     mp3.setComments("Me gusta esta Canción");       // write a comment in spanish - overwrites the previous german  comment
+    *     mp3.setComments("Das Lied gefï¿½llt mir");        // write a comment in german  - overwrites the previous english comment
+    *     mp3.setComments("Me gusta esta Canciï¿½n");       // write a comment in spanish - overwrites the previous german  comment
     *     System.out.println("the song " + mp3.getTitle() + " has a comment: " + mp3.getComments());</pre></code>
     * @param comments  comment about the song.
     * @throws IllegalStateException   if the mp3 song was loaded from a URL or an input stream and is therefore considered to be read only and thus may not be modified.
@@ -1015,7 +1015,7 @@ public class MP3 extends MP3Base
     *
     *     // load the song "Living in a World" from Axxis' album, "Kingdom of the Night".
     *     MP3 mp3 = new MP3("c:/mp3/axxis/kingdom of the night/living in a world.mp3");
-    *     mp3.setMusicBy("Bernhard Weiß/Walter Pietsch");
+    *     mp3.setMusicBy("Bernhard Weiï¿½/Walter Pietsch");
     *     System.out.println("the music to the song " + mp3.getTitle() + " was written by " + mp3.getMusicBy());
     * @param composer  the person(s) who wrote the music to the song.
     * @throws IllegalStateException   if the mp3 song was loaded from a URL or an input stream and is therefore considered to be read only and thus may not be modified.

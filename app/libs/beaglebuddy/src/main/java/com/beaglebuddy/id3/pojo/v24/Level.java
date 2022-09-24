@@ -33,7 +33,7 @@ public class Level
    private short frequency;   // frequency (in hz) in the range 0 - 32767 hz.   note: internally, the frequency is stored in increments of 1/2   = 0.5         hz.
                               // ex: 500hz =              1,000 / 2, we would store  1,000 (0x03 E8)
                               // ex: 16khz = 16,000 hz = 32,000 / 2, we would store 32,000 (0x7D 00)
-   private short volume;      // volume    (in db) in the range ±64 db.         note: internally, the volume    is stored in increments of 1/512 = 0.001953125 db.
+   private short volume;      // volume    (in db) in the range ï¿½64 db.         note: internally, the volume    is stored in increments of 1/512 = 0.001953125 db.
                               // ex:  2 db =  1024 / 512, so to get a 2 db volume increase, we would store  1024 (0x04 00)
                               // ex: -2 db = -1024 / 512, so to get a 2 db volume decrease, we would store -1024 (0xFC 00)
 
@@ -99,12 +99,12 @@ public class Level
     * Ex: +2.5 db<br/>
     * Ex: -3.0 db<br/>
     * @param volume   the amount of volume (in db) to adjust this equalization level.  Allowed values are from -64 db - +64 db.
-    * @throws IllegalArgumentException  if the volume is not in the range of ±64 db.
+    * @throws IllegalArgumentException  if the volume is not in the range of ï¿½64 db.
     */
    public void setVolume(double volume)
    {
       if (volume < -64.0 || volume > 64.0)
-         throw new IllegalArgumentException("Invalid volume " + volume + ".  It must be in the range of ±64 db.");
+         throw new IllegalArgumentException("Invalid volume " + volume + ".  It must be in the range of ï¿½64 db.");
 
       this.volume = (short)Math.round(volume * 512);
    }
