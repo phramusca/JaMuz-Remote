@@ -86,7 +86,7 @@ public class MusicLibrary {
                 return -1;
             }
             cursor.moveToFirst();
-            return cursor.getInt(cursor.getColumnIndex(COL_ID_REMOTE));
+            return cursor.getInt(cursor.getColumnIndexOrThrow(COL_ID_REMOTE));
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "getTrackIdFileRemote(" + path + ")", ex); //NON-NLS
         }
@@ -102,7 +102,7 @@ public class MusicLibrary {
                 return -1;
             }
             cursor.moveToFirst();
-            return cursor.getInt(cursor.getColumnIndex(COL_ID_REMOTE));
+            return cursor.getInt(cursor.getColumnIndexOrThrow(COL_ID_REMOTE));
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "getTrackIdFileRemote(" + idFileServer + ")", ex); //NON-NLS
         }
@@ -392,22 +392,22 @@ public class MusicLibrary {
     }
 
     public Track cursorToTrack(Cursor c, boolean statsOnly) {
-        int idFileRemote = c.getInt(c.getColumnIndex(COL_ID_REMOTE));
-        int idFileServer = c.getInt(c.getColumnIndex(COL_ID_SERVER));
-        double rating = c.getDouble(c.getColumnIndex(COL_RATING));
-        String status = c.getString(c.getColumnIndex(COL_STATUS));
-        long size = c.getLong(c.getColumnIndex(COL_SIZE));
-        int length = c.getInt(c.getColumnIndex(COL_LENGTH));
-        String path = c.getString(c.getColumnIndex(COL_PATH));
-        String genre = c.getString(c.getColumnIndex(COL_GENRE));
+        int idFileRemote = c.getInt(c.getColumnIndexOrThrow(COL_ID_REMOTE));
+        int idFileServer = c.getInt(c.getColumnIndexOrThrow(COL_ID_SERVER));
+        double rating = c.getDouble(c.getColumnIndexOrThrow(COL_RATING));
+        String status = c.getString(c.getColumnIndexOrThrow(COL_STATUS));
+        long size = c.getLong(c.getColumnIndexOrThrow(COL_SIZE));
+        int length = c.getInt(c.getColumnIndexOrThrow(COL_LENGTH));
+        String path = c.getString(c.getColumnIndexOrThrow(COL_PATH));
+        String genre = c.getString(c.getColumnIndexOrThrow(COL_GENRE));
         Date addedDate = HelperDateTime.parseSqlUtc(
-                c.getString(c.getColumnIndex(COL_ADDED_DATE)));
+                c.getString(c.getColumnIndexOrThrow(COL_ADDED_DATE)));
         Date lastPlayed = HelperDateTime.parseSqlUtc(
-                c.getString(c.getColumnIndex(COL_LAST_PLAYED)));
-        int playCounter = c.getInt(c.getColumnIndex(COL_PLAY_COUNTER));
-        String idPath = c.getString(c.getColumnIndex(COL_ID_PATH));
+                c.getString(c.getColumnIndexOrThrow(COL_LAST_PLAYED)));
+        int playCounter = c.getInt(c.getColumnIndexOrThrow(COL_PLAY_COUNTER));
+        String idPath = c.getString(c.getColumnIndexOrThrow(COL_ID_PATH));
         Date modifDate = HelperDateTime.parseSqlUtc(
-                c.getString(c.getColumnIndex(COL_MODIF_DATE)));
+                c.getString(c.getColumnIndexOrThrow(COL_MODIF_DATE)));
 
         String title = "";
         String album = "";
@@ -431,35 +431,35 @@ public class MusicLibrary {
         float albumGain = -1;
 
         if (!statsOnly) {
-            title = c.getString(c.getColumnIndex(COL_TITLE));
-            album = c.getString(c.getColumnIndex(COL_ALBUM));
-            artist = c.getString(c.getColumnIndex(COL_ARTIST));
-            albumArtist = c.getString(c.getColumnIndex(COL_ALBUM_ARTIST));
-            year = c.getString(c.getColumnIndex(COL_YEAR));
-            trackNo = c.getInt(c.getColumnIndex(COL_TRACK_NO));
-            trackTotal = c.getInt(c.getColumnIndex(COL_TRACK_TOTAL));
-            discNo = c.getInt(c.getColumnIndex(COL_DISC_NO));
-            discTotal = c.getInt(c.getColumnIndex(COL_DISC_TOTAL));
-            bitRate = c.getString(c.getColumnIndex(COL_BITRATE));
-            format = c.getString(c.getColumnIndex(COL_FORMAT));
-            bpm = c.getDouble(c.getColumnIndex(COL_BPM));
-            checkedFlag = c.getString(c.getColumnIndex(COL_CHECKED_FLAG));
-            copyRight = c.getString(c.getColumnIndex(COL_COPYRIGHT));
-            coverHash = c.getString(c.getColumnIndex(COL_COVER_HASH));
+            title = c.getString(c.getColumnIndexOrThrow(COL_TITLE));
+            album = c.getString(c.getColumnIndexOrThrow(COL_ALBUM));
+            artist = c.getString(c.getColumnIndexOrThrow(COL_ARTIST));
+            albumArtist = c.getString(c.getColumnIndexOrThrow(COL_ALBUM_ARTIST));
+            year = c.getString(c.getColumnIndexOrThrow(COL_YEAR));
+            trackNo = c.getInt(c.getColumnIndexOrThrow(COL_TRACK_NO));
+            trackTotal = c.getInt(c.getColumnIndexOrThrow(COL_TRACK_TOTAL));
+            discNo = c.getInt(c.getColumnIndexOrThrow(COL_DISC_NO));
+            discTotal = c.getInt(c.getColumnIndexOrThrow(COL_DISC_TOTAL));
+            bitRate = c.getString(c.getColumnIndexOrThrow(COL_BITRATE));
+            format = c.getString(c.getColumnIndexOrThrow(COL_FORMAT));
+            bpm = c.getDouble(c.getColumnIndexOrThrow(COL_BPM));
+            checkedFlag = c.getString(c.getColumnIndexOrThrow(COL_CHECKED_FLAG));
+            copyRight = c.getString(c.getColumnIndexOrThrow(COL_COPYRIGHT));
+            coverHash = c.getString(c.getColumnIndexOrThrow(COL_COVER_HASH));
             pathModifDate = HelperDateTime.parseSqlUtc(
-                    c.getString(c.getColumnIndex(COL_PATH_MODIF_DATE)));
-            pathMbid = c.getString(c.getColumnIndex(COL_PATH_MB_ID));
-            comment = c.getString(c.getColumnIndex(COL_COMMENT));
-            trackGain = c.getFloat(c.getColumnIndex(COL_TRACK_GAIN));
-            albumGain = c.getFloat(c.getColumnIndex(COL_ALBUM_GAIN));
+                    c.getString(c.getColumnIndexOrThrow(COL_PATH_MODIF_DATE)));
+            pathMbid = c.getString(c.getColumnIndexOrThrow(COL_PATH_MB_ID));
+            comment = c.getString(c.getColumnIndexOrThrow(COL_COMMENT));
+            trackGain = c.getFloat(c.getColumnIndexOrThrow(COL_TRACK_GAIN));
+            albumGain = c.getFloat(c.getColumnIndexOrThrow(COL_ALBUM_GAIN));
         }
 
         //TODO Use below in sync or merge processes (DO NOT store in db, or values from remote)
-//        boolean deleted=c.getString(c.getColumnIndex(COL_));
-//        int previousPlayCounter=c.getInt(c.getColumnIndex(COL_));
-//        Date genreModifDate=c.getString(c.getColumnIndex(COL_));
-//        Date tagsModifDate=c.getString(c.getColumnIndex(COL_));
-//        Date ratingModifDate=c.getString(c.getColumnIndex(COL_));
+//        boolean deleted=c.getString(c.getColumnIndexOrThrow(COL_));
+//        int previousPlayCounter=c.getInt(c.getColumnIndexOrThrow(COL_));
+//        Date genreModifDate=c.getString(c.getColumnIndexOrThrow(COL_));
+//        Date tagsModifDate=c.getString(c.getColumnIndexOrThrow(COL_));
+//        Date ratingModifDate=c.getString(c.getColumnIndexOrThrow(COL_));
 
         return new Track(pathModifDate, pathMbid, comment, idPath, albumArtist, year,
                 trackNo, trackTotal, discNo, discTotal, bitRate, format, bpm, modifDate, checkedFlag,

@@ -34,14 +34,14 @@ public class AdapterListItemAlbum {
 
     public static AdapterListItemAlbum fromCursor(Cursor c) {
         return new AdapterListItemAlbum(
-                c.getString(c.getColumnIndex(COL_ALBUM)),
-                c.getString(c.getColumnIndex(COL_ARTIST)),
-                c.getInt(c.getColumnIndex(COL_PLAY_COUNTER)), //Ugly trick => nbTracks
-                c.getDouble(c.getColumnIndex(COL_RATING)),
-                c.getString(c.getColumnIndex(COL_GENRE)),
-                c.getString(c.getColumnIndex(COL_COVER_HASH)),
-                c.getString(c.getColumnIndex(COL_PATH)),
-                c.getString(c.getColumnIndex(COL_ID_PATH)));
+                c.getString(c.getColumnIndexOrThrow(COL_ALBUM)),
+                c.getString(c.getColumnIndexOrThrow(COL_ARTIST)),
+                c.getInt(c.getColumnIndexOrThrow(COL_PLAY_COUNTER)), //Ugly trick => nbTracks
+                c.getDouble(c.getColumnIndexOrThrow(COL_RATING)),
+                c.getString(c.getColumnIndexOrThrow(COL_GENRE)),
+                c.getString(c.getColumnIndexOrThrow(COL_COVER_HASH)),
+                c.getString(c.getColumnIndexOrThrow(COL_PATH)),
+                c.getString(c.getColumnIndexOrThrow(COL_ID_PATH)));
     }
 
     public String getAlbum() {
