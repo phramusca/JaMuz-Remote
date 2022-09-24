@@ -2,7 +2,7 @@
 
 By contributing to this project you agree to license your contribution under the terms of the [GNU GPLv3](LICENSE).
 
-[[_TOC_]]
+[[__TOC__]]
 
 ## Issues
 
@@ -42,7 +42,7 @@ Please submit to the `master` branch.
 
 1. Build APK with Android Studio: `Build / Build bundle(s) / APK(s) / Build APK(s)`
 
-1. Rename it to JaMuz_Remote_vx.y.z[-beta].apk
+1. Rename it to JaMuz_Remote_vx.y.z.apk
 
     ```bash
     version=x.y.z
