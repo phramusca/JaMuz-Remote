@@ -347,8 +347,8 @@ public enum Language
    NIC("Niger-Kordofanian languages"                                                     ), /** Niuean                                                                           */
    NIU("Niuean"                                                                          ), /** Dutch; Flemish                                                                   */
    NLD("Dutch; Flemish"                                                                  ), /** Norwegian Nynorsk; Nynorsk, Norwegian                                            */
-   NNO("Norwegian Nynorsk; Nynorsk, Norwegian"                                           ), /** Bokmål, Norwegian; Norwegian Bokmål                                              */
-   NOB("Bokmål, Norwegian; Norwegian Bokmål"                                             ), /** Nogai                                                                            */
+   NNO("Norwegian Nynorsk; Nynorsk, Norwegian"                                           ), /** Bokmï¿½l, Norwegian; Norwegian Bokmï¿½l                                              */
+   NOB("Bokmï¿½l, Norwegian; Norwegian Bokmï¿½l"                                             ), /** Nogai                                                                            */
    NOG("Nogai"                                                                           ), /** Norse, Old                                                                       */
    NON("Norse, Old"                                                                      ), /** Norwegian                                                                        */
    NOR("Norwegian"                                                                       ), /** N'Ko                                                                             */
@@ -384,8 +384,8 @@ public enum Language
    POL("Polish"                                                                          ), /** Pohnpeian                                                                        */
    PON("Pohnpeian"                                                                       ), /** Portuguese                                                                       */
    POR("Portuguese"                                                                      ), /** Prakrit languages                                                                */
-   PRA("Prakrit languages"                                                               ), /** Provençal, Old (to 1500Occitan, Old (to 1500)                                    */
-   PRO("Provençal, Old (to 1500Occitan, Old (to 1500)"                                   ), /** Pushto; Pashto                                                                   */
+   PRA("Prakrit languages"                                                               ), /** Provenï¿½al, Old (to 1500Occitan, Old (to 1500)                                    */
+   PRO("Provenï¿½al, Old (to 1500Occitan, Old (to 1500)"                                   ), /** Pushto; Pashto                                                                   */
    PUS("Pushto; Pashto"                                                                  ), /** Quechua                                                                          */
    QUE("Quechua"                                                                         ), /** Rajasthani                                                                       */
    RAJ("Rajasthani"                                                                      ), /** Rapanui                                                                          */
@@ -496,8 +496,8 @@ public enum Language
    UZB("Uzbek"                                                                           ), /** Vai                                                                              */
    VAI("Vai"                                                                             ), /** Venda                                                                            */
    VEN("Venda"                                                                           ), /** Vietnamese                                                                       */
-   VIE("Vietnamese"                                                                      ), /** Volapük                                                                          */
-   VOL("Volapük"                                                                         ), /** Votic                                                                            */
+   VIE("Vietnamese"                                                                      ), /** Volapï¿½k                                                                          */
+   VOL("Volapï¿½k"                                                                         ), /** Votic                                                                            */
    VOT("Votic"                                                                           ), /** Wakashan languages                                                               */
    WAK("Wakashan languages"                                                              ), /** Wolaitta; Wolaytta                                                               */
    WAL("Wolaitta; Wolaytta"                                                              ), /** Waray                                                                            */

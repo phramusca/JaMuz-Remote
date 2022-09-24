@@ -39,7 +39,8 @@ public class APEHeader extends APEFooter
     * @throws ParseException  if the bytes do not contain a valid APE header.
     */
    public APEHeader(byte[] bytes) throws ParseException
-   {      super(bytes, "header");
+   {
+      super(bytes, "header");
    }
 
    /**
