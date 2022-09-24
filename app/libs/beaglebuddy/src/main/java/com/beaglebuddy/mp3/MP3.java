@@ -256,8 +256,9 @@ public class MP3 extends MP3Base
     */
    public void save() throws IOException, IllegalStateException
    {
-      if (mp3File == null)
-	     throw new IllegalStateException(getReadOnlyErrorMessage());
+      if (mp3File == null) {
+         throw new IllegalStateException(getReadOnlyErrorMessage());
+      }
 
       if (id3v23Tag != null)
          saveID3v23();
