@@ -1,4 +1,4 @@
-﻿package com.beaglebuddy.id3.enums;
+package com.beaglebuddy.id3.enums;
 
 
 
