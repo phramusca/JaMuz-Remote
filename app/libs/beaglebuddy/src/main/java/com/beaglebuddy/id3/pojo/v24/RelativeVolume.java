@@ -91,7 +91,7 @@ public class RelativeVolume
 
    // data members
    private Channel        channel;        // speaker channel whose volume will be adjusted
-   private short          volume;         // volume    (in db) in the range ±64 db.         note: internally, the volume    is stored in increments of 1/512 = 0.001953125 db.
+   private short          volume;         // volume    (in db) in the range ï¿½64 db.         note: internally, the volume    is stored in increments of 1/512 = 0.001953125 db.
                                           // ex:  2 db =  1024 / 512, so to get a 2 db volume increase, we would store  1024 (0x04 00)
                                           // ex: -2 db = -1024 / 512, so to get a 2 db volume decrease, we would store -1024 (0xFC 00)
    private PeakVolumeSize peakVolumeSize; // how many bits are used to store the peak volume.  Again, what brain dead monkey thought this was a good idea?
@@ -162,13 +162,13 @@ public class RelativeVolume
     * Ex: +2.5 db<br/>
     * Ex: -3.0 db<br/>
     * @param volume   the amount of volume (in db) to adjust this equalization level.
-    * @throws IllegalArgumentException  if the volume is not in the range of ±64 db.
+    * @throws IllegalArgumentException  if the volume is not in the range of ï¿½64 db.
     * @see #getVolume()
     */
    public void setVolume(double volume)
    {
       if (volume < -64.0 || volume > 64.0)
-         throw new IllegalArgumentException("Invalid volume " + volume + ".  It must be in the range of ±64 db.");
+         throw new IllegalArgumentException("Invalid volume " + volume + ".  It must be in the range of ï¿½64 db.");
 
       this.volume = (short)Math.round(volume * 512);
    }
