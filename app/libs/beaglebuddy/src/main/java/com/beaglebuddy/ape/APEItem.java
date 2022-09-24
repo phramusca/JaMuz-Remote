@@ -53,7 +53,8 @@ public class APEItem
     * @param index   index into the byte array.
     */
    public APEItem(byte[] bytes, int index)
-   {      int valueLength = Utility.littleEndianBytesToInt(bytes, index);
+   {
+      int valueLength = Utility.littleEndianBytesToInt(bytes, index);
       flags = new APEFlags(bytes, index + SIZE_VALUE);
       key   = getString(bytes, index + SIZE_VALUE + SIZE_FLAGS);
       size  = SIZE_VALUE + SIZE_FLAGS + key.length() + 1 + valueLength;

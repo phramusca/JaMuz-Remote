@@ -51,7 +51,7 @@ import com.beaglebuddy.id3.enums.v23.FrameType;
  *          <tr><td class="beaglebuddy">TCOP</td><td class="beaglebuddy">The 'Copyright message' frame, which must begin with a year and a space character (making five characters), is intended
  *                                                                       for the copyright holder of the original sound, not the audio file itself. The absence of this frame means only that the
  *                                                                       copyright information is unavailable or has been removed, and must not be interpreted to mean that the sound is public
- *                                                                       domain. Every time this field is displayed the field must be preceded with "Copyright © ".  </td></tr>
+ *                                                                       domain. Every time this field is displayed the field must be preceded with "Copyright ï¿½ ".  </td></tr>
  *          <tr><td class="beaglebuddy">TDAT</td><td class="beaglebuddy">The 'Date' frame is a numeric string in the DDMM format containing the date for the recording. This field is always four
  *                                                                       characters long.  </td></tr>
  *          <tr><td class="beaglebuddy">TDLY</td><td class="beaglebuddy">The 'Playlist delay' defines the numbers of milliseconds of silence between every song in a playlist. The player should use

@@ -148,8 +148,8 @@ public enum Currency
    SLL("Sierra Leone Leone"                                      ), /** Somalia Shilling                                         */
    SOS("Somalia Shilling"                                        ), /** Seborga Luigino                                          */
    SPL("Seborga Luigino"                                         ), /** Suriname Dollar                                          */
-   SRD("Suriname Dollar"                                         ), /** São Principe and Tome Dobra                              */
-   STD("São Principe and Tome Dobra"                             ), /** El Salvador Colon                                        */
+   SRD("Suriname Dollar"                                         ), /** Sï¿½o Principe and Tome Dobra                              */
+   STD("Sï¿½o Principe and Tome Dobra"                             ), /** El Salvador Colon                                        */
    SVC("El Salvador Colon"                                       ), /** Syria Pound                                              */
    SYP("Syria Pound"                                             ), /** Swaziland Lilangeni                                      */
    SZL("Swaziland Lilangeni"                                     ), /** Thailand Baht                                            */
@@ -171,12 +171,12 @@ public enum Currency
    VEF("Venezuela Bolivar Fuerte"                                ), /** Viet Nam Dong                                            */
    VND("Viet Nam Dong"                                           ), /** Vanuatu Vatu                                             */
    VUV("Vanuatu Vatu"                                            ), /** Samoa Tala                                               */
-   WST("Samoa Tala"                                              ), /** Communauté Financière Africaine (BEAC) CFA Franc BEAC    */
-   XAF("Communauté Financière Africaine (BEAC) CFA Franc BEAC"   ), /** East Caribbean Dollar                                    */
+   WST("Samoa Tala"                                              ), /** Communautï¿½ Financiï¿½re Africaine (BEAC) CFA Franc BEAC    */
+   XAF("Communautï¿½ Financiï¿½re Africaine (BEAC) CFA Franc BEAC"   ), /** East Caribbean Dollar                                    */
    XCD("East Caribbean Dollar"                                   ), /** International Monetary Fund (IMF) Special Drawing Rights */
-   XDR("International Monetary Fund (IMF) Special Drawing Rights"), /** Communauté Financière Africaine (BCEAO) Franc            */
-   XOF("Communauté Financière Africaine (BCEAO) Franc"           ), /** Comptoirs Français du Pacifique (CFP) Franc              */
-   XPF("Comptoirs Français du Pacifique (CFP) Franc"             ), /** Yemen Rial                                               */
+   XDR("International Monetary Fund (IMF) Special Drawing Rights"), /** Communautï¿½ Financiï¿½re Africaine (BCEAO) Franc            */
+   XOF("Communautï¿½ Financiï¿½re Africaine (BCEAO) Franc"           ), /** Comptoirs Franï¿½ais du Pacifique (CFP) Franc              */
+   XPF("Comptoirs Franï¿½ais du Pacifique (CFP) Franc"             ), /** Yemen Rial                                               */
    YER("Yemen Rial"                                              ), /** South Africa Rand                                        */
    ZAR("South Africa Rand"                                       ), /** Zambia Kwacha                                            */
    ZMK("Zambia Kwacha"                                           ), /** Zimbabwe Dollar                                          */

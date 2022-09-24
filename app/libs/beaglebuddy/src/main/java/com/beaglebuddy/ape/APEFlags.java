@@ -81,7 +81,8 @@ public class APEFlags
     * @param index   offset into the byte stream where the flag bytes are located.
     */
    public APEFlags(byte[] bytes, int index)
-   {      tagContainsHeader = (bytes[index + 3] & MASK_TAG_CONTAINS_HEADER) != 0;
+   {
+      tagContainsHeader = (bytes[index + 3] & MASK_TAG_CONTAINS_HEADER) != 0;
       tagContainsFooter = (bytes[index + 3] & MASK_TAG_CONTAINS_FOOTER) != 0;
       header            = (bytes[index + 3] & MASK_IS_HEADER          ) != 0;
       readOnly          = (bytes[index    ] & MASK_READ_ONLY          ) != 0;
