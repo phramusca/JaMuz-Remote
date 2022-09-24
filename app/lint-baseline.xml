@@ -1,0 +1,1100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="5" by="lint Dolphin | 2021.3.1">
+
+    <issue
+        id="JcenterRepositoryObsolete"
+        message="JCenter Maven repository is no longer receiving updates: newer library versions may be available elsewhere">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="JcenterRepositoryObsolete"
+        message="JCenter Maven repository is no longer receiving updates: newer library versions may be available elsewhere">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="ScopedStorage"
+        message="WRITE_EXTERNAL_STORAGE no longer provides write access when targeting Android 10+">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="7"/>
+    </issue>
+
+    <issue
+        id="ScrollViewSize"
+        message="This RelativeLayout should use `android:layout_height=&quot;wrap_content&quot;`">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="11"/>
+    </issue>
+
+    <issue
+        id="TextViewEdits"
+        message="Attribute `android:inputType` should not be used with `&lt;TextView>`: Change element type to `&lt;EditText>` ?">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="48"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/RetryInterceptor.java"
+            line="48"/>
+    </issue>
+
+    <issue
+        id="SimpleDateFormat"
+        message="To get local formatting use `getDateInstance()`, `getDateTimeInstance()`, or `getTimeInstance()`, or use `new SimpleDateFormat(String template, Locale locale)` with for example `Locale.US` for ASCII dates.">
+        <location
+            file="src/main/java/com/beaglebuddy/util/Utility.java"
+            line="40"/>
+    </issue>
+
+    <issue
+        id="SuspiciousIndentation"
+        message="Suspicious indentation: This is conditionally executed; expected it to be indented">
+        <location
+            file="src/main/java/com/beaglebuddy/ape/APETag.java"
+            line="307"/>
+        <location
+            file="src/main/java/com/beaglebuddy/ape/APETag.java"
+            line="306"/>
+    </issue>
+
+    <issue
+        id="SuspiciousIndentation"
+        message="Suspicious indentation: This is conditionally executed; expected it to be indented">
+        <location
+            file="src/main/java/com/beaglebuddy/id3/v23/frame_body/ID3v23FrameBodyCommercial.java"
+            line="298"/>
+        <location
+            file="src/main/java/com/beaglebuddy/id3/v23/frame_body/ID3v23FrameBodyCommercial.java"
+            line="297"/>
+    </issue>
+
+    <issue
+        id="SuspiciousIndentation"
+        message="Suspicious indentation: This is conditionally executed; expected it to be indented">
+        <location
+            file="src/main/java/com/beaglebuddy/id3/v23/frame_body/ID3v23FrameBodyOwnership.java"
+            line="191"/>
+        <location
+            file="src/main/java/com/beaglebuddy/id3/v23/frame_body/ID3v23FrameBodyOwnership.java"
+            line="190"/>
+    </issue>
+
+    <issue
+        id="SuspiciousIndentation"
+        message="Suspicious indentation: This is conditionally executed; expected it to be indented">
+        <location
+            file="src/main/java/com/beaglebuddy/id3/v24/frame_body/ID3v24FrameBodyCommercial.java"
+            line="298"/>
+        <location
+            file="src/main/java/com/beaglebuddy/id3/v24/frame_body/ID3v24FrameBodyCommercial.java"
+            line="297"/>
+    </issue>
+
+    <issue
+        id="SuspiciousIndentation"
+        message="Suspicious indentation: This is conditionally executed; expected it to be indented">
+        <location
+            file="src/main/java/com/beaglebuddy/id3/v24/frame_body/ID3v24FrameBodyOwnership.java"
+            line="191"/>
+        <location
+            file="src/main/java/com/beaglebuddy/id3/v24/frame_body/ID3v24FrameBodyOwnership.java"
+            line="190"/>
+    </issue>
+
+    <issue
+        id="NonConstantResourceId"
+        message="Resource IDs will be non-final by default in Android Gradle Plugin version 8.0, avoid using them in switch case statements">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/ActivityMain.java"
+            line="2233"/>
+    </issue>
+
+    <issue
+        id="NonConstantResourceId"
+        message="Resource IDs will be non-final by default in Android Gradle Plugin version 8.0, avoid using them in switch case statements">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/ActivityMain.java"
+            line="2236"/>
+    </issue>
+
+    <issue
+        id="NonConstantResourceId"
+        message="Resource IDs will be non-final by default in Android Gradle Plugin version 8.0, avoid using them in switch case statements">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/ActivitySettings.java"
+            line="197"/>
+    </issue>
+
+    <issue
+        id="NonConstantResourceId"
+        message="Resource IDs will be non-final by default in Android Gradle Plugin version 8.0, avoid using them in switch case statements">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/ActivitySettings.java"
+            line="201"/>
+    </issue>
+
+    <issue
+        id="NonConstantResourceId"
+        message="Resource IDs will be non-final by default in Android Gradle Plugin version 8.0, avoid using them in switch case statements">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/ActivitySettings.java"
+            line="205"/>
+    </issue>
+
+    <issue
+        id="RedundantLabel"
+        message="Redundant label can be removed">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="22"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.appcompat:appcompat than 1.3.1 is available: 1.5.1">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.appcompat:appcompat than 1.3.1 is available: 1.5.1">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.constraintlayout:constraintlayout than 2.1.1 is available: 2.1.4">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.android.material:material than 1.4.0 is available: 1.6.1">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.code.gson:gson than 2.8.6 is available: 2.9.1">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.guava:guava than 23.3-android is available: 24.1-jre">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.journeyapps:zxing-android-embedded than 3.6.0 is available: 4.3.0">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="LockedOrientationActivity"
+        message="Expecting `android:screenOrientation=&quot;unspecified&quot;` or `&quot;fullSensor&quot;` for this activity so the user can use the application in any orientation and provide a great experience on Chrome OS devices">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="24"/>
+    </issue>
+
+    <issue
+        id="LockedOrientationActivity"
+        message="Expecting `android:screenOrientation=&quot;unspecified&quot;` or `&quot;fullSensor&quot;` for this activity so the user can use the application in any orientation and provide a great experience on Chrome OS devices">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="24"/>
+    </issue>
+
+    <issue
+        id="UseCompatLoadingForDrawables"
+        message="Use `ResourcesCompat.getDrawable()`">
+        <location
+            file="src/main/java/com/kiddoware/kidsplace/sdk/view/CircularBackImageView.java"
+            line="38"/>
+    </issue>
+
+    <issue
+        id="UseCompatLoadingForDrawables"
+        message="Use `ResourcesCompat.getDrawable()`">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/SwipeHelper.java"
+            line="261"/>
+    </issue>
+
+    <issue
+        id="UsingOnClickInXml"
+        message="Use databinding or explicit wiring of click listener in code">
+        <location
+            file="src/main/res/layout/content_main.xml"
+            line="303"/>
+    </issue>
+
+    <issue
+        id="UsingOnClickInXml"
+        message="Use databinding or explicit wiring of click listener in code">
+        <location
+            file="src/main/res/layout/content_main.xml"
+            line="309"/>
+    </issue>
+
+    <issue
+        id="UsingOnClickInXml"
+        message="Use databinding or explicit wiring of click listener in code">
+        <location
+            file="src/main/res/layout/content_settings.xml"
+            line="167"/>
+    </issue>
+
+    <issue
+        id="UsingOnClickInXml"
+        message="Use databinding or explicit wiring of click listener in code">
+        <location
+            file="src/main/res/layout/content_settings.xml"
+            line="173"/>
+    </issue>
+
+    <issue
+        id="UsingOnClickInXml"
+        message="Use databinding or explicit wiring of click listener in code">
+        <location
+            file="src/main/res/layout/content_settings.xml"
+            line="179"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;kpsdk_enter_pin_desc&quot; is not translated in &quot;nb&quot; (Norwegian Bokmål) or &quot;fr&quot; (French)">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;kpsdk_e_invalid_pin&quot; is not translated in &quot;nb&quot; (Norwegian Bokmål) or &quot;fr&quot; (French)">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="4"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;settingsSpeechTextViewTitle&quot; is not translated in &quot;nb&quot; (Norwegian Bokmål)">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="147"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;settingsRadioSpeechPause&quot; is not translated in &quot;nb&quot; (Norwegian Bokmål)">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="148"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;settingsRadioSpeechLowerVolume&quot; is not translated in &quot;nb&quot; (Norwegian Bokmål)">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="149"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;settingsRadioSpeechNone&quot; is not translated in &quot;nb&quot; (Norwegian Bokmål)">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="150"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;settingsSpeechTitle&quot; is not translated in &quot;nb&quot; (Norwegian Bokmål)">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="151"/>
+    </issue>
+
+    <issue
+        id="GetInstance"
+        message="`Cipher.getInstance` should not be called without setting the encryption mode and padding">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/Encryption.java"
+            line="29"/>
+    </issue>
+
+    <issue
+        id="GetInstance"
+        message="`Cipher.getInstance` should not be called without setting the encryption mode and padding">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/Encryption.java"
+            line="41"/>
+    </issue>
+
+    <issue
+        id="UnspecifiedImmutableFlag"
+        message="Missing `PendingIntent` mutability flag">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/ActivityAlbumTracks.java"
+            line="124"/>
+    </issue>
+
+    <issue
+        id="UnspecifiedImmutableFlag"
+        message="Missing `PendingIntent` mutability flag">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/ServiceBase.java"
+            line="70"/>
+    </issue>
+
+    <issue
+        id="ExpiringTargetSdkVersion"
+        message="Google Play will soon require that apps target API level 31 or higher. This will be required for new apps in August 2022, and for updates to existing apps in November 2022.">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="ExpiringTargetSdkVersion"
+        message="Google Play will soon require that apps target API level 31 or higher. This will be required for new apps in August 2022, and for updates to existing apps in November 2022.">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="ExpiringTargetSdkVersion"
+        message="Google Play will soon require that apps target API level 31 or higher. This will be required for new apps in August 2022, and for updates to existing apps in November 2022.">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="ExpiringTargetSdkVersion"
+        message="Google Play will soon require that apps target API level 31 or higher. This will be required for new apps in August 2022, and for updates to existing apps in November 2022.">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort.">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/ActivityPlayQueue.java"
+            line="60"/>
+    </issue>
+
+    <issue
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort.">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/ActivityPlayQueue.java"
+            line="73"/>
+    </issue>
+
+    <issue
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort.">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/ActivityPlayQueue.java"
+            line="82"/>
+    </issue>
+
+    <issue
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort.">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/ActivityPlayQueue.java"
+            line="103"/>
+    </issue>
+
+    <issue
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort.">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/AdapterCursor.java"
+            line="121"/>
+    </issue>
+
+    <issue
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort.">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/AdapterCursor.java"
+            line="125"/>
+    </issue>
+
+    <issue
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort.">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/AdapterCursor.java"
+            line="136"/>
+    </issue>
+
+    <issue
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort.">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/AdapterCursor.java"
+            line="143"/>
+    </issue>
+
+    <issue
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort.">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/AdapterLoadQueue.java"
+            line="41"/>
+    </issue>
+
+    <issue
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort.">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/AdapterLoadQueue.java"
+            line="58"/>
+    </issue>
+
+    <issue
+        id="Recycle"
+        message="This `Cursor` should be freed up after use with `#close()`">
+        <location
+            file="src/main/java/com/kiddoware/kidsplace/sdk/KPUtility.java"
+            line="750"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="This folder configuration (`v21`) is unnecessary; `minSdkVersion` is 21. Merge all the resources in this folder into `values`.">
+        <location
+            file="src/main/res/values-v21"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        message="Do not place Android context classes in static fields (static reference to `AudioPlayer` which has field `mContext` pointing to `Context`); this is a memory leak">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/ActivityMain.java"
+            line="112"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        message="Do not place Android context classes in static fields; this is a memory leak">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/ActivityMain.java"
+            line="130"/>
+    </issue>
+
+    <issue
+        id="UselessParent"
+        message="This `LinearLayout` layout or its `FrameLayout` parent is unnecessary">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="66"/>
+    </issue>
+
+    <issue
+        id="RedundantNamespace"
+        message="This namespace declaration is redundant">
+        <location
+            file="src/main/res/layout/content_main.xml"
+            line="322"/>
+    </issue>
+
+    <issue
+        id="RedundantNamespace"
+        message="This namespace declaration is redundant">
+        <location
+            file="src/main/res/layout/content_main.xml"
+            line="323"/>
+    </issue>
+
+    <issue
+        id="RedundantNamespace"
+        message="This namespace declaration is redundant">
+        <location
+            file="src/main/res/layout/content_main.xml"
+            line="342"/>
+    </issue>
+
+    <issue
+        id="RedundantNamespace"
+        message="This namespace declaration is redundant">
+        <location
+            file="src/main/res/layout/content_main.xml"
+            line="343"/>
+    </issue>
+
+    <issue
+        id="RedundantNamespace"
+        message="This namespace declaration is redundant">
+        <location
+            file="src/main/res/layout/content_main.xml"
+            line="363"/>
+    </issue>
+
+    <issue
+        id="RedundantNamespace"
+        message="This namespace declaration is redundant">
+        <location
+            file="src/main/res/layout/content_main.xml"
+            line="364"/>
+    </issue>
+
+    <issue
+        id="IconXmlAndPng"
+        message="The following images appear both as density independent `.xml` files and as bitmap files: src/main/res/drawable-anydpi/ic_button_enqueue.xml, src/main/res/drawable-hdpi/ic_button_enqueue.png">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_button_enqueue.png"/>
+        <location
+            file="src/main/res/drawable-xhdpi/ic_button_enqueue.png"/>
+        <location
+            file="src/main/res/drawable-mdpi/ic_button_enqueue.png"/>
+        <location
+            file="src/main/res/drawable-hdpi/ic_button_enqueue.png"/>
+        <location
+            file="src/main/res/drawable-anydpi/ic_button_enqueue.xml"/>
+    </issue>
+
+    <issue
+        id="IconXmlAndPng"
+        message="The following images appear both as density independent `.xml` files and as bitmap files: src/main/res/drawable-anydpi/ic_button_enqueue_play.xml, src/main/res/drawable-hdpi/ic_button_enqueue_play.png">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_button_enqueue_play.png"/>
+        <location
+            file="src/main/res/drawable-xhdpi/ic_button_enqueue_play.png"/>
+        <location
+            file="src/main/res/drawable-mdpi/ic_button_enqueue_play.png"/>
+        <location
+            file="src/main/res/drawable-hdpi/ic_button_enqueue_play.png"/>
+        <location
+            file="src/main/res/drawable-anydpi/ic_button_enqueue_play.xml"/>
+    </issue>
+
+    <issue
+        id="IconXmlAndPng"
+        message="The following images appear both as density independent `.xml` files and as bitmap files: src/main/res/drawable-hdpi/ic_button_new.png, src/main/res/drawable/ic_button_new.xml">
+        <location
+            file="src/main/res/drawable/ic_button_new.xml"/>
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_button_new.png"/>
+        <location
+            file="src/main/res/drawable-xhdpi/ic_button_new.png"/>
+        <location
+            file="src/main/res/drawable-mdpi/ic_button_new.png"/>
+        <location
+            file="src/main/res/drawable-hdpi/ic_button_new.png"/>
+    </issue>
+
+    <issue
+        id="IconXmlAndPng"
+        message="The following images appear both as density independent `.xml` files and as bitmap files: src/main/res/drawable-anydpi/ic_button_search.xml, src/main/res/drawable-hdpi/ic_button_search.png">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_button_search.png"/>
+        <location
+            file="src/main/res/drawable-xhdpi/ic_button_search.png"/>
+        <location
+            file="src/main/res/drawable-mdpi/ic_button_search.png"/>
+        <location
+            file="src/main/res/drawable-hdpi/ic_button_search.png"/>
+        <location
+            file="src/main/res/drawable-anydpi/ic_button_search.xml"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-hdpi/ic_action_down.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-mdpi/ic_action_down.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xhdpi/ic_action_down.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_action_down.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-hdpi/ic_action_forward.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-mdpi/ic_action_forward.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xhdpi/ic_action_forward.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_action_forward.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-hdpi/ic_action_next.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-mdpi/ic_action_next.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xhdpi/ic_action_next.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_action_next.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-hdpi/ic_action_play.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-mdpi/ic_action_play.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xhdpi/ic_action_play.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_action_play.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-hdpi/ic_action_previous.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-mdpi/ic_action_previous.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xhdpi/ic_action_previous.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_action_previous.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-hdpi/ic_action_pullup.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-mdpi/ic_action_pullup.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xhdpi/ic_action_pullup.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_action_pullup.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-hdpi/ic_action_rewind.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-mdpi/ic_action_rewind.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xhdpi/ic_action_rewind.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_action_rewind.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-hdpi/ic_action_toggle_edit_red.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-mdpi/ic_action_toggle_edit_red.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xhdpi/ic_action_toggle_edit_red.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_action_toggle_edit_red.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-hdpi/ic_action_toggle_genre_red.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-mdpi/ic_action_toggle_genre_red.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xhdpi/ic_action_toggle_genre_red.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_action_toggle_genre_red.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-hdpi/ic_action_toggle_order_red.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-mdpi/ic_action_toggle_order_red.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xhdpi/ic_action_toggle_order_red.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_action_toggle_order_red.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-hdpi/ic_action_up.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-mdpi/ic_action_up.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xhdpi/ic_action_up.png"/>
+    </issue>
+
+    <issue
+        id="IconColors"
+        message="Action Bar icons should use a single gray color (`#333333` for light themes (with 60%/30% opacity for enabled/disabled), and `#FFFFFF` with opacity 80%/30% for dark themes">
+        <location
+            file="src/main/res/drawable-xxhdpi/ic_action_up.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/ic_launcher_home.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/ic_launcher_home.png"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute">
+        <location
+            file="src/main/res/layout/content_albums.xml"
+            line="43"/>
+    </issue>
+
+    <issue
+        id="ClickableViewAccessibility"
+        message="`OnSwipeTouchListener#onTouch` should call `View#performClick` when a click is detected">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/OnSwipeTouchListener.java"
+            line="20"/>
+    </issue>
+
+    <issue
+        id="ClickableViewAccessibility"
+        message="`onTouch` should call `View#performClick` when a click is detected">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/SwipeHelper.java"
+            line="59"/>
+    </issue>
+
+    <issue
+        id="ClickableViewAccessibility"
+        message="Custom view ``RecyclerView`` has `setOnTouchListener` called on it but does not override `performClick`">
+        <location
+            file="src/main/java/phramusca/com/jamuzremote/SwipeHelper.java"
+            line="84"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Search&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/content_albums.xml"
+            line="47"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Kidsplace&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/kpsdk_install_dialog.xml"
+            line="32"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Powered by Kiddoware&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/kpsdk_install_dialog.xml"
+            line="40"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;1&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="81"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;2&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="85"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;3&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="89"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;4&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="103"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;5&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="107"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;6&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="111"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;7&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="126"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;8&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="130"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;9&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="134"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;&lt;&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="150"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;0&quot;, should use `@string` resource">
+        <location
+            file="src/main/res/layout/kpsdk_pin_dialog.xml"
+            line="155"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        message="Consider replacing `android:layout_marginLeft` with `android:layout_marginStart=&quot;16dp&quot;` to better support right-to-left layouts">
+        <location
+            file="src/main/res/layout/kpsdk_install_dialog.xml"
+            line="25"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        message="Consider replacing `android:layout_marginLeft` with `android:layout_marginStart=&quot;16dp&quot;` to better support right-to-left layouts">
+        <location
+            file="src/main/res/layout/kpsdk_install_dialog.xml"
+            line="25"/>
+    </issue>
+
+</issues>
