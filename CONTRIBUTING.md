@@ -62,7 +62,7 @@ Please submit to the `master` branch.
     versionName "x.y.z+1-dev" 
     ```
 
-1. Commit (named vx.y.z-dev) & PUSH
+1. Commit (named vx.y.z+1-dev) & PUSH
 1. Update [voiceCommands.md](https://github.com/phramusca/JaMuz-Remote/blob/master/data/voiceCommands.md)
 
     -If any of the following changed :
