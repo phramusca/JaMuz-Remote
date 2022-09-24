@@ -15,7 +15,7 @@ import com.kiddoware.kidsplace.sdk.R;
 /**
  * Created by Shardul on 29/03/16.
  */
-public class CircularBackImageView extends ImageView {
+public class CircularBackImageView extends androidx.appcompat.widget.AppCompatImageView {
 
     public CircularBackImageView(Context context) {
         super(context);
@@ -27,11 +27,6 @@ public class CircularBackImageView extends ImageView {
 
     public CircularBackImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public CircularBackImageView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Override
