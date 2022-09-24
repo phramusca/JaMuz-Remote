@@ -21,10 +21,10 @@ android {
         sourceCompatibility 1.8
     }
     namespace 'phramusca.com.jamuzremote'
-
-    lintOptions {
-        baseline file("lint-baseline.xml")
+    lint {
+        baseline file('lint-baseline.xml')
     }
+
 }
 
 dependencies {
