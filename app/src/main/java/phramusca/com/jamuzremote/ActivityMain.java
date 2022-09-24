@@ -1475,6 +1475,8 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void getFromQRcode(String content) {
+        //FIXME: QR portrait as in CookAndFreeze
+        // https://stackoverflow.com/questions/8007194/how-to-use-zxing-in-portrait-mode
         if (content != null) {
             if (!content.equals("")) {
                 content = content.substring("jamuzremote://".length());
