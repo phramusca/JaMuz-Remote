@@ -42,6 +42,8 @@ dependencies {
     // DO NOT UPDATE guava unless changing sourceCompatibility 1.8
     // https://stackoverflow.com/a/49619157
     implementation 'com.google.guava:guava:23.3-android'
+    //https://stackoverflow.com/questions/56639529/duplicate-class-com-google-common-util-concurrent-listenablefuture-found-in-modu
+    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
     implementation 'com.google.android:flexbox:0.3.0'
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0' //QR Code
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.3.Final'
