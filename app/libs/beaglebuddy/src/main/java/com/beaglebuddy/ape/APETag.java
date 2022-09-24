@@ -303,8 +303,9 @@ public class APETag
       buffer.append("   size.........: " + size          + " bytes\n");
       buffer.append("   header.......: " + header        + "\n");
       buffer.append("   items........: " + items.size()  + "\n");
-      for(APEItem item : items)
-      buffer.append("      " + item                      + "\n");
+      for(APEItem item : items) {
+         buffer.append("      " + item                      + "\n");
+      }
       buffer.append("   footer.......: " + footer              );
 
       return buffer.toString();

@@ -144,11 +144,11 @@
     <string name="playlistSummaryExcluded">Excl.</string>
     <string name="scanNotifyScanning">Scanning files…</string>
     <string name="scanTitle">Scan</string>
-    <string name="settingsSpeechTextViewTitle">Voice commands</string>
-    <string name="settingsRadioSpeechPause">Pause player.</string>
-    <string name="settingsRadioSpeechLowerVolume">Lower volume.</string>
-    <string name="settingsRadioSpeechNone">Do nothing special.</string>
-    <string name="settingsSpeechTitle">When prompting voice command:</string>
+    <string name="settingsSpeechTextViewTitle" tools:ignore="MissingTranslation">Voice commands</string>
+    <string name="settingsRadioSpeechPause" tools:ignore="MissingTranslation">Pause player.</string>
+    <string name="settingsRadioSpeechLowerVolume" tools:ignore="MissingTranslation">Lower volume.</string>
+    <string name="settingsRadioSpeechNone" tools:ignore="MissingTranslation">Do nothing special.</string>
+    <string name="settingsSpeechTitle" tools:ignore="MissingTranslation">When prompting voice command:</string>
     <string-array name="voiceCommands_PLAY_ARTIST_ONGOING">
         <item>current artist</item>
         <item>ongoing artist</item>
