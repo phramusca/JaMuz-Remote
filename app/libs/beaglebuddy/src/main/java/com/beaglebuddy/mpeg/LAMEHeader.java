@@ -364,7 +364,6 @@ public class LAMEHeader
 
    /**
     * read in the LAME header version bytes from the input stream and parse them.
-    * @param inputStream   input stream pointing to the version in the LAME header.
     * @throws ParseException   if the version can not be parsed from the LAME header
     * @see <a href="http://wiki.hydrogenaud.io/index.php?title=LAME_version_string">LAME version string</a>
     */

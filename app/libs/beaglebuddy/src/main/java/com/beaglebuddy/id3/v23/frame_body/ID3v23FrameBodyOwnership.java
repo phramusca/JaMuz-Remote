@@ -187,8 +187,9 @@ public class ID3v23FrameBodyOwnership extends ID3v23FrameBody
       Currency previous = null;
       for(Price price : prices)
       {
-         if (price.getCurrency() == previous)
-         throw new IllegalArgumentException("Invalid price list.  It contains two different " + price.getCurrency().getCode() + " prices.");
+         if (price.getCurrency() == previous) {
+            throw new IllegalArgumentException("Invalid price list.  It contains two different " + price.getCurrency().getCode() + " prices.");
+         }
       }
 
       this.dirty  = true;

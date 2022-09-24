@@ -233,10 +233,12 @@ public class ID3v24FrameBodyCommercial extends ID3v24FrameBody
       seller                  = new String(buffer, nullTerminatorIndex, nextNullTerminatorIndex-nullTerminatorIndex, encoding.getCharacterSet()).trim();
       nullTerminatorIndex    += nextNullTerminatorIndex + encoding.getNumBytesInNullTerminator();
       nextNullTerminatorIndex = getNextNullTerminator(nullTerminatorIndex, encoding);
-      description             = new String(buffer, nullTerminatorIndex, nextNullTerminatorIndex-nullTerminatorIndex, encoding.getCharacterSet()).trim();
+      description             = new String(buffer, nullTerminatorIndex, nextNullTerminatorIndex-nullTerminatorIndex, encoding.getCharacterSet()).trim();
+
       nullTerminatorIndex    += nextNullTerminatorIndex + encoding.getNumBytesInNullTerminator();
       nextNullTerminatorIndex = getNextNullTerminator(nullTerminatorIndex, Encoding.ISO_8859_1);
-      pictureMimeType         = new String(buffer, nullTerminatorIndex, nextNullTerminatorIndex-nullTerminatorIndex, Encoding.ISO_8859_1.getCharacterSet()).trim();
+      pictureMimeType         = new String(buffer, nullTerminatorIndex, nextNullTerminatorIndex-nullTerminatorIndex, Encoding.ISO_8859_1.getCharacterSet()).trim();
+
       nullTerminatorIndex    += nextNullTerminatorIndex + 1;
       sellerLogo              = new byte[buffer.length - nullTerminatorIndex];
       System.arraycopy(buffer, nullTerminatorIndex, sellerLogo, 0, sellerLogo.length);
@@ -292,8 +294,9 @@ public class ID3v24FrameBodyCommercial extends ID3v24FrameBody
       Currency previous = null;
       for(Price price : prices)
       {
-         if (price.getCurrency() == previous)
-         throw new IllegalArgumentException("The prices field in the " + frameType.getId() + " frame contains an invalid value.  It contains two different " + price.getCurrency().getCode() + " prices.");
+         if (price.getCurrency() == previous) {
+            throw new IllegalArgumentException("The prices field in the " + frameType.getId() + " frame contains an invalid value.  It contains two different " + price.getCurrency().getCode() + " prices.");
+         }
       }
 
       this.dirty  = true;
