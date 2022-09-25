@@ -17,10 +17,13 @@ jobs:
         java-version: 11
     - name: Make Gradle executable
       run: chmod +x ./gradlew
-    - name: Build Release APK
-      run: ./gradlew assembleRelease
+    - name: Build with Gradle
+      run: ./gradlew build
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
     - name: Releasing using Hub
-      uses: r0user/release-apk@main
+      uses: ShaunLWM/action-release-debugapk@master
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
         APP_FOLDER: app
+        RELEASE_TITLE: New Build
