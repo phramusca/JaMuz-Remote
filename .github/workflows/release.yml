@@ -17,13 +17,15 @@ jobs:
         java-version: 11
     - name: Make Gradle executable
       run: chmod +x ./gradlew
-    - name: Build with Gradle
-      run: ./gradlew build
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug
-    - name: Releasing using Hub
-      uses: ShaunLWM/action-release-debugapk@master
+    - name: Build debug apk
+      run: ./gradlew clean assembleDebug
+
+    - name: Create release and upload apk
+      uses: underwindfall/create-release-with-debugapk@v2.0.0
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        APP_FOLDER: app
-        RELEASE_TITLE: New Build
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      with:
+        tag_name: v9.8.7
+        asset_path: app/build/outputs/apk/debug/app-debug.apk
+        asset_name: Example.apk
+        asset_content_type: application/zip
