@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('../jamuzremote.jks')
+            storePassword 'jamuzremote'
+            keyAlias 'upload'
+            keyPassword 'jamuzremote'
+        }
+    }
     compileSdkVersion 32
 
     defaultConfig {
@@ -14,6 +22,8 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            debuggable true
         }
     }
     compileOptions {
