@@ -21,7 +21,7 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build release apk with Gradle
-      run: ./gradlew clean assembleDebug
+      run: ./gradlew clean assembleRelease
 
     - uses: ilharp/sign-android-release@v1 # Or use @nightly
       name: Sign app APK
