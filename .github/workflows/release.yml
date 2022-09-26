@@ -9,23 +9,39 @@ jobs:
   Gradle:
     runs-on: ubuntu-latest
     steps:
-    - name: checkout code
-      uses: actions/checkout@v2
-    - name: setup jdk
-      uses: actions/setup-java@v1
+    - uses: actions/checkout@v3
+    - name: set up JDK 11
+      uses: actions/setup-java@v3
       with:
-        java-version: 11
-    - name: Make Gradle executable
-      run: chmod +x ./gradlew
-    - name: Build debug apk
+        java-version: '11'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build release apk with Gradle
       run: ./gradlew clean assembleDebug
 
-    - name: Create release and upload apk
-      uses: underwindfall/create-release-with-debugapk@v2.0.0
-      env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+    - uses: ilharp/sign-android-release@v1 # Or use @nightly
+      name: Sign app APK
+      id: sign_app
       with:
-        tag_name: v9.8.7
-        asset_path: app/build/outputs/apk/debug/app-debug.apk
-        asset_name: Example.apk
-        asset_content_type: application/zip
+        releaseDir: app/build/outputs/apk/release
+        signingKey: ${{ secrets.ANDROID_SIGNING_KEY }}
+        keyAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
+        keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        buildToolsVersion: 33.0.0
+
+    # Upload your signed file if you want
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Signed app bundle
+        path: ${{steps.sign_app.outputs.signedFile}}
+
+    # - name: Releasing using Hub
+    #   uses: r0user/release-apk@main
+    #   env:
+    #    GITHUB_TOKEN: ${{ secrets.TOKEN }}
+    #    APP_FOLDER: app
