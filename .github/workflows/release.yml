@@ -56,8 +56,18 @@ jobs:
         name: Signed app bundle
         path: ${{steps.sign_app.outputs.signedFile}}
 
-    - name: "Create release on github"
-      uses: pipe-cd/actions-gh-release@v2.3.4
+    # - name: "Create release on github"
+    #   uses: pipe-cd/actions-gh-release@v2.3.4
+    #   with:
+    #     release_file: '**/RELEASE'
+    #     token: ${{ secrets.TOKEN }}
+
+    - name: "Create release on github with apk"
+      uses: svenstaro/upload-release-action@v2
       with:
-        release_file: '**/RELEASE'
-        token: ${{ secrets.TOKEN }}
+        repo_token: ${{ secrets.TOKEN }}
+        file: ${{steps.sign_app.outputs.signedFile}}
+        asset_name: mything
+        tag: ${{ github.ref }}
+        overwrite: true
+        body: "This is my release text"
