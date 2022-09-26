@@ -55,6 +55,6 @@ jobs:
         repo_token: ${{ secrets.TOKEN }}
         file: ${{steps.sign_app.outputs.signedFile}}
         asset_name: JaMuz_Remote_${{ github.ref }}.apk 
-        tag: JaMuz Remote ${{ github.ref }}
+        tag: ${{ github.ref }}
         overwrite: true
         body: "Release ${{ github.ref }}"
