@@ -49,12 +49,26 @@ jobs:
     #     name: Signed app bundle
     #     path: ${{steps.sign_app.outputs.signedFile}}
 
+    - name: Set asset_name
+      id: vars
+      run: echo ::set-output name=asset_name::JaMuz_Remote_${GITHUB_REF#refs/*/}.apk
+
+    - name: Display asset_name
+      run: echo ${{ steps.vars.outputs.asset_name }}
+
+    - name: Set body
+      id: var2
+      run: echo ::set-output name=body::Release ${GITHUB_REF#refs/*/} from pipeline
+
+    - name: Display asset_name
+      run: echo ${{ steps.var2.outputs.asset_name }}
+
     - name: "Create release on github with apk"
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.TOKEN }}
         file: ${{steps.sign_app.outputs.signedFile}}
-        asset_name: "JaMuz_Remote_${{ github.ref.name }}.apk"
+        asset_name: ${{ steps.vars.outputs.asset_name }}
         tag: ${{ github.ref }}
         overwrite: true
-        body: "Release ${{ github.ref.name }} from pipeline"
+        body: ${{ steps.var2.outputs.body }}
