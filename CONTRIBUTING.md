@@ -10,7 +10,7 @@ By contributing to this project you agree to license your contribution under the
 
 ## Internationalization
 
-Using [weblate.org](https://hosted.weblate.org/engage/jamuz-remote/)
+Using [weblate.org](https://hosted.weblate.org/engage/jamuz-remote/).
 
 ## Pull Requests
 
@@ -19,9 +19,9 @@ Please submit to the `master` branch.
 
 ### Get Started
 
-- Clone repository
-- Open project using [Android Studio](https://developer.android.com/studio/)
-- You can now run and enjoy (hopefully)
+- Clone repository.
+- Open project using [Android Studio](https://developer.android.com/studio/).
+- You can now run and enjoy (hopefully).
 
 ## Release process
 
@@ -42,30 +42,31 @@ Please submit to the `master` branch.
 
 3. Tag last commit "vx.y.z" and push. This will trigger the release github action.
 
-4. Update created release based on [previous ones](https://github.com/phramusca/JaMuz-Remote/releases)
-    - Drop APK built earlier
-    - [Edit gh-pages](https://github.com/phramusca/JaMuz/edit/gh-pages/index.md) with link to new release
+4. Update created release with changes.
 
-5. Update app/build.gradle
+5. [Edit gh-pages](https://github.com/phramusca/JaMuz/edit/gh-pages/index.md) with link to new release.
+
+6. Update app/build.gradle
 
     ```text
     versionName "x.y.z+1-dev" 
     ```
 
-6. Commit (named vx.y.z+1-dev) & PUSH
-   1. Update [voiceCommands.md](https://github.com/phramusca/JaMuz-Remote/blob/master/data/voiceCommands.md)
+7. Commit (named vx.y.z+1-dev) & push.
 
-       -If any of the following changed :
-         - in `VoiceKeyWords.java`,
-         - or in `res/values/strings.xml` files :
+8. Update [voiceCommands.md](https://github.com/phramusca/JaMuz-Remote/blob/master/data/voiceCommands.md):
 
-       ```xml
-       <string-array name="voiceCommands_XXXXXX">
-       </string-array>
-       ```
+    - If any of the following changed :
+        - in `VoiceKeyWords.java`,
+        - or in `res/values/strings.xml` files :
 
-       - Then, [export vocal commands](../../ReposSides/JaMuz-Remote/VoiceKeyWordsExport) to [voiceCommands.md](https://github.com/phramusca/JaMuz-Remote/edit/master/data/voiceCommands.md)
+    ```xml
+    <string-array name="voiceCommands_XXXXXX">
+    </string-array>
+    ```
 
-       ```bash
-       cd ../../ReposSides/JaMuz-Remote/VoiceKeyWordsExport/ && dotnet run Program.cs
-       ```
+    - Then, [export vocal commands](../../ReposSides/JaMuz-Remote/VoiceKeyWordsExport) to [voiceCommands.md](https://github.com/phramusca/JaMuz-Remote/edit/master/data/voiceCommands.md)
+
+    ```bash
+    cd ../../ReposSides/JaMuz-Remote/VoiceKeyWordsExport/ && dotnet run Program.cs
+    ```
