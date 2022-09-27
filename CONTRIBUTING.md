@@ -25,16 +25,16 @@ Please submit to the `master` branch.
 
 ## Release process
 
-1. Update year in strings.xml :  
+1. Update year in strings.xml:  
 
     ```xml
     <string name="mainWelcomeYear" translatable="false">2021</string>
     ```
 
-2. Update app/build.gradle
+2. Update app/build.gradle:
 
     ```text
-    versionName "x.y.z"
+    versionName "x.y.z" // remove "-dev" suffix
     versionCode +1
     ```
 
