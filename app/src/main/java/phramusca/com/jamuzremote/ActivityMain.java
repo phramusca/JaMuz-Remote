@@ -98,6 +98,8 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import phramusca.com.jamuzremote.utils.ExternalFilesDirs;
+
 // TODO: Move audio to a service
 // Why not using the standard android player by the way ? (less control for replaygain ?)
 public class ActivityMain extends AppCompatActivity {
@@ -111,13 +113,7 @@ public class ActivityMain extends AppCompatActivity {
     private AudioManager audioManager;
     public static AudioPlayer audioPlayer; //TODO: Remove static
     public static String login;
-
-    //In internal SD emulated storage:
-    //TODO: Possibly, change database location to external SD as we now have rights
-    //In external SD. Does not seem to work !
-    // DB_PATH = "/storage/3515-1C15/Android/data/"+BuildConfig.APPLICATION_ID
-    public static File musicLibraryDbFile = new File(
-            Environment.getExternalStorageDirectory() + "/JaMuz/JaMuzRemote.db"); //NON-NLS
+    public File musicLibraryDbFile;
 
     private Map<String, Playlist> localPlaylists = new LinkedHashMap<>();
     private ArrayAdapter<Playlist> playListArrayAdapter;
@@ -195,10 +191,8 @@ public class ActivityMain extends AppCompatActivity {
         //setEnabled does not seem enough (need to disable inner views too?) + some widgets are disabled/enabled during onCreate
         //layoutMain.setEnabled(false);
 
-        //The following call creates default application folder
-        // - in "external" card, the emulated one : /storage/emulated/0/Android//com.phramusca.jamuz/files
-        // - and in real removable sd card : /storage/xxxx-xxxx/Android/com.phramusca.jamuz/files
-        externalFilesDir = getExternalFilesDirs(null);
+        ExternalFilesDirs.init(mContext);
+        musicLibraryDbFile = new File(Environment.getExternalStorageDirectory(), "JaMuz/JaMuzRemote.db"); //NON-NLS
 
         VoiceKeyWords.set(mContext);
         prettyTime = new PrettyTime(Locale.getDefault());
@@ -317,7 +311,7 @@ public class ActivityMain extends AppCompatActivity {
                     if (!isMyServiceRunning(ServiceSync.class)) {
                         Intent service = new Intent(getApplicationContext(), ServiceSync.class);
                         service.putExtra("clientInfo", clientInfo);
-                        service.putExtra("getAppDataPath", getAppDataPath());
+                        service.putExtra("getAppDataPath", ExternalFilesDirs.getSelected());
                         startService(service);
                     }
                 } else {
@@ -798,7 +792,7 @@ public class ActivityMain extends AppCompatActivity {
         }
         //TODO Use a real password, from QR code
         return new ClientInfo(address, port, login, "tata", canal, //NON-NLS
-                "jamuz", getAppDataPath().getAbsolutePath()); //NON-NLS
+                "jamuz", ExternalFilesDirs.getSelected().getAbsolutePath()); //NON-NLS
     }
 
     private void toggleOff(ToggleButton button, View layout) {
@@ -1527,18 +1521,8 @@ public class ActivityMain extends AppCompatActivity {
         /*HelperLibrary.close();*/
     }
 
-    private static File[] externalFilesDir;
-
-    public static File getAppDataPath() {
-        File path = externalFilesDir[1];
-        if (!path.exists()) {
-            path.mkdirs();
-        }
-        return path;
-    }
-
     private void connectDatabase() {
-        HelperLibrary.open(getAppDataPath(), this);
+        HelperLibrary.open(this, ExternalFilesDirs.getSelected(), musicLibraryDbFile);
 
         new Thread() {
             public void run() {
@@ -1889,7 +1873,7 @@ public class ActivityMain extends AppCompatActivity {
                     + "<BR/><BR/>" +
                     "<i>- <u>" + getString(R.string.permissionMsg_3) + "</u></i> " + getString(R.string.permissionMsg_4) //NON-NLS //NON-NLS //NON-NLS
                     + "<BR/> " + //NON-NLS
-                    getString(R.string.permissionMsg_5) + " (\"" + getAppDataPath() + "\")."
+                    getString(R.string.permissionMsg_5) + " (\"" + ExternalFilesDirs.getSelected() + "\")."
                     + "<BR/>" +
                     getString(R.string.permissionMsg_6)
                     + "<BR/>" +
@@ -2055,7 +2039,7 @@ public class ActivityMain extends AppCompatActivity {
         if (!isMyServiceRunning(ServiceScan.class)) {
             Intent service = new Intent(getApplicationContext(), ServiceScan.class);
             service.putExtra("userPath", preferences.getString("userPath", "/"));
-            service.putExtra("getAppDataPath", getAppDataPath());
+            service.putExtra("getAppDataPath", ExternalFilesDirs.getSelected());
             startService(service);
         }
     }

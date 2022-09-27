@@ -1,14 +1,5 @@
 package phramusca.com.jamuzremote;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-
-import static phramusca.com.jamuzremote.ActivityMain.getAppDataPath;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -28,13 +19,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import phramusca.com.jamuzremote.utils.ExternalFilesDirs;
+
 public class ClientReception extends ProcessAbstract {
 
     private static final String TAG = ClientReception.class.getName();
     private final BufferedReader bufferedReader;
     private final InputStream inputStream;
     private final IListenerReception callback;
-    private Context mContext;
+    private final Context mContext;
 
     ClientReception(InputStream inputStream, IListenerReception callback, Context context) {
         super("Thread.Client.ClientReception");
@@ -66,7 +59,7 @@ public class ClientReception extends ProcessAbstract {
                     Track fileInfoReception;
                     try {
                         String json = msg.substring("SENDING_FILE".length()); //NON-NLS
-                        fileInfoReception = new Track(new JSONObject(json), getAppDataPath(), false);
+                        fileInfoReception = new Track(new JSONObject(json), ExternalFilesDirs.getSelected(), false);
                         File destinationPath = new File(new File(fileInfoReception.getPath()).getParent());
                         destinationPath.mkdirs();
                         Log.i(TAG, "Start file reception: \n" + fileInfoReception); //NON-NLS

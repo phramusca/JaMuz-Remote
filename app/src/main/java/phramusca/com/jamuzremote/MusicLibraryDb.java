@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.io.File;
+
 /**
  * Created by raph on 10/06/17.
  */
@@ -84,13 +86,8 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
             + COL_ALBUM_GAIN + " REAL, " //NON-NLS
             + COL_PATH + " TEXT NOT NULL); "; //NON-NLS
 
-    //By default store in user internal folder
-    //public MusicLibraryDb(Context context) {
-    //    super(context, DB_NAME, null, DB_VERSION); //NON-NLS
-    //}
-
-    MusicLibraryDb(final Context context) {
-        super(context, ActivityMain.musicLibraryDbFile.getAbsolutePath(), null, DB_VERSION); //NON-NLS
+    MusicLibraryDb(final Context context, File musicLibraryDbFile) {
+        super(context, musicLibraryDbFile.getAbsolutePath(), null, DB_VERSION);
     }
 
     @Override
