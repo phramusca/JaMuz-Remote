@@ -14,9 +14,9 @@ public final class HelperLibrary {
     private HelperLibrary() {
     }
 
-    public static void open(File getAppDataPath, Context context) {
+    public static void open(Context context, File getAppDataPath, File musicLibraryDbFile) {
         if (musicLibrary == null || !musicLibrary.db.isOpen()) {
-            musicLibrary = new MusicLibrary(getAppDataPath, context);
+            musicLibrary = new MusicLibrary(context, getAppDataPath, musicLibraryDbFile);
             musicLibrary.open();
         }
     }

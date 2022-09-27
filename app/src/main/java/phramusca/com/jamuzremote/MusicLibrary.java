@@ -64,9 +64,9 @@ public class MusicLibrary {
     private final MusicLibraryDb musicLibraryDb;
     private static final String TAG = MusicLibrary.class.getName();
 
-    MusicLibrary(File getAppDataPath, Context context) {
+    MusicLibrary(Context context, File getAppDataPath, File musicLibraryDbFile) {
         this.getAppDataPath = getAppDataPath;
-        musicLibraryDb = new MusicLibraryDb(context);
+        musicLibraryDb = new MusicLibraryDb(context, musicLibraryDbFile);
     }
 
     public synchronized void open() {

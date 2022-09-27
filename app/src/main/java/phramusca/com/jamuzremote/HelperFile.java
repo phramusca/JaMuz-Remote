@@ -17,16 +17,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+import phramusca.com.jamuzremote.utils.ExternalFilesDirs;
+
 /**
  * Created by raph on 01/05/17.
  */
 public final class HelperFile {
 
     private static final String TAG = HelperFile.class.getName();
-    private static final String path = Environment.getExternalStorageDirectory() + "/JaMuz/"; //NON-NLS
-
-    private HelperFile() {
-    }
+    private static final File path =
+            new File(Environment.getExternalStorageDirectory(), "JaMuz"); //NON-NLS
 
     public static File createFolder(String folder) {
         File file = getFolder(folder);
@@ -40,12 +40,12 @@ public final class HelperFile {
 
     @NonNull
     private static File getFolder(String folder) {
-        return new File(path + folder + "/");
+        return new File(path, folder);
     }
 
     @NonNull
     private static File getFile(String folder, String filename) {
-        return new File(path + folder + "/" + filename);
+        return new File(new File(path, folder), filename);
     }
 
     @NonNull

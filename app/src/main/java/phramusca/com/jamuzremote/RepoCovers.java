@@ -19,6 +19,7 @@
 
  import android.graphics.Bitmap;
  import android.graphics.BitmapFactory;
+ import android.os.Environment;
  import android.util.Log;
  import android.util.Pair;
 
@@ -28,6 +29,8 @@
  import java.io.IOException;
  import java.security.MessageDigest;
  import java.security.NoSuchAlgorithmException;
+
+ import phramusca.com.jamuzremote.utils.ExternalFilesDirs;
 
  /**
   * @author phramusca ( https://github.com/phramusca/JaMuz/ )
@@ -143,7 +146,7 @@
 
      //TODO: Move this to a generic class if to be used elsewhere
      private static File getFile(String filename, String... args) {
-         File file = ActivityMain.getAppDataPath();
+         File file = Environment.getExternalStorageDirectory();
          for (String subFolder : args) {
              file = new File(file, subFolder);
              //noinspection ResultOfMethodCallIgnored
