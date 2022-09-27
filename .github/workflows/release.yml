@@ -65,4 +65,4 @@ jobs:
         asset_name: ${{ steps.vars.outputs.asset_name }}
         tag: ${{ github.ref }}
         overwrite: true
-        body: Release ${GITHUB_REF_NAME} from pipeline youpi
+        body: ${{ steps.var2.outputs.body }}
