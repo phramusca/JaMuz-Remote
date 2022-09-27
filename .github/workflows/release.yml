@@ -54,7 +54,7 @@ jobs:
       with:
         repo_token: ${{ secrets.TOKEN }}
         file: ${{steps.sign_app.outputs.signedFile}}
-        asset_name: JaMuz_Remote_${{ github.ref }}.apk 
+        asset_name: JaMuz_Remote_${{ github.ref.name }}.apk 
         tag: ${{ github.ref }}
         overwrite: true
-        body: "Release ${{ github.ref }}"
+        body: "Release ${{ github.ref.name }} from pipeline"
