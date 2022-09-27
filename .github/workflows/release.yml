@@ -44,17 +44,17 @@ jobs:
         buildToolsVersion: 33.0.0
 
     # Upload your signed file if you want
-    - uses: actions/upload-artifact@v2
-      with:
-        name: Signed app bundle
-        path: ${{steps.sign_app.outputs.signedFile}}
+    # - uses: actions/upload-artifact@v2
+    #   with:
+    #     name: Signed app bundle
+    #     path: ${{steps.sign_app.outputs.signedFile}}
 
     - name: "Create release on github with apk"
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.TOKEN }}
         file: ${{steps.sign_app.outputs.signedFile}}
-        asset_name: JaMuz_Remote_${{ github.ref.name }}.apk 
+        asset_name: "JaMuz_Remote_${{ github.ref.name }}.apk"
         tag: ${{ github.ref }}
         overwrite: true
         body: "Release ${{ github.ref.name }} from pipeline"
