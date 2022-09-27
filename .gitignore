@@ -16,3 +16,5 @@ libs/beaglebuddy/build/
 libs/kidsplace_sdk/build/
 
 app/release/
+
+app/libs/beaglebuddy/bin/
