@@ -557,7 +557,7 @@ public class Playlist implements Comparable, Serializable {
         Gson gson = new Gson();
         boolean previousModified = modified;
         modified = false; //otherwise saved as modified => non-sense
-        if (HelperFile.write(folder, getName() + ".plli", gson.toJson(this))) {
+        if (HelperFile.writeTextFile(getName() + ".plli", gson.toJson(this), "..", folder)) {
             return true;
         } else {
             modified = previousModified;

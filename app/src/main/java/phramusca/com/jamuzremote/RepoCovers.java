@@ -19,7 +19,6 @@
 
  import android.graphics.Bitmap;
  import android.graphics.BitmapFactory;
- import android.os.Environment;
  import android.util.Log;
  import android.util.Pair;
 
@@ -29,8 +28,6 @@
  import java.io.IOException;
  import java.security.MessageDigest;
  import java.security.NoSuchAlgorithmException;
-
- import phramusca.com.jamuzremote.utils.ExternalFilesDirs;
 
  /**
   * @author phramusca ( https://github.com/phramusca/JaMuz/ )
@@ -77,9 +74,9 @@
 
      private static String returnHex(byte[] inBytes) {
          StringBuilder builder = new StringBuilder();
-         for (int i = 0; i < inBytes.length; i++) { //for loop ID:1
-             builder.append(Integer.toString((inBytes[i] & 0xff) + 0x100, 16).substring(1));
-         }                                   // Belongs to for loop ID:1
+         for (byte inByte : inBytes) {
+             builder.append(Integer.toString((inByte & 0xff) + 0x100, 16).substring(1));
+         }
          return builder.toString();
      }
 
@@ -141,19 +138,7 @@
 
      private static File getCacheFile(String coverHash, IconSize iconSize) {
          String filename = coverHash.equals("") ? "NA" : coverHash + iconSize.name();
-         return getFile(filename + ".png", "..", "cache", "cover-icons"); //NON-NLS
-     }
-
-     //TODO: Move this to a generic class if to be used elsewhere
-     private static File getFile(String filename, String... args) {
-         File file = ExternalFilesDirs.getSelected();
-         for (String subFolder : args) {
-             file = new File(file, subFolder);
-             //noinspection ResultOfMethodCallIgnored
-             file.mkdirs();
-         }
-         file = new File(file, filename);
-         return file;
+         return HelperFile.getFile(filename + ".png", "..", "cache", "cover-icons"); //NON-NLS
      }
 
      enum IconSize {
