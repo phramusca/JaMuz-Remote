@@ -29,7 +29,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -97,8 +96,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import phramusca.com.jamuzremote.utils.ExternalFilesDirs;
 
 // TODO: Move audio to a service
 // Why not using the standard android player by the way ? (less control for replaygain ?)
@@ -191,9 +188,11 @@ public class ActivityMain extends AppCompatActivity {
         //setEnabled does not seem enough (need to disable inner views too?) + some widgets are disabled/enabled during onCreate
         //layoutMain.setEnabled(false);
 
-        ExternalFilesDirs.init(mContext); //TODO: merge ExternalFilesDirs and HelperFile
-        HelperFile.init();
-        musicLibraryDbFile = new File(Environment.getExternalStorageDirectory(), "JaMuz/JaMuzRemote.db"); //NON-NLS
+        if(!HelperFile.init(mContext)) {
+            helperToast.toastLong("Unable to find a writable application folder. Exiting :(");
+            return;
+        }
+        musicLibraryDbFile = HelperFile.getFile("JaMuzRemote.db", "..");
 
         VoiceKeyWords.set(mContext);
         prettyTime = new PrettyTime(Locale.getDefault());
@@ -312,7 +311,7 @@ public class ActivityMain extends AppCompatActivity {
                     if (!isMyServiceRunning(ServiceSync.class)) {
                         Intent service = new Intent(getApplicationContext(), ServiceSync.class);
                         service.putExtra("clientInfo", clientInfo);
-                        service.putExtra("getAppDataPath", ExternalFilesDirs.getSelected());
+                        service.putExtra("getAppDataPath", HelperFile.getSelectedAppDir());
                         startService(service);
                     }
                 } else {
@@ -552,7 +551,6 @@ public class ActivityMain extends AppCompatActivity {
                         .append(localSelectedPlaylist.getName())
                         .append("\" ")
                         .append(getString(R.string.playlistLabelRestored));
-                HelperFile.createFolder(getString(R.string.mainDefaultPlaylistsFolderName));
                 Playlist playlist = readPlaylist(localSelectedPlaylist.getName() + ".plli");
                 if (playlist != null) {
                     msg.append(" ").append(getString(R.string.playlistLabelSuccessfully));
@@ -577,7 +575,8 @@ public class ActivityMain extends AppCompatActivity {
                                 " \"" + localSelectedPlaylist.getName() + "\" " + getString(R.string.playlistLabelQuestionDeleteSuffix))
                         .setPositiveButton(R.string.globalLabelYes, (dialog, which) -> {
                             if (localPlaylists.size() > 1) {
-                                HelperFile.delete(getString(R.string.mainDefaultPlaylistsFolderName), localSelectedPlaylist.getName() + ".plli");
+                                HelperFile.delete(localSelectedPlaylist.getName() + ".plli",
+                                        "..", getString(R.string.mainDefaultPlaylistsFolderName));
                                 localPlaylists.remove(localSelectedPlaylist.getName());
                                 setupLocalPlaylistSpinner((String) null);
                             } else {
@@ -793,7 +792,7 @@ public class ActivityMain extends AppCompatActivity {
         }
         //TODO Use a real password, from QR code
         return new ClientInfo(address, port, login, "tata", canal, //NON-NLS
-                "jamuz", ExternalFilesDirs.getSelected().getAbsolutePath()); //NON-NLS
+                "jamuz", HelperFile.getSelectedAppDir().getAbsolutePath()); //NON-NLS
     }
 
     private void toggleOff(ToggleButton button, View layout) {
@@ -1178,9 +1177,9 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         boolean kidsplaceLimit = preferences.getBoolean("kidsplaceLimit", false);
-        boolean iskidsplacenabled = !isKidsPlace || !kidsplaceLimit;
-        spinnerPlaylist.setEnabled(iskidsplacenabled);
-        if (!iskidsplacenabled) {
+        boolean isKidsplaceEnabled = !isKidsPlace || !kidsplaceLimit;
+        spinnerPlaylist.setEnabled(isKidsplaceEnabled);
+        if (!isKidsplaceEnabled) {
             String selectedPlaylist = preferences.getString("kidsplaceLimitPlaylist", null);
             setupLocalPlaylistSpinner(selectedPlaylist);
         }
@@ -1523,7 +1522,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void connectDatabase() {
-        HelperLibrary.open(this, ExternalFilesDirs.getSelected(), musicLibraryDbFile);
+        HelperLibrary.open(this, HelperFile.getSelectedAppDir(), musicLibraryDbFile);
 
         new Thread() {
             public void run() {
@@ -1874,7 +1873,7 @@ public class ActivityMain extends AppCompatActivity {
                     + "<BR/><BR/>" +
                     "<i>- <u>" + getString(R.string.permissionMsg_3) + "</u></i> " + getString(R.string.permissionMsg_4) //NON-NLS //NON-NLS //NON-NLS
                     + "<BR/> " + //NON-NLS
-                    getString(R.string.permissionMsg_5) + " (\"" + ExternalFilesDirs.getSelected() + "\")."
+                    getString(R.string.permissionMsg_5) + " (\"" + HelperFile.getSelectedAppDir() + "\")."
                     + "<BR/>" +
                     getString(R.string.permissionMsg_6)
                     + "<BR/>" +
@@ -2009,7 +2008,7 @@ public class ActivityMain extends AppCompatActivity {
 
     private void setupLocalPlaylistsThenStartServiceScan() {
         localPlaylists = new HashMap<>();
-        File playlistFolder = HelperFile.createFolder(getString(R.string.mainDefaultPlaylistsFolderName));
+        File playlistFolder = HelperFile.getFolder("..", getString(R.string.mainDefaultPlaylistsFolderName));
         if (playlistFolder != null) {
             for (String file : Objects.requireNonNull(playlistFolder.list())) {
                 if (file.endsWith(".plli")) {
@@ -2040,7 +2039,7 @@ public class ActivityMain extends AppCompatActivity {
         if (!isMyServiceRunning(ServiceScan.class)) {
             Intent service = new Intent(getApplicationContext(), ServiceScan.class);
             service.putExtra("userPath", preferences.getString("userPath", "/"));
-            service.putExtra("getAppDataPath", ExternalFilesDirs.getSelected());
+            service.putExtra("getAppDataPath", HelperFile.getSelectedAppDir());
             startService(service);
         }
     }
@@ -2166,13 +2165,12 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     public Playlist readPlaylist(String filename) {
-        String readJson = HelperFile.read(getString(R.string.mainDefaultPlaylistsFolderName), filename);
+        String readJson = HelperFile.readTextFile(filename, "..", getString(R.string.mainDefaultPlaylistsFolderName));
         if (!readJson.equals("")) {
             Playlist playlist = new Playlist(
                     filename.replaceFirst("[.][^.]+$", ""), true);
             Gson gson = new Gson();
-            Type mapType = new TypeToken<Playlist>() {
-            }.getType();
+            Type mapType = new TypeToken<Playlist>(){}.getType();
             try {
                 playlist = gson.fromJson(readJson, mapType);
             } catch (JsonSyntaxException ex) {
