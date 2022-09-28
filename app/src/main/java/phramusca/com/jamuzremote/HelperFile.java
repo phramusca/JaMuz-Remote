@@ -38,6 +38,12 @@ public final class HelperFile {
         return file;
     }
 
+    public static void init() {
+        if(!path.exists()) {
+            path.mkdirs();
+        }
+    }
+
     @NonNull
     private static File getFolder(String folder) {
         return new File(path, folder);
