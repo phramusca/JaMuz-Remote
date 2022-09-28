@@ -191,7 +191,8 @@ public class ActivityMain extends AppCompatActivity {
         //setEnabled does not seem enough (need to disable inner views too?) + some widgets are disabled/enabled during onCreate
         //layoutMain.setEnabled(false);
 
-        ExternalFilesDirs.init(mContext);
+        ExternalFilesDirs.init(mContext); //TODO: merge ExternalFilesDirs and HelperFile
+        HelperFile.init();
         musicLibraryDbFile = new File(Environment.getExternalStorageDirectory(), "JaMuz/JaMuzRemote.db"); //NON-NLS
 
         VoiceKeyWords.set(mContext);

@@ -146,7 +146,7 @@
 
      //TODO: Move this to a generic class if to be used elsewhere
      private static File getFile(String filename, String... args) {
-         File file = Environment.getExternalStorageDirectory();
+         File file = ExternalFilesDirs.getSelected();
          for (String subFolder : args) {
              file = new File(file, subFolder);
              //noinspection ResultOfMethodCallIgnored
