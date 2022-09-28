@@ -48,8 +48,8 @@ public final class HelperFile {
         return selectedApplicationFilesDir != null;
     }
 
-    static File getSelectedAppDir() {
-        return selectedApplicationFilesDir;
+    static File getAudioRootFolder() {
+        return getFolder("audio");
     }
 
     static File getFolder(String... folders) {
