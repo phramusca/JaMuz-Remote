@@ -138,7 +138,7 @@
 
      private static File getCacheFile(String coverHash, IconSize iconSize) {
          String filename = coverHash.equals("") ? "NA" : coverHash + iconSize.name();
-         return HelperFile.getFile(filename + ".png", "..", "cache", "cover-icons"); //NON-NLS
+         return HelperFile.getFile(filename + ".png", "cache", "cover-icons"); //NON-NLS
      }
 
      enum IconSize {

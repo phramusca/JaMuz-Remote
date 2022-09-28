@@ -57,7 +57,7 @@ public class ClientReception extends ProcessAbstract {
                     Track fileInfoReception;
                     try {
                         String json = msg.substring("SENDING_FILE".length()); //NON-NLS
-                        fileInfoReception = new Track(new JSONObject(json), HelperFile.getSelectedAppDir(), false);
+                        fileInfoReception = new Track(new JSONObject(json), HelperFile.getAudioRootFolder(), false);
                         File destinationPath = new File(new File(fileInfoReception.getPath()).getParent());
                         destinationPath.mkdirs();
                         Log.i(TAG, "Start file reception: \n" + fileInfoReception); //NON-NLS
