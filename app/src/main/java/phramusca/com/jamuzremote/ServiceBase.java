@@ -4,16 +4,20 @@ package phramusca.com.jamuzremote;
   Created by raph on 10/06/17.
 */
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.File;
@@ -66,7 +70,11 @@ public abstract class ServiceBase extends Service {
                 ActivityMain.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        int flag = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            flag  = PendingIntent.FLAG_MUTABLE;
+        }
         return PendingIntent.getActivity(getApplicationContext(), 0,
-                notificationIntent, 0);
+                notificationIntent, flag);
     }
 }
