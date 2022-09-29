@@ -23,7 +23,6 @@ import java.util.Set;
  */
 public class Playlist implements Comparable, Serializable {
 
-    private static final String TAG = Playlist.class.getName();
     private String name;
     private final Map<String, TriStateButton.STATE> tags = new HashMap<>();
     private final Map<String, TriStateButton.STATE> genres = new HashMap<>();
