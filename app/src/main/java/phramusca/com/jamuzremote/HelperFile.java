@@ -28,7 +28,7 @@ public final class HelperFile {
      * Selects appropriate application folder:
      * <p><ul>
      * <li>IF AVAILABLE: the real removable sd card, /storage/xxxx-xxxx/Android/com.phramusca.jamuz/files</li>
-     * <li>OR BY DEFAULT, the "external" card, the emulated one : /storage/emulated/0/Android//com.phramusca.jamuz/files</li>
+     * <li>OR BY DEFAULT, the "external" card, the emulated one : /storage/emulated/0/Android/com.phramusca.jamuz/files</li>
      * </ul>
      * If it does not yet exist, it is created.
      * @return true if a writable application folder is available.

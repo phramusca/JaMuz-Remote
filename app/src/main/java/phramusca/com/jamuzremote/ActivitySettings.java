@@ -26,6 +26,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import net.rdrei.android.dirchooser.DirectoryChooserActivity;
+import net.rdrei.android.dirchooser.DirectoryChooserConfig;
+
 import java.util.ArrayList;
 
 public class ActivitySettings extends AppCompatActivity {
@@ -36,6 +39,7 @@ public class ActivitySettings extends AppCompatActivity {
     private IntentIntegrator qrScan;
     private TextView textViewPath;
     private static final int QR_REQUEST_CODE = 49374;
+    private static final int DIRECTORY_REQUEST_CODE = 591534;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,26 +74,19 @@ public class ActivitySettings extends AppCompatActivity {
                 .concat(userPath)
                 .concat("</html>"))));
         Button dirChooserButton = findViewById(R.id.button_browse);
-        dirChooserButton.setOnClickListener(new View.OnClickListener() {
-            private final boolean m_newFolderEnabled = false;
 
-            @Override
-            public void onClick(View v) {
-                DirectoryChooserDialog directoryChooserDialog =
-                        new DirectoryChooserDialog(ActivitySettings.this,
-                                chosenDir -> {
-                                    textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
-                                            .concat(chosenDir)
-                                            .concat("</html>"))));
-                                    setConfig("userPath", chosenDir);
-                                    Intent data = new Intent();
-                                    data.putExtra("action", "checkPermissionsThenScanLibrary"); //NON-NLS
-                                    setResult(RESULT_OK, data);
-                                    finish();
-                                });
-                directoryChooserDialog.setNewFolderEnabled(m_newFolderEnabled);
-                directoryChooserDialog.chooseDirectory(preferences.getString("userPath", "/"));
+        dirChooserButton.setOnClickListener(v -> {
+            final Intent chooserIntent = new Intent(getApplicationContext(), DirectoryChooserActivity.class);
+            DirectoryChooserConfig.Builder builder = DirectoryChooserConfig.builder()
+                    .newDirectoryName("DirChooserSample")
+                    .allowReadOnlyDirectory(true)
+                    .allowNewDirectoryNameModification(true);
+            if(!userPath.equals("/")) {
+                builder.initialDirectory(userPath);
             }
+            chooserIntent.putExtra(DirectoryChooserActivity.EXTRA_CONFIG, builder.build());
+            startActivityForResult(chooserIntent, DIRECTORY_REQUEST_CODE);
+            //FIXME: Replace all startActivityForResult with registerForActivityResult
         });
 
         SeekBar seekBarReplayGain = findViewById(R.id.seekBarReplayGain);
@@ -222,6 +219,18 @@ public class ActivitySettings extends AppCompatActivity {
                 setResult(RESULT_OK, data);
                 finish();
             }
+        } else if (requestCode == DIRECTORY_REQUEST_CODE
+                        && resultCode == DirectoryChooserActivity.RESULT_CODE_DIR_SELECTED) {
+            String chosenDir = data
+                    .getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR);
+            textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
+                .concat(chosenDir)
+                .concat("</html>"))));
+            setConfig("userPath", chosenDir);
+            Intent dataAction = new Intent();
+            dataAction.putExtra("action", "checkPermissionsThenScanLibrary"); //NON-NLS
+            setResult(RESULT_OK, dataAction);
+            finish();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
