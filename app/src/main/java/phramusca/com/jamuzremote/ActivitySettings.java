@@ -86,7 +86,6 @@ public class ActivitySettings extends AppCompatActivity {
             }
             chooserIntent.putExtra(DirectoryChooserActivity.EXTRA_CONFIG, builder.build());
             startActivityForResult(chooserIntent, DIRECTORY_REQUEST_CODE);
-            //FIXME: Replace all startActivityForResult with registerForActivityResult
         });
 
         SeekBar seekBarReplayGain = findViewById(R.id.seekBarReplayGain);
