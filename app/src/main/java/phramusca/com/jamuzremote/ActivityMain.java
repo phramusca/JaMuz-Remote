@@ -1860,6 +1860,7 @@ public class ActivityMain extends AppCompatActivity {
     private static final int REQUEST = 112;
 
     private final String[] PERMISSIONS = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.PROCESS_OUTGOING_CALLS
     };
