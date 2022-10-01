@@ -3,7 +3,6 @@
     <string name="mainWelcomeTitle">Welcome to</string>
     <string name="applicationName" translatable="false">JaMuz</string>
     <string name="mainWelcomeYear" translatable="false">2022</string>
-    <string name="mainDefaultPlaylistsFolderName" translatable="false">Playlists</string>
     <string name="mainToastClientInfoBadFormat">Bad format:</string>
     <string name="mainToastClientInfoExpected">Expected:</string>
     <string name="mainToastClientInfoIP">IP</string>

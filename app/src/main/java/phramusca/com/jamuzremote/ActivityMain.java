@@ -532,7 +532,7 @@ public class ActivityMain extends AppCompatActivity {
                         .append(localSelectedPlaylist.getName())
                         .append("\" ")
                         .append(getString(R.string.playlistLabelSaved));
-                if (localSelectedPlaylist.save(getString(R.string.mainDefaultPlaylistsFolderName))) {
+                if (localSelectedPlaylist.save()) {
                     button_save.setBackgroundResource(localSelectedPlaylist.isModified() ?
                             R.drawable.ic_button_save_red : R.drawable.ic_button_save);
                     msg.append(" ").append(getString(R.string.playlistLabelSuccessfully));
@@ -575,8 +575,7 @@ public class ActivityMain extends AppCompatActivity {
                                 " \"" + localSelectedPlaylist.getName() + "\" " + getString(R.string.playlistLabelQuestionDeleteSuffix))
                         .setPositiveButton(R.string.globalLabelYes, (dialog, which) -> {
                             if (localPlaylists.size() > 1) {
-                                HelperFile.delete(localSelectedPlaylist.getName() + ".plli",
-                                        getString(R.string.mainDefaultPlaylistsFolderName));
+                                HelperFile.delete(localSelectedPlaylist.getName() + ".plli", "playlists");
                                 localPlaylists.remove(localSelectedPlaylist.getName());
                                 setupLocalPlaylistSpinner((String) null);
                             } else {
@@ -2007,7 +2006,7 @@ public class ActivityMain extends AppCompatActivity {
 
     private void setupLocalPlaylistsThenStartServiceScan() {
         localPlaylists = new HashMap<>();
-        File playlistFolder = HelperFile.getFolder(getString(R.string.mainDefaultPlaylistsFolderName));
+        File playlistFolder = HelperFile.getFolder("playlists");
         if (playlistFolder != null) {
             for (String file : Objects.requireNonNull(playlistFolder.list())) {
                 if (file.endsWith(".plli")) {
@@ -2164,7 +2163,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     public Playlist readPlaylist(String filename) {
-        String readJson = HelperFile.readTextFile(filename, getString(R.string.mainDefaultPlaylistsFolderName));
+        String readJson = HelperFile.readTextFile(filename, "playlists");
         if (!readJson.equals("")) {
             Playlist playlist = new Playlist(
                     filename.replaceFirst("[.][^.]+$", ""), true);
