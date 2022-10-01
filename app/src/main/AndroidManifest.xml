@@ -21,9 +21,9 @@
         tools:replace="android:theme">
         <activity
             android:name=".ActivityMain"
-            android:label="@string/applicationName"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="true">
             <intent-filter>

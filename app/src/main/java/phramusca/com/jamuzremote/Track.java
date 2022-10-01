@@ -383,40 +383,20 @@ public class Track implements Serializable {
         return albumArtist;
     }
 
-    public void setAlbumArtist(String albumArtist) {
-        this.albumArtist = albumArtist;
-    }
-
     public String getYear() {
         return year;
-    }
-
-    public void setYear(String year) {
-        this.year = year;
     }
 
     public Integer getTrackNo() {
         return trackNo;
     }
 
-    public void setTrackNo(Integer trackNo) {
-        this.trackNo = trackNo;
-    }
-
     public Integer getTrackTotal() {
         return trackTotal;
     }
 
-    public void setTrackTotal(Integer trackTotal) {
-        this.trackTotal = trackTotal;
-    }
-
     public Integer getDiscNo() {
         return discNo;
-    }
-
-    public void setDiscNo(Integer discNo) {
-        this.discNo = discNo;
     }
 
     public Integer getDiscTotal() {
@@ -439,64 +419,32 @@ public class Track implements Serializable {
         return BPM;
     }
 
-    public void setBPM(Double bpm) {
-        this.BPM = bpm;
-    }
-
     public Date getModifDate() {
         return modifDate;
-    }
-
-    public void setModifDate(Date modifDate) {
-        this.modifDate = modifDate;
     }
 
     public String getCheckedFlag() {
         return checkedFlag;
     }
 
-    public void setCheckedFlag(String checkedFlag) {
-        this.checkedFlag = checkedFlag;
-    }
-
     public String getCopyRight() {
         return copyRight;
-    }
-
-    public void setCopyRight(String copyRight) {
-        this.copyRight = copyRight;
     }
 
     public String getLyrics() {
         return lyrics;
     }
 
-    public void setLyrics(String lyrics) {
-        this.lyrics = lyrics;
-    }
-
     public Date getPathModifDate() {
         return pathModifDate;
-    }
-
-    public void setPathModifDate(Date pathModifDate) {
-        this.pathModifDate = pathModifDate;
     }
 
     public String getPathMbId() {
         return pathMbId;
     }
 
-    public void setPathMbId(String pathMbId) {
-        this.pathMbId = pathMbId;
-    }
-
     public String getComment() {
         return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
     }
 
     public void setSize(long size) {
@@ -561,30 +509,12 @@ public class Track implements Serializable {
     }
 
     /**
-     * Get Last Played Date (local)
-     *
-     * @return date in "yyyy-MM-dd HH:mm:ss" format,
-     */
-    public String getLastPlayedLocalTime() {
-        return HelperDateTime.formatUTCtoSqlLocal(this.lastPlayed);
-    }
-
-    /**
      * Get Added Date (utc)
      *
      * @return date in "yyyy-MM-dd HH:mm:ss" format
      */
     public String getFormattedAddedDate() {
         return HelperDateTime.formatUTCtoSqlUTC(this.addedDate);
-    }
-
-    /**
-     * Get Added Date (local)
-     *
-     * @return date in "yyyy-MM-dd HH:mm:ss" format,
-     */
-    public String getAddedDateLocalTime() {
-        return HelperDateTime.formatUTCtoSqlLocal(this.addedDate);
     }
 
     public int getPlayCounter() {
