@@ -2,6 +2,7 @@ package phramusca.com.jamuzremote;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.CountDownTimer;
 import android.util.Log;
 
@@ -31,7 +32,11 @@ public class AudioPlayer {
             Log.i(TAG, "Playing " + track.getRelativeFullPath()); //NON-NLS
             enableControl = false;
             mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(track.getPath());
+            if(track.getPath().startsWith("content://")) {
+                mediaPlayer.setDataSource(mContext, Uri.parse(track.getPath()));
+            } else {
+                mediaPlayer.setDataSource(track.getPath());
+            }
             mediaPlayer.prepare();
             callback.reset();
             String msg = applyReplayGain(mediaPlayer, track);

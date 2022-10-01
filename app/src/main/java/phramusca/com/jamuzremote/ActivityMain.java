@@ -1546,25 +1546,28 @@ public class ActivityMain extends AppCompatActivity {
 
     private boolean play(Track track) {
         displayedTrack = track;
-        File file = new File(displayedTrack.getPath());
-        if (file.exists()) {
-            dimOn();
-            localTrack = displayedTrack;
-            audioPlayer.stop(false);
-            displayedTrack.setSource(
-                    displayedTrack.isHistory()
-                            ? getString(R.string.playlistLabelHistory)
-                            : displayedTrack.isLocked()
-                            ? getString(R.string.playlistLabelUser)
-                            : localSelectedPlaylist.toString());
-            audioPlayer.play(displayedTrack, helperToast);
-            displayedTrack.setHistory(true);
-            return true;
+        if (!displayedTrack.getPath().startsWith("content://")) {
+            File file = new File(displayedTrack.getPath());
+            if (!file.exists()) {
+                Log.d(TAG, "play(): " + displayedTrack); //NON-NLS
+                displayedTrack.delete();
+                return false;
+            }
         } else {
-            Log.d(TAG, "play(): " + displayedTrack); //NON-NLS
-            displayedTrack.delete();
-            return false;
+            //FIXME: Remove from db if no more in MediaStore
         }
+        dimOn();
+        localTrack = displayedTrack;
+        audioPlayer.stop(false);
+        displayedTrack.setSource(
+                displayedTrack.isHistory()
+                        ? getString(R.string.playlistLabelHistory)
+                        : displayedTrack.isLocked()
+                        ? getString(R.string.playlistLabelUser)
+                        : localSelectedPlaylist.toString());
+        audioPlayer.play(displayedTrack, helperToast);
+        displayedTrack.setHistory(true);
+        return true;
     }
 
     private void playNext() {

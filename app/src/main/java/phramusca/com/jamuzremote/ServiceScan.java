@@ -45,6 +45,7 @@ public class ServiceScan extends ServiceBase {
             wakeLock.acquire(24 * 60 * 60 * 1000); //24 hours, enough to scan a lot, if not all !
         }
 
+        //FIXME: Change userPath with a boolean, once MediaStore tested on every android version
         userPath = intent.getStringExtra("userPath");
 
         //https://developer.android.com/training/data-storage/shared/media#check-for-updates
@@ -136,14 +137,14 @@ public class ServiceScan extends ServiceBase {
                     nbFiles = 0;
                     for (Track track : tracks) {
                         checkAbort();
-                        if(!track.getPath().startsWith("content://")) {
+                        if (track.getPath().startsWith("content://")) {
+                            //FIXME: Remove from db if no more in MediaStore
+                        } else {
                             File file = new File(track.getPath());
                             if (!file.exists()) {
                                 Log.d(TAG, "Remove track from db: " + track); //NON-NLS
                                 track.delete();
                             }
-                        } else {
-                            //FIXME: Remove from db if no more in MediaStore
                         }
                         notifyScan(getString(R.string.serviceScanNotifyScanningDeleted), 200);
                     }
