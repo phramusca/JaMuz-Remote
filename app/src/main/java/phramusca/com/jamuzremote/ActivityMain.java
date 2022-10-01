@@ -684,7 +684,7 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         localTrack = new Track("albumArtist", "v" + version, -1, -1,
-                -1, -1, "bitRate", "format", -1, 5, //NON-NLS
+                -1, -1, -1, "format", -1, 5, //NON-NLS
                 getString(R.string.mainWelcomeTitle),
                 getString(R.string.mainWelcomeYear), getString(R.string.applicationName),
                 "welcomeHash", //Warning: "welcomeHash" value has a meaning

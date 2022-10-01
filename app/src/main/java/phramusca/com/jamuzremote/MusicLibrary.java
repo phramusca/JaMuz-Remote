@@ -179,10 +179,10 @@ public class MusicLibrary {
         return new Triplet<>(-1, (long) -1, (long) -1);
     }
 
-    synchronized boolean insertOrUpdateTrack(String absolutePath, File rootPath) {
+    synchronized boolean insertOrUpdateTrack(String absolutePath, File rootPath, Context context) {
         Track track = new Track(rootPath, absolutePath);
         //TODO: Do not read if file has not changed (takes time to read cover and other)
-        if (track.read()) {
+        if (track.read(context)) {
             return insertOrUpdateTrack(track);
         }
         return false;
@@ -418,7 +418,7 @@ public class MusicLibrary {
         int trackTotal = -1;
         int discNo = -1;
         int discTotal = -1;
-        String bitRate = "";
+        int bitRate = -1;
         String format = "";
         double bpm = -1;
         String checkedFlag = "";
@@ -440,7 +440,7 @@ public class MusicLibrary {
             trackTotal = c.getInt(c.getColumnIndexOrThrow(COL_TRACK_TOTAL));
             discNo = c.getInt(c.getColumnIndexOrThrow(COL_DISC_NO));
             discTotal = c.getInt(c.getColumnIndexOrThrow(COL_DISC_TOTAL));
-            bitRate = c.getString(c.getColumnIndexOrThrow(COL_BITRATE));
+            bitRate = c.getInt(c.getColumnIndexOrThrow(COL_BITRATE));
             format = c.getString(c.getColumnIndexOrThrow(COL_FORMAT));
             bpm = c.getDouble(c.getColumnIndexOrThrow(COL_BPM));
             checkedFlag = c.getString(c.getColumnIndexOrThrow(COL_CHECKED_FLAG));
