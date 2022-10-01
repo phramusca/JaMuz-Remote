@@ -25,10 +25,11 @@ public class ServiceScan extends ServiceBase {
     private Notification notificationScan;
     private int nbFiles = 0;
     private int nbFilesTotal = 0;
-    private ProcessAbstract scanLibrary;
-    private ProcessAbstract processBrowseFS;
+    private ProcessAbstract processScan;
+    private ProcessAbstract processBrowse;
     private PowerManager.WakeLock wakeLock;
     private SharedPreferences defaultSharedPreferences;
+    boolean forceRefresh;
 
     @Override
     public void onCreate() {
@@ -40,6 +41,7 @@ public class ServiceScan extends ServiceBase {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
+        forceRefresh = (boolean) intent.getSerializableExtra("forceRefresh");
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         if (powerManager != null) {
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "jamuzremote:MyPowerWakelockTag"); //NON-NLS
@@ -47,8 +49,10 @@ public class ServiceScan extends ServiceBase {
         }
         String previousMediaStoreVersion = defaultSharedPreferences.getString(MEDIA_STORE_VERSION, "");
         String mediaStoreVersion = MediaStore.getVersion(getApplicationContext());
-        if(!previousMediaStoreVersion.equals(mediaStoreVersion)) {
-            scanMediaStoreInThread();
+        if(forceRefresh || !previousMediaStoreVersion.equals(mediaStoreVersion)) {
+            scanInThread();
+        } else {
+            stopSelf();
         }
         return START_REDELIVER_INTENT;
     }
@@ -60,7 +64,7 @@ public class ServiceScan extends ServiceBase {
         super.onDestroy();
     }
 
-    private void scanMediaStoreInThread() {
+    private void scanInThread() {
         new Thread() {
             public void run() {
                 runOnUiThread(() -> helperNotification.notifyBar(notificationScan, getString(R.string.serviceScanNotifyCleaningDatabase)));
@@ -68,8 +72,8 @@ public class ServiceScan extends ServiceBase {
                     //Delete tracks from database that are from another folder than those 2
                     HelperLibrary.musicLibrary.deleteTrack(getAppDataPath, "content://");
                     //Scan MediaStore and cleanup library
-                    scanMediaStore();
-                    waitScanMediaStore();
+                    scan();
+                    waitScan();
 
                     RepoAlbums.reset();
                     SharedPreferences.Editor editor = defaultSharedPreferences.edit();
@@ -88,38 +92,38 @@ public class ServiceScan extends ServiceBase {
         }.start();
     }
 
-    private void waitScanMediaStore() {
+    private void waitScan() {
         try {
-            if (scanLibrary != null) {
-                scanLibrary.join();
+            if (processScan != null) {
+                processScan.join();
             }
         } catch (InterruptedException e) {
             Log.e(TAG, "ActivityMain onDestroy: UNEXPECTED InterruptedException", e); //NON-NLS
         }
     }
 
-    private void scanMediaStore() {
-        scanLibrary = new ProcessAbstract("Thread.ActivityMain.scanLibrayInThread") { //NON-NLS
+    private void scan() {
+        processScan = new ProcessAbstract("Thread.ActivityMain.scanInThread") { //NON-NLS
             public void run() {
                 try {
                     checkAbort();
                     nbFiles = 0;
                     nbFilesTotal = 0;
                     checkAbort();
-                    processBrowseFS = new ProcessAbstract("Thread.ActivityMain.browseFS") { //NON-NLS
+                    processBrowse = new ProcessAbstract("Thread.ActivityMain.browseFS") { //NON-NLS
                         public void run() {
                             try {
                                 browseMediaStore(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
                                 browseMediaStore(MediaStore.Audio.Media.INTERNAL_CONTENT_URI);
                             } catch (IllegalStateException | InterruptedException e) {
                                 Log.w(TAG, "Thread.ActivityMain.browseFS InterruptedException"); //NON-NLS
-                                scanLibrary.abort();
+                                processScan.abort();
                             }
                         }
                     };
-                    processBrowseFS.start();
+                    processBrowse.start();
                     checkAbort();
-                    processBrowseFS.join();
+                    processBrowse.join();
 
                     //Scan deleted files
                     //This will remove from db files not in filesystem
@@ -145,7 +149,7 @@ public class ServiceScan extends ServiceBase {
                         notifyScan(getString(R.string.serviceScanNotifyScanningDeleted), 200);
                     }
                 } catch (InterruptedException e) {
-                    Log.w(TAG, "Thread.ActivityMain.scanLibrayInThread InterruptedException"); //NON-NLS
+                    Log.w(TAG, "Thread.ActivityMain.scanInThread InterruptedException"); //NON-NLS
                 }
             }
 
@@ -194,7 +198,7 @@ public class ServiceScan extends ServiceBase {
                 cursor.close();
             }
         };
-        scanLibrary.start();
+        processScan.start();
     }
 
     private void notifyScan(final String action, int every) {
@@ -205,18 +209,18 @@ public class ServiceScan extends ServiceBase {
     private void stop() {
         //Abort and wait scanLibrayInThread is aborted
         //So it does not crash if scanLib not completed
-        if (processBrowseFS != null) {
-            processBrowseFS.abort();
+        if (processBrowse != null) {
+            processBrowse.abort();
         }
-        if (scanLibrary != null) {
-            scanLibrary.abort();
+        if (processScan != null) {
+            processScan.abort();
         }
         try {
-            if (processBrowseFS != null) {
-                processBrowseFS.join();
+            if (processBrowse != null) {
+                processBrowse.join();
             }
-            if (scanLibrary != null) {
-                scanLibrary.join();
+            if (processScan != null) {
+                processScan.join();
             }
         } catch (InterruptedException e) {
             Log.e(TAG, "ActivityMain onDestroy: UNEXPECTED InterruptedException", e); //NON-NLS
