@@ -1,27 +1,26 @@
 package phramusca.com.jamuzremote;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
-import android.os.Build;
+import android.net.Uri;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.ocpsoft.prettytime.PrettyTime;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -198,41 +197,57 @@ public class Track implements Serializable {
      * @param rootPath Track root path.
      * @param absolutePath Track absolute path.
      */
-    public Track(File rootPath, String absolutePath) {
+    public Track(File rootPath, String absolutePath, String idPath) {
         this.path = absolutePath;
-        try {
-            this.relativeFullPath = path.substring(rootPath.getAbsolutePath().length() + 1);
-        } catch (StringIndexOutOfBoundsException ex) {
-            Log.e(TAG, "Error getting relativeFullPath; path=" + path + ", getAppDataPath=" + rootPath, ex); //NON-NLS //NON-NLS
+        this.idPath = idPath;
+        if(!path.startsWith("content://")) {
+            try {
+                this.relativeFullPath = path.substring(rootPath.getAbsolutePath().length() + 1);
+            } catch (StringIndexOutOfBoundsException ex) {
+                Log.e(TAG, "Error getting relativeFullPath; path=" + path + ", getAppDataPath=" + rootPath, ex); //NON-NLS //NON-NLS
+            }
         }
     }
 
-    public boolean read() {
+    public boolean read(Context context) {
         try {
-            File file = new File(path);
-            size=file.length();
-            addedDate=new Date();
-            modifDate=new Date(file.lastModified());
-
             MediaExtractor mex = new MediaExtractor();
-            mex.setDataSource(path);
-            MediaFormat mf = mex.getTrackFormat(0);
-            String bitrate = mf.getString(MediaFormat.KEY_BIT_RATE);
-            if(bitrate!=null) { //TODO: Why is bitrate always null ? :(
-                bitRate = bitrate;
+            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            Bitmap bitmap;
+            if(!path.startsWith("content://")) {
+                File file = new File(path);
+                size=file.length();
+                addedDate=new Date();
+                modifDate=new Date(file.lastModified());
+                File folder = file.getParentFile();
+                pathModifDate=new Date(Objects.requireNonNull(folder).lastModified());
+                mex.setDataSource(path);
+                mmr.setDataSource(path);
+                bitmap = readCover(path);
+            } else {
+                mex.setDataSource(context, Uri.parse(path), null);
+                mmr.setDataSource(context, Uri.parse(path));
+                bitmap = readCover(mmr);
             }
+            if(bitmap != null) {
+                coverHash = RepoCovers.readCoverHash(bitmap);
+                if(!RepoCovers.contains(coverHash, RepoCovers.IconSize.COVER)) {
+                    RepoCovers.writeIconsToCache(coverHash, bitmap, RepoCovers.IconSize.COVER);
+                }
+            }
+            MediaFormat mf = mex.getTrackFormat(0);
+            bitRate = mf.getInteger(MediaFormat.KEY_BIT_RATE);
             length = (int) Math.round(mf.getLong(MediaFormat.KEY_DURATION)/1000.0/1000.0);
             format = mf.getString(MediaFormat.KEY_MIME);
-
-            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-            mmr.setDataSource(path);
             album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
             artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
             title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
             genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
-
             albumArtist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST);
-            year = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR);
+            String yearMeta = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR);
+            if(yearMeta!=null) {
+                year = yearMeta;
+            }
             String trackNumber = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER);
             if(trackNumber.contains("/")) {
                 String[] split = trackNumber.split("/");
@@ -242,22 +257,16 @@ public class Track implements Serializable {
                 trackNo = Integer.parseInt(trackNumber);
                 trackTotal = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS));
             }
-            discNo = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER));
-
-            //TODO: Get discTotal and comment
-
-            Bitmap bitmap = readCover(path);
-            if(bitmap != null) {
-                coverHash = RepoCovers.readCoverHash(bitmap);
-                if(!RepoCovers.contains(coverHash, RepoCovers.IconSize.COVER)) {
-                    RepoCovers.writeIconsToCache(coverHash, bitmap, RepoCovers.IconSize.COVER);
-                }
+            String discNumber = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER);
+            if(discNumber.contains("/")) {
+                String[] split = discNumber.split("/");
+                discNo = Integer.parseInt(split[0]);
+                discTotal = Integer.parseInt(split[1]);
+            } else {
+                discNo = Integer.parseInt(discNumber);
+                discTotal = -1;
             }
-
-            File folder = file.getParentFile();
-            pathModifDate=new Date(Objects.requireNonNull(folder).lastModified());
-            idPath=folder.getAbsolutePath();
-
+            //TODO: Get comment
             return true;
         } catch (RuntimeException | IOException | NoSuchAlgorithmException ex) {
             Log.e(TAG, "Error reading file tags " + path, ex); //NON-NLS
@@ -466,6 +475,7 @@ public class Track implements Serializable {
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         return path;
@@ -545,27 +555,29 @@ public class Track implements Serializable {
         return coverHash;
     }
 
-    public static Bitmap readCover(String path) {
+    public static Bitmap readCover(MediaMetadataRetriever mmr) {
         Bitmap cover = null;
         try {
-            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-            mmr.setDataSource(path);
             byte[] art = mmr.getEmbeddedPicture();
             if (art != null) {
                 cover = BitmapFactory.decodeByteArray(art, 0, art.length); //NON-NLS
             } //NON-NLS
         } catch (final RuntimeException ex) { //NON-NLS
-            Log.e("Track", "Error reading art of " + path + " " + ex); //NON-NLS
+            Log.e("Track", "Error reading art of " + mmr.toString() + " " + ex); //NON-NLS
         }
         return cover;
     }
 
+    public static Bitmap readCover(String path) {
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(path);
+        return readCover(mmr);
+    }
+
     //TODO: Do not update all, only requested fields
     public boolean update() {
-        boolean success =
-                HelperLibrary.musicLibrary != null
-                && HelperLibrary.musicLibrary.updateTrack(this, false);
-        return success;
+        return HelperLibrary.musicLibrary != null
+            && HelperLibrary.musicLibrary.updateTrack(this, false);
     }
 
     /**
@@ -655,7 +667,7 @@ public class Track implements Serializable {
                 tagsAsMap.put(tag);
             }
             jsonObject.put("tags", tagsAsMap); //NON-NLS
-        } catch (JSONException e) {
+        } catch (JSONException ignored) {
         }
         return jsonObject;
     }

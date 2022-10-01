@@ -1866,7 +1866,7 @@ public class ActivityMain extends AppCompatActivity {
 
     public void checkPermissionsThenScanLibrary() {
         if (!hasPermissions(this, PERMISSIONS)) {
-
+//FIXME: Adjust message
             String msgStr = "<html><b>" + getString(R.string.permissionMsg_1) + "</b>" + getString(R.string.permissionMsg_2)
                     + "<BR/><BR/>" +
                     "<i>- <u>" + getString(R.string.permissionMsg_3) + "</u></i> " + getString(R.string.permissionMsg_4) //NON-NLS //NON-NLS //NON-NLS

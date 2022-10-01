@@ -1,8 +1,16 @@
 package phramusca.com.jamuzremote;
 
+import android.content.ContentUris;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
 import android.os.PowerManager;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
+
+import androidx.annotation.RequiresApi;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,7 +27,6 @@ public class ServiceScan extends ServiceBase {
     private int nbFilesTotal = 0;
     private ProcessAbstract scanLibrary;
     private ProcessAbstract processBrowseFS;
-    private ProcessAbstract processBrowseFScount;
     private String userPath;
     private PowerManager.WakeLock wakeLock;
 
@@ -39,6 +46,10 @@ public class ServiceScan extends ServiceBase {
         }
 
         userPath = intent.getStringExtra("userPath");
+
+        //https://developer.android.com/training/data-storage/shared/media#check-for-updates
+        //FIXME: No need to update library if no changes made
+
         scanLibraryInThread();
         return START_REDELIVER_INTENT;
     }
@@ -52,6 +63,7 @@ public class ServiceScan extends ServiceBase {
 
     private void scanLibraryInThread() {
         new Thread() {
+            @RequiresApi(api = Build.VERSION_CODES.R)
             public void run() {
                 runOnUiThread(() -> helperNotification.notifyBar(notificationScan, getString(R.string.serviceScanNotifyCleaningDatabase)));
                 if (HelperLibrary.musicLibrary != null) {
@@ -94,11 +106,11 @@ public class ServiceScan extends ServiceBase {
                         nbFiles = 0;
                         nbFilesTotal = 0;
                         checkAbort();
-                        //Scan android filesystem for files
                         processBrowseFS = new ProcessAbstract("Thread.ActivityMain.browseFS") { //NON-NLS
                             public void run() {
                                 try {
-                                    browseFS(pathToScan);
+                                    browseMediaStore(pathToScan, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+                                    browseMediaStore(pathToScan, MediaStore.Audio.Media.INTERNAL_CONTENT_URI);
                                 } catch (IllegalStateException | InterruptedException e) {
                                     Log.w(TAG, "Thread.ActivityMain.browseFS InterruptedException"); //NON-NLS
                                     scanLibrary.abort();
@@ -106,21 +118,8 @@ public class ServiceScan extends ServiceBase {
                             }
                         };
                         processBrowseFS.start();
-                        //Get total number of files
-                        processBrowseFScount = new ProcessAbstract("Thread.ActivityMain.browseFScount") { //NON-NLS
-                            public void run() {
-                                try {
-                                    browseFScount(pathToScan);
-                                } catch (InterruptedException e) {
-                                    Log.w(TAG, "Thread.ActivityMain.browseFScount InterruptedException"); //NON-NLS
-                                    scanLibrary.abort();
-                                }
-                            }
-                        };
-                        processBrowseFScount.start();
                         checkAbort();
                         processBrowseFS.join();
-                        processBrowseFScount.join();
                     }
 
                     //Scan deleted files
@@ -137,10 +136,14 @@ public class ServiceScan extends ServiceBase {
                     nbFiles = 0;
                     for (Track track : tracks) {
                         checkAbort();
-                        File file = new File(track.getPath());
-                        if (!file.exists()) {
-                            Log.d(TAG, "Remove track from db: " + track); //NON-NLS
-                            track.delete();
+                        if(!track.getPath().startsWith("content://")) {
+                            File file = new File(track.getPath());
+                            if (!file.exists()) {
+                                Log.d(TAG, "Remove track from db: " + track); //NON-NLS
+                                track.delete();
+                            }
+                        } else {
+                            //FIXME: Remove from db if no more in MediaStore
                         }
                         notifyScan(getString(R.string.serviceScanNotifyScanningDeleted), 200);
                     }
@@ -149,59 +152,48 @@ public class ServiceScan extends ServiceBase {
                 }
             }
 
-            private void browseFS(File path) throws InterruptedException {
-                checkAbort();
-                if (path.isDirectory()) {
-                    File[] files = path.listFiles();
-                    if (files != null) {
-                        if (files.length > 0) {
-                            for (File file : files) {
-                                checkAbort();
-                                if (file.isDirectory()) {
-                                    browseFS(file);
-                                } else {
-                                    String absolutePath = file.getAbsolutePath();
-                                    //getAppDataPath is managed in ServiceSync
-                                    if (!absolutePath.startsWith(getAppDataPath.getAbsolutePath())) {
-                                        //Scanning extra local folder
-                                        List<String> audioExtensions = new ArrayList<>();
-                                        audioExtensions.add("mp3"); //NON-NLS
-                                        audioExtensions.add("flac"); //NON-NLS
-                                        /*audioFiles.add("ogg");*/
-                                        String ext = absolutePath.substring(absolutePath.lastIndexOf(".") + 1); //NON-NLS
-                                        if (audioExtensions.contains(ext)) {
-                                            HelperLibrary.musicLibrary.insertOrUpdateTrack(absolutePath, pathToScan);
-                                        }
-                                    }
-                                    notifyScan(getString(R.string.scanNotifyScanning), 13);
-                                }
-                            }
-                        } else {
-                            Log.i(TAG, "Deleting empty folder " + path.getAbsolutePath()); //NON-NLS
-                            //noinspection ResultOfMethodCallIgnored
-                            path.delete();
-                        }
+            private void browseMediaStore(File folder, Uri collection) throws InterruptedException {
+                String[] projection = {
+                        MediaStore.Audio.Media.MIME_TYPE,
+                        MediaStore.Audio.Media._ID,
+                        MediaStore.Audio.Media.ALBUM_ID,
+                        MediaStore.Audio.Media.DATE_ADDED
+                };
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    if (MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.equals(collection)) {
+                        collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL);
+                    } else if (MediaStore.Audio.Media.INTERNAL_CONTENT_URI.equals(collection)) {
+                        collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_INTERNAL);
                     }
                 }
-            }
-
-            private void browseFScount(File path) throws InterruptedException {
-                checkAbort();
-                if (path.isDirectory()) {
-                    File[] files = path.listFiles();
-                    if (files != null) {
-                        if (files.length > 0) {
-                            for (File file : files) {
-                                checkAbort();
-                                if (file.isDirectory()) {
-                                    browseFScount(file);
-                                } else {
-                                    nbFilesTotal++;
-                                }
-                            }
-                        }
-                    }
+                String selection = MediaStore.Audio.Media.MIME_TYPE + " = ?";
+                String[] selectionArgs = new String[] {
+                        MimeTypeMap.getSingleton().getMimeTypeFromExtension("mp3")
+                        //FIXME: Add flac too
+                        //,MimeTypeMap.getSingleton().getMimeTypeFromExtension("flac")
+                };
+                String sortOrder = MediaStore.Audio.Media.DATE_ADDED + " DESC";
+                Cursor cursor = getApplicationContext().getContentResolver().query(
+                        collection,
+                        projection ,
+                        selection,
+                        selectionArgs,
+                        sortOrder
+                );
+                int idColumnId = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
+                int albumIdColumnId = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID);
+                nbFilesTotal = cursor.getCount();
+                while(cursor.moveToNext())
+                {
+                    checkAbort();
+                    long id = cursor.getLong(idColumnId);
+                    Uri contentUri = ContentUris.withAppendedId(collection, id);
+                    long albumId=cursor.getLong(albumIdColumnId);
+                    HelperLibrary.musicLibrary.insertOrUpdateTrack(contentUri.toString(), folder,
+                            getApplicationContext(), "MediaStore_" + albumId);
+                    notifyScan(getString(R.string.scanNotifyScanning), 13);
                 }
+                cursor.close();
             }
         };
         scanLibrary.start();
@@ -218,18 +210,12 @@ public class ServiceScan extends ServiceBase {
         if (processBrowseFS != null) {
             processBrowseFS.abort();
         }
-        if (processBrowseFScount != null) {
-            processBrowseFScount.abort();
-        }
         if (scanLibrary != null) {
             scanLibrary.abort();
         }
         try {
             if (processBrowseFS != null) {
                 processBrowseFS.join();
-            }
-            if (processBrowseFScount != null) {
-                processBrowseFScount.join();
             }
             if (scanLibrary != null) {
                 scanLibrary.join();
