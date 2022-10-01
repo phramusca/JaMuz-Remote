@@ -40,7 +40,7 @@ public class Track implements Serializable {
     private int trackTotal = -1;
     private int discNo = -1;
     private int discTotal = -1;
-    private String bitRate = "";
+    private int bitRate = -1;
     private String format = "";
     private double BPM = -1;
     private Date modifDate = new Date(0);
@@ -72,9 +72,9 @@ public class Track implements Serializable {
     /**
      * From database
      *
-     * @param pathModifDate
-     * @param pathMbId
-     * @param comment
+     * @param pathModifDate  -
+     * @param pathMbId       -
+     * @param comment        -
      * @param idPath         -
      * @param albumArtist    -
      * @param year           -
@@ -85,17 +85,17 @@ public class Track implements Serializable {
      * @param bitRate        -
      * @param format         -
      * @param bpm            -
-     * @param modifDate
-     * @param checkedFlag
-     * @param copyRight
-     * @param getAppDataPath
+     * @param modifDate      -
+     * @param checkedFlag    -
+     * @param copyRight      -
+     * @param getAppDataPath -
      * @param idFileRemote   -
      * @param idFileServer   -
      * @param rating         -
      * @param title          -
      * @param album          -
      * @param artist         -
-     * @param coverHash
+     * @param coverHash      -
      * @param path           -
      * @param genre          -
      * @param addedDate      -
@@ -107,7 +107,7 @@ public class Track implements Serializable {
      */
     public Track(Date pathModifDate, String pathMbId, String comment, String idPath,
                  String albumArtist, String year, int trackNo, int trackTotal,
-                 int discNo, int discTotal, String bitRate, String format, double bpm,
+                 int discNo, int discTotal, int bitRate, String format, double bpm,
                  Date modifDate, String checkedFlag, String copyRight, File getAppDataPath,
                  int idFileRemote, int idFileServer, double rating, String title, String album,
                  String artist, String coverHash, String path, String genre, Date addedDate,
@@ -162,7 +162,7 @@ public class Track implements Serializable {
      * @param discNo      -
      * @param discTotal   -
      * @param bitRate     -
-     * @param format
+     * @param format      -
      * @param bpm         -
      * @param rating      -
      * @param title       -
@@ -172,7 +172,7 @@ public class Track implements Serializable {
      * @param genre       -
      */
     public Track(String albumArtist, String year, int trackNo, int trackTotal, int discNo,
-                 int discTotal, String bitRate, String format, double bpm, double rating, String title,
+                 int discTotal, int bitRate, String format, double bpm, double rating, String title,
                  String album, String artist, String coverHash, String genre) {
         this.albumArtist = albumArtist;
         this.year = year;
@@ -304,7 +304,7 @@ public class Track implements Serializable {
                 trackTotal = file.getInt("trackTotal");
                 discNo = file.getInt("discNo");
                 discTotal = file.getInt("discTotal"); //NON-NLS
-                bitRate = file.getString("bitRate");
+                bitRate = file.getInt("bitRate");
                 format = file.getString("format"); //NON-NLS
                 BPM = file.getDouble("BPM");
                 checkedFlag = file.getString("checkedFlag");
@@ -423,11 +423,7 @@ public class Track implements Serializable {
         return discTotal;
     }
 
-    public void setDiscTotal(Integer discTotal) {
-        this.discTotal = discTotal;
-    }
-
-    public String getBitrate() {
+    public int getBitrate() {
         return bitRate;
     }
 
