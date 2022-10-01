@@ -2,6 +2,8 @@ package phramusca.com.jamuzremote;
 
 import static phramusca.com.jamuzremote.StringManager.trimTrailingWhitespace;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -27,7 +29,6 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import net.rdrei.android.dirchooser.DirectoryChooserActivity;
-import net.rdrei.android.dirchooser.DirectoryChooserConfig;
 
 import java.util.ArrayList;
 
@@ -67,25 +68,14 @@ public class ActivitySettings extends AppCompatActivity {
                 qrScan.initiateScan()
         );
 
-        textViewPath = findViewById(R.id.textViewPath);
-
-        String userPath = preferences.getString("userPath", "/");
-        textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
-                .concat(userPath)
-                .concat("</html>"))));
-        Button dirChooserButton = findViewById(R.id.button_browse);
-
+        Button dirChooserButton = findViewById(R.id.button_refresh);
         dirChooserButton.setOnClickListener(v -> {
-            final Intent chooserIntent = new Intent(getApplicationContext(), DirectoryChooserActivity.class);
-            DirectoryChooserConfig.Builder builder = DirectoryChooserConfig.builder()
-                    .newDirectoryName("DirChooserSample")
-                    .allowReadOnlyDirectory(true)
-                    .allowNewDirectoryNameModification(true);
-            if(!userPath.equals("/")) {
-                builder.initialDirectory(userPath);
+            //Start Scan Service
+            if (!isMyServiceRunning(ServiceScan.class)) {
+                Intent service = new Intent(getApplicationContext(), ServiceScan.class);
+                service.putExtra("getAppDataPath", HelperFile.getAudioRootFolder());
+                startService(service);
             }
-            chooserIntent.putExtra(DirectoryChooserActivity.EXTRA_CONFIG, builder.build());
-            startActivityForResult(chooserIntent, DIRECTORY_REQUEST_CODE);
         });
 
         SeekBar seekBarReplayGain = findViewById(R.id.seekBarReplayGain);
@@ -184,6 +174,18 @@ public class ActivitySettings extends AppCompatActivity {
                 ((RadioButton)findViewById(R.id.settingsRadioSpeechPause)).setChecked(true);
                 break;
         }
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if (manager != null) {
+            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+                if (serviceClass.getName().equals(service.service.getClassName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void onRadioButtonClicked(View view) {

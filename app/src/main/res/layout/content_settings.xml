@@ -15,7 +15,10 @@
             android:layout_column="0"
             android:layout_width="45dp"
             android:layout_height="wrap_content"
-            android:background="@drawable/ic_button_back"/>
+            android:background="@drawable/ic_button_back"
+            android:text="Back"
+            android:textColor="@color/colorPrimaryDark"
+            />
         <TextView
             android:text="@string/settingsTitle"
             android:layout_row="0"
@@ -42,6 +45,18 @@
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:background="@color/colorPrimaryDark"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <CheckBox
+                    android:id="@+id/settingsCheckBoxDisplayServer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settingsCheckBoxDisplayServer"
+                    android:textColor="@color/textColor"
+                    android:background="@color/colorPrimary"
+                    android:checked="true"/>
+            </LinearLayout>
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -58,25 +73,29 @@
                     android:layout_row="0"
                     android:layout_column="0"
                     android:orientation="horizontal" />
+
                 <TextView android:text="@string/settingsServerTextViewIpPort"
                     android:layout_row="0"
                     android:layout_column="1"
                     android:textColor="@color/textColor"/>
-                <EditText android:id="@+id/editText_info"
-                    android:inputType="text"
-                    android:imeOptions="actionDone"
-                    android:text="@string/settingsServerDefaultConnectionString"
+
+                <EditText
+                    android:id="@+id/editText_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:enabled="true"
-                    android:layout_gravity="start|end"
-                    android:gravity="center_horizontal"
-                    android:hint="@string/settingsServerTextViewIpPort"
                     android:layout_row="0"
                     android:layout_column="2"
+                    android:layout_gravity="start|end"
+                    android:enabled="true"
+                    android:gravity="center_horizontal"
+                    android:hint="@string/settingsServerTextViewIpPort"
+                    android:imeOptions="actionDone"
+                    android:importantForAutofill="no"
+                    android:inputType="text"
+                    android:minHeight="48dp"
+                    android:text="@string/settingsServerDefaultConnectionString"
                     android:textColor="@color/textColor"
-                    android:theme="@style/EditText"
-                    android:importantForAutofill="no" />
+                    android:theme="@style/EditText" />
                 <Button
                     style="?android:attr/buttonStyleSmall"
                     android:padding="5dp"
@@ -103,6 +122,59 @@
                     android:layout_column="2"
                     android:textAllCaps="false"/>
             </GridLayout>
+            <TextView android:text="@string/settingsLocalFilesTextViewTitle"
+                android:textColor="@color/textColor"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:gravity="start"
+                android:layout_marginTop="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="@color/colorPrimaryDark"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:orientation="vertical"
+                android:background="@color/colorPrimary">
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorPrimary"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp">
+
+                    <CheckBox
+                        android:id="@+id/settingsCheckBoxDisplayMediaStore"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_row="0"
+                        android:layout_column="0"
+                        android:checked="true"
+                        android:minHeight="48dp"
+                        android:text="@string/settingsCheckBoxDisplayMediaStore"
+                        android:textColor="@color/textColor" />
+                    <Button
+                        android:id="@+id/button_refresh"
+                        style="?android:attr/buttonStyleSmall"
+                        android:layout_gravity="end"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_row="0"
+                        android:layout_column="1"
+                        android:background="@drawable/ic_button"
+                        android:padding="5dp"
+                        android:text="@string/settingsLocalFilesButtonRefresh"
+                        android:textAllCaps="false"
+                        android:textColor="@color/textColor" />
+                </GridLayout>
+                <TextView android:text="@string/settingsLocalFilesTextViewHelp"
+                    android:textColor="@color/textColor"
+                    android:gravity="start"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent" />
+            </LinearLayout>
             <TextView android:text="ReplayGain"
                 tools:ignore="HardcodedText"
                 android:textColor="@color/textColor"
@@ -227,66 +299,6 @@
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:textColor="@color/textColor"/>
-            </LinearLayout>
-            <TextView android:text="@string/settingsLocalFilesTextViewTitle"
-                android:textColor="@color/textColor"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:gravity="start"
-                android:layout_marginTop="5dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:background="@color/colorPrimaryDark"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:orientation="vertical"
-            android:background="@color/colorPrimary">
-            <TextView android:text="@string/settingsLocalFilesTextViewHelp"
-                android:textColor="@color/textColor"
-                android:gravity="start"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent" />
-            <GridLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:background="@color/colorPrimary">
-                <TextView
-                    android:text="@string/settingsLocalFilesTextViewPath"
-                    android:layout_row="0"
-                    android:layout_column="1"
-                    android:textColor="@color/textColor"/>
-                <EditText
-                    android:id="@+id/textViewPath"
-                    android:textColor="@color/textColor"
-                    android:enabled="false"
-                    android:layout_gravity="start|end|center_vertical"
-                    android:gravity="center_horizontal"
-                    android:layout_row="0"
-                    android:layout_column="2"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:inputType="textCapSentences|textMultiLine"
-                    android:maxLength="2000"
-                    android:maxLines="4"
-                    android:importantForAutofill="no" />
-                <Button
-                    style="?android:attr/buttonStyleSmall"
-                    android:padding="5dp"
-                    android:background="@drawable/ic_button"
-                    android:textColor="@color/textColor"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settingsLocalFilesButtonChoose"
-                    android:id="@+id/button_browse"
-                    android:layout_row="0"
-                    android:layout_column="3"
-                    android:textAllCaps="false"/>
-            </GridLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

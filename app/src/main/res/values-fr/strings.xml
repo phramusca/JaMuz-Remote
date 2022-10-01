@@ -17,9 +17,8 @@
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Autoriser l\'édition des pistes</string>
     <string name="settingsKidsPlaceCheckBoxOnStartup">Lancer Kids Place avec JaMuz</string>
     <string name="settingsLocalFilesTextViewTitle">Pistes locales</string>
-    <string name="settingsLocalFilesTextViewHelp"><html>Vous pouvez ajouter des pistes dans la médiathèque depuis un dossier local.<br/>ATTENTION : Les pistes locales ne seront PAS synchronisées avec JaMuz Server ! Il est fortement recommandé d\'utiliser plutôt JaMuz Server pour télécharger vos pistes !</html></string>
     <string name="settingsLocalFilesTextViewPath">Chemin :</string>
-    <string name="settingsLocalFilesButtonChoose">Choisir</string>
+    <string name="settingsLocalFilesTextViewHelp">ATTENTION : Les pistes locales ne seront PAS synchronisées avec JaMuz Server ! Il est fortement recommandé d\'utiliser plutôt JaMuz Server pour télécharger vos pistes !</string>
     <string name="settingsDirectoryChooserButtonNewFolder">Nouveau dossier</string>
     <string name="settingsDirectoryChooserNewFolderName">Nom du nouveau dossier</string>
     <string name="playlistTextViewExcludeTheLast">Exclure les </string>
@@ -216,4 +215,7 @@
     <string name="settingsRadioSpeechLowerVolume">Baisser le volume.</string>
     <string name="settingsRadioSpeechNone">Ne rien faire de spécial.</string>
     <string name="settingsSpeechTitle">Lors d\'une commande vocale :</string>
+    <string name="settingsLocalFilesButtonRefresh">Actualiser</string>
+    <string name="settingsCheckBoxDisplayServer">Afficher les pistes de JaMuz Server</string>
+    <string name="settingsCheckBoxDisplayMediaStore">Afficher les pistes du MediaStore Android</string>
 </resources>

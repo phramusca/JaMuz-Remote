@@ -33,9 +33,8 @@
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Allow track edition</string>
     <string name="settingsKidsPlaceCheckBoxOnStartup">Start Kids Place with JaMuz</string>
     <string name="settingsLocalFilesTextViewTitle">Local tracks</string>
-    <string name="settingsLocalFilesTextViewHelp"><html>You can add tracks to library from a local path.<br/>Warning: Those local tracks will NOT be synced with the JaMuz Server, so instead using that to get your tracks is highly recommended!</html></string>
+    <string name="settingsLocalFilesTextViewHelp" tools:ignore="MissingTranslation">Warning: Those local tracks will NOT be synced with the JaMuz Server, so instead using that to get your tracks is highly recommended!</string>
     <string name="settingsLocalFilesTextViewPath">Path:</string>
-    <string name="settingsLocalFilesButtonChoose">Choose</string>
     <string name="settingsDirectoryChooserButtonNewFolder">New folder</string>
     <string name="settingsDirectoryChooserNewFolderName">New folder name</string>
     <string name="settingsDirectoryChooserFailedToCreate">Error creating folder</string>
@@ -212,7 +211,10 @@
         <item>restart</item>
     </string-array>
     <string name="playlistLabelRestored">restored</string>
-    <string name="serviceSyncNotifySyncRemaining">Remaning:</string>
+    <string name="serviceSyncNotifySyncRemaining">Remaining:</string>
     <string name="clientReceptionToastSocketClosed">Socket closed (received null)</string>
     <string name="mainToastQR">QR code read. New configuration in use.</string>
+    <string name="settingsLocalFilesButtonRefresh" tools:ignore="MissingTranslation">Refresh</string>
+    <string name="settingsCheckBoxDisplayServer" tools:ignore="MissingTranslation">Display files from JaMuz Server</string>
+    <string name="settingsCheckBoxDisplayMediaStore" tools:ignore="MissingTranslation">Display files from Android MediaStore</string>
 </resources>
