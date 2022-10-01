@@ -179,8 +179,8 @@ public class MusicLibrary {
         return new Triplet<>(-1, (long) -1, (long) -1);
     }
 
-    synchronized boolean insertOrUpdateTrack(String absolutePath, File rootPath, Context context) {
-        Track track = new Track(rootPath, absolutePath);
+    synchronized boolean insertOrUpdateTrack(String absolutePath, File rootPath, Context context, String idPath) {
+        Track track = new Track(rootPath, absolutePath, idPath);
         //TODO: Do not read if file has not changed (takes time to read cover and other)
         if (track.read(context)) {
             return insertOrUpdateTrack(track);
