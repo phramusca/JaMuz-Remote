@@ -214,20 +214,24 @@ public class Track implements Serializable {
             MediaExtractor mex = new MediaExtractor();
             MediaMetadataRetriever mmr = new MediaMetadataRetriever();
             Bitmap bitmap;
-            if(!path.startsWith("content://")) {
+            addedDate=new Date();
+            if (path.startsWith("content://")) {
+                mex.setDataSource(context, Uri.parse(path), null);
+                mmr.setDataSource(context, Uri.parse(path));
+                bitmap = readCover(mmr);
+                //TODO: Set those:
+//                size=file.length();
+//                modifDate=new Date(file.lastModified());
+//                pathModifDate=new Date(Objects.requireNonNull(folder).lastModified());
+            } else {
                 File file = new File(path);
                 size=file.length();
-                addedDate=new Date();
                 modifDate=new Date(file.lastModified());
                 File folder = file.getParentFile();
                 pathModifDate=new Date(Objects.requireNonNull(folder).lastModified());
                 mex.setDataSource(path);
                 mmr.setDataSource(path);
                 bitmap = readCover(path);
-            } else {
-                mex.setDataSource(context, Uri.parse(path), null);
-                mmr.setDataSource(context, Uri.parse(path));
-                bitmap = readCover(mmr);
             }
             if(bitmap != null) {
                 coverHash = RepoCovers.readCoverHash(bitmap);
@@ -236,8 +240,16 @@ public class Track implements Serializable {
                 }
             }
             MediaFormat mf = mex.getTrackFormat(0);
-            bitRate = mf.getInteger(MediaFormat.KEY_BIT_RATE);
-            length = (int) Math.round(mf.getLong(MediaFormat.KEY_DURATION)/1000.0/1000.0);
+            try {
+                bitRate = mf.getInteger(MediaFormat.KEY_BIT_RATE);
+            } catch (NullPointerException ignored) {
+                bitRate = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE));
+            }
+            try {
+                length = (int) Math.round(mf.getLong(MediaFormat.KEY_DURATION)/1000.0/1000.0);
+            } catch (NullPointerException ignored) {
+                length = (int) Math.round(Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION))/1000.0);
+            }
             format = mf.getString(MediaFormat.KEY_MIME);
             album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
             artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
@@ -264,7 +276,7 @@ public class Track implements Serializable {
                 discTotal = Integer.parseInt(split[1]);
             } else {
                 discNo = Integer.parseInt(discNumber);
-                discTotal = -1;
+                discTotal = Integer.parseInt(discNumber);
             }
             //TODO: Get comment
             return true;
