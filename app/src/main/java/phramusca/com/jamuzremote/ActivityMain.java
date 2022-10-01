@@ -2039,8 +2039,8 @@ public class ActivityMain extends AppCompatActivity {
         //Start Scan Service
         if (!isMyServiceRunning(ServiceScan.class)) {
             Intent service = new Intent(getApplicationContext(), ServiceScan.class);
-            service.putExtra("userPath", preferences.getString("userPath", "/"));
             service.putExtra("getAppDataPath", HelperFile.getAudioRootFolder());
+            service.putExtra("forceRefresh", false);
             startService(service);
         }
     }

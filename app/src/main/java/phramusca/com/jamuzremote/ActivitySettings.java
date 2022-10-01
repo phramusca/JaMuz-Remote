@@ -1,7 +1,5 @@
 package phramusca.com.jamuzremote;
 
-import static phramusca.com.jamuzremote.StringManager.trimTrailingWhitespace;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +7,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
-import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,15 +17,12 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-
-import net.rdrei.android.dirchooser.DirectoryChooserActivity;
 
 import java.util.ArrayList;
 
@@ -38,9 +32,7 @@ public class ActivitySettings extends AppCompatActivity {
     private EditText editTextConnectInfo;
     private SharedPreferences preferences;
     private IntentIntegrator qrScan;
-    private TextView textViewPath;
     private static final int QR_REQUEST_CODE = 49374;
-    private static final int DIRECTORY_REQUEST_CODE = 591534;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,12 +60,12 @@ public class ActivitySettings extends AppCompatActivity {
                 qrScan.initiateScan()
         );
 
-        Button dirChooserButton = findViewById(R.id.button_refresh);
-        dirChooserButton.setOnClickListener(v -> {
-            //Start Scan Service
+        Button buttonRefresh = findViewById(R.id.button_refresh);
+        buttonRefresh.setOnClickListener(v -> {
             if (!isMyServiceRunning(ServiceScan.class)) {
                 Intent service = new Intent(getApplicationContext(), ServiceScan.class);
                 service.putExtra("getAppDataPath", HelperFile.getAudioRootFolder());
+                service.putExtra("forceRefresh", true);
                 startService(service);
             }
         });
@@ -82,15 +74,13 @@ public class ActivitySettings extends AppCompatActivity {
         displayServer.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> setConfig("displayServer", isChecked)
         );
-        displayServer.setChecked(
-                preferences.getBoolean("displayServer", true));
+        displayServer.setChecked(preferences.getBoolean("displayServer", true)); //FIXME: Use it
 
         CheckBox displayMediaStore = findViewById(R.id.settingsCheckBoxDisplayMediaStore);
         displayMediaStore.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> setConfig("displayMediaStore", isChecked)
         );
-        displayMediaStore.setChecked(
-                preferences.getBoolean("displayMediaStore", true));
+        displayMediaStore.setChecked(preferences.getBoolean("displayMediaStore", true)); //FIXME: Use it
 
         SeekBar seekBarReplayGain = findViewById(R.id.seekBarReplayGain);
         seekBarReplayGain.setProgress(preferences.getInt("baseVolume", 70));
@@ -234,18 +224,6 @@ public class ActivitySettings extends AppCompatActivity {
                 setResult(RESULT_OK, data);
                 finish();
             }
-        } else if (requestCode == DIRECTORY_REQUEST_CODE
-                        && resultCode == DirectoryChooserActivity.RESULT_CODE_DIR_SELECTED) {
-            String chosenDir = data
-                    .getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR);
-            textViewPath.setText(trimTrailingWhitespace(Html.fromHtml("<html>"
-                .concat(chosenDir)
-                .concat("</html>"))));
-            setConfig("userPath", chosenDir);
-            Intent dataAction = new Intent();
-            dataAction.putExtra("action", "checkPermissionsThenScanLibrary"); //NON-NLS
-            setResult(RESULT_OK, dataAction);
-            finish();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
