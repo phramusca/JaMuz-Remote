@@ -78,6 +78,20 @@ public class ActivitySettings extends AppCompatActivity {
             }
         });
 
+        CheckBox displayServer = findViewById(R.id.settingsCheckBoxDisplayServer);
+        displayServer.setOnCheckedChangeListener(
+                (buttonView, isChecked) -> setConfig("displayServer", isChecked)
+        );
+        displayServer.setChecked(
+                preferences.getBoolean("displayServer", true));
+
+        CheckBox displayMediaStore = findViewById(R.id.settingsCheckBoxDisplayMediaStore);
+        displayMediaStore.setOnCheckedChangeListener(
+                (buttonView, isChecked) -> setConfig("displayMediaStore", isChecked)
+        );
+        displayMediaStore.setChecked(
+                preferences.getBoolean("displayMediaStore", true));
+
         SeekBar seekBarReplayGain = findViewById(R.id.seekBarReplayGain);
         seekBarReplayGain.setProgress(preferences.getInt("baseVolume", 70));
         seekBarReplayGain.setMax(100);
