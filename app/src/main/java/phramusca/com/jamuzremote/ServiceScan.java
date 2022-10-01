@@ -12,7 +12,6 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +27,6 @@ public class ServiceScan extends ServiceBase {
     private int nbFilesTotal = 0;
     private ProcessAbstract scanLibrary;
     private ProcessAbstract processBrowseFS;
-    private String userPath;
     private PowerManager.WakeLock wakeLock;
     private SharedPreferences defaultSharedPreferences;
 
@@ -47,14 +45,10 @@ public class ServiceScan extends ServiceBase {
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "jamuzremote:MyPowerWakelockTag"); //NON-NLS
             wakeLock.acquire(24 * 60 * 60 * 1000); //24 hours, enough to scan a lot, if not all !
         }
-
-        //FIXME: Change userPath with a boolean, once MediaStore tested on every android version
-        userPath = intent.getStringExtra("userPath");
-
         String previousMediaStoreVersion = defaultSharedPreferences.getString(MEDIA_STORE_VERSION, "");
         String mediaStoreVersion = MediaStore.getVersion(getApplicationContext());
         if(!previousMediaStoreVersion.equals(mediaStoreVersion)) {
-            scanLibraryInThread();
+            scanMediaStoreInThread();
         }
         return START_REDELIVER_INTENT;
     }
@@ -66,17 +60,16 @@ public class ServiceScan extends ServiceBase {
         super.onDestroy();
     }
 
-    private void scanLibraryInThread() {
+    private void scanMediaStoreInThread() {
         new Thread() {
             public void run() {
                 runOnUiThread(() -> helperNotification.notifyBar(notificationScan, getString(R.string.serviceScanNotifyCleaningDatabase)));
                 if (HelperLibrary.musicLibrary != null) {
                     //Delete tracks from database that are from another folder than those 2
-                    HelperLibrary.musicLibrary.deleteTrack(getAppDataPath, userPath);
-                    //Scan user folder and cleanup library
-                    File folder = new File(userPath);
-                    scanFolder(folder);
-                    waitScanFolder();
+                    HelperLibrary.musicLibrary.deleteTrack(getAppDataPath, "content://");
+                    //Scan MediaStore and cleanup library
+                    scanMediaStore();
+                    waitScanMediaStore();
 
                     RepoAlbums.reset();
                     SharedPreferences.Editor editor = defaultSharedPreferences.edit();
@@ -95,7 +88,7 @@ public class ServiceScan extends ServiceBase {
         }.start();
     }
 
-    private void waitScanFolder() {
+    private void waitScanMediaStore() {
         try {
             if (scanLibrary != null) {
                 scanLibrary.join();
@@ -105,30 +98,28 @@ public class ServiceScan extends ServiceBase {
         }
     }
 
-    private void scanFolder(final File pathToScan) {
+    private void scanMediaStore() {
         scanLibrary = new ProcessAbstract("Thread.ActivityMain.scanLibrayInThread") { //NON-NLS
             public void run() {
                 try {
-                    if (!pathToScan.getAbsolutePath().equals("/")) { //NON-NLS
-                        checkAbort();
-                        nbFiles = 0;
-                        nbFilesTotal = 0;
-                        checkAbort();
-                        processBrowseFS = new ProcessAbstract("Thread.ActivityMain.browseFS") { //NON-NLS
-                            public void run() {
-                                try {
-                                    browseMediaStore(pathToScan, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-                                    browseMediaStore(pathToScan, MediaStore.Audio.Media.INTERNAL_CONTENT_URI);
-                                } catch (IllegalStateException | InterruptedException e) {
-                                    Log.w(TAG, "Thread.ActivityMain.browseFS InterruptedException"); //NON-NLS
-                                    scanLibrary.abort();
-                                }
+                    checkAbort();
+                    nbFiles = 0;
+                    nbFilesTotal = 0;
+                    checkAbort();
+                    processBrowseFS = new ProcessAbstract("Thread.ActivityMain.browseFS") { //NON-NLS
+                        public void run() {
+                            try {
+                                browseMediaStore(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+                                browseMediaStore(MediaStore.Audio.Media.INTERNAL_CONTENT_URI);
+                            } catch (IllegalStateException | InterruptedException e) {
+                                Log.w(TAG, "Thread.ActivityMain.browseFS InterruptedException"); //NON-NLS
+                                scanLibrary.abort();
                             }
-                        };
-                        processBrowseFS.start();
-                        checkAbort();
-                        processBrowseFS.join();
-                    }
+                        }
+                    };
+                    processBrowseFS.start();
+                    checkAbort();
+                    processBrowseFS.join();
 
                     //Scan deleted files
                     //This will remove from db files not in filesystem
@@ -144,15 +135,13 @@ public class ServiceScan extends ServiceBase {
                     nbFiles = 0;
                     for (Track track : tracks) {
                         checkAbort();
-                        if (track.getPath().startsWith("content://")) {
-                            //FIXME: Remove from db if no more in MediaStore
-                        } else {
-                            File file = new File(track.getPath());
-                            if (!file.exists()) {
-                                Log.d(TAG, "Remove track from db: " + track); //NON-NLS
-                                track.delete();
-                            }
-                        }
+                        // FIXME: Remove from db if no more in MediaStore
+                        // (track.getPath() is an uriContent here)
+//                        File file = new File(track.getPath());
+//                        if (!file.exists()) {
+//                            Log.d(TAG, "Remove track from db: " + track); //NON-NLS
+//                            track.delete();
+//                        }
                         notifyScan(getString(R.string.serviceScanNotifyScanningDeleted), 200);
                     }
                 } catch (InterruptedException e) {
@@ -160,7 +149,7 @@ public class ServiceScan extends ServiceBase {
                 }
             }
 
-            private void browseMediaStore(File folder, Uri collection) throws InterruptedException {
+            private void browseMediaStore(Uri collection) throws InterruptedException {
                 String[] projection = {
                         MediaStore.Audio.Media.MIME_TYPE,
                         MediaStore.Audio.Media._ID,
@@ -174,6 +163,7 @@ public class ServiceScan extends ServiceBase {
                         collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_INTERNAL);
                     }
                 }
+                //FIXME: Restrict to /Music folder
                 String selection = MediaStore.Audio.Media.MIME_TYPE + " = ?";
                 String[] selectionArgs = new String[] {
                         MimeTypeMap.getSingleton().getMimeTypeFromExtension("mp3")
@@ -197,7 +187,7 @@ public class ServiceScan extends ServiceBase {
                     long id = cursor.getLong(idColumnId);
                     Uri contentUri = ContentUris.withAppendedId(collection, id);
                     long albumId=cursor.getLong(albumIdColumnId);
-                    HelperLibrary.musicLibrary.insertOrUpdateTrack(contentUri.toString(), folder,
+                    HelperLibrary.musicLibrary.insertOrUpdateTrack(contentUri.toString(),
                             getApplicationContext(), "MediaStore_" + albumId);
                     notifyScan(getString(R.string.scanNotifyScanning), 5);
                 }

@@ -13,7 +13,6 @@
     <string name="settingsKidsPlaceCheckBoxAllowEdition">Tillat endring av spor</string>
     <string name="settingsKidsPlaceCheckBoxOnStartup">Start Barnerommet med JaMuz</string>
     <string name="settingsLocalFilesTextViewPath">Sti:</string>
-    <string name="settingsLocalFilesButtonChoose">Velg</string>
     <string name="settingsDirectoryChooserButtonNewFolder">Ny mappe</string>
     <string name="settingsDirectoryChooserFailedToCreate">Klarte ikke å opprette</string>
     <string name="settingsDirectoryChooserFailedToCreateSuffix">mappe.</string>
@@ -104,8 +103,7 @@
     <string name="mainToastNotImplemented">Ikke implementert.</string>
     <string name="mainAlertDialogClosingApplicationTitle">Lukker JaMuz</string>
     <string name="mainAlertDialogClosingApplicationMessage">Stopp avspilling og avslutt programmet\?</string>
-    <string name="settingsLocalFilesTextViewHelp">Du kan legge til spor i biblioteket fra lokal sti.
-\nAdvarsel: Disse lokale sporene vil IKKE synkroniseres med JaMuz-tjeneren! Det anbefales sterkt å istedenfor bruke JaMuz-tjener for å hente sporene dine!</string>
+    <string name="settingsLocalFilesTextViewHelp">Advarsel: Disse lokale sporene vil IKKE synkroniseres med JaMuz-tjeneren! Det anbefales sterkt å istedenfor bruke JaMuz-tjener for å hente sporene dine!</string>
     <string name="serviceSyncNotifySyncReceivedGenres">Mottatte sjangere …</string>
     <string name="serviceSyncNotifySyncPreparingMerge">Forbereder fletting av statistikk.</string>
     <string name="serviceSyncNotifySyncRequestingMerge">Forespør fletting av statistikk.</string>

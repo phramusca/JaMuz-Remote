@@ -194,19 +194,11 @@ public class Track implements Serializable {
     /**
      * Creates a LOCAL track
      *
-     * @param rootPath Track root path.
      * @param absolutePath Track absolute path.
      */
-    public Track(File rootPath, String absolutePath, String idPath) {
+    public Track(String absolutePath, String idPath) {
         this.path = absolutePath;
         this.idPath = idPath;
-        if(!path.startsWith("content://")) {
-            try {
-                this.relativeFullPath = path.substring(rootPath.getAbsolutePath().length() + 1);
-            } catch (StringIndexOutOfBoundsException ex) {
-                Log.e(TAG, "Error getting relativeFullPath; path=" + path + ", getAppDataPath=" + rootPath, ex); //NON-NLS //NON-NLS
-            }
-        }
     }
 
     public boolean read(Context context) {
