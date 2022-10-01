@@ -2,15 +2,15 @@ package phramusca.com.jamuzremote;
 
 import android.content.ContentUris;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
-
-import androidx.annotation.RequiresApi;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -22,6 +22,7 @@ import java.util.List;
 public class ServiceScan extends ServiceBase {
 
     private static final String TAG = ServiceScan.class.getName();
+    private static final String MEDIA_STORE_VERSION = "mediaStoreVersion";
     private Notification notificationScan;
     private int nbFiles = 0;
     private int nbFilesTotal = 0;
@@ -29,10 +30,12 @@ public class ServiceScan extends ServiceBase {
     private ProcessAbstract processBrowseFS;
     private String userPath;
     private PowerManager.WakeLock wakeLock;
+    private SharedPreferences defaultSharedPreferences;
 
     @Override
     public void onCreate() {
         notificationScan = new Notification(this, NotificationId.get(), getString(R.string.scanTitle));
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         super.onCreate();
     }
 
@@ -48,10 +51,11 @@ public class ServiceScan extends ServiceBase {
         //FIXME: Change userPath with a boolean, once MediaStore tested on every android version
         userPath = intent.getStringExtra("userPath");
 
-        //https://developer.android.com/training/data-storage/shared/media#check-for-updates
-        //FIXME: No need to update library if no changes made
-
-        scanLibraryInThread();
+        String previousMediaStoreVersion = defaultSharedPreferences.getString(MEDIA_STORE_VERSION, "");
+        String mediaStoreVersion = MediaStore.getVersion(getApplicationContext());
+        if(!previousMediaStoreVersion.equals(mediaStoreVersion)) {
+            scanLibraryInThread();
+        }
         return START_REDELIVER_INTENT;
     }
 
@@ -64,7 +68,6 @@ public class ServiceScan extends ServiceBase {
 
     private void scanLibraryInThread() {
         new Thread() {
-            @RequiresApi(api = Build.VERSION_CODES.R)
             public void run() {
                 runOnUiThread(() -> helperNotification.notifyBar(notificationScan, getString(R.string.serviceScanNotifyCleaningDatabase)));
                 if (HelperLibrary.musicLibrary != null) {
@@ -74,8 +77,12 @@ public class ServiceScan extends ServiceBase {
                     File folder = new File(userPath);
                     scanFolder(folder);
                     waitScanFolder();
-                    RepoAlbums.reset();
 
+                    RepoAlbums.reset();
+                    SharedPreferences.Editor editor = defaultSharedPreferences.edit();
+                    String mediaStoreVersion = MediaStore.getVersion(getApplicationContext());
+                    editor.putString(MEDIA_STORE_VERSION, mediaStoreVersion);
+                    editor.apply();
                     //Scan complete, warn user
                     final String msg = getString(R.string.serviceScanNotifyDatabaseUpdated);
                     runOnUiThread(() -> {
@@ -192,7 +199,7 @@ public class ServiceScan extends ServiceBase {
                     long albumId=cursor.getLong(albumIdColumnId);
                     HelperLibrary.musicLibrary.insertOrUpdateTrack(contentUri.toString(), folder,
                             getApplicationContext(), "MediaStore_" + albumId);
-                    notifyScan(getString(R.string.scanNotifyScanning), 13);
+                    notifyScan(getString(R.string.scanNotifyScanning), 5);
                 }
                 cursor.close();
             }

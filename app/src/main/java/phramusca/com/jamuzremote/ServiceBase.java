@@ -4,8 +4,6 @@ package phramusca.com.jamuzremote;
   Created by raph on 10/06/17.
 */
 
-import static android.app.PendingIntent.FLAG_IMMUTABLE;
-
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -17,7 +15,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 
-import androidx.annotation.RequiresApi;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.File;
