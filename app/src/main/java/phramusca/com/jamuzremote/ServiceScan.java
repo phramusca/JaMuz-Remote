@@ -158,7 +158,8 @@ public class ServiceScan extends ServiceBase {
                         MediaStore.Audio.Media.MIME_TYPE,
                         MediaStore.Audio.Media._ID,
                         MediaStore.Audio.Media.ALBUM_ID,
-                        MediaStore.Audio.Media.DATE_ADDED
+                        MediaStore.Audio.Media.DATE_ADDED,
+                        MediaStore.Audio.Media.DATA
                 };
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     if (MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.equals(collection)) {
@@ -167,12 +168,12 @@ public class ServiceScan extends ServiceBase {
                         collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_INTERNAL);
                     }
                 }
-                //FIXME: Restrict to /Music folder
-                String selection = MediaStore.Audio.Media.MIME_TYPE + " = ?";
+                String selection = "(" + MediaStore.Audio.Media.MIME_TYPE + " = ? " +
+                        "OR " + MediaStore.Audio.Media.MIME_TYPE + " = ? )" +
+                        "AND "+ MediaStore.Audio.Media.DATA + " LIKE '%/Music/%' ";
                 String[] selectionArgs = new String[] {
-                        MimeTypeMap.getSingleton().getMimeTypeFromExtension("mp3")
-                        //FIXME: Add flac too
-                        //,MimeTypeMap.getSingleton().getMimeTypeFromExtension("flac")
+                        MimeTypeMap.getSingleton().getMimeTypeFromExtension("mp3"),
+                        MimeTypeMap.getSingleton().getMimeTypeFromExtension("flac")
                 };
                 String sortOrder = MediaStore.Audio.Media.DATE_ADDED + " DESC";
                 Cursor cursor = getApplicationContext().getContentResolver().query(
@@ -191,6 +192,8 @@ public class ServiceScan extends ServiceBase {
                     long id = cursor.getLong(idColumnId);
                     Uri contentUri = ContentUris.withAppendedId(collection, id);
                     long albumId=cursor.getLong(albumIdColumnId);
+                    //TODO: Use track metadata from MediaStore instead of reading file
+                    //Warning: not all fields are available depending on android version
                     HelperLibrary.musicLibrary.insertOrUpdateTrack(contentUri.toString(),
                             getApplicationContext(), "MediaStore_" + albumId);
                     notifyScan(getString(R.string.scanNotifyScanning), 1);
