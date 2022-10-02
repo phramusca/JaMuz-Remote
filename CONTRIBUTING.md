@@ -40,7 +40,7 @@ Please submit to the `master` branch.
 
 3. Tag last commit "vx.y.z" and push. This will trigger the [release github action](https://github.com/phramusca/JaMuz-Remote/actions/workflows/release.yml).
 
-4. Update created release with changes.
+4. Update [created release](https://github.com/phramusca/JaMuz-Remote/releases) with changes.
 
 5. [Edit gh-pages](https://github.com/phramusca/JaMuz/edit/gh-pages/index.md) with link to new release.
 
