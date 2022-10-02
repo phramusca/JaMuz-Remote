@@ -2,8 +2,6 @@
 
 By contributing to this project you agree to license your contribution under the terms of the [GNU GPLv3](LICENSE).
 
-[[__TOC__]]
-
 ## Issues
 
 [Open an issue](https://github.com/phramusca/JaMuz-Remote/issues?state=open) for anything you would like to see in JaMuz, but please check other issues first.
