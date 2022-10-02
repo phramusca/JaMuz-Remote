@@ -1564,15 +1564,17 @@ public class ActivityMain extends AppCompatActivity {
 
     private boolean play(Track track) {
         displayedTrack = track;
-        if (!displayedTrack.getPath().startsWith("content://")) {
-            File file = new File(displayedTrack.getPath());
-            if (!file.exists()) {
-                Log.d(TAG, "play(): " + displayedTrack); //NON-NLS
-                displayedTrack.delete();
-                return false;
-            }
+        boolean fileExists;
+        if (displayedTrack.getPath().startsWith("content://")) {
+            fileExists = HelperFile.checkUriExist(this, Uri.parse(displayedTrack.getPath()));
         } else {
-            //FIXME: Remove from db if no more in MediaStore
+            File file = new File(displayedTrack.getPath());
+            fileExists = file.exists();
+        }
+        if (!fileExists) {
+            Log.d(TAG, "play(): " + displayedTrack); //NON-NLS
+            displayedTrack.delete();
+            return false;
         }
         dimOn();
         localTrack = displayedTrack;

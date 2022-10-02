@@ -6,12 +6,19 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import androidx.documentfile.provider.DocumentFile;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,13 +146,11 @@ public class ServiceScan extends ServiceBase {
                     nbFiles = 0;
                     for (Track track : tracks) {
                         checkAbort();
-                        // FIXME: Remove from db if no more in MediaStore
-                        // (track.getPath() is an uriContent here)
-//                        File file = new File(track.getPath());
-//                        if (!file.exists()) {
-//                            Log.d(TAG, "Remove track from db: " + track); //NON-NLS
-//                            track.delete();
-//                        }
+                        Uri uriContent = Uri.parse(track.getPath());
+                        if (!HelperFile.checkUriExist(getApplicationContext(), uriContent)) {
+                            Log.d(TAG, "Remove track from db: " + track); //NON-NLS
+                            track.delete();
+                        }
                         notifyScan(getString(R.string.serviceScanNotifyScanningDeleted), 200);
                     }
                 } catch (InterruptedException e) {
