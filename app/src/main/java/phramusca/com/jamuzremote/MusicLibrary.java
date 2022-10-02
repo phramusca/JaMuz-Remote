@@ -649,25 +649,29 @@ public class MusicLibrary {
 
     Cursor getAlbums(String search) {
         Cursor cursor = null;
-        try {
-            String query = "SELECT status, count(" + COL_ID_REMOTE + ") AS " + COL_PLAY_COUNTER + ", \n" + //NON-NLS //NON-NLS //NON-NLS
-                    "round(avg(" + COL_RATING + "), 2) AS " + COL_RATING + ", \n" + //NON-NLS //NON-NLS //NON-NLS
-                    "group_concat(distinct " + COL_GENRE + ") AS " + COL_GENRE + ", \n" + //NON-NLS //NON-NLS //NON-NLS //NON-NLS
-                    "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + ", \n" + //NON-NLS //NON-NLS
-                    COL_ALBUM + ", " +COL_COVER_HASH + ", " + COL_PATH + ", " + COL_ID_PATH + " \n"+ //NON-NLS
-                    "FROM tracks \n" //NON-NLS
-                    + (search.isEmpty()?"":" WHERE (" + COL_ALBUM + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS //NON-NLS
-                        "OR " + COL_ARTIST + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS
-                        "OR " + COL_ALBUM_ARTIST + " LIKE \"%"+search+"%\" " + //NON-NLS
-                        "OR " + COL_TITLE + " LIKE \"%"+search+"%\") \n") + //NON-NLS
-                    "GROUP BY " + COL_ID_PATH + " \n" + //NON-NLS //NON-NLS
-                    "HAVING MIN(CASE status WHEN 'REC' THEN 1 WHEN 'LOCAL' THEN 2 ELSE 3 END) \n" +
-                    "ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, " + COL_ALBUM + ", " + COL_ARTIST; //NON-NLS
-            Log.i(TAG, query);
-            cursor = db.rawQuery(query, new String[]{}); //NON-NLS
-            Log.i(TAG, "getAlbums(): " + cursor.getCount()); //NON-NLS //NON-NLS
-        } catch (SQLiteException | IllegalStateException ex) { //NON-NLS
-            Log.e(TAG, "getAlbums()", ex); //NON-NLS
+        ArrayList<Track.Status> statuses = ActivityMain.getScope(true);
+        if(statuses.size()>0) {
+            try {
+                String query = "SELECT status, count(" + COL_ID_REMOTE + ") AS " + COL_PLAY_COUNTER + ", \n" + //NON-NLS //NON-NLS //NON-NLS
+                        "round(avg(" + COL_RATING + "), 2) AS " + COL_RATING + ", \n" + //NON-NLS //NON-NLS //NON-NLS
+                        "group_concat(distinct " + COL_GENRE + ") AS " + COL_GENRE + ", \n" + //NON-NLS //NON-NLS //NON-NLS //NON-NLS
+                        "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + ", \n" + //NON-NLS //NON-NLS
+                        COL_ALBUM + ", " +COL_COVER_HASH + ", " + COL_PATH + ", " + COL_ID_PATH + " \n"+ //NON-NLS
+                        "FROM tracks \n" //NON-NLS
+                        + (search.isEmpty()?"":" WHERE (" + COL_ALBUM + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS //NON-NLS
+                            "OR " + COL_ARTIST + " LIKE \"%"+search+"%\" " + //NON-NLS //NON-NLS
+                            "OR " + COL_ALBUM_ARTIST + " LIKE \"%"+search+"%\" " + //NON-NLS
+                            "OR " + COL_TITLE + " LIKE \"%"+search+"%\") \n") + //NON-NLS
+                        " WHERE " + Playlist.getWhereStatus(statuses) +
+                        " GROUP BY " + COL_ID_PATH + " \n" + //NON-NLS //NON-NLS
+                        " HAVING MIN(CASE status WHEN 'REC' THEN 1 WHEN 'LOCAL' THEN 2 ELSE 3 END) \n" +
+                        " ORDER BY " + COL_RATING + " DESC, " + COL_PLAY_COUNTER + " DESC, " + COL_ALBUM + ", " + COL_ARTIST; //NON-NLS
+                Log.i(TAG, query);
+                cursor = db.rawQuery(query, new String[]{}); //NON-NLS
+                Log.i(TAG, "getAlbums(): " + cursor.getCount()); //NON-NLS //NON-NLS
+            } catch (SQLiteException | IllegalStateException ex) { //NON-NLS
+                Log.e(TAG, "getAlbums()", ex); //NON-NLS
+            }
         }
         return cursor;
     }

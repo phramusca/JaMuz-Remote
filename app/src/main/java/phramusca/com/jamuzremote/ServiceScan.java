@@ -193,7 +193,7 @@ public class ServiceScan extends ServiceBase {
                     long albumId=cursor.getLong(albumIdColumnId);
                     HelperLibrary.musicLibrary.insertOrUpdateTrack(contentUri.toString(),
                             getApplicationContext(), "MediaStore_" + albumId);
-                    notifyScan(getString(R.string.scanNotifyScanning), 5);
+                    notifyScan(getString(R.string.scanNotifyScanning), 1);
                 }
                 cursor.close();
             }

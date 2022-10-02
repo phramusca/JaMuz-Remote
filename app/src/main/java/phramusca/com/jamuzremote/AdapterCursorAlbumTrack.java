@@ -24,7 +24,7 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
     private final String searchQuery;
 
     public AdapterCursorAlbumTrack(Context context, Cursor cursor, String searchQuery) {
-        super(context, cursor);
+        super(cursor);
         this.searchQuery = searchQuery;
         newStatuses = new HashMap<>();
     }

@@ -61,15 +61,10 @@ public class Playlist implements Comparable, Serializable {
 
     public Cursor getTracks() {
         if(HelperLibrary.musicLibrary!=null) {
-            return HelperLibrary.musicLibrary.getTracksCursor(false, getWhere(new ArrayList<>(), new ArrayList<Track.Status>() {
-                {
-                    add(Track.Status.REC);
-                    add(Track.Status.LOCAL);
-                    add(Track.Status.INFO);
-                    add(Track.Status.NEW);
-                    add(Track.Status.ERROR);
-                }
-            }), getHaving(), order.value, -1);
+            return HelperLibrary.musicLibrary.getTracksCursor(
+                    false,
+                    getWhere(new ArrayList<>(), ActivityMain.getScope(true)),
+                    getHaving(), order.value, -1);
         }
         return null;
     }
@@ -77,12 +72,7 @@ public class Playlist implements Comparable, Serializable {
     public void getNbFiles() {
         if (HelperLibrary.musicLibrary != null) {
             Triplet<Integer, Long, Long> entry = HelperLibrary.musicLibrary.getNb(
-                    getWhere(new ArrayList<>(), new ArrayList<Track.Status>() {
-                        {
-                            add(Track.Status.REC);
-                            add(Track.Status.LOCAL);
-                        }
-                    }), getHaving());
+                    getWhere(new ArrayList<>(), ActivityMain.getScope()), getHaving());
             nbFiles = entry.getFirst();
             //TODO: Offer choice to display one or the other (length OR size) OR both
             /*lengthOrSize = StringManager.humanReadableByteCount(entry.getSecond(), false);*/
@@ -301,12 +291,24 @@ public class Playlist implements Comparable, Serializable {
         modified = true;
     }
 
-    private String getWhere(List<Integer> excluded, List<Track.Status> statuses) {
+    public static String getWhereStatus(List<Track.Status> statuses) {
         ArrayList<String> statusString = new ArrayList<>();
         for(Track.Status status : statuses) {
             statusString.add(status.name());
         }
-        String in = " WHERE " + COL_STATUS + " IN ( " + getInClause(statusString) + " )" + //NON-NLS
+        return COL_STATUS + " IN ( " + getInClause(statusString) + " )"; //NON-NLS
+    }
+
+    private String getWhere(List<Integer> excluded, List<Track.Status> statuses) {
+        if(statuses.size()<=0) {
+            return " WHERE 0 ";
+        }
+
+        ArrayList<String> statusString = new ArrayList<>();
+        for(Track.Status status : statuses) {
+            statusString.add(status.name());
+        }
+        String in = " WHERE " + getWhereStatus(statuses) + //NON-NLS
                 " AND rating " + getRatingString() + " "; //NON-NLS
 
         if (limitValue > 0) {
@@ -399,7 +401,7 @@ public class Playlist implements Comparable, Serializable {
         return builder.toString();
     }
 
-    private String getInClause(ArrayList<String> include) {
+    private static String getInClause(ArrayList<String> include) {
         StringBuilder in = new StringBuilder();
         for (String entry : include) {
             in.append("\"").append(entry).append("\",");

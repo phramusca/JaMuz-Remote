@@ -57,7 +57,7 @@ public class ActivityAlbums extends AppCompatActivity {
     private String searchQuery="";
 
     private void setupList(Cursor cursor) {
-        AdapterCursorAlbum adapterCursorAlbum = new AdapterCursorAlbum(getApplicationContext(), cursor);
+        AdapterCursorAlbum adapterCursorAlbum = new AdapterCursorAlbum(cursor);
         recyclerView.setAdapter(adapterCursorAlbum);
         adapterCursorAlbum.addListener(adapterListItemAlbum -> {
             //Open album tracks layout

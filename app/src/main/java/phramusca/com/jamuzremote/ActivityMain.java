@@ -926,6 +926,28 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
+    static ArrayList<Track.Status> getScope() {
+        return getScope(false);
+    }
+
+    static ArrayList<Track.Status> getScope(boolean getAll) {
+        ArrayList<Track.Status> statuses = new ArrayList<>();
+        boolean displayServer = preferences.getBoolean("displayServer", true);
+        boolean displayMediaStore = preferences.getBoolean("displayMediaStore", true);
+        if(displayServer) {
+            statuses.add(Track.Status.REC);
+        }
+        if(displayMediaStore) {
+            statuses.add(Track.Status.LOCAL);
+            if(getAll) {
+                statuses.add(Track.Status.INFO);
+                statuses.add(Track.Status.NEW);
+                statuses.add(Track.Status.ERROR);
+            }
+        }
+        return statuses;
+    }
+
     private void applyPlaylist(Playlist playlist, boolean playNext) {
         dimOn();
         if (isRemoteConnected()) {
@@ -934,12 +956,7 @@ public class ActivityMain extends AppCompatActivity {
             displayPlaylist(playlist);
             localSelectedPlaylist = playlist;
             if (playNext) {
-                PlayQueue.queue.setQueue(playlist.getTracks(10, new ArrayList<Track.Status>() {
-                    {
-                        add(Track.Status.REC);
-                        add(Track.Status.LOCAL);
-                    }
-                }));
+                PlayQueue.queue.setQueue(playlist.getTracks(10, getScope()));
                 playNext();
             } else {
                 refreshQueueAndPlaylistSpinner();
