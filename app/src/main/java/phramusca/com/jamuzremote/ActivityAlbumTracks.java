@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
@@ -26,7 +25,6 @@ import okhttp3.OkHttpClient;
 
 public class ActivityAlbumTracks extends AppCompatActivity {
 
-    private static final String TAG = ActivityAlbumTracks.class.getName();
     AdapterCursorAlbumTrack adapterCursorAlbumTrack;
 
     @Override
@@ -130,8 +128,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                     mNotifyManager);
             HelperToast helperToast = new HelperToast(getApplicationContext());
             ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
-            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-              processDownload = new DownloadProcess(
+            processDownload = new DownloadProcess(
                       "ActivityAlbumTracks.ProcessDownload",
                       newTracks,
                       getApplicationContext(),
@@ -172,8 +169,6 @@ public class ActivityAlbumTracks extends AppCompatActivity {
     }
 
     private void updateStatus(Track track, String msg, int position) {
-        runOnUiThread(() -> {
-            adapterCursorAlbumTrack.updateStatus(track.getStatus(), position, msg);
-        });
+        runOnUiThread(() -> adapterCursorAlbumTrack.updateStatus(track.getStatus(), position, msg));
     }
 }

@@ -81,12 +81,12 @@
     <string name="syncLabelConnecting">Connecting…</string>
     <string name="queueItemCoverDescription">Cover</string>
     <string name="permissionTitle">Warning!</string>
-    <string name="permissionMsg_1">For a full JaMuz experience</string>
-    <string name="permissionMsg_2">, please consider allowing permissions that you will be asked for:</string>
-    <string name="permissionMsg_3">Multimedia files</string>
-    <string name="permissionMsg_10" tools:ignore="MissingTranslation">To read tracks from Android MediaStore</string>
-    <string name="permissionMsg_8">Phone calls</string>
-    <string name="permissionMsg_9">To pause and resume audio during phone calls.</string>
+    <string name="permissionMsg_01">For a full JaMuz experience</string>
+    <string name="permissionMsg_02">, please consider allowing permissions that you will be asked for:</string>
+    <string name="permissionMsg_11">Multimedia files</string>
+    <string name="permissionMsg_12" tools:ignore="MissingTranslation">To read tracks from Android MediaStore</string>
+    <string name="permissionMsg_21">Phone calls</string>
+    <string name="permissionMsg_22">To pause and resume audio during phone calls.</string>
     <string name="contentAlbumsTitle">Albums</string>
     <string name="contentQueueTitle">Play Queue</string>
     <string name="contentAlbumTracksTitle">Album Tracks</string>

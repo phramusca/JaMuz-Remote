@@ -37,7 +37,7 @@ public class DownloadProcess extends ProcessAbstract {
     protected HelperToast helperToast;
     private final OkHttpClient clientDownload;
     private final IListenerSyncDown callback;
-    private WifiManager.WifiLock wifiLock;
+    private final WifiManager.WifiLock wifiLock;
 
     DownloadProcess(String name, Map<Track, Integer> newTracks, Context context, HelperNotification helperNotification, ClientInfo clientInfo, OkHttpClient clientDownload, String title, IListenerSyncDown callback, WifiManager.WifiLock wifiLock) {
         super(name);

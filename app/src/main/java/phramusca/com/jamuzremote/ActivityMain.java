@@ -1889,11 +1889,11 @@ public class ActivityMain extends AppCompatActivity {
 
     public void checkPermissionsThenScanLibrary() {
         if (!hasPermissions(this, PERMISSIONS)) {
-            String msgStr = "<html><b>" + getString(R.string.permissionMsg_1) + "</b>" + getString(R.string.permissionMsg_2)
+            String msgStr = "<html><b>" + getString(R.string.permissionMsg_01) + "</b>" + getString(R.string.permissionMsg_02)
                     + "<BR/><BR/>"
-                    + "<i>- <u>" + getString(R.string.permissionMsg_3) + "</u></i>: " + getString(R.string.permissionMsg_10)
+                    + "<i>- <u>" + getString(R.string.permissionMsg_11) + "</u></i>: " + getString(R.string.permissionMsg_12)
                     + "<BR/>"
-                    + "<i>- <u>" + getString(R.string.permissionMsg_8) + "</u></i>: " + getString(R.string.permissionMsg_9)
+                    + "<i>- <u>" + getString(R.string.permissionMsg_21) + "</u></i>: " + getString(R.string.permissionMsg_22)
                     + "</html>";
 
             AlertDialog alertDialog = new AlertDialog.Builder(ActivityMain.this).create();
