@@ -1,6 +1,5 @@
 package phramusca.com.jamuzremote;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.Handler;

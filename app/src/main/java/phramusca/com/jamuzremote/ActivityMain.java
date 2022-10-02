@@ -939,14 +939,14 @@ public class ActivityMain extends AppCompatActivity {
         boolean displayMediaStore = preferences.getBoolean("displayMediaStore", true);
         if(displayServer) {
             statuses.add(Track.Status.REC);
-        }
-        if(displayMediaStore) {
-            statuses.add(Track.Status.LOCAL);
             if(getAll) {
                 statuses.add(Track.Status.INFO);
                 statuses.add(Track.Status.NEW);
                 statuses.add(Track.Status.ERROR);
             }
+        }
+        if(displayMediaStore) {
+            statuses.add(Track.Status.LOCAL);
         }
         return statuses;
     }
