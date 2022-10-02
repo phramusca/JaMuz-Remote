@@ -38,7 +38,7 @@ Please submit to the `master` branch.
 
     - [About versioning](https://developer.android.com/studio/publish/versioning): "Typically, you would release the first version of your app with `versionCode` set to 1, then monotonically increase the value with each release, regardless of whether the release constitutes a major or minor release"
 
-3. Tag last commit "vx.y.z" and push. This will trigger the release github action.
+3. Tag last commit "vx.y.z" and push. This will trigger the [release github action](https://github.com/phramusca/JaMuz-Remote/actions/workflows/release.yml).
 
 4. Update created release with changes.
 
