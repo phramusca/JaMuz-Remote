@@ -72,7 +72,7 @@
         <activity android:name=".ActivityAlbumTracks" />
         <activity android:name=".ActivitySettings" />
         <activity
-            android:name=".CaptureActivityPortrait"
+            android:name=".ActivityCapturePortrait"
             android:screenOrientation="sensorPortrait"
             tools:ignore="LockedOrientationActivity"
             android:stateNotNeeded="true"

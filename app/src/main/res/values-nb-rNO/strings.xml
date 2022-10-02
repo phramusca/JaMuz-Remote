@@ -42,11 +42,10 @@
     <string name="queueItemCoverDescription">Omslag</string>
     <string name="permissionTitle">Advarsel!</string>
     <string name="permissionMsg_1">For en helhetlig JaMuz-opplevelse</string>
-    <string name="permissionMsg_6">- Lese kun brukervalgt mappe på eksternt SD-kort.</string>
-    <string name="permissionMsg_5">- Skrive filer fra JaMuz til en programmappe på eksternt SD-kort</string>
-    <string name="permissionMsg_7">- Lagre database i JaMuz-mappe på internt SD-kort</string>
+    <string name="permissionMsg_2">kan du overveie å tillate tilganger det spørres om:</string>
+    <string name="permissionMsg_3">Multimediafiler</string>
     <string name="permissionMsg_8">Telefonsamtaler</string>
-    <string name="permissionMsg_9">: For å kunne pause og fortsette lyd under telefonsamtaler.</string>
+    <string name="permissionMsg_9">For å kunne pause og fortsette lyd under telefonsamtaler.</string>
     <string name="contentAlbumsTitle">Album</string>
     <string name="contentAlbumTracksTitle">Albumspor</string>
     <string name="contentQueueTitle">Spill kø</string>
@@ -77,9 +76,7 @@
     <string name="speakRatingIncorrect">uriktig.</string>
     <string name="settingsDirectoryChooserNewFolderName">Nytt mappenavn</string>
     <string name="speakRating">Vurdering</string>
-    <string name="permissionMsg_2">kan du overveie å tillate tilganger det spørres om:</string>
-    <string name="permissionMsg_3">Multimediafiler</string>
-    <string name="permissionMsg_4">: Tillater programmet å:</string>
+
     <string name="serviceSyncNotifyDownloadTitle">Last ned</string>
     <string name="serviceSyncNotifySyncComplete">Fullført.</string>
     <string name="serviceSyncNotifySyncTitle">Synk.</string>

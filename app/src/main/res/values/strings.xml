@@ -84,12 +84,9 @@
     <string name="permissionMsg_1">For a full JaMuz experience</string>
     <string name="permissionMsg_2">, please consider allowing permissions that you will be asked for:</string>
     <string name="permissionMsg_3">Multimedia files</string>
-    <string name="permissionMsg_4">: Allows the app to:</string>
-    <string name="permissionMsg_5">- Write files received from JaMuz Server on an external SD card (in an application dedicated folder).</string>
-    <string name="permissionMsg_6">- Read-only user selected folder on an external SD card.</string>
-    <string name="permissionMsg_7">- Store database in JaMuz folder on the internal SD card</string>
+    <string name="permissionMsg_10" tools:ignore="MissingTranslation">To read tracks from Android MediaStore</string>
     <string name="permissionMsg_8">Phone calls</string>
-    <string name="permissionMsg_9">: To pause and resume audio during phone calls.</string>
+    <string name="permissionMsg_9">To pause and resume audio during phone calls.</string>
     <string name="contentAlbumsTitle">Albums</string>
     <string name="contentQueueTitle">Play Queue</string>
     <string name="contentAlbumTracksTitle">Album Tracks</string>
@@ -219,4 +216,5 @@
     <string name="settingsCheckBoxDisplayServer" tools:ignore="MissingTranslation">Display files from JaMuz Server</string>
     <string name="settingsCheckBoxDisplayMediaStore" tools:ignore="MissingTranslation">Display files from Android MediaStore</string>
     <string name="qrScanPromptMessage" tools:ignore="MissingTranslation">Thank you to scan QR code displayed in JaMuz Server (Server tab) to get connection information.</string>
+
 </resources>

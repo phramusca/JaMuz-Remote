@@ -97,6 +97,9 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
+//TODO: Use auto backup for database and playlists
+//https://developer.android.com/guide/topics/data/backup
+
 // TODO: Move audio to a service
 // Why not using the standard android player by the way ? (less control for replaygain ?)
 public class ActivityMain extends AppCompatActivity {
@@ -1884,18 +1887,11 @@ public class ActivityMain extends AppCompatActivity {
 
     public void checkPermissionsThenScanLibrary() {
         if (!hasPermissions(this, PERMISSIONS)) {
-//FIXME: Adjust message
             String msgStr = "<html><b>" + getString(R.string.permissionMsg_1) + "</b>" + getString(R.string.permissionMsg_2)
-                    + "<BR/><BR/>" +
-                    "<i>- <u>" + getString(R.string.permissionMsg_3) + "</u></i> " + getString(R.string.permissionMsg_4) //NON-NLS //NON-NLS //NON-NLS
-                    + "<BR/> " + //NON-NLS
-                    getString(R.string.permissionMsg_5) + " (\"" + HelperFile.getAudioRootFolder() + "\")."
-                    + "<BR/>" +
-                    getString(R.string.permissionMsg_6)
-                    + "<BR/>" +
-                    getString(R.string.permissionMsg_7) + " (\"" + musicLibraryDbFile.getAbsolutePath() + "\")."
-                    + "<BR/><BR/>" +
-                    "<i>- <u>" + getString(R.string.permissionMsg_8) + "</u></i> " + getString(R.string.permissionMsg_9) //NON-NLS //NON-NLS
+                    + "<BR/><BR/>"
+                    + "<i>- <u>" + getString(R.string.permissionMsg_3) + "</u></i>: " + getString(R.string.permissionMsg_10)
+                    + "<BR/>"
+                    + "<i>- <u>" + getString(R.string.permissionMsg_8) + "</u></i>: " + getString(R.string.permissionMsg_9)
                     + "</html>";
 
             AlertDialog alertDialog = new AlertDialog.Builder(ActivityMain.this).create();
