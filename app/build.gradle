@@ -6,9 +6,9 @@ android {
     defaultConfig {
         applicationId "org.phramusca.jamuz"
         minSdkVersion 21
-        targetSdkVersion 33 //FIXME: Test this version in emulator
-        versionCode 7
-        versionName "0.5.6-dev"
+        targetSdkVersion 33
+        versionCode 8
+        versionName "0.6.0"
     }
     buildTypes {
         release {
