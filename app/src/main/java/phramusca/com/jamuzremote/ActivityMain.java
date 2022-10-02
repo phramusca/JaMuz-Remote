@@ -1881,13 +1881,23 @@ public class ActivityMain extends AppCompatActivity {
 
     private static final int REQUEST = 112;
 
-    private final String[] PERMISSIONS = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.PROCESS_OUTGOING_CALLS
-    };
+    private String[] PERMISSIONS;
 
     public void checkPermissionsThenScanLibrary() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            PERMISSIONS = new String[]{
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.PROCESS_OUTGOING_CALLS
+            };
+        } else {
+            PERMISSIONS = new String[]{
+                    Manifest.permission.READ_MEDIA_AUDIO,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                    Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.PROCESS_OUTGOING_CALLS
+            };
+        }
         if (!hasPermissions(this, PERMISSIONS)) {
             String msgStr = "<html><b>" + getString(R.string.permissionMsg_01) + "</b>" + getString(R.string.permissionMsg_02)
                     + "<BR/><BR/>"
