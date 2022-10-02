@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -117,11 +118,15 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                     .readTimeout(60, TimeUnit.SECONDS)
                     .build();
             NotificationManager mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                flags  = flags | PendingIntent.FLAG_MUTABLE;
+            }
             HelperNotification helperNotification = new HelperNotification(
                     PendingIntent.getActivity(getApplicationContext(),
                             1,
                             getIntent(),
-                            PendingIntent.FLAG_UPDATE_CURRENT),
+                            flags),
                     mNotifyManager);
             HelperToast helperToast = new HelperToast(getApplicationContext());
             ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);

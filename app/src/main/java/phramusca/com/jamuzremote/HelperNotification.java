@@ -1,7 +1,9 @@
 package phramusca.com.jamuzremote;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.os.Build;
 import android.os.CountDownTimer;
 import android.util.Log;
 
@@ -21,6 +23,12 @@ public class HelperNotification {
     HelperNotification(PendingIntent pendingIntent, NotificationManager notificationManager) {
         this.pendingIntent = pendingIntent;
         this.notificationManager = notificationManager;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            NotificationChannel channel1 = new
+                    NotificationChannel("MyNotificationChannelId", "Channel(1)", NotificationManager.IMPORTANCE_LOW);
+            channel1.setDescription("Channel 1 Dec..");
+            notificationManager.createNotificationChannel(channel1);
+        }
     }
 
     //Ends a notification

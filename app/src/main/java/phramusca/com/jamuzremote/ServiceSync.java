@@ -161,7 +161,6 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncInterrupted));
             } catch (Exception e) {
                 Log.e(TAG, "Error ProcessSync", e); //NON-NLS
-                //FIXME: Notifications are not displayed in android 11 (api 30)   [and above ?]
                 helperNotification.notifyBar(notificationSync, "ERROR: " + e.getLocalizedMessage(), 0, 0, false, //NON-NLS
                         true, false, "ERROR: " + e.getLocalizedMessage()); //NON-NLS
             }
