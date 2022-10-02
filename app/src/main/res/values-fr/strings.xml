@@ -218,4 +218,5 @@
     <string name="settingsLocalFilesButtonRefresh">Actualiser</string>
     <string name="settingsCheckBoxDisplayServer">Afficher les pistes de JaMuz Server</string>
     <string name="settingsCheckBoxDisplayMediaStore">Afficher les pistes du MediaStore Android</string>
+    <string name="qrScanPromptMessage">Merci de scanner le QR code affiché par JaMuz Server (onglet Serveur) pour récupérer les informations de connexion.</string>
 </resources>

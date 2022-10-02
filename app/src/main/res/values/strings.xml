@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--TODO: Remove all tools:ignore="MissingTranslation" annotations when all languages translated with WebLate-->
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="mainWelcomeTitle">Welcome to</string>
     <string name="applicationName" translatable="false">JaMuz</string>
@@ -217,4 +218,5 @@
     <string name="settingsLocalFilesButtonRefresh" tools:ignore="MissingTranslation">Refresh</string>
     <string name="settingsCheckBoxDisplayServer" tools:ignore="MissingTranslation">Display files from JaMuz Server</string>
     <string name="settingsCheckBoxDisplayMediaStore" tools:ignore="MissingTranslation">Display files from Android MediaStore</string>
+    <string name="qrScanPromptMessage" tools:ignore="MissingTranslation">Thank you to scan QR code displayed in JaMuz Server (Server tab) to get connection information.</string>
 </resources>

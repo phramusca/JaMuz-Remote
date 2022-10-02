@@ -37,6 +37,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.google.android:flexbox:0.3.0'
 
     implementation 'com.google.code.gson:gson:2.8.6'
     // DO NOT UPDATE guava unless changing sourceCompatibility 1.8
@@ -44,8 +45,11 @@ dependencies {
     implementation 'com.google.guava:guava:23.3-android'
     //https://stackoverflow.com/questions/56639529/duplicate-class-com-google-common-util-concurrent-listenablefuture-found-in-modu
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
-    implementation 'com.google.android:flexbox:0.3.0'
-    implementation 'com.journeyapps:zxing-android-embedded:3.6.0' //QR Code
+
+    //QR Code
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
+    implementation 'com.google.zxing:core:3.3.2'
+
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.3.Final'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     implementation 'com.athkalia.emphasis:emphasis:0.4'

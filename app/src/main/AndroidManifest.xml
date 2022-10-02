@@ -71,7 +71,13 @@
         <activity android:name=".ActivityAlbums" />
         <activity android:name=".ActivityAlbumTracks" />
         <activity android:name=".ActivitySettings" />
-        <activity android:name="net.rdrei.android.dirchooser.DirectoryChooserActivity" />
+        <activity
+            android:name=".CaptureActivityPortrait"
+            android:screenOrientation="sensorPortrait"
+            tools:ignore="LockedOrientationActivity"
+            android:stateNotNeeded="true"
+            android:theme="@style/zxing_CaptureTheme"
+            android:windowSoftInputMode="stateAlwaysHidden" />
     </application>
 
 </manifest>
