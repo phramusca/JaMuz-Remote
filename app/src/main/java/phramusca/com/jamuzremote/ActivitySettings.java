@@ -55,6 +55,9 @@ public class ActivitySettings extends AppCompatActivity {
 
         qrScan = new IntentIntegrator(this);
         qrScan.setRequestCode(QR_REQUEST_CODE);
+        qrScan.setOrientationLocked(true);
+        qrScan.setPrompt(getString(R.string.qrScanPromptMessage));
+        qrScan.setCaptureActivity(CaptureActivityPortrait.class);
         Button button_scan_QR = findViewById(R.id.button_scan_QR);
         button_scan_QR.setOnClickListener(view ->
                 qrScan.initiateScan()
