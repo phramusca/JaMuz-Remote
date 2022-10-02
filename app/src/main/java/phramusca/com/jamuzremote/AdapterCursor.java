@@ -17,7 +17,6 @@
 
 package phramusca.com.jamuzremote;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 
@@ -31,14 +30,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public abstract class AdapterCursor<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
-    private final Context mContext;
     private Cursor mCursor;
     private boolean mDataValid;
     private int mRowIdColumn;
     private final DataSetObserver mDataSetObserver;
 
-    public AdapterCursor(Context context, Cursor cursor) {
-        mContext = context;
+    public AdapterCursor(Cursor cursor) {
         mCursor = cursor;
         mDataValid = cursor != null;
         mRowIdColumn = mDataValid ? mCursor.getColumnIndex("_id") : -1; //NON-NLS
@@ -87,24 +84,11 @@ public abstract class AdapterCursor<VH extends RecyclerView.ViewHolder> extends 
     }
 
     /**
-     * Change the underlying cursor to a new cursor. If there is an existing cursor it will be
-     * closed.
+     * Swap in a new Cursor, returning the old Cursor.
      */
-    public void changeCursor(Cursor cursor) {
-        Cursor old = swapCursor(cursor);
-        if (old != null) {
-            old.close();
-        }
-    }
-
-    /**
-     * Swap in a new Cursor, returning the old Cursor.  Unlike
-     * {@link #changeCursor(Cursor)}, the returned old Cursor is <em>not</em>
-     * closed.
-     */
-    public Cursor swapCursor(Cursor newCursor) {
+    public void swapCursor(Cursor newCursor) {
         if (newCursor == mCursor) {
-            return null;
+            return;
         }
         final Cursor oldCursor = mCursor;
         if (oldCursor != null && mDataSetObserver != null) {
@@ -125,7 +109,6 @@ public abstract class AdapterCursor<VH extends RecyclerView.ViewHolder> extends 
             notifyDataSetChanged();
             //There is no notifyDataSetInvalidated() method in RecyclerView.Adapter
         }
-        return oldCursor;
     }
 
     private class NotifyingDataSetObserver extends DataSetObserver {

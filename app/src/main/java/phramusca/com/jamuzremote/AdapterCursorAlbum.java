@@ -20,8 +20,8 @@ public class AdapterCursorAlbum extends AdapterCursor<AdapterLoad.UserViewHolder
 
     private ViewGroup parent;
 
-    public AdapterCursorAlbum(Context context, Cursor cursor) {
-        super(context, cursor);
+    public AdapterCursorAlbum(Cursor cursor) {
+        super(cursor);
         oriCursor = cursor;
     }
 

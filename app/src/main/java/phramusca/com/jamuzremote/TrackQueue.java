@@ -8,7 +8,6 @@ import java.util.List;
 public class TrackQueue extends TrackList {
 
     private static final String TAG = TrackQueue.class.getName();
-
     private static final int MAX_QUEUE_PREVIOUS = 5;
     private static final int MAX_QUEUE_NEXT = 10;
 
@@ -27,12 +26,7 @@ public class TrackQueue extends TrackList {
     }
 
     synchronized int insert(Playlist playlist) {
-        List<Track> playlistTracks = playlist.getTracks(new ArrayList<Track.Status>() {
-            {
-                add(Track.Status.REC);
-                add(Track.Status.LOCAL);
-            }
-        });
+        List<Track> playlistTracks = playlist.getTracks(ActivityMain.getScope());
         for (Track track : playlistTracks) {
             track.setLocked(true);
         }
@@ -56,12 +50,7 @@ public class TrackQueue extends TrackList {
     private synchronized List<Track> add(List<Integer> excluded, Playlist playlist) {
         List<Track> addToTracks = new ArrayList<>();
         if (playlist != null) {// && nbTracksAfterPlaying<MAX_QUEUE_NEXT+1 ) {
-            addToTracks = playlist.getTracks(MAX_QUEUE_NEXT, excluded, new ArrayList<Track.Status>() {
-                {
-                    add(Track.Status.REC);
-                    add(Track.Status.LOCAL);
-                }
-            });
+            addToTracks = playlist.getTracks(MAX_QUEUE_NEXT, excluded, ActivityMain.getScope());
             tracks.addAll(addToTracks);
         }
         return addToTracks;
