@@ -1,7 +1,12 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
+import android.net.Uri;
+import android.os.Build;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
+
+import androidx.documentfile.provider.DocumentFile;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -100,6 +105,21 @@ public final class HelperFile {
     static void delete(String filename, String... folders) {
         //noinspection ResultOfMethodCallIgnored
         getFile(filename, folders).delete();
+    }
+
+    static boolean checkUriExist(Context context, Uri uri) {
+        if (Build.VERSION.SDK_INT >= 29) {
+            DocumentFile docFile = DocumentFile.fromSingleUri(context, uri);
+            return docFile!=null && docFile.exists();
+        }
+        else {
+            try (ParcelFileDescriptor ignored
+                         = context.getContentResolver().openFileDescriptor(uri, "r")) {
+                return true;
+            } catch (IOException e) {
+                return false;
+            }
+        }
     }
 
     //Writes to internal memory application folder. File is removed when application is uninstalled
