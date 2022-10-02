@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
@@ -573,9 +574,12 @@ public class Track implements Serializable {
     }
 
     public static Bitmap readCover(String path) {
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(path);
-        return readCover(mmr);
+        if(new File(path).exists()) {
+            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(path);
+            return readCover(mmr);
+        }
+        return null;
     }
 
     //TODO: Do not update all, only requested fields
