@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Objects;
 
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -42,7 +43,7 @@ public class ClientInfo implements Serializable {
     }
 
     public HttpUrl.Builder getUrlBuilder(String url) {
-        return HttpUrl.parse("http://" + getAddress() + ":" + (getPort() + 1) + "/" + url).newBuilder(); //NON-NLS
+        return Objects.requireNonNull(HttpUrl.parse("http://" + getAddress() + ":" + (getPort() + 1) + "/" + url)).newBuilder(); //NON-NLS
     }
 
     public Request.Builder getRequestBuilder(HttpUrl.Builder urlBuilder) {
@@ -73,12 +74,10 @@ public class ClientInfo implements Serializable {
     private ResponseBody getBody(Request request, OkHttpClient client) throws IOException, ServiceSync.ServerException {
         Response response = client.newCall(request).execute();
         if (!response.isSuccessful()) {
-            switch (response.code()) {
-                case 301:
-                    throw new ServiceSync.ServerException(request.header("api-version") + " not supported. " + response.body().string()); //NON-NLS
-                default:
-                    throw new ServiceSync.ServerException(response.code() + ": " + response.message());
+            if (response.code() == 301) {
+                throw new ServiceSync.ServerException(request.header("api-version") + " not supported. " + Objects.requireNonNull(response.body()).string()); //NON-NLS
             }
+            throw new ServiceSync.ServerException(response.code() + ": " + response.message());
         }
         return response.body();
     }
@@ -107,7 +106,7 @@ public class ClientInfo implements Serializable {
             jsonObject.put("canal", canal); //NON-NLS
             jsonObject.put("appId", appId);
             jsonObject.put("rootPath", rootPath);
-        } catch (JSONException e) {
+        } catch (JSONException ignored) {
         }
         return jsonObject;
     }
