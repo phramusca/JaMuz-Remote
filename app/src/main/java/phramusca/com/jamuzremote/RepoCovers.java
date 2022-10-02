@@ -50,14 +50,14 @@
       * @return The cover icon.
       */
      public static Bitmap getCoverIcon(String coverHash, String path, IconSize iconSize, boolean readIfNotFound) {
-         Bitmap icon;
+         Bitmap icon = null;
          icon = readIconFromCache(coverHash, iconSize);
          if (icon != null) {
              return icon;
          }
-         if (readIfNotFound) {
-            Bitmap trackCover = Track.readCover(path);
-            icon = writeIconsToCache(coverHash, trackCover, iconSize);
+         if (readIfNotFound && !path.startsWith("content://")) {
+             Bitmap trackCover = Track.readCover(path);
+             icon = writeIconsToCache(coverHash, trackCover, iconSize);
          }
          return icon;
      }
@@ -108,10 +108,12 @@
              if (icon != null) {
                  try {
                      File cacheFile = getCacheFile(coverHash, iconSize);
-                     FileOutputStream fOut = new FileOutputStream(cacheFile);
-                     icon.compress(Bitmap.CompressFormat.PNG, 90, fOut);
-                     fOut.flush();
-                     fOut.close();
+                     if(cacheFile!=null) {
+                         FileOutputStream fOut = new FileOutputStream(cacheFile);
+                         icon.compress(Bitmap.CompressFormat.PNG, 90, fOut);
+                         fOut.flush();
+                         fOut.close();
+                     }
                  } catch (IOException e) {
                      Log.e(TAG, "Error writing thumb to cache", e); //NON-NLS
                      e.printStackTrace();
@@ -123,22 +125,25 @@
 
      public static boolean contains(String coverHash, IconSize iconSize) {
          File file = getCacheFile(coverHash, iconSize);
-         return file.exists();
+         return file!=null && file.exists();
      }
 
      //TODO: Offer at least a cache cleanup function (better would be a smart auto cleanup)
      //Until then, can delete cache folder (or only audio)
      public static Bitmap readIconFromCache(String coverHash, IconSize iconSize) {
          File file = getCacheFile(coverHash, iconSize);
-         if (file.exists()) {
+         if (file!=null && file.exists()) {
              return BitmapFactory.decodeFile(file.getAbsolutePath());
          }
          return null;
      }
 
+     //TODO: Move cache to android dedicated cache folder (in ext sd card if possible) for application so that user can clean the cache easily
      private static File getCacheFile(String coverHash, IconSize iconSize) {
-         String filename = coverHash.equals("") ? "NA" : coverHash + iconSize.name();
-         return HelperFile.getFile(filename + ".png", "cache", "cover-icons"); //NON-NLS
+         if(coverHash.equals("")) {
+             return null;
+         }
+         return HelperFile.getFile(coverHash + iconSize.name() + ".png", "cache", "cover-icons"); //NON-NLS
      }
 
      enum IconSize {

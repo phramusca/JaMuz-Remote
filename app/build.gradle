@@ -6,7 +6,7 @@ android {
     defaultConfig {
         applicationId "org.phramusca.jamuz"
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 33 //FIXME: Test this version in emulator
         versionCode 7
         versionName "0.5.6-dev"
     }
@@ -47,8 +47,8 @@ dependencies {
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 
     //QR Code
-    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
-    implementation 'com.google.zxing:core:3.3.2'
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    implementation 'com.google.zxing:core:3.4.1'
 
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.3.Final'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
