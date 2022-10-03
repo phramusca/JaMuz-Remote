@@ -1902,7 +1902,7 @@ public class ActivityMain extends AppCompatActivity {
             String msgStr = "<html><b>" + getString(R.string.permissionMsg_01) + "</b>" + getString(R.string.permissionMsg_02)
                     + "<BR/><BR/>"
                     + "<i>- <u>" + getString(R.string.permissionMsg_11) + "</u></i>: " + getString(R.string.permissionMsg_12)
-                    + "<BR/>"
+                    + "<BR/><BR/>"
                     + "<i>- <u>" + getString(R.string.permissionMsg_21) + "</u></i>: " + getString(R.string.permissionMsg_22)
                     + "</html>";
 
