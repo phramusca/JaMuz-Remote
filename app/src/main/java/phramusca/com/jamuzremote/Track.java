@@ -213,6 +213,7 @@ public class Track implements Serializable {
                 mmr.setDataSource(context, Uri.parse(path));
                 bitmap = readCover(mmr);
                 //TODO: Set those:
+//                File file = new File(path);
 //                size=file.length();
 //                modifDate=new Date(file.lastModified());
 //                pathModifDate=new Date(Objects.requireNonNull(folder).lastModified());

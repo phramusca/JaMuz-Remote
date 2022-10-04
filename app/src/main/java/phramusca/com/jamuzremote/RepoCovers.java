@@ -66,9 +66,8 @@
          ByteArrayOutputStream stream = new ByteArrayOutputStream();
          bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
          byte[] data = stream.toByteArray();
-         MessageDigest md = MessageDigest.getInstance("MD5"); //NOI18N
-         md.update(data);
-         byte[] hash = md.digest();
+         MessageDigest md = MessageDigest.getInstance("SHA-256"); //NOI18N
+         byte[] hash = md.digest(data);
          return returnHex(hash);
      }
 
