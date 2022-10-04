@@ -19,7 +19,9 @@
         android:label="@string/applicationName"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:replace="android:theme">
+        tools:replace="android:theme"
+        android:networkSecurityConfig="@xml/network_security_config"
+        tools:ignore="UnusedAttribute"> <!-- used, but only for API 24 and higher-->
         <activity
             android:name=".ActivityMain"
             android:launchMode="singleTask"
