@@ -115,6 +115,68 @@ public class ActivitySettings extends AppCompatActivity {
             }
         });
 
+        CheckBox kidsplaceAllowAddNewDel = findViewById(R.id.settingsCheckBoxKidsPlaceAllowAddNewDel);
+        kidsplaceAllowAddNewDel.setOnCheckedChangeListener(
+                (buttonView, isChecked) ->
+                        setConfig("kidsplaceAllowAddNewDel", isChecked)
+        );
+        kidsplaceAllowAddNewDel.setChecked(
+                preferences.getBoolean("kidsplaceAllowAddNewDel", false));
+
+        Spinner kidsplaceLimitPlaylist = findViewById(R.id.kidsPlaceLimitPlaylist);
+        CheckBox kidsplaceLimit = findViewById(R.id.settingsCheckBoxKidsPlaceLimit);
+        kidsplaceLimit.setOnCheckedChangeListener(
+                (buttonView, isChecked) ->
+                {
+                    kidsplaceLimitPlaylist.setEnabled(isChecked);
+                    kidsplaceAllowAddNewDel.setEnabled(!isChecked);
+                    setConfig("kidsplaceLimit", isChecked);
+                }
+        );
+        kidsplaceLimitPlaylist.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int pos, long id) {
+                Playlist playlist = (Playlist) parent.getItemAtPosition(pos);
+                setConfig("kidsplaceLimitPlaylist", playlist.getName());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+        ArrayList<Parcelable> localPlaylists = getIntent()
+                .getParcelableArrayListExtra("localPlaylists");
+        ArrayAdapter playListArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item,
+                localPlaylists);
+        kidsplaceLimitPlaylist.setAdapter(playListArrayAdapter);
+
+        String selectedPlaylist = preferences.getString("kidsplaceLimitPlaylist", null);
+        if (selectedPlaylist != null) {
+            kidsplaceLimitPlaylist.setSelection(playListArrayAdapter.getPosition(
+                    new Playlist(selectedPlaylist, true)));
+        }
+
+        boolean isKidsPlaceLimit = preferences.getBoolean("kidsplaceLimit", false);
+        kidsplaceLimit.setChecked(isKidsPlaceLimit);
+        kidsplaceLimitPlaylist.setEnabled(isKidsPlaceLimit);
+
+        CheckBox kidsplaceOnStartup = findViewById(R.id.settingsCheckBoxKidsPlaceOnStartup);
+        kidsplaceOnStartup.setOnCheckedChangeListener(
+                (buttonView, isChecked) ->
+                        setConfig("kidsplaceOnStartup", isChecked)
+        );
+        kidsplaceOnStartup.setChecked(
+                preferences.getBoolean("kidsplaceOnStartup", false));
+
+        CheckBox kidsplaceAllowEdition = findViewById(R.id.settingsCheckBoxKidsPlaceAllowEdition);
+        kidsplaceAllowEdition.setOnCheckedChangeListener(
+                (buttonView, isChecked) ->
+                        setConfig("kidsplaceAllowEdition", isChecked)
+        );
+        kidsplaceAllowEdition.setChecked(
+                preferences.getBoolean("kidsplaceAllowEdition", false));
+
         ActivityMain.SpeechFlavor speechFavor = ActivityMain.SpeechFlavor.valueOf(preferences.getString("speechFavor", ActivityMain.SpeechFlavor.PAUSE.name()));
         switch (speechFavor) {
             case NONE:

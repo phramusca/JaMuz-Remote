@@ -11,5 +11,10 @@
 
 app/src/main/assets/keys.properties
 
+app/libs/beaglebuddy/build/
+app/libs/beaglebuddy/bin/
+app/libs/kidsplace_sdk/build/
+app/libs/kidsplace_sdk/bin/
+
 app/release/
 

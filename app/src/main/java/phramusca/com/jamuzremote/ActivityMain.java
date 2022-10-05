@@ -75,6 +75,7 @@ import com.google.android.flexbox.FlexboxLayout;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.kiddoware.kidsplace.sdk.KPUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -101,9 +102,6 @@ import java.util.TimerTask;
 
 // TODO: Move audio to a service
 // Why not using the standard android player by the way ? (less control for replaygain ?)
-
-//TODO: Find another library for kiosk mode since kidsplace has to be removed for fdroid inclusion
-
 public class ActivityMain extends AppCompatActivity {
 
     private static final String TAG = ActivityMain.class.getName();
@@ -722,6 +720,11 @@ public class ActivityMain extends AppCompatActivity {
             enableSync(false);
         }
 
+        boolean kidsplaceOnStartup = preferences.getBoolean("kidsplaceOnStartup", false);
+        if (kidsplaceOnStartup) {
+            KPUtility.handleKPIntegration(this, KPUtility.GOOGLE_MARKET);
+        }
+
         setDimMode(toggleButtonDimMode.isChecked());
         checkPermissionsThenScanLibrary();
     }
@@ -1174,8 +1177,41 @@ public class ActivityMain extends AppCompatActivity {
             dimOn();
         }
 
+        applyKidsPlaceOptions();
+
         audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
         registerButtonReceiver();
+    }
+
+    private void applyKidsPlaceOptions() {
+        boolean isKidsPlace = KPUtility.isKidsPlaceRunning(this);
+
+        buttonRemote.setVisibility(isKidsPlace ? View.GONE : View.VISIBLE);
+        buttonSync.setVisibility(isKidsPlace ? View.GONE : View.VISIBLE);
+        button_settings.setVisibility(isKidsPlace ? View.GONE : View.VISIBLE);
+
+        if (!isKidsPlace && wasRemoteConnected && !audioPlayer.isPlaying()) {
+            buttonRemote.setEnabled(false);
+            buttonRemote.performClick();
+        }
+
+        boolean kidsplaceLimit = preferences.getBoolean("kidsplaceLimit", false);
+        boolean isKidsplaceEnabled = !isKidsPlace || !kidsplaceLimit;
+        spinnerPlaylist.setEnabled(isKidsplaceEnabled);
+        if (!isKidsplaceEnabled) {
+            String selectedPlaylist = preferences.getString("kidsplaceLimitPlaylist", null);
+            setupLocalPlaylistSpinner(selectedPlaylist);
+        }
+
+        boolean kidsplaceAllowEdition = preferences.getBoolean("kidsplaceAllowEdition", false);
+        kidsplaceAllowEdition = !isKidsPlace || kidsplaceAllowEdition;
+        toggleButtonEditTags.setVisibility(kidsplaceAllowEdition ? View.VISIBLE : View.GONE);
+
+        boolean kidsplaceAllowAddNewDel = preferences.getBoolean("kidsplaceAllowAddNewDel", false);
+        kidsplaceAllowAddNewDel = !isKidsPlace || (kidsplaceAllowAddNewDel && !kidsplaceLimit);
+        button_delete.setVisibility(kidsplaceAllowAddNewDel ? View.VISIBLE : View.GONE);
+        button_save.setVisibility(kidsplaceAllowAddNewDel ? View.VISIBLE : View.GONE);
+        button_new.setVisibility(kidsplaceAllowAddNewDel ? View.VISIBLE : View.GONE);
     }
 
     private void registerButtonReceiver() {

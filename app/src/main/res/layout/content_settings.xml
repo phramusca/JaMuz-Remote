@@ -248,6 +248,55 @@
                         android:onClick="onRadioButtonClicked"/>
                 </RadioGroup>
             </LinearLayout>
+            <TextView android:text="@string/settingsKidsPlaceTextViewTitle"
+                android:textColor="@color/textColor"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:gravity="start"
+                android:layout_marginTop="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="@color/colorPrimaryDark"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:orientation="vertical"
+                android:background="@color/colorPrimary">
+                <TextView android:text="@string/settingsKidsPlaceTextViewHelp"
+                    android:textColor="@color/textColor"
+                    android:gravity="start"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent" />
+                <CheckBox android:id="@+id/settingsCheckBoxKidsPlaceLimit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settingsKidsPlaceCheckBoxLimit"
+                    android:textColor="@color/textColor" />
+                <Spinner android:id="@+id/kidsPlaceLimitPlaylist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_gradient_spinner"
+                    android:layout_gravity="center_vertical|start|end"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"/>
+                <CheckBox android:id="@+id/settingsCheckBoxKidsPlaceAllowAddNewDel"
+                    android:text="@string/settingsKidsPlaceCheckBoxAllowDeleteSaveNew"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:textColor="@color/textColor"/>
+                <CheckBox android:id="@+id/settingsCheckBoxKidsPlaceAllowEdition"
+                    android:text="@string/settingsKidsPlaceCheckBoxAllowEdition"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:textColor="@color/textColor"/>
+                <CheckBox android:id="@+id/settingsCheckBoxKidsPlaceOnStartup"
+                    android:text="@string/settingsKidsPlaceCheckBoxOnStartup"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:textColor="@color/textColor"/>
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

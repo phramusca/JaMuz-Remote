@@ -28,6 +28,8 @@ android {
 }
 
 dependencies {
+    implementation project(path: ':app:libs:beaglebuddy')
+    implementation project(path: ':app:libs:kidsplace_sdk')
     testImplementation 'junit:junit:4.13.2'
     implementation 'net.jthink:jaudiotagger:3.0.1'
     implementation 'com.google.android.material:material:1.6.1'

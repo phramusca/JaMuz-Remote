@@ -16,6 +16,10 @@
  */
 package phramusca.com.jamuzremote;
 
+import com.beaglebuddy.ape.APEItem;
+import com.beaglebuddy.ape.APETag;
+import com.beaglebuddy.mp3.MP3;
+
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
@@ -47,8 +51,7 @@ public class ReplayGain {
         switch (ext) {
             case "mp3": //NON-NLS
                 //First try reading from APE tags (default mp3gain storage)
-                //TODO: Find another library to get APE replaygain since beaglebuddy has to be removed for fdroid inclusion
-                //gainValues = readReplayGainFromAPE(path);
+                gainValues = readReplayGainFromAPE(path);
                 if (!gainValues.isValid()) {
                     //If not found, read from ID3 (written by some other tool, foobar2000 maybe ?)
                     gainValues = readReplayGainFromID3(path);
@@ -130,7 +133,60 @@ public class ReplayGain {
         return gv;
     }
 
-     private static float getFloatFromString(String dbFloat) {
+    //http://www.beaglebuddy.com/
+    private static GainValues readReplayGainFromAPE(File path) {
+        GainValues gv = new GainValues();
+        try {
+            MP3 mp3 = new MP3(path);
+            if (mp3.hasAPETag()) {
+//				mp3 contains an APEv2 tag
+//				MP3GAIN_MINMAX : 052,209
+//				MP3GAIN_ALBUM_MINMAX : 052,209
+//				MP3GAIN_UNDO : +001,+001,N
+//				REPLAYGAIN_TRACK_GAIN : +0.920000 dB
+//				REPLAYGAIN_TRACK_PEAK : 0.860053
+//				REPLAYGAIN_ALBUM_GAIN : +0.400000 dB
+//				REPLAYGAIN_ALBUM_PEAK : 0.899413
+                APETag apeTag = mp3.getAPETag();
+//				System.out.println("mp3 contains an " + apeTag.getVersionString() + " tag");
+//				System.out.println(apeTag);
+                for (APEItem item : apeTag.getItems()) {
+                    if (item.isValueText()) {
+                        switch (item.getKey().toUpperCase()) { //NON-NLS
+                            case "REPLAYGAIN_TRACK_GAIN": //NON-NLS
+                                gv.trackGain = getFloatFromString(item.getTextValue());
+                                break;
+                            case "REPLAYGAIN_ALBUM_GAIN": //NON-NLS
+                                gv.albumGain = getFloatFromString(item.getTextValue()); //NON-NLS
+                                break;
+                            case "REPLAYGAIN_ALBUM_PEAK": //NON-NLS
+                                gv.albumPeak = getFloatFromString(item.getTextValue());
+                                break; //NON-NLS
+                            case "REPLAYGAIN_TRACK_PEAK": //NON-NLS
+                                gv.trackPeak = getFloatFromString(item.getTextValue());
+                                break;
+                            case "MP3GAIN_MINMAX": //NON-NLS
+                                gv.MP3GAIN_MINMAX = item.getTextValue();
+                                break;
+                            case "MP3GAIN_ALBUM_MINMAX": //NON-NLS
+                                gv.MP3GAIN_ALBUM_MINMAX = item.getTextValue(); //NON-NLS
+                                break;
+                            case "MP3GAIN_UNDO": //NON-NLS
+                                gv.MP3GAIN_UNDO = item.getTextValue();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ReplayGain.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return gv;
+    }
+
+    private static float getFloatFromString(String dbFloat) {
         float rg_float = Float.NaN;
         try {
             String nums = dbFloat.replaceAll("[^0-9.-]", "");
@@ -156,7 +212,7 @@ public class ReplayGain {
             MP3File mp3file = (MP3File) AudioFileIO.read(path);
             AbstractID3v2Tag v2tag = mp3file.getID3v2Tag();
 
-            Iterator<Object> i = v2tag.getFrameOfType("TXXX");
+            Iterator i = v2tag.getFrameOfType("TXXX");
             while (i.hasNext()) {
                 Object obj = i.next();
                 if (obj instanceof AbstractID3v2Frame) {

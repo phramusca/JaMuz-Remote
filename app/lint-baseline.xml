@@ -223,7 +223,15 @@
             line="24"/>
     </issue>
 
-     <issue
+    <issue
+        id="UseCompatLoadingForDrawables"
+        message="Use `ResourcesCompat.getDrawable()`">
+        <location
+            file="src/main/java/com/kiddoware/kidsplace/sdk/view/CircularBackImageView.java"
+            line="38"/>
+    </issue>
+
+    <issue
         id="UseCompatLoadingForDrawables"
         message="Use `ResourcesCompat.getDrawable()`">
         <location
@@ -465,6 +473,14 @@
         <location
             file="src/main/java/phramusca/com/jamuzremote/AdapterLoadQueue.java"
             line="58"/>
+    </issue>
+
+    <issue
+        id="Recycle"
+        message="This `Cursor` should be freed up after use with `#close()`">
+        <location
+            file="src/main/java/com/kiddoware/kidsplace/sdk/KPUtility.java"
+            line="750"/>
     </issue>
 
     <issue
