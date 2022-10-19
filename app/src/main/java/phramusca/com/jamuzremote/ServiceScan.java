@@ -173,19 +173,20 @@ public class ServiceScan extends ServiceBase {
                         collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_INTERNAL);
                     }
                 }
-                String selection = "(" + MediaStore.Audio.Media.MIME_TYPE + " = ? " +
-                        "OR " + MediaStore.Audio.Media.MIME_TYPE + " = ? )" +
-                        "AND "+ MediaStore.Audio.Media.DATA + " LIKE '%/Music/%' ";
-                String[] selectionArgs = new String[] {
-                        MimeTypeMap.getSingleton().getMimeTypeFromExtension("mp3"),
-                        MimeTypeMap.getSingleton().getMimeTypeFromExtension("flac")
-                };
+//                String selection = "(" + MediaStore.Audio.Media.MIME_TYPE + " = ? " +
+//                        "OR " + MediaStore.Audio.Media.MIME_TYPE + " = ? )" +
+//                        "AND "+ MediaStore.Audio.Media.DATA + " LIKE '%/Music/%' ";
+//                String[] selectionArgs = new String[] {
+//                        MimeTypeMap.getSingleton().getMimeTypeFromExtension("mp3"),
+//                        MimeTypeMap.getSingleton().getMimeTypeFromExtension("flac")
+//                };
+                String selection = MediaStore.Audio.Media.DATA + " LIKE '%/Music/%' ";
                 String sortOrder = MediaStore.Audio.Media.DATE_ADDED + " DESC";
                 Cursor cursor = getApplicationContext().getContentResolver().query(
                         collection,
                         projection ,
                         selection,
-                        selectionArgs,
+                        null,
                         sortOrder
                 );
                 int idColumnId = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);

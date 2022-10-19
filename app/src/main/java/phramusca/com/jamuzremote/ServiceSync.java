@@ -367,8 +367,12 @@ public class ServiceSync extends ServiceBase {
     @Override
     public void onDestroy() {
         unregisterReceiver(userStopReceiver);
-        wakeLock.release();
-        wifiLock.release();
+        if(wakeLock!=null) {
+            wakeLock.release();
+        }
+        if(wifiLock!=null) {
+            wifiLock.release();
+        }
         super.onDestroy();
     }
 
