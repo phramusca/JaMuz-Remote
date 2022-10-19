@@ -7,7 +7,7 @@ android {
         applicationId "org.phramusca.jamuz"
         minSdkVersion 21
         targetSdkVersion 33
-        versionName "0.6.2"
+        versionName "0.6.3-dev"
         versionCode 10
     }
     buildTypes {
