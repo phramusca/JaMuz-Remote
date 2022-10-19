@@ -8,7 +8,7 @@
   * ***Audio Player:***
     * Playlist editor (user tags, rating and genre)
     * Track editor (user tags, rating and genre)
-    * Replaygain support (MP3 only, FLAC on its way)
+    * Replaygain support (only mp3 and flac tracks from server)
     * One finger control
     * [Voice commands](data/voiceCommands.md)
   * ***Merge your statistics with JaMuz***
