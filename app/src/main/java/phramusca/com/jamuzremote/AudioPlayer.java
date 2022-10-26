@@ -1,9 +1,13 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
+import android.content.IntentFilter;
+import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.CountDownTimer;
 import android.util.Log;
 
@@ -22,6 +26,7 @@ public class AudioPlayer {
     private static MediaPlayer mediaPlayer;
     private static CountDownTimer timer;
     private final AudioManager audioManager;
+    private final AudioFocusRequest focusRequest;
     private int duration;
     private boolean enableControl = false;
 
@@ -29,6 +34,20 @@ public class AudioPlayer {
         mContext = context;
         this.callback = callback;
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build();
+            focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                    .setAudioAttributes(audioAttributes)
+                    .setAcceptsDelayedFocusGain(true)
+                    .setOnAudioFocusChangeListener(audioFocusChangeListener)
+                    .setWillPauseWhenDucked(true)
+                    .build();
+        } else {
+            focusRequest = null;
+        }
     }
 
     public void play(Track track, HelperToast helperToast) {
@@ -65,19 +84,24 @@ public class AudioPlayer {
         }
     }
 
-    private void askFocusAndPlay() {
-        int result = audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+    public void askFocusAndPlay() {
+        int result;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            result = audioManager.requestAudioFocus(focusRequest);
+        } else {
+            result = audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        }
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             mediaPlayer.start();
         }
     }
 
     AudioManager.OnAudioFocusChangeListener audioFocusChangeListener = focusChange -> {
-        if (focusChange == AudioManager.AUDIOFOCUS_GAIN
-         || focusChange == AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE) {
+        if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
             resume();
-        } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT
-                || focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+        } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS
+                || focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT
+                || focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
             pause();
         }
     };
