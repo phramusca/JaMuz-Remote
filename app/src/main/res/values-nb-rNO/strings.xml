@@ -44,8 +44,6 @@
     <string name="permissionMsg_01">For en helhetlig JaMuz-opplevelse</string>
     <string name="permissionMsg_02">kan du overveie å tillate tilganger det spørres om:</string>
     <string name="permissionMsg_11">Multimediafiler</string>
-    <string name="permissionMsg_21">Telefonsamtaler</string>
-    <string name="permissionMsg_22">For å kunne pause og fortsette lyd under telefonsamtaler.</string>
     <string name="contentAlbumsTitle">Album</string>
     <string name="contentAlbumTracksTitle">Albumspor</string>
     <string name="contentQueueTitle">Spill kø</string>

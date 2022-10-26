@@ -57,8 +57,6 @@
     <string name="permissionMsg_02">, merci de bien vouloir autoriser :</string>
     <string name="permissionMsg_11">Contenus multimédias</string>
     <string name="permissionMsg_12">Pour lire les pistes du MediaStore Android.</string>
-    <string name="permissionMsg_21">Gestion des appels</string>
-    <string name="permissionMsg_22">Pour mettre pause et reprendre la lecture lors des appels.</string>
     <string name="contentAlbumsTitle">Albums</string>
     <string name="contentQueueTitle">File d\'attente</string>
     <string name="adapterCursorAlbumLabelTracks">piste(s)</string>
