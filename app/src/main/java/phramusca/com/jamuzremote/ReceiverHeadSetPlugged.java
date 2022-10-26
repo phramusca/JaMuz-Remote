@@ -13,17 +13,22 @@ public class ReceiverHeadSetPlugged extends BroadcastReceiver {
     private static final String TAG = ReceiverHeadSetPlugged.class.getName();
     private boolean headsetConnected = false;
 
+    @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.hasExtra("state")) { //NON-NLS
-            if (headsetConnected && intent.getIntExtra("state", 0) == 0) { //NON-NLS
-                headsetConnected = false;
-                Log.i(TAG, "headset NOT Connected => pause"); //NON-NLS
-                ActivityMain.audioPlayer.pause();
-            } else if (!headsetConnected && intent.getIntExtra("state", 0) == 1) { //NON-NLS
-                headsetConnected = true;
-                Log.i(TAG, "headset IS Connected => resume"); //NON-NLS
-                ActivityMain.audioPlayer.resume();
-            }
+        if (intent == null
+                || !Intent.ACTION_HEADSET_PLUG.equals(intent.getAction())
+                || !intent.hasExtra("state")) {
+            Log.d(TAG, "Ignore unsupported intent: " + intent);
+            return;
+        }
+        if (headsetConnected && intent.getIntExtra("state", 0) == 0) { //NON-NLS
+            headsetConnected = false;
+            Log.i(TAG, "headset NOT Connected => pause"); //NON-NLS
+            ActivityMain.audioPlayer.pause();
+        } else if (!headsetConnected && intent.getIntExtra("state", 0) == 1) { //NON-NLS
+            headsetConnected = true;
+            Log.i(TAG, "headset IS Connected => resume"); //NON-NLS
+            ActivityMain.audioPlayer.resume();
         }
     }
 }

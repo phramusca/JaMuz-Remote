@@ -1,5 +1,6 @@
 package phramusca.com.jamuzremote;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Message;
@@ -7,15 +8,13 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import androidx.media.session.MediaButtonReceiver;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
 /**
  * Created by raph on 12/06/17.
  */
-public class ReceiverMediaButton extends MediaButtonReceiver {
+public class ReceiverMediaButton extends BroadcastReceiver {
     private static final String TAG = ReceiverMediaButton.class.getName();
     private static final int DOUBLE_CLICK_DELAY = 0; //TODO: Make this an option (0 to desactivate, 1000 to activate)
     private static long sLastClickTime = 0;

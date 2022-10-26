@@ -1,6 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.CountDownTimer;
@@ -8,6 +9,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Created by raph on 17/06/17.
@@ -19,12 +21,14 @@ public class AudioPlayer {
     private static final String TAG = AudioPlayer.class.getName();
     private static MediaPlayer mediaPlayer;
     private static CountDownTimer timer;
+    private final AudioManager audioManager;
     private int duration;
     private boolean enableControl = false;
 
     AudioPlayer(Context context, final IListenerPlayer callback) {
         mContext = context;
         this.callback = callback;
+        audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
     public void play(Track track, HelperToast helperToast) {
@@ -45,7 +49,7 @@ public class AudioPlayer {
             }
             mediaPlayer.setOnPreparedListener(mp -> {
                 duration = mediaPlayer.getDuration();
-                mediaPlayer.start();
+                askFocusAndPlay();
                 startTimer();
                 mediaPlayer.setOnCompletionListener(mediaPlayer -> callback.onPlayBackEnd());
                 mediaPlayer.setOnSeekCompleteListener(mediaPlayer -> startTimer());
@@ -60,6 +64,23 @@ public class AudioPlayer {
             callback.onPlayBackEnd();
         }
     }
+
+    private void askFocusAndPlay() {
+        int result = audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            mediaPlayer.start();
+        }
+    }
+
+    AudioManager.OnAudioFocusChangeListener audioFocusChangeListener = focusChange -> {
+        if (focusChange == AudioManager.AUDIOFOCUS_GAIN
+         || focusChange == AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE) {
+            resume();
+        } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT
+                || focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+            pause();
+        }
+    };
 
     //TODO: Make Replaygain options.
     private final boolean mReplayGainTrackEnabled = true;
@@ -101,7 +122,7 @@ public class AudioPlayer {
                     "%s \n%s\n---------------\n %s\n Base Volume=%s\n Adjust=%s\n Set Volume=%s (limit 1.0)", //NON-NLS
                     mContext.getString(R.string.audioPlayerToastRgBaseVolTooHigh),
                     mContext.getString(R.string.audioPlayerToastRgConsiderLower),
-                    rg.toString(),
+                    rg,
                     baseVolume,
                     adjust,
                     rg_result);
@@ -136,7 +157,7 @@ public class AudioPlayer {
         if (mediaPlayer == null) {
             playNext();
         } else if (!mediaPlayer.isPlaying()) {
-            mediaPlayer.start();
+            askFocusAndPlay();
             startTimer();
         }
     }
@@ -161,7 +182,7 @@ public class AudioPlayer {
             mediaPlayer.pause();
             stopTimer();
         } else {
-            mediaPlayer.start();
+            askFocusAndPlay();
             startTimer();
         }
     }
@@ -177,7 +198,7 @@ public class AudioPlayer {
     public void resume() {
         Log.i(TAG, "resume()"); //NON-NLS
         if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
-            mediaPlayer.start();
+            askFocusAndPlay();
             startTimer();
         } //NON-NLS
     }
@@ -186,7 +207,7 @@ public class AudioPlayer {
         Log.i(TAG, "stop()"); //NON-NLS
         try {
             if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                Log.i(TAG, "mediaPlayer.stop()" + mediaPlayer.getTrackInfo().toString()); //NON-NLS
+                Log.i(TAG, "mediaPlayer.stop()" + Arrays.toString(mediaPlayer.getTrackInfo())); //NON-NLS
                 mediaPlayer.stop();
                 if (release) {
                     mediaPlayer.release();

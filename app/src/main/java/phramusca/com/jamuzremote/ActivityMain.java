@@ -1850,24 +1850,18 @@ public class ActivityMain extends AppCompatActivity {
     public void checkPermissionsThenScanLibrary() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             PERMISSIONS = new String[]{
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_PHONE_STATE,
-                    Manifest.permission.PROCESS_OUTGOING_CALLS
+                    Manifest.permission.READ_EXTERNAL_STORAGE
             };
         } else {
             PERMISSIONS = new String[]{
                     Manifest.permission.READ_MEDIA_AUDIO,
-                    Manifest.permission.POST_NOTIFICATIONS,
-                    Manifest.permission.READ_PHONE_STATE,
-                    Manifest.permission.PROCESS_OUTGOING_CALLS
+                    Manifest.permission.POST_NOTIFICATIONS
             };
         }
         if (!hasPermissions(this, PERMISSIONS)) {
             String msgStr = "<html><b>" + getString(R.string.permissionMsg_01) + "</b>" + getString(R.string.permissionMsg_02)
                     + "<BR/><BR/>"
                     + "<i>- <u>" + getString(R.string.permissionMsg_11) + "</u></i>: " + getString(R.string.permissionMsg_12)
-                    + "<BR/><BR/>"
-                    + "<i>- <u>" + getString(R.string.permissionMsg_21) + "</u></i>: " + getString(R.string.permissionMsg_22)
                     + "</html>";
 
             AlertDialog alertDialog = new AlertDialog.Builder(ActivityMain.this).create();
