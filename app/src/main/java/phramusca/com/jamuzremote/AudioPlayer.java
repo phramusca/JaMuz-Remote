@@ -1,9 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
@@ -13,20 +11,14 @@ import android.os.Build;
 import android.os.CountDownTimer;
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.HttpUrl;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -71,7 +63,7 @@ public class AudioPlayer {
         //FIXME Why port is -1 ? Should be 8080, confusing
         // 192.168.1.27 (dev local)
         // 192.168.1.145" (rasperry)
-        clientInfo = new ClientInfo("192.168.1.27", 8079, "", "", -1, "", "");
+        clientInfo = new ClientInfo("192.168.1.145", 8079, "", "", -1, "", "");
     }
 
     private Track track;
@@ -140,6 +132,9 @@ public class AudioPlayer {
                             if (!response.isSuccessful()) {
                                 if (response.code() == 400) {
                                     //TODO: Already playing
+                                }
+                                else if (response.code() == 404) {
+                                    //TODO: Not found
                                 }
                             }
                         } catch (IOException e) {
