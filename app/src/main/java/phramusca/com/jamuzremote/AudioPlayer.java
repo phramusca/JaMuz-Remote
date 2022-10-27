@@ -1,7 +1,6 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
-import android.content.IntentFilter;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
@@ -24,6 +23,7 @@ public class AudioPlayer {
     private final IListenerPlayer callback;
     private static final String TAG = AudioPlayer.class.getName();
     private static MediaPlayer mediaPlayer;
+    private boolean mediaPlayerWasPlaying = false;
     private static CountDownTimer timer;
     private final AudioManager audioManager;
     private final AudioFocusRequest focusRequest;
@@ -69,7 +69,7 @@ public class AudioPlayer {
             mediaPlayer.setOnPreparedListener(mp -> {
                 duration = mediaPlayer.getDuration();
                 askFocusAndPlay();
-                startTimer();
+
                 mediaPlayer.setOnCompletionListener(mediaPlayer -> callback.onPlayBackEnd());
                 mediaPlayer.setOnSeekCompleteListener(mediaPlayer -> startTimer());
                 enableControl = true;
@@ -93,16 +93,18 @@ public class AudioPlayer {
         }
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             mediaPlayer.start();
+            mediaPlayerWasPlaying = true;
+            startTimer();
         }
     }
 
     AudioManager.OnAudioFocusChangeListener audioFocusChangeListener = focusChange -> {
-        if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+        if (focusChange == AudioManager.AUDIOFOCUS_GAIN && mediaPlayerWasPlaying) {
             resume();
         } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS
                 || focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT
                 || focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
-            pause();
+            pause(mediaPlayerWasPlaying);
         }
     };
 
@@ -182,7 +184,6 @@ public class AudioPlayer {
             playNext();
         } else if (!mediaPlayer.isPlaying()) {
             askFocusAndPlay();
-            startTimer();
         }
     }
 
@@ -207,15 +208,18 @@ public class AudioPlayer {
             stopTimer();
         } else {
             askFocusAndPlay();
-            startTimer();
         }
     }
 
     public void pause() {
+        pause(false);
+    }
+
+    public void pause(boolean mediaPlayerWasPlaying) {
         Log.i(TAG, "pause()"); //NON-NLS
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
-            stopTimer();
+            stopTimer(mediaPlayerWasPlaying);
         }
     } //NON-NLS
 
@@ -223,8 +227,7 @@ public class AudioPlayer {
         Log.i(TAG, "resume()"); //NON-NLS
         if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
             askFocusAndPlay();
-            startTimer();
-        } //NON-NLS
+        }
     }
 
     public void stop(boolean release) {
@@ -263,10 +266,6 @@ public class AudioPlayer {
         }
     }
 
-    public boolean isPlaying() {
-        return !(mediaPlayer == null || !mediaPlayer.isPlaying());
-    }
-
     private void startTimer() {
         callback.onPlayBackStart();
         timer = new CountDownTimer(duration - mediaPlayer.getCurrentPosition() - 1, 500) {
@@ -275,7 +274,7 @@ public class AudioPlayer {
                 if (mediaPlayer != null) {
                     callback.onPositionChanged(mediaPlayer.getCurrentPosition(), duration);
                 }
-                if (!isPlaying()) {
+                if (mediaPlayer == null || !mediaPlayer.isPlaying()) {
                     this.cancel();
                 }
             }
@@ -287,6 +286,11 @@ public class AudioPlayer {
     }
 
     private void stopTimer() {
+        stopTimer(false);
+    }
+
+    private void stopTimer(boolean mediaPlayerWasPlaying) {
+        this.mediaPlayerWasPlaying = mediaPlayerWasPlaying;
         if (timer != null) {
             timer.cancel();
             timer = null;
