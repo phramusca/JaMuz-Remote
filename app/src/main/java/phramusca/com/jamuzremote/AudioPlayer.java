@@ -1,6 +1,9 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
@@ -10,9 +13,21 @@ import android.os.Build;
 import android.os.CountDownTimer;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by raph on 17/06/17.
@@ -26,14 +41,18 @@ public class AudioPlayer {
     private boolean mediaPlayerWasPlaying = false;
     private static CountDownTimer timer;
     private final AudioManager audioManager;
+    private final SharedPreferences preferences;
     private final AudioFocusRequest focusRequest;
     private int duration;
     private boolean enableControl = false;
+    private final ClientInfo clientInfo;
 
-    AudioPlayer(Context context, final IListenerPlayer callback) {
+    public
+    AudioPlayer(Context context, final IListenerPlayer callback, SharedPreferences preferences) {
         mContext = context;
         this.callback = callback;
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        this.preferences = preferences;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
@@ -48,10 +67,18 @@ public class AudioPlayer {
         } else {
             focusRequest = null;
         }
+        //FIXME: IP as option
+        //FIXME Why port is -1 ? Should be 8080, confusing
+        // 192.168.1.27 (dev local)
+        // 192.168.1.145" (rasperry)
+        clientInfo = new ClientInfo("192.168.1.27", 8079, "", "", -1, "", "");
     }
+
+    private Track track;
 
     public void play(Track track, HelperToast helperToast) {
         try {
+            this.track = track;
             Log.i(TAG, "Playing " + track.getRelativeFullPath()); //NON-NLS
             enableControl = false;
             mediaPlayer = new MediaPlayer();
@@ -85,16 +112,44 @@ public class AudioPlayer {
     }
 
     public void askFocusAndPlay() {
-        int result;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            result = audioManager.requestAudioFocus(focusRequest);
-        } else {
-            result = audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-        }
-        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            mediaPlayer.start();
-            mediaPlayerWasPlaying = true;
-            startTimer();
+        ActivityMain.AudioOutput audioOutput = ActivityMain.AudioOutput.valueOf(preferences.getString("audioOutput", ActivityMain.AudioOutput.LOCAL.name()));
+        switch (audioOutput) {
+            case LOCAL:
+                int result;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    result = audioManager.requestAudioFocus(focusRequest);
+                } else {
+                    result = audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+                }
+                if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                    mediaPlayer.start();
+                }
+                break;
+            case RASPBERRY:
+                new Thread() {
+                    public void run() {
+                        OkHttpClient client = new OkHttpClient.Builder()
+                                .readTimeout(30, TimeUnit.SECONDS)
+                                .build();
+                        HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("api/play/" + track.getIdFileServer()); //NON-NLS
+                        //FIXME: Should be a POST
+                        Request request = clientInfo.getRequestBuilder(urlBuilder).get().build();
+                        Response response;
+                        try {
+                            response = client.newCall(request).execute();
+                            if (!response.isSuccessful()) {
+                                if (response.code() == 400) {
+                                    //TODO: Already playing
+                                }
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                }.start();
+
+                break;
         }
     }
 

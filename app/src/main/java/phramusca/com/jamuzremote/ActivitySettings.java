@@ -127,6 +127,16 @@ public class ActivitySettings extends AppCompatActivity {
                 ((RadioButton)findViewById(R.id.settingsRadioSpeechPause)).setChecked(true);
                 break;
         }
+
+        ActivityMain.AudioOutput audioOutput = ActivityMain.AudioOutput.valueOf(preferences.getString("audioOutput", ActivityMain.AudioOutput.LOCAL.name()));
+        switch (audioOutput) {
+            case LOCAL:
+                ((RadioButton)findViewById(R.id.settingsRadioAudioOutputLocal)).setChecked(true);
+                break;
+            case RASPBERRY:
+                ((RadioButton)findViewById(R.id.settingsRadioAudioOutputRaspberry)).setChecked(true);
+                break;
+        }
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -159,6 +169,22 @@ public class ActivitySettings extends AppCompatActivity {
                 break;
         }
         setConfig("speechFavor", speechFlavor.name());
+    }
+
+    public void onAudioOutputRadioButtonClicked(View view) {
+        boolean checked = ((RadioButton) view).isChecked();
+        ActivityMain.AudioOutput audioOutput = ActivityMain.AudioOutput.LOCAL;
+        switch(view.getId()) {
+            case R.id.settingsRadioAudioOutputLocal:
+                if(checked)
+                    audioOutput= ActivityMain.AudioOutput.LOCAL;
+                break;
+            case R.id.settingsRadioAudioOutputRaspberry:
+                if(checked)
+                    audioOutput= ActivityMain.AudioOutput.RASPBERRY;
+                break;
+        }
+        setConfig("audioOutput", audioOutput.name());
     }
 
     @Override

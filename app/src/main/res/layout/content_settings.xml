@@ -248,6 +248,45 @@
                         android:onClick="onRadioButtonClicked"/>
                 </RadioGroup>
             </LinearLayout>
+            <TextView android:text="Player"
+                android:textColor="@color/textColor"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:gravity="start"
+                android:layout_marginTop="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="@color/colorPrimaryDark"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:orientation="vertical"
+                android:background="@color/colorPrimary">
+                <TextView android:text="Select desired audio output:"
+                    android:textColor="@color/textColor"
+                    android:gravity="start"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent" />
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/settingsRadioAudioOutput">
+                    <RadioButton android:id="@+id/settingsRadioAudioOutputLocal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Local"
+                        android:textColor="@color/textColor"
+                        android:onClick="onAudioOutputRadioButtonClicked"/>
+                    <RadioButton android:id="@+id/settingsRadioAudioOutputRaspberry"
+                        android:text="Raspberry"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:textColor="@color/textColor"
+                        android:onClick="onAudioOutputRadioButtonClicked"/>
+                </RadioGroup>
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

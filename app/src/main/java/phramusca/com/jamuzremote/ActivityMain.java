@@ -698,7 +698,7 @@ public class ActivityMain extends AppCompatActivity {
         displayTrack();
 
         ListenerPlayer callBackPlayer = new ListenerPlayer();
-        audioPlayer = new AudioPlayer(this, callBackPlayer);
+        audioPlayer = new AudioPlayer(this, callBackPlayer, preferences);
         audioPlayer.setVolume(preferences.getInt("baseVolume", 70), displayedTrack);
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -2569,5 +2569,10 @@ public class ActivityMain extends AppCompatActivity {
             Log.e(TAG, "", ex);
         }
         return newPlaylist;
+    }
+
+    enum AudioOutput {
+        LOCAL,
+        RASPBERRY
     }
 }

@@ -38,6 +38,7 @@ public class ClientInfo implements Serializable {
     }
 
     public HttpUrl.Builder getUrlBuilder(String url) {
+        //FIXME: http for JaMuz; https (when back to https) for JaMuz-Raspberry !
         return Objects.requireNonNull(HttpUrl.parse("http://" + getAddress() + ":" + (getPort() + 1) + "/" + url)).newBuilder(); //NON-NLS
     }
 
