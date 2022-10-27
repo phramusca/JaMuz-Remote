@@ -1140,7 +1140,6 @@ public class ActivityMain extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.i(TAG, "ActivityMain onPause"); //NON-NLS
-        wasRemoteConnected = isRemoteConnected();
         stopRemote();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
@@ -1157,8 +1156,6 @@ public class ActivityMain extends AppCompatActivity {
             Log.e(TAG, "onWindowFocusChanged", ex);
         }
     }
-
-    private boolean wasRemoteConnected = false;
 
     @Override
     protected void onResume() {
@@ -1629,11 +1626,6 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         @Override
-        public void displaySpeechRecognizer() {
-            speechRecognizer();
-        }
-
-        @Override
         public void onPlayBackStart() {
             displayTrack();
         }
@@ -1717,6 +1709,9 @@ public class ActivityMain extends AppCompatActivity {
                     break;
                 case "playPrevious": //NON-NLS
                     audioPlayer.playPrevious();
+                    break;
+                case "displaySpeechRecognizer":
+                    // TODO: call speechRecognizer();, but requires it to be static, which is bad
                     break;
             }
         }

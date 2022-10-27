@@ -103,7 +103,7 @@ public class AudioPlayer {
         }
     }
 
-    public void askFocusAndPlay() {
+    private void askFocusAndPlay() {
         ActivityMain.AudioOutput audioOutput = ActivityMain.AudioOutput.valueOf(preferences.getString("audioOutput", ActivityMain.AudioOutput.LOCAL.name()));
         switch (audioOutput) {
             case LOCAL:
@@ -143,7 +143,6 @@ public class AudioPlayer {
                     }
 
                 }.start();
-
                 break;
         }
     }
@@ -239,10 +238,6 @@ public class AudioPlayer {
 
     public void playNext() {
         callback.doPlayNext();
-    }
-
-    public void displaySpeechRecognizer() {
-        callback.displaySpeechRecognizer();
     }
 
     public void playPrevious() {

@@ -14,7 +14,5 @@ public interface IListenerPlayer {
 
     void doPlayNext();
 
-    void displaySpeechRecognizer();
-
     void reset();
 }

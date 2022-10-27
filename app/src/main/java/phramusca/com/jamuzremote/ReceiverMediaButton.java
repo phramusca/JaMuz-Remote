@@ -46,7 +46,7 @@ public class ReceiverMediaButton extends BroadcastReceiver {
                     Log.i(TAG, "Tracking cancellation status: " + timerTask.cancel()); //NON-NLS
                     timerTask = null;
                 }
-                ActivityMain.audioPlayer.displaySpeechRecognizer();
+                sendMessage("displaySpeechRecognizer");
             } else {
                 Log.i(TAG, "First Click"); //NON-NLS
                 timer = new Timer();
