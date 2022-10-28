@@ -62,31 +62,30 @@ public class AudioPlayerRaspberry implements IAudioPlayer {
     private void askFocusAndPlay() {
         new Thread() {
             public void run() {
-            HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("api/play/" + track.getIdFileServer()); //NON-NLS
-            Request request = clientInfo.getRequestBuilder(urlBuilder).post(RequestBody.create("", MediaType.parse("application/json; charset=utf-8"))).build();
-            Response response;
-            try {
-                response = client.newCall(request).execute();
-                if (!response.isSuccessful()) {
-                    if (response.code() == 400) {
-                        //TODO: Already playing
+                HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("api/play/" + track.getIdFileServer()); //NON-NLS
+                Request request = clientInfo.getRequestBuilder(urlBuilder).post(RequestBody.create("", MediaType.parse("application/json; charset=utf-8"))).build();
+                Response response;
+                try {
+                    response = client.newCall(request).execute();
+                    if (!response.isSuccessful()) {
+                        if (response.code() == 400) {
+                            //TODO: Already playing
+                        }
+                        else if (response.code() == 404) {
+                            //TODO: Not found
+                        }
+                    } else {
+                        isPlaying = true;
+                        startTimer();
                     }
-                    else if (response.code() == 404) {
-                        //TODO: Not found
-                    }
-                } else {
-                    isPlaying = true;
-                    startTimer();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-            }
-
         }.start();
     }
 
-    //TODO: Make Replaygain options.
+    //TODO: Make ReplayGain options.
     private final boolean mReplayGainTrackEnabled = true;
     private final boolean mReplayGainAlbumEnabled = false;
     private float baseVolume = 0.70f;
@@ -189,8 +188,29 @@ public class AudioPlayerRaspberry implements IAudioPlayer {
     public void pause() {
         Log.i(TAG, "pause()"); //NON-NLS
         if (track != null && isPlaying()) {
-            stop(false); //TODO: Do pause instead !!
-            stopTimer();
+            new Thread() {
+                public void run() {
+                    HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("api/pause"); //NON-NLS
+                    Request request = clientInfo.getRequestBuilder(urlBuilder).post(RequestBody.create("", MediaType.parse("application/json; charset=utf-8"))).build();
+                    Response response;
+                    try {
+                        response = client.newCall(request).execute();
+                        if (!response.isSuccessful()) {
+                            if (response.code() == 400) {
+                                //TODO: Was not playing
+                            }
+                            else if (response.code() == 404) {
+                                //TODO: Not found
+                            }
+                        } else {
+                            isPlaying = false;
+                            stopTimer();
+                        }
+                    } catch (IOException e) {
+                        Log.w(TAG, "Failed to pause", e); //NON-NLS
+                    }
+                }
+            }.start();
         }
     }
 
@@ -231,7 +251,6 @@ public class AudioPlayerRaspberry implements IAudioPlayer {
                         Log.w(TAG, "Failed to stop", e); //NON-NLS
                     }
                 }
-
             }.start();
         }
     }
