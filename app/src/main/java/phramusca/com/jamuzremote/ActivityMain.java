@@ -1495,7 +1495,7 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         // Not closing as services may still need it
-        //TODO: Close when everything's complete (scan, sync and jamuz)
+        //TODO: Close when everything's complete (scan, sync and JaMuz)
         /*HelperLibrary.close();*/
     }
 
@@ -2008,9 +2008,7 @@ public class ActivityMain extends AppCompatActivity {
             toggleOff(toggleButtonControls, layoutControls);
         }, 500);
 
-        mHandler.postDelayed(() -> {
-            refreshLocalPlaylistSpinner(true);
-        }, 5000);
+        mHandler.postDelayed(() -> refreshLocalPlaylistSpinner(true), 5000);
 
         //Start Scan Service
         if (!isMyServiceRunning(ServiceScan.class)) {
@@ -2499,10 +2497,10 @@ public class ActivityMain extends AppCompatActivity {
 
             registerReceiver(mHeadsetBroadcastReceiver,
                     new IntentFilter(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED));
-
-            //This is triggered on phone calls, already received in ReceiverPhoneCall
-            /*registerReceiver(mHeadsetBroadcastReceiver,
-                    new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED));*/
+            /* This is triggered on phone calls, already handled by Audio Focus
+             registerReceiver(mHeadsetBroadcastReceiver,
+                    new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED));
+            */
         }
     };
 
@@ -2521,10 +2519,10 @@ public class ActivityMain extends AppCompatActivity {
                     }
                     audioPlayer.play(); //NON-NLS
                 } else if (state == BluetoothHeadset.STATE_DISCONNECTED) {
-                    Log.i(TAG, "BT DISconnected"); //NON-NLS
+                    Log.i(TAG, "BT Disconnected"); //NON-NLS
                     audioPlayer.pause();
 
-                    //Somehow, this situation (at least) (can) endup with other receivers (headsethook at least)
+                    //Somehow, this situation (at least) (can) end up with other receivers (headset hook at least)
                     //not to trigger anymore => Why ?
                     //So re-registering button receiver. Seems to work
                     audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
@@ -2543,7 +2541,7 @@ public class ActivityMain extends AppCompatActivity {
                 }
                 else if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED)
                 {
-                    Log.d(TAG, "BT AUDIO DISconnected");
+                    Log.d(TAG, "BT AUDIO Disconnected");
 
                 }
             }*/

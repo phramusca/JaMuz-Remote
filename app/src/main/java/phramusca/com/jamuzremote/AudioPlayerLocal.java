@@ -92,6 +92,7 @@ public class AudioPlayerLocal implements IAudioPlayer {
         }
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             mediaPlayer.start();
+            startTimer();
         }
     }
 
