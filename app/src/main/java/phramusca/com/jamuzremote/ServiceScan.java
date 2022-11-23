@@ -6,19 +6,11 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
-import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.webkit.MimeTypeMap;
 
-import androidx.documentfile.provider.DocumentFile;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -160,7 +152,7 @@ public class ServiceScan extends ServiceBase {
 
             private void browseMediaStore(Uri collection) throws InterruptedException {
                 String[] projection = {
-                        MediaStore.Audio.Media.MIME_TYPE,
+//                        MediaStore.Audio.Media.MIME_TYPE,
                         MediaStore.Audio.Media._ID,
                         MediaStore.Audio.Media.ALBUM_ID,
                         MediaStore.Audio.Media.DATE_ADDED,
@@ -186,7 +178,7 @@ public class ServiceScan extends ServiceBase {
                         collection,
                         projection ,
                         selection,
-                        null,
+                        new String[] {},
                         sortOrder
                 );
                 int idColumnId = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
@@ -197,7 +189,7 @@ public class ServiceScan extends ServiceBase {
                     checkAbort();
                     long id = cursor.getLong(idColumnId);
                     Uri contentUri = ContentUris.withAppendedId(collection, id);
-                    long albumId=cursor.getLong(albumIdColumnId);
+                    long albumId = cursor.getLong(albumIdColumnId);
                     //TODO: Use track metadata from MediaStore instead of reading file
                     //Warning: not all fields are available depending on android version
                     HelperLibrary.musicLibrary.insertOrUpdateTrack(contentUri.toString(),
