@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="serviceSyncNotifySyncDownloaded">Nedlastet:</string>
     <string name="settingsTitle">Innstillinger</string>
     <string name="settingsServerTitle">JaMuz-tjener</string>
@@ -74,7 +74,6 @@
     <string name="speakRatingIncorrect">uriktig.</string>
     <string name="settingsDirectoryChooserNewFolderName">Nytt mappenavn</string>
     <string name="speakRating">Vurdering</string>
-
     <string name="serviceSyncNotifyDownloadTitle">Last ned</string>
     <string name="serviceSyncNotifySyncComplete">Fullført.</string>
     <string name="serviceSyncNotifySyncTitle">Synk.</string>
@@ -130,4 +129,14 @@
     <string name="serviceSyncNotifyDownloadStarting">Starter nedlasting …</string>
     <string name="audioPlayerToastRgConsiderLower">Hvis du ser denne meldingen for ofte kan du overveie å senke den i innstillingene. (Kanskje det er en feil med én fil)</string>
     <string name="serviceSyncNotifySyncSuccess">filer har blitt nedlastet.</string>
+    <string name="settingsSpeechTextViewTitle" tools:ignore="MissingTranslation">Stemmekommandoer</string>
+    <string name="settingsLocalFilesButtonRefresh" tools:ignore="MissingTranslation">Gjenoppfrisk</string>
+    <string name="settingsSpeechTitle" tools:ignore="MissingTranslation">Ved forespørsel om stemmekommando:</string>
+    <string name="settingsCheckBoxDisplayMediaStore" tools:ignore="MissingTranslation">Vis filer fra Android-medialager</string>
+    <string name="permissionMsg_12" tools:ignore="MissingTranslation">For å lese spor fra Android-medialager</string>
+    <string name="settingsRadioSpeechPause" tools:ignore="MissingTranslation">Sett spiller på pause.</string>
+    <string name="settingsRadioSpeechLowerVolume" tools:ignore="MissingTranslation">Senk lydstyrken.</string>
+    <string name="settingsRadioSpeechNone" tools:ignore="MissingTranslation">Ikke gjør noe.</string>
+    <string name="settingsCheckBoxDisplayServer" tools:ignore="MissingTranslation">Vis filer fra JaMuz-tjeneren</string>
+    <string name="qrScanPromptMessage" tools:ignore="MissingTranslation">Takk for at du skannet QR-koden vist på JaMuz-tjeneren (tjenerfanen) for å hente tilkoblingsinfo.</string>
 </resources>
