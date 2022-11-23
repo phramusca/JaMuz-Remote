@@ -237,40 +237,48 @@ public class Track implements Serializable {
             try {
                 bitRate = mf.getInteger(MediaFormat.KEY_BIT_RATE);
             } catch (NullPointerException ignored) {
-                bitRate = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE));
+                bitRate = tryParseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE), -1);
             }
             try {
                 length = (int) Math.round(mf.getLong(MediaFormat.KEY_DURATION)/1000.0/1000.0);
             } catch (NullPointerException ignored) {
-                length = (int) Math.round(Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION))/1000.0);
+                length = (int) Math.round(tryParseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION), 0)/1000.0);
             }
             format = mf.getString(MediaFormat.KEY_MIME);
             album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+            album = album==null||album.isEmpty()?"Unknown album":album;
             artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+            artist = artist==null||artist.isEmpty()?"Unknown artist":artist;
             title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+            title = title==null||title.isEmpty()?"Unknown title":title;
             genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
             albumArtist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST);
+            albumArtist = albumArtist==null||albumArtist.isEmpty()?"Unknown album artist":albumArtist;
             String yearMeta = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR);
             if(yearMeta!=null) {
                 year = yearMeta;
             }
             String trackNumber = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER);
-            if(trackNumber.contains("/")) {
-                String[] split = trackNumber.split("/");
-                trackNo = Integer.parseInt(split[0]);
-                trackTotal = Integer.parseInt(split[1]);
-            } else {
-                trackNo = Integer.parseInt(trackNumber);
-                trackTotal = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS));
+            if(trackNumber!=null) {
+                if(trackNumber.contains("/")) {
+                    String[] split = trackNumber.split("/");
+                    trackNo = tryParseInt(split[0], -1);
+                    trackTotal = tryParseInt(split[1], -1);
+                } else {
+                    trackNo = tryParseInt(trackNumber, -1);
+                    trackTotal = tryParseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS), -1);
+                }
             }
             String discNumber = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER);
-            if(discNumber.contains("/")) {
-                String[] split = discNumber.split("/");
-                discNo = Integer.parseInt(split[0]);
-                discTotal = Integer.parseInt(split[1]);
-            } else {
-                discNo = Integer.parseInt(discNumber);
-                discTotal = Integer.parseInt(discNumber);
+            if(discNumber!=null) {
+                if(discNumber.contains("/")) {
+                    String[] split = discNumber.split("/");
+                    discNo = tryParseInt(split[0], -1);
+                    discTotal = tryParseInt(split[1], -1);
+                } else {
+                    discNo = tryParseInt(discNumber, -1);
+                    discTotal = tryParseInt(discNumber, -1);
+                }
             }
             //TODO: Get comment
             return true;
@@ -278,6 +286,14 @@ public class Track implements Serializable {
             Log.e(TAG, "Error reading file tags " + path, ex); //NON-NLS
         }
         return false;
+    }
+
+    private int tryParseInt(String value, int defaultValue) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
     Track(JSONObject file, File getAppDataPath, boolean statsOnly) {
