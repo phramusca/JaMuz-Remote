@@ -30,7 +30,7 @@ android {
 dependencies {
     testImplementation 'junit:junit:4.13.2'
     implementation 'net.jthink:jaudiotagger:3.0.1'
-    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
@@ -52,7 +52,9 @@ dependencies {
     // Moreover, with 4.3.0, MediaButtonReceiver is not found.
     //      Looks like some changes are required with 4.3.0: https://github.com/journeyapps/zxing-android-embedded/releases/tag/v4.3.0
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
-    implementation 'com.google.zxing:core:3.4.1'
+    // DO NOT UPDATE zxing:core more than 3.3.3 or set min Android >= 7.0
+    // https://github.com/zxing/zxing/issues/1170
+    implementation 'com.google.zxing:core:3.3.3'
 }
 
 repositories {
