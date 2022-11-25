@@ -46,6 +46,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -63,6 +64,9 @@ public class MusicLibrary {
     private final File getAppDataPath;
     private final MusicLibraryDb musicLibraryDb;
     private static final String TAG = MusicLibrary.class.getName();
+
+    private static final List<String> NOT_SUPPORTED_FORMATS =
+            Arrays.asList("audio/alac");
 
     MusicLibrary(Context context, File getAppDataPath, File musicLibraryDbFile) {
         this.getAppDataPath = getAppDataPath;
@@ -181,7 +185,7 @@ public class MusicLibrary {
 
     synchronized boolean insertOrUpdateTrack(String absolutePath, Context context, String idPath) {
         Track track = new Track(absolutePath, idPath);
-        if (track.read(context)) {
+        if (track.read(context) && !NOT_SUPPORTED_FORMATS.contains(track.getFormat())) {
             return insertOrUpdateTrack(track);
         }
         return false;

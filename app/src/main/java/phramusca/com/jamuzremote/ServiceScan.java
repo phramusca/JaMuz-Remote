@@ -12,6 +12,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,6 +30,11 @@ public class ServiceScan extends ServiceBase {
     private PowerManager.WakeLock wakeLock;
     private SharedPreferences defaultSharedPreferences;
     boolean forceRefresh;
+
+    // https://developer.android.com/guide/topics/media/media-formats#audio-formats
+    private static final List<String> SUPPORTED_MIME_TYPES =
+            Arrays.asList("audio/3gpp", "audio/3gpp2", "audio/3gp2", "audio/mp4", "audio/aac",
+                    "audio/flac", "audio/mpeg", "audio/mp3", "audio/ogg", "audio/wav");
 
     @Override
     public void onCreate() {
@@ -152,11 +158,12 @@ public class ServiceScan extends ServiceBase {
 
             private void browseMediaStore(Uri collection) throws InterruptedException {
                 String[] projection = {
-//                        MediaStore.Audio.Media.MIME_TYPE,
+                        MediaStore.Audio.Media.MIME_TYPE,
                         MediaStore.Audio.Media._ID,
                         MediaStore.Audio.Media.ALBUM_ID,
                         MediaStore.Audio.Media.DATE_ADDED,
-                        MediaStore.Audio.Media.DATA
+                        MediaStore.Audio.Media.DATA,
+                        MediaStore.Audio.Media.IS_MUSIC
                 };
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     if (MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.equals(collection)) {
@@ -165,20 +172,15 @@ public class ServiceScan extends ServiceBase {
                         collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_INTERNAL);
                     }
                 }
-//                String selection = "(" + MediaStore.Audio.Media.MIME_TYPE + " = ? " +
-//                        "OR " + MediaStore.Audio.Media.MIME_TYPE + " = ? )" +
-//                        "AND "+ MediaStore.Audio.Media.DATA + " LIKE '%/Music/%' ";
-//                String[] selectionArgs = new String[] {
-//                        MimeTypeMap.getSingleton().getMimeTypeFromExtension("mp3"),
-//                        MimeTypeMap.getSingleton().getMimeTypeFromExtension("flac")
-//                };
-                String selection = MediaStore.Audio.Media.DATA + " LIKE '%/Music/%' ";
+                String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0 "
+                        + "AND "+ MediaStore.Audio.Media.DATA + " LIKE '%/Music/%' "
+                        + "AND " + MediaStore.Audio.Media.MIME_TYPE + " IN (" + getSupportedMimeTypes() + ")";
                 String sortOrder = MediaStore.Audio.Media.DATE_ADDED + " DESC";
                 Cursor cursor = getApplicationContext().getContentResolver().query(
                         collection,
                         projection ,
                         selection,
-                        new String[] {},
+                        null,
                         sortOrder
                 );
                 int idColumnId = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
@@ -202,14 +204,20 @@ public class ServiceScan extends ServiceBase {
         processScan.start();
     }
 
+    private String getSupportedMimeTypes() {
+        StringBuilder sb = new StringBuilder();
+        for (String mime : SUPPORTED_MIME_TYPES) {
+            sb.append("'").append(mime).append("',");
+        }
+        return sb.substring(0, sb.length() - 1);
+    }
+
     private void notifyScan(final String action, int every) {
         nbFiles++;
         helperNotification.notifyBar(notificationScan, action, every, nbFiles, nbFilesTotal);
     }
 
     private void stop() {
-        //Abort and wait scanLibrayInThread is aborted
-        //So it does not crash if scanLib not completed
         if (processBrowse != null) {
             processBrowse.abort();
         }
