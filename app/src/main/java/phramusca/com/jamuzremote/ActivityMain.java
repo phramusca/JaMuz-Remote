@@ -96,10 +96,10 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-//TODO: Use auto backup for database and playlists
+//FIXME: Use auto backup for database and playlists
 //https://developer.android.com/guide/topics/data/backup
 
-// TODO: Move audio to a service
+// FIXME: Move audio to a service
 // Why not using the standard android player by the way ? (less control for replaygain ?)
 
 //TODO: Find another library for kiosk mode since kidsplace has to be removed for fdroid inclusion
@@ -125,7 +125,7 @@ public class ActivityMain extends AppCompatActivity {
     private static final int LISTS_REQUEST_CODE = 60568;
     private static final int SETTINGS_REQUEST_CODE = 23548;
 
-    private static Context mContext; //TODO: Remove static
+    private static Context mContext; //FIXME: Remove static
     private static PrettyTime prettyTime;
 
     // GUI elements
@@ -1432,7 +1432,7 @@ public class ActivityMain extends AppCompatActivity {
                 checkPermissionsThenScanLibrary();
             }
 
-            //TODO: Update volume directly from Settings activity
+            //FIXME: Update volume directly from Settings activity
             // Need to move audio to a service, which is a good thing anyway !
             int value = data.getIntExtra("volume", -1); //NON-NLS
             if (value >= 0) {

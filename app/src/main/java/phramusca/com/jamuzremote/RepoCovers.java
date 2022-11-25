@@ -137,7 +137,7 @@
          return null;
      }
 
-     //TODO: Move cache to android dedicated cache folder (in ext sd card if possible) for application so that user can clean the cache easily
+     //FIXME: Move cache to android dedicated cache folder (in ext sd card if possible) for application so that user can clean the cache easily
      private static File getCacheFile(String coverHash, IconSize iconSize) {
          if(coverHash.equals("")) {
              return null;
