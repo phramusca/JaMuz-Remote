@@ -2392,7 +2392,7 @@ public class ActivityMain extends AppCompatActivity {
                         final int currentPosition = jObject.getInt("currentPosition"); //NON-NLS
                         final int total = jObject.getInt("total"); //NON-NLS
                         if (isRemoteConnected()) {
-                            setSeekBar(currentPosition, total);
+                            setSeekBar(currentPosition * 1000, total * 1000);
                         }
                         break;
                     case "fileInfoInt":
