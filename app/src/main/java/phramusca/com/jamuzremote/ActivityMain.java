@@ -1176,6 +1176,10 @@ public class ActivityMain extends AppCompatActivity {
 
         audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
         registerButtonReceiver();
+
+        if(wasRemoteConnected) {
+            buttonRemote.performClick();
+        }
     }
 
     private void registerButtonReceiver() {
