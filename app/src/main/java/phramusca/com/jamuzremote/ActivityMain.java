@@ -1807,9 +1807,10 @@ public class ActivityMain extends AppCompatActivity {
                 buttonRemote.setBackgroundResource(R.drawable.remote_off);
                 enablePlaylistEdit(true);
                 setupLocalPlaylistSpinner();
+                buttonRemote.setText("1");
             } else {
-                buttonRemote.setText("0");
                 buttonRemote.setBackgroundResource(R.drawable.remote_on);
+                buttonRemote.setText("0");
             }
             buttonRemote.setEnabled(true);
         });
@@ -1820,11 +1821,11 @@ public class ActivityMain extends AppCompatActivity {
         runOnUiThread(() -> {
             buttonSync.setEnabled(false);
             if (enable) {
-                buttonSync.setText("1");
                 buttonSync.setBackgroundResource(R.drawable.connect_off_new);
+                buttonSync.setText("1");
             } else {
-                buttonSync.setText("0");
                 buttonSync.setBackgroundResource(R.drawable.connect_on);
+                buttonSync.setText("0");
             }
             buttonSync.setEnabled(true);
         });
