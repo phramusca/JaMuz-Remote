@@ -1,6 +1,12 @@
 
 **JaMuz Remote** is an Android **Audio Player** and also a **Remote** for [JaMuz](https://github.com/phramusca/JaMuz) application.
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/org.phramusca.jamuz/)
+
+or get the APK from the [Releases Section](https://github.com/phramusca/JaMuz-Remote/releases/latest).
+
 - - -
 
 * **Features**:
