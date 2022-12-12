@@ -115,6 +115,7 @@ public class ActivityMain extends AppCompatActivity {
     private AudioManager audioManager;
     public static AudioPlayer audioPlayer; //TODO: Remove static
     public static String login;
+    public static String model;
     public File musicLibraryDbFile;
 
     private Map<String, Playlist> localPlaylists = new LinkedHashMap<>();
@@ -203,6 +204,7 @@ public class ActivityMain extends AppCompatActivity {
         prettyTime = new PrettyTime(Locale.getDefault());
         prettyTime.removeUnit(org.ocpsoft.prettytime.units.Decade.class);
         login = Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID);
+        model = Build.MODEL;
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -791,7 +793,7 @@ public class ActivityMain extends AppCompatActivity {
         }
         //TODO Use a real password, from QR code
         return new ClientInfo(address, port, login, "tata", canal, //NON-NLS
-                "jamuz", HelperFile.getAudioRootFolder().getAbsolutePath()); //NON-NLS
+                "jamuz", HelperFile.getAudioRootFolder().getAbsolutePath(), model); //NON-NLS
     }
 
     private void toggleOff(ToggleButton button, View layout) {
