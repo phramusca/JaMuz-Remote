@@ -89,7 +89,14 @@ public class ServiceSync extends ServiceBase {
             try {
                 helperNotification.notifyBar(notificationSync, getString(R.string.syncLabelConnecting));
                 checkAbort();
-                clientInfo.getBodyString("connect", client); //NON-NLS
+
+                HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("connect"); //NON-NLS
+                Request request = clientInfo.getRequestBuilder(urlBuilder)
+                        .addHeader("password", clientInfo.getPassword())
+                        .addHeader("rootPath", clientInfo.getRootPath())
+                        .addHeader("model", clientInfo.getModel())
+                        .build();
+                clientInfo.getBodyString(request, client); //NON-NLS
 
                 long startTime = System.currentTimeMillis();
                 long startTimeTotal = startTime;
@@ -158,11 +165,10 @@ public class ServiceSync extends ServiceBase {
 
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error ProcessSync", e); //NON-NLS
-                helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncInterrupted));
+                stopSync(getString(R.string.serviceSyncNotifySyncInterrupted), -1);
             } catch (Exception e) {
                 Log.e(TAG, "Error ProcessSync", e); //NON-NLS
-                helperNotification.notifyBar(notificationSync, "ERROR: " + e.getLocalizedMessage(), 0, 0, false, //NON-NLS
-                        true, false, "ERROR: " + e.getLocalizedMessage()); //NON-NLS
+                stopSync("ERROR: " + e.getLocalizedMessage(), -1);
             }
         }
 
