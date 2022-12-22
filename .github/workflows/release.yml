@@ -53,9 +53,31 @@ jobs:
       id: vars
       run: echo ::set-output name=asset_name::JaMuz_Remote_${GITHUB_REF_NAME}.apk
 
-    - name: Set body
-      id: var2
-      run: echo ::set-output name=body::Release ${GITHUB_REF_NAME} from pipeline
+    # - name: Bump version
+    #   uses: chkfung/android-version-actions@v1.2.1
+    #   with:
+    #     gradlePath: app/build.gradle
+    #     versionCode: ${{GITHUB_RUN_NUMBER}}
+    #     versionName: 1.0.0
+
+    - name: Get Apk Info
+      id: apk
+      uses: JantHsueh/get-apk-version-action@master
+      with:
+      apkPath: ${{steps.sign_app.outputs.signedFile}}
+
+    - name: "Read file contents"
+      id: read_file
+      uses: andstor/file-reader-action@v1
+      with:
+        path: "metadata/en/changelogs/${steps.apk.outputs.versionCode}.txt"
+
+    - name: File contents
+      run: echo "${ steps.read_file.outputs.contents }"
+
+    # - name: Read VERSION file
+    #   id: getversion
+    #   run: echo "::set-output name=version::$(cat VERSION)"
 
     - name: "Create release on github with apk"
       uses: svenstaro/upload-release-action@v2
@@ -65,4 +87,4 @@ jobs:
         asset_name: ${{ steps.vars.outputs.asset_name }}
         tag: ${{ github.ref }}
         overwrite: true
-        body: ${{ steps.var2.outputs.body }}
+        body: ${{ steps.read_file.outputs.contents }}
