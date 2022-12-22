@@ -64,7 +64,7 @@ jobs:
       id: apk
       uses: JantHsueh/get-apk-version-action@master
       with:
-      apkPath: ${{steps.sign_app.outputs.signedFile}}
+        apkPath: ${{steps.sign_app.outputs.signedFile}}
 
     - name: "Read file contents"
       id: read_file
