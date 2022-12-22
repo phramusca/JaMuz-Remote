@@ -691,7 +691,7 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         localTrack = new Track("albumArtist", "v" + version, -1, -1,
-                -1, -1, -1, "format", -1, 5, //NON-NLS
+                -1, -1, "", "format", -1, 5, //NON-NLS
                 getString(R.string.mainWelcomeTitle),
                 getString(R.string.mainWelcomeYear), getString(R.string.applicationName),
                 "welcomeHash", //Warning: "welcomeHash" value has a meaning
@@ -1217,7 +1217,7 @@ public class ActivityMain extends AppCompatActivity {
             String appPackageName = "com.google.android.googlequicksearchbox";
             try {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName))); //NON-NLS
-            } catch (android.content.ActivityNotFoundException anfe) {
+            } catch (android.content.ActivityNotFoundException ex) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName))); //NON-NLS
             }
         }

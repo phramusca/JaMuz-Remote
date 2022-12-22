@@ -421,7 +421,7 @@ public class MusicLibrary {
         int trackTotal = -1;
         int discNo = -1;
         int discTotal = -1;
-        int bitRate = -1;
+        String bitRate = "";
         String format = "";
         double bpm = -1;
         String checkedFlag = "";
@@ -443,7 +443,7 @@ public class MusicLibrary {
             trackTotal = c.getInt(c.getColumnIndexOrThrow(COL_TRACK_TOTAL));
             discNo = c.getInt(c.getColumnIndexOrThrow(COL_DISC_NO));
             discTotal = c.getInt(c.getColumnIndexOrThrow(COL_DISC_TOTAL));
-            bitRate = c.getInt(c.getColumnIndexOrThrow(COL_BITRATE));
+            bitRate = c.getString(c.getColumnIndexOrThrow(COL_BITRATE));
             format = c.getString(c.getColumnIndexOrThrow(COL_FORMAT));
             bpm = c.getDouble(c.getColumnIndexOrThrow(COL_BPM));
             checkedFlag = c.getString(c.getColumnIndexOrThrow(COL_CHECKED_FLAG));
