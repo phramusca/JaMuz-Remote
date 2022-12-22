@@ -73,7 +73,7 @@ jobs:
         path: metadata/en/changelogs/${{steps.apk.outputs.versionCode}}.txt
 
     - name: File contents
-      run: echo "${ steps.read_file.outputs.contents }"
+      run: echo ${{ steps.read_file.outputs.contents }}
 
     # - name: Read VERSION file
     #   id: getversion
