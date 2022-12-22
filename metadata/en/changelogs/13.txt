@@ -1,0 +1,4 @@
+v0.6.5 
+
+- Restrict to some MIME types: ("audio/3gpp", "audio/3gpp2", "audio/3gp2", "audio/mp4", "audio/aac", "audio/flac", "audio/mpeg", "audio/mp3", "audio/ogg", "audio/wav")
+- Then, remove those with unsupported formats: ("audio/alac")
