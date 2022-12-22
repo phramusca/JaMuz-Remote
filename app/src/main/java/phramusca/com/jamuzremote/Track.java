@@ -16,7 +16,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
@@ -29,7 +28,7 @@ import java.util.Objects;
  */
 public class Track implements Serializable {
     private static final String TAG = Track.class.getName();
-    private String lyrics = "";
+    private final String lyrics = "";
     private Date pathModifDate = new Date(0);
     private String pathMbId = "";
     private String comment = "";
@@ -40,7 +39,7 @@ public class Track implements Serializable {
     private int trackTotal = -1;
     private int discNo = -1;
     private int discTotal = -1;
-    private int bitRate = -1;
+    private String bitRate = "";
     private String format = "";
     private double BPM = -1;
     private Date modifDate = new Date(0);
@@ -107,7 +106,7 @@ public class Track implements Serializable {
      */
     public Track(Date pathModifDate, String pathMbId, String comment, String idPath,
                  String albumArtist, String year, int trackNo, int trackTotal,
-                 int discNo, int discTotal, int bitRate, String format, double bpm,
+                 int discNo, int discTotal, String bitRate, String format, double bpm,
                  Date modifDate, String checkedFlag, String copyRight, File getAppDataPath,
                  int idFileRemote, int idFileServer, double rating, String title, String album,
                  String artist, String coverHash, String path, String genre, Date addedDate,
@@ -172,7 +171,7 @@ public class Track implements Serializable {
      * @param genre       -
      */
     public Track(String albumArtist, String year, int trackNo, int trackTotal, int discNo,
-                 int discTotal, int bitRate, String format, double bpm, double rating, String title,
+                 int discTotal, String bitRate, String format, double bpm, double rating, String title,
                  String album, String artist, String coverHash, String genre) {
         this.albumArtist = albumArtist;
         this.year = year;
@@ -235,9 +234,9 @@ public class Track implements Serializable {
             }
             MediaFormat mf = mex.getTrackFormat(0);
             try {
-                bitRate = mf.getInteger(MediaFormat.KEY_BIT_RATE);
+                bitRate = String.valueOf(mf.getInteger(MediaFormat.KEY_BIT_RATE));
             } catch (NullPointerException ignored) {
-                bitRate = tryParseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE), -1);
+                bitRate = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE);
             }
             try {
                 length = (int) Math.round(mf.getLong(MediaFormat.KEY_DURATION)/1000.0/1000.0);
@@ -335,7 +334,7 @@ public class Track implements Serializable {
                 trackTotal = file.getInt("trackTotal");
                 discNo = file.getInt("discNo");
                 discTotal = file.getInt("discTotal"); //NON-NLS
-                bitRate = file.getInt("bitRate");
+                bitRate = file.getString("bitRate");
                 format = file.getString("format"); //NON-NLS
                 BPM = file.getDouble("BPM");
                 checkedFlag = file.getString("checkedFlag");
@@ -434,7 +433,7 @@ public class Track implements Serializable {
         return discTotal;
     }
 
-    public int getBitrate() {
+    public String getBitrate() {
         return bitRate;
     }
 

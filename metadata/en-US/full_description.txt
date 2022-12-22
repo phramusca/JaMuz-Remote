@@ -1,14 +1,14 @@
 Audio Player:
-    Playlist editor (user tags, rating and genre)
-    Tag editor (user tags, rating and genre)
-    Replaygain support (MP3 only, FLAC on its way)
-    One finger control
-    Voice commands
+ - Playlist editor (user tags, rating and genre)
+ - Tag editor (user tags, rating and genre)
+ - Replaygain support (MP3 only, FLAC on its way)
+ - One finger control
+ - Voice commands
 
-Merge your statistics with JaMuz
-    And so with all players JaMuz can merge with (Mixxx, Kodi, guayadeque,...)
+Merge your statistics with <a href="https://phramusca.github.io/JaMuz/">JaMuz Desktop</a>
+ - And so with all players JaMuz Desktop can merge with (Mixxx, Kodi, guayadeque,...)
 
-Sync files from JaMuz over WiFi
-    Select a playlist on JaMuz, connect JaMuz Remote sync, and wait for your files.
+Sync files from <a href="https://phramusca.github.io/JaMuz/">JaMuz Desktop</a> over WiFi
+ - Select a playlist on JaMuz Desktop, connect JaMuz Android, and wait for your files.
 
-Remote Control for JaMuz
+Remote Control for <a href="https://phramusca.github.io/JaMuz/">JaMuz Desktop</a>

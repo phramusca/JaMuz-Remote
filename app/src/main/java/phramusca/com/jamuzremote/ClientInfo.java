@@ -25,9 +25,10 @@ public class ClientInfo implements Serializable {
     private final String login;
     private final String password;
     private final String rootPath;
+    private final String model;
 
     public ClientInfo(String address, int port, String login, String password,
-                      int canal, String appId, String rootPath) {
+                      int canal, String appId, String rootPath, String model) {
         this.port = port;
         this.login = login;
         this.password = password;
@@ -35,6 +36,7 @@ public class ClientInfo implements Serializable {
         this.canal = canal;
         this.appId = appId;
         this.rootPath = rootPath;
+        this.model = model;
     }
 
     public HttpUrl.Builder getUrlBuilder(String url) {
@@ -44,7 +46,7 @@ public class ClientInfo implements Serializable {
     public Request.Builder getRequestBuilder(HttpUrl.Builder urlBuilder) {
         return new Request.Builder()
                 .addHeader("login", getLogin() + "-" + getAppId()) //NON-NLS
-                .addHeader("api-version", "1.0") //NON-NLS
+                .addHeader("api-version", "2.0") //NON-NLS
                 .url(urlBuilder.build());
     }
 
@@ -89,6 +91,10 @@ public class ClientInfo implements Serializable {
         return login;
     }
 
+    public String getModel() {
+        return model;
+    }
+
     public String getAppId() {
         return appId;
     }
@@ -97,6 +103,7 @@ public class ClientInfo implements Serializable {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("login", login); //NON-NLS
+            jsonObject.put("model", model); //NON-NLS
             jsonObject.put("password", password); //NON-NLS
             jsonObject.put("canal", canal); //NON-NLS
             jsonObject.put("appId", appId);
@@ -104,5 +111,13 @@ public class ClientInfo implements Serializable {
         } catch (JSONException ignored) {
         }
         return jsonObject;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getRootPath() {
+        return rootPath;
     }
 }

@@ -115,6 +115,7 @@ public class ActivityMain extends AppCompatActivity {
     private AudioManager audioManager;
     public static AudioPlayer audioPlayer; //TODO: Remove static
     public static String login;
+    public static String model;
     public File musicLibraryDbFile;
 
     private Map<String, Playlist> localPlaylists = new LinkedHashMap<>();
@@ -203,6 +204,7 @@ public class ActivityMain extends AppCompatActivity {
         prettyTime = new PrettyTime(Locale.getDefault());
         prettyTime.removeUnit(org.ocpsoft.prettytime.units.Decade.class);
         login = Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID);
+        model = Build.MODEL;
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -689,7 +691,7 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         localTrack = new Track("albumArtist", "v" + version, -1, -1,
-                -1, -1, -1, "format", -1, 5, //NON-NLS
+                -1, -1, "", "format", -1, 5, //NON-NLS
                 getString(R.string.mainWelcomeTitle),
                 getString(R.string.mainWelcomeYear), getString(R.string.applicationName),
                 "welcomeHash", //Warning: "welcomeHash" value has a meaning
@@ -791,7 +793,7 @@ public class ActivityMain extends AppCompatActivity {
         }
         //TODO Use a real password, from QR code
         return new ClientInfo(address, port, login, "tata", canal, //NON-NLS
-                "jamuz", HelperFile.getAudioRootFolder().getAbsolutePath()); //NON-NLS
+                "jamuz", HelperFile.getAudioRootFolder().getAbsolutePath(), model); //NON-NLS
     }
 
     private void toggleOff(ToggleButton button, View layout) {
@@ -1176,6 +1178,10 @@ public class ActivityMain extends AppCompatActivity {
 
         audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
         registerButtonReceiver();
+
+        if(wasRemoteConnected) {
+            buttonRemote.performClick();
+        }
     }
 
     private void registerButtonReceiver() {
@@ -1211,7 +1217,7 @@ public class ActivityMain extends AppCompatActivity {
             String appPackageName = "com.google.android.googlequicksearchbox";
             try {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName))); //NON-NLS
-            } catch (android.content.ActivityNotFoundException anfe) {
+            } catch (android.content.ActivityNotFoundException ex) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName))); //NON-NLS
             }
         }
@@ -1803,9 +1809,10 @@ public class ActivityMain extends AppCompatActivity {
                 buttonRemote.setBackgroundResource(R.drawable.remote_off);
                 enablePlaylistEdit(true);
                 setupLocalPlaylistSpinner();
+                buttonRemote.setText("1");
             } else {
-                buttonRemote.setText("0");
                 buttonRemote.setBackgroundResource(R.drawable.remote_on);
+                buttonRemote.setText("0");
             }
             buttonRemote.setEnabled(true);
         });
@@ -1816,11 +1823,11 @@ public class ActivityMain extends AppCompatActivity {
         runOnUiThread(() -> {
             buttonSync.setEnabled(false);
             if (enable) {
-                buttonSync.setText("1");
                 buttonSync.setBackgroundResource(R.drawable.connect_off_new);
+                buttonSync.setText("1");
             } else {
-                buttonSync.setText("0");
                 buttonSync.setBackgroundResource(R.drawable.connect_on);
+                buttonSync.setText("0");
             }
             buttonSync.setEnabled(true);
         });
@@ -2392,7 +2399,7 @@ public class ActivityMain extends AppCompatActivity {
                         final int currentPosition = jObject.getInt("currentPosition"); //NON-NLS
                         final int total = jObject.getInt("total"); //NON-NLS
                         if (isRemoteConnected()) {
-                            setSeekBar(currentPosition, total);
+                            setSeekBar(currentPosition * 1000, total * 1000);
                         }
                         break;
                     case "fileInfoInt":
