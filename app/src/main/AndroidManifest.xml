@@ -39,12 +39,6 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".ReceiverMediaButton"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </receiver>
         <receiver android:name=".ReceiverHeadSetPlugged"
             android:exported="true">
             <intent-filter>
@@ -60,6 +54,15 @@
             android:name=".ServiceScan"
             android:exported="false"
             android:singleUser="false" />
+        <service
+            android:name=".BackgroundAudioService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
 
         <activity android:name=".ActivityPlayQueue" />
         <activity android:name=".ActivityAlbums" />

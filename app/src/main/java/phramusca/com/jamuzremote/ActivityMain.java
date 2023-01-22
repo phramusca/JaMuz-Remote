@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
+import android.media.session.PlaybackState;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -32,11 +33,15 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.Html;
 import android.text.InputType;
 import android.text.Spanned;
@@ -180,6 +185,57 @@ public class ActivityMain extends AppCompatActivity {
     private GridLayout layoutPlaylistToolBar;
     private TextView textFileInfo_seekBefore;
     private TextView textFileInfo_seekAfter;
+
+
+    private MediaBrowserCompat mMediaBrowserCompat;
+    private MediaControllerCompat mMediaControllerCompat;
+
+    private static final int STATE_PAUSED = 0;
+    private static final int STATE_PLAYING = 1;
+
+    private int mCurrentState;
+
+    private final MediaBrowserCompat.ConnectionCallback mMediaBrowserCompatConnectionCallback = new MediaBrowserCompat.ConnectionCallback() {
+
+        @Override
+        public void onConnected() {
+            super.onConnected();
+            try {
+                mMediaControllerCompat = new MediaControllerCompat(ActivityMain.this, mMediaBrowserCompat.getSessionToken());
+                mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback);
+                MediaControllerCompat.setMediaController(ActivityMain.this, mMediaControllerCompat);
+
+                PlayQueue.queue.fill(localSelectedPlaylist);
+                Track track = PlayQueue.queue.getNext();
+                if (track != null) {
+                    getMediaController().getTransportControls().playFromMediaId(track.getPath(), null);
+                }
+            } catch( RemoteException ignored) {
+            }
+        }
+    };
+
+    private MediaControllerCompat.Callback mMediaControllerCompatCallback = new MediaControllerCompat.Callback() {
+
+        @Override
+        public void onPlaybackStateChanged(PlaybackStateCompat state) {
+            super.onPlaybackStateChanged(state);
+            if( state == null ) {
+                return;
+            }
+
+            switch( state.getState() ) {
+                case PlaybackStateCompat.STATE_PLAYING: {
+                    mCurrentState = STATE_PLAYING;
+                    break;
+                }
+                case PlaybackStateCompat.STATE_PAUSED: {
+                    mCurrentState = STATE_PAUSED;
+                    break;
+                }
+            }
+        }
+    };
 
     @SuppressLint({"HardwareIds", "ClickableViewAccessibility"})
     @Override
@@ -405,7 +461,30 @@ public class ActivityMain extends AppCompatActivity {
         spinnerGenre.setOnTouchListener(dimOnTouchListener);
 
         setupButton(R.id.button_previous, "previousTrack"); //NON-NLS
-        setupButton(R.id.button_play, "playTrack"); //NON-NLS
+//        setupButton(R.id.button_play, "playTrack"); //NON-NLS
+
+        mMediaBrowserCompat = new MediaBrowserCompat(this, new ComponentName(this, BackgroundAudioService.class),
+                mMediaBrowserCompatConnectionCallback, getIntent().getExtras());
+
+        mMediaBrowserCompat.connect();
+
+        Button mPlayPauseToggleButton = (Button) findViewById(R.id.button_play);
+        mPlayPauseToggleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if( mCurrentState == STATE_PAUSED ) {
+                    getMediaController().getTransportControls().play();
+                    mCurrentState = STATE_PLAYING;
+                } else {
+                    if( getMediaController().getPlaybackState().getState() == PlaybackState.STATE_PLAYING ) {
+                        getMediaController().getTransportControls().pause();
+                    }
+
+                    mCurrentState = STATE_PAUSED;
+                }
+            }
+        });
+
         setupButton(R.id.button_next, "nextTrack"); //NON-NLS
         setupButton(R.id.button_rewind, "rewind"); //NON-NLS
         setupButton(R.id.button_pullup, "pullup"); //NON-NLS
