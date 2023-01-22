@@ -705,18 +705,18 @@ public class ActivityMain extends AppCompatActivity {
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
-        registerButtonReceiver();
+//        registerButtonReceiver();
 
         //Start BT HeadSet connexion detection
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter != null) {
-            if (audioManager.isBluetoothScoAvailableOffCall()) {
-                mBluetoothAdapter.getProfileProxy(this, mHeadsetProfileListener,
-                        BluetoothProfile.HEADSET);
-            }
-        }
+//        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+//        if (mBluetoothAdapter != null) {
+//            if (audioManager.isBluetoothScoAvailableOffCall()) {
+//                mBluetoothAdapter.getProfileProxy(this, mHeadsetProfileListener,
+//                        BluetoothProfile.HEADSET);
+//            }
+//        }
 
-        //TODO: Why this one needs registerReceiver whereas ReceiverPhoneCall does not
+//        //TODO: Why this one needs registerReceiver whereas ReceiverPhoneCall does not
         registerReceiver(receiverHeadSetPlugged,
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG));
 
@@ -1176,19 +1176,19 @@ public class ActivityMain extends AppCompatActivity {
             dimOn();
         }
 
-        audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
-        registerButtonReceiver();
+//        audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
+//        registerButtonReceiver();
 
         if(wasRemoteConnected) {
             buttonRemote.performClick();
         }
     }
 
-    private void registerButtonReceiver() {
-        receiverMediaButtonName = new ComponentName(getPackageName(),
-                ReceiverMediaButton.class.getName());
-        audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
-    }
+//    private void registerButtonReceiver() {
+//        receiverMediaButtonName = new ComponentName(getPackageName(),
+//                ReceiverMediaButton.class.getName());
+//        audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
+//    }
 
     public enum SpeechPostAction {
         NONE, ASK_WITH_DELAY
@@ -1494,7 +1494,7 @@ public class ActivityMain extends AppCompatActivity {
 
         //Note: receiverMediaButtonName remains active if not unregistered
         //but causes issues
-        audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
+//        audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
 
         audioPlayer.stop(true);
 
@@ -2524,14 +2524,14 @@ public class ActivityMain extends AppCompatActivity {
             if (Objects.requireNonNull(intent.getAction())
                     .equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED);
-                if (state == BluetoothHeadset.STATE_CONNECTED) { //NON-NLS
+                if (state == BluetoothHeadset.STATE_CONNECTED) {
                     Log.i(TAG, "BT onConnected. Waiting 4s"); //NON-NLS
                     try {
                         Thread.sleep(4000);
                     } catch (InterruptedException e) {
-                        e.printStackTrace(); //NON-NLS
+                        e.printStackTrace();
                     }
-                    audioPlayer.play(); //NON-NLS
+                    audioPlayer.play();
                 } else if (state == BluetoothHeadset.STATE_DISCONNECTED) {
                     Log.i(TAG, "BT DISconnected"); //NON-NLS
                     audioPlayer.pause();
@@ -2539,8 +2539,8 @@ public class ActivityMain extends AppCompatActivity {
                     //Somehow, this situation (at least) (can) endup with other receivers (headsethook at least)
                     //not to trigger anymore => Why ?
                     //So re-registering button receiver. Seems to work
-                    audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
-                    registerButtonReceiver();
+//                    audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
+//                    registerButtonReceiver();
                 }
             }/*
             else // BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED

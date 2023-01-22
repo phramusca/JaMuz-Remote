@@ -219,9 +219,9 @@ public class AudioPlayer {
         Log.i(TAG, "pause()"); //NON-NLS
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
-            stopTimer(mediaPlayerWasPlaying);
         }
-    } //NON-NLS
+        stopTimer(mediaPlayerWasPlaying);
+    }
 
     public void resume() {
         Log.i(TAG, "resume()"); //NON-NLS
