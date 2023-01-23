@@ -1,5 +1,7 @@
 package phramusca.com.jamuzremote;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -19,7 +21,9 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.ResultReceiver;
 import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.TextUtils;
@@ -29,6 +33,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.media.MediaBrowserServiceCompat;
 import androidx.media.session.MediaButtonReceiver;
 
@@ -44,6 +49,9 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
 
     private MediaSessionCompat mMediaSessionCompat;
 
+    private PlaybackStateCompat.Builder playbackStateBuilder;
+    private MediaMetadataCompat.Builder metadataBuilder;
+
     private static final String MY_MEDIA_ROOT_ID = "media_root_id";
     private static final String MY_EMPTY_MEDIA_ROOT_ID = "empty_root_id";
 
@@ -58,7 +66,7 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
         }
     };
 
-    private MediaSessionCompat.Callback mMediaSessionCallback = new MediaSessionCompat.Callback() {
+    private final MediaSessionCompat.Callback mMediaSessionCallback = new MediaSessionCompat.Callback() {
         @Override
         public void onPlay() {
             super.onPlay();
@@ -132,7 +140,7 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
 
 
     private void initMediaSessionMetadata() {
-        MediaMetadataCompat.Builder metadataBuilder = new MediaMetadataCompat.Builder();
+
         //Notification icon in card
         metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
         metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
@@ -148,24 +156,88 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
     }
 
     private void showPlayingNotification() {
-        NotificationCompat.Builder builder = MediaStyleHelper.from(BackgroundAudioService.this, mMediaSessionCompat);
-        if (builder == null) {
-            return;
+//        NotificationCompat.Builder builder = MediaStyleHelper.from(BackgroundAudioService.this, mMediaSessionCompat);
+//        if (builder == null) {
+//            return;
+//        }
+//        builder.addAction(new NotificationCompat.Action(android.R.drawable.ic_media_pause, "Pause", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE)));
+//        //builder.setStyle(new NotificationCompat.MediaStyle().setShowActionsInCompactView(0).setMediaSession(mMediaSessionCompat.getSessionToken()));
+//        builder.setSmallIcon(R.mipmap.ic_launcher);
+//        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return;
+//        }
+//        NotificationManagerCompat.from(BackgroundAudioService.this).notify(1, builder.build());
+
+        // Given a media session and its context (usually the component containing the session)
+// Create a NotificationCompat.Builder
+
+// Get the session's metadata
+        MediaControllerCompat controller = mMediaSessionCompat.getController();
+        MediaMetadataCompat mediaMetadata = controller.getMetadata();
+        MediaDescriptionCompat description = mediaMetadata.getDescription();
+
+        NotificationChannel chan = null;
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            chan = new NotificationChannel("myNotificationChannelId", "channelName", NotificationManager.IMPORTANCE_NONE);
+            chan.setDescription("<Add channel Description>");
+            nm.createNotificationChannel(chan);
         }
-        builder.addAction(new NotificationCompat.Action(android.R.drawable.ic_media_pause, "Pause", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE)));
-        //builder.setStyle(new NotificationCompat.MediaStyle().setShowActionsInCompactView(0).setMediaSession(mMediaSessionCompat.getSessionToken()));
-        builder.setSmallIcon(R.mipmap.ic_launcher);
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        NotificationManagerCompat.from(BackgroundAudioService.this).notify(1, builder.build());
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "myNotificationChannelId");
+
+
+
+
+
+        builder
+                // Add the metadata for the currently playing track
+                .setContentTitle(description.getTitle())
+                .setContentText(description.getSubtitle())
+                .setSubText(description.getDescription())
+                .setLargeIcon(description.getIconBitmap())
+
+                // Enable launching the player by clicking the notification
+                .setContentIntent(controller.getSessionActivity())
+
+                // Stop the service when the notification is swiped away
+                .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
+                        PlaybackStateCompat.ACTION_STOP))
+
+                // Make the transport controls visible on the lockscreen
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+
+                // Add an app icon and set its accent color
+                // Be careful about the color
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary))
+
+                // Add a pause button
+                .addAction(new NotificationCompat.Action(
+                        R.drawable.ic_action_play, "Pause",
+                        MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
+                                PlaybackStateCompat.ACTION_PLAY_PAUSE)))
+
+                // Take advantage of MediaStyle features
+                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                        .setMediaSession(mMediaSessionCompat.getSessionToken())
+                        .setShowActionsInCompactView(0)
+
+                        // Add a cancel button
+                        .setShowCancelButton(true)
+                        .setCancelButtonIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
+                                PlaybackStateCompat.ACTION_STOP)));
+
+// Display the notification and place the service in the foreground
+        startForeground(NotificationId.get(), builder.build());
+
     }
 
     private void showPausedNotification() {
@@ -191,7 +263,7 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
 
 
     private void setMediaPlaybackState(int state) {
-        PlaybackStateCompat.Builder playbackStateBuilder = new PlaybackStateCompat.Builder();
+
         if( state == PlaybackStateCompat.STATE_PLAYING ) {
             playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE | PlaybackStateCompat.ACTION_PAUSE);
         } else {
@@ -237,6 +309,9 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
         } else {
             focusRequest = null;
         }
+
+        playbackStateBuilder = new PlaybackStateCompat.Builder();
+        metadataBuilder = new MediaMetadataCompat.Builder();
 
         initMediaPlayer();
         initMediaSession();
