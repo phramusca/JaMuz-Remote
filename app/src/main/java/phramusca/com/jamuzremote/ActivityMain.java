@@ -40,6 +40,7 @@ import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.Html;
@@ -104,9 +105,6 @@ import java.util.TimerTask;
 //FIXME: Use auto backup for database and playlists
 //https://developer.android.com/guide/topics/data/backup
 
-// FIXME: Move audio to a service
-// Why not using the standard android player by the way ? (less control for replaygain ?)
-
 //TODO: Find another library for kiosk mode since kidsplace has to be removed for fdroid inclusion
 
 public class ActivityMain extends AppCompatActivity {
@@ -142,7 +140,6 @@ public class ActivityMain extends AppCompatActivity {
     private TextView textViewPlaylist;
     private Button buttonRemote;
     private Button buttonSync;
-    private Button button_settings;
     private ToggleButton toggleButtonDimMode;
     private ToggleButton toggleButtonControls;
     private ToggleButton toggleButtonTagsPanel;
@@ -153,8 +150,6 @@ public class ActivityMain extends AppCompatActivity {
     private ToggleButton toggleButtonPlaylist;
     private Button buttonRatingOperator;
     private Button button_save;
-    private Button button_new;
-    private Button button_delete;
     private SeekBar seekBarPosition;
     private Spinner spinnerPlaylist;
     private Spinner spinnerGenre;
@@ -185,37 +180,72 @@ public class ActivityMain extends AppCompatActivity {
     private GridLayout layoutPlaylistToolBar;
     private TextView textFileInfo_seekBefore;
     private TextView textFileInfo_seekAfter;
+    private MediaBrowserCompat mediaBrowser;
+    private static final int MEDIA_STATE_PAUSED = 0;
+    private static final int MEDIA_STATE_PLAYING = 1;
+    private int mediaCurrentState;
 
-
-    private MediaBrowserCompat mMediaBrowserCompat;
-    private MediaControllerCompat mMediaControllerCompat;
-
-    private static final int STATE_PAUSED = 0;
-    private static final int STATE_PLAYING = 1;
-
-    private int mCurrentState;
-
-    private final MediaBrowserCompat.ConnectionCallback mMediaBrowserCompatConnectionCallback = new MediaBrowserCompat.ConnectionCallback() {
+    private final MediaBrowserCompat.ConnectionCallback mediaBrowserConnectionCallback = new MediaBrowserCompat.ConnectionCallback() {
 
         @Override
         public void onConnected() {
             super.onConnected();
-            try {
-                mMediaControllerCompat = new MediaControllerCompat(ActivityMain.this, mMediaBrowserCompat.getSessionToken());
-                mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback);
-                MediaControllerCompat.setMediaController(ActivityMain.this, mMediaControllerCompat);
+            MediaControllerCompat mediaController = new MediaControllerCompat(ActivityMain.this, mediaBrowser.getSessionToken());
+            MediaControllerCompat.setMediaController(ActivityMain.this, mediaController);
+            buildTransportControls();
+        }
 
-                PlayQueue.queue.fill(localSelectedPlaylist);
-                Track track = PlayQueue.queue.getNext();
-                if (track != null) {
-                    getMediaController().getTransportControls().playFromMediaId(track.getPath(), null);
-                }
-            } catch( RemoteException ignored) {
-            }
+        @Override
+        public void onConnectionSuspended() {
+            // The Service has crashed. Disable transport controls until it automatically reconnects
+        }
+
+        @Override
+        public void onConnectionFailed() {
+            // The Service has refused our connection
         }
     };
 
-    private MediaControllerCompat.Callback mMediaControllerCompatCallback = new MediaControllerCompat.Callback() {
+    void buildTransportControls()
+    {
+        //        setupButton(R.id.button_play, "playTrack"); //NON-NLS
+
+
+        findViewById(R.id.button_play).setOnClickListener(view -> {
+            int pbState = MediaControllerCompat.getMediaController(ActivityMain.this).getPlaybackState().getState();
+            if (pbState == PlaybackStateCompat.STATE_PLAYING) {
+                MediaControllerCompat.getMediaController(ActivityMain.this).getTransportControls().pause();
+            } else {
+                MediaControllerCompat.getMediaController(ActivityMain.this).getTransportControls().play();
+            }
+        });
+
+        //FIXME: Setup other buttons
+
+        setupButton(R.id.button_next, "nextTrack"); //NON-NLS
+        setupButton(R.id.button_rewind, "rewind"); //NON-NLS
+        setupButton(R.id.button_pullup, "pullup"); //NON-NLS
+        setupButton(R.id.button_forward, "forward"); //NON-NLS
+        setupButton(R.id.button_volUp, "volUp"); //NON-NLS
+        setupButton(R.id.button_volDown, "volDown"); //NON-NLS
+
+        MediaControllerCompat mediaController = MediaControllerCompat.getMediaController(ActivityMain.this);
+
+        // FIXME: Display the initial state
+        MediaMetadataCompat metadata = mediaController.getMetadata();
+        PlaybackStateCompat pbState = mediaController.getPlaybackState();
+
+        mediaController.registerCallback(mediaControllerCallback);
+
+        PlayQueue.queue.fill(localSelectedPlaylist);
+        Track track = PlayQueue.queue.getNext();
+        if (track != null) {
+            getMediaController().getTransportControls().playFromMediaId(track.getPath(), null);
+        }
+    }
+
+
+    private final MediaControllerCompat.Callback mediaControllerCallback = new MediaControllerCompat.Callback() {
 
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
@@ -226,15 +256,27 @@ public class ActivityMain extends AppCompatActivity {
 
             switch( state.getState() ) {
                 case PlaybackStateCompat.STATE_PLAYING: {
-                    mCurrentState = STATE_PLAYING;
+                    mediaCurrentState = MEDIA_STATE_PLAYING;
                     break;
                 }
                 case PlaybackStateCompat.STATE_PAUSED: {
-                    mCurrentState = STATE_PAUSED;
+                    mediaCurrentState = MEDIA_STATE_PAUSED;
                     break;
                 }
             }
         }
+
+        @Override
+        public void onMetadataChanged(MediaMetadataCompat metadata) {
+            //FIXME: Display changes
+        }
+
+        @Override
+        public void onSessionDestroyed() {
+            mediaBrowser.disconnect();
+            // maybe schedule a reconnection using a new MediaBrowser instance
+        }
+
     };
 
     @SuppressLint({"HardwareIds", "ClickableViewAccessibility"})
@@ -461,36 +503,6 @@ public class ActivityMain extends AppCompatActivity {
         spinnerGenre.setOnTouchListener(dimOnTouchListener);
 
         setupButton(R.id.button_previous, "previousTrack"); //NON-NLS
-//        setupButton(R.id.button_play, "playTrack"); //NON-NLS
-
-        mMediaBrowserCompat = new MediaBrowserCompat(this, new ComponentName(this, BackgroundAudioService.class),
-                mMediaBrowserCompatConnectionCallback, getIntent().getExtras());
-
-        mMediaBrowserCompat.connect();
-
-        Button mPlayPauseToggleButton = (Button) findViewById(R.id.button_play);
-        mPlayPauseToggleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if( mCurrentState == STATE_PAUSED ) {
-                    getMediaController().getTransportControls().play();
-                    mCurrentState = STATE_PLAYING;
-                } else {
-                    if( getMediaController().getPlaybackState().getState() == PlaybackState.STATE_PLAYING ) {
-                        getMediaController().getTransportControls().pause();
-                    }
-
-                    mCurrentState = STATE_PAUSED;
-                }
-            }
-        });
-
-        setupButton(R.id.button_next, "nextTrack"); //NON-NLS
-        setupButton(R.id.button_rewind, "rewind"); //NON-NLS
-        setupButton(R.id.button_pullup, "pullup"); //NON-NLS
-        setupButton(R.id.button_forward, "forward"); //NON-NLS
-        setupButton(R.id.button_volUp, "volUp"); //NON-NLS
-        setupButton(R.id.button_volDown, "volDown"); //NON-NLS
 
         toggleButtonDimMode = findViewById(R.id.button_dim_mode);
         toggleButtonDimMode.setOnClickListener(v -> setDimMode(toggleButtonDimMode.isChecked()));
@@ -574,14 +586,14 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        button_settings = findViewById(R.id.button_settings);
+        Button button_settings = findViewById(R.id.button_settings);
         button_settings.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), ActivitySettings.class);
             intent.putExtra("localPlaylists", new ArrayList<>(localPlaylists.values()));
             startActivityForResult(intent, SETTINGS_REQUEST_CODE);
         });
 
-        button_new = findViewById(R.id.button_new);
+        Button button_new = findViewById(R.id.button_new);
         button_new.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMain.this);
             builder.setTitle(R.string.playlistLabelNewName);
@@ -651,7 +663,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        button_delete = findViewById(R.id.button_delete);
+        Button button_delete = findViewById(R.id.button_delete);
         button_delete.setOnClickListener(v -> {
             if (localSelectedPlaylist != null) {
                 new AlertDialog.Builder(ActivityMain.this)
@@ -784,6 +796,9 @@ public class ActivityMain extends AppCompatActivity {
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
+        mediaBrowser = new MediaBrowserCompat(this, new ComponentName(this, BackgroundAudioService.class),
+                mediaBrowserConnectionCallback, getIntent().getExtras());
+
 //        registerButtonReceiver();
 
         //Start BT HeadSet connexion detection
@@ -805,6 +820,12 @@ public class ActivityMain extends AppCompatActivity {
 
         setDimMode(toggleButtonDimMode.isChecked());
         checkPermissionsThenScanLibrary();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mediaBrowser.connect();
     }
 
     private void displayQueue() {
@@ -1261,13 +1282,17 @@ public class ActivityMain extends AppCompatActivity {
         if(wasRemoteConnected) {
             buttonRemote.performClick();
         }
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
-//    private void registerButtonReceiver() {
-//        receiverMediaButtonName = new ComponentName(getPackageName(),
-//                ReceiverMediaButton.class.getName());
-//        audioManager.registerMediaButtonEventReceiver(receiverMediaButtonName);
-//    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (MediaControllerCompat.getMediaController(ActivityMain.this) != null) {
+            MediaControllerCompat.getMediaController(ActivityMain.this).unregisterCallback(mediaControllerCallback);
+        }
+        mediaBrowser.disconnect();
+    }
 
     public enum SpeechPostAction {
         NONE, ASK_WITH_DELAY

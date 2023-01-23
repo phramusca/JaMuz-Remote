@@ -39,6 +39,7 @@ dependencies {
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.3.Final'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     implementation 'com.athkalia.emphasis:emphasis:0.4'
+    implementation("androidx.media:media:1.6.0")
 
     implementation 'com.google.code.gson:gson:2.9.1'
     // DO NOT UPDATE guava unless changing sourceCompatibility 1.8
