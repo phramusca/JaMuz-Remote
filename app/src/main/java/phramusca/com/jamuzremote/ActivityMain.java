@@ -113,10 +113,13 @@ public class ActivityMain extends AppCompatActivity {
     private static SharedPreferences preferences;
     private final HelperToast helperToast = new HelperToast(this);
     private ClientRemote clientRemote;
+
     private Track displayedTrack;
     private Track localTrack;
-    private AudioManager audioManager;
-    public static AudioPlayer audioPlayer; //TODO: Remove static
+    private MediaBrowserCompat mediaBrowser;
+    private int mediaCurrentState = PlaybackStateCompat.STATE_STOPPED;
+    ReceiverHeadSetPlugged receiverHeadSetPlugged = new ReceiverHeadSetPlugged();
+
     public static String login;
     public static String model;
     public File musicLibraryDbFile;
@@ -180,10 +183,6 @@ public class ActivityMain extends AppCompatActivity {
     private GridLayout layoutPlaylistToolBar;
     private TextView textFileInfo_seekBefore;
     private TextView textFileInfo_seekAfter;
-    private MediaBrowserCompat mediaBrowser;
-    private static final int MEDIA_STATE_PAUSED = 0;
-    private static final int MEDIA_STATE_PLAYING = 1;
-    private int mediaCurrentState;
 
     private final MediaBrowserCompat.ConnectionCallback mediaBrowserConnectionCallback = new MediaBrowserCompat.ConnectionCallback() {
 
@@ -208,26 +207,117 @@ public class ActivityMain extends AppCompatActivity {
 
     void buildTransportControls()
     {
-        //        setupButton(R.id.button_play, "playTrack"); //NON-NLS
+        imageViewCover = findViewById(R.id.imageView);
 
+        LinearLayout layoutTrackInfo = findViewById(R.id.trackInfo);
+        layoutTrackInfo.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
+            @Override
+            public void onSwipeTop() {
+                Log.v(TAG, "onSwipeTop");
+                if (isRemoteConnected()) {
+                    clientRemote.send("forward"); //NON-NLS
+                } else {
+                    getMediaController().getTransportControls().fastForward();
+                }
+            }
 
-        findViewById(R.id.button_play).setOnClickListener(view -> {
-            int pbState = MediaControllerCompat.getMediaController(ActivityMain.this).getPlaybackState().getState();
-            if (pbState == PlaybackStateCompat.STATE_PLAYING) {
-                MediaControllerCompat.getMediaController(ActivityMain.this).getTransportControls().pause();
-            } else {
-                MediaControllerCompat.getMediaController(ActivityMain.this).getTransportControls().play();
+            @Override
+            public void onSwipeRight() {
+                Log.v(TAG, "onSwipeRight");
+                if (isRemoteConnected()) {
+                    clientRemote.send("previousTrack");
+                } else {
+                    playPrevious();
+                }
+            }
+
+            @Override
+            public void onSwipeLeft() {
+                Log.v(TAG, "onSwipeLeft");
+                if (isRemoteConnected()) {
+                    clientRemote.send("nextTrack");
+                } else {
+                    playNext();
+                }
+            }
+
+            @Override
+            public void onSwipeBottom() {
+                Log.v(TAG, "onSwipeBottom");
+                if (isRemoteConnected()) {
+                    clientRemote.send("rewind"); //NON-NLS
+                } else {
+                    getMediaController().getTransportControls().rewind();
+                }
+            }
+
+            @Override
+            public void onTouch() {
+                dimOn();
+            }
+
+            @Override
+            public void onTap() {
+                if (isDimOn) {
+                    if (isRemoteConnected()) {
+                        clientRemote.send("playTrack");
+                    } else {
+                        togglePlay();
+                    }
+                }
+            }
+
+            @Override
+            public void onDoubleTapUp() {
+                if (!isRemoteConnected() && isDimOn) {
+                    getMediaController().getTransportControls().seekTo(0);
+                    getMediaController().getTransportControls().play(); //As toggled by simple Tap
+                }
+                //TODO Send "pullup" to server if isRemoteConnected() && pullup is added back on JaMuz
+            }
+
+            @Override
+            public void onLongPressed() {
+                speechRecognizer();
             }
         });
+        String version = "version";
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            version = pInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        localTrack = new Track("albumArtist", "v" + version, -1, -1,
+                -1, -1, "", "format", -1, 5, //NON-NLS
+                getString(R.string.mainWelcomeTitle),
+                getString(R.string.mainWelcomeYear), getString(R.string.applicationName),
+                "welcomeHash", //Warning: "welcomeHash" value has a meaning
+                "---");
+        displayedTrack = localTrack;
+        displayTrack();
+        ListenerPlayer callBackPlayer = new ListenerPlayer(); //FIXME: Move listener logic to BackgroundAudioService
 
-        //FIXME: Setup other buttons
-
+        setupButton(R.id.button_play, "playTrack"); //NON-NLS
         setupButton(R.id.button_next, "nextTrack"); //NON-NLS
         setupButton(R.id.button_rewind, "rewind"); //NON-NLS
         setupButton(R.id.button_pullup, "pullup"); //NON-NLS
         setupButton(R.id.button_forward, "forward"); //NON-NLS
         setupButton(R.id.button_volUp, "volUp"); //NON-NLS
         setupButton(R.id.button_volDown, "volDown"); //NON-NLS
+
+        receiverHeadSetPlugged.setListener(new IListenerHeadSet() {
+            @Override
+            public void onPause() {
+                getMediaController().getTransportControls().pause();
+            }
+
+            @Override
+            public void onResume() {
+                getMediaController().getTransportControls().play();
+            }
+        });
+        registerReceiver(receiverHeadSetPlugged, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
 
         MediaControllerCompat mediaController = MediaControllerCompat.getMediaController(ActivityMain.this);
 
@@ -236,14 +326,10 @@ public class ActivityMain extends AppCompatActivity {
         PlaybackStateCompat pbState = mediaController.getPlaybackState();
 
         mediaController.registerCallback(mediaControllerCallback);
-
-        PlayQueue.queue.fill(localSelectedPlaylist);
-        Track track = PlayQueue.queue.getNext();
-        if (track != null) {
-            getMediaController().getTransportControls().playFromMediaId(track.getPath(), null);
-        }
     }
 
+    //FIXME: Why using this callback since we can call:  int pbState = MediaControllerCompat.getMediaController(ActivityMain.this).getPlaybackState().getState();
+    //Maybe to display that status ... :)
     private final MediaControllerCompat.Callback mediaControllerCallback = new MediaControllerCompat.Callback() {
 
         @Override
@@ -252,17 +338,7 @@ public class ActivityMain extends AppCompatActivity {
             if( state == null ) {
                 return;
             }
-
-            switch( state.getState() ) {
-                case PlaybackStateCompat.STATE_PLAYING: {
-                    mediaCurrentState = MEDIA_STATE_PLAYING;
-                    break;
-                }
-                case PlaybackStateCompat.STATE_PAUSED: {
-                    mediaCurrentState = MEDIA_STATE_PAUSED;
-                    break;
-                }
-            }
+            mediaCurrentState = state.getState();
         }
 
         @Override
@@ -696,108 +772,39 @@ public class ActivityMain extends AppCompatActivity {
         Button button_speech = findViewById(R.id.button_speech);
         button_speech.setOnClickListener(v -> speechRecognizer());
 
-        imageViewCover = findViewById(R.id.imageView);
-
-        LinearLayout layoutTrackInfo = findViewById(R.id.trackInfo);
-        layoutTrackInfo.setOnTouchListener(new OnSwipeTouchListener(this) {
-            @Override
-            public void onSwipeTop() {
-                Log.v(TAG, "onSwipeTop");
-                if (isRemoteConnected()) {
-                    clientRemote.send("forward"); //NON-NLS
-                } else {
-                    audioPlayer.forward();
-                }
-
-            }
-
-            @Override
-            public void onSwipeRight() {
-                Log.v(TAG, "onSwipeRight");
-                if (isRemoteConnected()) {
-                    clientRemote.send("previousTrack");
-                } else {
-                    playPrevious();
-                }
-            }
-
-            @Override
-            public void onSwipeLeft() {
-                Log.v(TAG, "onSwipeLeft");
-                if (isRemoteConnected()) {
-                    clientRemote.send("nextTrack");
-                } else {
-                    playNext();
-                }
-            }
-
-            @Override
-            public void onSwipeBottom() {
-                Log.v(TAG, "onSwipeBottom");
-                if (isRemoteConnected()) {
-                    clientRemote.send("rewind"); //NON-NLS
-                } else {
-                    audioPlayer.rewind();
-                }
-            }
-
-            @Override
-            public void onTouch() {
-                dimOn();
-            }
-
-            @Override
-            public void onTap() {
-                if (isDimOn) {
-                    if (isRemoteConnected()) {
-                        clientRemote.send("playTrack");
-                    } else {
-                        audioPlayer.togglePlay();
-                    }
-                }
-            }
-
-            @Override
-            public void onDoubleTapUp() {
-                if (!isRemoteConnected() && isDimOn) {
-                    audioPlayer.pullUp();
-                    audioPlayer.resume(); //As toggled by simple Tap
-                }
-                //TODO Send "pullup" to server if isRemoteConnected() && pullup is added back on JaMuz
-            }
-
-            @Override
-            public void onLongPressed() {
-                speechRecognizer();
-            }
-        });
-        String version = "version";
-        try {
-            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            version = pInfo.versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+        // Create the media browser service
+        Intent intent = new Intent(this, BackgroundAudioService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
         }
-        localTrack = new Track("albumArtist", "v" + version, -1, -1,
-                -1, -1, "", "format", -1, 5, //NON-NLS
-                getString(R.string.mainWelcomeTitle),
-                getString(R.string.mainWelcomeYear), getString(R.string.applicationName),
-                "welcomeHash", //Warning: "welcomeHash" value has a meaning
-                "---");
-        displayedTrack = localTrack;
-        displayTrack();
-        ListenerPlayer callBackPlayer = new ListenerPlayer();
-        audioPlayer = new AudioPlayer(this, callBackPlayer);
-        audioPlayer.setVolume(preferences.getInt("baseVolume", 70), displayedTrack);
-        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        else {
+            startService(intent);
+        }
+        // Create connection with the service
         mediaBrowser = new MediaBrowserCompat(this, new ComponentName(this, BackgroundAudioService.class),
-                mediaBrowserConnectionCallback, getIntent().getExtras());
-        registerReceiver(receiverHeadSetPlugged, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
+                mediaBrowserConnectionCallback, null);
+
         if (isMyServiceRunning(ServiceSync.class)) {
             enableSync(false);
         }
         setDimMode(toggleButtonDimMode.isChecked());
         checkPermissionsThenScanLibrary();
+    }
+
+    private void togglePlay() {
+        switch (mediaCurrentState) {
+            case PlaybackStateCompat.STATE_PLAYING:
+                getMediaController().getTransportControls().pause();
+                break;
+            case PlaybackStateCompat.STATE_PAUSED:
+                getMediaController().getTransportControls().play();
+                break;
+            case PlaybackStateCompat.STATE_STOPPED:
+            case PlaybackStateCompat.STATE_NONE:
+            case PlaybackStateCompat.STATE_ERROR:
+                playNext();
+                break;
+        }
     }
 
     @Override
@@ -1315,16 +1322,18 @@ public class ActivityMain extends AppCompatActivity {
         switch (speechFavor) {
             case PAUSE:
                 if (favor) {
-                    audioPlayer.pause();
+                    getMediaController().getTransportControls().pause();
                 } else {
-                    audioPlayer.resume();
+                    getMediaController().getTransportControls().play();
                 }
                 break;
             case LOWER_VOLUME:
                 if (favor) {
-                    audioPlayer.setVolume(20, displayedTrack);
+                    //FIXME: audioPlayer.setVolume(20, displayedTrack);
+                    getMediaController().setVolumeTo(20, AudioManager.ADJUST_SAME);// .setVolume(20, displayedTrack);
                 } else {
-                    audioPlayer.setVolume(preferences.getInt("baseVolume", 70), displayedTrack);
+                    //FIXME: audioPlayer.setVolume(preferences.getInt("baseVolume", 70), displayedTrack);
+                    getMediaController().setVolumeTo(preferences.getInt("baseVolume", 70), AudioManager.ADJUST_SAME);//, displayedTrack);
                 }
                 break;
             case NONE:
@@ -1472,15 +1481,15 @@ public class ActivityMain extends AppCompatActivity {
                         msg = "";
                         break;
                     case PLAYER_PAUSE:
-                        audioPlayer.pause();
+                        getMediaController().getTransportControls().pause();
                         msg = "";
                         break;
                     case PLAYER_RESUME:
-                        audioPlayer.resume();
+                        getMediaController().getTransportControls().play();
                         msg = "";
                         break;
                     case PLAYER_PULLUP:
-                        audioPlayer.pullUp();
+                        getMediaController().getTransportControls().seekTo(0);
                         msg = "";
                         break;
                 }
@@ -1517,10 +1526,12 @@ public class ActivityMain extends AppCompatActivity {
             // Need to move audio to a service, which is a good thing anyway !
             int value = data.getIntExtra("volume", -1); //NON-NLS
             if (value >= 0) {
-                String msg = audioPlayer.setVolume(value, displayedTrack);
-                if (!msg.equals("")) {
-                    (new HelperToast(getApplicationContext())).toastLong(msg);
-                }
+                getMediaController().setVolumeTo(value, AudioManager.FLAG_SHOW_UI);
+                //FIXME: audioPlayer.setVolume
+//                String msg = audioPlayer.setVolume(value, displayedTrack);
+//                if (!msg.equals("")) {
+//                    (new HelperToast(getApplicationContext())).toastLong(msg);
+//                }
             }
 
             //TODO New Feature: read CD barcode, get album info from musicbrainz and display album
@@ -1557,7 +1568,7 @@ public class ActivityMain extends AppCompatActivity {
         Log.i(TAG, "ActivityMain onDestroy"); //NON-NLS
         stopRemote();
         unregisterReceiver(receiverHeadSetPlugged);
-        audioPlayer.stop(true);
+//        getMediaController().getTransportControls().stop();
         if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
@@ -1607,14 +1618,24 @@ public class ActivityMain extends AppCompatActivity {
         }
         dimOn();
         localTrack = displayedTrack;
-        audioPlayer.stop(false);
+        getMediaController().getTransportControls().stop();
         displayedTrack.setSource(
                 displayedTrack.isHistory()
                         ? getString(R.string.playlistLabelHistory)
                         : displayedTrack.isLocked()
                         ? getString(R.string.playlistLabelUser)
                         : localSelectedPlaylist.toString());
-        audioPlayer.play(displayedTrack, helperToast);
+        Bundle bundle = new Bundle();
+        ReplayGain.GainValues replayGain = track.getReplayGain(false);
+        bundle.putFloat("AlbumGain", replayGain.getAlbumGain());
+        bundle.putFloat("TrackGain", replayGain.getTrackGain());
+        bundle.putInt("baseVolume", preferences.getInt("baseVolume", 70));
+        bundle.putString("title", track.getArtist() + " / " + track.getTitle());
+        bundle.putString("subtitle", track.getAlbum() + " (" + track.getAlbumArtist() + ")");
+        bundle.putLong("trackNumber", track.getTrackNo());
+        bundle.putLong("numTracks", track.getTrackTotal());
+        getMediaController().getTransportControls().playFromMediaId(displayedTrack.getPath(), bundle);
+        displayTrack(); //FIXME: Display from callback
         displayedTrack.setHistory(true);
         return true;
     }
@@ -1762,26 +1783,26 @@ public class ActivityMain extends AppCompatActivity {
         return msg.toString();
     }
 
-    public static Handler mHandler = new Handler(Looper.getMainLooper()) {
+    public Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message message) {
             String msg = (String) message.obj;
             Log.i(TAG, "handleMessage(" + msg + ")"); //NON-NLS
             switch (msg) {
                 case "play": //NON-NLS
-                    audioPlayer.play();
+                    getMediaController().getTransportControls().play();
                     break;
                 case "pause": //NON-NLS
-                    audioPlayer.pause();
+                    getMediaController().getTransportControls().pause();
                     break;
                 case "togglePlay": //NON-NLS
-                    audioPlayer.togglePlay();
+                    togglePlay();
                     break;
                 case "playNext": //NON-NLS
-                    audioPlayer.playNext();
+                    playNext();
                     break;
                 case "playPrevious": //NON-NLS
-                    audioPlayer.playPrevious();
+                    playPrevious();
                     break;
             }
         }
@@ -2027,24 +2048,22 @@ public class ActivityMain extends AppCompatActivity {
                     playNext();
                     break;
                 case "playTrack":
-                    audioPlayer.togglePlay(); //NON-NLS
+                    togglePlay();
                     break;
                 case "pullup": //NON-NLS
-                    audioPlayer.pullUp();
+                    getMediaController().getTransportControls().seekTo(0);
                     break; //NON-NLS
                 case "rewind": //NON-NLS
-                    audioPlayer.rewind(); //NON-NLS
+                    getMediaController().getTransportControls().rewind();
                     break;
                 case "forward": //NON-NLS
-                    audioPlayer.forward();
+                    getMediaController().getTransportControls().fastForward();
                     break;
                 case "volUp":
-                    audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
-                            AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
+                    getMediaController().adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
                     break;
                 case "volDown":
-                    audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
-                            AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
+                    getMediaController().adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
                     break;
                 default:
                     //Popup("Error", "Not implemented");
@@ -2302,8 +2321,10 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void displayTrackDetails() {
-        runOnUiThread(() -> setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
-                String.format(Locale.getDefault(), "<html><BR/>%s<BR/>%s %d/5 %s %s<BR/>%s%s<BR/></html>", //NON-NLS
+        runOnUiThread(() -> {
+            if(displayedTrack != null) {
+                setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
+                        String.format(Locale.getDefault(), "<html><BR/>%s<BR/>%s %d/5 %s %s<BR/>%s%s<BR/></html>", //NON-NLS
                         displayedTrack.getSource().equals("") //NON-NLS
                                 ? "" //NON-NLS
                                 : "<u>".concat(displayedTrack.getSource()).concat("</u>"), //NON-NLS
@@ -2312,7 +2333,9 @@ public class ActivityMain extends AppCompatActivity {
                         displayedTrack.getGenre(),
                         displayedTrack.getYear(),
                         getLastPlayedAgo(displayedTrack),
-                        getAddedDateAgo(displayedTrack))))));
+                        getAddedDateAgo(displayedTrack)))));
+            }
+        });
     }
 
     public static String getLastPlayedAgo(Track track) {
@@ -2528,8 +2551,6 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    //Receivers
-    ReceiverHeadSetPlugged receiverHeadSetPlugged = new ReceiverHeadSetPlugged();
     public static Playlist clonePlaylist(Playlist playlist) {
         Gson gson = new Gson();
         String json = gson.toJson(playlist);
