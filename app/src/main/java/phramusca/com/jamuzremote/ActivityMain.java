@@ -244,7 +244,6 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-
     private final MediaControllerCompat.Callback mediaControllerCallback = new MediaControllerCompat.Callback() {
 
         @Override
@@ -772,7 +771,6 @@ public class ActivityMain extends AppCompatActivity {
                 speechRecognizer();
             }
         });
-
         String version = "version";
         try {
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
@@ -780,7 +778,6 @@ public class ActivityMain extends AppCompatActivity {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-
         localTrack = new Track("albumArtist", "v" + version, -1, -1,
                 -1, -1, "", "format", -1, 5, //NON-NLS
                 getString(R.string.mainWelcomeTitle),
@@ -789,35 +786,16 @@ public class ActivityMain extends AppCompatActivity {
                 "---");
         displayedTrack = localTrack;
         displayTrack();
-
         ListenerPlayer callBackPlayer = new ListenerPlayer();
         audioPlayer = new AudioPlayer(this, callBackPlayer);
         audioPlayer.setVolume(preferences.getInt("baseVolume", 70), displayedTrack);
-
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-
         mediaBrowser = new MediaBrowserCompat(this, new ComponentName(this, BackgroundAudioService.class),
                 mediaBrowserConnectionCallback, getIntent().getExtras());
-
-//        registerButtonReceiver();
-
-        //Start BT HeadSet connexion detection
-//        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-//        if (mBluetoothAdapter != null) {
-//            if (audioManager.isBluetoothScoAvailableOffCall()) {
-//                mBluetoothAdapter.getProfileProxy(this, mHeadsetProfileListener,
-//                        BluetoothProfile.HEADSET);
-//            }
-//        }
-
-//        //TODO: Why this one needs registerReceiver whereas ReceiverPhoneCall does not
-        registerReceiver(receiverHeadSetPlugged,
-                new IntentFilter(Intent.ACTION_HEADSET_PLUG));
-
+        registerReceiver(receiverHeadSetPlugged, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
         if (isMyServiceRunning(ServiceSync.class)) {
             enableSync(false);
         }
-
         setDimMode(toggleButtonDimMode.isChecked());
         checkPermissionsThenScanLibrary();
     }
@@ -1266,19 +1244,12 @@ public class ActivityMain extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.i(TAG, "ActivityMain onResume"); //NON-NLS
-
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("ServiceBase"));
-
         getFromQRcode(getIntent().getDataString());
-
         if (toggleButtonDimMode.isChecked()) {
             dimOn();
         }
-
-//        audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
-//        registerButtonReceiver();
-
         if(wasRemoteConnected) {
             buttonRemote.performClick();
         }
@@ -1566,7 +1537,6 @@ public class ActivityMain extends AppCompatActivity {
             if (!content.equals("")) {
                 content = content.substring("jamuzremote://".length());
                 content = Encryption.decrypt(content, "NOTeBrrhzrtestSecretK");
-
                 buttonRemote.setEnabled(false);
                 buttonSync.setEnabled(false);
                 SharedPreferences.Editor editor = preferences.edit();
@@ -1586,27 +1556,12 @@ public class ActivityMain extends AppCompatActivity {
         super.onDestroy();
         Log.i(TAG, "ActivityMain onDestroy"); //NON-NLS
         stopRemote();
-
-        //Better unregister as it does not trigger anyway + raises exceptions if not
         unregisterReceiver(receiverHeadSetPlugged);
-        try {
-            unregisterReceiver(mHeadsetBroadcastReceiver);
-        } catch (IllegalArgumentException ex) {
-            //TODO: Why does this occurs in Galaxy tablet
-            //TODO: Test mHeadsetBroadcastReceiver in Galaxy tablet
-        }
-
-        //Note: receiverMediaButtonName remains active if not unregistered
-        //but causes issues
-//        audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
-
         audioPlayer.stop(true);
-
         if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
-
         // Not closing as services may still need it
         //TODO: Close when everything's complete (scan, sync and jamuz)
         /*HelperLibrary.close();*/
@@ -2402,7 +2357,6 @@ public class ActivityMain extends AppCompatActivity {
 
             if (displayedTrack.getIdFileRemote() >= 0) {
                 displayImage(RepoCovers.getCoverIcon(displayedTrack, RepoCovers.IconSize.COVER, true));
-                bluetoothNotifyChange(AVRCP_META_CHANGED);
             } else if (displayedTrack.getCoverHash().equals("welcomeHash")) {
                 displayImage(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_startup_cover_foreground));
             } else {
@@ -2423,22 +2377,6 @@ public class ActivityMain extends AppCompatActivity {
                 setTagButtonTextColor(button);
             }
         }
-    }
-
-    //private static final String AVRCP_PLAYSTATE_CHANGED = "com.android.music.playstatechanged";
-    private static final String AVRCP_META_CHANGED = "com.android.music.metachanged";
-
-    private void bluetoothNotifyChange(String what) {
-        Intent i = new Intent(what);
-        i.putExtra("id", Long.valueOf(displayedTrack.getIdFileRemote())); //NON-NLS
-        i.putExtra("artist", displayedTrack.getArtist()); //NON-NLS //NON-NLS //NON-NLS //NON-NLS //NON-NLS
-        i.putExtra("album", displayedTrack.getAlbum()); //NON-NLS
-        i.putExtra("track", displayedTrack.getTitle()); //NON-NLS
-        i.putExtra("playing", "true"); //NON-NLS
-        i.putExtra("ListSize", "99");
-        i.putExtra("duration", "20"); //NON-NLS
-        i.putExtra("position", "0"); //NON-NLS
-        sendBroadcast(i);
     }
 
     //Display cover from cache or ask for it
@@ -2591,88 +2529,11 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     //Receivers
-    ComponentName receiverMediaButtonName;
     ReceiverHeadSetPlugged receiverHeadSetPlugged = new ReceiverHeadSetPlugged();
-
-    protected BluetoothAdapter mBluetoothAdapter;
-    protected BluetoothHeadset mBluetoothHeadset;
-
-    protected BluetoothProfile.ServiceListener mHeadsetProfileListener = new BluetoothProfile.ServiceListener() {
-        @Override
-        public void onServiceDisconnected(int profile) {
-            try {
-                unregisterReceiver(mHeadsetBroadcastReceiver);
-            } catch (IllegalArgumentException ex) {
-                //java.lang.IllegalArgumentException: Receiver not registered
-                //TODO: We don't care but why does this happen ?
-            }
-            mBluetoothHeadset = null;
-        }
-
-        @Override
-        public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            mBluetoothHeadset = (BluetoothHeadset) proxy;
-
-            registerReceiver(mHeadsetBroadcastReceiver,
-                    new IntentFilter(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED));
-
-            //This is triggered on phone calls, already received in ReceiverPhoneCall
-            /*registerReceiver(mHeadsetBroadcastReceiver,
-                    new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED));*/
-        }
-    };
-
-    protected BroadcastReceiver mHeadsetBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Objects.requireNonNull(intent.getAction())
-                    .equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
-                int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED);
-                if (state == BluetoothHeadset.STATE_CONNECTED) {
-                    Log.i(TAG, "BT onConnected. Waiting 4s"); //NON-NLS
-                    try {
-                        Thread.sleep(4000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    audioPlayer.play();
-                } else if (state == BluetoothHeadset.STATE_DISCONNECTED) {
-                    Log.i(TAG, "BT DISconnected"); //NON-NLS
-                    audioPlayer.pause();
-
-                    //Somehow, this situation (at least) (can) endup with other receivers (headsethook at least)
-                    //not to trigger anymore => Why ?
-                    //So re-registering button receiver. Seems to work
-//                    audioManager.unregisterMediaButtonEventReceiver(receiverMediaButtonName);
-//                    registerButtonReceiver();
-                }
-            }/*
-            else // BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED
-            {
-                //This is triggered on phone calls, already received in ReceiverPhoneCall
-
-                int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_AUDIO_DISCONNECTED);
-                if (state == BluetoothHeadset.STATE_AUDIO_CONNECTED)
-                {
-                    Log.d(TAG, "BT AUDIO onConnected");
-
-                }
-                else if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED)
-                {
-                    Log.d(TAG, "BT AUDIO DISconnected");
-
-                }
-            }*/
-        }
-    };
-
     public static Playlist clonePlaylist(Playlist playlist) {
-        //Save to Json
         Gson gson = new Gson();
         String json = gson.toJson(playlist);
-        //Create a new from json
-        Type mapType = new TypeToken<Playlist>() {
-        }.getType();
+        Type mapType = new TypeToken<Playlist>() {}.getType();
         Playlist newPlaylist = null;
         try {
             newPlaylist = gson.fromJson(json, mapType);
