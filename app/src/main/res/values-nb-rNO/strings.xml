@@ -6,16 +6,6 @@
     <string name="settingsServerButtonScanQR">Skann QR</string>
     <string name="settingsServerToastProblemQR">Problem med lesing av QR-kode.</string>
     <string name="settingsReplayGainTextViewBaseVolume">Grunnlydstyrke:</string>
-    <string name="settingsKidsPlaceTextViewTitle">Barnerommet</string>
-    <string name="settingsKidsPlaceTextViewHelp">Barnerommet er et tredjepartsprogram fra Play-butikken.</string>
-    <string name="settingsKidsPlaceCheckBoxLimit">Begrens til denne spillelisten:</string>
-    <string name="settingsKidsPlaceCheckBoxAllowDeleteSaveNew">Tillat sletting, lagring og opprettelse av en ny spilleliste</string>
-    <string name="settingsKidsPlaceCheckBoxAllowEdition">Tillat endring av spor</string>
-    <string name="settingsKidsPlaceCheckBoxOnStartup">Start Barnerommet med JaMuz</string>
-    <string name="settingsLocalFilesTextViewPath">Sti:</string>
-    <string name="settingsDirectoryChooserButtonNewFolder">Ny mappe</string>
-    <string name="settingsDirectoryChooserFailedToCreate">Klarte ikke å opprette</string>
-    <string name="settingsDirectoryChooserFailedToCreateSuffix">mappe.</string>
     <string name="playlistTextViewExcludeTheLast">Utelukk siste</string>
     <string name="playlistTextViewOrderBy">Sorter etter:</string>
     <string name="playlistLabel">Spilleliste</string>
@@ -72,7 +62,6 @@
     <string name="playlistLabelAlreadyExists">finnes allerede.</string>
     <string name="speakUnknown">ukjent.</string>
     <string name="speakRatingIncorrect">uriktig.</string>
-    <string name="settingsDirectoryChooserNewFolderName">Nytt mappenavn</string>
     <string name="speakRating">Vurdering</string>
 
     <string name="serviceSyncNotifyDownloadTitle">Last ned</string>
@@ -96,8 +85,6 @@
     <string name="mainToastEmptyPlaylist">Tom spilleliste.</string>
     <string name="mainToastNoTracksBeyond">Ingen flere spor.</string>
     <string name="mainToastNotImplemented">Ikke implementert.</string>
-    <string name="mainAlertDialogClosingApplicationTitle">Lukker JaMuz</string>
-    <string name="mainAlertDialogClosingApplicationMessage">Stopp avspilling og avslutt programmet\?</string>
     <string name="settingsLocalFilesTextViewHelp">Advarsel: Disse lokale sporene vil IKKE synkroniseres med JaMuz-tjeneren! Det anbefales sterkt å istedenfor bruke JaMuz-tjener for å hente sporene dine!</string>
     <string name="serviceSyncNotifySyncReceivedGenres">Mottatte sjangere …</string>
     <string name="serviceSyncNotifySyncPreparingMerge">Forbereder fletting av statistikk.</string>

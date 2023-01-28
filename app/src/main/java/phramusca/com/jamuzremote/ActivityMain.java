@@ -2532,18 +2532,6 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() { //NON-NLS
-        Log.i(TAG, "ActivityMain onBackPressed"); //NON-NLS
-        new AlertDialog.Builder(this)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle(R.string.mainAlertDialogClosingApplicationTitle)
-                .setMessage(R.string.mainAlertDialogClosingApplicationMessage)
-                .setPositiveButton(R.string.globalLabelYes, (dialog, which) -> finish())
-                .setNegativeButton(R.string.globalLabelNo, null)
-                .show();
-    }
-
-    @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         if (intent.getAction() != null && intent.getAction().equals("android.intent.action.VIEW")) {
