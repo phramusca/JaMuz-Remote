@@ -80,21 +80,10 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
         }
         playbackStateBuilder = new PlaybackStateCompat.Builder();
         metadataBuilder = new MediaMetadataCompat.Builder();
-
-//        initMediaPlayer();
         initMediaSession();
         initNoisyReceiver();
-
         setMediaPlaybackState(PlaybackStateCompat.STATE_STOPPED);
-//        showPlayingNotification();
     }
-
-//    private void initMediaPlayer() {
-//        mediaPlayer = new MediaPlayer();
-//        mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-//        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-//        mediaPlayer.setVolume(1.0f, 1.0f);
-//    }
 
     private void initMediaSession() {
         ComponentName mediaButtonReceiver = new ComponentName(getApplicationContext(), MediaButtonReceiver.class);
@@ -119,8 +108,7 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
     private void initNoisyReceiver() {
         //Handles headphones coming unplugged. cannot be done through a manifest receiver
         IntentFilter filter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-        //FIXME: Raises Service phramusca.com.jamuzremote.BackgroundAudioService has leaked IntentReceiver phramusca.com.jamuzremote.BackgroundAudioService$3@b5d2b3f that was originally registered here. Are you missing a call to unregisterReceiver()?
-//        registerReceiver(noisyReceiver, filter);
+        registerReceiver(noisyReceiver, filter);
     }
 
     private final MediaSessionCompat.Callback mediaSessionCallback = new MediaSessionCompat.Callback() {
@@ -141,12 +129,7 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
                     Log.i(TAG, "mediaPlayer.stop()" + Arrays.toString(mediaPlayer.getTrackInfo())); //NON-NLS
                     mediaPlayer.stop();
                     setMediaPlaybackState(PlaybackStateCompat.STATE_STOPPED);
-                    //if (release) {
-                    //mediaPlayer.release();
-                    //mediaPlayer = null;
-                    //}
-                    //callback.onPositionChanged(0, 1);
-                }
+                 }
                 stopTimer();
             } catch (Exception e) { //NON-NLS //NON-NLS
                 Log.w(TAG, "Failed to stop"); //NON-NLS
@@ -210,12 +193,8 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
             if (mediaPlayer!=null && mediaPlayer.isPlaying()) {
                 mediaPlayer.pause();
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
-//                showPausedNotification();
+                stopForeground(false);
             }
-            //FIXME:
-//            unregisterReceiver(noisyReceiver);
-            // Take the service out of the foreground, retain the notification
-            stopForeground(false);
         }
 
         @Override
@@ -329,17 +308,10 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
             result = audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         }
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            // Start the service
             startService(new Intent(getApplicationContext(), MediaBrowserService.class));
-            // Set the session active  (and update metadata and state)
             mediaSession.setActive(true);
-            //askFocusAndPlay();
-            // start the player (custom call)
             mediaPlayer.start();
             setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
-            // Register BECOME_NOISY BroadcastReceiver
-            initNoisyReceiver();
-            // Put the service in the foreground, post notification
             showPlayingNotification();
             mediaPlayerWasPlaying = true;
             startTimer();
@@ -351,7 +323,7 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
             @Override
             public void onTick(long millisUntilFinished_) {
                 if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                    setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
+                    //setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
 //                    callback.onPositionChanged(mediaPlayer.getCurrentPosition(), duration);
                 } else {
                     this.cancel();
@@ -370,11 +342,11 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
             if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                 Log.i(TAG, "mediaPlayer.stop()" + Arrays.toString(mediaPlayer.getTrackInfo())); //NON-NLS
                 mediaPlayer.stop();
+                setMediaPlaybackState(PlaybackStateCompat.STATE_STOPPED);
                 if (release) {
                     mediaPlayer.release();
                     mediaPlayer = null;
                 }
-                setMediaPlaybackState(PlaybackStateCompat.STATE_STOPPED);
 //                callback.onPositionChanged(0, 1);
             }
             stopTimer();
@@ -446,34 +418,27 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
                 // Stop the service when the notification is swiped away
                 .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
                         PlaybackStateCompat.ACTION_STOP))
-
                 // Make the transport controls visible on the lockscreen
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-
                 // Add an app icon and set its accent color
                 // Be careful about the color
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary))
-
                 // Add a pause button
                 .addAction(new NotificationCompat.Action(
                         R.drawable.ic_action_play, "Pause",
                         MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
                                 PlaybackStateCompat.ACTION_PLAY_PAUSE)))
-
                 // Take advantage of MediaStyle features
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(mediaSession.getSessionToken())
                         .setShowActionsInCompactView(0)
-
                         // Add a cancel button
                         .setShowCancelButton(true)
                         .setCancelButtonIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
                                 PlaybackStateCompat.ACTION_STOP)));
-
-// Display the notification and place the service in the foreground
+        // Display the notification and place the service in the foreground
         startForeground(NotificationId.get(), builder.build());
-
     }
 
     private void setMediaPlaybackState(int state) {
@@ -555,9 +520,7 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
             result.sendResult(null);
             return;
         }
-
         // Assume for example that the music catalog is already loaded/cached.
-
         List<MediaBrowserCompat.MediaItem> mediaItems = new ArrayList<>();
 
         // Check if this is the root menu:
@@ -589,19 +552,12 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
         super.onDestroy();
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         audioManager.abandonAudioFocus(audioFocusChangeListener);
-//        unregisterReceiver(noisyReceiver); //FIXME: Can be not registered, which causes an exception ( java.lang.IllegalArgumentException: Receiver not registered)
-        mediaSession.release();
+        unregisterReceiver(noisyReceiver);
         NotificationManagerCompat.from(this).cancel(1);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             audioManager.abandonAudioFocusRequest(audioFocusRequest);
         }
-        //FIXME:
-//            unregisterReceiver(noisyReceiver);
-        // Stop the service
-        stopSelf();
-        // Set the session inactive  (and update metadata and state)
+        mediaSession.release();
         mediaSession.setActive(false);
-        // Take the service out of the foreground
-        stopForeground(false);
     }
 }
