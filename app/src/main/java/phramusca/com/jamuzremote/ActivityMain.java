@@ -332,21 +332,23 @@ public class ActivityMain extends AppCompatActivity {
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             super.onPlaybackStateChanged(state);
 
+            if(state.getState() == PlaybackStateCompat.STATE_SKIPPING_TO_NEXT) {
+                playNext();
+            }
+
             // If there's an ongoing animation, stop it now.
             if (mProgressAnimator != null) {
                 mProgressAnimator.cancel();
                 mProgressAnimator = null;
             }
 
-            final int progress = state != null
-                    ? (int) state.getPosition()
-                    : 0;
+            final int progress = (int) state.getPosition();
             setSeekBar(progress, seekBarPosition.getMax());
 
             // If the media is playing then the seekbar should follow it, and the easiest
             // way to do that is to create a ValueAnimator to update it so the bar reaches
             // the end of the media the same time as playback gets there (or close enough).
-            if (state != null && state.getState() == PlaybackStateCompat.STATE_PLAYING) {
+            if (state.getState() == PlaybackStateCompat.STATE_PLAYING) {
                 final int timeToEnd = (int) ((seekBarPosition.getMax() - progress) / state.getPlaybackSpeed());
 
                 mProgressAnimator = ValueAnimator.ofInt(progress, seekBarPosition.getMax())
@@ -1681,7 +1683,7 @@ public class ActivityMain extends AppCompatActivity {
         bundle.putLong("trackNumber", track.getTrackNo());
         bundle.putLong("numTracks", track.getTrackTotal());
         getMediaController().getTransportControls().playFromMediaId(displayedTrack.getPath(), bundle);
-        displayTrack(); //FIXME: Display from callback
+        displayTrack();
         displayedTrack.setHistory(true);
         return true;
     }
