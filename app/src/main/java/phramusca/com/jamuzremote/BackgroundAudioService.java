@@ -159,7 +159,6 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
                     mediaPlayer.setDataSource(mediaId);
                 }
                 mediaPlayer.prepare();
-//                callback.reset();
                 if (volume >= 0) {
                     baseVolume = ((float) volume / 100.0f);
                 }
@@ -311,20 +310,23 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
             startService(new Intent(getApplicationContext(), MediaBrowserService.class));
             mediaSession.setActive(true);
             mediaPlayer.start();
+            metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration);
+            mediaSession.setMetadata(metadataBuilder.build());
             setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
             showPlayingNotification();
             mediaPlayerWasPlaying = true;
+
             startTimer();
         }
     }
 
     private void startTimer() {
-        timer = new CountDownTimer(duration - mediaPlayer.getCurrentPosition() - 1, 500) {
+        timer = new CountDownTimer(duration - mediaPlayer.getCurrentPosition() - 1, 30000) {
             @Override
             public void onTick(long millisUntilFinished_) {
                 if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                    //setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
-//                    callback.onPositionChanged(mediaPlayer.getCurrentPosition(), duration);
+                    playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, mediaPlayer.getCurrentPosition(), 1);
+                    mediaSession.setPlaybackState(playbackStateBuilder.build());
                 } else {
                     this.cancel();
                 }
@@ -347,7 +349,8 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
                     mediaPlayer.release();
                     mediaPlayer = null;
                 }
-//                callback.onPositionChanged(0, 1);
+                playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1);
+                mediaSession.setPlaybackState(playbackStateBuilder.build());
             }
             stopTimer();
         } catch (Exception e) { //NON-NLS //NON-NLS

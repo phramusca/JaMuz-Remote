@@ -5,11 +5,9 @@ import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
 import static phramusca.com.jamuzremote.StringManager.trimTrailingWhitespace;
 
 import android.Manifest;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothHeadset;
-import android.bluetooth.BluetoothProfile;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -23,7 +21,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
-import android.media.session.PlaybackState;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -33,7 +30,6 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
@@ -52,6 +48,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -117,7 +114,6 @@ public class ActivityMain extends AppCompatActivity {
     private Track displayedTrack;
     private Track localTrack;
     private MediaBrowserCompat mediaBrowser;
-    private int mediaCurrentState = PlaybackStateCompat.STATE_STOPPED;
     ReceiverHeadSetPlugged receiverHeadSetPlugged = new ReceiverHeadSetPlugged();
 
     public static String login;
@@ -328,30 +324,80 @@ public class ActivityMain extends AppCompatActivity {
         mediaController.registerCallback(mediaControllerCallback);
     }
 
-    //FIXME: Why using this callback since we can call:  int pbState = MediaControllerCompat.getMediaController(ActivityMain.this).getPlaybackState().getState();
-    //Maybe to display that status ... :)
     private final MediaControllerCompat.Callback mediaControllerCallback = new MediaControllerCompat.Callback() {
+
+        private ValueAnimator mProgressAnimator;
 
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             super.onPlaybackStateChanged(state);
-            if( state == null ) {
-                return;
+
+            // If there's an ongoing animation, stop it now.
+            if (mProgressAnimator != null) {
+                mProgressAnimator.cancel();
+                mProgressAnimator = null;
             }
-            mediaCurrentState = state.getState();
+
+            final int progress = state != null
+                    ? (int) state.getPosition()
+                    : 0;
+            setSeekBar(progress, seekBarPosition.getMax());
+
+            // If the media is playing then the seekbar should follow it, and the easiest
+            // way to do that is to create a ValueAnimator to update it so the bar reaches
+            // the end of the media the same time as playback gets there (or close enough).
+            if (state != null && state.getState() == PlaybackStateCompat.STATE_PLAYING) {
+                final int timeToEnd = (int) ((seekBarPosition.getMax() - progress) / state.getPlaybackSpeed());
+
+                mProgressAnimator = ValueAnimator.ofInt(progress, seekBarPosition.getMax())
+                        .setDuration(timeToEnd);
+                mProgressAnimator.setInterpolator(new LinearInterpolator());
+                mProgressAnimator.addUpdateListener(valueAnimator -> {
+                    // If the user is changing the slider, cancel the animation.
+                    if (mIsTracking) {
+                        valueAnimator.cancel();
+                        return;
+                    }
+
+                    final int animatedIntValue = (int) valueAnimator.getAnimatedValue();
+                    setSeekBar(animatedIntValue, seekBarPosition.getMax());
+                });
+                mProgressAnimator.start();
+            }
         }
 
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
-            //FIXME: Display changes
+            final int max = metadata != null
+                    ? (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION)
+                    : 0;
+            setSeekBar(0, max);
         }
 
         @Override
         public void onSessionDestroyed() {
             mediaBrowser.disconnect();
-            // maybe schedule a reconnection using a new MediaBrowser instance
+        }
+    };
+
+    private boolean mIsTracking = false;
+
+    private final SeekBar.OnSeekBarChangeListener mOnSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         }
 
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            mIsTracking = true;
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            getMediaController().getTransportControls().seekTo(seekBarPosition.getProgress());
+            mIsTracking = false;
+        }
     };
 
     @SuppressLint({"HardwareIds", "ClickableViewAccessibility"})
@@ -567,7 +613,7 @@ public class ActivityMain extends AppCompatActivity {
         spinnerPlaylistLimitValue.setOnTouchListener(dimOnTouchListener);
 
         seekBarPosition = findViewById(R.id.seekBar);
-        seekBarPosition.setEnabled(false);
+        seekBarPosition.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
 
         spinnerPlaylist = findViewById(R.id.spinner_playlist);
         spinnerPlaylist.setOnItemSelectedListener(spinnerPlaylistListener);
@@ -792,7 +838,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void togglePlay() {
-        switch (mediaCurrentState) {
+        switch (getMediaController().getPlaybackState().getState()) {
             case PlaybackStateCompat.STATE_PLAYING:
                 getMediaController().getTransportControls().pause();
                 break;
@@ -1680,19 +1726,14 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    class ListenerPlayer implements IListenerPlayer {
+    class ListenerPlayer {
 
         private int quarterPosition = 0;
 
-        @Override
-        public void reset() {
-            quarterPosition = 0;
-        }
-
-        @Override
+        //FIXME: Implement this in new MediaSeekBar
         public void onPositionChanged(int position, int duration) {
             if (!isRemoteConnected()) {
-                setSeekBar(position, duration);
+                //setSeekBar(position, duration);
                 int remaining = (duration - position);
                 if (remaining < 5001 && remaining > 4501) { //TODO: Why those numbers ? (can't remember ...)
                     dimOn();
@@ -1712,33 +1753,6 @@ public class ActivityMain extends AppCompatActivity {
                     }
                 }
             }
-        }
-
-        @Override
-        public void displaySpeechRecognizer() {
-            speechRecognizer();
-        }
-
-        @Override
-        public void onPlayBackStart() {
-            displayTrack();
-        }
-
-        @Override
-        public void onPlayBackEnd() {
-            if (!isRemoteConnected()) {
-                playNext();
-            }
-        }
-
-        @Override
-        public void doPlayPrevious() {
-            playPrevious();
-        }
-
-        @Override
-        public void doPlayNext() {
-            playNext();
         }
     }
 
