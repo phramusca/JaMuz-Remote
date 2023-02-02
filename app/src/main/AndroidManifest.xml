@@ -63,7 +63,7 @@
             android:exported="false"
             android:singleUser="false" />
         <service
-            android:name=".BackgroundAudioService"
+            android:name=".ServiceAudioPlayer"
             android:exported="false">
             <intent-filter>
 <!--                <action android:name="android.intent.action.MEDIA_BUTTON" />-->

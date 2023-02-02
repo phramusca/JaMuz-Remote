@@ -292,7 +292,7 @@ public class ActivityMain extends AppCompatActivity {
                 "---");
         displayedTrack = localTrack;
         displayTrack();
-        ListenerPlayer callBackPlayer = new ListenerPlayer(); //FIXME: Move listener logic to BackgroundAudioService
+        ListenerPlayer callBackPlayer = new ListenerPlayer();
 
         setupButton(R.id.button_play, "playTrack"); //NON-NLS
         setupButton(R.id.button_next, "nextTrack"); //NON-NLS
@@ -332,14 +332,16 @@ public class ActivityMain extends AppCompatActivity {
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             super.onPlaybackStateChanged(state);
 
-            if(state.getState() == PlaybackStateCompat.STATE_SKIPPING_TO_NEXT) {
-                playNext();
-            }
-
             // If there's an ongoing animation, stop it now.
             if (mProgressAnimator != null) {
                 mProgressAnimator.cancel();
                 mProgressAnimator = null;
+            }
+
+            //FIXME!!! Move queue management to ServiceAudioPlayer as this trick only works when activity is running :(
+            //Good too for displaying metadata and passing only PlayQueue position b/w activity and service
+            if(state.getState() == PlaybackStateCompat.STATE_SKIPPING_TO_NEXT) {
+                playNext();
             }
 
             final int progress = (int) state.getPosition();
@@ -821,7 +823,7 @@ public class ActivityMain extends AppCompatActivity {
         button_speech.setOnClickListener(v -> speechRecognizer());
 
         // Create the media browser service
-        Intent intent = new Intent(this, BackgroundAudioService.class);
+        Intent intent = new Intent(this, ServiceAudioPlayer.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent);
         }
@@ -829,7 +831,7 @@ public class ActivityMain extends AppCompatActivity {
             startService(intent);
         }
         // Create connection with the service
-        mediaBrowser = new MediaBrowserCompat(this, new ComponentName(this, BackgroundAudioService.class),
+        mediaBrowser = new MediaBrowserCompat(this, new ComponentName(this, ServiceAudioPlayer.class),
                 mediaBrowserConnectionCallback, null);
 
         if (isMyServiceRunning(ServiceSync.class)) {
@@ -1616,13 +1618,11 @@ public class ActivityMain extends AppCompatActivity {
         Log.i(TAG, "ActivityMain onDestroy"); //NON-NLS
         stopRemote();
         unregisterReceiver(receiverHeadSetPlugged);
-//        getMediaController().getTransportControls().stop();
         if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
         // Not closing as services may still need it
-        //TODO: Close when everything's complete (scan, sync and jamuz)
         /*HelperLibrary.close();*/
     }
 

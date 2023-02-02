@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class BackgroundAudioService extends MediaBrowserServiceCompat implements MediaPlayer.OnCompletionListener {
+public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements MediaPlayer.OnCompletionListener {
 
     private MediaPlayer mediaPlayer;
     private AudioManager audioManager;
@@ -56,7 +56,7 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
 
     private boolean enableControl = false;
     private int duration;
-    private boolean mediaPlayerWasPlaying = false; //FIXME: Use this to fix audio resuming after getting focus whether it was not playing before
+    private boolean mediaPlayerWasPlayingOnFocusLost = false;
     private static CountDownTimer timer;
 
     @Override
@@ -87,7 +87,7 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
 
     private void initMediaSession() {
         ComponentName mediaButtonReceiver = new ComponentName(getApplicationContext(), MediaButtonReceiver.class);
-        Intent mediaSessionIntent = new Intent(getApplicationContext(), BackgroundAudioService.class);
+        Intent mediaSessionIntent = new Intent(getApplicationContext(), ServiceAudioPlayer.class);
         int flag = 0;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             flag  = PendingIntent.FLAG_MUTABLE;
@@ -124,17 +124,7 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
         public void onStop() {
             super.onStop();
             Log.i(TAG, "onStop()"); //NON-NLS
-            try {
-                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                    Log.i(TAG, "mediaPlayer.stop()" + Arrays.toString(mediaPlayer.getTrackInfo())); //NON-NLS
-                    mediaPlayer.stop();
-                    setMediaPlaybackState(PlaybackStateCompat.STATE_STOPPED);
-                    //FIXME: callback.onPositionChanged(0, 1);
-                 }
-                stopTimer();
-            } catch (Exception e) { //NON-NLS //NON-NLS
-                Log.w(TAG, "Failed to stop"); //NON-NLS
-            }
+            stop(false);
         }
 
         @Override
@@ -194,11 +184,8 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
         @Override
         public void onPause() {
             super.onPause();
-            if (mediaPlayer!=null && mediaPlayer.isPlaying()) {
-                mediaPlayer.pause();
-                setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
-                stopForeground(false);
-            }
+            pause();
+
         }
 
         @Override
@@ -235,7 +222,7 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
     };
 
     //FIXME: Use setVolume
-    public String setVolume(int volume, float albumGain, float trackGain) {
+    private String setVolume(int volume, float albumGain, float trackGain) {
         if (volume >= 0) {
             this.baseVolume = ((float) volume / 100.0f);
             Log.i(TAG, "setVolume()"); //NON-NLS
@@ -248,6 +235,20 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
             }
         }
         return "";
+    }
+
+    private void pause() {
+        pause(false);
+    }
+
+    private void pause(boolean mediaPlayerWasPlaying) {
+        Log.i(TAG, "pause()"); //NON-NLS
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+            setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
+            stopTimer(mediaPlayerWasPlaying);
+            stopForeground(false);
+        }
     }
 
     private final boolean mReplayGainTrackEnabled = true;
@@ -318,13 +319,12 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
             mediaSession.setMetadata(metadataBuilder.build());
             setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
             showPlayingNotification();
-            mediaPlayerWasPlaying = true;
+            mediaPlayerWasPlayingOnFocusLost = true;
             startTimer();
         }
     }
 
     private void startTimer() {
-        //FIXME: callback.onPlayBackStart(); (set playback state to PlaybackStateCompat.STATE_BUFFERING or PlaybackStateCompat.STATE_CONNECTING
         timer = new CountDownTimer(duration - mediaPlayer.getCurrentPosition() - 1, 30000) {
             @Override
             public void onTick(long millisUntilFinished_) {
@@ -353,8 +353,6 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
                     mediaPlayer.release();
                     mediaPlayer = null;
                 }
-                playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1);
-                mediaSession.setPlaybackState(playbackStateBuilder.build());
             }
             stopTimer();
         } catch (Exception e) { //NON-NLS //NON-NLS
@@ -367,7 +365,7 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
     }
 
     private void stopTimer(boolean mediaPlayerWasPlaying) {
-        this.mediaPlayerWasPlaying = mediaPlayerWasPlaying;
+        this.mediaPlayerWasPlayingOnFocusLost = mediaPlayerWasPlaying;
         if (timer != null) {
             timer.cancel();
             timer = null;
@@ -377,10 +375,7 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
     private final BroadcastReceiver noisyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                mediaPlayer.pause();
-                setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
-            }
+            pause();
         }
     };
 
@@ -451,10 +446,19 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
     private void setMediaPlaybackState(int state) {
         if( state == PlaybackStateCompat.STATE_PLAYING ) {
             playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PAUSE);
-        } else {
-            playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE | PlaybackStateCompat.ACTION_PLAY);
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, mediaPlayer.getCurrentPosition(), 1);
+            }
+        } else if( state == PlaybackStateCompat.STATE_PAUSED ) {
+            playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE);
+            if (mediaPlayer != null) {
+                playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, mediaPlayer.getCurrentPosition(), 0);
+            }
         }
-        playbackStateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0);
+        else {
+            playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY);
+            playbackStateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0);
+        }
         mediaSession.setPlaybackState(playbackStateBuilder.build());
     }
 
@@ -466,40 +470,17 @@ public class BackgroundAudioService extends MediaBrowserServiceCompat implements
     }
 
     AudioManager.OnAudioFocusChangeListener audioFocusChangeListener = focusChange -> {
-        //FIXME: OnAudioFocusChangeListener: Use commented code below from old AudioPlayer or new code ?
-//        if (focusChange == AudioManager.AUDIOFOCUS_GAIN && mediaPlayerWasPlaying) {
-//            resume();
-//        } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS
-//                || focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT
-//                || focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
-//            pause(mediaPlayerWasPlaying);
-//        }
         switch( focusChange ) {
-            case AudioManager.AUDIOFOCUS_LOSS: {
-                if( mediaPlayer.isPlaying() ) {
-                    mediaPlayer.stop();
-                    setMediaPlaybackState(PlaybackStateCompat.STATE_STOPPED);
-                }
-                break;
-            }
-            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT: {
-                mediaPlayer.pause();
-                setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
-                break;
-            }
-            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK: {
-                if( mediaPlayer != null ) {
-                    mediaPlayer.setVolume(0.3f, 0.3f);
-                }
+            case AudioManager.AUDIOFOCUS_LOSS:
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+            {
+                pause(mediaPlayerWasPlayingOnFocusLost);
                 break;
             }
             case AudioManager.AUDIOFOCUS_GAIN: {
-                if( mediaPlayer != null ) {
-                    if( !mediaPlayer.isPlaying() ) {
-                        mediaPlayer.start();
-                        setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
-                    }
-//                    mediaPlayer.setVolume(1.0f, 1.0f);
+                if(mediaPlayerWasPlayingOnFocusLost) {
+                    resume();
                 }
                 break;
             }
