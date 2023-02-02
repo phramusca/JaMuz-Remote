@@ -117,6 +117,8 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             super.onPlay();
             if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
                 askFocusAndPlay();
+            } else {
+                //FIXME: Do play next (need to manage queue here)
             }
         }
 
@@ -219,6 +221,18 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
                 mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() - duration / 10);
             }
         }
+
+        @Override
+        public void onSkipToNext() {
+            super.onSkipToNext();
+            //FIXME: Do skip to next (need to manage queue from here)
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            super.onSkipToPrevious();
+            //FIXME: Do skip to previous (need to manage queue from here)
+        }
     };
 
     //FIXME: Use setVolume
@@ -247,7 +261,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             mediaPlayer.pause();
             setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
             stopTimer(mediaPlayerWasPlaying);
-            stopForeground(false);
+//            stopForeground(false);
         }
     }
 
@@ -445,19 +459,24 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
 
     private void setMediaPlaybackState(int state) {
         if( state == PlaybackStateCompat.STATE_PLAYING ) {
-            playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PAUSE);
-            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, mediaPlayer.getCurrentPosition(), 1);
-            }
-        } else if( state == PlaybackStateCompat.STATE_PAUSED ) {
-            playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE);
+            playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PAUSE
+                    | PlaybackStateCompat.ACTION_PLAY_PAUSE
+                    | PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                    | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
             if (mediaPlayer != null) {
-                playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, mediaPlayer.getCurrentPosition(), 0);
+                playbackStateBuilder.setState(state, mediaPlayer.getCurrentPosition(), 1);
             }
         }
         else {
-            playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY);
-            playbackStateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0);
+            playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY
+                    | PlaybackStateCompat.ACTION_PLAY_PAUSE
+                    | PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                    | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
+            playbackStateBuilder.setState(state,
+                    mediaPlayer != null
+                            ? mediaPlayer.getCurrentPosition()
+                            : PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
+                    0);
         }
         mediaSession.setPlaybackState(playbackStateBuilder.build());
     }
