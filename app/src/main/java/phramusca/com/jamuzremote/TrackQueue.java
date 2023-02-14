@@ -10,12 +10,14 @@ public class TrackQueue extends TrackList {
     private static final String TAG = TrackQueue.class.getName();
     private static final int MAX_QUEUE_PREVIOUS = 5;
     private static final int MAX_QUEUE_NEXT = 10;
+    private Playlist playlist;
 
     TrackQueue(List<Track> tracks, int positionPlaying) {
         super(tracks, positionPlaying);
     }
 
     synchronized void refresh(Playlist playlist) {
+        this.playlist = playlist;
         for (int i = tracks.size() - 1; i > positionPlaying; i--) {
             Track track = tracks.get(i);
             if (!(track.isHistory() || track.isLocked())) {
@@ -37,6 +39,10 @@ public class TrackQueue extends TrackList {
     synchronized void insert(Track track) {
         track.setLocked(true);
         tracks.add(positionPlaying + 1, track);
+    }
+
+    synchronized List<Track> fill() {
+        return fill(playlist);
     }
 
     synchronized List<Track> fill(Playlist playlist) {
@@ -128,5 +134,9 @@ public class TrackQueue extends TrackList {
             return new PlayQueueRelative(positionPlaying, indexStart, list);
         }
         return new PlayQueueRelative();
+    }
+
+    synchronized public Playlist getPlaylist() {
+        return playlist;
     }
 }
