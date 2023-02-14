@@ -22,6 +22,7 @@ import android.service.media.MediaBrowserService;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.RatingCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -452,32 +453,33 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
     };
 
     private void initMediaSessionMetadata(Track track) {
-        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, RepoCovers.getCoverIcon(track, RepoCovers.IconSize.THUMB, true));
-        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, RepoCovers.getCoverIcon(track, RepoCovers.IconSize.COVER, true));
-        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, "METADATA_KEY_DISPLAY_TITLE");
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, "METADATA_KEY_DISPLAY_SUBTITLE");
+//        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, RepoCovers.getCoverIcon(track, RepoCovers.IconSize.THUMB, true));
+//        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, RepoCovers.getCoverIcon(track, RepoCovers.IconSize.COVER, true));
+        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, RepoCovers.getCoverIcon(track, RepoCovers.IconSize.THUMB, true));
 
         metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DISC_NUMBER, track.getDiscNo());
         metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, track.getTrackNo());
         metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, track.getTrackTotal());
 
+//        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, track.getTitle());
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, track.getTitle());
+//        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, track.getArtist());
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, track.getArtist());
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, track.getAlbumArtist());
+//        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, track.getAlbum());
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, track.getAlbum());
 
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DATE, track.getFormattedLastPlayed());
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_YEAR, track.getYear());
+        long year = 0;
+        try {
+            year = Long.parseLong(track.getYear());
+        } catch(NumberFormatException ex){
+        }
+        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_YEAR, year);
 
-        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_USER_RATING, (long) track.getRating());
-        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_RATING, (long) track.getRating());
+        metadataBuilder.putRating(MediaMetadataCompat.METADATA_KEY_USER_RATING, RatingCompat.newStarRating(RatingCompat.RATING_5_STARS, (float) track.getRating()));
+        metadataBuilder.putRating(MediaMetadataCompat.METADATA_KEY_RATING, RatingCompat.newStarRating(RatingCompat.RATING_5_STARS, (float) track.getRating()));
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_GENRE, track.getGenre());
-
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_COMPILATION, "METADATA_KEY_COMPILATION");
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ADVERTISEMENT, "METADATA_KEY_ADVERTISEMENT");
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, "METADATA_KEY_DISPLAY_DESCRIPTION");
 
         mediaSession.setMetadata(metadataBuilder.build());
     }
