@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements MediaPlayer.OnCompletionListener {
@@ -53,11 +54,11 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
     private static final String MY_MEDIA_ROOT_ID = "media_root_id";
     private static final String MY_EMPTY_MEDIA_ROOT_ID = "empty_root_id";
     private static final String TAG = ServiceBase.class.getName();
-
     private boolean enableControl = false;
     private int duration;
     private boolean mediaPlayerWasPlayingOnFocusLost = false;
     private static CountDownTimer timer;
+    private final HelperToast helperToast = new HelperToast(this);
 
     @Override
     public void onCreate() {
@@ -118,7 +119,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
                 askFocusAndPlay();
             } else {
-                //FIXME: Do play next (need to manage queue here)
+                playNext();
             }
         }
 
@@ -132,55 +133,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
             super.onPlayFromMediaId(mediaId, extras);
-            try {
-                //FIXME: get position from PlayQueue.queue.get(Integer.parseInt(mediaId));
-                // and eventually use this listener :
-//                PlayQueue.queue.addListener(positionPlaying -> {
-//                    trackAdapter.trackList.setPositionPlaying(positionPlaying - offset);
-//                    trackAdapter.notifyDataSetChanged();
-//                });
-                float albumGain = extras.getFloat("AlbumGain");
-                float trackGain = extras.getFloat("TrackGain");
-                int volume = extras.getInt("baseVolume");
-
-                String title = extras.getString("title");
-                String subtitle = extras.getString("subtitle");
-                Long trackNumber = extras.getLong("trackNumber");
-                Long numTracks = extras.getLong("numTracks");
-                initMediaSessionMetadata(title, subtitle, trackNumber, numTracks);
-
-                Log.i(TAG, "Playing " + mediaId); //NON-NLS
-                enableControl = false;
-                mediaPlayer = new MediaPlayer();
-                if(mediaId.startsWith("content://")) {
-                    mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(mediaId));
-                } else {
-                    mediaPlayer.setDataSource(mediaId);
-                }
-                mediaPlayer.prepare();
-                if (volume >= 0) {
-                    baseVolume = ((float) volume / 100.0f);
-                }
-                String msg = applyReplayGain(mediaPlayer, albumGain, trackGain);
-                //FIXME: Use replaygain message
-//                if (!msg.equals("")) {
-//                    helperToast.toastLong(msg);
-//                }
-                mediaPlayer.setOnPreparedListener(mp -> {
-                    duration = mediaPlayer.getDuration();
-                    askFocusAndPlay();
-                    mediaPlayer.setOnCompletionListener(mediaPlayer -> setMediaPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT));
-                    mediaPlayer.setOnSeekCompleteListener(mediaPlayer -> startTimer());
-                    enableControl = true;
-                });
-            } catch (IOException e) {
-                Log.e(TAG, "Error playing (\"" + mediaId + "\") => DELETING IT !!!!!!", e); //NON-NLS
-                stop(false);
-                File file = new File(mediaId);
-                //noinspection ResultOfMethodCallIgnored
-                file.delete();
-                setMediaPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT);
-            }
+            //FIXME: Remove call to this on activityMain
         }
 
         @Override
@@ -225,15 +178,120 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         @Override
         public void onSkipToNext() {
             super.onSkipToNext();
-            //FIXME: Do skip to next (need to manage queue from here)
+            playNext();
         }
 
         @Override
         public void onSkipToPrevious() {
             super.onSkipToPrevious();
-            //FIXME: Do skip to previous (need to manage queue from here)
+            playPrevious();
         }
     };
+
+    private void playNext() {
+        PlayQueue.queue.fill();
+        Track track = PlayQueue.queue.getNext();
+        if (track != null) {
+            //FIXME: Need this ? Why refresh PlayQueue right after fill() ?
+//            if(!track.isHistory() && !track.isLocked()) {
+//                refreshLocalPlaylistSpinner(false);
+//            }
+
+            //FIXME: Update lastPlayed and playCounter of previous track
+//            displayedTrack.setPlayCounter(displayedTrack.getPlayCounter() + 1);
+//            displayedTrack.setLastPlayed(new Date());
+//            displayedTrack.update();
+
+            //Play next one
+            if (play(track)) {
+                PlayQueue.queue.setNext();
+            } else {
+                PlayQueue.queue.removeNext();
+                playNext();
+            }
+        } else {
+            ////FIXME: Need this ?
+                //refreshLocalPlaylistSpinner(false);
+            helperToast.toastLong(getString(R.string.mainToastEmptyPlaylist));
+        }
+    }
+
+    private void playPrevious() {
+        Track track = PlayQueue.queue.getPrevious();
+        if (track != null) {
+            if (play(track)) {
+                PlayQueue.queue.setPrevious();
+            } else {
+                PlayQueue.queue.removePrevious();
+                playPrevious();
+            }
+        } else {
+            helperToast.toastLong(getString(R.string.mainToastNoTracksBeyond));
+        }
+    }
+
+    private boolean play(Track track) {
+        boolean fileExists;
+        if (track.getPath().startsWith("content://")) {
+            fileExists = HelperFile.checkUriExist(this, Uri.parse(track.getPath()));
+        } else {
+            File file = new File(track.getPath());
+            fileExists = file.exists();
+        }
+        if (!fileExists) {
+            Log.d(TAG, "play(): " + track); //NON-NLS
+            track.delete();
+            return false;
+        }
+        //dimOn(); //FIXME
+        stop(false);
+        track.setSource(
+                track.isHistory()
+                        ? getString(R.string.playlistLabelHistory)
+                        : track.isLocked()
+                        ? getString(R.string.playlistLabelUser)
+                        : PlayQueue.queue.getPlaylist().toString());
+        try {
+            initMediaSessionMetadata(track);
+
+            Log.i(TAG, "Playing " + track.getPath()); //NON-NLS
+            enableControl = false;
+            mediaPlayer = new MediaPlayer();
+            if(track.getPath().startsWith("content://")) {
+                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(track.getPath()));
+            } else {
+                mediaPlayer.setDataSource(track.getPath());
+            }
+            mediaPlayer.prepare();
+            int volume = 70; //FIXME: = preferences.getInt("baseVolume", 70);
+            if (volume >= 0) {
+                baseVolume = ((float) volume / 100.0f);
+            }
+            ReplayGain.GainValues replayGain = track.getReplayGain(false);
+            String msg = applyReplayGain(mediaPlayer, replayGain.getAlbumGain(), replayGain.getTrackGain());
+            //FIXME: Use replaygain message
+//                if (!msg.equals("")) {
+//                    helperToast.toastLong(msg);
+//                }
+            mediaPlayer.setOnPreparedListener(mp -> {
+                duration = mediaPlayer.getDuration();
+                askFocusAndPlay();
+                mediaPlayer.setOnCompletionListener(mediaPlayer -> playNext());
+                mediaPlayer.setOnSeekCompleteListener(mediaPlayer -> startTimer());
+                enableControl = true;
+            });
+        } catch (IOException e) {
+            Log.e(TAG, "Error playing (\"" + track.getPath() + "\") => DELETING IT !!!!!!", e); //NON-NLS
+            stop(false);
+            File file = new File(track.getPath());
+            //noinspection ResultOfMethodCallIgnored
+            file.delete();
+            playNext();
+        }
+        //displayTrack();
+        //displayedTrack.setHistory(true); //FIXME
+        return true;
+    }
 
     //FIXME: Use setVolume
     private String setVolume(int volume, float albumGain, float trackGain) {
@@ -393,19 +451,33 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         }
     };
 
-    private void initMediaSessionMetadata(String title, String subtitle, Long trackNumber, Long numTracks) {
-
-        //Notification icon in card
-        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-
-        //lock screen icon for pre lollipop
+    private void initMediaSessionMetadata(Track track) {
+        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, RepoCovers.getCoverIcon(track, RepoCovers.IconSize.THUMB, true));
+        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, RepoCovers.getCoverIcon(track, RepoCovers.IconSize.COVER, true));
         metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
 
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title);
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, subtitle);
-        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, trackNumber);
-        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, numTracks);
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, "METADATA_KEY_DISPLAY_TITLE");
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, "METADATA_KEY_DISPLAY_SUBTITLE");
+
+        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DISC_NUMBER, track.getDiscNo());
+        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, track.getTrackNo());
+        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, track.getTrackTotal());
+
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, track.getTitle());
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, track.getArtist());
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, track.getAlbumArtist());
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, track.getAlbum());
+
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DATE, track.getFormattedLastPlayed());
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_YEAR, track.getYear());
+
+        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_USER_RATING, (long) track.getRating());
+        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_RATING, (long) track.getRating());
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_GENRE, track.getGenre());
+
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_COMPILATION, "METADATA_KEY_COMPILATION");
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ADVERTISEMENT, "METADATA_KEY_ADVERTISEMENT");
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, "METADATA_KEY_DISPLAY_DESCRIPTION");
 
         mediaSession.setMetadata(metadataBuilder.build());
     }

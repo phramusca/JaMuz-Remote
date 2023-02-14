@@ -45,6 +45,7 @@ import android.text.Spanned;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -201,6 +202,7 @@ public class ActivityMain extends AppCompatActivity {
         }
     };
 
+    @SuppressLint("ClickableViewAccessibility")
     void buildTransportControls()
     {
         imageViewCover = findViewById(R.id.imageView);
@@ -223,7 +225,7 @@ public class ActivityMain extends AppCompatActivity {
                 if (isRemoteConnected()) {
                     clientRemote.send("previousTrack");
                 } else {
-                    playPrevious();
+                    getMediaController().getTransportControls().skipToPrevious();
                 }
             }
 
@@ -233,7 +235,7 @@ public class ActivityMain extends AppCompatActivity {
                 if (isRemoteConnected()) {
                     clientRemote.send("nextTrack");
                 } else {
-                    playNext();
+                    getMediaController().getTransportControls().skipToNext();
                 }
             }
 
@@ -250,6 +252,11 @@ public class ActivityMain extends AppCompatActivity {
             @Override
             public void onTouch() {
                 dimOn();
+            }
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return super.onTouch(v, event);
             }
 
             @Override
@@ -336,12 +343,6 @@ public class ActivityMain extends AppCompatActivity {
             if (mProgressAnimator != null) {
                 mProgressAnimator.cancel();
                 mProgressAnimator = null;
-            }
-
-            //FIXME!!! Move queue management to ServiceAudioPlayer as this trick only works when activity is running :(
-            //Good too for displaying metadata and passing only PlayQueue position b/w activity and service
-            if(state.getState() == PlaybackStateCompat.STATE_SKIPPING_TO_NEXT) {
-                playNext();
             }
 
             final int progress = (int) state.getPosition();
@@ -852,7 +853,7 @@ public class ActivityMain extends AppCompatActivity {
             case PlaybackStateCompat.STATE_STOPPED:
             case PlaybackStateCompat.STATE_NONE:
             case PlaybackStateCompat.STATE_ERROR:
-                playNext();
+                getMediaController().getTransportControls().skipToNext();
                 break;
         }
     }
@@ -1094,7 +1095,7 @@ public class ActivityMain extends AppCompatActivity {
             localSelectedPlaylist = playlist;
             if (playNext) {
                 PlayQueue.queue.setQueue(playlist.getTracks(10, getScope()));
-                playNext();
+                getMediaController().getTransportControls().skipToNext();
             } else {
                 refreshQueueAndPlaylistSpinner();
             }
@@ -1444,7 +1445,7 @@ public class ActivityMain extends AppCompatActivity {
                             Playlist playlist = new Playlist(arguments, true);
                             playlist.setArtist(arguments);
                             if (PlayQueue.queue.insert(playlist) > 0) {
-                                playNext();
+                                getMediaController().getTransportControls().skipToNext();
                                 msg = "";
                             }
                         }
@@ -1461,7 +1462,7 @@ public class ActivityMain extends AppCompatActivity {
                             Playlist playlist = new Playlist(arguments, true);
                             playlist.setAlbum(arguments);
                             if (PlayQueue.queue.insert(playlist) > 0) {
-                                playNext();
+                                getMediaController().getTransportControls().skipToNext();
                                 msg = "";
                             }
                         }
@@ -1523,11 +1524,11 @@ public class ActivityMain extends AppCompatActivity {
                         msg = "";
                         break;
                     case PLAYER_NEXT:
-                        playNext();
+                        getMediaController().getTransportControls().skipToNext();
                         msg = "";
                         break;
                     case PLAYER_PREVIOUS:
-                        playPrevious();
+                        getMediaController().getTransportControls().skipToPrevious();
                         msg = "";
                         break;
                     case PLAYER_PAUSE:
@@ -1554,11 +1555,11 @@ public class ActivityMain extends AppCompatActivity {
             String action = data.getStringExtra("action"); //NON-NLS
             switch (action) {
                 case "playNextAndDisplayQueue": //NON-NLS
-                    playNext();
+                    getMediaController().getTransportControls().skipToNext();
                     displayQueue();
                     break;
                 case "playNext": //NON-NLS
-                    playNext();
+                    getMediaController().getTransportControls().skipToNext();
                     break;
                 case "displayQueue": //NON-NLS
                     displayQueue();
@@ -1650,84 +1651,6 @@ public class ActivityMain extends AppCompatActivity {
         return false;
     }
 
-    private boolean play(Track track) {
-        displayedTrack = track;
-        boolean fileExists;
-        if (displayedTrack.getPath().startsWith("content://")) {
-            fileExists = HelperFile.checkUriExist(this, Uri.parse(displayedTrack.getPath()));
-        } else {
-            File file = new File(displayedTrack.getPath());
-            fileExists = file.exists();
-        }
-        if (!fileExists) {
-            Log.d(TAG, "play(): " + displayedTrack); //NON-NLS
-            displayedTrack.delete();
-            return false;
-        }
-        dimOn();
-        localTrack = displayedTrack;
-        getMediaController().getTransportControls().stop();
-        displayedTrack.setSource(
-                displayedTrack.isHistory()
-                        ? getString(R.string.playlistLabelHistory)
-                        : displayedTrack.isLocked()
-                        ? getString(R.string.playlistLabelUser)
-                        : localSelectedPlaylist.toString());
-        Bundle bundle = new Bundle();
-        ReplayGain.GainValues replayGain = track.getReplayGain(false);
-        bundle.putFloat("AlbumGain", replayGain.getAlbumGain());
-        bundle.putFloat("TrackGain", replayGain.getTrackGain());
-        bundle.putInt("baseVolume", preferences.getInt("baseVolume", 70));
-        bundle.putString("title", track.getArtist() + " / " + track.getTitle());
-        bundle.putString("subtitle", track.getAlbum() + " (" + track.getAlbumArtist() + ")");
-        bundle.putLong("trackNumber", track.getTrackNo());
-        bundle.putLong("numTracks", track.getTrackTotal());
-        getMediaController().getTransportControls().playFromMediaId(displayedTrack.getPath(), bundle);
-        displayTrack();
-        displayedTrack.setHistory(true);
-        return true;
-    }
-
-    private void playNext() {
-        PlayQueue.queue.fill(localSelectedPlaylist);
-        Track track = PlayQueue.queue.getNext();
-        if (track != null) {
-            if(!track.isHistory() && !track.isLocked()) {
-                refreshLocalPlaylistSpinner(false);
-            }
-
-            //Update lastPlayed and playCounter of previous track
-            displayedTrack.setPlayCounter(displayedTrack.getPlayCounter() + 1);
-            displayedTrack.setLastPlayed(new Date());
-            displayedTrack.update();
-
-            //Play next one
-            if (play(track)) {
-                PlayQueue.queue.setNext();
-            } else {
-                PlayQueue.queue.removeNext();
-                playNext();
-            }
-        } else {
-            refreshLocalPlaylistSpinner(false);
-            helperToast.toastLong(getString(R.string.mainToastEmptyPlaylist));
-        }
-    }
-
-    private void playPrevious() {
-        Track track = PlayQueue.queue.getPrevious();
-        if (track != null) {
-            if (play(track)) {
-                PlayQueue.queue.setPrevious();
-            } else {
-                PlayQueue.queue.removePrevious();
-                playPrevious();
-            }
-        } else {
-            helperToast.toastLong(getString(R.string.mainToastNoTracksBeyond));
-        }
-    }
-
     class ListenerPlayer {
 
         private int quarterPosition = 0;
@@ -1815,10 +1738,10 @@ public class ActivityMain extends AppCompatActivity {
                     togglePlay();
                     break;
                 case "playNext": //NON-NLS
-                    playNext();
+                    getMediaController().getTransportControls().skipToNext();
                     break;
                 case "playPrevious": //NON-NLS
-                    playPrevious();
+                    getMediaController().getTransportControls().skipToPrevious();
                     break;
             }
         }
@@ -2058,10 +1981,10 @@ public class ActivityMain extends AppCompatActivity {
         } else {
             switch (msg) {
                 case "previousTrack":
-                    playPrevious();
+                    getMediaController().getTransportControls().skipToPrevious();
                     break;
                 case "nextTrack":
-                    playNext();
+                    getMediaController().getTransportControls().skipToNext();
                     break;
                 case "playTrack":
                     togglePlay();
