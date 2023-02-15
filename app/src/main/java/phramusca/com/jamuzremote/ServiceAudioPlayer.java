@@ -1,5 +1,6 @@
 package phramusca.com.jamuzremote;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,7 +9,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
@@ -17,7 +18,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.ResultReceiver;
 import android.service.media.MediaBrowserService;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
@@ -60,6 +60,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
     private boolean mediaPlayerWasPlayingOnFocusLost = false;
     private static CountDownTimer timer;
     private final HelperToast helperToast = new HelperToast(this);
+    private static final int NOTIFICATION_ID = NotificationId.get();
 
     @Override
     public void onCreate() {
@@ -85,6 +86,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         initMediaSession();
         initNoisyReceiver();
         setMediaPlaybackState(PlaybackStateCompat.STATE_STOPPED);
+        showPlayingNotification();
     }
 
     private void initMediaSession() {
@@ -135,7 +137,6 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         public void onPause() {
             super.onPause();
             pause();
-
         }
 
         @Override
@@ -236,8 +237,8 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
                 track.isHistory()
                         ? getString(R.string.playlistLabelHistory)
                         : track.isLocked()
-                        ? getString(R.string.playlistLabelUser)
-                        : PlayQueue.queue.getPlaylist().toString());
+                            ? getString(R.string.playlistLabelUser)
+                            : PlayQueue.queue.getPlaylist().toString());
         try {
             Log.i(TAG, "Playing " + track.getPath()); //NON-NLS
             enableControl = false;
@@ -249,12 +250,15 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             }
             mediaPlayer.prepare();
             int volume = 70; //FIXME: = preferences.getInt("baseVolume", 70);
-            if (volume >= 0) {
-                baseVolume = ((float) volume / 100.0f);
-            }
             ReplayGain.GainValues replayGain = track.getReplayGain(false);
-            String msg = applyReplayGain(mediaPlayer, replayGain.getAlbumGain(), replayGain.getTrackGain());
+            String msg = setVolume(volume, replayGain.getAlbumGain(), replayGain.getTrackGain());
+//            if (volume >= 0) {
+//                baseVolume = ((float) volume / 100.0f);
+//            }
+//            ReplayGain.GainValues replayGain = track.getReplayGain(false);
+//            String msg = applyReplayGain(mediaPlayer, replayGain.getAlbumGain(), replayGain.getTrackGain());
             //FIXME: Use replaygain message
+
 //                if (!msg.equals("")) {
 //                    helperToast.toastLong(msg);
 //                }
@@ -356,7 +360,6 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         }
         Log.i(TAG, "mediaPlayer.setVolume(" + rg_result + ", " + rg_result + ")"); //NON-NLS
         mediaPlayer.setVolume(rg_result, rg_result);
-
         return msg;
     }
 
@@ -372,7 +375,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             mediaSession.setActive(true);
             mediaPlayer.start();
             setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
-            showPlayingNotification();
+            updateNotification();
             mediaPlayerWasPlayingOnFocusLost = true;
             startTimer();
         }
@@ -403,6 +406,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
                 Log.i(TAG, "mediaPlayer.stop()" + Arrays.toString(mediaPlayer.getTrackInfo())); //NON-NLS
                 mediaPlayer.stop();
                 setMediaPlaybackState(PlaybackStateCompat.STATE_STOPPED);
+//                stopForeground(false);
                 if (release) {
                     mediaPlayer.release();
                     mediaPlayer = null;
@@ -467,50 +471,75 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
     }
 
     private void showPlayingNotification() {
+        startForeground(NOTIFICATION_ID, getNotification());
+    }
+
+    private Notification getNotification() {
         MediaControllerCompat controller = mediaSession.getController();
         MediaMetadataCompat mediaMetadata = controller.getMetadata();
-        MediaDescriptionCompat description = mediaMetadata.getDescription();
+        String contentTitle = "title";
+        String contentText = "subTitle";
+        String subText = "description";
+        Bitmap iconBitmap = null;
+        if(mediaMetadata!=null) {
+            MediaDescriptionCompat description = mediaMetadata.getDescription();
+            contentTitle = (String) description.getTitle();
+            contentText = (String) description.getSubtitle();
+            subText = (String) description.getDescription();
+            iconBitmap = description.getIconBitmap();
+        }
 
-        NotificationChannel chan;
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            chan = new NotificationChannel("myNotificationChannelId", "channelName", NotificationManager.IMPORTANCE_NONE);
+            NotificationChannel chan = new NotificationChannel("myNotificationChannelId", "channelName", NotificationManager.IMPORTANCE_NONE);
             chan.setDescription("<Add channel Description>");
             nm.createNotificationChannel(chan);
         }
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "myNotificationChannelId");
         builder
                 // Add the metadata for the currently playing track
-                .setContentTitle(description.getTitle())
-                .setContentText(description.getSubtitle())
-                .setSubText(description.getDescription())
-                .setLargeIcon(description.getIconBitmap())
-                // Enable launching the player by clicking the notification
+                .setContentTitle(contentTitle)
+                .setContentText(contentText)
+                .setSubText(subText)
+                .setLargeIcon(iconBitmap)
+                // FIXME: Enable launching the player by clicking the notification
                 .setContentIntent(controller.getSessionActivity())
-                // Stop the service when the notification is swiped away
-                .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
-                        PlaybackStateCompat.ACTION_STOP))
-                // Make the transport controls visible on the lockscreen
+                .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(), PlaybackStateCompat.ACTION_STOP))
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 // Add an app icon and set its accent color
                 // Be careful about the color
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary))
+
+                //FIXME: Change buttons depending on playing state
+
                 // Add a pause button
                 .addAction(new NotificationCompat.Action(
                         R.drawable.ic_action_play, "Pause",
                         MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
                                 PlaybackStateCompat.ACTION_PLAY_PAUSE)))
+
+
+                .addAction(new NotificationCompat.Action(
+                        R.drawable.ic_action_next, "Next",
+                        MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
+                                PlaybackStateCompat.ACTION_SKIP_TO_NEXT)))
+
                 // Take advantage of MediaStyle features
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(mediaSession.getSessionToken())
                         .setShowActionsInCompactView(0)
-                        // Add a cancel button
                         .setShowCancelButton(true)
                         .setCancelButtonIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
                                 PlaybackStateCompat.ACTION_STOP)));
         // Display the notification and place the service in the foreground
-        startForeground(NotificationId.get(), builder.build());
+        return builder.build();
+    }
+
+    private void updateNotification() {
+        Notification notification = getNotification();
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(NOTIFICATION_ID, notification);
     }
 
     private void setMediaPlaybackState(int state) {
