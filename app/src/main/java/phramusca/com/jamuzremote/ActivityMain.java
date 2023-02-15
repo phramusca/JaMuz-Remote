@@ -37,6 +37,7 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.RatingCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.Html;
@@ -297,7 +298,10 @@ public class ActivityMain extends AppCompatActivity {
                 getString(R.string.mainWelcomeYear), getString(R.string.applicationName),
                 "welcomeHash", //Warning: "welcomeHash" value has a meaning
                 "---");
-        displayedTrack = localTrack;
+        displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
+        if(displayedTrack==null) {
+            displayedTrack = localTrack;
+        }
         displayTrack();
         ListenerPlayer callBackPlayer = new ListenerPlayer();
 
@@ -321,13 +325,7 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
         registerReceiver(receiverHeadSetPlugged, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
-
         MediaControllerCompat mediaController = MediaControllerCompat.getMediaController(ActivityMain.this);
-
-        // FIXME: Display the initial state
-        MediaMetadataCompat metadata = mediaController.getMetadata();
-        PlaybackStateCompat pbState = mediaController.getPlaybackState();
-
         mediaController.registerCallback(mediaControllerCallback);
     }
 
@@ -354,6 +352,10 @@ public class ActivityMain extends AppCompatActivity {
             if (state.getState() == PlaybackStateCompat.STATE_PLAYING) {
                 final int timeToEnd = (int) ((seekBarPosition.getMax() - progress) / state.getPlaybackSpeed());
 
+                if(timeToEnd<0) {
+                    return; //FIXME: Should not happen (happens after app restart, when seekBarPosition probably not set)
+                }
+
                 mProgressAnimator = ValueAnimator.ofInt(progress, seekBarPosition.getMax())
                         .setDuration(timeToEnd);
                 mProgressAnimator.setInterpolator(new LinearInterpolator());
@@ -373,10 +375,10 @@ public class ActivityMain extends AppCompatActivity {
 
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
-            final int max = metadata != null
-                    ? (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION)
-                    : 0;
-            setSeekBar(0, max);
+            setSeekBar(0, (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+            displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
+            displayedTrack.setHistory(true);
+            displayTrack();
         }
 
         @Override

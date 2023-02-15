@@ -132,24 +132,10 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         }
 
         @Override
-        public void onPlayFromMediaId(String mediaId, Bundle extras) {
-            super.onPlayFromMediaId(mediaId, extras);
-            //FIXME: Remove call to this on activityMain
-        }
-
-        @Override
         public void onPause() {
             super.onPause();
             pause();
 
-        }
-
-        @Override
-        public void onCommand(String command, Bundle extras, ResultReceiver cb) {
-            super.onCommand(command, extras, cb);
-//            if( COMMAND_EXAMPLE.equalsIgnoreCase(command) ) {
-//                //Custom command here
-//            }
         }
 
         @Override
@@ -193,11 +179,6 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         PlayQueue.queue.fill();
         Track track = PlayQueue.queue.getNext();
         if (track != null) {
-            //FIXME: Need this ? Why refresh PlayQueue right after fill() ?
-//            if(!track.isHistory() && !track.isLocked()) {
-//                refreshLocalPlaylistSpinner(false);
-//            }
-
             //FIXME: Update lastPlayed and playCounter of previous track
 //            displayedTrack.setPlayCounter(displayedTrack.getPlayCounter() + 1);
 //            displayedTrack.setLastPlayed(new Date());
@@ -211,8 +192,6 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
                 playNext();
             }
         } else {
-            ////FIXME: Need this ?
-                //refreshLocalPlaylistSpinner(false);
             helperToast.toastLong(getString(R.string.mainToastEmptyPlaylist));
         }
     }
@@ -244,7 +223,6 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             track.delete();
             return false;
         }
-        //dimOn(); //FIXME
         stop(false);
         track.setSource(
                 track.isHistory()
@@ -253,8 +231,6 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
                         ? getString(R.string.playlistLabelUser)
                         : PlayQueue.queue.getPlaylist().toString());
         try {
-            initMediaSessionMetadata(track);
-
             Log.i(TAG, "Playing " + track.getPath()); //NON-NLS
             enableControl = false;
             mediaPlayer = new MediaPlayer();
@@ -276,6 +252,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
 //                }
             mediaPlayer.setOnPreparedListener(mp -> {
                 duration = mediaPlayer.getDuration();
+                initMediaSessionMetadata(track);
                 askFocusAndPlay();
                 mediaPlayer.setOnCompletionListener(mediaPlayer -> playNext());
                 mediaPlayer.setOnSeekCompleteListener(mediaPlayer -> startTimer());
@@ -289,8 +266,6 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             file.delete();
             playNext();
         }
-        //displayTrack();
-        //displayedTrack.setHistory(true); //FIXME
         return true;
     }
 
@@ -388,8 +363,6 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             startService(new Intent(getApplicationContext(), MediaBrowserService.class));
             mediaSession.setActive(true);
             mediaPlayer.start();
-            metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration);
-            mediaSession.setMetadata(metadataBuilder.build());
             setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
             showPlayingNotification();
             mediaPlayerWasPlayingOnFocusLost = true;
@@ -453,8 +426,10 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
     };
 
     private void initMediaSessionMetadata(Track track) {
+        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration);
+
 //        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, RepoCovers.getCoverIcon(track, RepoCovers.IconSize.THUMB, true));
-//        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, RepoCovers.getCoverIcon(track, RepoCovers.IconSize.COVER, true));
+//        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, RepoCovers.getCoverIcon(track, RepoCovers.IconSize.THUMB, true));
         metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, RepoCovers.getCoverIcon(track, RepoCovers.IconSize.THUMB, true));
 
         metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DISC_NUMBER, track.getDiscNo());
@@ -476,7 +451,6 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         } catch(NumberFormatException ex){
         }
         metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_YEAR, year);
-
         metadataBuilder.putRating(MediaMetadataCompat.METADATA_KEY_USER_RATING, RatingCompat.newStarRating(RatingCompat.RATING_5_STARS, (float) track.getRating()));
         metadataBuilder.putRating(MediaMetadataCompat.METADATA_KEY_RATING, RatingCompat.newStarRating(RatingCompat.RATING_5_STARS, (float) track.getRating()));
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_GENRE, track.getGenre());
