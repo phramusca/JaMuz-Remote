@@ -9,6 +9,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
@@ -18,6 +19,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.ResultReceiver;
+import android.preference.PreferenceManager;
 import android.service.media.MediaBrowserService;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
@@ -61,11 +64,12 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
     private static CountDownTimer timer;
     private final HelperToast helperToast = new HelperToast(this);
     private static final int NOTIFICATION_ID = NotificationId.get();
+    private static SharedPreferences preferences;
 
     @Override
     public void onCreate() {
         super.onCreate();
-
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
         audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
@@ -174,6 +178,16 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             super.onSkipToPrevious();
             playPrevious();
         }
+
+        @Override
+        public void onCommand(String command, Bundle extras, ResultReceiver cb) {
+            super.onCommand(command, extras, cb);
+            if(command.equals("setBaseVolume")) {
+                int volume = extras.getInt("baseVolume", preferences.getInt("baseVolume", 70));
+                Track track = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
+                setVolume(volume, track);
+            }
+        }
     };
 
     private void playNext() {
@@ -249,19 +263,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
                 mediaPlayer.setDataSource(track.getPath());
             }
             mediaPlayer.prepare();
-            int volume = 70; //FIXME: = preferences.getInt("baseVolume", 70);
-            ReplayGain.GainValues replayGain = track.getReplayGain(false);
-            String msg = setVolume(volume, replayGain.getAlbumGain(), replayGain.getTrackGain());
-//            if (volume >= 0) {
-//                baseVolume = ((float) volume / 100.0f);
-//            }
-//            ReplayGain.GainValues replayGain = track.getReplayGain(false);
-//            String msg = applyReplayGain(mediaPlayer, replayGain.getAlbumGain(), replayGain.getTrackGain());
-            //FIXME: Use replaygain message
-
-//                if (!msg.equals("")) {
-//                    helperToast.toastLong(msg);
-//                }
+            setVolume(preferences.getInt("baseVolume", 70), track);
             mediaPlayer.setOnPreparedListener(mp -> {
                 duration = mediaPlayer.getDuration();
                 initMediaSessionMetadata(track);
@@ -281,20 +283,18 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         return true;
     }
 
-    //FIXME: Use setVolume
-    private String setVolume(int volume, float albumGain, float trackGain) {
+    private void setVolume(int volume, Track track) {
         if (volume >= 0) {
             this.baseVolume = ((float) volume / 100.0f);
-            Log.i(TAG, "setVolume()"); //NON-NLS
-            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            Log.i(TAG, "setVolume("+baseVolume+")"); //NON-NLS
+            if (mediaPlayer != null) { //why  && mediaPlayer.isPlaying() ?
                 try {
-                    return applyReplayGain(mediaPlayer, albumGain, trackGain);
+                    applyReplayGain(track);
                 } catch (Exception e) {
                     Log.w(TAG, "Failed to set volume"); //NON-NLS
                 }
             }
         }
-        return "";
     }
 
     private void pause() {
@@ -319,7 +319,10 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
      * Enables or disables Replay Gain.
      * Taken partially from https://github.com/vanilla-music/vanilla
      */
-    private String applyReplayGain(MediaPlayer mediaPlayer, float albumGain, float trackGain) {
+    private void applyReplayGain(Track track) {
+        ReplayGain.GainValues replayGain = track.getReplayGain(false);
+        float albumGain = replayGain.getAlbumGain();
+        float trackGain = replayGain.getTrackGain();
         String rgStr = "albumGain=" + albumGain + ", trackGain=" + trackGain;
         Log.i(TAG, rgStr);
         float adjust = 0f;
@@ -360,7 +363,9 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         }
         Log.i(TAG, "mediaPlayer.setVolume(" + rg_result + ", " + rg_result + ")"); //NON-NLS
         mediaPlayer.setVolume(rg_result, rg_result);
-        return msg;
+        if (!msg.equals("")) {
+            helperToast.toastLong(msg);
+        }
     }
 
     private void askFocusAndPlay() {
@@ -375,7 +380,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             mediaSession.setActive(true);
             mediaPlayer.start();
             setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
-            updateNotification();
+
             mediaPlayerWasPlayingOnFocusLost = true;
             startTimer();
         }
@@ -471,10 +476,10 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
     }
 
     private void showPlayingNotification() {
-        startForeground(NOTIFICATION_ID, getNotification());
+        startForeground(NOTIFICATION_ID, getNotification(PlaybackStateCompat.ACTION_PLAY));
     }
 
-    private Notification getNotification() {
+    private Notification getNotification(@PlaybackStateCompat.MediaKeyAction long action) {
         MediaControllerCompat controller = mediaSession.getController();
         MediaMetadataCompat mediaMetadata = controller.getMetadata();
         String contentTitle = "title";
@@ -496,56 +501,58 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             nm.createNotificationChannel(chan);
         }
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "myNotificationChannelId");
+
+        int icon = R.drawable.ic_action_speech; //Should not happen
+        if(action==PlaybackStateCompat.ACTION_PLAY) {
+            icon = R.drawable.ic_action_play;
+        } else if(action==PlaybackStateCompat.ACTION_PAUSE) {
+            icon = R.drawable.ic_action_pause;
+        }
+
         builder
-                // Add the metadata for the currently playing track
                 .setContentTitle(contentTitle)
                 .setContentText(contentText)
                 .setSubText(subText)
                 .setLargeIcon(iconBitmap)
                 // FIXME: Enable launching the player by clicking the notification
                 .setContentIntent(controller.getSessionActivity())
-                .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(), PlaybackStateCompat.ACTION_STOP))
+                .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(), PlaybackStateCompat.ACTION_PAUSE))
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                // Add an app icon and set its accent color
-                // Be careful about the color
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary))
-
-                //FIXME: Change buttons depending on playing state
-
-                // Add a pause button
                 .addAction(new NotificationCompat.Action(
-                        R.drawable.ic_action_play, "Pause",
+                        R.drawable.ic_action_previous, "Previous",
                         MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
-                                PlaybackStateCompat.ACTION_PLAY_PAUSE)))
-
-
+                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)))
+                .addAction(new NotificationCompat.Action(
+                        icon, "Play/Pause",
+                        MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
+                                action)))
                 .addAction(new NotificationCompat.Action(
                         R.drawable.ic_action_next, "Next",
                         MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
                                 PlaybackStateCompat.ACTION_SKIP_TO_NEXT)))
-
                 // Take advantage of MediaStyle features
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(mediaSession.getSessionToken())
                         .setShowActionsInCompactView(0)
                         .setShowCancelButton(true)
                         .setCancelButtonIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
-                                PlaybackStateCompat.ACTION_STOP)));
+                                PlaybackStateCompat.ACTION_PAUSE)));
         // Display the notification and place the service in the foreground
         return builder.build();
     }
 
-    private void updateNotification() {
-        Notification notification = getNotification();
+    private void updateNotification(@PlaybackStateCompat.MediaKeyAction long action) {
+        Notification notification = getNotification(action);
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(NOTIFICATION_ID, notification);
     }
 
     private void setMediaPlaybackState(int state) {
         if( state == PlaybackStateCompat.STATE_PLAYING ) {
+            updateNotification(PlaybackStateCompat.ACTION_PAUSE);
             playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PAUSE
-                    | PlaybackStateCompat.ACTION_PLAY_PAUSE
                     | PlaybackStateCompat.ACTION_SKIP_TO_NEXT
                     | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
             if (mediaPlayer != null) {
@@ -553,8 +560,8 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             }
         }
         else {
+            updateNotification(PlaybackStateCompat.ACTION_PLAY);
             playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY
-                    | PlaybackStateCompat.ACTION_PLAY_PAUSE
                     | PlaybackStateCompat.ACTION_SKIP_TO_NEXT
                     | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
             playbackStateBuilder.setState(state,

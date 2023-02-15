@@ -37,7 +37,6 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.RatingCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.Html;
@@ -90,7 +89,6 @@ import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -1369,7 +1367,7 @@ public class ActivityMain extends AppCompatActivity {
         LOWER_VOLUME,
         NONE
     }
-
+    private int previousVolume;
     private void speechFavor(boolean favor) {
         SpeechFlavor speechFavor = SpeechFlavor.valueOf(preferences.getString("speechFavor", SpeechFlavor.PAUSE.name()));
         switch (speechFavor) {
@@ -1382,11 +1380,10 @@ public class ActivityMain extends AppCompatActivity {
                 break;
             case LOWER_VOLUME:
                 if (favor) {
-                    //FIXME: audioPlayer.setVolume(20, displayedTrack);
-                    getMediaController().setVolumeTo(20, AudioManager.ADJUST_SAME);// .setVolume(20, displayedTrack);
+                    previousVolume = getMediaController().getPlaybackInfo().getCurrentVolume();
+                    getMediaController().setVolumeTo(getMediaController().getPlaybackInfo().getMaxVolume() / 10, AudioManager.ADJUST_SAME);
                 } else {
-                    //FIXME: audioPlayer.setVolume(preferences.getInt("baseVolume", 70), displayedTrack);
-                    getMediaController().setVolumeTo(preferences.getInt("baseVolume", 70), AudioManager.ADJUST_SAME);//, displayedTrack);
+                    getMediaController().setVolumeTo(previousVolume, AudioManager.ADJUST_SAME);
                 }
                 break;
             case NONE:
@@ -1575,16 +1572,10 @@ public class ActivityMain extends AppCompatActivity {
                 checkPermissionsThenScanLibrary();
             }
 
-            //FIXME: Update volume directly from Settings activity
-            // Need to move audio to a service, which is a good thing anyway !
-            int value = data.getIntExtra("volume", -1); //NON-NLS
-            if (value >= 0) {
-                getMediaController().setVolumeTo(value, AudioManager.FLAG_SHOW_UI);
-//                String msg = audioPlayer.setVolume(value, displayedTrack);
-//                if (!msg.equals("")) {
-//                    (new HelperToast(getApplicationContext())).toastLong(msg);
-//                }
-            }
+            Bundle bundle = new Bundle();
+            bundle.putInt("baseVolume", preferences.getInt("baseVolume", 70));
+            //TODO: call this from ActivitySettings somehow
+            getMediaController().sendCommand("setBaseVolume", bundle, null);
 
             //TODO New Feature: read CD barcode, get album info from musicbrainz and display album
             String QRcode = data.getStringExtra("QRcode");
