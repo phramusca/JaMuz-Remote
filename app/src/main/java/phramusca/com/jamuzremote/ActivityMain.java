@@ -1580,7 +1580,6 @@ public class ActivityMain extends AppCompatActivity {
             int value = data.getIntExtra("volume", -1); //NON-NLS
             if (value >= 0) {
                 getMediaController().setVolumeTo(value, AudioManager.FLAG_SHOW_UI);
-                //FIXME: audioPlayer.setVolume
 //                String msg = audioPlayer.setVolume(value, displayedTrack);
 //                if (!msg.equals("")) {
 //                    (new HelperToast(getApplicationContext())).toastLong(msg);
