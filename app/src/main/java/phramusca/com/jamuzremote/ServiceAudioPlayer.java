@@ -179,12 +179,20 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         PlayQueue.queue.fill();
         Track track = PlayQueue.queue.getNext();
         if (track != null) {
-            //FIXME: Update lastPlayed and playCounter of previous track
-//            displayedTrack.setPlayCounter(displayedTrack.getPlayCounter() + 1);
-//            displayedTrack.setLastPlayed(new Date());
-//            displayedTrack.update();
-
-            //Play next one
+            Track displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
+            if(displayedTrack!=null) {
+                new Thread() {
+                    public void run() {
+                        // Update LastPlayed and increase playCounter of current track
+                        displayedTrack.setPlayCounter(displayedTrack.getPlayCounter() + 1);
+                        displayedTrack.setLastPlayed(new Date());
+                        displayedTrack.update();
+                    }
+                }.start();
+            } else {
+                helperToast.toastLong("Pas de piste en cours");
+            }
+            // and Play next one
             if (play(track)) {
                 PlayQueue.queue.setNext();
             } else {
