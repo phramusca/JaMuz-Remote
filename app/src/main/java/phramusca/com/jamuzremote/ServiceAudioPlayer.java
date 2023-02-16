@@ -204,8 +204,6 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
                         displayedTrack.update();
                     }
                 }.start();
-            } else {
-                helperToast.toastLong("Pas de piste en cours");
             }
             // and Play next one
             if (play(track)) {
@@ -502,44 +500,52 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         }
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "myNotificationChannelId");
 
-        int icon = R.drawable.ic_action_speech; //Should not happen
+        int actionIcon = R.drawable.ic_action_speech; //Should not happen
+        int smallIcon = R.drawable.buttons_red; //Should not happen
         if(action==PlaybackStateCompat.ACTION_PLAY) {
-            icon = R.drawable.ic_action_play;
+            actionIcon = R.drawable.ic_action_play;
+            smallIcon = R.drawable.ic_action_pause;
         } else if(action==PlaybackStateCompat.ACTION_PAUSE) {
-            icon = R.drawable.ic_action_pause;
+            actionIcon = R.drawable.ic_action_pause;
+            smallIcon = R.drawable.ic_action_play;
         }
+
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            flags  = flags | PendingIntent.FLAG_MUTABLE;
+        }
+
+        Intent activityIntent = new Intent(getApplicationContext(), ActivityMain.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, activityIntent, flags);
 
         builder
                 .setContentTitle(contentTitle)
                 .setContentText(contentText)
                 .setSubText(subText)
                 .setLargeIcon(iconBitmap)
-                // FIXME: Enable launching the player by clicking the notification
-                .setContentIntent(controller.getSessionActivity())
+                .setContentIntent(pendingIntent)
                 .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(), PlaybackStateCompat.ACTION_PAUSE))
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(smallIcon)
                 .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary))
                 .addAction(new NotificationCompat.Action(
                         R.drawable.ic_action_previous, "Previous",
                         MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
                                 PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)))
                 .addAction(new NotificationCompat.Action(
-                        icon, "Play/Pause",
+                        actionIcon, "Play/Pause",
                         MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
                                 action)))
                 .addAction(new NotificationCompat.Action(
                         R.drawable.ic_action_next, "Next",
                         MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
                                 PlaybackStateCompat.ACTION_SKIP_TO_NEXT)))
-                // Take advantage of MediaStyle features
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(mediaSession.getSessionToken())
-                        .setShowActionsInCompactView(0)
+                        .setShowActionsInCompactView(1)
                         .setShowCancelButton(true)
                         .setCancelButtonIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
                                 PlaybackStateCompat.ACTION_PAUSE)));
-        // Display the notification and place the service in the foreground
         return builder.build();
     }
 
