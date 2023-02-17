@@ -99,9 +99,6 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-//FIXME: Use auto backup for database and playlists
-//https://developer.android.com/guide/topics/data/backup
-
 //TODO: Find another library for kiosk mode since kidsplace has to be removed for fdroid inclusion
 
 public class ActivityMain extends AppCompatActivity {

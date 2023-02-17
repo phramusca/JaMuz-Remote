@@ -30,7 +30,7 @@
  import java.security.NoSuchAlgorithmException;
 
  /**
-  * @author phramusca ( https://github.com/phramusca/JaMuz/ )
+  * @author phramusca ( <a href="https://github.com/phramusca/JaMuz/">...</a> )
   */
  public class RepoCovers {
      private static final String TAG = RepoCovers.class.getName();
@@ -50,8 +50,7 @@
       * @return The cover icon.
       */
      public static Bitmap getCoverIcon(String coverHash, String path, IconSize iconSize, boolean readIfNotFound) {
-         Bitmap icon = null;
-         icon = readIconFromCache(coverHash, iconSize);
+         Bitmap icon = readIconFromCache(coverHash, iconSize);
          if (icon != null) {
              return icon;
          }
@@ -137,7 +136,8 @@
          return null;
      }
 
-     //FIXME: Move cache to android dedicated cache folder (in ext sd card if possible) for application so that user can clean the cache easily
+     //TODO: Move cache to android dedicated cache folder (if available on ext sd card)
+     //         so that user can clean the cache easily
      private static File getCacheFile(String coverHash, IconSize iconSize) {
          if(coverHash.equals("")) {
              return null;
