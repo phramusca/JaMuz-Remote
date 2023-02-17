@@ -284,7 +284,6 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-
         setupButton(R.id.button_play, "playTrack"); //NON-NLS
         setupButton(R.id.button_next, "nextTrack"); //NON-NLS
         setupButton(R.id.button_rewind, "rewind"); //NON-NLS
