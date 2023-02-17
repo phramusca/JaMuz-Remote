@@ -105,34 +105,25 @@ import java.util.TimerTask;
 //TODO: Find another library for kiosk mode since kidsplace has to be removed for fdroid inclusion
 
 public class ActivityMain extends AppCompatActivity {
-
     private static final String TAG = ActivityMain.class.getName();
     private static SharedPreferences preferences;
-
     private static Map<String, String> stringMap;
-
     private VoiceKeyWords voiceKeyWords;
     private final HelperToast helperToast = new HelperToast(this);
     private ClientRemote clientRemote;
-
     private Track displayedTrack;
     private Track localTrack;
     private MediaBrowserCompat mediaBrowser;
     ReceiverHeadSetPlugged receiverHeadSetPlugged = new ReceiverHeadSetPlugged();
-
     public static String login;
     public static String model;
     public File musicLibraryDbFile;
-
     private Map<String, Playlist> localPlaylists = new LinkedHashMap<>();
     private ArrayAdapter<Playlist> playListArrayAdapter;
     private Playlist localSelectedPlaylist;
-
     private static final int SPEECH_REQUEST_CODE = 15489;
     private static final int LISTS_REQUEST_CODE = 60568;
     private static final int SETTINGS_REQUEST_CODE = 23548;
-
-    private Context mContext; //TODO: replace with this
     private static PrettyTime prettyTime;
 
     // GUI elements
@@ -429,10 +420,8 @@ public class ActivityMain extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "ActivityMain onCreate"); //NON-NLS
-        mContext = this;
         setContentView(R.layout.activity_main);
         layoutMain = findViewById(R.id.panel_main);
-
         stringMap = new HashMap<>();
         stringMap.put("settingsServerDefaultConnectionString", getString(R.string.settingsServerDefaultConnectionString));
         stringMap.put("mainToastClientInfoBadFormat", getString(R.string.mainToastClientInfoBadFormat));
@@ -448,7 +437,7 @@ public class ActivityMain extends AppCompatActivity {
         //setEnabled does not seem enough (need to disable inner views too?) + some widgets are disabled/enabled during onCreate
         //layoutMain.setEnabled(false);
 
-        if(!HelperFile.init(mContext)) {
+        if(!HelperFile.init(this)) {
             helperToast.toastLong("Unable to find a writable application folder. Exiting :(");
             return;
         }
@@ -543,7 +532,7 @@ public class ActivityMain extends AppCompatActivity {
                     clientInfo = getClientInfo(ClientCanal.REMOTE, helperToast);
                 }
                 if (clientInfo != null) {
-                    clientRemote = new ClientRemote(clientInfo, new ListenerRemote(), mContext);
+                    clientRemote = new ClientRemote(clientInfo, new ListenerRemote(), this);
                     new Thread() {
                         public void run() {
                             enableRemote(!clientRemote.connect());
@@ -1179,7 +1168,7 @@ public class ActivityMain extends AppCompatActivity {
                 if (!isRemoteConnected() && localSelectedPlaylist != null) {
                     Playlist.LimitUnit limitUnit1 = null;
                     for (Playlist.LimitUnit limitUnit : Playlist.LimitUnit.values()) {
-                        if (limitUnit.getDisplay(mContext).equals(value)) {
+                        if (limitUnit.getDisplay(getApplicationContext()).equals(value)) {
                             limitUnit1 = limitUnit;
                             break;
                         }
@@ -2151,7 +2140,7 @@ public class ActivityMain extends AppCompatActivity {
 
             spinnerLimitUnitSend = false;
             spinnerPlaylistLimitUnit.setAdapter(playListLimitUnitArrayAdapter);
-            spinnerPlaylistLimitUnit.setSelection(playListLimitUnitArrayAdapter.getPosition(playlist.getLimitUnit().getDisplay(mContext)));
+            spinnerPlaylistLimitUnit.setSelection(playListLimitUnitArrayAdapter.getPosition(playlist.getLimitUnit().getDisplay(this)));
 
             spinnerLimitValueSend = false;
             spinnerPlaylistLimitValue.setAdapter(playListLimitValueArrayAdapter);
