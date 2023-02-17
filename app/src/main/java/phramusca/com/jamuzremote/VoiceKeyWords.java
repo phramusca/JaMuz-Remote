@@ -16,17 +16,17 @@ import java.util.stream.Collectors;
 public class VoiceKeyWords {
     private static final ArrayList<KeyWord> KEY_WORDS = new ArrayList<>();
 
-    public static void set() {
+    public VoiceKeyWords(Context context) {
         for (Command command : Command.values()) {
             if(!command.equals(Command.UNKNOWN)) {
-                for (String keyword : Resources.getSystem().getStringArray(command.resId)) {
+                for (String keyword : context.getResources().getStringArray(command.resId)) {
                     KEY_WORDS.add(new KeyWord(keyword, command));
                 }
             }
         }
     }
 
-    public static KeyWord get(String spokenText) {
+    public KeyWord get(String spokenText) {
         String searchValue = spokenText.toLowerCase().trim();
         Command command = Command.UNKNOWN;
         for (KeyWord word : KEY_WORDS) {
@@ -39,11 +39,11 @@ public class VoiceKeyWords {
         return new KeyWord(searchValue, command);
     }
 
-    public static ArrayList<KeyWord> get() {
+    public ArrayList<KeyWord> get() {
         return KEY_WORDS;
     }
 
-    static class KeyWord {
+    class KeyWord {
         private final String keyword;
         private final Command command;
 
