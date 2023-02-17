@@ -5,13 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-/**
- * Created by raph on 17/06/17.
- */
 public class ReceiverHeadSetPlugged extends BroadcastReceiver {
 
     private static final String TAG = ReceiverHeadSetPlugged.class.getName();
     private boolean headsetConnected = false;
+    private IListenerHeadSet listener;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -23,12 +21,16 @@ public class ReceiverHeadSetPlugged extends BroadcastReceiver {
         }
         if (headsetConnected && intent.getIntExtra("state", 0) == 0) { //NON-NLS
             headsetConnected = false;
-            Log.i(TAG, "headset NOT Connected => pause"); //NON-NLS
-            ActivityMain.audioPlayer.pause();
+            Log.d(TAG, "headset NOT Connected => pause"); //NON-NLS
+            listener.onPause();
         } else if (!headsetConnected && intent.getIntExtra("state", 0) == 1) { //NON-NLS
             headsetConnected = true;
-            Log.i(TAG, "headset IS Connected => resume"); //NON-NLS
-            ActivityMain.audioPlayer.resume();
+            Log.d(TAG, "headset IS Connected => resume"); //NON-NLS
+            listener.onResume();
         }
+    }
+
+    public void setListener(IListenerHeadSet listener) {
+        this.listener = listener;
     }
 }

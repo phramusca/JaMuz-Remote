@@ -13,8 +13,6 @@
     <string name="mainToastEmptyPlaylist">Empty Playlist.</string>
     <string name="mainToastNoTracksBeyond">No further tracks.</string>
     <string name="mainToastNotImplemented">Not implemented.</string>
-    <string name="mainAlertDialogClosingApplicationTitle">Closing JaMuz</string>
-    <string name="mainAlertDialogClosingApplicationMessage">Stop playback and exit the app?</string>
     <string name="globalLabelOK">OK</string>
     <string name="globalLabelCancel">Cancel</string>
     <string name="globalLabelYes">Yes</string>
@@ -27,19 +25,8 @@
     <string name="settingsServerButtonScanQR">Scan QR</string>
     <string name="settingsServerToastProblemQR">Could not read the QR code.</string>
     <string name="settingsReplayGainTextViewBaseVolume">Base volume:</string>
-    <string name="settingsKidsPlaceTextViewTitle">Kids Place</string>
-    <string name="settingsKidsPlaceTextViewHelp">\"Kids Place\" is a third-party kiddoware app from the Play store.</string>
-    <string name="settingsKidsPlaceCheckBoxLimit">Limit to this playlist:</string>
-    <string name="settingsKidsPlaceCheckBoxAllowDeleteSaveNew">Allow deleting, saving and creating a new playlist</string>
-    <string name="settingsKidsPlaceCheckBoxAllowEdition">Allow track edition</string>
-    <string name="settingsKidsPlaceCheckBoxOnStartup">Start Kids Place with JaMuz</string>
     <string name="settingsLocalFilesTextViewTitle">Local tracks</string>
     <string name="settingsLocalFilesTextViewHelp" tools:ignore="MissingTranslation">Warning: Those local tracks will NOT be synced with the JaMuz Server, so instead using that to get your tracks is highly recommended!</string>
-    <string name="settingsLocalFilesTextViewPath">Path:</string>
-    <string name="settingsDirectoryChooserButtonNewFolder">New folder</string>
-    <string name="settingsDirectoryChooserNewFolderName">New folder name</string>
-    <string name="settingsDirectoryChooserFailedToCreate">Error creating folder</string>
-    <string name="settingsDirectoryChooserFailedToCreateSuffix">folder.</string>
     <string name="playlistTextViewExcludeTheLast">Exclude the last </string>
     <string-array name="limitUnits">
         <item>minutes</item>

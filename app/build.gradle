@@ -32,13 +32,14 @@ dependencies {
     implementation 'net.jthink:jaudiotagger:3.0.1'
     implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.appcompat:appcompat:1.6.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.google.android:flexbox:0.3.0'
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.3.Final'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     implementation 'com.athkalia.emphasis:emphasis:0.4'
+    implementation("androidx.media:media:1.6.0")
 
     implementation 'com.google.code.gson:gson:2.9.1'
     // DO NOT UPDATE guava unless changing sourceCompatibility 1.8
