@@ -54,7 +54,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-//TODO: Use the COL_xxx everywhere !!
+//FIXME: Use the COL_xxx everywhere !!
 
 /**
  * Created by raph on 12/06/17.
@@ -196,7 +196,7 @@ public class MusicLibrary {
         boolean result;
         if (idFileRemote >= 0) {
             track.setIdFileRemote(idFileRemote);
-            //TODO, for LOCAL tracks only: update only if file is modified:
+            //FIXME, for LOCAL tracks only: update only if file is modified:
             //based on lastModificationDate and/or size (not on content as longer than updateTrack)
             Log.d(TAG, "updateTrack " + track.getPath()); //NON-NLS
             result = updateTrack(track, false);

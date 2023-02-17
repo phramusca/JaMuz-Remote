@@ -47,7 +47,7 @@ public class ReplayGain {
         switch (ext) {
             case "mp3": //NON-NLS
                 //First try reading from APE tags (default mp3gain storage)
-                //TODO: Find another library to get APE replaygain since beaglebuddy has to be removed for fdroid inclusion
+                //FIXME: Find another library to get APE replaygain since beaglebuddy has to be removed for fdroid inclusion
                 //gainValues = readReplayGainFromAPE(path);
                 if (!gainValues.isValid()) {
                     //If not found, read from ID3 (written by some other tool, foobar2000 maybe ?)
@@ -141,13 +141,13 @@ public class ReplayGain {
         }
     }
 
-    //TODO: Read FLAC ReplayGain (no more urgent since getting replayGain from server)
+    //FIXME: Read FLAC ReplayGain (no more urgent since getting replayGain from server)
     //=> using jaudiotagger 2.2.4 instead of 2.2.6 to avoid : java.lang.NoSuchMethodError: ...
     //https://bitbucket.org/ijabz/jaudiotagger/issues/149/some-nio-classes-are-unavailable-while
     //=> but 2.2.4 does not (seem to) read FLAC replaygain
     //=> can a higher version solve the issue ?
 
-    //TODO: Check if jaudiotagger > 2.2.6 supports REPLAYGAIN tags as generic fields for MP3 (and FLAC)
+    //FIXME: Check if jaudiotagger > 2.2.6 supports REPLAYGAIN tags as generic fields for MP3 (and FLAC)
     //https://bitbucket.org/ijabz/jaudiotagger/issues/37/add-generic-support-for-reading-writing
 
     private static GainValues readReplayGainFromID3(File path) {
@@ -192,7 +192,7 @@ public class ReplayGain {
                 }
             }
         } catch (NoSuchMethodError | CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException ex) {
-            //TODO: Same NoSuchMethodError problem as with FLAC ?
+            //FIXME: Same NoSuchMethodError problem as with FLAC ?
             //Not tested but catching NoSuchMethodError as it should be the same
             Logger.getLogger(ReplayGain.class.getName()).log(Level.SEVERE, null, ex);
         }

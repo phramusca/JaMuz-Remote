@@ -2386,7 +2386,7 @@ public class ActivityMain extends AppCompatActivity {
                         break;
                     case "fileInfoInt":
                         displayedTrack = new Track(jObject, new File(""), false);
-                        //TODO: Display Playlist name and nbFiles
+                        //FIXME: Display Playlist name and nbFiles
                         displayTrack();
                         break;
                 }
