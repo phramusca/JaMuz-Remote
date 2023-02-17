@@ -1,11 +1,8 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
-import android.content.res.Resources;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 /**
  * Created by raph on 18/03/18.
@@ -14,7 +11,7 @@ import java.util.stream.Collectors;
 //TODO: Make keywords configurable in application
 
 public class VoiceKeyWords {
-    private static final ArrayList<KeyWord> KEY_WORDS = new ArrayList<>();
+    private final ArrayList<KeyWord> KEY_WORDS = new ArrayList<>();
 
     public VoiceKeyWords(Context context) {
         for (Command command : Command.values()) {
