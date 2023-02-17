@@ -301,7 +301,6 @@ public class ActivityMain extends AppCompatActivity {
             displayedTrack = localTrack;
         }
         displayTrack();
-        ListenerPlayer callBackPlayer = new ListenerPlayer();
 
         setupButton(R.id.button_play, "playTrack"); //NON-NLS
         setupButton(R.id.button_next, "nextTrack"); //NON-NLS
@@ -330,30 +329,23 @@ public class ActivityMain extends AppCompatActivity {
     private final MediaControllerCompat.Callback mediaControllerCallback = new MediaControllerCompat.Callback() {
 
         private ValueAnimator mProgressAnimator;
+        private int quarterPosition = 0;
 
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             super.onPlaybackStateChanged(state);
-
             // If there's an ongoing animation, stop it now.
             if (mProgressAnimator != null) {
                 mProgressAnimator.cancel();
                 mProgressAnimator = null;
             }
-
             final int progress = (int) state.getPosition();
             setSeekBar(progress, seekBarPosition.getMax());
-
-            // If the media is playing then the seekbar should follow it, and the easiest
-            // way to do that is to create a ValueAnimator to update it so the bar reaches
-            // the end of the media the same time as playback gets there (or close enough).
             if (state.getState() == PlaybackStateCompat.STATE_PLAYING) {
                 final int timeToEnd = (int) ((seekBarPosition.getMax() - progress) / state.getPlaybackSpeed());
-
                 if(timeToEnd<0) {
                     return; //FIXME: Should not happen (happens after app restart, when seekBarPosition probably not set)
                 }
-
                 mProgressAnimator = ValueAnimator.ofInt(progress, seekBarPosition.getMax())
                         .setDuration(timeToEnd);
                 mProgressAnimator.setInterpolator(new LinearInterpolator());
@@ -363,9 +355,25 @@ public class ActivityMain extends AppCompatActivity {
                         valueAnimator.cancel();
                         return;
                     }
-
                     final int animatedIntValue = (int) valueAnimator.getAnimatedValue();
                     setSeekBar(animatedIntValue, seekBarPosition.getMax());
+                    int remaining = (seekBarPosition.getMax() - animatedIntValue);
+                    if (remaining < 5001 && remaining > 4501) { //TODO: Why those numbers ? (can't remember ...)
+                        dimOn();
+                    }
+                    if (remaining > 1 && quarterPosition < 4) {
+                        int quarter = seekBarPosition.getMax() / 4;
+                        if (quarterPosition < 1 && (remaining < 3 * quarter)) {
+                            quarterPosition = 1;
+                            askEdition(false);
+                        } else if (quarterPosition < 2 && (remaining < 2 * quarter)) {
+                            quarterPosition = 2;
+                            askEdition(false);
+                        } else if (quarterPosition < 3 && (remaining < quarter)) {
+                            quarterPosition = 3;
+                            askEdition(false);
+                        }
+                    }
                 });
                 mProgressAnimator.start();
             }
@@ -374,6 +382,7 @@ public class ActivityMain extends AppCompatActivity {
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             setSeekBar(0, (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+            quarterPosition = 0;
             displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
             displayedTrack.setHistory(true);
             displayTrack();
@@ -1641,36 +1650,6 @@ public class ActivityMain extends AppCompatActivity {
             }
         }
         return false;
-    }
-
-    class ListenerPlayer {
-
-        private int quarterPosition = 0;
-
-        //FIXME: Implement this in new MediaSeekBar
-        public void onPositionChanged(int position, int duration) {
-            if (!isRemoteConnected()) {
-                //setSeekBar(position, duration);
-                int remaining = (duration - position);
-                if (remaining < 5001 && remaining > 4501) { //TODO: Why those numbers ? (can't remember ...)
-                    dimOn();
-                }
-
-                if (remaining > 1 && quarterPosition < 4) {
-                    int quarter = duration / 4;
-                    if (quarterPosition < 1 && (remaining < 3 * quarter)) {
-                        quarterPosition = 1;
-                        askEdition(false);
-                    } else if (quarterPosition < 2 && (remaining < 2 * quarter)) {
-                        quarterPosition = 2;
-                        askEdition(false);
-                    } else if (quarterPosition < 3 && (remaining < quarter)) {
-                        quarterPosition = 3;
-                        askEdition(false);
-                    }
-                }
-            }
-        }
     }
 
     private void askEdition(boolean force) {
