@@ -61,7 +61,6 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
     private boolean enableControl = false;
     private int duration;
     private boolean mediaPlayerWasPlayingOnFocusLost = false;
-    private static CountDownTimer timer;
     private final HelperToast helperToast = new HelperToast(this);
     private static final int NOTIFICATION_ID = NotificationId.get();
     private static SharedPreferences preferences;
@@ -267,7 +266,6 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
                 initMediaSessionMetadata(track);
                 askFocusAndPlay();
                 mediaPlayer.setOnCompletionListener(mediaPlayer -> playNext());
-                mediaPlayer.setOnSeekCompleteListener(mediaPlayer -> startTimer());
                 enableControl = true;
             });
         } catch (IOException e) {
@@ -304,7 +302,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
-            stopTimer(mediaPlayerWasPlaying);
+            this.mediaPlayerWasPlayingOnFocusLost = mediaPlayerWasPlaying;
 //            stopForeground(false);
         }
     }
@@ -378,28 +376,8 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             mediaSession.setActive(true);
             mediaPlayer.start();
             setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
-
             mediaPlayerWasPlayingOnFocusLost = true;
-            startTimer();
         }
-    }
-
-    private void startTimer() {
-        timer = new CountDownTimer(duration - mediaPlayer.getCurrentPosition() - 1, 30000) {
-            @Override
-            public void onTick(long millisUntilFinished_) {
-                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                    playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, mediaPlayer.getCurrentPosition(), 1);
-                    mediaSession.setPlaybackState(playbackStateBuilder.build());
-                } else {
-                    this.cancel();
-                }
-            }
-
-            @Override
-            public void onFinish() {
-            }
-        }.start();
     }
 
     private void stop(boolean release) {
@@ -415,21 +393,9 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
                     mediaPlayer = null;
                 }
             }
-            stopTimer();
+            this.mediaPlayerWasPlayingOnFocusLost = false;
         } catch (Exception e) { //NON-NLS //NON-NLS
             Log.w(TAG, "Failed to stop"); //NON-NLS
-        }
-    }
-
-    private void stopTimer() {
-        stopTimer(false);
-    }
-
-    private void stopTimer(boolean mediaPlayerWasPlaying) {
-        this.mediaPlayerWasPlayingOnFocusLost = mediaPlayerWasPlaying;
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
         }
     }
 
