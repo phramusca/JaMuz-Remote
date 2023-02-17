@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application
         android:allowBackup="true"
@@ -39,16 +40,17 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".ReceiverMediaButton"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </receiver>
         <receiver android:name=".ReceiverHeadSetPlugged"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.HEADSET_PLUG" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="androidx.media.session.MediaButtonReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON"/>
             </intent-filter>
         </receiver>
 
@@ -60,6 +62,15 @@
             android:name=".ServiceScan"
             android:exported="false"
             android:singleUser="false" />
+        <service
+            android:name=".ServiceAudioPlayer"
+            android:exported="false">
+            <intent-filter>
+<!--                <action android:name="android.intent.action.MEDIA_BUTTON" />-->
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
 
         <activity android:name=".ActivityPlayQueue" />
         <activity android:name=".ActivityAlbums" />
