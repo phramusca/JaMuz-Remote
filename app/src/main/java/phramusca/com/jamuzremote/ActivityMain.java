@@ -109,6 +109,8 @@ public class ActivityMain extends AppCompatActivity {
 
     private static final String TAG = ActivityMain.class.getName();
     private static SharedPreferences preferences;
+
+    private VoiceKeyWords voiceKeyWords;
     private final HelperToast helperToast = new HelperToast(this);
     private ClientRemote clientRemote;
 
@@ -440,7 +442,7 @@ public class ActivityMain extends AppCompatActivity {
         }
         musicLibraryDbFile = HelperFile.getFile("JaMuzRemote.db");
 
-        VoiceKeyWords.set();
+        voiceKeyWords = new VoiceKeyWords(this);
         prettyTime = new PrettyTime(Locale.getDefault());
         prettyTime.removeUnit(org.ocpsoft.prettytime.units.Decade.class);
         login = Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -1423,7 +1425,7 @@ public class ActivityMain extends AppCompatActivity {
                 // Ska Punk      | ska punk
                 // Trip Hop      | trip hop
 
-                VoiceKeyWords.KeyWord keyWord = VoiceKeyWords.get(spokenText);
+                VoiceKeyWords.KeyWord keyWord = voiceKeyWords.get(spokenText);
                 String arguments = keyWord.getKeyword();
                 String msg = getString(R.string.speakUnknownCommand) + " \"" + spokenText + "\".";
                 switch (keyWord.getCommand()) {
