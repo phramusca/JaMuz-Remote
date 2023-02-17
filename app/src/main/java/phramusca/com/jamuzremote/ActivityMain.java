@@ -17,7 +17,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -110,6 +109,8 @@ public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getName();
     private static SharedPreferences preferences;
 
+    private static Map<String, String> stringMap;
+
     private VoiceKeyWords voiceKeyWords;
     private final HelperToast helperToast = new HelperToast(this);
     private ClientRemote clientRemote;
@@ -131,7 +132,7 @@ public class ActivityMain extends AppCompatActivity {
     private static final int LISTS_REQUEST_CODE = 60568;
     private static final int SETTINGS_REQUEST_CODE = 23548;
 
-    private Context mContext;
+    private Context mContext; //TODO: replace with this
     private static PrettyTime prettyTime;
 
     // GUI elements
@@ -431,6 +432,17 @@ public class ActivityMain extends AppCompatActivity {
         mContext = this;
         setContentView(R.layout.activity_main);
         layoutMain = findViewById(R.id.panel_main);
+
+        stringMap = new HashMap<>();
+        stringMap.put("settingsServerDefaultConnectionString", getString(R.string.settingsServerDefaultConnectionString));
+        stringMap.put("mainToastClientInfoBadFormat", getString(R.string.mainToastClientInfoBadFormat));
+        stringMap.put("mainToastClientInfoExpected", getString(R.string.mainToastClientInfoExpected));
+        stringMap.put("mainToastClientInfoIP", getString(R.string.mainToastClientInfoIP));
+        stringMap.put("mainToastClientInfoPort", getString(R.string.mainToastClientInfoPort));
+        stringMap.put("mainToastClientInfoEx", getString(R.string.mainToastClientInfoEx));
+        stringMap.put("trackNeverPlayed", getString(R.string.trackNeverPlayed));
+        stringMap.put("trackPlayed", getString(R.string.trackPlayed));
+        stringMap.put("trackAdded", getString(R.string.trackAdded));
 
         //TODO: Disable touch events while loading until panels are toggled off.
         //setEnabled does not seem enough (need to disable inner views too?) + some widgets are disabled/enabled during onCreate
@@ -924,18 +936,18 @@ public class ActivityMain extends AppCompatActivity {
     static ClientInfo getClientInfo(int canal, HelperToast helperToast) {
         String infoConnect = preferences.getString(
                 "connectionString",
-                Resources.getSystem().getString(R.string.settingsServerDefaultConnectionString));
+                stringMap.get("settingsServerDefaultConnectionString"));
         String[] split = infoConnect.split(":");  //NOI18N
         if (split.length < 2) {
             helperToast.toastLong(
                     String.format("%s %s\n%s <%s>:<%s>\n%s %s", //NON-NLS
-                            Resources.getSystem().getString(R.string.mainToastClientInfoBadFormat),
+                            stringMap.get("mainToastClientInfoBadFormat"),
                             infoConnect,
-                            Resources.getSystem().getString(R.string.mainToastClientInfoExpected),
-                            Resources.getSystem().getString(R.string.mainToastClientInfoIP),
-                            Resources.getSystem().getString(R.string.mainToastClientInfoPort),
-                            Resources.getSystem().getString(R.string.mainToastClientInfoEx),
-                            Resources.getSystem().getString(R.string.settingsServerDefaultConnectionString)));
+                            stringMap.get("mainToastClientInfoExpected"),
+                            stringMap.get("mainToastClientInfoIP"),
+                            stringMap.get("mainToastClientInfoPort"),
+                            stringMap.get("mainToastClientInfoEx"),
+                            stringMap.get("settingsServerDefaultConnectionString")));
             return null;
         }
         String address = split[0];
@@ -2259,10 +2271,10 @@ public class ActivityMain extends AppCompatActivity {
 
     public static String getLastPlayedAgo(Track track) {
         return track.getPlayCounter() <= 0
-                ? Resources.getSystem().getString(R.string.trackNeverPlayed)
+                ? stringMap.get("trackNeverPlayed")
                 : String.format(Locale.getDefault(),
                 "%s %s (%dx). ", //NON-NLS
-                Resources.getSystem().getString(R.string.trackPlayed),
+                stringMap.get("trackNeverPlayed"),
                 prettyTime.format(track.getLastPlayed()),
                 track.getPlayCounter());
     }
@@ -2270,7 +2282,7 @@ public class ActivityMain extends AppCompatActivity {
     public static String getAddedDateAgo(Track track) { //NON-NLS
         return String.format(
                 "%s %s.", //NON-NLS
-                Resources.getSystem().getString(R.string.trackAdded),
+                stringMap.get("trackNeverPlayed"),
                 prettyTime.format(track.getAddedDate()));
     }
 

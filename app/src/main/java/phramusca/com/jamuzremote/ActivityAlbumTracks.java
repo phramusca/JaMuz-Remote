@@ -128,17 +128,19 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                     mNotifyManager);
             HelperToast helperToast = new HelperToast(getApplicationContext());
             ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
-            processDownload = new DownloadProcess(
-                      "ActivityAlbumTracks.ProcessDownload",
-                      newTracks,
-                      getApplicationContext(),
-                      helperNotification,
-                      clientInfo,
-                      clientDownload,
-                      title,
-                      this::updateStatus,
-                      null);
-            processDownload.start();
+            if (clientInfo != null) {
+                processDownload = new DownloadProcess(
+                        "ActivityAlbumTracks.ProcessDownload",
+                        newTracks,
+                        getApplicationContext(),
+                        helperNotification,
+                        clientInfo,
+                        clientDownload,
+                        title,
+                        this::updateStatus,
+                        null);
+                processDownload.start();
+            }
         }
     }
 
