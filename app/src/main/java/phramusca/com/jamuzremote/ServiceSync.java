@@ -306,8 +306,8 @@ public class ServiceSync extends ServiceBase {
             String body = clientInfo.getBodyString("tags", client); //NON-NLS
             helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncReceivedTags));
             final JSONObject jObject = new JSONObject(body);
-            //TODO Get tags list with their respective number of files, for sorting
-            //TODO Add a "x/y" button to display tag & genre (in playlist) pages x/y (# of tags per page to be defined/optional)
+            //FIXME Get tags list with their respective number of files, for sorting
+            //FIXME Add a "x/y" button to display tag & genre (in playlist) pages x/y (# of tags per page to be defined/optional)
             final JSONArray jsonTags = (JSONArray) jObject.get("tags"); //NON-NLS
             final List<String> newTags = new ArrayList<>();
             for (int i = 0; i < jsonTags.length(); i++) {

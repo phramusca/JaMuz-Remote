@@ -15,7 +15,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
 
     static final String TABLE_TRACKS = "tracks"; //NON-NLS
 
-    //TODO: Use this syntax and make the same for other tables
+    //FIXME: Use this syntax and make the same for other tables
     //static final String COL_ID_REMOTE = TABLE_TRACKS+".idFileRemote";
     static final String COL_ID_REMOTE = "idFileRemote";
     static final String COL_ID_SERVER = "idFileServer";

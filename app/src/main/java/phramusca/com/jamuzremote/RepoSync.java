@@ -32,7 +32,7 @@ public final class RepoSync {
                     // merge list only takes REC files
                     // then we will get an up-to-date list of NEW from server
                     // And finally file will be deleted during checkFiles(INFO) step, so downloaded/checked for nothing
-                    // TODO: But, what about files that have been downloaded manually ?
+                    // FIXME: But, what about files that have been downloaded manually ?
                     // => Offer a way to keep those on sync (and so a cleanup option)
                     // May be easier to create a new Track.Status for that purpose ?
                     track.setStatus(Track.Status.INFO);

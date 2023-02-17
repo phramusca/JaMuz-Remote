@@ -192,8 +192,8 @@ public class ServiceScan extends ServiceBase {
                     long id = cursor.getLong(idColumnId);
                     Uri contentUri = ContentUris.withAppendedId(collection, id);
                     long albumId = cursor.getLong(albumIdColumnId);
-                    //TODO: Use track metadata from MediaStore instead of reading file
-                    //Warning: not all fields are available depending on android version
+                    //We could have used track metadata from MediaStore instead of reading file
+                    // but not all fields are available depending on android version
                     HelperLibrary.musicLibrary.insertOrUpdateTrack(contentUri.toString(),
                             getApplicationContext(), "MediaStore_" + albumId);
                     notifyScan(getString(R.string.scanNotifyScanning), 1);
