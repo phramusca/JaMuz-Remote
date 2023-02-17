@@ -1,6 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import android.content.Context;
+import android.content.res.Resources;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,10 +16,10 @@ import java.util.stream.Collectors;
 public class VoiceKeyWords {
     private static final ArrayList<KeyWord> KEY_WORDS = new ArrayList<>();
 
-    public static void set(Context context) {
+    public static void set() {
         for (Command command : Command.values()) {
             if(!command.equals(Command.UNKNOWN)) {
-                for (String keyword : context.getResources().getStringArray(command.resId)) {
+                for (String keyword : Resources.getSystem().getStringArray(command.resId)) {
                     KEY_WORDS.add(new KeyWord(keyword, command));
                 }
             }
