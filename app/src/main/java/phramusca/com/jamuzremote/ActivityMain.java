@@ -17,6 +17,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -128,7 +129,7 @@ public class ActivityMain extends AppCompatActivity {
     private static final int LISTS_REQUEST_CODE = 60568;
     private static final int SETTINGS_REQUEST_CODE = 23548;
 
-    private static Context mContext; //FIXME: Remove static
+    private Context mContext;
     private static PrettyTime prettyTime;
 
     // GUI elements
@@ -439,7 +440,7 @@ public class ActivityMain extends AppCompatActivity {
         }
         musicLibraryDbFile = HelperFile.getFile("JaMuzRemote.db");
 
-        VoiceKeyWords.set(mContext);
+        VoiceKeyWords.set();
         prettyTime = new PrettyTime(Locale.getDefault());
         prettyTime.removeUnit(org.ocpsoft.prettytime.units.Decade.class);
         login = Settings.Secure.getString(ActivityMain.this.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -921,18 +922,18 @@ public class ActivityMain extends AppCompatActivity {
     static ClientInfo getClientInfo(int canal, HelperToast helperToast) {
         String infoConnect = preferences.getString(
                 "connectionString",
-                mContext.getString(R.string.settingsServerDefaultConnectionString));
+                Resources.getSystem().getString(R.string.settingsServerDefaultConnectionString));
         String[] split = infoConnect.split(":");  //NOI18N
         if (split.length < 2) {
             helperToast.toastLong(
                     String.format("%s %s\n%s <%s>:<%s>\n%s %s", //NON-NLS
-                            mContext.getString(R.string.mainToastClientInfoBadFormat),
+                            Resources.getSystem().getString(R.string.mainToastClientInfoBadFormat),
                             infoConnect,
-                            mContext.getString(R.string.mainToastClientInfoExpected),
-                            mContext.getString(R.string.mainToastClientInfoIP),
-                            mContext.getString(R.string.mainToastClientInfoPort),
-                            mContext.getString(R.string.mainToastClientInfoEx),
-                            mContext.getString(R.string.settingsServerDefaultConnectionString)));
+                            Resources.getSystem().getString(R.string.mainToastClientInfoExpected),
+                            Resources.getSystem().getString(R.string.mainToastClientInfoIP),
+                            Resources.getSystem().getString(R.string.mainToastClientInfoPort),
+                            Resources.getSystem().getString(R.string.mainToastClientInfoEx),
+                            Resources.getSystem().getString(R.string.settingsServerDefaultConnectionString)));
             return null;
         }
         String address = split[0];
@@ -2256,10 +2257,10 @@ public class ActivityMain extends AppCompatActivity {
 
     public static String getLastPlayedAgo(Track track) {
         return track.getPlayCounter() <= 0
-                ? mContext.getString(R.string.trackNeverPlayed)
+                ? Resources.getSystem().getString(R.string.trackNeverPlayed)
                 : String.format(Locale.getDefault(),
                 "%s %s (%dx). ", //NON-NLS
-                mContext.getString(R.string.trackPlayed),
+                Resources.getSystem().getString(R.string.trackPlayed),
                 prettyTime.format(track.getLastPlayed()),
                 track.getPlayCounter());
     }
@@ -2267,7 +2268,7 @@ public class ActivityMain extends AppCompatActivity {
     public static String getAddedDateAgo(Track track) { //NON-NLS
         return String.format(
                 "%s %s.", //NON-NLS
-                mContext.getString(R.string.trackAdded),
+                Resources.getSystem().getString(R.string.trackAdded),
                 prettyTime.format(track.getAddedDate()));
     }
 
