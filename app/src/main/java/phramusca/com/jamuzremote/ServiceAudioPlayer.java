@@ -147,6 +147,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             super.onSeekTo(pos);
             if (mediaPlayer != null && enableControl) {
                 mediaPlayer.seekTo((int) pos);
+                setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
             }
         }
 
@@ -155,6 +156,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             super.onFastForward();
             if (mediaPlayer != null && enableControl) {
                 mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + duration / 10);
+                setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
             }
         }
 
@@ -163,6 +165,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             super.onRewind();
             if (mediaPlayer != null && enableControl) {
                 mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() - duration / 10);
+                setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
             }
         }
 
