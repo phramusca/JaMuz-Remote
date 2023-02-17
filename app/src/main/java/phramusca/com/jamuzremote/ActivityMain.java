@@ -283,24 +283,7 @@ public class ActivityMain extends AppCompatActivity {
                 speechRecognizer();
             }
         });
-        String version = "version";
-        try {
-            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            version = pInfo.versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        localTrack = new Track("albumArtist", "v" + version, -1, -1,
-                -1, -1, "", "format", -1, 5, //NON-NLS
-                getString(R.string.mainWelcomeTitle),
-                getString(R.string.mainWelcomeYear), getString(R.string.applicationName),
-                "welcomeHash", //Warning: "welcomeHash" value has a meaning
-                "---");
-        displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
-        if(displayedTrack==null) {
-            displayedTrack = localTrack;
-        }
-        displayTrack();
+
 
         setupButton(R.id.button_play, "playTrack"); //NON-NLS
         setupButton(R.id.button_next, "nextTrack"); //NON-NLS
@@ -324,59 +307,37 @@ public class ActivityMain extends AppCompatActivity {
         registerReceiver(receiverHeadSetPlugged, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
         MediaControllerCompat mediaController = MediaControllerCompat.getMediaController(ActivityMain.this);
         mediaController.registerCallback(mediaControllerCallback);
+
+        // Display "welcome" or current track
+        String version = "version";
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            version = pInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        localTrack = new Track("albumArtist", "v" + version, -1, -1,
+                -1, -1, "", "format", -1, 5, //NON-NLS
+                getString(R.string.mainWelcomeTitle),
+                getString(R.string.mainWelcomeYear), getString(R.string.applicationName),
+                "welcomeHash", //Warning: "welcomeHash" value has a meaning
+                "---");
+        displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
+        if(displayedTrack==null) {
+            displayedTrack = localTrack;
+        }
+        displayTrack();
+        MediaMetadataCompat metadata = mediaController.getMetadata();
+        if(metadata!=null) {
+            setSeekBarPosition(mediaController.getPlaybackState(), (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+        }
     }
 
     private final MediaControllerCompat.Callback mediaControllerCallback = new MediaControllerCompat.Callback() {
-
-        private ValueAnimator mProgressAnimator;
-        private int quarterPosition = 0;
-
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             super.onPlaybackStateChanged(state);
-            // If there's an ongoing animation, stop it now.
-            if (mProgressAnimator != null) {
-                mProgressAnimator.cancel();
-                mProgressAnimator = null;
-            }
-            final int progress = (int) state.getPosition();
-            setSeekBar(progress, seekBarPosition.getMax());
-            if (state.getState() == PlaybackStateCompat.STATE_PLAYING) {
-                final int timeToEnd = (int) ((seekBarPosition.getMax() - progress) / state.getPlaybackSpeed());
-                if(timeToEnd<0) {
-                    return; //FIXME: Should not happen (happens after app restart, when seekBarPosition probably not set)
-                }
-                mProgressAnimator = ValueAnimator.ofInt(progress, seekBarPosition.getMax())
-                        .setDuration(timeToEnd);
-                mProgressAnimator.setInterpolator(new LinearInterpolator());
-                mProgressAnimator.addUpdateListener(valueAnimator -> {
-                    // If the user is changing the slider, cancel the animation.
-                    if (mIsTracking) {
-                        valueAnimator.cancel();
-                        return;
-                    }
-                    final int animatedIntValue = (int) valueAnimator.getAnimatedValue();
-                    setSeekBar(animatedIntValue, seekBarPosition.getMax());
-                    int remaining = (seekBarPosition.getMax() - animatedIntValue);
-                    if (remaining < 5001 && remaining > 4501) { //TODO: Why those numbers ? (can't remember ...)
-                        dimOn();
-                    }
-                    if (remaining > 1 && quarterPosition < 4) {
-                        int quarter = seekBarPosition.getMax() / 4;
-                        if (quarterPosition < 1 && (remaining < 3 * quarter)) {
-                            quarterPosition = 1;
-                            askEdition(false);
-                        } else if (quarterPosition < 2 && (remaining < 2 * quarter)) {
-                            quarterPosition = 2;
-                            askEdition(false);
-                        } else if (quarterPosition < 3 && (remaining < quarter)) {
-                            quarterPosition = 3;
-                            askEdition(false);
-                        }
-                    }
-                });
-                mProgressAnimator.start();
-            }
+            setSeekBarPosition(state, seekBarPosition.getMax());
         }
 
         @Override
@@ -393,6 +354,52 @@ public class ActivityMain extends AppCompatActivity {
             mediaBrowser.disconnect();
         }
     };
+
+    private ValueAnimator mProgressAnimator;
+    private int quarterPosition = 0;
+
+    private void setSeekBarPosition(PlaybackStateCompat state, int duration) {
+        // If there's an ongoing animation, stop it now.
+        if (mProgressAnimator != null) {
+            mProgressAnimator.cancel();
+            mProgressAnimator = null;
+        }
+        final int progress = (int) state.getPosition();
+        setSeekBar(progress, duration);
+        if (state.getState() == PlaybackStateCompat.STATE_PLAYING) {
+            final int timeToEnd = (int) ((duration - progress) / state.getPlaybackSpeed());
+            mProgressAnimator = ValueAnimator.ofInt(progress, duration)
+                    .setDuration(timeToEnd);
+            mProgressAnimator.setInterpolator(new LinearInterpolator());
+            int quarter = duration / 4;
+            mProgressAnimator.addUpdateListener(valueAnimator -> {
+                // If the user is changing the slider, cancel the animation.
+                if (mIsTracking) {
+                    valueAnimator.cancel();
+                    return;
+                }
+                final int animatedIntValue = (int) valueAnimator.getAnimatedValue();
+                setSeekBar(animatedIntValue, duration);
+                int remaining = duration - animatedIntValue;
+                if (remaining < 5001 && remaining > 4501) { //TODO: Why those numbers ? (can't remember ...)
+                    dimOn();
+                }
+                if (remaining > 1 && quarterPosition < 4) {
+                    if (quarterPosition < 1 && (remaining < 3 * quarter)) {
+                        quarterPosition = 1;
+                        askEdition(false);
+                    } else if (quarterPosition < 2 && (remaining < 2 * quarter)) {
+                        quarterPosition = 2;
+                        askEdition(false);
+                    } else if (quarterPosition < 3 && (remaining < quarter)) {
+                        quarterPosition = 3;
+                        askEdition(false);
+                    }
+                }
+            });
+            mProgressAnimator.start();
+        }
+    }
 
     private boolean mIsTracking = false;
 
