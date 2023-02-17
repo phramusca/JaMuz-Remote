@@ -2016,7 +2016,7 @@ public class ActivityMain extends AppCompatActivity {
         }, 500);
 
         mHandler.postDelayed(() -> {
-            refreshLocalPlaylistSpinner(true);
+            applyPlaylist(localSelectedPlaylist, false);
         }, 5000);
 
         //Start Scan Service
