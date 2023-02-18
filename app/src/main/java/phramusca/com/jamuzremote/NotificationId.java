@@ -3,7 +3,7 @@ package phramusca.com.jamuzremote;
 import java.util.Date;
 
 /**
- * @author phramusca ( https://github.com/phramusca/JaMuz/ )
+ * @author phramusca ( <a href="https://github.com/phramusca/JaMuz/">...</a> )
  */
 public class NotificationId {
     public static int get() {

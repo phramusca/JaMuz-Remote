@@ -23,12 +23,6 @@ public class HelperNotification {
     HelperNotification(PendingIntent pendingIntent, NotificationManager notificationManager) {
         this.pendingIntent = pendingIntent;
         this.notificationManager = notificationManager;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            NotificationChannel channel1 = new
-                    NotificationChannel("MyNotificationChannelId", "Channel(1)", NotificationManager.IMPORTANCE_LOW);
-            channel1.setDescription("Channel 1 Dec..");
-            notificationManager.createNotificationChannel(channel1);
-        }
     }
 
     //Ends a notification

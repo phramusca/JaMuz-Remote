@@ -48,7 +48,7 @@ public class ServiceSync extends ServiceBase {
 
     @Override
     public void onCreate() {
-        notificationSync = new Notification(this, NotificationId.get(), getString(R.string.serviceSyncNotifySyncTitle));
+        notificationSync = new Notification(this, NotificationId.get(), getString(R.string.serviceSyncNotifySyncTitle), "Sync service", "Displays progression of tracks synchronization with JaMuz Server.");
         clientDownload = new OkHttpClient.Builder()
                 .readTimeout(60, TimeUnit.SECONDS)
                 .build();
