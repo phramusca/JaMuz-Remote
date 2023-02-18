@@ -15,8 +15,6 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
 
     static final String TABLE_TRACKS = "tracks"; //NON-NLS
 
-    //FIXME: Use this syntax and make the same for other tables
-    //static final String COL_ID_REMOTE = TABLE_TRACKS+".idFileRemote";
     static final String COL_ID_REMOTE = "idFileRemote";
     static final String COL_ID_SERVER = "idFileServer";
     static final String COL_TITLE = "title"; //NON-NLS
@@ -51,7 +49,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
     static final String COL_TRACK_GAIN = "trackGain";
     static final String COL_ALBUM_GAIN = "albumGain";
 
-    private static final String CREATE_BDD = "CREATE TABLE " + TABLE_TRACKS + " (" //NON-NLS //NON-NLS
+    private static final String CREATE_TABLE_TRACKS = "CREATE TABLE " + TABLE_TRACKS + " (" //NON-NLS //NON-NLS
             + COL_ID_REMOTE + " INTEGER PRIMARY KEY AUTOINCREMENT, " //NON-NLS //NON-NLS
             + COL_ID_SERVER + " INTEGER NOT NULL, " //NON-NLS
             + COL_ID_PATH + " INTEGER NOT NULL, " //NON-NLS
@@ -86,39 +84,51 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
             + COL_ALBUM_GAIN + " REAL, " //NON-NLS
             + COL_PATH + " TEXT NOT NULL); "; //NON-NLS
 
+    private static final String TABLE_TAG = "tag";
+    static final String COL_TAG_ID = "id";
+    static final String COL_TAG_VALUE = "value"; //NON-NLS
+    private static final String CREATE_TABLE_TAG = "CREATE TABLE " + TABLE_TAG + " (\n" //NON-NLS //NON-NLS
+            + COL_TAG_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \n" //NON-NLS //NON-NLS
+            + COL_TAG_VALUE + " TEXT NOT NULL, \n" //NON-NLS
+            + " CONSTRAINT name_unique UNIQUE ('" + COL_TAG_VALUE + "'));\n"; //NON-NLS
+
+    private static final String TABLE_TAG_FILE = "tagfile"; //NON-NLS
+    static final String COL_TAG_FILE_ID_FILE = "idFile";
+    static final String COL_TAG_FILE_ID_TAG = "idTag"; //NON-NLS
+    private static final String CREATE_TABLE_TAG_FILE = "CREATE TABLE " + TABLE_TAG_FILE + " (\n" //NON-NLS //NON-NLS
+            + COL_TAG_FILE_ID_FILE + " INTEGER NOT NULL, \n" //NON-NLS
+            + COL_TAG_FILE_ID_TAG + " INTEGER NOT NULL, \n" //NON-NLS
+            + "\tPRIMARY KEY (idFile, 'idTag'),\n" //NON-NLS
+            + "\tFOREIGN KEY(" + COL_TAG_FILE_ID_FILE + ") REFERENCES " + TABLE_TRACKS + "(" + COL_ID_REMOTE + "),\n" //NON-NLS //NON-NLS
+            + "\tFOREIGN KEY(" + COL_TAG_FILE_ID_TAG + ") REFERENCES " + TABLE_TAG + "(" + COL_TAG_ID + ") ON DELETE CASCADE);"; //NON-NLS //NON-NLS //NON-NLS
+
+    private static final String TABLE_GENRE = "genre"; //NON-NLS
+    static final String COL_GENRE_ID = "id"; //NON-NLS
+    static final String COL_GENRE_VALUE = "value"; //NON-NLS
+    private static final String CREATE_TABLE_GENRE = "CREATE TABLE " + TABLE_GENRE + " (\n" //NON-NLS
+            + COL_GENRE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \n" //NON-NLS
+            + COL_GENRE_VALUE + " TEXT NOT NULL);"; //NON-NLS
+
     MusicLibraryDb(final Context context, File musicLibraryDbFile) {
         super(context, musicLibraryDbFile.getAbsolutePath(), null, DB_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_BDD);
-        db.execSQL("CREATE TABLE 'tag' (\n" + //NON-NLS
-                "'id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\n" + //NON-NLS //NON-NLS
-                "'value' TEXT NOT NULL,\n" + //NON-NLS
-                "CONSTRAINT name_unique UNIQUE ('value')\n" + //NON-NLS
-                ")"); //NON-NLS
-        db.execSQL("CREATE TABLE 'tagfile' (\n" + //NON-NLS
-                "    'idFile' INTEGER NOT NULL,\n" + //NON-NLS //NON-NLS
-                "    'idTag' INTEGER NOT NULL,\n" + //NON-NLS
-                "\tPRIMARY KEY (idFile, 'idTag'),\n" + //NON-NLS
-                "\tFOREIGN KEY(idFile) REFERENCES " + TABLE_TRACKS + "(" + COL_ID_REMOTE + "),\n" + //NON-NLS //NON-NLS
-                "\tFOREIGN KEY(idTag) REFERENCES tag(id) ON DELETE CASCADE\n" + //NON-NLS //NON-NLS
-                ");"); //NON-NLS
-        db.execSQL("CREATE TABLE \"genre\" (\n" + //NON-NLS
-                "    \"id\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\n" + //NON-NLS
-                "    \"value\" TEXT NOT NULL\n" + //NON-NLS
-                ");");
-    } //NON-NLS
+        db.execSQL(CREATE_TABLE_TRACKS);
+        db.execSQL(CREATE_TABLE_TAG);
+        db.execSQL(CREATE_TABLE_TAG_FILE);
+        db.execSQL(CREATE_TABLE_GENRE);
+    }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) { //NON-NLS
         //TODO: How to warn user he needs to sync before upgrading version ? //NON-NLS //NON-NLS //NON-NLS
         // in case database change and this is called. //NON-NLS
-        db.execSQL("DROP TABLE " + TABLE_TRACKS + ";"); //NON-NLS //NON-NLS //NON-NLS
-        db.execSQL("DROP TABLE tag"); //NON-NLS
-        db.execSQL("DROP TABLE tagfile"); //NON-NLS //NON-NLS
-        db.execSQL("DROP TABLE genre"); //NON-NLS
+        db.execSQL("DROP TABLE " + TABLE_TRACKS + ";"); //NON-NLS //NON-NLS
+        db.execSQL("DROP TABLE " + TABLE_TAG + ";"); //NON-NLS //NON-NLS
+        db.execSQL("DROP TABLE " + TABLE_TAG_FILE + ";"); //NON-NLS //NON-NLS
+        db.execSQL("DROP TABLE " + TABLE_GENRE + ";"); //NON-NLS //NON-NLS
         onCreate(db);
     }
 }

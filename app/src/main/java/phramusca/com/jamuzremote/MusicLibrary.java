@@ -54,8 +54,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-//FIXME: Use the COL_xxx everywhere !!
-
 /**
  * Created by raph on 12/06/17.
  */
@@ -64,7 +62,6 @@ public class MusicLibrary {
     private final File getAppDataPath;
     private final MusicLibraryDb musicLibraryDb;
     private static final String TAG = MusicLibrary.class.getName();
-
     private static final List<String> NOT_SUPPORTED_FORMATS =
             Arrays.asList("audio/alac");
 
@@ -158,8 +155,8 @@ public class MusicLibrary {
 
     public Triplet<Integer, Long, Long> getNb(String where, String having) {
         Cursor cursor = null;
-        try { //NON-NLS
-            String query = "SELECT count(*), SUM(size) AS sizeTotal, SUM(length) AS lengthTotal \n" + //NON-NLS //NON-NLS
+        try {
+            String query = "SELECT count(*), SUM(size) AS sizeTotal, SUM(length) AS lengthTotal \n" + //NON-NLS
                     " FROM (SELECT size, length FROM tracks \n" + //NON-NLS
                     " LEFT JOIN tagfile ON tracks.idFileRemote=tagfile.idFile \n" + //NON-NLS
                     " LEFT JOIN tag ON tag.id=tagfile.idTag \n" + //NON-NLS
@@ -660,7 +657,7 @@ public class MusicLibrary {
                         "round(avg(" + COL_RATING + "), 2) AS " + COL_RATING + ", \n" + //NON-NLS //NON-NLS //NON-NLS
                         "group_concat(distinct " + COL_GENRE + ") AS " + COL_GENRE + ", \n" + //NON-NLS //NON-NLS //NON-NLS //NON-NLS
                         "group_concat(distinct " + COL_ARTIST + ") AS " + COL_ARTIST + ", \n" + //NON-NLS //NON-NLS
-                        COL_ALBUM + ", " +COL_COVER_HASH + ", " + COL_PATH + ", " + COL_ID_PATH + " \n"+ //NON-NLS
+                        COL_ALBUM + ", " + COL_COVER_HASH + ", " + COL_PATH + ", " + COL_ID_PATH + " \n"+ //NON-NLS
                         "FROM tracks \n" +//NON-NLS
                         " WHERE " + Playlist.getWhereStatus(statuses) +
                         (search.isEmpty()?"":
