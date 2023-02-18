@@ -92,7 +92,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
 
         String channelId = "Audio service"+"A notification with media controls.";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel chan = new NotificationChannel(channelId, "Audio service", NotificationManager.IMPORTANCE_NONE);
+            NotificationChannel chan = new NotificationChannel(channelId, "Audio service", NotificationManager.IMPORTANCE_LOW);
             chan.setDescription("A notification with media controls.");
             NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             nm.createNotificationChannel(chan);

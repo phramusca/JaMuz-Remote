@@ -20,7 +20,7 @@ public class Notification {
     Notification(Context context, int id, String title, String channelName, String channelDescription) {
         String channelId = channelName+channelDescription;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel chan = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_NONE);
+            NotificationChannel chan = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW);
             chan.setDescription(channelDescription);
             NotificationManager nm = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
             nm.createNotificationChannel(chan);
