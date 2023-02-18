@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
@@ -18,7 +19,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
 import android.service.media.MediaBrowserService;
@@ -55,6 +55,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
     private MediaSessionCompat mediaSession;
     private PlaybackStateCompat.Builder playbackStateBuilder;
     private MediaMetadataCompat.Builder metadataBuilder;
+    private NotificationCompat.Builder builder;
     private static final String MY_MEDIA_ROOT_ID = "media_root_id";
     private static final String MY_EMPTY_MEDIA_ROOT_ID = "empty_root_id";
     private static final String TAG = ServiceBase.class.getName();
@@ -88,8 +89,17 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         metadataBuilder = new MediaMetadataCompat.Builder();
         initMediaSession();
         initNoisyReceiver();
+
+        String channelId = "Audio service"+"A notification with media controls.";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel chan = new NotificationChannel(channelId, "Audio service", NotificationManager.IMPORTANCE_NONE);
+            chan.setDescription("A notification with media controls.");
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            nm.createNotificationChannel(chan);
+        }
+        builder = new NotificationCompat.Builder(getApplicationContext(), channelId);
         setMediaPlaybackState(PlaybackStateCompat.STATE_STOPPED);
-        showPlayingNotification();
+        startForeground(NOTIFICATION_ID, getNotification(PlaybackStateCompat.ACTION_PLAY));
     }
 
     private void initMediaSession() {
@@ -266,7 +276,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             setVolume(preferences.getInt("baseVolume", 70), track);
             mediaPlayer.setOnPreparedListener(mp -> {
                 duration = mediaPlayer.getDuration();
-                initMediaSessionMetadata(track);
+                setMediaSessionMetadata(track);
                 askFocusAndPlay();
                 mediaPlayer.setOnCompletionListener(mediaPlayer -> playNext());
                 enableControl = true;
@@ -316,7 +326,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
 
     /**
      * Enables or disables Replay Gain.
-     * Taken partially from https://github.com/vanilla-music/vanilla
+     * Taken partially from <a href="https://github.com/vanilla-music/vanilla">...</a>
      */
     private void applyReplayGain(Track track) {
         ReplayGain.GainValues replayGain = track.getReplayGain(false);
@@ -409,7 +419,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         }
     };
 
-    private void initMediaSessionMetadata(Track track) {
+    private void setMediaSessionMetadata(Track track) {
         metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration);
 
 //        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, RepoCovers.getCoverIcon(track, RepoCovers.IconSize.THUMB, true));
@@ -438,37 +448,28 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         metadataBuilder.putRating(MediaMetadataCompat.METADATA_KEY_USER_RATING, RatingCompat.newStarRating(RatingCompat.RATING_5_STARS, (float) track.getRating()));
         metadataBuilder.putRating(MediaMetadataCompat.METADATA_KEY_RATING, RatingCompat.newStarRating(RatingCompat.RATING_5_STARS, (float) track.getRating()));
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_GENRE, track.getGenre());
-
         mediaSession.setMetadata(metadataBuilder.build());
-    }
-
-    private void showPlayingNotification() {
-        startForeground(NOTIFICATION_ID, getNotification(PlaybackStateCompat.ACTION_PLAY));
     }
 
     private Notification getNotification(@PlaybackStateCompat.MediaKeyAction long action) {
         MediaControllerCompat controller = mediaSession.getController();
         MediaMetadataCompat mediaMetadata = controller.getMetadata();
-        String contentTitle = "title";
-        String contentText = "subTitle";
-        String subText = "description";
-        Bitmap iconBitmap = null;
+        String contentTitle;
+        String contentText;
+        String subText;
+        Bitmap iconBitmap;
         if(mediaMetadata!=null) {
             MediaDescriptionCompat description = mediaMetadata.getDescription();
             contentTitle = (String) description.getTitle();
             contentText = (String) description.getSubtitle();
             subText = (String) description.getDescription();
             iconBitmap = description.getIconBitmap();
+        } else {
+            contentTitle = getString(R.string.mainWelcomeTitle);
+            contentText = getString(R.string.applicationName);
+            subText = getString(R.string.mainWelcomeYear);
+            iconBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         }
-
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel chan = new NotificationChannel("myNotificationChannelId", "channelName", NotificationManager.IMPORTANCE_NONE);
-            chan.setDescription("<Add channel Description>");
-            nm.createNotificationChannel(chan);
-        }
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "myNotificationChannelId");
-
         int actionIcon = R.drawable.ic_action_speech; //Should not happen
         int smallIcon = R.drawable.buttons_red; //Should not happen
         if(action==PlaybackStateCompat.ACTION_PLAY) {
@@ -478,15 +479,12 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             actionIcon = R.drawable.ic_action_pause;
             smallIcon = R.drawable.ic_action_play;
         }
-
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             flags  = flags | PendingIntent.FLAG_MUTABLE;
         }
-
         Intent activityIntent = new Intent(getApplicationContext(), ActivityMain.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, activityIntent, flags);
-
         builder
                 .setContentTitle(contentTitle)
                 .setContentText(contentText)
@@ -497,6 +495,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSmallIcon(smallIcon)
                 .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary))
+                .clearActions()
                 .addAction(new NotificationCompat.Action(
                         R.drawable.ic_action_previous, "Previous",
                         MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),

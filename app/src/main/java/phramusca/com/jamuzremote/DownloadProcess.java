@@ -48,7 +48,7 @@ public class DownloadProcess extends ProcessAbstract {
         this.wifiLock = wifiLock;
         helperToast = new HelperToast(mContext);
         this.helperNotification = helperNotification;
-        notificationDownload = new Notification(mContext, NotificationId.get(), title);
+        notificationDownload = new Notification(mContext, NotificationId.get(), title, "Download service", "Download files progress.");
         this.newTracks = newTracks;
         nbFilesStart = newTracks.size();
         downloadServices = new ArrayList<>();

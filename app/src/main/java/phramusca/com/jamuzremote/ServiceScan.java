@@ -38,7 +38,7 @@ public class ServiceScan extends ServiceBase {
 
     @Override
     public void onCreate() {
-        notificationScan = new Notification(this, NotificationId.get(), getString(R.string.scanTitle));
+        notificationScan = new Notification(this, NotificationId.get(), getString(R.string.scanTitle), "Scan service", "Progress on reading android media store.");
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         super.onCreate();
     }
