@@ -1,13 +1,13 @@
 package phramusca.com.jamuzremote;
 
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ALBUM;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ARTIST;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_COVER_HASH;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_GENRE;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_PATH;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PATH;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PLAY_COUNTER;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_ALBUM;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_ARTIST;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_COVER_HASH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_GENRE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_ID_PATH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_PATH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_PLAY_COUNTER;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_RATING;
 
 import android.database.Cursor;
 
@@ -34,14 +34,14 @@ public class AdapterListItemAlbum {
 
     public static AdapterListItemAlbum fromCursor(Cursor c) {
         return new AdapterListItemAlbum(
-                c.getString(c.getColumnIndexOrThrow(COL_ALBUM)),
-                c.getString(c.getColumnIndexOrThrow(COL_ARTIST)),
-                c.getInt(c.getColumnIndexOrThrow(COL_PLAY_COUNTER)), //Ugly trick => nbTracks
-                c.getDouble(c.getColumnIndexOrThrow(COL_RATING)),
-                c.getString(c.getColumnIndexOrThrow(COL_GENRE)),
-                c.getString(c.getColumnIndexOrThrow(COL_COVER_HASH)),
-                c.getString(c.getColumnIndexOrThrow(COL_PATH)),
-                c.getString(c.getColumnIndexOrThrow(COL_ID_PATH)));
+                c.getString(c.getColumnIndexOrThrow(COL_TRACKS_ALBUM)),
+                c.getString(c.getColumnIndexOrThrow(COL_TRACKS_ARTIST)),
+                c.getInt(c.getColumnIndexOrThrow(COL_TRACKS_PLAY_COUNTER)), //Ugly trick => nbTracks
+                c.getDouble(c.getColumnIndexOrThrow(COL_TRACKS_RATING)),
+                c.getString(c.getColumnIndexOrThrow(COL_TRACKS_GENRE)),
+                c.getString(c.getColumnIndexOrThrow(COL_TRACKS_COVER_HASH)),
+                c.getString(c.getColumnIndexOrThrow(COL_TRACKS_PATH)),
+                c.getString(c.getColumnIndexOrThrow(COL_TRACKS_ID_PATH)));
     }
 
     public String getAlbum() {
