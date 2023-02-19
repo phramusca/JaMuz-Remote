@@ -1,18 +1,17 @@
 package phramusca.com.jamuzremote;
 
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ALBUM;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ARTIST;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_DISC_NO;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_GENRE;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_PATH;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_ID_REMOTE;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_LAST_PLAYED;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_PLAY_COUNTER;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_RATING;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_STATUS;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TAG_ID;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_ALBUM;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_ARTIST;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_DISC_NO;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_GENRE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_ID_PATH;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_ID_REMOTE;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_LAST_PLAYED;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_PLAY_COUNTER;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_RATING;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_STATUS;
 import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TAG_VALUE;
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACK_NO;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_TRACK_NO;
 import static phramusca.com.jamuzremote.MusicLibraryDb.TABLE_TAG;
 import static phramusca.com.jamuzremote.MusicLibraryDb.TABLE_TRACKS;
 
@@ -310,7 +309,7 @@ public class Playlist implements Comparable, Serializable {
         for(Track.Status status : statuses) {
             statusString.add(status.name());
         }
-        return COL_STATUS + " IN ( " + getInClause(statusString) + " )"; //NON-NLS
+        return COL_TRACKS_STATUS + " IN ( " + getInClause(statusString) + " )"; //NON-NLS
     }
 
     private String getWhere(List<Integer> excluded, List<Track.Status> statuses) {
@@ -323,10 +322,10 @@ public class Playlist implements Comparable, Serializable {
             statusString.add(status.name());
         }
         String in = " WHERE " + getWhereStatus(statuses) + //NON-NLS
-                " AND " + COL_RATING + " " + getRatingString() + " "; //NON-NLS
+                " AND " + COL_TRACKS_RATING + " " + getRatingString() + " "; //NON-NLS
 
         if (limitValue > 0) {
-            in += "\n AND " + COL_LAST_PLAYED + " < datetime(datetime('now'), '-" + limitValue + " " + limitUnit.value + "')"; //NON-NLS
+            in += "\n AND " + COL_TRACKS_LAST_PLAYED + " < datetime(datetime('now'), '-" + limitValue + " " + limitUnit.value + "')"; //NON-NLS
         }
 
         ArrayList<String> include = new ArrayList<>();
@@ -343,22 +342,22 @@ public class Playlist implements Comparable, Serializable {
         }
 
         if (include.size() > 0) {
-            in += "\n AND " + COL_GENRE + " IN (" + getInClause(include) + ") "; //NON-NLS
+            in += "\n AND " + COL_TRACKS_GENRE + " IN (" + getInClause(include) + ") "; //NON-NLS
         }
         if (exclude.size() > 0) {
-            in += "\n AND " + COL_GENRE + " NOT IN (" + getInClause(exclude) + ") "; //NON-NLS
+            in += "\n AND " + COL_TRACKS_GENRE + " NOT IN (" + getInClause(exclude) + ") "; //NON-NLS
         }
 
         if (artist != null) {
-            in += "\n AND " + COL_ARTIST + " LIKE \"" + artist + "\" "; //NON-NLS
+            in += "\n AND " + COL_TRACKS_ARTIST + " LIKE \"" + artist + "\" "; //NON-NLS
         }
 
         if (album != null) {
-            in += "\n AND " + COL_ALBUM + " LIKE \"" + album + "\" "; //NON-NLS
+            in += "\n AND " + COL_TRACKS_ALBUM + " LIKE \"" + album + "\" "; //NON-NLS
         }
 
         if (idPath != null) {
-            in += "\n AND " + COL_ID_PATH + " = \"" + idPath + "\" "; //NON-NLS
+            in += "\n AND " + COL_TRACKS_ID_PATH + " = \"" + idPath + "\" "; //NON-NLS
         }
 
         in += getInClause(excluded);
@@ -406,7 +405,7 @@ public class Playlist implements Comparable, Serializable {
     private static String getInClause(List<Integer> excluded) {
         StringBuilder builder = new StringBuilder();
         if (excluded.size() > 0) {
-            builder.append("\n AND " + TABLE_TRACKS + "." + COL_ID_REMOTE + " NOT IN ("); //NON-NLS
+            builder.append("\n AND " + TABLE_TRACKS + "." + COL_TRACKS_ID_REMOTE + " NOT IN ("); //NON-NLS
             for (int integer : excluded) {
                 builder.append(integer).append(",");
             }
@@ -552,8 +551,8 @@ public class Playlist implements Comparable, Serializable {
 
     public enum Order {
         RANDOM("ORDER BY RANDOM()", R.string.playlistOrderRandom),  //NON-NLS
-        PLAYCOUNTER_LASTPLAYED("ORDER BY " + COL_PLAY_COUNTER + ", " + COL_LAST_PLAYED, R.string.playlistOrderPlayCounter), //NON-NLS
-        DISC_TRACK("ORDER BY " + COL_DISC_NO + ", " + COL_TRACK_NO, R.string.playlistOrderTrackNb);  //NON-NLS
+        PLAYCOUNTER_LASTPLAYED("ORDER BY " + COL_TRACKS_PLAY_COUNTER + ", " + COL_TRACKS_LAST_PLAYED, R.string.playlistOrderPlayCounter), //NON-NLS
+        DISC_TRACK("ORDER BY " + COL_TRACKS_DISC_NO + ", " + COL_TRACKS_TRACK_NO, R.string.playlistOrderTrackNb);  //NON-NLS
 
         private final String value;
         private final int resId;

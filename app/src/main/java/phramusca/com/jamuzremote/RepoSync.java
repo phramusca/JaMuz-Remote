@@ -1,6 +1,6 @@
 package phramusca.com.jamuzremote;
 
-import static phramusca.com.jamuzremote.MusicLibraryDb.COL_STATUS;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_STATUS;
 
 import android.database.Cursor;
 import android.util.Log;
@@ -23,7 +23,7 @@ public final class RepoSync {
     public synchronized static void read() {
         tracks = HashBasedTable.create();
         Cursor cursor = HelperLibrary.musicLibrary.getTracksCursor(true,
-                "WHERE " + COL_STATUS + "!=\"" + Track.Status.LOCAL.name() + "\"",  //NON-NLS
+                "WHERE " + COL_TRACKS_STATUS + "!=\"" + Track.Status.LOCAL.name() + "\"",  //NON-NLS
                 "", "", -1); //NON-NLS
         if (cursor != null && cursor.moveToFirst()) {
             do {
