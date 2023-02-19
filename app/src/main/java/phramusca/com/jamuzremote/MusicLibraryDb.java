@@ -84,7 +84,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
             + COL_ALBUM_GAIN + " REAL, " //NON-NLS
             + COL_PATH + " TEXT NOT NULL); "; //NON-NLS
 
-    private static final String TABLE_TAG = "tag";
+    static final String TABLE_TAG = "tag";
     static final String COL_TAG_ID = "id";
     static final String COL_TAG_VALUE = "value"; //NON-NLS
     private static final String CREATE_TABLE_TAG = "CREATE TABLE " + TABLE_TAG + " (\n" //NON-NLS //NON-NLS
@@ -92,7 +92,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
             + COL_TAG_VALUE + " TEXT NOT NULL, \n" //NON-NLS
             + " CONSTRAINT name_unique UNIQUE ('" + COL_TAG_VALUE + "'));\n"; //NON-NLS
 
-    private static final String TABLE_TAG_FILE = "tagfile"; //NON-NLS
+    static final String TABLE_TAG_FILE = "tagfile"; //NON-NLS
     static final String COL_TAG_FILE_ID_FILE = "idFile";
     static final String COL_TAG_FILE_ID_TAG = "idTag"; //NON-NLS
     private static final String CREATE_TABLE_TAG_FILE = "CREATE TABLE " + TABLE_TAG_FILE + " (\n" //NON-NLS //NON-NLS
@@ -102,7 +102,7 @@ public class MusicLibraryDb extends SQLiteOpenHelper {
             + "\tFOREIGN KEY(" + COL_TAG_FILE_ID_FILE + ") REFERENCES " + TABLE_TRACKS + "(" + COL_ID_REMOTE + "),\n" //NON-NLS //NON-NLS
             + "\tFOREIGN KEY(" + COL_TAG_FILE_ID_TAG + ") REFERENCES " + TABLE_TAG + "(" + COL_TAG_ID + ") ON DELETE CASCADE);"; //NON-NLS //NON-NLS //NON-NLS
 
-    private static final String TABLE_GENRE = "genre"; //NON-NLS
+    static final String TABLE_GENRE = "genre"; //NON-NLS
     static final String COL_GENRE_ID = "id"; //NON-NLS
     static final String COL_GENRE_VALUE = "value"; //NON-NLS
     private static final String CREATE_TABLE_GENRE = "CREATE TABLE " + TABLE_GENRE + " (\n" //NON-NLS
