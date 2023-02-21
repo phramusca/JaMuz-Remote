@@ -68,6 +68,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StyleRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -412,9 +413,37 @@ public class ActivityMain extends AppCompatActivity {
         }
     };
 
+    private boolean scheduleRestart;
+    private static ThemeSetting defaultTheme = ThemeSetting.GREEN;
+
+    private enum ThemeSetting {
+        DEFAULT(R.style.AppTheme), //NOI18N
+        GREEN(R.style.AppTheme_Green);
+
+        private final @StyleRes int resId;
+
+        ThemeSetting(@StyleRes int resId) {
+            this.resId = resId;
+        }
+    }
+
+    private class ThemeListener implements SharedPreferences.OnSharedPreferenceChangeListener {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
+            ThemeSetting defaultTheme = ThemeSetting.valueOf(pref.getString("defaultTheme", ThemeSetting.DEFAULT.name()));
+            if (key.equals("defaultTheme") && !defaultTheme.equals(ActivityMain.defaultTheme)) {
+                ActivityMain.defaultTheme = defaultTheme;
+                scheduleRestart = true;
+            }
+        }
+    }
+
     @SuppressLint({"HardwareIds", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences.registerOnSharedPreferenceChangeListener(new ThemeListener());
+        setTheme(defaultTheme.resId);
         super.onCreate(savedInstanceState);
         Log.i(TAG, "ActivityMain onCreate"); //NON-NLS
         setContentView(R.layout.activity_main);
@@ -516,7 +545,7 @@ public class ActivityMain extends AppCompatActivity {
         textFileInfo_seekBefore = findViewById(R.id.textFileInfo_seekBefore);
         textFileInfo_seekAfter = findViewById(R.id.textFileInfo_seekAfter);
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
 
         buttonRemote = findViewById(R.id.button_connect);
         buttonRemote.setOnClickListener(v -> {
@@ -1328,6 +1357,14 @@ public class ActivityMain extends AppCompatActivity {
             buttonRemote.performClick();
         }
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        if(scheduleRestart)
+        {
+            scheduleRestart = false;
+            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage( getBaseContext().getPackageName() );
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+        }
     }
 
     @Override

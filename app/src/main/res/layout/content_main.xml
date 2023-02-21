@@ -12,7 +12,7 @@
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimaryDark"
+        android:background="?attr/colorPrimaryDark"
         android:alpha="0.9"
         android:layout_gravity="center_horizontal">
 
@@ -109,7 +109,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
+        android:background="?attr/colorPrimary"
         android:paddingBottom="5dp"
         android:layout_gravity="center_horizontal">
 
@@ -121,7 +121,7 @@
             android:paddingBottom="5dp"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:background="@color/colorPrimaryDark">
+            android:background="?attr/colorPrimaryDark">
 
             <Spinner android:id="@+id/spinner_playlist"
                 android:layout_width="wrap_content"
@@ -259,14 +259,14 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
+            android:background="?attr/colorPrimary"
             android:paddingTop="5dp">
 
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimary">
+                android:background="?attr/colorPrimary">
 
                 <TextView
                     android:textColor="@color/textColor"
@@ -315,7 +315,7 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary">
+            android:background="?attr/colorPrimary">
 
             <com.google.android.flexbox.FlexboxLayout
                 android:id="@+id/panel_tags_playlist"
@@ -335,7 +335,7 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimary">
+                android:background="?attr/colorPrimary">
 
                 <com.google.android.flexbox.FlexboxLayout
                     android:id="@+id/panel_genre_playlist"
