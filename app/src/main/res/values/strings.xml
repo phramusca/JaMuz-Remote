@@ -201,5 +201,8 @@
     <string name="settingsCheckBoxDisplayServer" tools:ignore="MissingTranslation">Display files from JaMuz Server</string>
     <string name="settingsCheckBoxDisplayMediaStore" tools:ignore="MissingTranslation">Display files from Android MediaStore</string>
     <string name="qrScanPromptMessage" tools:ignore="MissingTranslation">Thank you to scan QR code displayed in JaMuz Server (Server tab) to get connection information.</string>
+    <string name="settingsThemeViewTitle" tools:ignore="MissingTranslation">Theme</string>
+    <string name="settingsRadioThemeDefault" tools:ignore="MissingTranslation">Default</string>
+    <string name="settingsRadioThemeGreen" tools:ignore="MissingTranslation">Green</string>
 
 </resources>

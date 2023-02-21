@@ -413,39 +413,28 @@ public class ActivityMain extends AppCompatActivity {
         }
     };
 
-    private boolean scheduleRestart;
-    private static ThemeSetting defaultTheme = ThemeSetting.GREEN;
+    private ThemeSetting themeApplied = ThemeSetting.GREEN;
 
-    private enum ThemeSetting {
+    enum ThemeSetting {
         DEFAULT(R.style.AppTheme), //NOI18N
         GREEN(R.style.AppTheme_Green);
 
-        private final @StyleRes int resId;
+        final @StyleRes int resId;
 
         ThemeSetting(@StyleRes int resId) {
             this.resId = resId;
         }
     }
 
-    private class ThemeListener implements SharedPreferences.OnSharedPreferenceChangeListener {
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
-            ThemeSetting defaultTheme = ThemeSetting.valueOf(pref.getString("defaultTheme", ThemeSetting.DEFAULT.name()));
-            if (key.equals("defaultTheme") && !defaultTheme.equals(ActivityMain.defaultTheme)) {
-                ActivityMain.defaultTheme = defaultTheme;
-                scheduleRestart = true;
-            }
-        }
-    }
-
     @SuppressLint({"HardwareIds", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        preferences.registerOnSharedPreferenceChangeListener(new ThemeListener());
-        setTheme(defaultTheme.resId);
-        super.onCreate(savedInstanceState);
         Log.i(TAG, "ActivityMain onCreate"); //NON-NLS
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        ThemeSetting themePref = ThemeSetting.valueOf(preferences.getString("defaultTheme", ThemeSetting.DEFAULT.name()));
+        setTheme(themePref.resId); //Needed to be done before super.onCreate
+        themeApplied = themePref;
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         layoutMain = findViewById(R.id.panel_main);
         stringMap = new HashMap<>();
@@ -1357,14 +1346,6 @@ public class ActivityMain extends AppCompatActivity {
             buttonRemote.performClick();
         }
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
-        if(scheduleRestart)
-        {
-            scheduleRestart = false;
-            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage( getBaseContext().getPackageName() );
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(i);
-        }
     }
 
     @Override
@@ -1634,6 +1615,14 @@ public class ActivityMain extends AppCompatActivity {
             String QRcode = data.getStringExtra("QRcode");
             if (QRcode != null) {
                 getFromQRcode(QRcode);
+            }
+
+            ThemeSetting themePref = ThemeSetting.valueOf(preferences.getString("defaultTheme", ThemeSetting.DEFAULT.name()));
+            if (!themeApplied.equals(themePref)) {
+                //Restart activity to apply new selected theme
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);

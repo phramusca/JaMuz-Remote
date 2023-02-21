@@ -36,18 +36,24 @@ public class ActivitySettings extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
-
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        ActivityMain.ThemeSetting defaultTheme = ActivityMain.ThemeSetting.valueOf(preferences.getString("defaultTheme", ActivityMain.ThemeSetting.DEFAULT.name()));
+        setTheme(defaultTheme.resId);
+        super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.activity_settings);
+        switch (defaultTheme) {
+            case DEFAULT:
+                ((RadioButton)findViewById(R.id.settingsRadioThemeDefault)).setChecked(true);
+                break;
+            case GREEN:
+                ((RadioButton)findViewById(R.id.settingsRadioThemeGreen)).setChecked(true);
+                break;
+        }
         Button button_exit_settings = findViewById(R.id.button_exit_settings);
         button_exit_settings.setOnClickListener(v -> onBackPressed());
-
         editTextConnectInfo = findViewById(R.id.editText_info);
-
         editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.11:2013"));
-
         Button buttonSaveConnectionString = findViewById(R.id.button_save_connectionString);
         buttonSaveConnectionString.setOnClickListener(view ->
                 setConfig("connectionString", editTextConnectInfo.getText().toString())
@@ -139,6 +145,30 @@ public class ActivitySettings extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    public void onRadioButtonThemeClicked(View view) {
+        boolean checked = ((RadioButton) view).isChecked();
+        ActivityMain.ThemeSetting defaultTheme = ActivityMain.ThemeSetting.DEFAULT;
+        switch(view.getId()) {
+            case R.id.settingsRadioThemeDefault:
+                if(checked)
+                    defaultTheme= ActivityMain.ThemeSetting.DEFAULT;
+                break;
+            case R.id.settingsRadioThemeGreen:
+                if(checked)
+                    defaultTheme= ActivityMain.ThemeSetting.GREEN;
+                break;
+        }
+        Intent data = new Intent();
+        data.putExtra("defaultTheme", defaultTheme.name()); //NON-NLS
+        setResult(RESULT_OK, data);
+        setConfig("defaultTheme", defaultTheme.name());
+
+        //Restart activity to apply new selected theme
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
     }
 
     public void onRadioButtonClicked(View view) {
