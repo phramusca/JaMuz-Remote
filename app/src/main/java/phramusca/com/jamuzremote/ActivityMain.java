@@ -413,7 +413,7 @@ public class ActivityMain extends AppCompatActivity {
         }
     };
 
-    private ThemeSetting themeApplied = ThemeSetting.GREEN;
+    private ThemeSetting themeApplied = ThemeSetting.DEFAULT;
 
     enum ThemeSetting {
         DEFAULT(R.style.AppTheme), //NOI18N
