@@ -494,7 +494,6 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
                 .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(), PlaybackStateCompat.ACTION_PAUSE))
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSmallIcon(smallIcon)
-                .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary))
                 .clearActions()
                 .addAction(new NotificationCompat.Action(
                         R.drawable.ic_action_previous, "Previous",
