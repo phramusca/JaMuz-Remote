@@ -125,11 +125,7 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
                 ActivityMain.getAddedDateAgo(track)));
 
         userViewHolder.imageViewCover.setImageBitmap(bitmap);
-
-        if (track.isHistory()) {
-            userViewHolder.layout_item.setBackgroundColor(ContextCompat.getColor(parent.getContext(), R.color.colorPrimary));
-        } else {
-            userViewHolder.layout_item.setBackgroundColor(ContextCompat.getColor(parent.getContext(), R.color.background_color));
-        }
     }
+
+
 }

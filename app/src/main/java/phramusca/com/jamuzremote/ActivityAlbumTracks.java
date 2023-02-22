@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -29,6 +30,8 @@ public class ActivityAlbumTracks extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ActivityMain.ThemeSetting themePref = ActivityMain.ThemeSetting.valueOf(PreferenceManager.getDefaultSharedPreferences(this).getString("defaultTheme", ActivityMain.ThemeSetting.DEFAULT.name()));
+        setTheme(themePref.resId); //Needed to be done before super.onCreate
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album_tracks);
 

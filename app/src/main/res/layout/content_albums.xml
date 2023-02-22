@@ -7,7 +7,8 @@
     android:weightSum="1"
     tools:showIn="@layout/activity_albums"
     android:focusable="true"
-    android:focusableInTouchMode="true">
+    android:focusableInTouchMode="true"
+    android:background="?attr/colorPrimaryDark">
 
     <GridLayout
         android:layout_width="match_parent"
