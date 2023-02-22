@@ -140,7 +140,6 @@
             android:layout_height="match_parent" >
 
             <TextView android:id="@+id/textViewPlaylist"
-                android:textColor="@color/textColor"
                 android:layout_gravity="center_vertical"
                 android:gravity="center_horizontal"
                 android:layout_width="match_parent"
@@ -269,7 +268,6 @@
                 android:background="?attr/colorPrimary">
 
                 <TextView
-                    android:textColor="@color/textColor"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:text="@string/playlistTextViewExcludeTheLast"/>
@@ -278,16 +276,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:dropDownWidth="50dp"
-                    android:textColor="@color/textColor"/>
+                    />
 
                 <Spinner android:id="@+id/spinner_playlist_limit_unit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/textColor"/>
+                    />
 
             </LinearLayout>
             <TextView
-                android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/playlistTextViewOrderBy"/>
@@ -300,14 +297,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/playlistOrderRandom"
-                    android:onClick="onPlaylistOrderRadioButtonClicked"
-                    android:textColor="@color/textColor"/>
+                    android:onClick="onPlaylistOrderRadioButtonClicked" />
                 <RadioButton android:id="@+id/order_playCounter_lastPlayed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/playlistOrderPlayCounter"
-                    android:onClick="onPlaylistOrderRadioButtonClicked"
-                    android:textColor="@color/textColor"/>
+                    android:onClick="onPlaylistOrderRadioButtonClicked" />
             </RadioGroup>
         </LinearLayout>
 
@@ -513,7 +508,6 @@
             android:orientation="vertical"
             android:background="@drawable/rounded_corner"
             android:alpha="0.8"
-            android:textColor="@color/textColor"
             android:paddingStart="10dp"
             android:paddingEnd="10dp">
 
@@ -526,7 +520,6 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="2dp"
                 android:paddingEnd="2dp"
-                android:textColor="@color/textColor"
                 tools:ignore="HardcodedText"
                 android:textSize="26sp">
             </TextView>
@@ -540,7 +533,6 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="2dp"
                 android:paddingEnd="2dp"
-                android:textColor="@color/textColor"
                 tools:ignore="HardcodedText"
                 android:textSize="20sp">
             </TextView>
@@ -572,7 +564,16 @@
             </TextView>
 
         </LinearLayout>
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical"
+            android:background="@drawable/rounded_corner"
+            android:alpha="0.8"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp">
         <GridLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -612,6 +613,7 @@
                 android:textSize="12sp">
             </TextView>
         </GridLayout>
+        </LinearLayout>
         <ImageView
             android:id="@+id/imageView"
             android:layout_gravity="center_horizontal"

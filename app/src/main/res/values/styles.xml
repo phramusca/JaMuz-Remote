@@ -1,17 +1,33 @@
 <resources>
 
+    <!-- Themes. -->
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:radioButtonStyle">@style/RadioButtonColor</item>
+        <item name="android:checkboxStyle">@style/CheckBoxColor</item>
+    </style>
+    <style name="RadioButtonColor" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:textColor">@color/textColor</item>
+    </style>
+    <style name="CheckBoxColor" parent="Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="android:textColor">@color/textColor</item>
     </style>
 
     <style name="AppTheme.Green">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimaryGreen</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDarkGreen</item>
-        <item name="colorAccent">@color/colorAccentGreen</item>
+        <item name="android:textColor">@color/colorAccentGreen</item>
+        <item name="android:radioButtonStyle">@style/RadioButtonColorGreen</item>
+        <item name="android:checkboxStyle">@style/CheckBoxColorGreen</item>
+    </style>
+    <style name="RadioButtonColorGreen" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:textColor">@color/colorAccentGreen</item>
+    </style>
+    <style name="CheckBoxColorGreen" parent="Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="android:textColor">@color/colorAccentGreen</item>
     </style>
 
     <!-- Controls styles. -->
@@ -25,6 +41,7 @@
         <item name="colorControlNormal">@color/background_color</item>
     </style>
 
+    <!-- This is used to hide textOn and textOff on BUTTONS-->
     <style name="ToggleButton" parent="Theme.AppCompat">
         <item name="android:textOn" />
         <item name="android:textOff" />

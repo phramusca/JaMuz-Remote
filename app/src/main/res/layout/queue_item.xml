@@ -29,7 +29,6 @@
             android:layout_height="wrap_content"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
-            android:textColor="@color/textColor"
             tools:ignore="HardcodedText"
             android:textSize="16sp">
         </com.athkalia.emphasis.EmphasisTextView>
@@ -41,7 +40,6 @@
             android:layout_height="wrap_content"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
-            android:textColor="@color/textColor"
             tools:ignore="HardcodedText"
             android:textSize="14sp">
         </com.athkalia.emphasis.EmphasisTextView>
