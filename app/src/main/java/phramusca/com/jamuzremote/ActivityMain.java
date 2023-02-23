@@ -2286,7 +2286,7 @@ public class ActivityMain extends AppCompatActivity {
                 ? stringMap.get("trackNeverPlayed")
                 : String.format(Locale.getDefault(),
                 "%s %s (%dx). ", //NON-NLS
-                stringMap.get("trackNeverPlayed"),
+                stringMap.get("trackPlayed"),
                 prettyTime.format(track.getLastPlayed()),
                 track.getPlayCounter());
     }
@@ -2294,7 +2294,7 @@ public class ActivityMain extends AppCompatActivity {
     public static String getAddedDateAgo(Track track) { //NON-NLS
         return String.format(
                 "%s %s.", //NON-NLS
-                stringMap.get("trackNeverPlayed"),
+                stringMap.get("trackAdded"),
                 prettyTime.format(track.getAddedDate()));
     }
 
