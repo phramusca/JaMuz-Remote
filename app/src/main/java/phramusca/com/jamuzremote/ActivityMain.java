@@ -974,7 +974,7 @@ public class ActivityMain extends AppCompatActivity {
     private ToggleButton getButtonTag(int key, String value) {
         ToggleButton button = new ToggleButton(this);
         button.setId(key);
-        button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        HelperGui.setTextColor(this, R.attr.textColorDisabled, button);
         button.setBackgroundResource(R.drawable.ic_tags);
         button.setAlpha(0.7F);
         button.setAllCaps(false);
@@ -1011,7 +1011,7 @@ public class ActivityMain extends AppCompatActivity {
         TriStateButton button = new TriStateButton(this);
         button.setId(key);
         button.setTag(value);
-        button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        HelperGui.setTextColor(this, R.attr.textColorDisabled, button);
         button.setBackgroundResource(R.drawable.ic_tags);
         button.setAlpha(0.7F);
         button.setAllCaps(false);
@@ -1038,7 +1038,7 @@ public class ActivityMain extends AppCompatActivity {
         TriStateButton button = new TriStateButton(this);
         button.setId(key);
         button.setTag(value);
-        button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        HelperGui.setTextColor(this, R.attr.textColorDisabled, button);
         button.setBackgroundResource(R.drawable.ic_tags);
         button.setAlpha(0.7F);
         button.setAllCaps(false);
@@ -1072,25 +1072,25 @@ public class ActivityMain extends AppCompatActivity {
 
     //This is a trick since the following (not in listener) is not working:
     //button.setTextColor(ContextCompat.getColor(this, R.color.toggle_text));
-    private void setTagButtonTextColor(ToggleButton b) {
-        if (b != null) {
-            boolean checked = b.isChecked();
-            b.setTextColor(ContextCompat.getColor(this, checked ? R.color.textColor : R.color.colorPrimaryDark));
+    private void setTagButtonTextColor(ToggleButton button) {
+        if (button != null) {
+            boolean checked = button.isChecked();
+            HelperGui.setTextColor(this, checked ? android.R.attr.textColor : R.attr.textColorDisabled, button);
         }
     }
 
     private void setTagButtonTextColor(TriStateButton button, TriStateButton.STATE state) {
         switch (state) {
             case ANY:
-                button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+                HelperGui.setTextColor(this, R.attr.textColorDisabled, button);
                 button.setBackgroundResource(R.drawable.ic_gradient_button);
                 break;
             case TRUE:
-                button.setTextColor(ContextCompat.getColor(this, R.color.textColor));
+                HelperGui.setTextColor(this, android.R.attr.textColor, button);
                 button.setBackgroundResource(R.drawable.ic_gradient_button_pressed);
                 break;
             case FALSE:
-                button.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
+                HelperGui.setTextColor(this, R.attr.textColorError, button);
                 button.setBackgroundResource(R.drawable.ic_gradient_button_pressed);
                 break;
             default:

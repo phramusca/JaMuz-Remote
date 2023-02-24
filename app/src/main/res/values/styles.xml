@@ -6,6 +6,8 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColor">@color/textColor</item>
+        <item name="textColorDisabled">@color/textColorDisabled</item>
+        <item name="textColorError">@color/textColorError</item>
         <item name="android:radioButtonStyle">@style/RadioButtonColor</item>
         <item name="android:checkboxStyle">@style/CheckBoxColor</item>
     </style>
@@ -19,15 +21,18 @@
     <style name="AppTheme.Green">
         <item name="colorPrimary">@color/colorPrimaryGreen</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDarkGreen</item>
-        <item name="android:textColor">@color/colorAccentGreen</item>
+        <item name="colorAccent">@color/colorAccentGreen</item>
+        <item name="android:textColor">@color/textColorGreen</item>
+        <item name="textColorDisabled">@color/textColorDisabledGreen</item>
+        <item name="textColorError">@color/textColorErrorGreen</item>
         <item name="android:radioButtonStyle">@style/RadioButtonColorGreen</item>
         <item name="android:checkboxStyle">@style/CheckBoxColorGreen</item>
     </style>
     <style name="RadioButtonColorGreen" parent="Widget.AppCompat.CompoundButton.RadioButton">
-        <item name="android:textColor">@color/colorAccentGreen</item>
+        <item name="android:textColor">@color/textColorGreen</item>
     </style>
     <style name="CheckBoxColorGreen" parent="Widget.AppCompat.CompoundButton.CheckBox">
-        <item name="android:textColor">@color/colorAccentGreen</item>
+        <item name="android:textColor">@color/textColorGreen</item>
     </style>
 
     <!-- Controls styles. -->

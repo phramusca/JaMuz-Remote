@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--Default application -->
-    <color name="colorPrimary">#626D6E</color>
-    <color name="colorPrimaryDark">#434C4D</color>
-    <color name="colorAccent">#D34B24</color>
+    <color name="colorPrimary">#455a64</color>
+    <color name="colorPrimaryDark">#1c313a</color>
+    <color name="colorAccent">#fb8c00</color>
+    <color name="textColor">#FFFFFF</color>
+    <color name="textColorDisabled">#b8dbeb</color>
+    <color name="textColorError">#c13e0c</color>
 
     <!--Green application -->
     <color name="colorPrimaryGreen">#1b5e20</color>
     <color name="colorPrimaryDarkGreen">#003300</color>
-    <color name="colorAccentGreen">#ffe082</color>
+    <color name="colorAccentGreen">#ffa000</color>
+    <color name="textColorGreen">#fafafa</color>
+    <color name="textColorDisabledGreen">#388e3c</color>
+    <color name="textColorErrorGreen">#ff5722</color>
 
-    <!--Rating bar-->
+    <!--Controls styles-->
     <color name="duskYellow">#a69d62</color>
     <color name="lightYellow">#d1bc6e</color>
-
     <color name="background_color">#606060</color>
-    <color name="textColor">#FFFFFF</color>
+
 </resources>
