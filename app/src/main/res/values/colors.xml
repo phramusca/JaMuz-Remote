@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Blue Grey 800 -->
-    <color name="colorPrimary">#37474f</color>
-    <color name="colorPrimaryDark">#102027</color>
-    <color name="textColorDisabled">#b8dbeb</color> <!-- Blue Grey 400 -->
-    <color name="colorAccent">#D34B24</color>
-    <color name="textColor">#FFFFFF</color>
-    <color name="textColorError">#D34B24</color>
+    <color name="colorPrimaryBlueGrey">#37474f</color>
+    <color name="colorPrimaryDarkBlueGrey">#102027</color>
+    <color name="textColorDisabledBlueGrey">#b8dbeb</color> <!-- Blue Grey 400 -->
+    <color name="colorAccentBlueGrey">#D34B24</color>
+    <color name="textColorBlueGrey">#FFFFFF</color>
+    <color name="textColorErrorBlueGrey">#D34B24</color>
 
     <!--Teal 800 -->
     <color name="colorPrimaryTeal">#00695c</color>

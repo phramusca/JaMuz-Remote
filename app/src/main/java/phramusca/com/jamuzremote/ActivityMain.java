@@ -412,10 +412,10 @@ public class ActivityMain extends AppCompatActivity {
         }
     };
 
-    private ThemeSetting themeApplied = ThemeSetting.DEFAULT;
+    public static ThemeSetting themeApplied = ActivityMain.ThemeSetting.getDefault();
 
     enum ThemeSetting {
-        DEFAULT(R.style.AppTheme), //NOI18N
+        BLUE_GREY(R.style.AppTheme_BlueGrey), //NOI18N
         TEAL(R.style.AppTheme_Teal),
         GREY(R.style.AppTheme_Grey),
         YELLOW(R.style.AppTheme_Yellow);
@@ -425,6 +425,10 @@ public class ActivityMain extends AppCompatActivity {
         ThemeSetting(@StyleRes int resId) {
             this.resId = resId;
         }
+
+        public static ThemeSetting getDefault() {
+            return GREY;
+        }
     }
 
     @SuppressLint({"HardwareIds", "ClickableViewAccessibility"})
@@ -432,7 +436,7 @@ public class ActivityMain extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "ActivityMain onCreate"); //NON-NLS
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        ThemeSetting themePref = ThemeSetting.valueOf(preferences.getString("defaultTheme", ThemeSetting.DEFAULT.name()));
+        ThemeSetting themePref = ThemeSetting.valueOf(preferences.getString("defaultTheme", ActivityMain.ThemeSetting.getDefault().name()));
         setTheme(themePref.resId); //Needed to be done before super.onCreate
         themeApplied = themePref;
         super.onCreate(savedInstanceState);
@@ -1618,7 +1622,7 @@ public class ActivityMain extends AppCompatActivity {
                 getFromQRcode(QRcode);
             }
 
-            ThemeSetting themePref = ThemeSetting.valueOf(preferences.getString("defaultTheme", ThemeSetting.DEFAULT.name()));
+            ThemeSetting themePref = ThemeSetting.valueOf(preferences.getString("defaultTheme", ActivityMain.ThemeSetting.getDefault().name()));
             if (!themeApplied.equals(themePref)) {
                 //Restart activity to apply new selected theme
                 Intent intent = getIntent();
