@@ -63,13 +63,13 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                 trackAdapter.notifyDataSetChanged();
             });
 
-            new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
+            new HelperSwipe(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
                 @Override
                 public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder,
                                                       List<UnderlayButton> underlayButtons) {
 
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            SwipeHelper.ButtonInfo.DEL,
+                    underlayButtons.add(new HelperSwipe.UnderlayButton(
+                            HelperSwipe.ButtonInfo.DEL,
                             position -> {
                                 PlayQueue.queue.remove(position + offset);
                                 trackAdapter.trackList.remove(position);
@@ -77,7 +77,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                             },
                             getApplicationContext()));
 
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                    underlayButtons.add(new HelperSwipe.UnderlayButton(
                             ButtonInfo.DOWN,
                             position -> {
                                 PlayQueue.queue.moveDown(position + offset);
@@ -86,7 +86,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                             },
                             getApplicationContext()));
 
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                    underlayButtons.add(new HelperSwipe.UnderlayButton(
                             ButtonInfo.PLAY,
                             position -> {
                                 if (PlayQueue.queue.insertNext(position + offset)) {
@@ -98,7 +98,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                             },
                             getApplicationContext()));
 
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                    underlayButtons.add(new HelperSwipe.UnderlayButton(
                             ButtonInfo.QUEUE,
                             position -> {
                                 PlayQueue.queue.insertNext(position + offset);

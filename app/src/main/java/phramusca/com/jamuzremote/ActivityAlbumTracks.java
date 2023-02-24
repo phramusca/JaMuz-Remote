@@ -86,10 +86,10 @@ public class ActivityAlbumTracks extends AppCompatActivity {
 
         title.setText(finalTrack.getAlbum());
 
-        new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
+        new HelperSwipe(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
             @Override
             public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
-                underlayButtons.add(new SwipeHelper.UnderlayButton(
+                underlayButtons.add(new HelperSwipe.UnderlayButton(
                         ButtonInfo.PLAY,
                         pos -> {
                             Track track = adapterCursorAlbumTrack.getTrack(pos);
@@ -97,7 +97,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                         },
                         getApplicationContext()));
 
-                underlayButtons.add(new SwipeHelper.UnderlayButton(
+                underlayButtons.add(new HelperSwipe.UnderlayButton(
                         ButtonInfo.QUEUE,
                         pos -> {
                             Track track = adapterCursorAlbumTrack.getTrack(pos);

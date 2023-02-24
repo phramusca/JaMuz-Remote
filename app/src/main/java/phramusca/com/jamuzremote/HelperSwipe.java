@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Queue;
 
 //https://stackoverflow.com/questions/44965278/recyclerview-itemtouchhelper-buttons-on-swipe?answertab=active#tab-top
-public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
+public abstract class HelperSwipe extends ItemTouchHelper.SimpleCallback {
 
     private static final int BUTTON_WIDTH = 100;
     private final RecyclerView recyclerView;
@@ -36,7 +36,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
     private final SparseArray<List<UnderlayButton>> buttonsBuffer;
     private final Queue<Integer> recoverQueue;
 
-    SwipeHelper(Context context, RecyclerView recyclerView, int swipeDirs) {
+    HelperSwipe(Context context, RecyclerView recyclerView, int swipeDirs) {
         super(0, swipeDirs);
         this.recyclerView = recyclerView;
         this.buttons = new ArrayList<>();
@@ -74,7 +74,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
                     } else {
                         recoverQueue.add(swipedPos);
                         swipedPos = -1;
-                        SwipeHelper.this.recoverSwipedItem();
+                        HelperSwipe.this.recoverSwipedItem();
                     }
                 }
                 return false;
