@@ -31,13 +31,13 @@ public class ActivitySettings extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        ActivityMain.ThemeSetting defaultTheme = ActivityMain.ThemeSetting.valueOf(preferences.getString("defaultTheme", ActivityMain.ThemeSetting.DEFAULT.name()));
+        ActivityMain.ThemeSetting defaultTheme = ActivityMain.ThemeSetting.valueOf(preferences.getString("defaultTheme", ActivityMain.ThemeSetting.getDefault().name()));
         setTheme(defaultTheme.resId);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_settings);
         switch (defaultTheme) {
-            case DEFAULT:
+            case BLUE_GREY:
                 ((RadioButton)findViewById(R.id.settingsRadioThemeDefault)).setChecked(true);
                 break;
             case TEAL:
@@ -149,11 +149,11 @@ public class ActivitySettings extends AppCompatActivity {
 
     public void onRadioButtonThemeClicked(View view) {
         boolean checked = ((RadioButton) view).isChecked();
-        ActivityMain.ThemeSetting defaultTheme = ActivityMain.ThemeSetting.DEFAULT;
+        ActivityMain.ThemeSetting defaultTheme = ActivityMain.ThemeSetting.getDefault();
         if(checked) {
             switch(view.getId()) {
                 case R.id.settingsRadioThemeDefault:
-                    defaultTheme= ActivityMain.ThemeSetting.DEFAULT; break;
+                    defaultTheme= ActivityMain.ThemeSetting.BLUE_GREY; break;
                 case R.id.settingsRadioThemeTeal:
                         defaultTheme= ActivityMain.ThemeSetting.TEAL;break;
                 case R.id.settingsRadioThemeGrey:

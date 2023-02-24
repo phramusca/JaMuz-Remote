@@ -27,7 +27,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        ActivityMain.ThemeSetting themePref = ActivityMain.ThemeSetting.valueOf(PreferenceManager.getDefaultSharedPreferences(this).getString("defaultTheme", ActivityMain.ThemeSetting.DEFAULT.name()));
+        ActivityMain.ThemeSetting themePref = ActivityMain.ThemeSetting.valueOf(PreferenceManager.getDefaultSharedPreferences(this).getString("defaultTheme", ActivityMain.ThemeSetting.getDefault().name()));
         setTheme(themePref.resId); //Needed to be done before super.onCreate
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_queue);

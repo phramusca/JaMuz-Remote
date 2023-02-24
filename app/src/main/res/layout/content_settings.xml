@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:weightSum="1"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="?attr/colorPrimaryDark">
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -24,6 +25,11 @@
             android:paddingStart="10dp"
             android:paddingEnd="10dp"/>
     </GridLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:background="?attr/colorPrimary">
+    </LinearLayout>
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -238,37 +244,46 @@
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:background="?attr/colorPrimaryDark"/>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="?attr/colorPrimary"
                 android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:orientation="vertical"
-                android:background="?attr/colorPrimary">
+                android:paddingBottom="5dp">
+
                 <RadioGroup
+                    android:id="@+id/settingsTheme"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:id="@+id/settingsTheme">
-                    <RadioButton android:id="@+id/settingsRadioThemeDefault"
+                    android:layout_height="match_parent">
+
+                    <RadioButton
+                        android:id="@+id/settingsRadioThemeDefault"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/settingsRadioThemeDefault"
-                        android:onClick="onRadioButtonThemeClicked"/>
-                    <RadioButton android:id="@+id/settingsRadioThemeTeal"
-                        android:text="@string/settingsRadioThemeTeal"
-                        android:layout_height="wrap_content"
+                        android:onClick="onRadioButtonThemeClicked"
+                        android:text="@string/settingsRadioThemeBlueGrey" />
+
+                    <RadioButton
+                        android:id="@+id/settingsRadioThemeTeal"
                         android:layout_width="match_parent"
-                        android:onClick="onRadioButtonThemeClicked"/>
-                    <RadioButton android:id="@+id/settingsRadioThemeGrey"
-                        android:text="@string/settingsRadioThemeGrey"
                         android:layout_height="wrap_content"
+                        android:onClick="onRadioButtonThemeClicked"
+                        android:text="@string/settingsRadioThemeTeal" />
+
+                    <RadioButton
+                        android:id="@+id/settingsRadioThemeGrey"
                         android:layout_width="match_parent"
-                        android:onClick="onRadioButtonThemeClicked"/>
-                    <RadioButton android:id="@+id/settingsRadioThemeYellow"
-                        android:text="@string/settingsRadioThemeYellow"
                         android:layout_height="wrap_content"
+                        android:onClick="onRadioButtonThemeClicked"
+                        android:text="@string/settingsRadioThemeGrey" />
+
+                    <RadioButton
+                        android:id="@+id/settingsRadioThemeYellow"
                         android:layout_width="match_parent"
-                        android:onClick="onRadioButtonThemeClicked"/>
+                        android:layout_height="wrap_content"
+                        android:onClick="onRadioButtonThemeClicked"
+                        android:text="@string/settingsRadioThemeYellow" />
                 </RadioGroup>
             </LinearLayout>
         </LinearLayout>
