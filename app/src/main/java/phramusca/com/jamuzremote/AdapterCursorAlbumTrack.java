@@ -75,26 +75,26 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
         }
 
         if (track.getStatus().equals(Track.Status.INFO) || track.getStatus().equals(Track.Status.NEW)) {
-            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.colorPrimaryDark));
-            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.colorPrimaryDark));
-            userViewHolder.item_line3.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.colorPrimaryDark));
-            userViewHolder.item_line4.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.colorPrimaryDark));
+            HelperGui.setTextColor(parent.getContext(), R.attr.textColorDisabled, userViewHolder.item_line1);
+            HelperGui.setTextColor(parent.getContext(), R.attr.textColorDisabled, userViewHolder.item_line2);
+            HelperGui.setTextColor(parent.getContext(), R.attr.textColorDisabled, userViewHolder.item_line3);
+            HelperGui.setTextColor(parent.getContext(), R.attr.textColorDisabled, userViewHolder.item_line4);
             if(track.getStatus().equals(Track.Status.NEW)) {
                 bitmap = HelperBitmap.overlayIcon(bitmap, R.drawable.ic_download, parent.getContext());
             } else {
                 bitmap = HelperBitmap.overlayIcon(bitmap, R.drawable.ic_info, parent.getContext());
             }
         } else if (track.getStatus().equals(Track.Status.ERROR)) {
-            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.lightYellow));
-            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.lightYellow));
-            userViewHolder.item_line3.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.lightYellow));
-            userViewHolder.item_line4.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.lightYellow));
+            HelperGui.setTextColor(parent.getContext(), R.attr.textColorError, userViewHolder.item_line1);
+            HelperGui.setTextColor(parent.getContext(), R.attr.textColorError, userViewHolder.item_line2);
+            HelperGui.setTextColor(parent.getContext(), R.attr.textColorError, userViewHolder.item_line3);
+            HelperGui.setTextColor(parent.getContext(), R.attr.textColorError, userViewHolder.item_line4);
             bitmap = HelperBitmap.overlayIcon(bitmap, R.drawable.ic_error, parent.getContext());
         } else {
-            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
-            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
-            userViewHolder.item_line3.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
-            userViewHolder.item_line4.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.textColor));
+            HelperGui.setTextColor(parent.getContext(), android.R.attr.textColor, userViewHolder.item_line1);
+            HelperGui.setTextColor(parent.getContext(), android.R.attr.textColor, userViewHolder.item_line2);
+            HelperGui.setTextColor(parent.getContext(), android.R.attr.textColor, userViewHolder.item_line3);
+            HelperGui.setTextColor(parent.getContext(), android.R.attr.textColor, userViewHolder.item_line4);
         }
 
         userViewHolder.item_line1.setText(String.format(Locale.ENGLISH,"%s%d %s", //NON-NLS
@@ -104,11 +104,11 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
         userViewHolder.item_line2.setText(track.getArtist());
         if(searchQuery!=null && !searchQuery.isEmpty()) {
             userViewHolder.item_line1.setTextToHighlight(searchQuery);
-            userViewHolder.item_line1.setTextHighlightColor(R.color.colorAccent);
+            userViewHolder.item_line1.setTextHighlightColor(R.attr.colorAccent);
             userViewHolder.item_line1.setCaseInsensitive(true);
             userViewHolder.item_line1.highlight();
             userViewHolder.item_line2.setTextToHighlight(searchQuery);
-            userViewHolder.item_line2.setTextHighlightColor(R.color.colorAccent);
+            userViewHolder.item_line2.setTextHighlightColor(R.attr.colorAccent);
             userViewHolder.item_line2.setCaseInsensitive(true);
             userViewHolder.item_line2.highlight();
         }

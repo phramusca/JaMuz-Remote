@@ -131,21 +131,21 @@ public abstract class AdapterLoadQueue extends AdapterLoad {
             bitmap = HelperBitmap.getEmptyThumb(mContext);
         }
         if (position == trackList.getPositionPlaying()) {
-            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
-            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
-            userViewHolder.item_line3.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
-            userViewHolder.item_line4.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
+            HelperGui.setTextColor(mContext, android.R.attr.textColor, userViewHolder.item_line1);
+            HelperGui.setTextColor(mContext, android.R.attr.textColor, userViewHolder.item_line2);
+            HelperGui.setTextColor(mContext, android.R.attr.textColor, userViewHolder.item_line3);
+            HelperGui.setTextColor(mContext, android.R.attr.textColor, userViewHolder.item_line4);
             bitmap = HelperBitmap.overlayIcon(bitmap, R.drawable.ic_playing, mContext);
         } else if (trackList.get(position).isHistory()) {
-            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark));
-            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark));
-            userViewHolder.item_line3.setTextColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark));
-            userViewHolder.item_line4.setTextColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark));
+            HelperGui.setTextColor(mContext, R.attr.textColorDisabled, userViewHolder.item_line1);
+            HelperGui.setTextColor(mContext, R.attr.textColorDisabled, userViewHolder.item_line2);
+            HelperGui.setTextColor(mContext, R.attr.textColorDisabled, userViewHolder.item_line3);
+            HelperGui.setTextColor(mContext, R.attr.textColorDisabled, userViewHolder.item_line4);
         } else {
-            userViewHolder.item_line1.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
-            userViewHolder.item_line2.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
-            userViewHolder.item_line3.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
-            userViewHolder.item_line4.setTextColor(ContextCompat.getColor(mContext, R.color.textColor));
+            HelperGui.setTextColor(mContext, android.R.attr.textColor, userViewHolder.item_line1);
+            HelperGui.setTextColor(mContext, android.R.attr.textColor, userViewHolder.item_line2);
+            HelperGui.setTextColor(mContext, android.R.attr.textColor, userViewHolder.item_line3);
+            HelperGui.setTextColor(mContext, android.R.attr.textColor, userViewHolder.item_line4);
         }
         userViewHolder.imageViewCover.setImageBitmap(bitmap);
 
