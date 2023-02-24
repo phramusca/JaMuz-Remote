@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:id="@+id/layout_item">
+    android:id="@+id/layout_item"
+    android:background="?attr/colorPrimary">
 
     <ImageView
         android:id="@+id/imageView"
@@ -28,7 +29,6 @@
             android:layout_height="wrap_content"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
-            android:textColor="@color/textColor"
             tools:ignore="HardcodedText"
             android:textSize="16sp">
         </com.athkalia.emphasis.EmphasisTextView>
@@ -40,7 +40,6 @@
             android:layout_height="wrap_content"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
-            android:textColor="@color/textColor"
             tools:ignore="HardcodedText"
             android:textSize="14sp">
         </com.athkalia.emphasis.EmphasisTextView>

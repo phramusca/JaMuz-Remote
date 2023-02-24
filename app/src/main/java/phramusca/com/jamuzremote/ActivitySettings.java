@@ -5,26 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-
-import java.util.ArrayList;
 
 public class ActivitySettings extends AppCompatActivity {
 
@@ -36,18 +30,30 @@ public class ActivitySettings extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
-
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        ActivityMain.ThemeSetting defaultTheme = ActivityMain.ThemeSetting.valueOf(preferences.getString("defaultTheme", ActivityMain.ThemeSetting.getDefault().name()));
+        setTheme(defaultTheme.resId);
+        super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.activity_settings);
+        switch (defaultTheme) {
+            case BLUE_GREY:
+                ((RadioButton)findViewById(R.id.settingsRadioThemeDefault)).setChecked(true);
+                break;
+            case TEAL:
+                ((RadioButton)findViewById(R.id.settingsRadioThemeTeal)).setChecked(true);
+                break;
+            case GREY:
+                ((RadioButton)findViewById(R.id.settingsRadioThemeGrey)).setChecked(true);
+                break;
+            case YELLOW:
+                ((RadioButton)findViewById(R.id.settingsRadioThemeYellow)).setChecked(true);
+                break;
+        }
         Button button_exit_settings = findViewById(R.id.button_exit_settings);
         button_exit_settings.setOnClickListener(v -> onBackPressed());
-
         editTextConnectInfo = findViewById(R.id.editText_info);
-
         editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.11:2013"));
-
         Button buttonSaveConnectionString = findViewById(R.id.button_save_connectionString);
         buttonSaveConnectionString.setOnClickListener(view ->
                 setConfig("connectionString", editTextConnectInfo.getText().toString())
@@ -139,6 +145,32 @@ public class ActivitySettings extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    public void onRadioButtonThemeClicked(View view) {
+        boolean checked = ((RadioButton) view).isChecked();
+        ActivityMain.ThemeSetting defaultTheme = ActivityMain.ThemeSetting.getDefault();
+        if(checked) {
+            switch(view.getId()) {
+                case R.id.settingsRadioThemeDefault:
+                    defaultTheme= ActivityMain.ThemeSetting.BLUE_GREY; break;
+                case R.id.settingsRadioThemeTeal:
+                        defaultTheme= ActivityMain.ThemeSetting.TEAL;break;
+                case R.id.settingsRadioThemeGrey:
+                    defaultTheme= ActivityMain.ThemeSetting.GREY;break;
+                case R.id.settingsRadioThemeYellow:
+                    defaultTheme= ActivityMain.ThemeSetting.YELLOW;break;
+            }
+        }
+        Intent data = new Intent();
+        data.putExtra("defaultTheme", defaultTheme.name()); //NON-NLS
+        setResult(RESULT_OK, data);
+        setConfig("defaultTheme", defaultTheme.name());
+
+        //Restart activity to apply new selected theme
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
     }
 
     public void onRadioButtonClicked(View view) {

@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:weightSum="1"
-    tools:showIn="@layout/activity_queue">
+    tools:showIn="@layout/activity_queue"
+    android:background="?attr/colorPrimaryDark">
 
     <GridLayout
         android:layout_width="match_parent"

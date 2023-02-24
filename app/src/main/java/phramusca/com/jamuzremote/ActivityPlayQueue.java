@@ -2,6 +2,7 @@ package phramusca.com.jamuzremote;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,6 +27,8 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ActivityMain.ThemeSetting themePref = ActivityMain.ThemeSetting.valueOf(PreferenceManager.getDefaultSharedPreferences(this).getString("defaultTheme", ActivityMain.ThemeSetting.getDefault().name()));
+        setTheme(themePref.resId); //Needed to be done before super.onCreate
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_queue);
 
@@ -60,13 +63,13 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                 trackAdapter.notifyDataSetChanged();
             });
 
-            new SwipeHelper(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
+            new HelperSwipe(this, recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
                 @Override
                 public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder,
                                                       List<UnderlayButton> underlayButtons) {
 
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            SwipeHelper.ButtonInfo.DEL,
+                    underlayButtons.add(new HelperSwipe.UnderlayButton(
+                            HelperSwipe.ButtonInfo.DEL,
                             position -> {
                                 PlayQueue.queue.remove(position + offset);
                                 trackAdapter.trackList.remove(position);
@@ -74,7 +77,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                             },
                             getApplicationContext()));
 
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                    underlayButtons.add(new HelperSwipe.UnderlayButton(
                             ButtonInfo.DOWN,
                             position -> {
                                 PlayQueue.queue.moveDown(position + offset);
@@ -83,7 +86,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                             },
                             getApplicationContext()));
 
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                    underlayButtons.add(new HelperSwipe.UnderlayButton(
                             ButtonInfo.PLAY,
                             position -> {
                                 if (PlayQueue.queue.insertNext(position + offset)) {
@@ -95,7 +98,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
                             },
                             getApplicationContext()));
 
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                    underlayButtons.add(new HelperSwipe.UnderlayButton(
                             ButtonInfo.QUEUE,
                             position -> {
                                 PlayQueue.queue.insertNext(position + offset);

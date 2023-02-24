@@ -134,8 +134,8 @@ public class DownloadProcess extends ProcessAbstract {
                 "-%d/%d\n%s/%s\n%s %d/%d. %d %s\n", //NON-NLS
                 newTracks.size(),
                 nbFilesStart,
-                StringManager.humanReadableByteCount(sizeRemaining, false),
-                StringManager.humanReadableByteCount(sizeTotal, false),
+                HelperString.humanReadableByteCount(sizeRemaining, false),
+                HelperString.humanReadableByteCount(sizeTotal, false),
                 mContext.getString(R.string.serviceSyncNotifyDownloadAttempt),
                 nbRetries + 1,
                 maxNbRetries,
