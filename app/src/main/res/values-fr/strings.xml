@@ -203,5 +203,7 @@
     <string name="qrScanPromptMessage">Merci de scanner le QR code affiché par JaMuz Server (onglet Serveur) pour récupérer les informations de connexion.</string>
     <string name="settingsThemeViewTitle">Thème</string>
     <string name="settingsRadioThemeDefault">Défaut</string>
-    <string name="settingsRadioThemeGreen">Vert</string>
+    <string name="settingsRadioThemeTeal">Turquoise</string>
+    <string name="settingsRadioThemeGrey">Gris</string>
+    <string name="settingsRadioThemeYellow">Jaune</string>
 </resources>
