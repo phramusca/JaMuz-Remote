@@ -422,7 +422,7 @@
                 android:layout_marginBottom="5dp"/>
 
             <Button
-                android:background="@drawable/ic_button_up"
+                android:background="@drawable/ic_button_volume_up_dark"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/button_volUp"
@@ -432,7 +432,7 @@
                 android:layout_marginBottom="5dp"/>
 
             <Button
-                android:background="@drawable/ic_button_previous"
+                android:background="@drawable/ic_button_previous_dark"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/button_previous"
@@ -441,7 +441,7 @@
                 android:layout_marginEnd="5dp"/>
 
             <Button android:id="@+id/button_play"
-                android:background="@drawable/ic_button_play"
+                android:background="@drawable/ic_button_play_dark"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:layout_row="0"
@@ -449,7 +449,7 @@
                 android:layout_marginEnd="5dp"/>
 
             <Button
-                android:background="@drawable/ic_button_next"
+                android:background="@drawable/ic_button_next_dark"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/button_next"
@@ -457,7 +457,7 @@
                 android:layout_column="3"/>
 
             <Button
-                android:background="@drawable/ic_button_down"
+                android:background="@drawable/ic_button_volume_down_dark"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/button_volDown"
@@ -465,7 +465,7 @@
                 android:layout_column="0"/>
 
             <Button
-                android:background="@drawable/ic_button_rewind"
+                android:background="@drawable/ic_button_rewind_dark"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/button_rewind"
@@ -473,7 +473,7 @@
                 android:layout_column="1"/>
 
             <Button
-                android:background="@drawable/ic_button_pullup"
+                android:background="@drawable/ic_button_pullup_dark"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/button_pullup"
@@ -481,7 +481,7 @@
                 android:layout_column="2"/>
 
             <Button
-                android:background="@drawable/ic_button_forward"
+                android:background="@drawable/ic_button_forward_dark"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/button_forward"
