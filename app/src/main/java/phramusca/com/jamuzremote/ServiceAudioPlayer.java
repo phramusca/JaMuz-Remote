@@ -36,7 +36,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
 import androidx.media.MediaBrowserServiceCompat;
 import androidx.media.session.MediaButtonReceiver;
 
@@ -473,11 +472,11 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         int actionIcon = R.drawable.ic_action_speech; //Should not happen
         int smallIcon = R.drawable.buttons_red; //Should not happen
         if(action==PlaybackStateCompat.ACTION_PLAY) {
-            actionIcon = R.drawable.ic_action_play;
+            actionIcon = R.drawable.ic_action_play_dark;
             smallIcon = R.drawable.ic_action_pause;
         } else if(action==PlaybackStateCompat.ACTION_PAUSE) {
             actionIcon = R.drawable.ic_action_pause;
-            smallIcon = R.drawable.ic_action_play;
+            smallIcon = R.drawable.ic_action_play_dark;
         }
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -496,7 +495,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
                 .setSmallIcon(smallIcon)
                 .clearActions()
                 .addAction(new NotificationCompat.Action(
-                        R.drawable.ic_action_previous, "Previous",
+                        R.drawable.ic_action_previous_dark, "Previous",
                         MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
                                 PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)))
                 .addAction(new NotificationCompat.Action(
@@ -504,7 +503,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
                         MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
                                 action)))
                 .addAction(new NotificationCompat.Action(
-                        R.drawable.ic_action_next, "Next",
+                        R.drawable.ic_action_next_dark, "Next",
                         MediaButtonReceiver.buildMediaButtonPendingIntent(getApplicationContext(),
                                 PlaybackStateCompat.ACTION_SKIP_TO_NEXT)))
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
