@@ -5,26 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-
-import java.util.ArrayList;
 
 public class ActivitySettings extends AppCompatActivity {
 
@@ -46,8 +40,14 @@ public class ActivitySettings extends AppCompatActivity {
             case DEFAULT:
                 ((RadioButton)findViewById(R.id.settingsRadioThemeDefault)).setChecked(true);
                 break;
-            case GREEN:
-                ((RadioButton)findViewById(R.id.settingsRadioThemeGreen)).setChecked(true);
+            case TEAL:
+                ((RadioButton)findViewById(R.id.settingsRadioThemeTeal)).setChecked(true);
+                break;
+            case GREY:
+                ((RadioButton)findViewById(R.id.settingsRadioThemeGrey)).setChecked(true);
+                break;
+            case YELLOW:
+                ((RadioButton)findViewById(R.id.settingsRadioThemeYellow)).setChecked(true);
                 break;
         }
         Button button_exit_settings = findViewById(R.id.button_exit_settings);
@@ -150,15 +150,17 @@ public class ActivitySettings extends AppCompatActivity {
     public void onRadioButtonThemeClicked(View view) {
         boolean checked = ((RadioButton) view).isChecked();
         ActivityMain.ThemeSetting defaultTheme = ActivityMain.ThemeSetting.DEFAULT;
-        switch(view.getId()) {
-            case R.id.settingsRadioThemeDefault:
-                if(checked)
-                    defaultTheme= ActivityMain.ThemeSetting.DEFAULT;
-                break;
-            case R.id.settingsRadioThemeGreen:
-                if(checked)
-                    defaultTheme= ActivityMain.ThemeSetting.GREEN;
-                break;
+        if(checked) {
+            switch(view.getId()) {
+                case R.id.settingsRadioThemeDefault:
+                    defaultTheme= ActivityMain.ThemeSetting.DEFAULT; break;
+                case R.id.settingsRadioThemeTeal:
+                        defaultTheme= ActivityMain.ThemeSetting.TEAL;break;
+                case R.id.settingsRadioThemeGrey:
+                    defaultTheme= ActivityMain.ThemeSetting.GREY;break;
+                case R.id.settingsRadioThemeYellow:
+                    defaultTheme= ActivityMain.ThemeSetting.YELLOW;break;
+            }
         }
         Intent data = new Intent();
         data.putExtra("defaultTheme", defaultTheme.name()); //NON-NLS

@@ -73,7 +73,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.flexbox.FlexboxLayout;
@@ -417,7 +416,9 @@ public class ActivityMain extends AppCompatActivity {
 
     enum ThemeSetting {
         DEFAULT(R.style.AppTheme), //NOI18N
-        GREEN(R.style.AppTheme_Green);
+        TEAL(R.style.AppTheme_Teal),
+        GREY(R.style.AppTheme_Grey),
+        YELLOW(R.style.AppTheme_Yellow);
 
         final @StyleRes int resId;
 

@@ -1,20 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--Default application -->
+    <!-- Blue Grey 800 -->
     <color name="colorPrimary">#37474f</color>
     <color name="colorPrimaryDark">#102027</color>
-    <color name="colorAccent">#f4511e</color>
+    <color name="textColorDisabled">#b8dbeb</color> <!-- Blue Grey 400 -->
+    <color name="colorAccent">#D34B24</color>
     <color name="textColor">#FFFFFF</color>
-    <color name="textColorDisabled">#b8dbeb</color>
-    <color name="textColorError">#e65100</color>
+    <color name="textColorError">#D34B24</color>
 
-    <!--Green application -->
-    <color name="colorPrimaryGreen">#1b5e20</color>
-    <color name="colorPrimaryDarkGreen">#003300</color>
-    <color name="colorAccentGreen">#ffa000</color>
-    <color name="textColorGreen">#fafafa</color>
-    <color name="textColorDisabledGreen">#4caf50</color>
-    <color name="textColorErrorGreen">#ff5722</color>
+    <!--Teal 800 -->
+    <color name="colorPrimaryTeal">#00695c</color>
+    <color name="colorPrimaryDarkTeal">#003d33</color>
+    <color name="textColorDisabledTeal">#26a69a</color> <!--Teal 400 -->
+    <color name="colorAccentTeal">#D34B24</color>
+    <color name="textColorTeal">#FFFFFF</color>
+    <color name="textColorErrorTeal">#D34B24</color>
+
+    <!--Grey 800 -->
+    <color name="colorPrimaryGrey">#616161</color>
+    <color name="colorPrimaryDarkGrey">#373737</color>
+    <color name="textColorDisabledGrey">#bdbdbd</color> <!--Grey 400 -->
+    <color name="colorAccentGrey">#D34B24</color>
+    <color name="textColorGrey">#FFFFFF</color>
+    <color name="textColorErrorGrey">#D34B24</color>
+
+    <!--Yellow 800 -->
+    <color name="colorPrimaryYellow">#f9a825</color>
+    <color name="colorPrimaryDarkYellow">#c17900</color>
+    <color name="textColorDisabledYellow">#ffee58</color> <!--Yellow 400 -->
+    <color name="colorAccentYellow">#D34B24</color>
+    <color name="textColorYellow">#FFFFFF</color>
+    <color name="textColorErrorYellow">#D34B24</color>
 
     <!--Controls styles-->
     <color name="duskYellow">#a69d62</color>
