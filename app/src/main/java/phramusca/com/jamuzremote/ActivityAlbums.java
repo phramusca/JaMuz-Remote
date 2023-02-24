@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -28,6 +29,8 @@ public class ActivityAlbums extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ActivityMain.ThemeSetting themePref = ActivityMain.ThemeSetting.valueOf(PreferenceManager.getDefaultSharedPreferences(this).getString("defaultTheme", ActivityMain.ThemeSetting.getDefault().name()));
+        setTheme(themePref.resId); //Needed to be done before super.onCreate
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_albums);
 
@@ -101,11 +104,11 @@ public class ActivityAlbums extends AppCompatActivity {
             inputMethodManager.showSoftInput(queryText, InputMethodManager.SHOW_IMPLICIT);
         });
 
-        new SwipeHelper(getApplicationContext(), recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
+        new HelperSwipe(getApplicationContext(), recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
             @Override
             public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
 
-                underlayButtons.add(new SwipeHelper.UnderlayButton(
+                underlayButtons.add(new HelperSwipe.UnderlayButton(
                         ButtonInfo.PLAY,
                         pos -> {
                             AdapterListItemAlbum adapterListItemAlbum = adapterCursorAlbum.getAlbumListItem(pos);
@@ -113,7 +116,7 @@ public class ActivityAlbums extends AppCompatActivity {
                         },
                         getApplicationContext()));
 
-                underlayButtons.add(new SwipeHelper.UnderlayButton(
+                underlayButtons.add(new HelperSwipe.UnderlayButton(
                         ButtonInfo.QUEUE,
                         pos -> {
                             AdapterListItemAlbum adapterListItemAlbum = adapterCursorAlbum.getAlbumListItem(pos);

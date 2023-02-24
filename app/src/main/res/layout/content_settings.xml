@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:weightSum="1"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="?attr/colorPrimaryDark">
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,11 +21,15 @@
             android:text="@string/settingsTitle"
             android:layout_row="0"
             android:layout_column="1"
-            android:textColor="@color/textColor"
             android:layout_gravity="center"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"/>
     </GridLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:background="?attr/colorPrimary">
+    </LinearLayout>
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -34,14 +39,13 @@
             android:orientation="vertical">
 
             <TextView android:text="@string/settingsServerTitle"
-                android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:gravity="start"
                 android:layout_marginTop="5dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
-                android:background="@color/colorPrimaryDark"/>
+                android:background="?attr/colorPrimaryDark"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -50,8 +54,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/settingsCheckBoxDisplayServer"
-                    android:textColor="@color/textColor"
-                    android:background="@color/colorPrimary"
+                    android:background="?attr/colorPrimary"
                     android:checked="true"/>
             </LinearLayout>
             <GridLayout
@@ -59,7 +62,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
-                android:background="@color/colorPrimary">
+                android:background="?attr/colorPrimary">
                 <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
                 <LinearLayout
                     tools:ignore="UselessLeaf"
@@ -73,8 +76,7 @@
 
                 <TextView android:text="@string/settingsServerTextViewIpPort"
                     android:layout_row="0"
-                    android:layout_column="1"
-                    android:textColor="@color/textColor"/>
+                    android:layout_column="1" />
 
                 <EditText
                     android:id="@+id/editText_info"
@@ -91,13 +93,11 @@
                     android:inputType="text"
                     android:minHeight="48dp"
                     android:text="@string/settingsServerDefaultConnectionString"
-                    android:textColor="@color/textColor"
                     android:theme="@style/EditText" />
                 <Button
                     style="?android:attr/buttonStyleSmall"
                     android:padding="5dp"
                     android:background="@drawable/ic_button"
-                    android:textColor="@color/textColor"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/settingsServerButtonSave"
@@ -109,7 +109,6 @@
                     style="?android:attr/buttonStyleSmall"
                     android:padding="5dp"
                     android:background="@drawable/ic_button"
-                    android:textColor="@color/textColor"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/settingsServerButtonScanQR"
@@ -120,25 +119,24 @@
                     android:textAllCaps="false"/>
             </GridLayout>
             <TextView android:text="@string/settingsLocalFilesTextViewTitle"
-                android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:gravity="start"
                 android:layout_marginTop="5dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
-                android:background="@color/colorPrimaryDark"/>
+                android:background="?attr/colorPrimaryDark"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:orientation="vertical"
-                android:background="@color/colorPrimary">
+                android:background="?attr/colorPrimary">
                 <GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/colorPrimary"
+                    android:background="?attr/colorPrimary"
                     android:paddingTop="5dp"
                     android:paddingBottom="5dp">
 
@@ -150,8 +148,7 @@
                         android:layout_column="0"
                         android:checked="true"
                         android:minHeight="48dp"
-                        android:text="@string/settingsCheckBoxDisplayMediaStore"
-                        android:textColor="@color/textColor" />
+                        android:text="@string/settingsCheckBoxDisplayMediaStore" />
                     <Button
                         android:id="@+id/button_refresh"
                         style="?android:attr/buttonStyleSmall"
@@ -163,36 +160,32 @@
                         android:background="@drawable/ic_button"
                         android:padding="5dp"
                         android:text="@string/settingsLocalFilesButtonRefresh"
-                        android:textAllCaps="false"
-                        android:textColor="@color/textColor" />
+                        android:textAllCaps="false" />
                 </GridLayout>
                 <TextView android:text="@string/settingsLocalFilesTextViewHelp"
-                    android:textColor="@color/textColor"
                     android:gravity="start"
                     android:layout_height="wrap_content"
-                    android:layout_width="match_parent" />
+                    android:layout_width="match_parent"/>
             </LinearLayout>
             <TextView android:text="ReplayGain"
                 tools:ignore="HardcodedText"
-                android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:gravity="start"
                 android:layout_marginTop="5dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
-                android:background="@color/colorPrimaryDark" />
+                android:background="?attr/colorPrimaryDark" />
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
-                android:background="@color/colorPrimary">
+                android:background="?attr/colorPrimary">
                 <TextView
                     android:text="@string/settingsReplayGainTextViewBaseVolume"
                     android:layout_row="0"
-                    android:layout_column="1"
-                    android:textColor="@color/textColor"/>
+                    android:layout_column="1" />
                 <SeekBar
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -204,23 +197,21 @@
                     android:paddingTop="5dp"/>
             </GridLayout>
             <TextView android:text="@string/settingsSpeechTextViewTitle"
-                android:textColor="@color/textColor"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:gravity="start"
                 android:layout_marginTop="5dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
-                android:background="@color/colorPrimaryDark"/>
+                android:background="?attr/colorPrimaryDark"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:orientation="vertical"
-                android:background="@color/colorPrimary">
+                android:background="?attr/colorPrimary">
                 <TextView android:text="@string/settingsSpeechTitle"
-                    android:textColor="@color/textColor"
                     android:gravity="start"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent" />
@@ -232,20 +223,67 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/settingsRadioSpeechPause"
-                        android:textColor="@color/textColor"
                         android:onClick="onRadioButtonClicked"/>
                     <RadioButton android:id="@+id/settingsRadioSpeechLowerVolume"
                         android:text="@string/settingsRadioSpeechLowerVolume"
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent"
-                        android:textColor="@color/textColor"
                         android:onClick="onRadioButtonClicked"/>
                     <RadioButton android:id="@+id/settingsRadioSpeechNone"
                         android:text="@string/settingsRadioSpeechNone"
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent"
-                        android:textColor="@color/textColor"
                         android:onClick="onRadioButtonClicked"/>
+                </RadioGroup>
+            </LinearLayout>
+            <TextView android:text="@string/settingsThemeViewTitle"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:gravity="start"
+                android:layout_marginTop="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="?attr/colorPrimaryDark"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/colorPrimary"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp">
+
+                <RadioGroup
+                    android:id="@+id/settingsTheme"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <RadioButton
+                        android:id="@+id/settingsRadioThemeDefault"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:onClick="onRadioButtonThemeClicked"
+                        android:text="@string/settingsRadioThemeBlueGrey" />
+
+                    <RadioButton
+                        android:id="@+id/settingsRadioThemeTeal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:onClick="onRadioButtonThemeClicked"
+                        android:text="@string/settingsRadioThemeTeal" />
+
+                    <RadioButton
+                        android:id="@+id/settingsRadioThemeGrey"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:onClick="onRadioButtonThemeClicked"
+                        android:text="@string/settingsRadioThemeGrey" />
+
+                    <RadioButton
+                        android:id="@+id/settingsRadioThemeYellow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:onClick="onRadioButtonThemeClicked"
+                        android:text="@string/settingsRadioThemeYellow" />
                 </RadioGroup>
             </LinearLayout>
         </LinearLayout>

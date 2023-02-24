@@ -2,7 +2,7 @@ package phramusca.com.jamuzremote;
 
 import static phramusca.com.jamuzremote.Playlist.Order.PLAYCOUNTER_LASTPLAYED;
 import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
-import static phramusca.com.jamuzremote.StringManager.trimTrailingWhitespace;
+import static phramusca.com.jamuzremote.HelperString.trimTrailingWhitespace;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
@@ -68,11 +68,11 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StyleRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.flexbox.FlexboxLayout;
@@ -412,11 +412,34 @@ public class ActivityMain extends AppCompatActivity {
         }
     };
 
+    public static ThemeSetting themeApplied = ActivityMain.ThemeSetting.getDefault();
+
+    enum ThemeSetting {
+        BLUE_GREY(R.style.AppTheme_BlueGrey), //NOI18N
+        TEAL(R.style.AppTheme_Teal),
+        GREY(R.style.AppTheme_Grey),
+        YELLOW(R.style.AppTheme_Yellow);
+
+        final @StyleRes int resId;
+
+        ThemeSetting(@StyleRes int resId) {
+            this.resId = resId;
+        }
+
+        public static ThemeSetting getDefault() {
+            return GREY;
+        }
+    }
+
     @SuppressLint({"HardwareIds", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         Log.i(TAG, "ActivityMain onCreate"); //NON-NLS
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        ThemeSetting themePref = ThemeSetting.valueOf(preferences.getString("defaultTheme", ActivityMain.ThemeSetting.getDefault().name()));
+        setTheme(themePref.resId); //Needed to be done before super.onCreate
+        themeApplied = themePref;
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         layoutMain = findViewById(R.id.panel_main);
         stringMap = new HashMap<>();
@@ -516,7 +539,7 @@ public class ActivityMain extends AppCompatActivity {
         textFileInfo_seekBefore = findViewById(R.id.textFileInfo_seekBefore);
         textFileInfo_seekAfter = findViewById(R.id.textFileInfo_seekAfter);
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
 
         buttonRemote = findViewById(R.id.button_connect);
         buttonRemote.setOnClickListener(v -> {
@@ -956,7 +979,7 @@ public class ActivityMain extends AppCompatActivity {
     private ToggleButton getButtonTag(int key, String value) {
         ToggleButton button = new ToggleButton(this);
         button.setId(key);
-        button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        HelperGui.setTextColor(this, R.attr.textColorDisabled, button);
         button.setBackgroundResource(R.drawable.ic_tags);
         button.setAlpha(0.7F);
         button.setAllCaps(false);
@@ -993,7 +1016,7 @@ public class ActivityMain extends AppCompatActivity {
         TriStateButton button = new TriStateButton(this);
         button.setId(key);
         button.setTag(value);
-        button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        HelperGui.setTextColor(this, R.attr.textColorDisabled, button);
         button.setBackgroundResource(R.drawable.ic_tags);
         button.setAlpha(0.7F);
         button.setAllCaps(false);
@@ -1020,7 +1043,7 @@ public class ActivityMain extends AppCompatActivity {
         TriStateButton button = new TriStateButton(this);
         button.setId(key);
         button.setTag(value);
-        button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        HelperGui.setTextColor(this, R.attr.textColorDisabled, button);
         button.setBackgroundResource(R.drawable.ic_tags);
         button.setAlpha(0.7F);
         button.setAllCaps(false);
@@ -1054,25 +1077,25 @@ public class ActivityMain extends AppCompatActivity {
 
     //This is a trick since the following (not in listener) is not working:
     //button.setTextColor(ContextCompat.getColor(this, R.color.toggle_text));
-    private void setTagButtonTextColor(ToggleButton b) {
-        if (b != null) {
-            boolean checked = b.isChecked();
-            b.setTextColor(ContextCompat.getColor(this, checked ? R.color.textColor : R.color.colorPrimaryDark));
+    private void setTagButtonTextColor(ToggleButton button) {
+        if (button != null) {
+            boolean checked = button.isChecked();
+            HelperGui.setTextColor(this, checked ? android.R.attr.textColor : R.attr.textColorDisabled, button);
         }
     }
 
     private void setTagButtonTextColor(TriStateButton button, TriStateButton.STATE state) {
         switch (state) {
             case ANY:
-                button.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+                HelperGui.setTextColor(this, R.attr.textColorDisabled, button);
                 button.setBackgroundResource(R.drawable.ic_gradient_button);
                 break;
             case TRUE:
-                button.setTextColor(ContextCompat.getColor(this, R.color.textColor));
+                HelperGui.setTextColor(this, android.R.attr.textColor, button);
                 button.setBackgroundResource(R.drawable.ic_gradient_button_pressed);
                 break;
             case FALSE:
-                button.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
+                HelperGui.setTextColor(this, R.attr.textColorError, button);
                 button.setBackgroundResource(R.drawable.ic_gradient_button_pressed);
                 break;
             default:
@@ -1597,6 +1620,14 @@ public class ActivityMain extends AppCompatActivity {
             String QRcode = data.getStringExtra("QRcode");
             if (QRcode != null) {
                 getFromQRcode(QRcode);
+            }
+
+            ThemeSetting themePref = ThemeSetting.valueOf(preferences.getString("defaultTheme", ActivityMain.ThemeSetting.getDefault().name()));
+            if (!themeApplied.equals(themePref)) {
+                //Restart activity to apply new selected theme
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -2229,11 +2260,11 @@ public class ActivityMain extends AppCompatActivity {
         runOnUiThread(() -> {
             seekBarPosition.setMax(total);
             seekBarPosition.setProgress(currentPosition);
-            textFileInfo_seekBefore.setText(StringManager.secondsToMMSS(currentPosition / 1000));
+            textFileInfo_seekBefore.setText(HelperString.secondsToMMSS(currentPosition / 1000));
             textFileInfo_seekAfter.setText(String.format(
                     "- %s / %s",
-                    StringManager.secondsToMMSS((total - currentPosition) / 1000),
-                    StringManager.secondsToMMSS(total / 1000)));
+                    HelperString.secondsToMMSS((total - currentPosition) / 1000),
+                    HelperString.secondsToMMSS(total / 1000)));
         });
     }
 
@@ -2260,7 +2291,7 @@ public class ActivityMain extends AppCompatActivity {
                 ? stringMap.get("trackNeverPlayed")
                 : String.format(Locale.getDefault(),
                 "%s %s (%dx). ", //NON-NLS
-                stringMap.get("trackNeverPlayed"),
+                stringMap.get("trackPlayed"),
                 prettyTime.format(track.getLastPlayed()),
                 track.getPlayCounter());
     }
@@ -2268,7 +2299,7 @@ public class ActivityMain extends AppCompatActivity {
     public static String getAddedDateAgo(Track track) { //NON-NLS
         return String.format(
                 "%s %s.", //NON-NLS
-                stringMap.get("trackNeverPlayed"),
+                stringMap.get("trackAdded"),
                 prettyTime.format(track.getAddedDate()));
     }
 

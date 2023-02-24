@@ -25,7 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by skyfishjy on 10/31/14.
- * https://gist.github.com/skyfishjy/443b7448f59be978bc59
+ * <a href="https://gist.github.com/skyfishjy/443b7448f59be978bc59">...</a>
  */
 
 public abstract class AdapterCursor<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
