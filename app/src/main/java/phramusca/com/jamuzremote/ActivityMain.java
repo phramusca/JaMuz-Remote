@@ -2,7 +2,7 @@ package phramusca.com.jamuzremote;
 
 import static phramusca.com.jamuzremote.Playlist.Order.PLAYCOUNTER_LASTPLAYED;
 import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
-import static phramusca.com.jamuzremote.StringManager.trimTrailingWhitespace;
+import static phramusca.com.jamuzremote.HelperString.trimTrailingWhitespace;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
@@ -2255,11 +2255,11 @@ public class ActivityMain extends AppCompatActivity {
         runOnUiThread(() -> {
             seekBarPosition.setMax(total);
             seekBarPosition.setProgress(currentPosition);
-            textFileInfo_seekBefore.setText(StringManager.secondsToMMSS(currentPosition / 1000));
+            textFileInfo_seekBefore.setText(HelperString.secondsToMMSS(currentPosition / 1000));
             textFileInfo_seekAfter.setText(String.format(
                     "- %s / %s",
-                    StringManager.secondsToMMSS((total - currentPosition) / 1000),
-                    StringManager.secondsToMMSS(total / 1000)));
+                    HelperString.secondsToMMSS((total - currentPosition) / 1000),
+                    HelperString.secondsToMMSS(total / 1000)));
         });
     }
 

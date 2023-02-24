@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by raph on 01/05/17.
  */
-public class StringManager {
+public class HelperString {
 
     /**
      * Trims trailing whitespace. Removes any of these characters:

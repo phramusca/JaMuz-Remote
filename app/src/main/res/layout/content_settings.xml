@@ -159,7 +159,7 @@
                 <TextView android:text="@string/settingsLocalFilesTextViewHelp"
                     android:gravity="start"
                     android:layout_height="wrap_content"
-                    android:layout_width="match_parent" />
+                    android:layout_width="match_parent"/>
             </LinearLayout>
             <TextView android:text="ReplayGain"
                 tools:ignore="HardcodedText"

@@ -36,9 +36,9 @@ public class Benchmark {
         long elapseSum = sum(partialTimes);
         long remainingTime = mean(partialTimes, elapseSum) * (size - index);
         index++;
-        String elapsed = StringManager.humanReadableSeconds(elapsedTime / 1000, "+");
-        String remaining = StringManager.humanReadableSeconds(remainingTime / 1000, "-");
-        String speed = StringManager.humanReadableBitCount((sum(partialSizes) * 8) / ((elapseSum < 1 ? 1 : elapseSum) / 1000), true);
+        String elapsed = HelperString.humanReadableSeconds(elapsedTime / 1000, "+");
+        String remaining = HelperString.humanReadableSeconds(remainingTime / 1000, "-");
+        String speed = HelperString.humanReadableBitCount((sum(partialSizes) * 8) / ((elapseSum < 1 ? 1 : elapseSum) / 1000), true);
         lastMsg = MessageFormat.format("{1} @ {2}ps ({0})", elapsed, remaining, speed); //NOI18N NON-NLS
         return lastMsg;
     }

@@ -104,11 +104,11 @@ public class ActivityAlbums extends AppCompatActivity {
             inputMethodManager.showSoftInput(queryText, InputMethodManager.SHOW_IMPLICIT);
         });
 
-        new SwipeHelper(getApplicationContext(), recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
+        new HelperSwipe(getApplicationContext(), recyclerView, ItemTouchHelper.LEFT + ItemTouchHelper.RIGHT) {
             @Override
             public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
 
-                underlayButtons.add(new SwipeHelper.UnderlayButton(
+                underlayButtons.add(new HelperSwipe.UnderlayButton(
                         ButtonInfo.PLAY,
                         pos -> {
                             AdapterListItemAlbum adapterListItemAlbum = adapterCursorAlbum.getAlbumListItem(pos);
@@ -116,7 +116,7 @@ public class ActivityAlbums extends AppCompatActivity {
                         },
                         getApplicationContext()));
 
-                underlayButtons.add(new SwipeHelper.UnderlayButton(
+                underlayButtons.add(new HelperSwipe.UnderlayButton(
                         ButtonInfo.QUEUE,
                         pos -> {
                             AdapterListItemAlbum adapterListItemAlbum = adapterCursorAlbum.getAlbumListItem(pos);
