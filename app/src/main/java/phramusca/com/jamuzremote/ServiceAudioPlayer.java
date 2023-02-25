@@ -328,7 +328,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
      * Taken partially from <a href="https://github.com/vanilla-music/vanilla">...</a>
      */
     private void applyReplayGain(Track track) {
-        ReplayGain.GainValues replayGain = track.getReplayGain(false);
+        ReplayGain.GainValues replayGain = track.getReplayGain();
         float albumGain = replayGain.getAlbumGain();
         float trackGain = replayGain.getTrackGain();
         String rgStr = "albumGain=" + albumGain + ", trackGain=" + trackGain;

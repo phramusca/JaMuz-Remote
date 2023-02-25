@@ -658,10 +658,7 @@ public class Track implements Serializable {
         this.genre = genre;
     }
 
-    public ReplayGain.GainValues getReplayGain(boolean read) {
-        if (read || !replayGain.isValid()) {
-            replayGain = ReplayGain.read(new File(path), path.substring(path.lastIndexOf(".") + 1));
-        }
+    public ReplayGain.GainValues getReplayGain() {
         return replayGain;
     }
 
