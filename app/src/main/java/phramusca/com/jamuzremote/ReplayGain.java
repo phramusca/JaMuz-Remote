@@ -41,31 +41,7 @@ import java.util.logging.Logger;
  */
 public class ReplayGain {
 
-    //http://wiki.hydrogenaud.io/index.php?title=ReplayGain_2.0_specification#Metadata_format
-    public static GainValues read(File path, String ext) {
-        GainValues gainValues = new GainValues();
-        switch (ext) {
-            case "mp3": //NON-NLS
-                //First try reading from APE tags (default mp3gain storage)
-                //FIXME: Find another library to get APE replaygain since beaglebuddy has to be removed for fdroid inclusion
-                //gainValues = readReplayGainFromAPE(path);
-                if (!gainValues.isValid()) {
-                    //If not found, read from ID3 (written by some other tool, foobar2000 maybe ?)
-                    gainValues = readReplayGainFromID3(path);
-                }
-                break;
-            case "flac": //NON-NLS
-                //http://www.bobulous.org.uk/misc/Replay-Gain-in-Linux.html#flac-and-metaflac
-                gainValues = readReplayGainFromFlac(path);
-                break;
-            case "ogg": //NON-NLS
-                //http://www.bobulous.org.uk/misc/Replay-Gain-in-Linux.html#vorbisgain
-                //TODO: Support ReplayGain for Ogg Vorbis
-            default:
-                //Not supported
-        }
-        return gainValues;
-    }
+    //TODO: Find a way to read replaygain from "content://" paths (mediaStore)
 
     public static class GainValues implements Serializable {
         private float albumGain = Float.NaN;
@@ -110,93 +86,4 @@ public class ReplayGain {
             this.trackGain = trackGain;
         }
     }
-
-    private static GainValues readReplayGainFromFlac(File path) {
-        GainValues gv = new GainValues();
-        try {
-            org.jaudiotagger.audio.AudioFile f = AudioFileIO.read(path);
-            FlacTag tag = (FlacTag) f.getTag();
-            VorbisCommentTag vcTag = tag.getVorbisCommentTag();
-
-            gv.REPLAYGAIN_REFERENCE_LOUDNESS = vcTag.getFirst("REPLAYGAIN_REFERENCE_LOUDNESS"); //NON-NLS
-            gv.trackGain = getFloatFromString(vcTag.getFirst("REPLAYGAIN_TRACK_GAIN")); //NON-NLS
-            gv.albumGain = getFloatFromString(vcTag.getFirst("REPLAYGAIN_ALBUM_GAIN")); //NON-NLS
-            gv.albumPeak = getFloatFromString(vcTag.getFirst("REPLAYGAIN_ALBUM_PEAK")); //NON-NLS
-            gv.trackPeak = getFloatFromString(vcTag.getFirst("REPLAYGAIN_TRACK_PEAK")); //NON-NLS
-        } catch (NoSuchMethodError | CannotReadException | IOException | TagException |
-                ReadOnlyFileException | InvalidAudioFrameException ex) {
-            Logger.getLogger(ReplayGain.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return gv;
-    }
-
-     private static float getFloatFromString(String dbFloat) {
-        float rg_float = Float.NaN;
-        try {
-            String nums = dbFloat.replaceAll("[^0-9.-]", "");
-            rg_float = Float.parseFloat(nums);
-            return rg_float;
-        } catch (Exception ex) {
-            return rg_float;
-        }
-    }
-
-    //FIXME: Read FLAC ReplayGain (no more urgent since getting replayGain from server)
-    //=> using jaudiotagger 2.2.4 instead of 2.2.6 to avoid : java.lang.NoSuchMethodError: ...
-    //https://bitbucket.org/ijabz/jaudiotagger/issues/149/some-nio-classes-are-unavailable-while
-    //=> but 2.2.4 does not (seem to) read FLAC replaygain
-    //=> can a higher version solve the issue ?
-
-    //FIXME: Check if jaudiotagger > 2.2.6 supports REPLAYGAIN tags as generic fields for MP3 (and FLAC)
-    //https://bitbucket.org/ijabz/jaudiotagger/issues/37/add-generic-support-for-reading-writing
-
-    private static GainValues readReplayGainFromID3(File path) {
-        GainValues gv = new GainValues();
-        try {
-            MP3File mp3file = (MP3File) AudioFileIO.read(path);
-            AbstractID3v2Tag v2tag = mp3file.getID3v2Tag();
-
-            Iterator<Object> i = v2tag.getFrameOfType("TXXX");
-            while (i.hasNext()) {
-                Object obj = i.next();
-                if (obj instanceof AbstractID3v2Frame) {
-                    AbstractTagFrameBody af = ((AbstractID3v2Frame) obj).getBody();
-                    if (af instanceof FrameBodyTXXX) {
-                        FrameBodyTXXX fb = (FrameBodyTXXX) af; //NON-NLS
-                        switch (fb.getDescription().toUpperCase()) {
-                            case "REPLAYGAIN_TRACK_GAIN": //NON-NLS
-                                gv.trackGain = getFloatFromString(fb.getTextWithoutTrailingNulls());
-                                break; //NON-NLS
-                            case "REPLAYGAIN_ALBUM_GAIN": //NON-NLS
-                                gv.albumGain = getFloatFromString(fb.getTextWithoutTrailingNulls());
-                                break; //NON-NLS
-                            case "REPLAYGAIN_ALBUM_PEAK": //NON-NLS
-                                gv.albumPeak = getFloatFromString(fb.getTextWithoutTrailingNulls()); //NON-NLS
-                                break; //NON-NLS
-                            case "REPLAYGAIN_TRACK_PEAK": //NON-NLS
-                                gv.trackPeak = getFloatFromString(fb.getTextWithoutTrailingNulls()); //NON-NLS
-                                break;
-                            case "MP3GAIN_MINMAX": //NON-NLS
-                                gv.MP3GAIN_MINMAX = fb.getTextWithoutTrailingNulls();
-                                break; //NON-NLS
-                            case "MP3GAIN_ALBUM_MINMAX": //NON-NLS
-                                gv.MP3GAIN_ALBUM_MINMAX = fb.getTextWithoutTrailingNulls();
-                                break; //NON-NLS
-                            case "MP3GAIN_UNDO": //NON-NLS
-                                gv.MP3GAIN_UNDO = fb.getTextWithoutTrailingNulls();
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-            }
-        } catch (NoSuchMethodError | CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException ex) {
-            //FIXME: Same NoSuchMethodError problem as with FLAC ?
-            //Not tested but catching NoSuchMethodError as it should be the same
-            Logger.getLogger(ReplayGain.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return gv;
-    }
-
 }

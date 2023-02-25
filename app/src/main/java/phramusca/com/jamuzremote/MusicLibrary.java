@@ -395,7 +395,7 @@ public class MusicLibrary {
             values.put(COL_TRACKS_PATH_MODIF_DATE, HelperDateTime.formatUTCtoSqlUTC(track.getPathModifDate()));
             values.put(COL_TRACKS_PATH_MB_ID, track.getPathMbId());
             values.put(COL_TRACKS_COMMENT, track.getComment());
-            ReplayGain.GainValues gainValues = track.getReplayGain(false);
+            ReplayGain.GainValues gainValues = track.getReplayGain();
             values.put(COL_TRACKS_TRACK_GAIN, gainValues.getTrackGain());
             values.put(COL_TRACKS_ALBUM_GAIN, gainValues.getAlbumGain());
         }
