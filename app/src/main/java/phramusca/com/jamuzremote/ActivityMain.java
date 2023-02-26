@@ -313,15 +313,7 @@ public class ActivityMain extends AppCompatActivity {
                 getString(R.string.mainWelcomeYear), getString(R.string.applicationName),
                 "welcomeHash", //Warning: "welcomeHash" value has a meaning
                 "---");
-        displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
-        if(displayedTrack==null) {
-            displayedTrack = localTrack;
-        }
-        displayTrack();
-        MediaMetadataCompat metadata = mediaController.getMetadata();
-        if(metadata!=null) {
-            setSeekBarPosition(mediaController.getPlaybackState(), (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
-        }
+        displayPlayingTrack();
     }
 
     private final MediaControllerCompat.Callback mediaControllerCallback = new MediaControllerCompat.Callback() {
@@ -2303,6 +2295,18 @@ public class ActivityMain extends AppCompatActivity {
                 prettyTime.format(track.getAddedDate()));
     }
 
+    private void displayPlayingTrack() {
+        displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
+        if(displayedTrack==null) {
+            displayedTrack = localTrack;
+        }
+        displayTrack();
+        MediaMetadataCompat metadata = MediaMetadataCompat.fromMediaMetadata(getMediaController().getMetadata());
+        if(metadata!=null) {
+            setSeekBarPosition(PlaybackStateCompat.fromPlaybackState(getMediaController().getPlaybackState()), (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+        }
+    }
+
     private void displayTrack() {
         if (displayedTrack != null) {
             runOnUiThread(() -> {
@@ -2443,8 +2447,7 @@ public class ActivityMain extends AppCompatActivity {
             }
             enableClientRemote(buttonRemote);
             setupLocalPlaylistSpinner();
-            displayedTrack = localTrack;
-            displayTrack();
+            runOnUiThread(() -> displayPlayingTrack());
         }
     }
 
