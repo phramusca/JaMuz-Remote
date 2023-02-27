@@ -49,10 +49,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteStatement;
+import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
 import java.io.File;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -86,20 +88,22 @@ public class MusicLibrary {
         db.close();
     }
 
-    private synchronized int getTrackIdFileRemote(String path) {
+    private synchronized AbstractMap.SimpleEntry<Integer, Date> getTrackIdFileRemote(String path) {
         try (Cursor cursor = db.query(TABLE_TRACKS,
-                new String[]{ COL_TRACKS_ID_REMOTE },
+                new String[]{ COL_TRACKS_ID_REMOTE, COL_TRACKS_MODIF_DATE },
                 COL_TRACKS_PATH + " LIKE \"" + path + "\"", //NON-NLS
                 null, null, null, null)) {
             if (cursor.getCount() == 0) {
-                return -1;
+                return new AbstractMap.SimpleEntry<>(-1, new Date(0));
             }
             cursor.moveToFirst();
-            return cursor.getInt(cursor.getColumnIndexOrThrow(COL_TRACKS_ID_REMOTE));
+            Date modifDate = HelperDateTime.parseSqlUtc(
+                    cursor.getString(cursor.getColumnIndexOrThrow(COL_TRACKS_MODIF_DATE)));
+            return new AbstractMap.SimpleEntry<>(cursor.getInt(cursor.getColumnIndexOrThrow(COL_TRACKS_ID_REMOTE)), modifDate);
         } catch (SQLiteException | IllegalStateException ex) {
             Log.e(TAG, "getTrackIdFileRemote(" + path + ")", ex); //NON-NLS
         }
-        return -1;
+        return new AbstractMap.SimpleEntry<>(-1, new Date(0));
     }
 
     private synchronized int getTrackIdFileRemote(int idFileServer) {
@@ -191,25 +195,27 @@ public class MusicLibrary {
         return new Triplet<>(-1, (long) -1, (long) -1);
     }
 
-    synchronized boolean insertOrUpdateTrack(String absolutePath, Context context, String idPath) {
-        Track track = new Track(absolutePath, idPath);
+    synchronized boolean insertOrUpdateTrack(Uri contentUri, Context context, String idPath, Date dateModified, long size) {
+        Track track = new Track(contentUri.toString(), idPath);
+        track.setModifDate(dateModified);
+        track.setSize(size);
         if (track.read(context) && !NOT_SUPPORTED_FORMATS.contains(track.getFormat())) {
-            return insertOrUpdateTrack(track);
+            return insertOrUpdateTrack(track, dateModified);
         }
         return false;
     }
 
-    synchronized boolean insertOrUpdateTrack(Track track) {
-        int idFileRemote = getTrackIdFileRemote(track.getPath());
+    synchronized boolean insertOrUpdateTrack(Track track, Date dateModified) {
+        AbstractMap.SimpleEntry<Integer, Date> fileRemote = getTrackIdFileRemote(track.getPath());
         boolean result;
-        if (idFileRemote >= 0) {
-            track.setIdFileRemote(idFileRemote);
-            //FIXME, for LOCAL tracks only: update only if file is modified:
-            //based on lastModificationDate and/or size (not on content as longer than updateTrack)
-            Log.d(TAG, "updateTrack " + track.getPath()); //NON-NLS
-            result = updateTrack(track, false);
+        if (fileRemote.getKey() >= 0) {
+            track.setIdFileRemote(fileRemote.getKey());
+            if(dateModified.after(fileRemote.getValue())) {
+                result = updateTrack(track, false);
+            } else {
+                return true;
+            }
         } else {
-            Log.d(TAG, "insertTrack " + track.getPath()); //NON-NLS
             result = insertTrack(track);
         }
         return result;

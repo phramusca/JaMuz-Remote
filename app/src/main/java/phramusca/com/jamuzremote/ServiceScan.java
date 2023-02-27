@@ -13,6 +13,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -115,13 +116,16 @@ public class ServiceScan extends ServiceBase {
                     nbFiles = 0;
                     nbFilesTotal = 0;
                     checkAbort();
-                    processBrowse = new ProcessAbstract("Thread.ActivityMain.browseFS") { //NON-NLS
+                    processBrowse = new ProcessAbstract("Thread.ActivityMain.browse") { //NON-NLS
                         public void run() {
                             try {
                                 browseMediaStore(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
                                 browseMediaStore(MediaStore.Audio.Media.INTERNAL_CONTENT_URI);
-                            } catch (IllegalStateException | InterruptedException e) {
-                                Log.w(TAG, "Thread.ActivityMain.browseFS InterruptedException"); //NON-NLS
+                            } catch (IllegalStateException e) {
+                                Log.e(TAG, "Thread.ActivityMain.browse", e); //NON-NLS
+                                processScan.abort();
+                            } catch (InterruptedException e) {
+                                Log.w(TAG, "Thread.ActivityMain.browse InterruptedException"); //NON-NLS
                                 processScan.abort();
                             }
                         }
@@ -163,7 +167,9 @@ public class ServiceScan extends ServiceBase {
                         MediaStore.Audio.Media.ALBUM_ID,
                         MediaStore.Audio.Media.DATE_ADDED,
                         MediaStore.Audio.Media.DATA,
-                        MediaStore.Audio.Media.IS_MUSIC
+                        MediaStore.Audio.Media.IS_MUSIC,
+                        MediaStore.MediaColumns.DATE_MODIFIED,
+                        MediaStore.MediaColumns.SIZE
                 };
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     if (MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.equals(collection)) {
@@ -185,6 +191,8 @@ public class ServiceScan extends ServiceBase {
                 );
                 int idColumnId = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
                 int albumIdColumnId = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID);
+                int dateModifiedColumnId = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_MODIFIED);
+                int sizeColumnId = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE);
                 nbFilesTotal = cursor.getCount();
                 while(cursor.moveToNext())
                 {
@@ -192,10 +200,12 @@ public class ServiceScan extends ServiceBase {
                     long id = cursor.getLong(idColumnId);
                     Uri contentUri = ContentUris.withAppendedId(collection, id);
                     long albumId = cursor.getLong(albumIdColumnId);
+                    Date dateModified = new Date(cursor.getLong(dateModifiedColumnId)*1000);
+                    long size = cursor.getLong(sizeColumnId);
                     //We could have used track metadata from MediaStore instead of reading file
                     // but not all fields are available depending on android version
-                    HelperLibrary.musicLibrary.insertOrUpdateTrack(contentUri.toString(),
-                            getApplicationContext(), "MediaStore_" + albumId);
+                    HelperLibrary.musicLibrary.insertOrUpdateTrack(contentUri,
+                            getApplicationContext(), "MediaStore_" + albumId, dateModified, size);
                     notifyScan(getString(R.string.scanNotifyScanning), 1);
                 }
                 cursor.close();
