@@ -7,6 +7,7 @@ import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -211,11 +212,6 @@ public class Track implements Serializable {
                 mex.setDataSource(context, Uri.parse(path), null);
                 mmr.setDataSource(context, Uri.parse(path));
                 bitmap = readCover(mmr);
-                //TODO: Set those:
-//                File file = new File(path);
-//                size=file.length();
-//                modifDate=new Date(file.lastModified());
-//                pathModifDate=new Date(Objects.requireNonNull(folder).lastModified());
             } else {
                 File file = new File(path);
                 size=file.length();
@@ -487,6 +483,10 @@ public class Track implements Serializable {
 
     public Date getLastPlayed() {
         return lastPlayed;
+    }
+
+    public void setModifDate(Date modifDate) {
+        this.modifDate = modifDate;
     }
 
     public enum Status {
