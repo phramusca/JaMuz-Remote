@@ -907,7 +907,7 @@ public class ActivityMain extends AppCompatActivity {
         if (isRemoteConnected()) {
             clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
         } else {
-            displayedTrack.update();
+            displayedTrack.updateRating(Math.round(rating));
             displayTrackDetails();
             RepoAlbums.reset();
         }

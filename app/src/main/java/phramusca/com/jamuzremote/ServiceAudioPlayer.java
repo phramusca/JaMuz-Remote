@@ -209,10 +209,7 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
             if(displayedTrack!=null) {
                 new Thread() {
                     public void run() {
-                        // Update LastPlayed and increase playCounter of current track
-                        displayedTrack.setPlayCounter(displayedTrack.getPlayCounter() + 1);
-                        displayedTrack.setLastPlayed(new Date());
-                        displayedTrack.update();
+                        displayedTrack.updatePlayCounterAndLastPlayed();
                     }
                 }.start();
             }

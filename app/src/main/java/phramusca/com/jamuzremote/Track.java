@@ -598,12 +598,6 @@ public class Track implements Serializable {
         return null;
     }
 
-    //FIXME: Do not update all, only requested fields
-    public boolean update() {
-        return HelperLibrary.musicLibrary != null
-            && HelperLibrary.musicLibrary.updateTrack(this, false);
-    }
-
     /**
      * @return boolean
      */
@@ -649,6 +643,25 @@ public class Track implements Serializable {
         if (HelperLibrary.musicLibrary != null) {
             setGenre(genre);
             HelperLibrary.musicLibrary.updateGenre(this);
+            RepoAlbums.reset();
+        }
+        return false;
+    }
+
+    public boolean updateRating(int rating) {
+        if (HelperLibrary.musicLibrary != null) {
+            setRating(rating);
+            HelperLibrary.musicLibrary.updateRating(this);
+            RepoAlbums.reset();
+        }
+        return false;
+    }
+
+    public boolean updatePlayCounterAndLastPlayed() {
+        if (HelperLibrary.musicLibrary != null) {
+            setPlayCounter(getPlayCounter() + 1);
+            setLastPlayed(new Date());
+            HelperLibrary.musicLibrary.updatePlayCounterAndLastPlayed(this);
             RepoAlbums.reset();
         }
         return false;
