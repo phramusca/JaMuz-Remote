@@ -88,7 +88,7 @@ public class MusicLibrary {
 
     private synchronized int getTrackIdFileRemote(String path) {
         try (Cursor cursor = db.query(TABLE_TRACKS,
-                new String[]{COL_TRACKS_ID_REMOTE},
+                new String[]{ COL_TRACKS_ID_REMOTE },
                 COL_TRACKS_PATH + " LIKE \"" + path + "\"", //NON-NLS
                 null, null, null, null)) {
             if (cursor.getCount() == 0) {
@@ -104,7 +104,7 @@ public class MusicLibrary {
 
     private synchronized int getTrackIdFileRemote(int idFileServer) {
         try (Cursor cursor = db.query(TABLE_TRACKS,
-                new String[]{COL_TRACKS_ID_REMOTE},
+                new String[]{ COL_TRACKS_ID_REMOTE },
                 COL_TRACKS_ID_SERVER + "=" + idFileServer,
                 null, null, null, null)) {
             if (cursor.getCount() == 0) {
@@ -481,7 +481,7 @@ public class MusicLibrary {
 
     List<String> getGenres() {
         List<String> genres = new ArrayList<>();
-        Cursor cursor = db.rawQuery("SELECT "+COL_GENRE_VALUE+" FROM "+TABLE_GENRE+" ORDER BY "+COL_GENRE_VALUE+"", new String[]{}); //NON-NLS
+        Cursor cursor = db.query(TABLE_GENRE, new String[]{ COL_GENRE_VALUE },"",null, null, null, COL_GENRE_VALUE);
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 genres.add(cursor.getString(0));
@@ -495,7 +495,7 @@ public class MusicLibrary {
 
     public Map<Integer, String> getTags() {
         Map<Integer, String> tags = new LinkedHashMap<>();
-        Cursor cursor = db.rawQuery("SELECT "+COL_TAG_ID+", "+COL_TAG_VALUE+" FROM "+TABLE_TAG+" ORDER BY "+COL_TAG_VALUE+"", new String[]{}); //NON-NLS
+        Cursor cursor = db.query(TABLE_TAG, new String[]{ COL_TAG_ID, COL_TAG_VALUE },"",null, null, null, COL_TAG_VALUE);
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 tags.put(cursor.getInt(0), cursor.getString(1));
@@ -574,7 +574,7 @@ public class MusicLibrary {
  //NON-NLS
     private synchronized int getIdTag(String tag) { //NON-NLS
         int idTag = -1;
-        try (Cursor cursor = db.query(TABLE_TAG, null, COL_TAG_VALUE+"=?", //NON-NLS //NON-NLS
+        try (Cursor cursor = db.query(TABLE_TAG, new String[]{ COL_TAG_ID }, COL_TAG_VALUE+"=?", //NON-NLS //NON-NLS
                 new String[]{tag}, "", "", "")) {
             if (cursor.getCount() > 0) { //NON-NLS
                 cursor.moveToFirst();
