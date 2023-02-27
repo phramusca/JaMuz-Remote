@@ -614,6 +614,33 @@ public class MusicLibrary {
         return -1;
     }
 
+    synchronized int updateRating(Track track) {
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COL_TRACKS_RATING, track.getRating());
+            return db.update(TABLE_TRACKS, //NON-NLS
+                    values,
+                    COL_TRACKS_ID_REMOTE + " = " + track.getIdFileRemote(), null);
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "updateRating(" + track.getIdFileRemote() + ")", ex); //NON-NLS //NON-NLS
+        }
+        return -1;
+    }
+
+    synchronized int updatePlayCounterAndLastPlayed(Track track) {
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COL_TRACKS_PLAY_COUNTER, track.getPlayCounter());
+            values.put(COL_TRACKS_LAST_PLAYED, track.getFormattedLastPlayed());
+            return db.update(TABLE_TRACKS, //NON-NLS
+                    values,
+                    COL_TRACKS_ID_REMOTE + " = " + track.getIdFileRemote(), null);
+        } catch (SQLiteException | IllegalStateException ex) {
+            Log.e(TAG, "updatePlayCounterAndLastPlayed(" + track.getIdFileRemote() + ")", ex); //NON-NLS //NON-NLS
+        }
+        return -1;
+    }
+
     synchronized boolean addGenre(String genre) { //NON-NLS
         try {
             //Add the genre in db if it does not exist //NON-NLS //NON-NLS //NON-NLS
