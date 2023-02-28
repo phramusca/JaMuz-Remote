@@ -9,6 +9,8 @@ import java.util.Map;
  * Created by raph on 10/06/17.
  */
 
+//FIXME: User can add add/edit/delete tags => sync with server
+
 public final class RepoTags {
 
     private static Map<Integer, String> tags = new HashMap<>();
