@@ -206,4 +206,5 @@
     <string name="settingsRadioThemeGrey">Gris</string>
     <string name="settingsRadioThemeYellow">Jaune</string>
     <string name="settingsRadioThemeBlueGrey">Bleu Gris</string>
+    <string name="labelServer">Serveur :</string>
 </resources>

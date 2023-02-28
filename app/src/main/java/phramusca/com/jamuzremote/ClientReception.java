@@ -88,8 +88,8 @@ public class ClientReception extends ProcessAbstract {
             if (ex.getCause() instanceof ErrnoException) {
                 int errno = ((ErrnoException) ex.getCause()).errno;
                 isENOSPC = errno == OsConstants.ENOSPC;
-                //FIXME: sync and merge: Manage errors like ENOENT (No such file or directory)") : SyncStatus{status=CONNECTED, nbRetries=0}
-                //Less chance to happen since "SENDING_FILE" is not more received (reaplaced by API)
+                //TODO, maybe: sync and merge: Manage errors like ENOENT (No such file or directory)") : SyncStatus{status=CONNECTED, nbRetries=0}
+                // => Less chance to happen since "SENDING_FILE" is not more received (replaced by API)
                 //5-13 21:28:32.452 I/phramusca.com.jamuzremote.ClientSync:
                 // onDisconnected("/storage/extSdCard/Android/data/org.phramusca.jamuz/files/Autres/DJ Little Tune/
                 // New Remix Maquette 2007 /02 track2 .mp3:

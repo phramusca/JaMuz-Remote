@@ -206,5 +206,6 @@
     <string name="settingsRadioThemeGrey" tools:ignore="MissingTranslation">Grey</string>
     <string name="settingsRadioThemeYellow" tools:ignore="MissingTranslation">Yellow</string>
     <string name="settingsRadioThemeBlueGrey" tools:ignore="MissingTranslation">Blue Grey</string>
+    <string name="labelServer" tools:ignore="MissingTranslation">Server:</string>
 
 </resources>

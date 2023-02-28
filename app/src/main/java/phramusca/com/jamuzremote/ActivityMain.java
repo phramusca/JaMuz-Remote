@@ -2420,8 +2420,10 @@ public class ActivityMain extends AppCompatActivity {
                         }
                         break;
                     case "fileInfoInt":
-                        displayedTrack = new Track(jObject, new File(""), false);
-                        //FIXME: Display Playlist name and nbFiles
+                        String playlistInfo = jObject.getString("playlistInfo"); //NON-NLS //NON-NLS
+                        JSONObject fileInfoIntObject = (JSONObject) jObject.get("fileInfoInt");
+                        displayedTrack = new Track(fileInfoIntObject, new File(""), false);
+                        displayedTrack.setSource(getString(R.string.labelServer) + " " + playlistInfo);
                         displayTrack();
                         break;
                 }
