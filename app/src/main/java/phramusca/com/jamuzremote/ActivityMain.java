@@ -341,12 +341,15 @@ public class ActivityMain extends AppCompatActivity {
     private ValueAnimator mProgressAnimator;
     private int quarterPosition = 0;
 
-    private void setSeekBarPosition(PlaybackStateCompat state, int duration) {
-        // If there's an ongoing animation, stop it now.
+    private void stopSeekBarAnimator() {
         if (mProgressAnimator != null) {
             mProgressAnimator.cancel();
             mProgressAnimator = null;
         }
+    }
+
+    private void setSeekBarPosition(PlaybackStateCompat state, int duration) {
+        stopSeekBarAnimator();
         final int progress = (int) state.getPosition();
         setSeekBar(progress, duration);
         if (state.getState() == PlaybackStateCompat.STATE_PLAYING) {
@@ -547,6 +550,7 @@ public class ActivityMain extends AppCompatActivity {
                     clientRemote = new ClientRemote(clientInfo, new ListenerRemote(), this);
                     new Thread() {
                         public void run() {
+                            runOnUiThread(() -> stopSeekBarAnimator());
                             enableRemote(!clientRemote.connect());
                         }
                     }.start();
@@ -2364,6 +2368,8 @@ public class ActivityMain extends AppCompatActivity {
             if (maxWidth <= 0) {
                 maxWidth = RepoCovers.IconSize.COVER.getSize();
             }
+            //FIXME: Do not ask more than X times (to be defined) OR send a NO_COVER message somehow
+            //Otherwise it will ask forever in case of a bad cover from server (no cover), until a new cover is requested
             if (clientRemote != null) {
                 clientRemote.send("sendCover" + maxWidth);
             }
@@ -2415,15 +2421,15 @@ public class ActivityMain extends AppCompatActivity {
                     case "currentPosition":
                         final int currentPosition = jObject.getInt("currentPosition"); //NON-NLS
                         final int total = jObject.getInt("total"); //NON-NLS
-                        if (isRemoteConnected()) {
-                            setSeekBar(currentPosition * 1000, total * 1000);
-                        }
+                        setSeekBar(currentPosition * 1000, total * 1000);
                         break;
                     case "fileInfoInt":
                         String playlistInfo = jObject.getString("playlistInfo"); //NON-NLS //NON-NLS
                         JSONObject fileInfoIntObject = (JSONObject) jObject.get("fileInfoInt");
                         displayedTrack = new Track(fileInfoIntObject, new File(""), false);
                         displayedTrack.setSource(getString(R.string.labelServer) + " " + playlistInfo);
+                        int startPosition = jObject.getInt("currentPosition");
+                        setSeekBar(startPosition * 1000, displayedTrack.getLength() * 1000);
                         displayTrack();
                         break;
                 }
