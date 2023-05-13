@@ -104,11 +104,11 @@ public class AdapterCursorAlbumTrack extends AdapterCursor<AdapterLoad.UserViewH
         userViewHolder.item_line2.setText(track.getArtist());
         if(searchQuery!=null && !searchQuery.isEmpty()) {
             userViewHolder.item_line1.setTextToHighlight(searchQuery);
-            userViewHolder.item_line1.setTextHighlightColor(R.attr.colorAccent);
+            HelperGui.setTextHighlightColor(parent.getContext(), R.attr.colorAccent, userViewHolder.item_line1);
             userViewHolder.item_line1.setCaseInsensitive(true);
             userViewHolder.item_line1.highlight();
             userViewHolder.item_line2.setTextToHighlight(searchQuery);
-            userViewHolder.item_line2.setTextHighlightColor(R.attr.colorAccent);
+            HelperGui.setTextHighlightColor(parent.getContext(), R.attr.colorAccent, userViewHolder.item_line2);
             userViewHolder.item_line2.setCaseInsensitive(true);
             userViewHolder.item_line2.highlight();
         }

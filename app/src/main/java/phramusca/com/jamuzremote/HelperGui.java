@@ -12,6 +12,8 @@ import android.widget.TextView;
 import androidx.annotation.ColorInt;
 import androidx.appcompat.widget.AppCompatButton;
 
+import com.athkalia.emphasis.EmphasisTextView;
+
 public class HelperGui {
     public static void setColor(Context context, int resId, View view) {
         TypedValue typedValue = new TypedValue();
@@ -34,6 +36,20 @@ public class HelperGui {
             }
         } else {
             view.setTextColor(typedValue.data);
+        }
+    }
+
+    public static void setTextHighlightColor(Context context, int resId, EmphasisTextView view) {
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = context.getTheme();
+        theme.resolveAttribute(resId, typedValue, true);
+        if (typedValue.resourceId != 0) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                view.setTextHighlightColor(String.format("#%06X",
+                        (0xFFFFFF & context.getResources().getColor(typedValue.resourceId, theme))));
+            }
+        } else {
+            view.setTextHighlightColor(String.format("#%06X", (0xFFFFFF & typedValue.data)));
         }
     }
 }
