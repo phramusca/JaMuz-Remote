@@ -1324,7 +1324,7 @@ public class ActivityMain extends AppCompatActivity {
             if (hasFocus) {
                 setDimMode(toggleButtonDimMode.isChecked());
             } else {
-                setDimMode(true);
+                setDimMode(false);
             }
         } catch (Exception ex) {
             Log.e(TAG, "onWindowFocusChanged", ex);
