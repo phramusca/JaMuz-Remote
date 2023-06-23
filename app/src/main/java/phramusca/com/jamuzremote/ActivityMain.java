@@ -35,6 +35,7 @@ import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.speech.tts.Voice;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -96,6 +97,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -471,7 +473,19 @@ public class ActivityMain extends AppCompatActivity {
 
         textToSpeech = new TextToSpeech(getApplicationContext(), status -> {
             if (status != TextToSpeech.ERROR) {
-                textToSpeech.setLanguage(textToSpeech.getDefaultVoice().getLocale());
+                Locale locale = null;
+                Voice defaultVoice = textToSpeech.getDefaultVoice();
+                if(defaultVoice==null) {
+                    Voice voice = (Voice) textToSpeech.getVoices().toArray()[0];
+                    if(voice!=null) {
+                        locale = voice.getLocale();
+                    }
+                } else {
+                    locale = defaultVoice.getLocale();
+                }
+                if(locale!=null) {
+                    textToSpeech.setLanguage(locale);
+                }
             }
         });
         textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
