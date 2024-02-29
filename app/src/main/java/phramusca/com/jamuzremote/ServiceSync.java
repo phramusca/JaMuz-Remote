@@ -8,6 +8,8 @@ import android.net.wifi.WifiManager;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.launchdarkly.eventsource.MessageEvent;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,6 +29,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * @author phramusca
@@ -98,70 +101,116 @@ public class ServiceSync extends ServiceBase {
                         .build();
                 clientInfo.getBodyString(request, client); //NON-NLS
 
-                long startTime = System.currentTimeMillis();
-                long startTimeTotal = startTime;
-                helperNotification.notifyBar(notificationSync, getString(R.string.syncLabelReadingList));
-                checkAbort();
-                RepoSync.read();
-                Log.w(TAG, "RepoSync.read() :"+(System.currentTimeMillis() - startTime)+" ms");
+//https://medium.com/@anugrahasb1997/implementing-server-sent-events-sse-in-android-with-okhttp-eventsource-226dc9b2599d
+//https://github.com/Aarkan1/java-express?tab=readme-ov-file#server-sent-events
+//FIXME ! implementation 'com.launchdarkly:okhttp-eventsource:1.0.0' => update until Duration / API 26
+//TODO: Or Switch to https://github.com/square/okhttp/tree/master/okhttp-sse when ready
 
-                checkAbort();
-                getTags();
 
-                checkAbort();
-                getGenres();
+                SSEClient sseClient = new SSEClient();
 
-                startTime = System.currentTimeMillis();
-                checkAbort();
-                requestMerge();
-                Log.w(TAG, "requestMerge() :"+(System.currentTimeMillis() - startTime)+" ms");
+                sseClient.initSse(new SSEHandler() {
+                    @Override
+                    public void onSSEConnectionOpened() {
+                        System.out.println("SSE connection opened");
+                    }
 
-                startTime = System.currentTimeMillis();
-                checkAbort();
-                checkFiles(Track.Status.NEW);
-                Log.w(TAG, "checkFiles(Track.Status.NEW) :"+(System.currentTimeMillis() - startTime)+" ms");
+                    @Override
+                    public void onSSEConnectionClosed() {
+                        System.out.println("SSE connection closed");
+                    }
+                    @Override
+                    public void onSSEEventReceived(String event, MessageEvent messageEvent) {
+                        System.out.println("SSE received: " + messageEvent.getData());
+                    }
 
-                startTime = System.currentTimeMillis();
-                checkAbort();
+                    @Override
+                    public void onSSEError(Throwable t) {
+                        System.err.println("Error occurred: " + t.getMessage());
+                    }
+                }, clientInfo.getUrlBuilder("sse").build().uri());
 
-                Map<Track, Integer> map = new HashMap<>();
-                for (Track track : RepoSync.getDownloadList()) {
-                    map.put(track, -1);
-                }
-                startDownloads(map);
-                Log.w(TAG, "startDownloads(RepoSync.getDownloadList()) :"+(System.currentTimeMillis() - startTime)+" ms");
+                HttpUrl.Builder urlBuilderPlay = clientInfo.getUrlBuilder("play"); //NON-NLS
+                Request requestPlay = clientInfo.getRequestBuilder(urlBuilderPlay)
+                        .addHeader("idFile", "1361")
+                        .build();
 
-                startTime = System.currentTimeMillis();
-                checkFiles(Track.Status.INFO);
-                Log.w(TAG, "checkFiles(Track.Status.INFO) :"+(System.currentTimeMillis() - startTime)+" ms");
+                String body = clientInfo.getBodyString(requestPlay, client); //NON-NLS
 
-                startTime = System.currentTimeMillis();
-                //Remove files in db but not received from server
-                helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRemovingDeleted));
-                List<Track> trackList = RepoSync.getNotSyncedList();
-                Log.w(TAG, "RepoSync.getNotSyncedList() :"+(System.currentTimeMillis() - startTime)+" ms");
-                int nbTracks = trackList.size();
-                int i = 0;
-                for (Track track : trackList) {
-                    checkAbort();
-                    i++;
-                    helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRemovingDeleted), 10, i, nbTracks);
-                    File file = new File(track.getPath());
-                    //noinspection ResultOfMethodCallIgnored
-                    file.delete();
-                    HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
-                }
-                Log.w(TAG, "TOTAL Sync :"+(System.currentTimeMillis() - startTimeTotal)+" ms");
 
-                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncCheckComplete), -1));
-                if (processDownload != null) {
-                    processDownload.join();
-                    String finalToastMsg = processDownload.checkCompleted();
-                    stopSync(finalToastMsg, -1);
-                } else {
-                    stopSync(getString(R.string.serviceSyncNotifySyncCompleteNoDownloads), -1);
-                }
-                RepoAlbums.reset();
+
+
+
+
+
+
+
+
+
+//                long startTime = System.currentTimeMillis();
+//                long startTimeTotal = startTime;
+//                helperNotification.notifyBar(notificationSync, getString(R.string.syncLabelReadingList));
+//                checkAbort();
+//                RepoSync.read();
+//                Log.w(TAG, "RepoSync.read() :"+(System.currentTimeMillis() - startTime)+" ms");
+//
+//                checkAbort();
+//                getTags();
+//
+//                checkAbort();
+//                getGenres();
+//
+//                startTime = System.currentTimeMillis();
+//                checkAbort();
+//                requestMerge();
+//                Log.w(TAG, "requestMerge() :"+(System.currentTimeMillis() - startTime)+" ms");
+//
+//                startTime = System.currentTimeMillis();
+//                checkAbort();
+//                checkFiles(Track.Status.NEW);
+//                Log.w(TAG, "checkFiles(Track.Status.NEW) :"+(System.currentTimeMillis() - startTime)+" ms");
+//
+//                startTime = System.currentTimeMillis();
+//                checkAbort();
+//
+//                Map<Track, Integer> map = new HashMap<>();
+//                for (Track track : RepoSync.getDownloadList()) {
+//                    map.put(track, -1);
+//                }
+//                startDownloads(map);
+//                Log.w(TAG, "startDownloads(RepoSync.getDownloadList()) :"+(System.currentTimeMillis() - startTime)+" ms");
+//
+//                startTime = System.currentTimeMillis();
+//                checkFiles(Track.Status.INFO);
+//                Log.w(TAG, "checkFiles(Track.Status.INFO) :"+(System.currentTimeMillis() - startTime)+" ms");
+//
+//                startTime = System.currentTimeMillis();
+//                //Remove files in db but not received from server
+//                helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRemovingDeleted));
+//                List<Track> trackList = RepoSync.getNotSyncedList();
+//                Log.w(TAG, "RepoSync.getNotSyncedList() :"+(System.currentTimeMillis() - startTime)+" ms");
+//                int nbTracks = trackList.size();
+//                int i = 0;
+//                for (Track track : trackList) {
+//                    checkAbort();
+//                    i++;
+//                    helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRemovingDeleted), 10, i, nbTracks);
+//                    File file = new File(track.getPath());
+//                    //noinspection ResultOfMethodCallIgnored
+//                    file.delete();
+//                    HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
+//                }
+//                Log.w(TAG, "TOTAL Sync :"+(System.currentTimeMillis() - startTimeTotal)+" ms");
+//
+//                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncCheckComplete), -1));
+//                if (processDownload != null) {
+//                    processDownload.join();
+//                    String finalToastMsg = processDownload.checkCompleted();
+//                    stopSync(finalToastMsg, -1);
+//                } else {
+//                    stopSync(getString(R.string.serviceSyncNotifySyncCompleteNoDownloads), -1);
+//                }
+//                RepoAlbums.reset();
 
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error ProcessSync", e); //NON-NLS
