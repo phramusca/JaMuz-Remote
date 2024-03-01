@@ -8,8 +8,6 @@ import android.net.wifi.WifiManager;
 import android.os.PowerManager;
 import android.util.Log;
 
-import com.launchdarkly.eventsource.MessageEvent;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,7 +27,6 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 
 /**
  * @author phramusca
@@ -37,7 +34,7 @@ import okhttp3.Response;
 public class ServiceSync extends ServiceBase {
 
     private static final String TAG = ServiceSync.class.getName();
-    public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE_SCAN_REMOTE"; //NON-NLS
+    public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE_SYNC"; //NON-NLS
 
     private DownloadProcess processDownload;
     private ClientInfo clientInfo;
@@ -101,116 +98,70 @@ public class ServiceSync extends ServiceBase {
                         .build();
                 clientInfo.getBodyString(request, client); //NON-NLS
 
-//https://medium.com/@anugrahasb1997/implementing-server-sent-events-sse-in-android-with-okhttp-eventsource-226dc9b2599d
-//https://github.com/Aarkan1/java-express?tab=readme-ov-file#server-sent-events
-//FIXME ! implementation 'com.launchdarkly:okhttp-eventsource:1.0.0' => update until Duration / API 26
-//TODO: Or Switch to https://github.com/square/okhttp/tree/master/okhttp-sse when ready
+                long startTime = System.currentTimeMillis();
+                long startTimeTotal = startTime;
+                helperNotification.notifyBar(notificationSync, getString(R.string.syncLabelReadingList));
+                checkAbort();
+                RepoSync.read();
+                Log.w(TAG, "RepoSync.read() :"+(System.currentTimeMillis() - startTime)+" ms");
 
+                checkAbort();
+                getTags();
 
-                SSEClient sseClient = new SSEClient();
+                checkAbort();
+                getGenres();
 
-                sseClient.initSse(new SSEHandler() {
-                    @Override
-                    public void onSSEConnectionOpened() {
-                        System.out.println("SSE connection opened");
-                    }
+                startTime = System.currentTimeMillis();
+                checkAbort();
+                requestMerge();
+                Log.w(TAG, "requestMerge() :"+(System.currentTimeMillis() - startTime)+" ms");
 
-                    @Override
-                    public void onSSEConnectionClosed() {
-                        System.out.println("SSE connection closed");
-                    }
-                    @Override
-                    public void onSSEEventReceived(String event, MessageEvent messageEvent) {
-                        System.out.println("SSE received: " + messageEvent.getData());
-                    }
+                startTime = System.currentTimeMillis();
+                checkAbort();
+                checkFiles(Track.Status.NEW);
+                Log.w(TAG, "checkFiles(Track.Status.NEW) :"+(System.currentTimeMillis() - startTime)+" ms");
 
-                    @Override
-                    public void onSSEError(Throwable t) {
-                        System.err.println("Error occurred: " + t.getMessage());
-                    }
-                }, clientInfo.getUrlBuilder("sse").build().uri());
+                startTime = System.currentTimeMillis();
+                checkAbort();
 
-                HttpUrl.Builder urlBuilderPlay = clientInfo.getUrlBuilder("play"); //NON-NLS
-                Request requestPlay = clientInfo.getRequestBuilder(urlBuilderPlay)
-                        .addHeader("idFile", "1361")
-                        .build();
+                Map<Track, Integer> map = new HashMap<>();
+                for (Track track : RepoSync.getDownloadList()) {
+                    map.put(track, -1);
+                }
+                startDownloads(map);
+                Log.w(TAG, "startDownloads(RepoSync.getDownloadList()) :"+(System.currentTimeMillis() - startTime)+" ms");
 
-                String body = clientInfo.getBodyString(requestPlay, client); //NON-NLS
+                startTime = System.currentTimeMillis();
+                checkFiles(Track.Status.INFO);
+                Log.w(TAG, "checkFiles(Track.Status.INFO) :"+(System.currentTimeMillis() - startTime)+" ms");
 
+                startTime = System.currentTimeMillis();
+                //Remove files in db but not received from server
+                helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRemovingDeleted));
+                List<Track> trackList = RepoSync.getNotSyncedList();
+                Log.w(TAG, "RepoSync.getNotSyncedList() :"+(System.currentTimeMillis() - startTime)+" ms");
+                int nbTracks = trackList.size();
+                int i = 0;
+                for (Track track : trackList) {
+                    checkAbort();
+                    i++;
+                    helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRemovingDeleted), 10, i, nbTracks);
+                    File file = new File(track.getPath());
+                    //noinspection ResultOfMethodCallIgnored
+                    file.delete();
+                    HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
+                }
+                Log.w(TAG, "TOTAL Sync :"+(System.currentTimeMillis() - startTimeTotal)+" ms");
 
-
-
-
-
-
-
-
-
-
-//                long startTime = System.currentTimeMillis();
-//                long startTimeTotal = startTime;
-//                helperNotification.notifyBar(notificationSync, getString(R.string.syncLabelReadingList));
-//                checkAbort();
-//                RepoSync.read();
-//                Log.w(TAG, "RepoSync.read() :"+(System.currentTimeMillis() - startTime)+" ms");
-//
-//                checkAbort();
-//                getTags();
-//
-//                checkAbort();
-//                getGenres();
-//
-//                startTime = System.currentTimeMillis();
-//                checkAbort();
-//                requestMerge();
-//                Log.w(TAG, "requestMerge() :"+(System.currentTimeMillis() - startTime)+" ms");
-//
-//                startTime = System.currentTimeMillis();
-//                checkAbort();
-//                checkFiles(Track.Status.NEW);
-//                Log.w(TAG, "checkFiles(Track.Status.NEW) :"+(System.currentTimeMillis() - startTime)+" ms");
-//
-//                startTime = System.currentTimeMillis();
-//                checkAbort();
-//
-//                Map<Track, Integer> map = new HashMap<>();
-//                for (Track track : RepoSync.getDownloadList()) {
-//                    map.put(track, -1);
-//                }
-//                startDownloads(map);
-//                Log.w(TAG, "startDownloads(RepoSync.getDownloadList()) :"+(System.currentTimeMillis() - startTime)+" ms");
-//
-//                startTime = System.currentTimeMillis();
-//                checkFiles(Track.Status.INFO);
-//                Log.w(TAG, "checkFiles(Track.Status.INFO) :"+(System.currentTimeMillis() - startTime)+" ms");
-//
-//                startTime = System.currentTimeMillis();
-//                //Remove files in db but not received from server
-//                helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRemovingDeleted));
-//                List<Track> trackList = RepoSync.getNotSyncedList();
-//                Log.w(TAG, "RepoSync.getNotSyncedList() :"+(System.currentTimeMillis() - startTime)+" ms");
-//                int nbTracks = trackList.size();
-//                int i = 0;
-//                for (Track track : trackList) {
-//                    checkAbort();
-//                    i++;
-//                    helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRemovingDeleted), 10, i, nbTracks);
-//                    File file = new File(track.getPath());
-//                    //noinspection ResultOfMethodCallIgnored
-//                    file.delete();
-//                    HelperLibrary.musicLibrary.deleteTrack(track.getIdFileServer());
-//                }
-//                Log.w(TAG, "TOTAL Sync :"+(System.currentTimeMillis() - startTimeTotal)+" ms");
-//
-//                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncCheckComplete), -1));
-//                if (processDownload != null) {
-//                    processDownload.join();
-//                    String finalToastMsg = processDownload.checkCompleted();
-//                    stopSync(finalToastMsg, -1);
-//                } else {
-//                    stopSync(getString(R.string.serviceSyncNotifySyncCompleteNoDownloads), -1);
-//                }
-//                RepoAlbums.reset();
+                runOnUiThread(() -> helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncCheckComplete), -1));
+                if (processDownload != null) {
+                    processDownload.join();
+                    String finalToastMsg = processDownload.checkCompleted();
+                    stopSync(finalToastMsg, -1);
+                } else {
+                    stopSync(getString(R.string.serviceSyncNotifySyncCompleteNoDownloads), -1);
+                }
+                RepoAlbums.reset();
 
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error ProcessSync", e); //NON-NLS
@@ -222,7 +173,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         private void checkFiles(Track.Status status)
-                throws InterruptedException, ServerException, IOException {
+                throws InterruptedException, ClientInfo.ServerException, IOException {
             int nbFilesInBatch = 500;
             int nbFilesServer = getFilesCount(status);
             String msg = String.format(
@@ -339,7 +290,7 @@ public class ServiceSync extends ServiceBase {
             return newTracks;
         }
 
-        private Integer getFilesCount(Track.Status status) throws IOException, ServerException {
+        private Integer getFilesCount(Track.Status status) throws IOException, ClientInfo.ServerException {
             HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/" + status.name()); //NON-NLS
             urlBuilder.addQueryParameter("getCount", "true"); //NON-NLS
             String body = clientInfo.getBodyString(urlBuilder, client);
@@ -351,7 +302,7 @@ public class ServiceSync extends ServiceBase {
             return Integer.valueOf(body);
         }
 
-        private void getTags() throws IOException, ServerException, JSONException {
+        private void getTags() throws IOException, ClientInfo.ServerException, JSONException {
             String body = clientInfo.getBodyString("tags", client); //NON-NLS
             helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncReceivedTags));
             final JSONObject jObject = new JSONObject(body);
@@ -366,7 +317,7 @@ public class ServiceSync extends ServiceBase {
             sendMessage("setupTags");
         }
 
-        private void getGenres() throws IOException, ServerException, JSONException { //NON-NLS
+        private void getGenres() throws IOException, ClientInfo.ServerException, JSONException { //NON-NLS
             String body = clientInfo.getBodyString("genres", client); //NON-NLS
             helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncReceivedGenres));
             final JSONObject jObject = new JSONObject(body);
@@ -380,7 +331,7 @@ public class ServiceSync extends ServiceBase {
             sendMessage("setupGenres");
         }
 
-        private void requestMerge() throws JSONException, ServerException, IOException {
+        private void requestMerge() throws JSONException, ClientInfo.ServerException, IOException {
             helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncPreparingMerge));
             List<Track> tracks = RepoSync.getMergeList();
             OkHttpClient client = new OkHttpClient.Builder()
@@ -429,12 +380,6 @@ public class ServiceSync extends ServiceBase {
             wifiLock.release();
         }
         super.onDestroy();
-    }
-
-    static class ServerException extends Exception {
-        public ServerException(String errorMessage) {
-            super(errorMessage);
-        } //NON-NLS
     }
 
     public class UserStopServiceReceiver extends BroadcastReceiver {

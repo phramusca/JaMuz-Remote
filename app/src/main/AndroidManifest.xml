@@ -62,6 +62,10 @@
             android:exported="false"
             android:singleUser="false" />
         <service
+            android:name=".ServiceRemote"
+            android:exported="false"
+            android:singleUser="false" />
+        <service
             android:name=".ServiceScan"
             android:exported="false"
             android:singleUser="false" />

@@ -70,7 +70,7 @@ public class DownloadTask extends ProcessAbstract implements Runnable {
             } else {
                 switch (response.code()) { //NON-NLS
                     case 301:
-                        throw new ServiceSync.ServerException(request.header("api-version") + " not supported. " + Objects.requireNonNull(response.body()).string()); //NON-NLS
+                        throw new ClientInfo.ServerException(request.header("api-version") + " not supported. " + Objects.requireNonNull(response.body()).string()); //NON-NLS
                     case 410: //Gone
                         //Transcoded file is not available
                         track.setStatus(Track.Status.ERROR);
@@ -82,7 +82,7 @@ public class DownloadTask extends ProcessAbstract implements Runnable {
                         RepoSync.update(track);
                         break;
                     default:
-                        throw new ServiceSync.ServerException(response.code() + ": " + response.message()); //NON-NLS
+                        throw new ClientInfo.ServerException(response.code() + ": " + response.message()); //NON-NLS
                 }
             }
         } catch (InterruptedException e) {

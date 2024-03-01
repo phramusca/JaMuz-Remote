@@ -14,7 +14,7 @@ import android.widget.TextView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class EmphasisTextView extends TextView implements Emphasis {
+public class EmphasisTextView extends androidx.appcompat.widget.AppCompatTextView implements Emphasis {
 
     private int highlightColor;
 

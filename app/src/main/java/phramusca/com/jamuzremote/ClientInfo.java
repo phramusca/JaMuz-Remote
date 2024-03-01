@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
+import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -45,38 +46,50 @@ public class ClientInfo implements Serializable {
 
     public Request.Builder getRequestBuilder(HttpUrl.Builder urlBuilder) {
         return new Request.Builder()
-                .addHeader("login", getLogin() + "-" + getAppId()) //NON-NLS
-                .addHeader("api-version", "2.0") //NON-NLS
+                .headers(getHeaders())
                 .url(urlBuilder.build());
     }
 
-    public String getBodyString(String url, OkHttpClient client) throws IOException, ServiceSync.ServerException {
+    public Headers getHeaders() {
+        return new Headers.Builder()
+                .add("login", getLogin() + "-" + getAppId()) //NON-NLS
+                .add("api-version", "2.0") //NON-NLS
+                .build();
+    }
+
+    public String getBodyString(String url, OkHttpClient client) throws IOException, ServerException {
         HttpUrl.Builder urlBuilder = getUrlBuilder(url);
         return getBodyString(urlBuilder, client);
     }
 
-    public String getBodyString(HttpUrl.Builder urlBuilder, OkHttpClient client) throws IOException, ServiceSync.ServerException {
+    public String getBodyString(HttpUrl.Builder urlBuilder, OkHttpClient client) throws IOException, ServerException {
         return getBody(urlBuilder, client).string();
     }
 
-    public ResponseBody getBody(HttpUrl.Builder urlBuilder, OkHttpClient client) throws IOException, ServiceSync.ServerException {
+    public ResponseBody getBody(HttpUrl.Builder urlBuilder, OkHttpClient client) throws IOException, ServerException {
         Request request = getRequestBuilder(urlBuilder).build();
         return getBody(request, client);
     }
 
-    public String getBodyString(Request request, OkHttpClient client) throws IOException, ServiceSync.ServerException {
+    public String getBodyString(Request request, OkHttpClient client) throws IOException, ServerException {
         return getBody(request, client).string();
     }
 
-    private ResponseBody getBody(Request request, OkHttpClient client) throws IOException, ServiceSync.ServerException {
+    private ResponseBody getBody(Request request, OkHttpClient client) throws IOException, ServerException {
         Response response = client.newCall(request).execute();
         if (!response.isSuccessful()) {
             if (response.code() == 301) {
-                throw new ServiceSync.ServerException(request.header("api-version") + " not supported. " + Objects.requireNonNull(response.body()).string()); //NON-NLS
+                throw new ServerException(request.header("api-version") + " not supported. " + Objects.requireNonNull(response.body()).string()); //NON-NLS
             }
-            throw new ServiceSync.ServerException(response.code() + ": " + response.message());
+            throw new ServerException(response.code() + ": " + response.message());
         }
         return response.body();
+    }
+
+    static class ServerException extends Exception {
+        public ServerException(String errorMessage) {
+            super(errorMessage);
+        } //NON-NLS
     }
 
     public String getAddress() {

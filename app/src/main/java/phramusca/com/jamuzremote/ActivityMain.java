@@ -556,24 +556,25 @@ public class ActivityMain extends AppCompatActivity {
             buttonRemote.setEnabled(false);
             buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
             if (buttonRemote.getText().equals("1")) {
+                enableRemote(false);
                 ClientInfo clientInfo = null;
                 if (checkWifiConnection()) {
                     clientInfo = getClientInfo(ClientCanal.REMOTE, helperToast);
                 }
                 if (clientInfo != null) {
-                    clientRemote = new ClientRemote(clientInfo, new ListenerRemote(), this);
-                    new Thread() {
-                        public void run() {
-                            runOnUiThread(() -> stopSeekBarAnimator());
-                            enableRemote(!clientRemote.connect());
-                        }
-                    }.start();
+                    if (!isMyServiceRunning(ServiceRemote.class)) {
+                        Intent service = new Intent(getApplicationContext(), ServiceRemote.class);
+                        service.putExtra("clientInfo", clientInfo);
+                        service.putExtra("getAppDataPath", HelperFile.getAudioRootFolder());
+                        startService(service);
+                    }
                 } else {
                     enableRemote(true);
                 }
             } else {
+                Log.i(TAG, "Broadcast(" + ServiceRemote.USER_STOP_SERVICE_REQUEST + ")"); //NON-NLS
+                sendBroadcast(new Intent(ServiceRemote.USER_STOP_SERVICE_REQUEST));
                 enableRemote(true);
-                stopRemote();
             }
         });
 
@@ -886,6 +887,9 @@ public class ActivityMain extends AppCompatActivity {
 
         if (isMyServiceRunning(ServiceSync.class)) {
             enableSync(false);
+        }
+        if (isMyServiceRunning(ServiceRemote.class)) {
+            enableRemote(false);
         }
         setDimMode(toggleButtonDimMode.isChecked());
         checkPermissionsThenScanLibrary();
@@ -1775,6 +1779,8 @@ public class ActivityMain extends AppCompatActivity {
                 case "enableSync":
                     enableSync(true);
                     break;
+                case "enableRemote":
+                    enableRemote(true);
                 case "setupGenres":
                     setupGenres();
                     break;
