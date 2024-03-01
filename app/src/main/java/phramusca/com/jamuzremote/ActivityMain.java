@@ -1,8 +1,8 @@
 package phramusca.com.jamuzremote;
 
+import static phramusca.com.jamuzremote.HelperString.trimTrailingWhitespace;
 import static phramusca.com.jamuzremote.Playlist.Order.PLAYCOUNTER_LASTPLAYED;
 import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
-import static phramusca.com.jamuzremote.HelperString.trimTrailingWhitespace;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
@@ -14,6 +14,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -28,6 +29,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -80,10 +82,8 @@ import com.google.android.flexbox.FlexboxLayout;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.launchdarkly.eventsource.MessageEvent;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
 
 import java.io.File;
@@ -97,7 +97,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -123,6 +122,7 @@ public class ActivityMain extends AppCompatActivity {
     private static final int LISTS_REQUEST_CODE = 60568;
     private static final int SETTINGS_REQUEST_CODE = 23548;
     private static PrettyTime prettyTime;
+    private ServiceRemote serviceRemote;
 
     // GUI elements
     private TextView textViewFileInfo1;
@@ -407,6 +407,27 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            ServiceRemote.MyBinder binder = (ServiceRemote.MyBinder) service;
+            serviceRemote = binder.getService();
+            serviceRemote.registerCallback(new ServiceRemoteCallback() {
+                @Override
+                public void onServiceDataReceived(String event, MessageEvent messageEvent) {
+                    if(event.equals("positionChanged")) {
+                        setSeekBar(Integer.parseInt(messageEvent.getData()), Integer.parseInt(messageEvent.getLastEventId()));
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // Handle disconnection
+        }
+    };
+
     @SuppressLint({"HardwareIds", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -528,7 +549,6 @@ public class ActivityMain extends AppCompatActivity {
         textFileInfo_seekAfter = findViewById(R.id.textFileInfo_seekAfter);
 
 
-
         buttonRemote = findViewById(R.id.button_connect);
         buttonRemote.setOnClickListener(v -> {
             dimOn();
@@ -545,6 +565,7 @@ public class ActivityMain extends AppCompatActivity {
                         Intent service = new Intent(getApplicationContext(), ServiceRemote.class);
                         service.putExtra("clientInfo", clientInfo);
                         service.putExtra("getAppDataPath", HelperFile.getAudioRootFolder());
+                        bindService(service, serviceConnection, Context.BIND_AUTO_CREATE);
                         startService(service);
                     }
                 } else {
@@ -1825,16 +1846,6 @@ public class ActivityMain extends AppCompatActivity {
                 buttonSync.setText("0");
             }
             buttonSync.setEnabled(true);
-        });
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void enableClientRemote(final Button button) {
-        runOnUiThread(() -> {
-            button.setEnabled(false);
-            button.setText("1");
-            button.setBackgroundResource(R.drawable.remote_off);
-            button.setEnabled(true);
         });
     }
 

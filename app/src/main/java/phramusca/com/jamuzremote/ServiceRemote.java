@@ -5,29 +5,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
-import android.os.PowerManager;
+import android.os.Binder;
+import android.os.IBinder;
 import android.util.Log;
 
 import com.launchdarkly.eventsource.MessageEvent;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import okhttp3.HttpUrl;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 
 /**
  * @author phramusca
@@ -42,6 +32,34 @@ public class ServiceRemote extends ServiceBase {
     private BroadcastReceiver userStopReceiver;
     private WifiManager.WifiLock wifiLock;
     private ProcessRemote processRemote;
+    private final IBinder binder = new MyBinder();
+    private List<ServiceRemoteCallback> callbacks = new ArrayList<>();
+
+    // Binder class for clients to access public methods of the Service
+    public class MyBinder extends Binder {
+        public ServiceRemote getService() {
+            return ServiceRemote.this;
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+
+    public void registerCallback(ServiceRemoteCallback callback) {
+        callbacks.add(callback);
+    }
+
+    public void unregisterCallback(ServiceRemoteCallback callback) {
+        callbacks.remove(callback);
+    }
+
+    private void notifyCallbacks(String event, MessageEvent messageEvent) {
+        for (ServiceRemoteCallback callback : callbacks) {
+            callback.onServiceDataReceived(event, messageEvent);
+        }
+    }
 
     @Override
     public void onCreate() {
@@ -79,7 +97,9 @@ public class ServiceRemote extends ServiceBase {
     }
 
     private void stopSync(String msg, long millisInFuture) {
-        processRemote.abort();
+        if(processRemote!=null) {
+            processRemote.abort();
+        }
         if (!msg.equals("")) {
             runOnUiThread(() -> {
                 helperNotification.notifyBar(notification, msg, millisInFuture);
@@ -115,7 +135,6 @@ public class ServiceRemote extends ServiceBase {
 //FIXME ! implementation 'com.launchdarkly:okhttp-eventsource:1.0.0' => update until Duration / API 26
 //TODO: Or Switch to https://github.com/square/okhttp/tree/master/okhttp-sse when ready
 
-
                 SSEClient sseClient = new SSEClient(new SSEHandler() {
                     @Override
                     public void onSSEConnectionOpened() {
@@ -125,16 +144,7 @@ public class ServiceRemote extends ServiceBase {
                     @Override
                     public void onSSEEventReceived(String event, MessageEvent messageEvent) {
                         System.out.println("SSE received: " + messageEvent.getData());
-
-                        //FIXME ! Update ActivityMain (display progression for now)
-
-                        if(Integer.parseInt(messageEvent.getData()) > 100) {
-                            try {
-                                clientInfo.getBodyString("stop", client);
-                            } catch (IOException | ClientInfo.ServerException e) {
-                                Log.e(TAG, "Error UserStopServiceReceiver", e); //NON-NLS
-                            }
-                        }
+                        notifyCallbacks(event, messageEvent);
                     }
 
                     @Override
@@ -145,12 +155,6 @@ public class ServiceRemote extends ServiceBase {
                         clientInfo.getHeaders());
 
                 sseClient.start();
-
-                HttpUrl.Builder urlBuilderPlay = clientInfo.getUrlBuilder("play"); //NON-NLS
-                Request requestPlay = clientInfo.getRequestBuilder(urlBuilderPlay)
-                        .addHeader("idFile", "1361")
-                        .build();
-                clientInfo.getBodyString(requestPlay, client); //NON-NLS
 
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error ProcessRemote", e); //NON-NLS
