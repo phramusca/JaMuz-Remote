@@ -125,6 +125,14 @@ public class ServiceRemote extends ServiceBase {
                     @Override
                     public void onSSEEventReceived(String event, MessageEvent messageEvent) {
                         System.out.println("SSE received: " + messageEvent.getData());
+
+                        if(Integer.parseInt(messageEvent.getData()) > 100) {
+                            try {
+                                clientInfo.getBodyString("stop", client);
+                            } catch (IOException | ClientInfo.ServerException e) {
+                                Log.e(TAG, "Error UserStopServiceReceiver", e); //NON-NLS
+                            }
+                        }
                     }
 
                     @Override
