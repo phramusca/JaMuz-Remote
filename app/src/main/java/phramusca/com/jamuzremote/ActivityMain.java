@@ -109,7 +109,6 @@ public class ActivityMain extends AppCompatActivity {
     private static Map<String, String> stringMap;
     private VoiceKeyWords voiceKeyWords;
     private final HelperToast helperToast = new HelperToast(this);
-    private ClientRemote clientRemote;
     private Track displayedTrack;
     private Track localTrack;
     private MediaBrowserCompat mediaBrowser;
@@ -205,41 +204,25 @@ public class ActivityMain extends AppCompatActivity {
             @Override
             public void onSwipeTop() {
                 Log.v(TAG, "onSwipeTop");
-                if (isRemoteConnected()) {
-                    clientRemote.send("forward"); //NON-NLS
-                } else {
-                    getMediaController().getTransportControls().fastForward();
-                }
+                getMediaController().getTransportControls().fastForward();
             }
 
             @Override
             public void onSwipeRight() {
                 Log.v(TAG, "onSwipeRight");
-                if (isRemoteConnected()) {
-                    clientRemote.send("previousTrack");
-                } else {
-                    getMediaController().getTransportControls().skipToPrevious();
-                }
+                getMediaController().getTransportControls().skipToPrevious();
             }
 
             @Override
             public void onSwipeLeft() {
                 Log.v(TAG, "onSwipeLeft");
-                if (isRemoteConnected()) {
-                    clientRemote.send("nextTrack");
-                } else {
-                    getMediaController().getTransportControls().skipToNext();
-                }
+                getMediaController().getTransportControls().skipToNext();
             }
 
             @Override
             public void onSwipeBottom() {
                 Log.v(TAG, "onSwipeBottom");
-                if (isRemoteConnected()) {
-                    clientRemote.send("rewind"); //NON-NLS
-                } else {
-                    getMediaController().getTransportControls().rewind();
-                }
+                getMediaController().getTransportControls().rewind();
             }
 
             @Override
@@ -255,17 +238,13 @@ public class ActivityMain extends AppCompatActivity {
             @Override
             public void onTap() {
                 if (isDimOn) {
-                    if (isRemoteConnected()) {
-                        clientRemote.send("playTrack");
-                    } else {
-                        togglePlay();
-                    }
+                    togglePlay();
                 }
             }
 
             @Override
             public void onDoubleTapUp() {
-                if (!isRemoteConnected() && isDimOn) {
+                if (isDimOn) {
                     getMediaController().getTransportControls().seekTo(0);
                     getMediaController().getTransportControls().play(); //As toggled by simple Tap
                 }
@@ -926,25 +905,17 @@ public class ActivityMain extends AppCompatActivity {
     private void setRating(int rating) {
         ratingBar.setEnabled(false);
         displayedTrack.setRating(Math.round(rating));
-        if (isRemoteConnected()) {
-            clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
-        } else {
-            displayedTrack.updateRating(Math.round(rating));
-            displayTrackDetails();
-            RepoAlbums.reset();
-        }
+        displayedTrack.updateRating(Math.round(rating));
+        displayTrackDetails();
+        RepoAlbums.reset();
         ratingBar.setEnabled(true);
     }
 
     private void setGenre(String genre) {
         spinnerGenre.setEnabled(false);
         displayedTrack.setGenre(genre);
-        if (isRemoteConnected()) {
-            clientRemote.send("setGenre".concat(genre));
-        } else {
-            displayedTrack.updateGenre(genre);
-            displayTrackDetails();
-        }
+        displayedTrack.updateGenre(genre);
+        displayTrackDetails();
         spinnerGenre.setEnabled(true);
     }
 
@@ -1019,11 +990,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void toggleTag(String tag) {
-        if (isRemoteConnected()) {
-            clientRemote.send("toggleTag".concat(tag));
-        } else {
-            displayedTrack.toggleTag(tag);
-        }
+        displayedTrack.toggleTag(tag);
     }
 
     private void makeButtonTagPlaylist(int key, String value) {
@@ -1141,17 +1108,13 @@ public class ActivityMain extends AppCompatActivity {
 
     private void applyPlaylist(Playlist playlist, boolean playNext) {
         dimOn();
-        if (isRemoteConnected()) {
-            clientRemote.send("setPlaylist".concat(playlist.toString()));
+        displayPlaylist(playlist);
+        localSelectedPlaylist = playlist;
+        if (playNext) {
+            PlayQueue.queue.setQueue(playlist.getTracks(10, getScope()));
+            getMediaController().getTransportControls().skipToNext();
         } else {
-            displayPlaylist(playlist);
-            localSelectedPlaylist = playlist;
-            if (playNext) {
-                PlayQueue.queue.setQueue(playlist.getTracks(10, getScope()));
-                getMediaController().getTransportControls().skipToNext();
-            } else {
-                refreshQueueAndPlaylistSpinner();
-            }
+            refreshQueueAndPlaylistSpinner();
         }
     }
 
@@ -1199,7 +1162,7 @@ public class ActivityMain extends AppCompatActivity {
             if (spinnerLimitUnitSend) {
                 dimOn();
                 String value = (String) parent.getItemAtPosition(pos);
-                if (!isRemoteConnected() && localSelectedPlaylist != null) {
+                if (localSelectedPlaylist != null) {
                     Playlist.LimitUnit limitUnit1 = null;
                     for (Playlist.LimitUnit limitUnit : Playlist.LimitUnit.values()) {
                         if (limitUnit.getDisplay(getApplicationContext()).equals(value)) {
@@ -1226,7 +1189,7 @@ public class ActivityMain extends AppCompatActivity {
             if (spinnerLimitValueSend) {
                 dimOn();
                 Integer value = (Integer) parent.getItemAtPosition(pos);
-                if (!isRemoteConnected() && localSelectedPlaylist != null) {
+                if (localSelectedPlaylist != null) {
                     localSelectedPlaylist.setLimitValue(value);
                     refreshQueueAndPlaylistSpinner();
                 }
@@ -1245,10 +1208,6 @@ public class ActivityMain extends AppCompatActivity {
         dimOn();
         return false;
     };
-
-    private boolean isRemoteConnected() {
-        return (clientRemote != null && clientRemote.isConnected());
-    }
 
     private void setDimMode(boolean enable) {
         if (enable) {
@@ -1331,8 +1290,6 @@ public class ActivityMain extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.i(TAG, "ActivityMain onPause"); //NON-NLS
-        wasRemoteConnected = isRemoteConnected();
-        stopRemote();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
@@ -1349,8 +1306,6 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    private boolean wasRemoteConnected = false;
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -1360,9 +1315,6 @@ public class ActivityMain extends AppCompatActivity {
         getFromQRcode(getIntent().getDataString());
         if (toggleButtonDimMode.isChecked()) {
             dimOn();
-        }
-        if(wasRemoteConnected) {
-            buttonRemote.performClick();
         }
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
@@ -1670,8 +1622,7 @@ public class ActivityMain extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "ActivityMain onDestroy"); //NON-NLS
-        stopRemote();
-        unregisterReceiver(receiverHeadSetPlugged);
+          unregisterReceiver(receiverHeadSetPlugged);
         if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
@@ -2001,39 +1952,35 @@ public class ActivityMain extends AppCompatActivity {
 
     protected void doAction(String msg) {
         dimOn();
-        if (isRemoteConnected()) {
-            clientRemote.send(msg);
-        } else {
-            switch (msg) {
-                case "previousTrack":
-                    getMediaController().getTransportControls().skipToPrevious();
-                    break;
-                case "nextTrack":
-                    getMediaController().getTransportControls().skipToNext();
-                    break;
-                case "playTrack":
-                    togglePlay();
-                    break;
-                case "pullup": //NON-NLS
-                    getMediaController().getTransportControls().seekTo(0);
-                    break; //NON-NLS
-                case "rewind": //NON-NLS
-                    getMediaController().getTransportControls().rewind();
-                    break;
-                case "forward": //NON-NLS
-                    getMediaController().getTransportControls().fastForward();
-                    break;
-                case "volUp":
-                    getMediaController().adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
-                    break;
-                case "volDown":
-                    getMediaController().adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
-                    break;
-                default:
-                    //Popup("Error", "Not implemented");
-                    helperToast.toastLong(getString(R.string.mainToastNotImplemented));
-                    break;
-            }
+        switch (msg) {
+            case "previousTrack":
+                getMediaController().getTransportControls().skipToPrevious();
+                break;
+            case "nextTrack":
+                getMediaController().getTransportControls().skipToNext();
+                break;
+            case "playTrack":
+                togglePlay();
+                break;
+            case "pullup": //NON-NLS
+                getMediaController().getTransportControls().seekTo(0);
+                break; //NON-NLS
+            case "rewind": //NON-NLS
+                getMediaController().getTransportControls().rewind();
+                break;
+            case "forward": //NON-NLS
+                getMediaController().getTransportControls().fastForward();
+                break;
+            case "volUp":
+                getMediaController().adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
+                break;
+            case "volDown":
+                getMediaController().adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
+                break;
+            default:
+                //Popup("Error", "Not implemented");
+                helperToast.toastLong(getString(R.string.mainToastNotImplemented));
+                break;
         }
     }
 
@@ -2383,16 +2330,6 @@ public class ActivityMain extends AppCompatActivity {
         Bitmap coverIcon = RepoCovers.getCoverIcon(displayedTrack, RepoCovers.IconSize.COVER, false);
         if (coverIcon != null) {
             displayImage(coverIcon);
-        } else { //Ask cover
-            int maxWidth = this.getWindow().getDecorView().getWidth();
-            if (maxWidth <= 0) {
-                maxWidth = RepoCovers.IconSize.COVER.getSize();
-            }
-            //FIXME: Do not ask more than X times (to be defined) OR send a NO_COVER message somehow
-            //Otherwise it will ask forever in case of a bad cover from server (no cover), until a new cover is requested
-            if (clientRemote != null) {
-                clientRemote.send("sendCover" + maxWidth);
-            }
         }
     }
 
@@ -2407,83 +2344,6 @@ public class ActivityMain extends AppCompatActivity {
             bitmapDrawable.setAlpha(50);
             layoutMain.setBackground(bitmapDrawable);
         });
-    }
-
-    class ListenerRemote implements IListenerRemote {
-
-        private final String TAG = ListenerRemote.class.getName();
-
-        @Override
-        public void onReceivedJson(final String json) {
-            try {
-                JSONObject jObject = new JSONObject(json);
-                String type = jObject.getString("type"); //NON-NLS //NON-NLS
-                switch (type) {
-                    case "playlists": //NON-NLS
-                        String selectedPlaylist = jObject.getString("selectedPlaylist"); //NON-NLS
-                        Playlist temp = new Playlist(selectedPlaylist, false);
-                        final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists"); //NON-NLS
-                        final List<Playlist> playlists = new ArrayList<>();
-                        for (int i = 0; i < jsonPlaylists.length(); i++) {
-                            String playlist = (String) jsonPlaylists.get(i);
-                            Playlist playList = new Playlist(playlist, false);
-                            if (playlist.equals(selectedPlaylist)) {
-                                playList = temp;
-                            }
-                            playlists.add(playList);
-                        }
-                        ArrayAdapter<Playlist> arrayAdapter =
-                                new ArrayAdapter<>(ActivityMain.this,
-                                        R.layout.spinner_item, playlists);
-                        setupPlaylistSpinner(arrayAdapter, temp);
-                        enablePlaylistEdit(false);
-                        break;
-                    case "currentPosition":
-                        final int currentPosition = jObject.getInt("currentPosition"); //NON-NLS
-                        final int total = jObject.getInt("total"); //NON-NLS
-                        setSeekBar(currentPosition * 1000, total * 1000);
-                        break;
-                    case "fileInfoInt":
-                        String playlistInfo = jObject.getString("playlistInfo"); //NON-NLS //NON-NLS
-                        JSONObject fileInfoIntObject = (JSONObject) jObject.get("fileInfoInt");
-                        displayedTrack = new Track(fileInfoIntObject, new File(""), false);
-                        displayedTrack.setSource(getString(R.string.labelServer) + " " + playlistInfo);
-                        int startPosition = jObject.getInt("currentPosition");
-                        setSeekBar(startPosition * 1000, displayedTrack.getLength() * 1000);
-                        displayTrack();
-                        break;
-                }
-            } catch (JSONException e) {
-                Log.e(TAG, e.toString());
-            }
-        }
-
-        @Override
-        public void onReceivedBitmap(final Bitmap bitmap) { //NON-NLS
-            Log.d(TAG, "onReceivedBitmap: callback"); //NON-NLS //NON-NLS
-            Log.d(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight()); //NON-NLS //NON-NLS
-            if (bitmap != null && !RepoCovers.contains(displayedTrack.getCoverHash(), RepoCovers.IconSize.COVER)) {
-                RepoCovers.writeIconToCache(displayedTrack.getCoverHash(), bitmap);
-            }
-            displayCover();
-        }
-
-        @Override
-        public void onDisconnected(final String msg) {
-            if (!msg.equals("")) {
-                runOnUiThread(() -> helperToast.toastShort(msg));
-            }
-            enableClientRemote(buttonRemote);
-            setupLocalPlaylistSpinner();
-            runOnUiThread(() -> displayPlayingTrack());
-        }
-    }
-
-    private void stopRemote() { //NON-NLS
-        if (clientRemote != null) {
-            clientRemote.close();
-            clientRemote = null;
-        }
     }
 
     @Override
