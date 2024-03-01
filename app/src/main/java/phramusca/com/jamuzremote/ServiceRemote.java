@@ -126,6 +126,8 @@ public class ServiceRemote extends ServiceBase {
                     public void onSSEEventReceived(String event, MessageEvent messageEvent) {
                         System.out.println("SSE received: " + messageEvent.getData());
 
+                        //FIXME ! Update ActivityMain (display progression for now)
+
                         if(Integer.parseInt(messageEvent.getData()) > 100) {
                             try {
                                 clientInfo.getBodyString("stop", client);

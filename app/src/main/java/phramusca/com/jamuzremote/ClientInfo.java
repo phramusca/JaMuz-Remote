@@ -41,7 +41,7 @@ public class ClientInfo implements Serializable {
     }
 
     public HttpUrl.Builder getUrlBuilder(String url) {
-        return Objects.requireNonNull(HttpUrl.parse("http://" + getAddress() + ":" + (getPort() + 1) + "/" + url)).newBuilder(); //NON-NLS
+        return Objects.requireNonNull(HttpUrl.parse("http://" + getAddress() + ":" + getPort() + "/" + url)).newBuilder(); //NON-NLS
     }
 
     public Request.Builder getRequestBuilder(HttpUrl.Builder urlBuilder) {
