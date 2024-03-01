@@ -407,24 +407,23 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
+    private ServiceRemoteCallback serviceRemoteCallback;
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             ServiceRemote.MyBinder binder = (ServiceRemote.MyBinder) service;
             serviceRemote = binder.getService();
-            serviceRemote.registerCallback(new ServiceRemoteCallback() {
-                @Override
-                public void onServiceDataReceived(String event, MessageEvent messageEvent) {
-                    if(event.equals("positionChanged")) {
-                        setSeekBar(Integer.parseInt(messageEvent.getData()), Integer.parseInt(messageEvent.getLastEventId()));
-                    }
+            serviceRemoteCallback = (event, messageEvent) -> {
+                if (event.equals("positionChanged")) {
+                    setSeekBar(Integer.parseInt(messageEvent.getData()), Integer.parseInt(messageEvent.getLastEventId()));
                 }
-            });
+            };
+            serviceRemote.registerCallback(serviceRemoteCallback);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            // Handle disconnection
+            // FIXME: Handle disconnection
         }
     };
 
@@ -1647,6 +1646,11 @@ public class ActivityMain extends AppCompatActivity {
         if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
+        }
+        // Unbind from the service and unregister callback
+        if (serviceRemote != null) {
+            serviceRemote.unregisterCallback(serviceRemoteCallback);
+            unbindService(serviceConnection);
         }
         // Not closing as services may still need it
         /*HelperLibrary.close();*/
