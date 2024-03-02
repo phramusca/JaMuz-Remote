@@ -82,7 +82,6 @@ import com.google.android.flexbox.FlexboxLayout;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.launchdarkly.eventsource.MessageEvent;
 
 import org.ocpsoft.prettytime.PrettyTime;
 
@@ -557,7 +556,7 @@ public class ActivityMain extends AppCompatActivity {
                 enableRemote(false);
                 ClientInfo clientInfo = null;
                 if (checkWifiConnection()) {
-                    clientInfo = getClientInfo(ClientCanal.REMOTE, helperToast);
+                    clientInfo = getClientInfo(helperToast);
                 }
                 if (clientInfo != null) {
                     if (!isMyServiceRunning(ServiceRemote.class)) {
@@ -585,7 +584,7 @@ public class ActivityMain extends AppCompatActivity {
                 enableSync(false);
                 ClientInfo clientInfo = null;
                 if (checkWifiConnection()) {
-                    clientInfo = getClientInfo(ClientCanal.SYNC, helperToast);
+                    clientInfo = getClientInfo(helperToast);
                 }
                 if (clientInfo != null) {
                     if (!isMyServiceRunning(ServiceSync.class)) {
@@ -947,7 +946,7 @@ public class ActivityMain extends AppCompatActivity {
         return true;
     }
 
-    static ClientInfo getClientInfo(int canal, HelperToast helperToast) {
+    static ClientInfo getClientInfo(HelperToast helperToast) {
         String infoConnect = preferences.getString(
                 "connectionString",
                 stringMap.get("settingsServerDefaultConnectionString"));
@@ -972,7 +971,7 @@ public class ActivityMain extends AppCompatActivity {
             port = 2013;
         }
         //TODO Use a real password, from QR code
-        return new ClientInfo(address, port, login, "tata", canal, //NON-NLS
+        return new ClientInfo(address, port, login, "tata",  //NON-NLS
                 "jamuz", HelperFile.getAudioRootFolder().getAbsolutePath(), model); //NON-NLS
     }
 

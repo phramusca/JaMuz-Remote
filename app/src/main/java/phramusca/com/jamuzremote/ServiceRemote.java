@@ -11,7 +11,6 @@ import android.util.Log;
 
 import com.launchdarkly.eventsource.MessageEvent;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class ServiceRemote extends ServiceBase {
     private WifiManager.WifiLock wifiLock;
     private ProcessRemote processRemote;
     private final IBinder binder = new MyBinder();
-    private List<ServiceRemoteCallback> callbacks = new ArrayList<>();
+    private final List<ServiceRemoteCallback> callbacks = new ArrayList<>();
 
     // Binder class for clients to access public methods of the Service
     public class MyBinder extends Binder {
@@ -100,7 +99,7 @@ public class ServiceRemote extends ServiceBase {
         if(processRemote!=null) {
             processRemote.abort();
         }
-        if (!msg.equals("")) {
+        if (!msg.isEmpty()) {
             runOnUiThread(() -> {
                 helperNotification.notifyBar(notification, msg, millisInFuture);
                 helperToast.toastLong(msg);
@@ -140,13 +139,11 @@ public class ServiceRemote extends ServiceBase {
                     public void onSSEConnectionOpened() {
                         System.out.println("SSE connection opened");
                     }
-
                     @Override
                     public void onSSEEventReceived(String event, MessageEvent messageEvent) {
                         System.out.println("SSE received: " + messageEvent.getData());
                         notifyCallbacks(event, messageEvent);
                     }
-
                     @Override
                     public void onSSEError(Throwable t) {
                         System.err.println("Error occurred: " + t.getMessage());
@@ -155,7 +152,6 @@ public class ServiceRemote extends ServiceBase {
                         clientInfo.getHeaders());
 
                 sseClient.start();
-
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error ProcessRemote", e); //NON-NLS
                 stopSync(getString(R.string.serviceSyncNotifySyncInterrupted), -1);
@@ -165,7 +161,6 @@ public class ServiceRemote extends ServiceBase {
             }
         }
     }
-
     public class UserStopServiceReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
