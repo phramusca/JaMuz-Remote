@@ -414,7 +414,7 @@ public class ActivityMain extends AppCompatActivity {
             serviceRemote = binder.getService();
             serviceRemoteCallback = (event, messageEvent) -> {
                 if (event.equals("positionChanged")) {
-                    setSeekBar(Integer.parseInt(messageEvent.getData()), Integer.parseInt(messageEvent.getLastEventId()));
+                    setSeekBar(Integer.parseInt(messageEvent.getData())*1000, Integer.parseInt(messageEvent.getLastEventId())*1000);
                 }
             };
             serviceRemote.registerCallback(serviceRemoteCallback);

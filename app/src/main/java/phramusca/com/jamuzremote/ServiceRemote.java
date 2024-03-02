@@ -62,6 +62,7 @@ public class ServiceRemote extends ServiceBase {
 
     @Override
     public void onCreate() {
+        //FIXME ! Change title
         notification = new Notification(this, NotificationId.get(), getString(R.string.serviceSyncNotifySyncTitle),
                 "Remote service",
                 "Remote control JaMuz Server.");
@@ -118,6 +119,7 @@ public class ServiceRemote extends ServiceBase {
         @Override
         public void run() {
             try {
+                //FIXME ! Change title
                 helperNotification.notifyBar(notification, getString(R.string.syncLabelConnecting));
                 checkAbort();
 
