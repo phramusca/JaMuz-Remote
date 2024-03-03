@@ -11,10 +11,19 @@ import android.util.Log;
 
 import com.launchdarkly.eventsource.MessageEvent;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 /**
  * @author phramusca
@@ -127,8 +136,28 @@ public class ServiceRemote extends ServiceBase {
         }.start();
     }
 
-    public void send(String test) {
-        //FIXME ! Implement this
+    public void send(String msg) {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+
+                    HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("action"); //NON-NLS
+
+                    //FIXME !! Send a application/json
+                    Request request = clientInfo.getRequestBuilder(urlBuilder) //NON-NLS
+                            .post(RequestBody.create("{\"action\": \""+msg+"\"}", MediaType.parse("application/json; charset=utf-8"))).build(); //NON-NLS
+
+                    //FIXME !! Use bodyString when required
+                    String bodyString = clientInfo.getBodyString(request, client);
+
+
+//                    clientInfo.getBodyString(clientInfo.getConnectRequest(), client); //NON-NLS
+                } catch (IOException | ClientInfo.ServerException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }.start();
     }
 
     //FIXME ! Get playing track info from remote and display it
