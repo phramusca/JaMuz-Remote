@@ -112,6 +112,7 @@ public class ActivityMain extends AppCompatActivity {
     private VoiceKeyWords voiceKeyWords;
     private final HelperToast helperToast = new HelperToast(this);
     private Track displayedTrack;
+    //FIXME Rename localTrack if only defaultTrack
     private Track localTrack;
     private MediaBrowserCompat mediaBrowser;
     ReceiverHeadSetPlugged receiverHeadSetPlugged = new ReceiverHeadSetPlugged();
@@ -413,8 +414,6 @@ public class ActivityMain extends AppCompatActivity {
 
     private final ServiceConnection serviceRemoteConnection = new ServiceConnection() {
 
-        private boolean connected = false;
-
         @Override
         public synchronized void onServiceConnected(ComponentName name, IBinder service) {
             ServiceRemote.MyBinder binder = (ServiceRemote.MyBinder) service;
@@ -442,19 +441,12 @@ public class ActivityMain extends AppCompatActivity {
                 }
             };
             serviceRemote.registerCallback(serviceRemoteCallback);
-            connected = true;
         }
 
         @Override
         public synchronized void onServiceDisconnected(ComponentName name) {
             serviceRemote.unregisterCallback(serviceRemoteCallback);
             serviceRemote = null;
-            connected = false;
-        }
-
-        //FIXME ! Use this to determine the actions for play / pause , ...
-        public synchronized boolean isConnected() {
-            return connected;
         }
     };
 
@@ -604,6 +596,7 @@ public class ActivityMain extends AppCompatActivity {
             } else {
                 Log.i(TAG, "Broadcast(" + ServiceRemote.USER_STOP_SERVICE_REQUEST + ")"); //NON-NLS
                 sendBroadcast(new Intent(ServiceRemote.USER_STOP_SERVICE_REQUEST));
+                //FIXME ! Set back displayedTrack here !
                 enableRemote(true);
             }
         });
