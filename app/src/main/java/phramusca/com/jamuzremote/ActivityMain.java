@@ -590,7 +590,6 @@ public class ActivityMain extends AppCompatActivity {
         textFileInfo_seekBefore = findViewById(R.id.textFileInfo_seekBefore);
         textFileInfo_seekAfter = findViewById(R.id.textFileInfo_seekAfter);
 
-
         buttonRemote = findViewById(R.id.button_connect);
         buttonRemote.setOnClickListener(v -> {
             dimOn();
@@ -968,12 +967,11 @@ public class ActivityMain extends AppCompatActivity {
     private void setRating(int rating) {
         ratingBar.setEnabled(false);
         displayedTrack.setRating(Math.round(rating));
+        displayedTrack.updateRating(Math.round(rating));
+        displayTrackDetails();
+        RepoAlbums.reset();
         if (isRemoteConnected()) {
             serviceRemote.send("setRating", String.valueOf(Math.round(rating)));
-        } else {
-            displayedTrack.updateRating(Math.round(rating));
-            displayTrackDetails();
-            RepoAlbums.reset();
         }
         ratingBar.setEnabled(true);
     }
@@ -981,11 +979,10 @@ public class ActivityMain extends AppCompatActivity {
     private void setGenre(String genre) {
         spinnerGenre.setEnabled(false);
         displayedTrack.setGenre(genre);
+        displayedTrack.updateGenre(genre);
+        displayTrackDetails();
         if (isRemoteConnected()) {
             serviceRemote.send("setGenre", genre);
-        } else {
-            displayedTrack.updateGenre(genre);
-            displayTrackDetails();
         }
         spinnerGenre.setEnabled(true);
     }
@@ -1061,10 +1058,9 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void toggleTag(String tag) {
+        displayedTrack.toggleTag(tag);
         if (isRemoteConnected()) {
             serviceRemote.send("toggleTag", tag);
-        } else {
-            displayedTrack.toggleTag(tag);
         }
     }
 
