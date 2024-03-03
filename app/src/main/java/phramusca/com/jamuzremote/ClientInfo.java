@@ -53,6 +53,15 @@ public class ClientInfo implements Serializable {
                 .build();
     }
 
+    public Request getConnectRequest() {
+        HttpUrl.Builder urlBuilder = getUrlBuilder("connect"); //NON-NLS
+        return getRequestBuilder(urlBuilder)
+                .addHeader("password", getPassword())
+                .addHeader("rootPath", getRootPath())
+                .addHeader("model", getModel())
+                .build();
+    }
+
     public String getBodyString(String url, OkHttpClient client) throws IOException, ServerException {
         HttpUrl.Builder urlBuilder = getUrlBuilder(url);
         return getBodyString(urlBuilder, client);

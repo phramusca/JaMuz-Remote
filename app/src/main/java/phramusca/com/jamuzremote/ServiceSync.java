@@ -90,13 +90,7 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationSync, getString(R.string.syncLabelConnecting));
                 checkAbort();
 
-                HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("connect"); //NON-NLS
-                Request request = clientInfo.getRequestBuilder(urlBuilder)
-                        .addHeader("password", clientInfo.getPassword())
-                        .addHeader("rootPath", clientInfo.getRootPath())
-                        .addHeader("model", clientInfo.getModel())
-                        .build();
-                clientInfo.getBodyString(request, client); //NON-NLS
+                clientInfo.getBodyString(clientInfo.getConnectRequest(), client); //NON-NLS
 
                 long startTime = System.currentTimeMillis();
                 long startTimeTotal = startTime;
@@ -396,7 +390,7 @@ public class ServiceSync extends ServiceBase {
             processDownload = null;
         }
         processSync.abort();
-        if (!msg.equals("")) {
+        if (!msg.isEmpty()) {
             runOnUiThread(() -> {
                 helperNotification.notifyBar(notificationSync, msg, millisInFuture);
                 helperToast.toastLong(msg);
@@ -407,7 +401,7 @@ public class ServiceSync extends ServiceBase {
     } //NON-NLS
 
     private void startDownloads(Map<Track, Integer> newTracks) {
-        if ((processDownload == null || !processDownload.isAlive()) && newTracks.size() > 0) {
+        if ((processDownload == null || !processDownload.isAlive()) && !newTracks.isEmpty()) {
             Log.i(TAG, "START ProcessDownload"); //NON-NLS
             processDownload = new DownloadProcess(
                     "ProcessDownload",
