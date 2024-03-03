@@ -48,7 +48,7 @@ public class ClientInfo implements Serializable {
     public Headers getHeaders() {
         return new Headers.Builder()
                 .add("login", getLogin() + "-" + getAppId()) //NON-NLS
-                //FIXME ! Update api version, and check behavior of JaMuz Desktop
+                //FIXME Update api version, and check behavior of JaMuz Desktop
                 .add("api-version", "2.0") //NON-NLS
                 .build();
     }

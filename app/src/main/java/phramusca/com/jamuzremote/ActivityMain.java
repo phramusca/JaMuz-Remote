@@ -1912,6 +1912,9 @@ public class ActivityMain extends AppCompatActivity {
         });
     }
 
+    //FIXME ! Check usage of private void enableRemote(final boolean enable)
+    //because wasRemoteConnected does not work as expected (button does not have expected text when performClick)
+
     @SuppressLint("SetTextI18n")
     private void enableRemote(final boolean enable) {
         runOnUiThread(() -> {

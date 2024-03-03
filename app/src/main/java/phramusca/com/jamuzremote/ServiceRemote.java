@@ -168,31 +168,13 @@ public class ServiceRemote extends ServiceBase {
                     obj.put("value", value);
                     Request request = clientInfo.getRequestBuilder(urlBuilder) //NON-NLS
                             .post(RequestBody.create(obj.toString(), MediaType.parse("application/json; charset=utf-8"))).build(); //NON-NLS
-                    //FIXME !! Use bodyString when required
-                    String bodyString = clientInfo.getBodyString(request, client);
+                    clientInfo.getBodyString(request, client);
                 } catch (IOException | ClientInfo.ServerException | JSONException e) {
                     Log.e(TAG, "sending " + action, e); //NON-NLS
                 }
             }
         }.start();
     }
-
-    //FIXME ! Get playing track info from remote and display it
-//    private void getTags() throws IOException, ClientInfo.ServerException, JSONException {
-//        String body = clientInfo.getBodyString("tags", client); //NON-NLS
-//        helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncReceivedTags));
-//        final JSONObject jObject = new JSONObject(body);
-//        //FIXME Get tags list with their respective number of files, for sorting
-//        //FIXME Add a "x/y" button to display tag & genre (in playlist) pages x/y (# of tags per page to be defined/optional)
-//        final JSONArray jsonTags = (JSONArray) jObject.get("tags"); //NON-NLS
-//        final List<String> newTags = new ArrayList<>();
-//        for (int i = 0; i < jsonTags.length(); i++) {
-//            newTags.add((String) jsonTags.get(i));
-//        }
-//        RepoTags.set(newTags);
-//        sendMessage("setupTags");
-//    }
-
     @Override
     public void onDestroy() {
         unregisterReceiver(userStopReceiver);
