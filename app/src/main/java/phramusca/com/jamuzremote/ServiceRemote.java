@@ -155,14 +155,17 @@ public class ServiceRemote extends ServiceBase {
 
     private void stopSync(String msg, long millisInFuture) {
         helperNotification.notifyBar(notification, getString(R.string.closing_remote_control));
-        sseClient.disconnect();
+        if (sseClient != null) {
+            sseClient.disconnect();
+        }
         if (!msg.isEmpty()) {
             runOnUiThread(() -> {
                 helperNotification.notifyBar(notification, msg, millisInFuture);
                 helperToast.toastLong(msg);
             });
         }
-        helperNotification.notifyBar(notification, getString(R.string.closed_remote_control), 5000);
+        runOnUiThread(() -> helperNotification.notifyBar(notification, getString(R.string.closed_remote_control), 5000));
+
         sendMessage("enableRemote"); //NON-NLS
         stopSelf();
     }

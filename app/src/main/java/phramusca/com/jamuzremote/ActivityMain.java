@@ -83,6 +83,9 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
 
 import java.io.File;
@@ -194,8 +197,7 @@ public class ActivityMain extends AppCompatActivity {
     };
 
     @SuppressLint("ClickableViewAccessibility")
-    void buildTransportControls()
-    {
+    void buildTransportControls() {
         imageViewCover = findViewById(R.id.imageView);
 
         LinearLayout layoutTrackInfo = findViewById(R.id.trackInfo);
@@ -408,23 +410,43 @@ public class ActivityMain extends AppCompatActivity {
 
     private ServiceRemoteCallback serviceRemoteCallback;
 
-    private ServiceConnection serviceRemoteConnection = new ServiceConnection() {
+    private final ServiceConnection serviceRemoteConnection = new ServiceConnection() {
+
+        private boolean connected = false;
+
         @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
+        public synchronized void onServiceConnected(ComponentName name, IBinder service) {
             ServiceRemote.MyBinder binder = (ServiceRemote.MyBinder) service;
             serviceRemote = binder.getService();
             serviceRemoteCallback = (event, messageEvent) -> {
                 if (event.equals("positionChanged")) {
-                    setSeekBar(Integer.parseInt(messageEvent.getData())*1000, Integer.parseInt(messageEvent.getLastEventId())*1000);
+                    try {
+                        final JSONObject jObject = new JSONObject(messageEvent.getData());
+                        int idFile = (int) jObject.get("idFile");
+                        //FIXME ! Use idFile to get File info to display. Only change when id changes. Refer to how android player handles it (can it be reused ?)
+                        int position = (int) jObject.get("position");
+                        int length = (int) jObject.get("length");
+                        setSeekBar(position * 1000, length * 1000);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+
                 }
             };
             serviceRemote.registerCallback(serviceRemoteCallback);
+            connected = true;
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {
+        public synchronized void onServiceDisconnected(ComponentName name) {
             serviceRemote.unregisterCallback(serviceRemoteCallback);
             serviceRemote = null;
+            connected = false;
+        }
+
+        //FIXME ! Use this to determine the actions for play / pause , ...
+        public synchronized boolean isConnected() {
+            return connected;
         }
     };
 
@@ -454,7 +476,7 @@ public class ActivityMain extends AppCompatActivity {
         //setEnabled does not seem enough (need to disable inner views too?) + some widgets are disabled/enabled during onCreate
         //layoutMain.setEnabled(false);
 
-        if(!HelperFile.init(this)) {
+        if (!HelperFile.init(this)) {
             helperToast.toastLong("Unable to find a writable application folder. Exiting :(");
             return;
         }
@@ -475,15 +497,15 @@ public class ActivityMain extends AppCompatActivity {
             if (status != TextToSpeech.ERROR) {
                 Locale locale = null;
                 Voice defaultVoice = textToSpeech.getDefaultVoice();
-                if(defaultVoice==null) {
+                if (defaultVoice == null) {
                     Voice voice = (Voice) textToSpeech.getVoices().toArray()[0];
-                    if(voice!=null) {
+                    if (voice != null) {
                         locale = voice.getLocale();
                     }
                 } else {
                     locale = defaultVoice.getLocale();
                 }
-                if(locale!=null) {
+                if (locale != null) {
                     textToSpeech.setLanguage(locale);
                 }
             }
@@ -877,8 +899,7 @@ public class ActivityMain extends AppCompatActivity {
         Intent intent = new Intent(this, ServiceAudioPlayer.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent);
-        }
-        else {
+        } else {
             startService(intent);
         }
         // Create connection with the service
@@ -1113,15 +1134,15 @@ public class ActivityMain extends AppCompatActivity {
         ArrayList<Track.Status> statuses = new ArrayList<>();
         boolean displayServer = preferences.getBoolean("displayServer", true);
         boolean displayMediaStore = preferences.getBoolean("displayMediaStore", true);
-        if(displayServer) {
+        if (displayServer) {
             statuses.add(Track.Status.REC);
-            if(getAll) {
+            if (getAll) {
                 statuses.add(Track.Status.INFO);
                 statuses.add(Track.Status.NEW);
                 statuses.add(Track.Status.ERROR);
             }
         }
-        if(displayMediaStore) {
+        if (displayMediaStore) {
             statuses.add(Track.Status.LOCAL);
         }
         return statuses;
@@ -1393,7 +1414,9 @@ public class ActivityMain extends AppCompatActivity {
         LOWER_VOLUME,
         NONE
     }
+
     private int previousVolume;
+
     private void speechFavor(boolean favor) {
         SpeechFlavor speechFavor = SpeechFlavor.valueOf(preferences.getString("speechFavor", SpeechFlavor.PAUSE.name()));
         switch (speechFavor) {
@@ -1575,8 +1598,7 @@ public class ActivityMain extends AppCompatActivity {
                 }
             }
             speechFavor(false);
-        }
-        else if (requestCode == LISTS_REQUEST_CODE && resultCode == RESULT_OK) {
+        } else if (requestCode == LISTS_REQUEST_CODE && resultCode == RESULT_OK) {
             String action = data.getStringExtra("action"); //NON-NLS
             switch (action) {
                 case "playNextAndDisplayQueue": //NON-NLS
@@ -1591,8 +1613,7 @@ public class ActivityMain extends AppCompatActivity {
                     break;
             }
 
-        }
-        else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
+        } else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
             String action = data.getStringExtra("action"); //NON-NLS
             if (action != null && action.equals("checkPermissionsThenScanLibrary")) { //NON-NLS
                 checkPermissionsThenScanLibrary();
@@ -1643,16 +1664,15 @@ public class ActivityMain extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "ActivityMain onDestroy"); //NON-NLS
-          unregisterReceiver(receiverHeadSetPlugged);
+        unregisterReceiver(receiverHeadSetPlugged);
         if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
-        // Unbind from the service and unregister callback
         if (serviceRemote != null) {
             serviceRemote.unregisterCallback(serviceRemoteCallback);
-            unbindService(serviceRemoteConnection);
         }
+        unbindService(serviceRemoteConnection);
         // Not closing as services may still need it
         /*HelperLibrary.close();*/
     }
@@ -2165,7 +2185,8 @@ public class ActivityMain extends AppCompatActivity {
             Playlist playlist = new Playlist(
                     filename.replaceFirst("[.][^.]+$", ""), true);
             Gson gson = new Gson();
-            Type mapType = new TypeToken<Playlist>(){}.getType();
+            Type mapType = new TypeToken<Playlist>() {
+            }.getType();
             try {
                 playlist = gson.fromJson(readJson, mapType);
             } catch (JsonSyntaxException ex) {
@@ -2250,18 +2271,18 @@ public class ActivityMain extends AppCompatActivity {
 
     private void displayTrackDetails() {
         runOnUiThread(() -> {
-            if(displayedTrack != null) {
+            if (displayedTrack != null) {
                 setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
                         String.format(Locale.getDefault(), "<html><BR/>%s<BR/>%s %d/5 %s %s<BR/>%s%s<BR/></html>", //NON-NLS
-                        displayedTrack.getSource().equals("") //NON-NLS
-                                ? "" //NON-NLS
-                                : "<u>".concat(displayedTrack.getSource()).concat("</u>"), //NON-NLS
-                        displayedTrack.getTags(),
-                        (int) displayedTrack.getRating(),
-                        displayedTrack.getGenre(),
-                        displayedTrack.getYear(),
-                        getLastPlayedAgo(displayedTrack),
-                        getAddedDateAgo(displayedTrack)))));
+                                displayedTrack.getSource().equals("") //NON-NLS
+                                        ? "" //NON-NLS
+                                        : "<u>".concat(displayedTrack.getSource()).concat("</u>"), //NON-NLS
+                                displayedTrack.getTags(),
+                                (int) displayedTrack.getRating(),
+                                displayedTrack.getGenre(),
+                                displayedTrack.getYear(),
+                                getLastPlayedAgo(displayedTrack),
+                                getAddedDateAgo(displayedTrack)))));
             }
         });
     }
@@ -2285,12 +2306,12 @@ public class ActivityMain extends AppCompatActivity {
 
     private void displayPlayingTrack() {
         displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
-        if(displayedTrack==null) {
+        if (displayedTrack == null) {
             displayedTrack = localTrack;
         }
         displayTrack();
         MediaMetadataCompat metadata = MediaMetadataCompat.fromMediaMetadata(getMediaController().getMetadata());
-        if(metadata!=null) {
+        if (metadata != null) {
             setSeekBarPosition(PlaybackStateCompat.fromPlaybackState(getMediaController().getPlaybackState()), (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
         }
     }
@@ -2398,7 +2419,8 @@ public class ActivityMain extends AppCompatActivity {
     public static Playlist clonePlaylist(Playlist playlist) {
         Gson gson = new Gson();
         String json = gson.toJson(playlist);
-        Type mapType = new TypeToken<Playlist>() {}.getType();
+        Type mapType = new TypeToken<Playlist>() {
+        }.getType();
         Playlist newPlaylist = null;
         try {
             newPlaylist = gson.fromJson(json, mapType);
