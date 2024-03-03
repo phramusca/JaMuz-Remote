@@ -969,7 +969,7 @@ public class ActivityMain extends AppCompatActivity {
         ratingBar.setEnabled(false);
         displayedTrack.setRating(Math.round(rating));
         if (isRemoteConnected()) {
-            serviceRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
+            serviceRemote.send("setRating", String.valueOf(Math.round(rating)));
         } else {
             displayedTrack.updateRating(Math.round(rating));
             displayTrackDetails();
@@ -982,7 +982,7 @@ public class ActivityMain extends AppCompatActivity {
         spinnerGenre.setEnabled(false);
         displayedTrack.setGenre(genre);
         if (isRemoteConnected()) {
-            serviceRemote.send("setGenre".concat(genre));
+            serviceRemote.send("setGenre", genre);
         } else {
             displayedTrack.updateGenre(genre);
             displayTrackDetails();
@@ -1062,7 +1062,7 @@ public class ActivityMain extends AppCompatActivity {
 
     private void toggleTag(String tag) {
         if (isRemoteConnected()) {
-            serviceRemote.send("toggleTag".concat(tag));
+            serviceRemote.send("toggleTag", tag);
         } else {
             displayedTrack.toggleTag(tag);
         }
@@ -1184,7 +1184,7 @@ public class ActivityMain extends AppCompatActivity {
     private void applyPlaylist(Playlist playlist, boolean playNext) {
         dimOn();
         if (isRemoteConnected()) {
-            serviceRemote.send("setPlaylist".concat(playlist.toString()));
+            serviceRemote.send("setPlaylist", playlist.toString());
         } else {
             displayPlaylist(playlist);
             localSelectedPlaylist = playlist;
@@ -2433,57 +2433,6 @@ public class ActivityMain extends AppCompatActivity {
             layoutMain.setBackground(bitmapDrawable);
         });
     }
-
-    //FIXME !!! Use this code to get returns from server
-//    class ListenerRemote implements IListenerRemote {
-//
-//        private final String TAG = ListenerRemote.class.getName();
-//
-//        @Override
-//        public void onReceivedJson(final String json) {
-//            try {
-//                JSONObject jObject = new JSONObject(json);
-//                String type = jObject.getString("type"); //NON-NLS //NON-NLS
-//                switch (type) {
-//                    case "playlists": //NON-NLS
-//                        String selectedPlaylist = jObject.getString("selectedPlaylist"); //NON-NLS
-//                        Playlist temp = new Playlist(selectedPlaylist, false);
-//                        final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists"); //NON-NLS
-//                        final List<Playlist> playlists = new ArrayList<>();
-//                        for (int i = 0; i < jsonPlaylists.length(); i++) {
-//                            String playlist = (String) jsonPlaylists.get(i);
-//                            Playlist playList = new Playlist(playlist, false);
-//                            if (playlist.equals(selectedPlaylist)) {
-//                                playList = temp;
-//                            }
-//                            playlists.add(playList);
-//                        }
-//                        ArrayAdapter<Playlist> arrayAdapter =
-//                                new ArrayAdapter<>(ActivityMain.this,
-//                                        R.layout.spinner_item, playlists);
-//                        setupPlaylistSpinner(arrayAdapter, temp);
-//                        enablePlaylistEdit(false);
-//                        break;
-//                    case "currentPosition":
-//                        final int currentPosition = jObject.getInt("currentPosition"); //NON-NLS
-//                        final int total = jObject.getInt("total"); //NON-NLS
-//                        setSeekBar(currentPosition * 1000, total * 1000);
-//                        break;
-//                    case "fileInfoInt":
-//                        String playlistInfo = jObject.getString("playlistInfo"); //NON-NLS //NON-NLS
-//                        JSONObject fileInfoIntObject = (JSONObject) jObject.get("fileInfoInt");
-//                        displayedTrack = new Track(fileInfoIntObject, new File(""), false);
-//                        displayedTrack.setSource(getString(R.string.labelServer) + " " + playlistInfo);
-//                        int startPosition = jObject.getInt("currentPosition");
-//                        setSeekBar(startPosition * 1000, displayedTrack.getLength() * 1000);
-//                        displayTrack();
-//                        break;
-//                }
-//            } catch (JSONException e) {
-//                Log.e(TAG, e.toString());
-//            }
-//        }
-//    }
 
     private void stopRemote() { //NON-NLS
         if (serviceRemote != null) {
