@@ -31,6 +31,7 @@ public class ServiceRemote extends ServiceBase {
     private BroadcastReceiver userStopReceiver;
     private WifiManager.WifiLock wifiLock;
     private ProcessRemote processRemote;
+    private final IBinder binder = new MyBinder();
     private final List<ServiceRemoteCallback> callbacks = new ArrayList<>();
     private SSEClient sseClient;
 
@@ -38,6 +39,11 @@ public class ServiceRemote extends ServiceBase {
         public ServiceRemote getService() {
             return ServiceRemote.this;
         }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
     }
 
     public void registerCallback(ServiceRemoteCallback callback) {
