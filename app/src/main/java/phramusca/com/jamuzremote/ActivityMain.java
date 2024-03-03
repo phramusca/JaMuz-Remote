@@ -1,6 +1,7 @@
 package phramusca.com.jamuzremote;
 
 import static phramusca.com.jamuzremote.HelperString.trimTrailingWhitespace;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_ID_SERVER;
 import static phramusca.com.jamuzremote.Playlist.Order.PLAYCOUNTER_LASTPLAYED;
 import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
 
@@ -423,14 +424,21 @@ public class ActivityMain extends AppCompatActivity {
                     try {
                         final JSONObject jObject = new JSONObject(messageEvent.getData());
                         int idFile = (int) jObject.get("idFile");
-                        //FIXME ! Use idFile to get File info to display. Only change when id changes. Refer to how android player handles it (can it be reused ?)
+                        if(displayedTrack.getIdFileServer()!=idFile) {
+                            List<Track> tracks = HelperLibrary.musicLibrary.getTracks(
+                                    "WHERE " + COL_TRACKS_ID_SERVER + "=" + idFile,
+                                    "",
+                                    "",
+                                    1);
+                            displayedTrack = tracks.get(0);
+                            displayTrack();
+                        }
                         int position = (int) jObject.get("position");
                         int length = (int) jObject.get("length");
                         setSeekBar(position * 1000, length * 1000);
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
-
                 }
             };
             serviceRemote.registerCallback(serviceRemoteCallback);

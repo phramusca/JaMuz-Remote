@@ -123,12 +123,8 @@ public class MusicLibrary {
     }
 
     List<Track> getTracks(String where, String having, String order, int limit) {
-        return getTracks(false, where, having, order, limit);
-    }
-
-    List<Track> getTracks(boolean statsOnly, String where, String having, String order, int limit) {
-        Cursor cursor = getTracksCursor(statsOnly, where, having, order, limit);
-        List<Track> tracks = getTracks(cursor, statsOnly);
+        Cursor cursor = getTracksCursor(false, where, having, order, limit);
+        List<Track> tracks = getTracks(cursor, false);
         if (limit > 0) {
             Collections.shuffle(tracks);
         }
