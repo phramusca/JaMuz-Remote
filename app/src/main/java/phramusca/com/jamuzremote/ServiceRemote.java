@@ -8,6 +8,7 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
 import com.launchdarkly.eventsource.MessageEvent;
 
@@ -89,6 +90,7 @@ public class ServiceRemote extends ServiceBase {
             }
         }
         startSse();
+        getPlaylists();
         return START_REDELIVER_INTENT;
     }
 
@@ -137,6 +139,20 @@ public class ServiceRemote extends ServiceBase {
         }.start();
     }
 
+    private void getPlaylists() {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    String bodyString = clientInfo.getBodyString("playlists", client);
+                    notifyCallbacks("playlists", new MessageEvent(bodyString));
+                } catch (IOException | ClientInfo.ServerException e) {
+                    Log.e(TAG, "getPlaylists", e); //NON-NLS
+                }
+            }
+        }.start();
+    }
+
     public void send(String action) {
         send(action, "");
     }
@@ -150,7 +166,7 @@ public class ServiceRemote extends ServiceBase {
                     JSONObject obj = new JSONObject();
                     obj.put("action", action);
                     obj.put("value", value);
-                     Request request = clientInfo.getRequestBuilder(urlBuilder) //NON-NLS
+                    Request request = clientInfo.getRequestBuilder(urlBuilder) //NON-NLS
                             .post(RequestBody.create(obj.toString(), MediaType.parse("application/json; charset=utf-8"))).build(); //NON-NLS
                     //FIXME !! Use bodyString when required
                     String bodyString = clientInfo.getBodyString(request, client);
@@ -160,43 +176,6 @@ public class ServiceRemote extends ServiceBase {
             }
         }.start();
     }
-
-    //FIXME !!! Use this code to get returns from server
-//    class ListenerRemote implements IListenerRemote {
-//
-//        private final String TAG = ListenerRemote.class.getName();
-//
-//        @Override
-//        public void onReceivedJson(final String json) {
-//            try {
-//                JSONObject jObject = new JSONObject(json);
-//                String type = jObject.getString("type"); //NON-NLS //NON-NLS
-//                switch (type) {
-//                    case "playlists": //NON-NLS
-//                        String selectedPlaylist = jObject.getString("selectedPlaylist"); //NON-NLS
-//                        Playlist temp = new Playlist(selectedPlaylist, false);
-//                        final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists"); //NON-NLS
-//                        final List<Playlist> playlists = new ArrayList<>();
-//                        for (int i = 0; i < jsonPlaylists.length(); i++) {
-//                            String playlist = (String) jsonPlaylists.get(i);
-//                            Playlist playList = new Playlist(playlist, false);
-//                            if (playlist.equals(selectedPlaylist)) {
-//                                playList = temp;
-//                            }
-//                            playlists.add(playList);
-//                        }
-//                        ArrayAdapter<Playlist> arrayAdapter =
-//                                new ArrayAdapter<>(ActivityMain.this,
-//                                        R.layout.spinner_item, playlists);
-//                        setupPlaylistSpinner(arrayAdapter, temp);
-//                        enablePlaylistEdit(false);
-//                        break;
-//                }
-//            } catch (JSONException e) {
-//                Log.e(TAG, e.toString());
-//            }
-//        }
-//    }
 
     //FIXME ! Get playing track info from remote and display it
 //    private void getTags() throws IOException, ClientInfo.ServerException, JSONException {

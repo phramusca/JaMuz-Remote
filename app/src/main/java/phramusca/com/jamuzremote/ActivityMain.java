@@ -439,25 +439,51 @@ public class ActivityMain extends AppCompatActivity {
             ServiceRemote.MyBinder binder = (ServiceRemote.MyBinder) service;
             serviceRemote = binder.getService();
             serviceRemoteCallback = (event, messageEvent) -> {
-                if (event.equals("positionChanged")) {
-                    try {
-                        final JSONObject jObject = new JSONObject(messageEvent.getData());
-                        int idFile = (int) jObject.get("idFile");
-                        if(displayedTrack.getIdFileServer()!=idFile) {
-                            List<Track> tracks = HelperLibrary.musicLibrary.getTracks(
-                                    "WHERE " + COL_TRACKS_ID_SERVER + "=" + idFile,
-                                    "",
-                                    "",
-                                    1);
-                            displayedTrack = tracks.get(0);
-                            displayTrack();
+                switch (event) {
+                    case "positionChanged":
+                        try {
+                            final JSONObject jObject = new JSONObject(messageEvent.getData());
+                            int idFile = (int) jObject.get("idFile");
+                            if(displayedTrack.getIdFileServer()!=idFile) {
+                                List<Track> tracks = HelperLibrary.musicLibrary.getTracks(
+                                        "WHERE " + COL_TRACKS_ID_SERVER + "=" + idFile,
+                                        "",
+                                        "",
+                                        1);
+                                displayedTrack = tracks.get(0);
+                                displayTrack();
+                            }
+                            int position = (int) jObject.get("position");
+                            int length = (int) jObject.get("length");
+                            setSeekBar(position * 1000, length * 1000);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
                         }
-                        int position = (int) jObject.get("position");
-                        int length = (int) jObject.get("length");
-                        setSeekBar(position * 1000, length * 1000);
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
+                        break;
+                    case "playlists":
+                        try {
+                            JSONObject jObject = new JSONObject(messageEvent.getData());
+                            String selectedPlaylist = jObject.getString("selectedPlaylist"); //NON-NLS
+                            Playlist temp = new Playlist(selectedPlaylist, false);
+                            final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists"); //NON-NLS
+                            final List<Playlist> playlists = new ArrayList<>();
+                            for (int i = 0; i < jsonPlaylists.length(); i++) {
+                                String playlist = (String) jsonPlaylists.get(i);
+                                Playlist playList = new Playlist(playlist, false);
+                                if (playlist.equals(selectedPlaylist)) {
+                                    playList = temp;
+                                }
+                                playlists.add(playList);
+                            }
+                            ArrayAdapter<Playlist> arrayAdapter =
+                                    new ArrayAdapter<>(ActivityMain.this,
+                                            R.layout.spinner_item, playlists);
+                            setupPlaylistSpinner(arrayAdapter, temp);
+                            enablePlaylistEdit(false);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                        break;
                 }
             };
             serviceRemote.registerCallback(serviceRemoteCallback);
