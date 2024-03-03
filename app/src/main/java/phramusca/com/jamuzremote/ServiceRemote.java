@@ -31,19 +31,13 @@ public class ServiceRemote extends ServiceBase {
     private BroadcastReceiver userStopReceiver;
     private WifiManager.WifiLock wifiLock;
     private ProcessRemote processRemote;
-    private final IBinder binder = new MyBinder();
     private final List<ServiceRemoteCallback> callbacks = new ArrayList<>();
+    private SSEClient sseClient;
 
-    // Binder class for clients to access public methods of the Service
     public class MyBinder extends Binder {
         public ServiceRemote getService() {
             return ServiceRemote.this;
         }
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
     }
 
     public void registerCallback(ServiceRemoteCallback callback) {
@@ -62,8 +56,7 @@ public class ServiceRemote extends ServiceBase {
 
     @Override
     public void onCreate() {
-        //FIXME ! Change title
-        notification = new Notification(this, NotificationId.get(), getString(R.string.serviceSyncNotifySyncTitle),
+        notification = new Notification(this, NotificationId.get(), getString(R.string.remote_control),
                 "Remote service",
                 "Remote control JaMuz Server.");
         userStopReceiver = new UserStopServiceReceiver();
@@ -97,6 +90,8 @@ public class ServiceRemote extends ServiceBase {
     }
 
     private void stopSync(String msg, long millisInFuture) {
+        helperNotification.notifyBar(notification, getString(R.string.closing_remote_control));
+        sseClient.disconnect();
         if(processRemote!=null) {
             processRemote.abort();
         }
@@ -106,10 +101,12 @@ public class ServiceRemote extends ServiceBase {
                 helperToast.toastLong(msg);
             });
         }
-        sendMessage("enableRemote");
+        helperNotification.notifyBar(notification, getString(R.string.closed_remote_control), 5000);
+        sendMessage("enableRemote"); //NON-NLS
         stopSelf();
-    } //NON-NLS
+    }
 
+    //TODO: No need for a Process, as only starting sse client, and then service keeps running
     private class ProcessRemote extends ProcessAbstract {
 
         ProcessRemote(String name) {
@@ -119,8 +116,7 @@ public class ServiceRemote extends ServiceBase {
         @Override
         public void run() {
             try {
-                //FIXME ! Change title
-                helperNotification.notifyBar(notification, getString(R.string.syncLabelConnecting));
+                helperNotification.notifyBar(notification, getString(R.string.connected_to_remote_control));
                 checkAbort();
 
                 HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("connect"); //NON-NLS
@@ -136,7 +132,7 @@ public class ServiceRemote extends ServiceBase {
 //FIXME ! implementation 'com.launchdarkly:okhttp-eventsource:1.0.0' => update until Duration / API 26
 //TODO: Or Switch to https://github.com/square/okhttp/tree/master/okhttp-sse when ready
 
-                SSEClient sseClient = new SSEClient(new SSEHandler() {
+                sseClient = new SSEClient(new SSEHandler() {
                     @Override
                     public void onSSEConnectionOpened() {
                         System.out.println("SSE connection opened");
@@ -154,6 +150,7 @@ public class ServiceRemote extends ServiceBase {
                         clientInfo.getHeaders());
 
                 sseClient.start();
+                checkAbort();
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error ProcessRemote", e); //NON-NLS
                 stopSync(getString(R.string.serviceSyncNotifySyncInterrupted), -1);

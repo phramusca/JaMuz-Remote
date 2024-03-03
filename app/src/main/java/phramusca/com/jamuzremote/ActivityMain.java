@@ -407,7 +407,8 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private ServiceRemoteCallback serviceRemoteCallback;
-    private ServiceConnection serviceConnection = new ServiceConnection() {
+
+    private ServiceConnection serviceRemoteConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             ServiceRemote.MyBinder binder = (ServiceRemote.MyBinder) service;
@@ -422,7 +423,8 @@ public class ActivityMain extends AppCompatActivity {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            // FIXME: Handle disconnection
+            serviceRemote.unregisterCallback(serviceRemoteCallback);
+            serviceRemote = null;
         }
     };
 
@@ -563,7 +565,7 @@ public class ActivityMain extends AppCompatActivity {
                         Intent service = new Intent(getApplicationContext(), ServiceRemote.class);
                         service.putExtra("clientInfo", clientInfo);
                         service.putExtra("getAppDataPath", HelperFile.getAudioRootFolder());
-                        bindService(service, serviceConnection, Context.BIND_AUTO_CREATE);
+                        bindService(service, serviceRemoteConnection, Context.BIND_AUTO_CREATE);
                         startService(service);
                     }
                 } else {
@@ -1649,7 +1651,7 @@ public class ActivityMain extends AppCompatActivity {
         // Unbind from the service and unregister callback
         if (serviceRemote != null) {
             serviceRemote.unregisterCallback(serviceRemoteCallback);
-            unbindService(serviceConnection);
+            unbindService(serviceRemoteConnection);
         }
         // Not closing as services may still need it
         /*HelperLibrary.close();*/
@@ -1755,6 +1757,7 @@ public class ActivityMain extends AppCompatActivity {
                     enableSync(true);
                     break;
                 case "enableRemote":
+                    unbindService(serviceRemoteConnection);
                     enableRemote(true);
                 case "setupGenres":
                     setupGenres();
