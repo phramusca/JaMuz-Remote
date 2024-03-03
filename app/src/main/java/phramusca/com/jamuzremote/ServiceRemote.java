@@ -82,6 +82,10 @@ public class ServiceRemote extends ServiceBase {
         return START_REDELIVER_INTENT;
     }
 
+    boolean isConnected() {
+        return sseClient.isConnected();
+    }
+
     private void startSse() {
         new Thread() {
             @Override
@@ -121,6 +125,10 @@ public class ServiceRemote extends ServiceBase {
                 }
             }
         }.start();
+    }
+
+    public void send(String test) {
+        //FIXME ! Implement this
     }
 
     //FIXME ! Get playing track info from remote and display it

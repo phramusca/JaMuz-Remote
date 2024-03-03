@@ -11,6 +11,7 @@ import okhttp3.Headers;
 public class SSEClient {
 
     private final EventSource eventSourceSse;
+    private boolean isConnected = false; // Flag to track connection status
 
     public SSEClient(SSEHandler sseHandler, URI uri, Headers headers) {
         EventHandler eventHandler = new DefaultEventHandler(sseHandler);
@@ -24,6 +25,11 @@ public class SSEClient {
 
     public void start() {
         eventSourceSse.start();
+        isConnected = true; // Update connection status when starting
+    }
+
+    public boolean isConnected() {
+        return isConnected;
     }
 
     private static class DefaultEventHandler implements EventHandler {
@@ -58,6 +64,7 @@ public class SSEClient {
         try {
             if (eventSourceSse != null) {
                 eventSourceSse.close();
+                isConnected = false; // Update connection status when disconnecting
             }
         } catch (Exception e) {
             e.printStackTrace();
