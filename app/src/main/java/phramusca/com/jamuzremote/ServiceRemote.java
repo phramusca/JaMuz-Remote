@@ -90,7 +90,7 @@ public class ServiceRemote extends ServiceBase {
             }
         }
         startSse();
-        getPlaylists();
+        getPlaying();
         return START_REDELIVER_INTENT;
     }
 
@@ -139,15 +139,15 @@ public class ServiceRemote extends ServiceBase {
         }.start();
     }
 
-    private void getPlaylists() {
+    private void getPlaying() {
         new Thread() {
             @Override
             public void run() {
                 try {
-                    String bodyString = clientInfo.getBodyString("playlists", client);
-                    notifyCallbacks("playlists", new MessageEvent(bodyString));
+                    String bodyString = clientInfo.getBodyString("playing", client);
+                    notifyCallbacks("playing", new MessageEvent(bodyString));
                 } catch (IOException | ClientInfo.ServerException e) {
-                    Log.e(TAG, "getPlaylists", e); //NON-NLS
+                    Log.e(TAG, "getPlaying", e); //NON-NLS
                 }
             }
         }.start();

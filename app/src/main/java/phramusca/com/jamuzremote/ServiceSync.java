@@ -131,6 +131,8 @@ public class ServiceSync extends ServiceBase {
 
                 startTime = System.currentTimeMillis();
                 //Remove files in db but not received from server
+                //FIXME ! Somehow this message stays (when proccess is quick)
+                //Also review message "serviceSyncNotifySyncRemovingDeleted", it is wrong, at least in french
                 helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRemovingDeleted));
                 List<Track> trackList = RepoSync.getNotSyncedList();
                 Log.w(TAG, "RepoSync.getNotSyncedList() :"+(System.currentTimeMillis() - startTime)+" ms");

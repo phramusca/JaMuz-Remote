@@ -444,15 +444,7 @@ public class ActivityMain extends AppCompatActivity {
                         try {
                             final JSONObject jObject = new JSONObject(messageEvent.getData());
                             int idFile = (int) jObject.get("idFile");
-                            if(displayedTrack.getIdFileServer()!=idFile) {
-                                List<Track> tracks = HelperLibrary.musicLibrary.getTracks(
-                                        "WHERE " + COL_TRACKS_ID_SERVER + "=" + idFile,
-                                        "",
-                                        "",
-                                        1);
-                                displayedTrack = tracks.get(0);
-                                displayTrack();
-                            }
+                            displayTrack(idFile);
                             int position = (int) jObject.get("position");
                             int length = (int) jObject.get("length");
                             setSeekBar(position * 1000, length * 1000);
@@ -460,9 +452,11 @@ public class ActivityMain extends AppCompatActivity {
                             throw new RuntimeException(e);
                         }
                         break;
-                    case "playlists":
+                    case "playing":
                         try {
                             JSONObject jObject = new JSONObject(messageEvent.getData());
+                            int idFile = jObject.getInt("idFile");
+                            displayTrack(idFile);
                             String selectedPlaylist = jObject.getString("selectedPlaylist"); //NON-NLS
                             Playlist temp = new Playlist(selectedPlaylist, false);
                             final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists"); //NON-NLS
@@ -2135,7 +2129,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void setupLocalPlaylistSpinner(String playlistName) {
-        if (localPlaylists.size() > 0) {
+        if (!localPlaylists.isEmpty()) {
             localPlaylists = sortHashMapByValues(localPlaylists);
         } else {
             Playlist playlistAll = new Playlist(getString(R.string.playlistDefaultAllPlaylistName), true);
@@ -2388,6 +2382,18 @@ public class ActivityMain extends AppCompatActivity {
         MediaMetadataCompat metadata = MediaMetadataCompat.fromMediaMetadata(getMediaController().getMetadata());
         if (metadata != null) {
             setSeekBarPosition(PlaybackStateCompat.fromPlaybackState(getMediaController().getPlaybackState()), (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+        }
+    }
+
+    private void displayTrack(int idFile) {
+        if(idFile>=0 && displayedTrack.getIdFileServer() != idFile) {
+            List<Track> tracks = HelperLibrary.musicLibrary.getTracks(
+                    "WHERE " + COL_TRACKS_ID_SERVER + "=" + idFile,
+                    "",
+                    "",
+                    1);
+            displayedTrack = tracks.get(0);
+            displayTrack();
         }
     }
 
