@@ -1,17 +1,21 @@
 package phramusca.com.jamuzremote;
 
+import android.util.Log;
+
 import com.launchdarkly.eventsource.EventHandler;
 import com.launchdarkly.eventsource.EventSource;
 import com.launchdarkly.eventsource.MessageEvent;
 
 import java.net.URI;
+import java.util.Objects;
 
 import okhttp3.Headers;
 
 public class SSEClient {
 
-    private final EventSource eventSourceSse;
-    private boolean isConnected = false; // Flag to track connection status
+    private static final String TAG = SSEClient.class.getName();
+    private EventSource eventSourceSse;
+    private boolean isConnected = false;
 
     public SSEClient(SSEHandler sseHandler, URI uri, Headers headers) {
         EventHandler eventHandler = new DefaultEventHandler(sseHandler);
@@ -25,7 +29,7 @@ public class SSEClient {
 
     public void start() {
         eventSourceSse.start();
-        isConnected = true; // Update connection status when starting
+        isConnected = true;
     }
 
     public boolean isConnected() {
@@ -63,11 +67,13 @@ public class SSEClient {
     public void disconnect() {
         try {
             if (eventSourceSse != null) {
+                //FIXME ! closing this does not trigger onClose event on server :( why ???
                 eventSourceSse.close();
-                isConnected = false; // Update connection status when disconnecting
+                isConnected = false;
+                eventSourceSse=null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, Objects.requireNonNull(e.getLocalizedMessage()));
         }
     }
 }

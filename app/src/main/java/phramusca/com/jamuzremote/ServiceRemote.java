@@ -196,7 +196,6 @@ public class ServiceRemote extends ServiceBase {
             });
         }
         runOnUiThread(() -> helperNotification.notifyBar(notification, getString(R.string.closed_remote_control), 5000));
-
         sendMessage("enableRemote"); //NON-NLS
         stopSelf();
     }

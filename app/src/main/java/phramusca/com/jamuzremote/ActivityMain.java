@@ -636,7 +636,6 @@ public class ActivityMain extends AppCompatActivity {
                 Log.i(TAG, "Broadcast(" + ServiceRemote.USER_STOP_SERVICE_REQUEST + ")"); //NON-NLS
                 sendBroadcast(new Intent(ServiceRemote.USER_STOP_SERVICE_REQUEST));
                 //FIXME ! Set back displayedTrack here !
-                enableRemote(true);
             }
         });
 
@@ -949,6 +948,8 @@ public class ActivityMain extends AppCompatActivity {
         if (isMyServiceRunning(ServiceSync.class)) {
             enableSync(false);
         }
+
+        //TODO: Use isMyServiceRunning or serviceRemote.isConnected() ? (and elsewhere too)
         if (isMyServiceRunning(ServiceRemote.class)) {
             enableRemote(false);
         }
@@ -1390,6 +1391,7 @@ public class ActivityMain extends AppCompatActivity {
         super.onPause();
         Log.i(TAG, "ActivityMain onPause"); //NON-NLS
         wasRemoteConnected = isRemoteConnected();
+        enableRemote(true); //Because broadcast receiver seems gone, so this would not be called
         stopRemote();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
@@ -1767,7 +1769,7 @@ public class ActivityMain extends AppCompatActivity {
         SpeechPostAction speechPostAction = SpeechPostAction.NONE;
         if (force
                 || displayedTrack.getRating() < 1 //no rating
-                || displayedTrack.getTags(false).size() < 1)  //no user tags
+                || displayedTrack.getTags(false).isEmpty())  //no user tags
         {
             if (ScreenReceiver.isScreenOn
                     && toggleButtonDimMode.isChecked()
@@ -1783,7 +1785,7 @@ public class ActivityMain extends AppCompatActivity {
     private String getDisplayedTrackStatus() {
         StringBuilder msg = new StringBuilder();
         ArrayList<String> trackTags = displayedTrack.getTags(false);
-        if (trackTags.size() > 0) {
+        if (!trackTags.isEmpty()) {
             msg.append(getString(R.string.speakTags)).append(": ");
             for (String tag : trackTags) {
                 msg.append(tag).append(", ");
@@ -1834,12 +1836,11 @@ public class ActivityMain extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             String msg = intent.getStringExtra("message"); //NON-NLS
             Log.i(TAG, "Broadcast.onReceive(" + msg + ")"); //NON-NLS
-            switch (msg) {
+            switch (Objects.requireNonNull(msg)) {
                 case "enableSync":
                     enableSync(true);
                     break;
                 case "enableRemote":
-                    stopRemote();
                     enableRemote(true);
                 case "setupGenres":
                     setupGenres();
@@ -1888,6 +1889,7 @@ public class ActivityMain extends AppCompatActivity {
                 @Override
                 public void run() {
                     Log.v(TAG, "timerTask performed"); //NON-NLS
+                    //TODO: Why not dimming out ?
                     setBrightness(0);
                     //dim(false);
                     isDimOn = false;
@@ -2469,6 +2471,7 @@ public class ActivityMain extends AppCompatActivity {
         if (serviceRemote != null) {
             serviceRemote.unregisterCallback(serviceRemoteCallback);
             unbindService(serviceRemoteConnection);
+            sendBroadcast(new Intent(ServiceRemote.USER_STOP_SERVICE_REQUEST));
             serviceRemote = null;
         }
     }
