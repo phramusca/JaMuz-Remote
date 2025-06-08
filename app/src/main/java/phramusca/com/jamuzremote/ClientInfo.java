@@ -68,7 +68,23 @@ public class ClientInfo implements Serializable {
     }
 
     public String getBodyString(HttpUrl.Builder urlBuilder, OkHttpClient client) throws IOException, ServerException {
-        return getBody(urlBuilder, client).string();
+        return getBodyString(getRequestBuilder(urlBuilder).build(), client);
+    }
+
+    public String getBodyString(Request request, OkHttpClient client) throws IOException, ServerException {
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                if (response.code() == 301) {
+                    throw new ServerException(request.header("api-version") + " not supported. " + Objects.requireNonNull(response.body()).string()); //NON-NLS
+                }
+                throw new ServerException(response.code() + ": " + response.message());
+            }
+            ResponseBody body = response.body();
+            if (body == null) {
+                throw new IOException("Empty response body");
+            }
+            return body.string();
+        }
     }
 
     public ResponseBody getBody(HttpUrl.Builder urlBuilder, OkHttpClient client) throws IOException, ServerException {
@@ -76,19 +92,20 @@ public class ClientInfo implements Serializable {
         return getBody(request, client);
     }
 
-    public String getBodyString(Request request, OkHttpClient client) throws IOException, ServerException {
-        return getBody(request, client).string();
-    }
-
     private ResponseBody getBody(Request request, OkHttpClient client) throws IOException, ServerException {
-        Response response = client.newCall(request).execute();
-        if (!response.isSuccessful()) {
-            if (response.code() == 301) {
-                throw new ServerException(request.header("api-version") + " not supported. " + Objects.requireNonNull(response.body()).string()); //NON-NLS
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                if (response.code() == 301) {
+                    throw new ServerException(request.header("api-version") + " not supported. " + Objects.requireNonNull(response.body()).string()); //NON-NLS
+                }
+                throw new ServerException(response.code() + ": " + response.message());
             }
-            throw new ServerException(response.code() + ": " + response.message());
+            ResponseBody body = response.body();
+            if (body == null) {
+                throw new IOException("Empty response body");
+            }
+            return body;
         }
-        return response.body();
     }
 
     public static class ServerException extends Exception {

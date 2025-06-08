@@ -95,7 +95,10 @@ public class ServiceRemote extends ServiceBase {
     }
 
     boolean isConnected() {
-        return sseClient.isConnected();
+        if (sseClient != null) {
+            return sseClient.isConnected();
+        }
+        return false;
     }
 
     private void startSse() {
