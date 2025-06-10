@@ -633,8 +633,7 @@ public class ActivityMain extends AppCompatActivity {
                     enableRemote(true);
                 }
             } else {
-                Log.i(TAG, "Broadcast(" + ServiceRemote.USER_STOP_SERVICE_REQUEST + ")"); //NON-NLS
-                sendBroadcast(new Intent(ServiceRemote.USER_STOP_SERVICE_REQUEST));
+                stopRemote();
                 //FIXME ! Set back displayedTrack here !
             }
         });
@@ -2468,6 +2467,7 @@ public class ActivityMain extends AppCompatActivity {
         if (serviceRemote != null) {
             serviceRemote.unregisterCallback(serviceRemoteCallback);
             unbindService(serviceRemoteConnection);
+            Log.i(TAG, "Broadcast(" + ServiceRemote.USER_STOP_SERVICE_REQUEST + ")"); //NON-NLS
             sendBroadcast(new Intent(ServiceRemote.USER_STOP_SERVICE_REQUEST));
             serviceRemote = null;
         }

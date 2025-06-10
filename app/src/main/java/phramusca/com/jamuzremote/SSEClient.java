@@ -67,10 +67,12 @@ public class SSEClient {
     public void disconnect() {
         try {
             if (eventSourceSse != null) {
-                //FIXME ! closing this does not trigger onClose event on server :( why ???
+                //FIXME ! HEARTBEAT/DISCONNECT closing this does not trigger onClose event on server :( why ???
+                //Replace with heartbeat from client and disconnect if not receiving for a time
+                //And with a /disconnect api endpoint
                 eventSourceSse.close();
                 isConnected = false;
-                eventSourceSse=null;
+                eventSourceSse = null;
             }
         } catch (Exception e) {
             Log.e(TAG, Objects.requireNonNull(e.getLocalizedMessage()));

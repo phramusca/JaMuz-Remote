@@ -8,17 +8,14 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
 import com.launchdarkly.eventsource.MessageEvent;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import okhttp3.HttpUrl;
@@ -129,6 +126,7 @@ public class ServiceRemote extends ServiceBase {
                         @Override
                         public void onSSEError(Throwable t) {
                             System.err.println("Error occurred: " + t.getMessage());
+                            stopSync("Error occurred: " + t.getMessage(), -1);
                         }
                     }, clientInfo.getUrlBuilder("sse").build().uri(),
                             clientInfo.getHeaders());
