@@ -2110,6 +2110,7 @@ public class ActivityMain extends AppCompatActivity {
             toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
             toggleOff(toggleButtonPlaylist, layoutPlaylist);
             toggleOff(toggleButtonEditTags, layoutEditTags);
+            toggleOff(toggleButtonControls, layoutControls);
         }, 500);
 
         mHandler.postDelayed(() -> {
