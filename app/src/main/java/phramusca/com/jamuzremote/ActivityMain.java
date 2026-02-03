@@ -633,6 +633,7 @@ public class ActivityMain extends AppCompatActivity {
                     enableRemote(true);
                 }
             } else {
+                sendBroadcast(new Intent(ServiceRemote.USER_STOP_SERVICE_REQUEST));
                 stopRemote();
                 //FIXME ! Set back displayedTrack here !
             }
@@ -659,7 +660,6 @@ public class ActivityMain extends AppCompatActivity {
                     enableSync(true);
                 }
             } else {
-                Log.i(TAG, "Broadcast(" + ServiceSync.USER_STOP_SERVICE_REQUEST + ")"); //NON-NLS
                 sendBroadcast(new Intent(ServiceSync.USER_STOP_SERVICE_REQUEST));
                 enableSync(true);
             }
@@ -1389,9 +1389,12 @@ public class ActivityMain extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.i(TAG, "ActivityMain onPause"); //NON-NLS
-        wasRemoteConnected = isRemoteConnected();
-        enableRemote(true); //Because broadcast receiver seems gone, so this would not be called
-        stopRemote();
+        // Only unbind, do not stop the service
+        if (serviceRemote != null) {
+            serviceRemote.unregisterCallback(serviceRemoteCallback);
+            unbindService(serviceRemoteConnection);
+            serviceRemote = null;
+        }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
@@ -1408,7 +1411,7 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    private boolean wasRemoteConnected = false;
+//    private boolean wasRemoteConnected = false;
 
     @Override
     protected void onResume() {
@@ -1419,9 +1422,6 @@ public class ActivityMain extends AppCompatActivity {
         getFromQRcode(getIntent().getDataString());
         if (toggleButtonDimMode.isChecked()) {
             dimOn();
-        }
-        if(wasRemoteConnected) {
-            buttonRemote.performClick();
         }
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
@@ -1740,7 +1740,7 @@ public class ActivityMain extends AppCompatActivity {
         /*HelperLibrary.close();*/
     }
 
-    private void connectDatabase() {
+    private void initializeMusicLibrary() {
         HelperLibrary.open(this, HelperFile.getAudioRootFolder(), musicLibraryDbFile);
 
         new Thread() {
@@ -1976,7 +1976,7 @@ public class ActivityMain extends AppCompatActivity {
                     });
             alertDialog.show();
         } else {
-            connectDatabase();
+            initializeMusicLibrary();
         }
     }
 
@@ -2041,7 +2041,7 @@ public class ActivityMain extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            connectDatabase();
+            initializeMusicLibrary();
         }
     }
 
@@ -2110,7 +2110,6 @@ public class ActivityMain extends AppCompatActivity {
             toggleOff(toggleButtonTagsPanel, layoutTagsPlaylistLayout);
             toggleOff(toggleButtonPlaylist, layoutPlaylist);
             toggleOff(toggleButtonEditTags, layoutEditTags);
-            toggleOff(toggleButtonControls, layoutControls);
         }, 500);
 
         mHandler.postDelayed(() -> {
@@ -2467,8 +2466,6 @@ public class ActivityMain extends AppCompatActivity {
         if (serviceRemote != null) {
             serviceRemote.unregisterCallback(serviceRemoteCallback);
             unbindService(serviceRemoteConnection);
-            Log.i(TAG, "Broadcast(" + ServiceRemote.USER_STOP_SERVICE_REQUEST + ")"); //NON-NLS
-            sendBroadcast(new Intent(ServiceRemote.USER_STOP_SERVICE_REQUEST));
             serviceRemote = null;
         }
     }
