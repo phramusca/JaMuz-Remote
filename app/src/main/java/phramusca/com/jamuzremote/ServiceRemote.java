@@ -67,6 +67,7 @@ public class ServiceRemote extends ServiceBase {
 
     @Override
     public void onCreate() {
+        //FIXME: Fix and translate those strings (add new ones as needed)
         notification = new Notification(this, NotificationId.get(), getString(R.string.remote_control),
                 "Remote service",
                 "Remote control JaMuz Server.");
@@ -87,7 +88,6 @@ public class ServiceRemote extends ServiceBase {
             }
         }
         startSse();
-        getPlaying();
         return START_REDELIVER_INTENT;
     }
 
@@ -132,6 +132,7 @@ public class ServiceRemote extends ServiceBase {
                             clientInfo.getHeaders());
 
                     sseClient.start();
+                    getPlaying();
                 } catch (Exception e) {
                     Log.e(TAG, "Error ServiceRemote", e); //NON-NLS
                     stopSync("ERROR: " + e.getLocalizedMessage(), -1);
