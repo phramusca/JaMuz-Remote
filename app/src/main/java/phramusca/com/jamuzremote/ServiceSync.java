@@ -22,6 +22,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import androidx.core.content.ContextCompat;
+
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -53,7 +55,7 @@ public class ServiceSync extends ServiceBase {
                 .readTimeout(60, TimeUnit.SECONDS)
                 .build();
         userStopReceiver = new UserStopServiceReceiver();
-        registerReceiver(userStopReceiver, new IntentFilter(USER_STOP_SERVICE_REQUEST));
+        ContextCompat.registerReceiver(this, userStopReceiver, new IntentFilter(USER_STOP_SERVICE_REQUEST), ContextCompat.RECEIVER_NOT_EXPORTED);
         super.onCreate();
     }
 

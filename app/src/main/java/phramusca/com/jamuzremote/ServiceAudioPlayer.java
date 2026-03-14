@@ -9,6 +9,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ServiceInfo;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -43,7 +44,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements MediaPlayer.OnCompletionListener {
@@ -98,7 +98,11 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
         }
         builder = new NotificationCompat.Builder(getApplicationContext(), channelId);
         setMediaPlaybackState(PlaybackStateCompat.STATE_STOPPED);
-        startForeground(NOTIFICATION_ID, getNotification(PlaybackStateCompat.ACTION_PLAY));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(NOTIFICATION_ID, getNotification(PlaybackStateCompat.ACTION_PLAY), ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+        } else {
+            startForeground(NOTIFICATION_ID, getNotification(PlaybackStateCompat.ACTION_PLAY));
+        }
     }
 
     private void initMediaSession() {

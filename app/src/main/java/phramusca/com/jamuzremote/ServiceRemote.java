@@ -21,6 +21,8 @@ import java.util.List;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import androidx.core.content.ContextCompat;
+
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
@@ -72,7 +74,7 @@ public class ServiceRemote extends ServiceBase {
                 "Remote service",
                 "Remote control JaMuz Server.");
         userStopReceiver = new UserStopServiceReceiver();
-        registerReceiver(userStopReceiver, new IntentFilter(USER_STOP_SERVICE_REQUEST));
+        ContextCompat.registerReceiver(this, userStopReceiver, new IntentFilter(USER_STOP_SERVICE_REQUEST), ContextCompat.RECEIVER_NOT_EXPORTED);
         super.onCreate();
     }
 
