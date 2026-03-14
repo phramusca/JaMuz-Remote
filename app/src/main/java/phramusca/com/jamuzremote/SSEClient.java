@@ -76,9 +76,7 @@ public class SSEClient {
     public void disconnect() {
         try {
             if (eventSourceSse != null) {
-                //FIXME ! HEARTBEAT/DISCONNECT closing this does not trigger onClose event on server :( why ???
-                //Replace with heartbeat from client and disconnect if not receiving for a time
-                //And with a /disconnect api endpoint
+                // Closing here does not always trigger server onClose(); ServiceRemote calls GET /disconnect before this.
                 eventSourceSse.close();
                 isConnected = false;
                 eventSourceSse = null;

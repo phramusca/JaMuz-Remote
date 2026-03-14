@@ -633,7 +633,7 @@ public class ActivityMain extends AppCompatActivity {
                     enableRemote(true);
                 }
             } else {
-                sendBroadcast(new Intent(ServiceRemote.USER_STOP_SERVICE_REQUEST));
+                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ServiceRemote.USER_STOP_SERVICE_REQUEST));
                 stopRemote();
                 //FIXME ! Set back displayedTrack here !
             }

@@ -22,6 +22,7 @@ import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -74,7 +75,7 @@ public class ServiceRemote extends ServiceBase {
                 "Remote service",
                 "Remote control JaMuz Server.");
         userStopReceiver = new UserStopServiceReceiver();
-        ContextCompat.registerReceiver(this, userStopReceiver, new IntentFilter(USER_STOP_SERVICE_REQUEST), ContextCompat.RECEIVER_NOT_EXPORTED);
+        LocalBroadcastManager.getInstance(this).registerReceiver(userStopReceiver, new IntentFilter(USER_STOP_SERVICE_REQUEST));
         super.onCreate();
     }
 
@@ -188,7 +189,7 @@ public class ServiceRemote extends ServiceBase {
     }
     @Override
     public void onDestroy() {
-        unregisterReceiver(userStopReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userStopReceiver);
         if (wifiLock != null) {
             wifiLock.release();
         }
@@ -197,18 +198,30 @@ public class ServiceRemote extends ServiceBase {
 
     private void stopRemote(String msg, long millisInFuture) {
         helperNotification.notifyBar(notification, getString(R.string.closing_remote_control));
-        if (sseClient != null) {
-            sseClient.disconnect();
-        }
-        if (!msg.isEmpty()) {
-            runOnUiThread(() -> {
-                helperNotification.notifyBar(notification, msg, millisInFuture);
-                helperToast.toastLong(msg);
-            });
-        }
-        runOnUiThread(() -> helperNotification.notifyBar(notification, getString(R.string.closed_remote_control), 5000));
-        sendMessage("enableRemote"); //NON-NLS
-        stopSelf();
+        new Thread(() -> {
+            try {
+                if (clientInfo != null) {
+                    try {
+                        clientInfo.getBodyString("disconnect", client);
+                    } catch (IOException | ClientInfo.ServerException e) {
+                        Log.e(TAG, "disconnect", e); //NON-NLS
+                    }
+                }
+                if (sseClient != null) {
+                    sseClient.disconnect();
+                }
+            } finally {
+                runOnUiThread(() -> {
+                    if (!msg.isEmpty()) {
+                        helperNotification.notifyBar(notification, msg, millisInFuture);
+                        helperToast.toastLong(msg);
+                    }
+                    helperNotification.notifyBar(notification, getString(R.string.closed_remote_control), 5000);
+                    sendMessage("enableRemote"); //NON-NLS
+                    stopSelf();
+                });
+            }
+        }).start();
     }
 
     public class UserStopServiceReceiver extends BroadcastReceiver {
