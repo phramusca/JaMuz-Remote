@@ -126,7 +126,7 @@ public class ServiceRemote extends ServiceBase {
 
                         @Override
                         public void onSSEEventReceived(String event, MessageEvent messageEvent) {
-                            System.out.println("SSE received: " + messageEvent.getData());
+                            System.out.println("SSE received event: " + event + " | " + messageEvent.getData());
                             if ("ping".equals(event)) return; // server heartbeat, keep connection alive
                             notifyCallbacks(event, messageEvent);
                         }
