@@ -21,8 +21,8 @@ android {
         }
     }
     compileOptions {
-        targetCompatibility 1.8
-        sourceCompatibility 1.8
+        targetCompatibility JavaVersion.VERSION_21
+        sourceCompatibility JavaVersion.VERSION_21
     }
     namespace 'phramusca.com.jamuzremote'
     lint {
@@ -43,17 +43,14 @@ dependencies {
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.3.Final'
     implementation("androidx.media:media:1.7.1")
 
+    implementation 'com.google.code.gson:gson:2.13.2'
+    implementation 'com.google.guava:guava:33.5.0-android'
+
+    //OK Http
     // DO NOT UPDATE okhttp more than 4.9.3 or update okhttp-eventsource before
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     // DO NOT UPDATE okhttp-eventsource more than 3.0.0 or raise minSdkVersion to 26+
     implementation 'com.launchdarkly:okhttp-eventsource:3.0.0'
-
-    implementation 'com.google.code.gson:gson:2.13.2'
-    // DO NOT UPDATE guava unless changing sourceCompatibility 1.8
-    // https://stackoverflow.com/a/49619157
-    implementation 'com.google.guava:guava:23.3-android'
-    //https://stackoverflow.com/questions/56639529/duplicate-class-com-google-common-util-concurrent-listenablefuture-found-in-modu
-    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 
     //QR Code
     // DO NOT UPDATE zxing-android-embedded more than 3.6.0 or update minSdkVersion accordingly
@@ -63,7 +60,6 @@ dependencies {
     // DO NOT UPDATE zxing:core more than 3.3.3 or set minSdkVersion >= 24
     // https://github.com/zxing/zxing/issues/1170
     implementation 'com.google.zxing:core:3.3.3'
-
 }
 
 repositories {
