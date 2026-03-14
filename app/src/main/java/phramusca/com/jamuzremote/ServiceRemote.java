@@ -121,7 +121,7 @@ public class ServiceRemote extends ServiceBase {
                         @Override
                         public void onSSEConnectionClosed() {
                             System.out.println("SSE connection closed");
-                            stopSync(getString(R.string.closing_remote_control), 0);
+                            stopRemote(getString(R.string.closing_remote_control), 0);
                         }
 
                         @Override
@@ -133,7 +133,7 @@ public class ServiceRemote extends ServiceBase {
                         @Override
                         public void onSSEError(Throwable t) {
                             System.err.println("Error occurred: " + t.getMessage());
-                            stopSync("Error occurred: " + t.getMessage(), -1);
+                            stopRemote("Error occurred: " + t.getMessage(), -1);
                         }
                     }, clientInfo.getUrlBuilder("sse").build().uri(),
                             clientInfo.getHeaders());
@@ -142,7 +142,7 @@ public class ServiceRemote extends ServiceBase {
                     getPlaying();
                 } catch (Exception e) {
                     Log.e(TAG, "Error ServiceRemote", e); //NON-NLS
-                    stopSync("ERROR: " + e.getLocalizedMessage(), -1);
+                    stopRemote("ERROR: " + e.getLocalizedMessage(), -1);
                 }
             }
         }.start();
@@ -193,7 +193,7 @@ public class ServiceRemote extends ServiceBase {
         super.onDestroy();
     }
 
-    private void stopSync(String msg, long millisInFuture) {
+    private void stopRemote(String msg, long millisInFuture) {
         helperNotification.notifyBar(notification, getString(R.string.closing_remote_control));
         if (sseClient != null) {
             sseClient.disconnect();
@@ -213,7 +213,7 @@ public class ServiceRemote extends ServiceBase {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i(TAG, "UserStopServiceReceiver.onReceive()"); //NON-NLS
-            stopSync(getString(R.string.serviceSyncNotifySyncUserStopped), 1500);
+            stopRemote(getString(R.string.serviceSyncNotifySyncUserStopped), 1500);
         }
     }
 }
