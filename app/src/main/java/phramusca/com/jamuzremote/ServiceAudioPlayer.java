@@ -107,21 +107,20 @@ public class ServiceAudioPlayer extends MediaBrowserServiceCompat implements Med
 
     private void initMediaSession() {
         ComponentName mediaButtonReceiver = new ComponentName(getApplicationContext(), MediaButtonReceiver.class);
-        Intent mediaSessionIntent = new Intent(getApplicationContext(), ServiceAudioPlayer.class);
         int flag = 0;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            flag  = PendingIntent.FLAG_MUTABLE;
+            flag = PendingIntent.FLAG_MUTABLE;
         }
-        PendingIntent intent = PendingIntent.getActivity(getApplicationContext(), 0, mediaSessionIntent, flag);
-        mediaSession = new MediaSessionCompat(getApplicationContext(), TAG, mediaButtonReceiver, intent);
-        mediaSession.setCallback(mediaSessionCallback);
-        mediaSession.setFlags( MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-                | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
-                | MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS );
+        // Media button receiver must be a BroadcastReceiver; do not use getActivity (crashes on API 34+).
         Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         mediaButtonIntent.setClass(this, MediaButtonReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, flag);
-        mediaSession.setMediaButtonReceiver(pendingIntent);
+        PendingIntent mbrPendingIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, flag);
+        mediaSession = new MediaSessionCompat(getApplicationContext(), TAG, mediaButtonReceiver, mbrPendingIntent);
+        mediaSession.setCallback(mediaSessionCallback);
+        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
+                | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
+                | MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS);
+        mediaSession.setMediaButtonReceiver(mbrPendingIntent);
         setSessionToken(mediaSession.getSessionToken());
     }
 
