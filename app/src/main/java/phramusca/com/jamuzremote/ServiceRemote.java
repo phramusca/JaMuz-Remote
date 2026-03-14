@@ -109,9 +109,6 @@ public class ServiceRemote extends ServiceBase {
                     helperNotification.notifyBar(notification, getString(R.string.connected_to_remote_control));
                     clientInfo.getBodyString(clientInfo.getConnectRequest(), client); //NON-NLS
 
-// https://medium.com/@anugrahasb1997/implementing-server-sent-events-sse-in-android-with-okhttp-eventsource-226dc9b2599d
-// TODO: Once no more experimental, maybe switch to https://github.com/square/okhttp/tree/master/okhttp-sse
-
                     //https://github.com/Aarkan1/java-express?tab=readme-ov-file#server-sent-events
                     sseClient = new SSEClient(new SSEHandler() {
                         @Override
