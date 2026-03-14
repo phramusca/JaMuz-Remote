@@ -8,6 +8,7 @@ import com.launchdarkly.eventsource.MessageEvent;
 
 import java.net.URI;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Headers;
 
@@ -19,11 +20,13 @@ public class SSEClient {
 
     public SSEClient(SSEHandler sseHandler, URI uri, Headers headers) {
         EventHandler eventHandler = new DefaultEventHandler(sseHandler);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        // readTimeout: 30s (heartbeat every 5s keeps stream active; 30s catches real drop)
+        // reconnectTime/maxReconnectTime: auto-reconnect with backoff on error (no stop on first failure)
         eventSourceSse = new EventSource.Builder(eventHandler, uri)
-//                    .connectTimeout()
-//                    .backoffResetThreshold(Duration.ofSeconds(3))
                 .headers(headers)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .reconnectTime(2, TimeUnit.SECONDS)
+                .maxReconnectTime(30, TimeUnit.SECONDS)
                 .build();
     }
 

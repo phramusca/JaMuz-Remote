@@ -127,13 +127,15 @@ public class ServiceRemote extends ServiceBase {
                         @Override
                         public void onSSEEventReceived(String event, MessageEvent messageEvent) {
                             System.out.println("SSE received: " + messageEvent.getData());
+                            if ("ping".equals(event)) return; // server heartbeat, keep connection alive
                             notifyCallbacks(event, messageEvent);
                         }
 
                         @Override
                         public void onSSEError(Throwable t) {
-                            System.err.println("Error occurred: " + t.getMessage());
-                            stopRemote("Error occurred: " + t.getMessage(), -1);
+                            Log.w(TAG, "SSE error (reconnecting if possible): " + t.getMessage());
+                            // Do not stopRemote: library will auto-reconnect (reconnectTime/maxReconnectTime).
+                            // onOpen() will be called again on successful reconnect.
                         }
                     }, clientInfo.getUrlBuilder("sse").build().uri(),
                             clientInfo.getHeaders());
