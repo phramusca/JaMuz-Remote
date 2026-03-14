@@ -35,7 +35,7 @@ public class ActivityAlbums extends AppCompatActivity {
         setContentView(R.layout.activity_albums);
 
         Button button_exit_albums = findViewById(R.id.button_exit_albums);
-        button_exit_albums.setOnClickListener(v -> onBackPressed());
+        button_exit_albums.setOnClickListener(v -> finish());
 
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

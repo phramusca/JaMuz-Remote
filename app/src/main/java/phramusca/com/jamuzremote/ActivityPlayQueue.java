@@ -33,7 +33,7 @@ public class ActivityPlayQueue extends AppCompatActivity implements IListenerTra
         setContentView(R.layout.activity_queue);
 
         Button button_exit_queue = findViewById(R.id.button_exit_queue);
-        button_exit_queue.setOnClickListener(v -> onBackPressed());
+        button_exit_queue.setOnClickListener(v -> finish());
         Intent intent = getIntent();
         final Playlist playlist = (Playlist) intent.getSerializableExtra("SelectedPlaylist");
 
