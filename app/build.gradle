@@ -34,19 +34,21 @@ android {
 dependencies {
     testImplementation 'junit:junit:4.13.2'
     implementation 'net.jthink:jaudiotagger:3.0.1'
-    implementation 'com.google.android.material:material:1.9.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.recyclerview:recyclerview:1.3.0'
+    implementation 'com.google.android.material:material:1.13.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.3.Final'
-    implementation("androidx.media:media:1.6.0")
+    implementation("androidx.media:media:1.7.1")
 
-    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
-    implementation 'com.launchdarkly:okhttp-eventsource:1.0.0'
+    // DO NOT UPDATE okhttp more than 4.9.3 or update okhttp-eventsource before
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    // DO NOT UPDATE okhttp-eventsource more than 3.0.0 or raise minSdkVersion to 26+
+    implementation 'com.launchdarkly:okhttp-eventsource:3.0.0'
 
-    implementation 'com.google.code.gson:gson:2.9.1'
+    implementation 'com.google.code.gson:gson:2.13.2'
     // DO NOT UPDATE guava unless changing sourceCompatibility 1.8
     // https://stackoverflow.com/a/49619157
     implementation 'com.google.guava:guava:23.3-android'
@@ -58,7 +60,7 @@ dependencies {
     // Moreover, with 4.3.0, MediaButtonReceiver is not found.
     //      Looks like some changes are required with 4.3.0: https://github.com/journeyapps/zxing-android-embedded/releases/tag/v4.3.0
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
-    // DO NOT UPDATE zxing:core more than 3.3.3 or set min Android >= 7.0
+    // DO NOT UPDATE zxing:core more than 3.3.3 or set minSdkVersion >= 24
     // https://github.com/zxing/zxing/issues/1170
     implementation 'com.google.zxing:core:3.3.3'
 

@@ -36,10 +36,10 @@ public class SSEClient {
         return isConnected;
     }
 
-    private static class DefaultEventHandler implements EventHandler {
+    private class DefaultEventHandler implements EventHandler {
         private final SSEHandler sseHandler;
 
-        public DefaultEventHandler(SSEHandler sseHandler) {
+        DefaultEventHandler(SSEHandler sseHandler) {
             this.sseHandler = sseHandler;
         }
 
@@ -61,6 +61,12 @@ public class SSEClient {
         @Override
         public void onComment(String comment) {
             System.out.println("SSE_CONNECTION: " + comment);
+        }
+
+        @Override
+        public void onClosed() {
+            isConnected = false;
+            sseHandler.onSSEConnectionClosed();
         }
     }
 
