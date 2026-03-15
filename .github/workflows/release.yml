@@ -87,7 +87,7 @@ jobs:
     - name: "Create release on github with apk"
       uses: svenstaro/upload-release-action@v2
       with:
-        repo_token: ${{ secrets.TOKEN }}
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: ${{steps.sign_app.outputs.signedFile}}
         asset_name: ${{ steps.vars.outputs.asset_name }}
         tag: ${{ github.ref }}
