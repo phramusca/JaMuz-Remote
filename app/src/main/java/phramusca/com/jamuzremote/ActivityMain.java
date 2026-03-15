@@ -332,14 +332,9 @@ public class ActivityMain extends AppCompatActivity {
 
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
-            if (isRemoteConnected()) {
-                return;
-            }
-            setSeekBar(0, (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+            if (isRemoteConnected()) return;
             quarterPosition = 0;
-            displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
-            displayedTrack.setHistory(true);
-            displayTrack();
+            switchToLocalDisplay();
         }
 
         @Override
@@ -412,7 +407,9 @@ public class ActivityMain extends AppCompatActivity {
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            getMediaController().getTransportControls().seekTo(seekBarPosition.getProgress());
+            if (!isRemoteConnected()) {
+                getMediaController().getTransportControls().seekTo(seekBarPosition.getProgress());
+            }
             mIsTracking = false;
         }
     };
@@ -446,44 +443,53 @@ public class ActivityMain extends AppCompatActivity {
             serviceRemote = binder.getService();
             serviceRemoteCallback = (event, messageEvent) -> {
                 switch (event) {
-                    case "positionChanged":
-                        try {
-                            final JSONObject jObject = new JSONObject(messageEvent.getData());
-                            int idFile = (int) jObject.get("idFile");
-                            displayTrack(idFile);
-                            int position = (int) jObject.get("position");
-                            int length = (int) jObject.get("length");
-                            setSeekBar(position * 1000, length * 1000);
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
-                        }
-                        break;
-                    case "playing":
-                        try {
-                            JSONObject jObject = new JSONObject(messageEvent.getData());
-                            int idFile = jObject.getInt("idFile");
-                            displayTrack(idFile);
-                            String selectedPlaylist = jObject.getString("selectedPlaylist"); //NON-NLS
-                            Playlist temp = new Playlist(selectedPlaylist, false);
-                            final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists"); //NON-NLS
-                            final List<Playlist> playlists = new ArrayList<>();
-                            for (int i = 0; i < jsonPlaylists.length(); i++) {
-                                String playlist = (String) jsonPlaylists.get(i);
-                                Playlist playList = new Playlist(playlist, false);
-                                if (playlist.equals(selectedPlaylist)) {
-                                    playList = temp;
-                                }
-                                playlists.add(playList);
+                    case "positionChanged": {
+                        final String data = messageEvent.getData();
+                        runOnUiThread(() -> {
+                            try {
+                                JSONObject jObject = new JSONObject(data);
+                                int idFile = (int) jObject.get("idFile");
+                                displayTrack(idFile);
+                                int position = (int) jObject.get("position");
+                                int length = (int) jObject.get("length");
+                                setSeekBar(position * 1000, length * 1000);
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
                             }
-                            ArrayAdapter<Playlist> arrayAdapter =
-                                    new ArrayAdapter<>(ActivityMain.this,
-                                            R.layout.spinner_item, playlists);
-                            setupPlaylistSpinner(arrayAdapter, temp);
-                            enablePlaylistEdit(false);
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
-                        }
+                        });
                         break;
+                    }
+                    case "playing": {
+                        final String data = messageEvent.getData();
+                        runOnUiThread(() -> {
+                            stopSeekBarAnimator();
+                            try {
+                                JSONObject jObject = new JSONObject(data);
+                                int idFile = jObject.getInt("idFile");
+                                displayTrack(idFile);
+                                String selectedPlaylist = jObject.getString("selectedPlaylist"); //NON-NLS
+                                Playlist temp = new Playlist(selectedPlaylist, false);
+                                final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists"); //NON-NLS
+                                final List<Playlist> playlists = new ArrayList<>();
+                                for (int i = 0; i < jsonPlaylists.length(); i++) {
+                                    String playlist = (String) jsonPlaylists.get(i);
+                                    Playlist playList = new Playlist(playlist, false);
+                                    if (playlist.equals(selectedPlaylist)) {
+                                        playList = temp;
+                                    }
+                                    playlists.add(playList);
+                                }
+                                ArrayAdapter<Playlist> arrayAdapter =
+                                        new ArrayAdapter<>(ActivityMain.this,
+                                                R.layout.spinner_item, playlists);
+                                setupPlaylistSpinner(arrayAdapter, temp);
+                                enablePlaylistEdit(false);
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                        break;
+                    }
                 }
             };
             serviceRemote.registerCallback(serviceRemoteCallback);
@@ -2388,19 +2394,35 @@ public class ActivityMain extends AppCompatActivity {
                 prettyTime.format(track.getAddedDate()));
     }
 
-    private void displayPlayingTrack() {
-        if (isRemoteConnected() && serviceRemote != null) {
-            serviceRemote.refreshPlaying();
-            return;
-        }
+    /** Switch to local mode: track + seek bar from PlayQueue/MediaController. */
+    private void switchToLocalDisplay() {
+        stopSeekBarAnimator();
         displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
         if (displayedTrack == null) {
             displayedTrack = localTrack;
+        } else {
+            displayedTrack.setHistory(true);
         }
         displayTrack();
         MediaMetadataCompat metadata = MediaMetadataCompat.fromMediaMetadata(getMediaController().getMetadata());
         if (metadata != null) {
             setSeekBarPosition(PlaybackStateCompat.fromPlaybackState(getMediaController().getPlaybackState()), (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+        }
+    }
+
+    /** Switch to remote mode: request playing from server, seek bar updated by positionChanged. */
+    private void switchToRemoteDisplay() {
+        stopSeekBarAnimator();
+        if (serviceRemote != null) {
+            serviceRemote.refreshPlaying();
+        }
+    }
+
+    private void displayPlayingTrack() {
+        if (isRemoteConnected()) {
+            switchToRemoteDisplay();
+        } else {
+            switchToLocalDisplay();
         }
     }
 
