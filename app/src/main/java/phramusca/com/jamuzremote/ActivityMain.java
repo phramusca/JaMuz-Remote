@@ -271,7 +271,7 @@ public class ActivityMain extends AppCompatActivity {
                     getMediaController().getTransportControls().seekTo(0);
                     getMediaController().getTransportControls().play(); //As toggled by simple Tap
                 }
-                //TODO Send "pullup" to server if isRemoteConnected() && pullup is added back on JaMuz
+                //TODO Send "pullup" to server when remote - would require reimplementing pullup on server, not used
             }
 
             @Override
