@@ -3,7 +3,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="mainWelcomeTitle">Welcome to</string>
     <string name="applicationName" translatable="false">JaMuz</string>
-    <string name="mainWelcomeYear" translatable="false">2022</string>
+    <string name="mainWelcomeYear" translatable="false">2026</string>
     <string name="mainToastClientInfoBadFormat">Bad format:</string>
     <string name="mainToastClientInfoExpected">Expected:</string>
     <string name="mainToastClientInfoIP">IP</string>

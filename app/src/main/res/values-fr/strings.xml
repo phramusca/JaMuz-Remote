@@ -207,4 +207,8 @@
     <string name="settingsRadioThemeYellow">Jaune</string>
     <string name="settingsRadioThemeBlueGrey">Bleu Gris</string>
     <string name="labelServer">Serveur :</string>
+    <string name="connected_to_remote_control">Connecté à la télécommande.</string>
+    <string name="closed_remote_control">Télécommande fermée</string>
+    <string name="closing_remote_control">Fermant la télécommande</string>
+    <string name="remote_control">Télécommande</string>
 </resources>
