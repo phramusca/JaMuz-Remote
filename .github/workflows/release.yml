@@ -62,9 +62,11 @@ jobs:
     #     name: Signed app bundle
     #     path: ${{steps.sign_app.outputs.signedFile}}
 
-    - name: Set asset_name
+    - name: Set asset name and copy APK
       id: vars
-      run: echo ::set-output name=asset_name::JaMuz_Remote_${GITHUB_REF_NAME}.apk
+      run: |
+        echo "asset_name=JaMuz_Remote_${GITHUB_REF_NAME}.apk" >> $GITHUB_OUTPUT
+        cp "${{ steps.sign_app.outputs.signedFile }}" "JaMuz_Remote_${GITHUB_REF_NAME}.apk"
 
     # - name: Bump version
     #   uses: chkfung/android-version-actions@v1.2.1
@@ -92,12 +94,25 @@ jobs:
     #   id: getversion
     #   run: echo "::set-output name=version::$(cat VERSION)"
 
-    - name: "Create release on github with apk"
-      uses: svenstaro/upload-release-action@v2
+    # Draft first, then publish: required when "immutable releases" is enabled,
+    # so the APK is attached before the release becomes immutable (else only the
+    # auto-generated attestation would be present).
+    - name: "Create draft release and upload APK"
+      uses: softprops/action-gh-release@v2
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ${{steps.sign_app.outputs.signedFile}}
-        asset_name: ${{ steps.vars.outputs.asset_name }}
-        tag: ${{ github.ref }}
-        overwrite: true
+        draft: true
+        tag_name: ${{ github.ref_name }}
+        name: ${{ github.ref_name }}
         body: ${{ steps.read_file.outputs.contents }}
+        files: JaMuz_Remote_${{ github.ref_name }}.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      id: release
+
+    - name: "Publish release"
+      uses: softprops/action-gh-release@v2
+      with:
+        release_id: ${{ steps.release.outputs.id }}
+        draft: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
