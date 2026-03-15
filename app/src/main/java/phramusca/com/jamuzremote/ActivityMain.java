@@ -324,11 +324,17 @@ public class ActivityMain extends AppCompatActivity {
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             super.onPlaybackStateChanged(state);
+            if (isRemoteConnected()) {
+                return;
+            }
             setSeekBarPosition(state, seekBarPosition.getMax());
         }
 
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
+            if (isRemoteConnected()) {
+                return;
+            }
             setSeekBar(0, (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
             quarterPosition = 0;
             displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
@@ -481,6 +487,7 @@ public class ActivityMain extends AppCompatActivity {
                 }
             };
             serviceRemote.registerCallback(serviceRemoteCallback);
+            serviceRemote.refreshPlaying();
         }
 
         @Override
@@ -635,7 +642,6 @@ public class ActivityMain extends AppCompatActivity {
             } else {
                 LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ServiceRemote.USER_STOP_SERVICE_REQUEST));
                 stopRemote();
-                //FIXME ! Set back displayedTrack here !
             }
         });
 
@@ -957,17 +963,25 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void togglePlay() {
-        switch (getMediaController().getPlaybackState().getState()) {
-            case PlaybackStateCompat.STATE_PLAYING:
+        switch (Objects.requireNonNull(getMediaController().getPlaybackState()).getState()) {
+            case android.media.session.PlaybackState.STATE_PLAYING:
                 getMediaController().getTransportControls().pause();
                 break;
-            case PlaybackStateCompat.STATE_PAUSED:
+            case android.media.session.PlaybackState.STATE_PAUSED:
                 getMediaController().getTransportControls().play();
                 break;
-            case PlaybackStateCompat.STATE_STOPPED:
-            case PlaybackStateCompat.STATE_NONE:
-            case PlaybackStateCompat.STATE_ERROR:
+            case android.media.session.PlaybackState.STATE_STOPPED:
+            case android.media.session.PlaybackState.STATE_NONE:
+            case android.media.session.PlaybackState.STATE_ERROR:
                 getMediaController().getTransportControls().skipToNext();
+                break;
+            case android.media.session.PlaybackState.STATE_BUFFERING,
+                 android.media.session.PlaybackState.STATE_CONNECTING,
+                 android.media.session.PlaybackState.STATE_FAST_FORWARDING,
+                 android.media.session.PlaybackState.STATE_REWINDING,
+                 android.media.session.PlaybackState.STATE_SKIPPING_TO_NEXT,
+                 android.media.session.PlaybackState.STATE_SKIPPING_TO_PREVIOUS,
+                 android.media.session.PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM:
                 break;
         }
     }
@@ -1411,12 +1425,13 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-//    private boolean wasRemoteConnected = false;
-
     @Override
     protected void onResume() {
         super.onResume();
         Log.i(TAG, "ActivityMain onResume"); //NON-NLS
+        if (isMyServiceRunning(ServiceRemote.class)) {
+            bindService(new Intent(this, ServiceRemote.class), serviceRemoteConnection, 0);
+        }
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("ServiceBase"));
         getFromQRcode(getIntent().getDataString());
@@ -1841,6 +1856,8 @@ public class ActivityMain extends AppCompatActivity {
                     break;
                 case "enableRemote":
                     enableRemote(true);
+                    displayPlayingTrack();
+                    break;
                 case "setupGenres":
                     setupGenres();
                     break;
@@ -2372,6 +2389,10 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void displayPlayingTrack() {
+        if (isRemoteConnected() && serviceRemote != null) {
+            serviceRemote.refreshPlaying();
+            return;
+        }
         displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
         if (displayedTrack == null) {
             displayedTrack = localTrack;

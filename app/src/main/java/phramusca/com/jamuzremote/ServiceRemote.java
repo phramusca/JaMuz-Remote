@@ -162,6 +162,13 @@ public class ServiceRemote extends ServiceBase {
         }.start();
     }
 
+    /** Call when activity resumes while connected, to refresh displayed track from server instead of local. */
+    public void refreshPlaying() {
+        if (clientInfo != null) {
+            getPlaying();
+        }
+    }
+
     public void send(String action) {
         send(action, "");
     }
