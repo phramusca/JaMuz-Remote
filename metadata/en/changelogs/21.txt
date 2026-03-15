@@ -1,4 +1,4 @@
-v0.6.13
+v0.6.14
 
 - Remote control: connect to JaMuz via SSE, receive playing state and position, send play/pause/next/previous/forward/rewind/volume from buttons and swipes. Correct local/remote display and rebind on resume; switch back to local on disconnect.
 - Build: Android API 34→36, min 21, AGP and Gradle update, Java 21, ProGuard config.
