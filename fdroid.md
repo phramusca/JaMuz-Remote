@@ -30,7 +30,7 @@ Pour vérifier que F-Droid peut builder l’app (même flux que [Building Applic
 - **fdroidserver** : installé (ex. `pipx run fdroidserver` ou env dédié).
 - **Android SDK** : installé (ex. `~/Android/Sdk`). À exposer via **`ANDROID_HOME`** (pas besoin de `sdk_path` dans `config.yml`).
 - **Java 17** : le projet est en Java 17 ; utiliser **`JAVA_HOME`** pointant vers un JDK 17.
-- **gradlew-fdroid** : le paquet pip/pipx ne fournit pas toujours le script. Option A : l’indiquer dans `config.yml` avec `gradle: "/chemin/vers/gradlew-fdroid"`. Option B : installer le script (voir ci‑dessous) et l’avoir dans le PATH ou dans `config.yml`.
+- **gradlew-fdroid** : le paquet pip/pipx ne fournit pas toujours le script. Mettre le script (voir ci‑dessous) dans ton **PATH** (ex. `~/.local/bin/gradlew-fdroid`) pour qu’il soit trouvé sans rien ajouter dans `config.yml`.
 
 ### 2. Script gradlew-fdroid (si besoin)
 
@@ -41,15 +41,22 @@ Si `fdroid build` échoue avec « Exec format error » sur `gradlew-fdroid`, le 
 ### 3. Config fdroiddata
 
 - Cloner le dépôt de données (ton fork ou `git clone https://gitlab.com/fdroid/fdroiddata.git`) et `cd fdroiddata`.
-- Copier `config.yml` depuis [fdroidserver](https://gitlab.com/fdroid/fdroidserver) (`examples/config.yml`) et l’adapter : utiliser des **chemins en chaînes** pour `gpghome`, `keystore`, `serverwebroot` (pas `{env: ...}`), sinon fdroid peut planter dans `fill_config_defaults`. Optionnel : `mkdir -p /tmp/repo/status` si `serverwebroot: "/tmp"` pour éviter les erreurs rsync.
-- Ne pas mettre `sdk_path` dans `config.yml` : lancer le build avec **`ANDROID_HOME`** (et **`JAVA_HOME`**) dans l’environnement.
+- Ne **pas** modifier `config.yml` : le config du repo utilise `{env: ...}` pour gpghome, keystore, serverwebroot, etc. Tout se fait par **variables d’environnement** (voir ci‑dessous). Avoir **gradlew-fdroid** dans le PATH (ex. `~/.local/bin`). Optionnel : `mkdir -p /tmp/repo/status` pour éviter des erreurs rsync si tu utilises `serverwebroot=/tmp`.
 
-### 4. Lancer le build avec les variables d’environnement
+### 4. Lancer le build (sans toucher au config)
 
-Depuis le répertoire **fdroiddata** :
+Depuis le répertoire **fdroiddata**, exporter les variables attendues par le config puis lancer le build :
 
 ```bash
-export ANDROID_HOME="$HOME/Android/Sdk"   # ou le chemin de ton SDK
+# Requises par le config du repo ({env: ...})
+export gpghome="$HOME/.gnupg"
+export keystore="/tmp/fdroid-keystore.jks"
+export keystorepass="android"
+export keypass="android"
+export serverwebroot="/tmp"
+
+# Pour le build Android
+export ANDROID_HOME="$HOME/Android/Sdk"   # adapter à ton SDK
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64   # adapter à ton système
 
 fdroid build org.phramusca.jamuz:20
@@ -61,6 +68,7 @@ Une seule version (ex. `:20`) : `fdroid build org.phramusca.jamuz:20`. Les APK n
 
 - **« Unsupported class file major version 65 »** : Gradle tourne avec une Java trop récente pour l’ancien bytecode. Utiliser Java 17 : `JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 fdroid build ...`
 - **« invalid source release: 21 »** : le tag/clone demande Java 21 alors que le build utilise Java 17. Le dépôt est en Java 17 ; pour la version 0.6.13 (tag v0.6.13 avec encore Java 21), les métadonnées F-Droid utilisent un patch `java17.patch` dans `metadata/org.phramusca.jamuz/` pour forcer Java 17 au build. Les releases suivantes (déjà en Java 17) n’en ont pas besoin.
+- **« La variable d’environnement {env: …} n’est pas configurée »** ou **« serverwebroot: has blank value »** : le config du repo attend des variables d’env. Exporter `gpghome`, `keystore`, `keystorepass`, `keypass`, `serverwebroot` (voir § 4).
 - **« SDK location not found »** : définir `ANDROID_HOME` (pointant vers le répertoire du SDK Android) avant d’exécuter `fdroid build`.
 - **« Unexpected version/version code in output »** : le `versionName` dans l’APK (ex. `0.6.14-dev`) ne correspond pas à celui attendu par les métadonnées (ex. `0.6.13`). Vérifier que le build cible le bon commit/tag (ex. tag `v0.6.13` pour la version 0.6.13).
 
