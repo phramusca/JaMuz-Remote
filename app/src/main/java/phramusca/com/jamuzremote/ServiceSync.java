@@ -22,6 +22,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import androidx.core.content.ContextCompat;
+
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -34,7 +36,7 @@ import okhttp3.RequestBody;
 public class ServiceSync extends ServiceBase {
 
     private static final String TAG = ServiceSync.class.getName();
-    public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE_SCAN_REMOTE"; //NON-NLS
+    public static final String USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE_SYNC"; //NON-NLS
 
     private DownloadProcess processDownload;
     private ClientInfo clientInfo;
@@ -53,7 +55,7 @@ public class ServiceSync extends ServiceBase {
                 .readTimeout(60, TimeUnit.SECONDS)
                 .build();
         userStopReceiver = new UserStopServiceReceiver();
-        registerReceiver(userStopReceiver, new IntentFilter(USER_STOP_SERVICE_REQUEST));
+        ContextCompat.registerReceiver(this, userStopReceiver, new IntentFilter(USER_STOP_SERVICE_REQUEST), ContextCompat.RECEIVER_NOT_EXPORTED);
         super.onCreate();
     }
 
@@ -90,13 +92,7 @@ public class ServiceSync extends ServiceBase {
                 helperNotification.notifyBar(notificationSync, getString(R.string.syncLabelConnecting));
                 checkAbort();
 
-                HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("connect"); //NON-NLS
-                Request request = clientInfo.getRequestBuilder(urlBuilder)
-                        .addHeader("password", clientInfo.getPassword())
-                        .addHeader("rootPath", clientInfo.getRootPath())
-                        .addHeader("model", clientInfo.getModel())
-                        .build();
-                clientInfo.getBodyString(request, client); //NON-NLS
+                clientInfo.getBodyString(clientInfo.getConnectRequest(), client); //NON-NLS
 
                 long startTime = System.currentTimeMillis();
                 long startTimeTotal = startTime;
@@ -137,6 +133,8 @@ public class ServiceSync extends ServiceBase {
 
                 startTime = System.currentTimeMillis();
                 //Remove files in db but not received from server
+                //FIXME ! Somehow this message stays (when proccess is quick)
+                //Also review message "serviceSyncNotifySyncRemovingDeleted", it is wrong, at least in french
                 helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncRemovingDeleted));
                 List<Track> trackList = RepoSync.getNotSyncedList();
                 Log.w(TAG, "RepoSync.getNotSyncedList() :"+(System.currentTimeMillis() - startTime)+" ms");
@@ -173,7 +171,7 @@ public class ServiceSync extends ServiceBase {
         }
 
         private void checkFiles(Track.Status status)
-                throws InterruptedException, ServerException, IOException {
+                throws InterruptedException, ClientInfo.ServerException, IOException {
             int nbFilesInBatch = 500;
             int nbFilesServer = getFilesCount(status);
             String msg = String.format(
@@ -290,7 +288,7 @@ public class ServiceSync extends ServiceBase {
             return newTracks;
         }
 
-        private Integer getFilesCount(Track.Status status) throws IOException, ServerException {
+        private Integer getFilesCount(Track.Status status) throws IOException, ClientInfo.ServerException {
             HttpUrl.Builder urlBuilder = clientInfo.getUrlBuilder("files/" + status.name()); //NON-NLS
             urlBuilder.addQueryParameter("getCount", "true"); //NON-NLS
             String body = clientInfo.getBodyString(urlBuilder, client);
@@ -302,7 +300,7 @@ public class ServiceSync extends ServiceBase {
             return Integer.valueOf(body);
         }
 
-        private void getTags() throws IOException, ServerException, JSONException {
+        private void getTags() throws IOException, ClientInfo.ServerException, JSONException {
             String body = clientInfo.getBodyString("tags", client); //NON-NLS
             helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncReceivedTags));
             final JSONObject jObject = new JSONObject(body);
@@ -317,7 +315,7 @@ public class ServiceSync extends ServiceBase {
             sendMessage("setupTags");
         }
 
-        private void getGenres() throws IOException, ServerException, JSONException { //NON-NLS
+        private void getGenres() throws IOException, ClientInfo.ServerException, JSONException { //NON-NLS
             String body = clientInfo.getBodyString("genres", client); //NON-NLS
             helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncReceivedGenres));
             final JSONObject jObject = new JSONObject(body);
@@ -331,7 +329,7 @@ public class ServiceSync extends ServiceBase {
             sendMessage("setupGenres");
         }
 
-        private void requestMerge() throws JSONException, ServerException, IOException {
+        private void requestMerge() throws JSONException, ClientInfo.ServerException, IOException {
             helperNotification.notifyBar(notificationSync, getString(R.string.serviceSyncNotifySyncPreparingMerge));
             List<Track> tracks = RepoSync.getMergeList();
             OkHttpClient client = new OkHttpClient.Builder()
@@ -382,12 +380,6 @@ public class ServiceSync extends ServiceBase {
         super.onDestroy();
     }
 
-    static class ServerException extends Exception {
-        public ServerException(String errorMessage) {
-            super(errorMessage);
-        } //NON-NLS
-    }
-
     public class UserStopServiceReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -402,7 +394,7 @@ public class ServiceSync extends ServiceBase {
             processDownload = null;
         }
         processSync.abort();
-        if (!msg.equals("")) {
+        if (!msg.isEmpty()) {
             runOnUiThread(() -> {
                 helperNotification.notifyBar(notificationSync, msg, millisInFuture);
                 helperToast.toastLong(msg);
@@ -413,7 +405,7 @@ public class ServiceSync extends ServiceBase {
     } //NON-NLS
 
     private void startDownloads(Map<Track, Integer> newTracks) {
-        if ((processDownload == null || !processDownload.isAlive()) && newTracks.size() > 0) {
+        if ((processDownload == null || !processDownload.isAlive()) && !newTracks.isEmpty()) {
             Log.i(TAG, "START ProcessDownload"); //NON-NLS
             processDownload = new DownloadProcess(
                     "ProcessDownload",

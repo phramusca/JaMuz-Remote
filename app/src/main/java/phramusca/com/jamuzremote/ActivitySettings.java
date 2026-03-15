@@ -51,7 +51,7 @@ public class ActivitySettings extends AppCompatActivity {
                 break;
         }
         Button button_exit_settings = findViewById(R.id.button_exit_settings);
-        button_exit_settings.setOnClickListener(v -> onBackPressed());
+        button_exit_settings.setOnClickListener(v -> finish());
         editTextConnectInfo = findViewById(R.id.editText_info);
         editTextConnectInfo.setText(preferences.getString("connectionString", "192.168.0.11:2013"));
         Button buttonSaveConnectionString = findViewById(R.id.button_save_connectionString);

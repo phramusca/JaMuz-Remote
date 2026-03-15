@@ -50,6 +50,7 @@ public abstract class ServiceBase extends Service {
         super.onDestroy();
     }
 
+    //TODO: Use string constants to make search easier
     protected void sendMessage(String msg) {
         Log.i(TAG, "Broadcast.sendMessage(" + msg + ")"); //NON-NLS
         Intent intent = new Intent("ServiceBase");

@@ -36,7 +36,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
         setContentView(R.layout.activity_album_tracks);
 
         Button button_exit_albums = findViewById(R.id.button_exit_album_tracks);
-        button_exit_albums.setOnClickListener(v -> onBackPressed());
+        button_exit_albums.setOnClickListener(v -> finish());
 
         TextView title = findViewById(R.id.album_tracks_title);
 
@@ -130,7 +130,7 @@ public class ActivityAlbumTracks extends AppCompatActivity {
                             flags),
                     mNotifyManager);
             HelperToast helperToast = new HelperToast(getApplicationContext());
-            ClientInfo clientInfo = ActivityMain.getClientInfo(ClientCanal.SYNC, helperToast);
+            ClientInfo clientInfo = ActivityMain.getClientInfo(helperToast);
             if (clientInfo != null) {
                 processDownload = new DownloadProcess(
                         "ActivityAlbumTracks.ProcessDownload",

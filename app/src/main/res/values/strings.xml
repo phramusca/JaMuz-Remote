@@ -207,5 +207,9 @@
     <string name="settingsRadioThemeYellow" tools:ignore="MissingTranslation">Yellow</string>
     <string name="settingsRadioThemeBlueGrey" tools:ignore="MissingTranslation">Blue Grey</string>
     <string name="labelServer" tools:ignore="MissingTranslation">Server:</string>
+    <string name="connected_to_remote_control">Connected to remote control.</string>
+    <string name="closed_remote_control">Closed remote control</string>
+    <string name="closing_remote_control">Closing remote control</string>
+    <string name="remote_control">Remote control</string>
 
 </resources>

@@ -7,16 +7,21 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <!-- Android 14+: type on ServiceAudioPlayer (mediaPlayback). Justification: Play Console > App content > FGS declaration -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"
+        tools:ignore="ForegroundServicesPolicy" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
 
     <!--        TODO: Somehow check if backup works -->
 <!--    https://developer.android.com/guide/topics/data/autobackup-->
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/backup_extraction_rules"
+        tools:targetApi="36"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/applicationName"
@@ -57,17 +62,27 @@
             </intent-filter>
         </receiver>
 
+        <!-- Not foreground services (do not call startForeground()). Empty type satisfies tooling. -->
         <service
             android:name=".ServiceSync"
             android:exported="false"
-            android:singleUser="false" />
+            android:singleUser="false"
+            android:foregroundServiceType="" />
+        <service
+            android:name=".ServiceRemote"
+            android:exported="false"
+            android:singleUser="false"
+            android:foregroundServiceType="" />
         <service
             android:name=".ServiceScan"
             android:exported="false"
-            android:singleUser="false" />
+            android:singleUser="false"
+            android:foregroundServiceType="" />
+        <!-- Only foreground service: media playback in background -->
         <service
             android:name=".ServiceAudioPlayer"
-            android:exported="false">
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback">
             <intent-filter>
 <!--                <action android:name="android.intent.action.MEDIA_BUTTON" />-->
                 <action android:name="android.media.AUDIO_BECOMING_NOISY" />

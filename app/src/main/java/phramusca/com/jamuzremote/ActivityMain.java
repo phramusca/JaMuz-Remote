@@ -1,8 +1,9 @@
 package phramusca.com.jamuzremote;
 
+import static phramusca.com.jamuzremote.HelperString.trimTrailingWhitespace;
+import static phramusca.com.jamuzremote.MusicLibraryDb.COL_TRACKS_ID_SERVER;
 import static phramusca.com.jamuzremote.Playlist.Order.PLAYCOUNTER_LASTPLAYED;
 import static phramusca.com.jamuzremote.Playlist.Order.RANDOM;
-import static phramusca.com.jamuzremote.HelperString.trimTrailingWhitespace;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
@@ -14,6 +15,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -28,6 +30,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -97,7 +100,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -109,8 +111,8 @@ public class ActivityMain extends AppCompatActivity {
     private static Map<String, String> stringMap;
     private VoiceKeyWords voiceKeyWords;
     private final HelperToast helperToast = new HelperToast(this);
-    private ClientRemote clientRemote;
     private Track displayedTrack;
+    //FIXME Rename localTrack if only defaultTrack
     private Track localTrack;
     private MediaBrowserCompat mediaBrowser;
     ReceiverHeadSetPlugged receiverHeadSetPlugged = new ReceiverHeadSetPlugged();
@@ -124,6 +126,7 @@ public class ActivityMain extends AppCompatActivity {
     private static final int LISTS_REQUEST_CODE = 60568;
     private static final int SETTINGS_REQUEST_CODE = 23548;
     private static PrettyTime prettyTime;
+    private ServiceRemote serviceRemote;
 
     // GUI elements
     private TextView textViewFileInfo1;
@@ -196,8 +199,7 @@ public class ActivityMain extends AppCompatActivity {
     };
 
     @SuppressLint("ClickableViewAccessibility")
-    void buildTransportControls()
-    {
+    void buildTransportControls() {
         imageViewCover = findViewById(R.id.imageView);
 
         LinearLayout layoutTrackInfo = findViewById(R.id.trackInfo);
@@ -206,7 +208,7 @@ public class ActivityMain extends AppCompatActivity {
             public void onSwipeTop() {
                 Log.v(TAG, "onSwipeTop");
                 if (isRemoteConnected()) {
-                    clientRemote.send("forward"); //NON-NLS
+                    serviceRemote.send("forward"); //NON-NLS
                 } else {
                     getMediaController().getTransportControls().fastForward();
                 }
@@ -216,7 +218,7 @@ public class ActivityMain extends AppCompatActivity {
             public void onSwipeRight() {
                 Log.v(TAG, "onSwipeRight");
                 if (isRemoteConnected()) {
-                    clientRemote.send("previousTrack");
+                    serviceRemote.send("previousTrack");
                 } else {
                     getMediaController().getTransportControls().skipToPrevious();
                 }
@@ -226,7 +228,7 @@ public class ActivityMain extends AppCompatActivity {
             public void onSwipeLeft() {
                 Log.v(TAG, "onSwipeLeft");
                 if (isRemoteConnected()) {
-                    clientRemote.send("nextTrack");
+                    serviceRemote.send("nextTrack");
                 } else {
                     getMediaController().getTransportControls().skipToNext();
                 }
@@ -236,7 +238,7 @@ public class ActivityMain extends AppCompatActivity {
             public void onSwipeBottom() {
                 Log.v(TAG, "onSwipeBottom");
                 if (isRemoteConnected()) {
-                    clientRemote.send("rewind"); //NON-NLS
+                    serviceRemote.send("rewind"); //NON-NLS
                 } else {
                     getMediaController().getTransportControls().rewind();
                 }
@@ -256,7 +258,7 @@ public class ActivityMain extends AppCompatActivity {
             public void onTap() {
                 if (isDimOn) {
                     if (isRemoteConnected()) {
-                        clientRemote.send("playTrack");
+                        serviceRemote.send("playTrack");
                     } else {
                         togglePlay();
                     }
@@ -269,7 +271,7 @@ public class ActivityMain extends AppCompatActivity {
                     getMediaController().getTransportControls().seekTo(0);
                     getMediaController().getTransportControls().play(); //As toggled by simple Tap
                 }
-                //TODO Send "pullup" to server if isRemoteConnected() && pullup is added back on JaMuz
+                //TODO Send "pullup" to server when remote - would require reimplementing pullup on server, not used
             }
 
             @Override
@@ -322,16 +324,17 @@ public class ActivityMain extends AppCompatActivity {
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             super.onPlaybackStateChanged(state);
+            if (isRemoteConnected()) {
+                return;
+            }
             setSeekBarPosition(state, seekBarPosition.getMax());
         }
 
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
-            setSeekBar(0, (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+            if (isRemoteConnected()) return;
             quarterPosition = 0;
-            displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
-            displayedTrack.setHistory(true);
-            displayTrack();
+            switchToLocalDisplay();
         }
 
         @Override
@@ -404,7 +407,9 @@ public class ActivityMain extends AppCompatActivity {
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            getMediaController().getTransportControls().seekTo(seekBarPosition.getProgress());
+            if (!isRemoteConnected()) {
+                getMediaController().getTransportControls().seekTo(seekBarPosition.getProgress());
+            }
             mIsTracking = false;
         }
     };
@@ -427,6 +432,76 @@ public class ActivityMain extends AppCompatActivity {
             return GREY;
         }
     }
+
+    private ServiceRemoteCallback serviceRemoteCallback;
+
+    private final ServiceConnection serviceRemoteConnection = new ServiceConnection() {
+
+        @Override
+        public synchronized void onServiceConnected(ComponentName name, IBinder service) {
+            ServiceRemote.MyBinder binder = (ServiceRemote.MyBinder) service;
+            serviceRemote = binder.getService();
+            serviceRemoteCallback = (event, messageEvent) -> {
+                switch (event) {
+                    case "positionChanged": {
+                        final String data = messageEvent.getData();
+                        runOnUiThread(() -> {
+                            try {
+                                JSONObject jObject = new JSONObject(data);
+                                int idFile = (int) jObject.get("idFile");
+                                displayTrack(idFile);
+                                int position = (int) jObject.get("position");
+                                int length = (int) jObject.get("length");
+                                setSeekBar(position * 1000, length * 1000);
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                        break;
+                    }
+                    case "playing": {
+                        final String data = messageEvent.getData();
+                        runOnUiThread(() -> {
+                            stopSeekBarAnimator();
+                            try {
+                                JSONObject jObject = new JSONObject(data);
+                                int idFile = jObject.getInt("idFile");
+                                displayTrack(idFile);
+                                String selectedPlaylist = jObject.getString("selectedPlaylist"); //NON-NLS
+                                Playlist temp = new Playlist(selectedPlaylist, false);
+                                final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists"); //NON-NLS
+                                final List<Playlist> playlists = new ArrayList<>();
+                                for (int i = 0; i < jsonPlaylists.length(); i++) {
+                                    String playlist = (String) jsonPlaylists.get(i);
+                                    Playlist playList = new Playlist(playlist, false);
+                                    if (playlist.equals(selectedPlaylist)) {
+                                        playList = temp;
+                                    }
+                                    playlists.add(playList);
+                                }
+                                ArrayAdapter<Playlist> arrayAdapter =
+                                        new ArrayAdapter<>(ActivityMain.this,
+                                                R.layout.spinner_item, playlists);
+                                setupPlaylistSpinner(arrayAdapter, temp);
+                                enablePlaylistEdit(false);
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                        break;
+                    }
+                }
+            };
+            serviceRemote.registerCallback(serviceRemoteCallback);
+            serviceRemote.refreshPlaying();
+        }
+
+        @Override
+        public synchronized void onServiceDisconnected(ComponentName name) {
+            serviceRemote.unregisterCallback(serviceRemoteCallback);
+            serviceRemote = null;
+        }
+    };
 
     @SuppressLint({"HardwareIds", "ClickableViewAccessibility"})
     @Override
@@ -454,7 +529,7 @@ public class ActivityMain extends AppCompatActivity {
         //setEnabled does not seem enough (need to disable inner views too?) + some widgets are disabled/enabled during onCreate
         //layoutMain.setEnabled(false);
 
-        if(!HelperFile.init(this)) {
+        if (!HelperFile.init(this)) {
             helperToast.toastLong("Unable to find a writable application folder. Exiting :(");
             return;
         }
@@ -475,15 +550,15 @@ public class ActivityMain extends AppCompatActivity {
             if (status != TextToSpeech.ERROR) {
                 Locale locale = null;
                 Voice defaultVoice = textToSpeech.getDefaultVoice();
-                if(defaultVoice==null) {
+                if (defaultVoice == null) {
                     Voice voice = (Voice) textToSpeech.getVoices().toArray()[0];
-                    if(voice!=null) {
+                    if (voice != null) {
                         locale = voice.getLocale();
                     }
                 } else {
                     locale = defaultVoice.getLocale();
                 }
-                if(locale!=null) {
+                if (locale != null) {
                     textToSpeech.setLanguage(locale);
                 }
             }
@@ -548,31 +623,30 @@ public class ActivityMain extends AppCompatActivity {
         textFileInfo_seekBefore = findViewById(R.id.textFileInfo_seekBefore);
         textFileInfo_seekAfter = findViewById(R.id.textFileInfo_seekAfter);
 
-
-
         buttonRemote = findViewById(R.id.button_connect);
         buttonRemote.setOnClickListener(v -> {
             dimOn();
             buttonRemote.setEnabled(false);
             buttonRemote.setBackgroundResource(R.drawable.remote_ongoing);
             if (buttonRemote.getText().equals("1")) {
+                enableRemote(false);
                 ClientInfo clientInfo = null;
                 if (checkWifiConnection()) {
-                    clientInfo = getClientInfo(ClientCanal.REMOTE, helperToast);
+                    clientInfo = getClientInfo(helperToast);
                 }
                 if (clientInfo != null) {
-                    clientRemote = new ClientRemote(clientInfo, new ListenerRemote(), this);
-                    new Thread() {
-                        public void run() {
-                            runOnUiThread(() -> stopSeekBarAnimator());
-                            enableRemote(!clientRemote.connect());
-                        }
-                    }.start();
+                    if (!isMyServiceRunning(ServiceRemote.class)) {
+                        Intent service = new Intent(getApplicationContext(), ServiceRemote.class);
+                        service.putExtra("clientInfo", clientInfo);
+                        service.putExtra("getAppDataPath", HelperFile.getAudioRootFolder());
+                        bindService(service, serviceRemoteConnection, Context.BIND_AUTO_CREATE);
+                        startService(service);
+                    }
                 } else {
                     enableRemote(true);
                 }
             } else {
-                enableRemote(true);
+                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ServiceRemote.USER_STOP_SERVICE_REQUEST));
                 stopRemote();
             }
         });
@@ -585,7 +659,7 @@ public class ActivityMain extends AppCompatActivity {
                 enableSync(false);
                 ClientInfo clientInfo = null;
                 if (checkWifiConnection()) {
-                    clientInfo = getClientInfo(ClientCanal.SYNC, helperToast);
+                    clientInfo = getClientInfo(helperToast);
                 }
                 if (clientInfo != null) {
                     if (!isMyServiceRunning(ServiceSync.class)) {
@@ -598,7 +672,6 @@ public class ActivityMain extends AppCompatActivity {
                     enableSync(true);
                 }
             } else {
-                Log.i(TAG, "Broadcast(" + ServiceSync.USER_STOP_SERVICE_REQUEST + ")"); //NON-NLS
                 sendBroadcast(new Intent(ServiceSync.USER_STOP_SERVICE_REQUEST));
                 enableSync(true);
             }
@@ -876,8 +949,7 @@ public class ActivityMain extends AppCompatActivity {
         Intent intent = new Intent(this, ServiceAudioPlayer.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent);
-        }
-        else {
+        } else {
             startService(intent);
         }
         // Create connection with the service
@@ -887,22 +959,35 @@ public class ActivityMain extends AppCompatActivity {
         if (isMyServiceRunning(ServiceSync.class)) {
             enableSync(false);
         }
+
+        //TODO: Use isMyServiceRunning or serviceRemote.isConnected() ? (and elsewhere too)
+        if (isMyServiceRunning(ServiceRemote.class)) {
+            enableRemote(false);
+        }
         setDimMode(toggleButtonDimMode.isChecked());
         checkPermissionsThenScanLibrary();
     }
 
     private void togglePlay() {
-        switch (getMediaController().getPlaybackState().getState()) {
-            case PlaybackStateCompat.STATE_PLAYING:
+        switch (Objects.requireNonNull(getMediaController().getPlaybackState()).getState()) {
+            case android.media.session.PlaybackState.STATE_PLAYING:
                 getMediaController().getTransportControls().pause();
                 break;
-            case PlaybackStateCompat.STATE_PAUSED:
+            case android.media.session.PlaybackState.STATE_PAUSED:
                 getMediaController().getTransportControls().play();
                 break;
-            case PlaybackStateCompat.STATE_STOPPED:
-            case PlaybackStateCompat.STATE_NONE:
-            case PlaybackStateCompat.STATE_ERROR:
+            case android.media.session.PlaybackState.STATE_STOPPED:
+            case android.media.session.PlaybackState.STATE_NONE:
+            case android.media.session.PlaybackState.STATE_ERROR:
                 getMediaController().getTransportControls().skipToNext();
+                break;
+            case android.media.session.PlaybackState.STATE_BUFFERING,
+                 android.media.session.PlaybackState.STATE_CONNECTING,
+                 android.media.session.PlaybackState.STATE_FAST_FORWARDING,
+                 android.media.session.PlaybackState.STATE_REWINDING,
+                 android.media.session.PlaybackState.STATE_SKIPPING_TO_NEXT,
+                 android.media.session.PlaybackState.STATE_SKIPPING_TO_PREVIOUS,
+                 android.media.session.PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM:
                 break;
         }
     }
@@ -922,12 +1007,11 @@ public class ActivityMain extends AppCompatActivity {
     private void setRating(int rating) {
         ratingBar.setEnabled(false);
         displayedTrack.setRating(Math.round(rating));
+        displayedTrack.updateRating(Math.round(rating));
+        displayTrackDetails();
+        RepoAlbums.reset();
         if (isRemoteConnected()) {
-            clientRemote.send("setRating".concat(String.valueOf(Math.round(rating))));
-        } else {
-            displayedTrack.updateRating(Math.round(rating));
-            displayTrackDetails();
-            RepoAlbums.reset();
+            serviceRemote.send("setRating", String.valueOf(Math.round(rating)));
         }
         ratingBar.setEnabled(true);
     }
@@ -935,11 +1019,10 @@ public class ActivityMain extends AppCompatActivity {
     private void setGenre(String genre) {
         spinnerGenre.setEnabled(false);
         displayedTrack.setGenre(genre);
+        displayedTrack.updateGenre(genre);
+        displayTrackDetails();
         if (isRemoteConnected()) {
-            clientRemote.send("setGenre".concat(genre));
-        } else {
-            displayedTrack.updateGenre(genre);
-            displayTrackDetails();
+            serviceRemote.send("setGenre", genre);
         }
         spinnerGenre.setEnabled(true);
     }
@@ -952,7 +1035,7 @@ public class ActivityMain extends AppCompatActivity {
         return true;
     }
 
-    static ClientInfo getClientInfo(int canal, HelperToast helperToast) {
+    static ClientInfo getClientInfo(HelperToast helperToast) {
         String infoConnect = preferences.getString(
                 "connectionString",
                 stringMap.get("settingsServerDefaultConnectionString"));
@@ -977,7 +1060,7 @@ public class ActivityMain extends AppCompatActivity {
             port = 2013;
         }
         //TODO Use a real password, from QR code
-        return new ClientInfo(address, port, login, "tata", canal, //NON-NLS
+        return new ClientInfo(address, port, login, "tata",  //NON-NLS
                 "jamuz", HelperFile.getAudioRootFolder().getAbsolutePath(), model); //NON-NLS
     }
 
@@ -1015,10 +1098,9 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void toggleTag(String tag) {
+        displayedTrack.toggleTag(tag);
         if (isRemoteConnected()) {
-            clientRemote.send("toggleTag".concat(tag));
-        } else {
-            displayedTrack.toggleTag(tag);
+            serviceRemote.send("toggleTag", tag);
         }
     }
 
@@ -1121,15 +1203,15 @@ public class ActivityMain extends AppCompatActivity {
         ArrayList<Track.Status> statuses = new ArrayList<>();
         boolean displayServer = preferences.getBoolean("displayServer", true);
         boolean displayMediaStore = preferences.getBoolean("displayMediaStore", true);
-        if(displayServer) {
+        if (displayServer) {
             statuses.add(Track.Status.REC);
-            if(getAll) {
+            if (getAll) {
                 statuses.add(Track.Status.INFO);
                 statuses.add(Track.Status.NEW);
                 statuses.add(Track.Status.ERROR);
             }
         }
-        if(displayMediaStore) {
+        if (displayMediaStore) {
             statuses.add(Track.Status.LOCAL);
         }
         return statuses;
@@ -1138,7 +1220,7 @@ public class ActivityMain extends AppCompatActivity {
     private void applyPlaylist(Playlist playlist, boolean playNext) {
         dimOn();
         if (isRemoteConnected()) {
-            clientRemote.send("setPlaylist".concat(playlist.toString()));
+            serviceRemote.send("setPlaylist", playlist.toString());
         } else {
             displayPlaylist(playlist);
             localSelectedPlaylist = playlist;
@@ -1243,7 +1325,7 @@ public class ActivityMain extends AppCompatActivity {
     };
 
     private boolean isRemoteConnected() {
-        return (clientRemote != null && clientRemote.isConnected());
+        return (serviceRemote != null && serviceRemote.isConnected());
     }
 
     private void setDimMode(boolean enable) {
@@ -1327,8 +1409,12 @@ public class ActivityMain extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.i(TAG, "ActivityMain onPause"); //NON-NLS
-        wasRemoteConnected = isRemoteConnected();
-        stopRemote();
+        // Only unbind, do not stop the service
+        if (serviceRemote != null) {
+            serviceRemote.unregisterCallback(serviceRemoteCallback);
+            unbindService(serviceRemoteConnection);
+            serviceRemote = null;
+        }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
@@ -1345,20 +1431,18 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    private boolean wasRemoteConnected = false;
-
     @Override
     protected void onResume() {
         super.onResume();
         Log.i(TAG, "ActivityMain onResume"); //NON-NLS
+        if (isMyServiceRunning(ServiceRemote.class)) {
+            bindService(new Intent(this, ServiceRemote.class), serviceRemoteConnection, 0);
+        }
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("ServiceBase"));
         getFromQRcode(getIntent().getDataString());
         if (toggleButtonDimMode.isChecked()) {
             dimOn();
-        }
-        if(wasRemoteConnected) {
-            buttonRemote.performClick();
         }
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
@@ -1416,7 +1500,9 @@ public class ActivityMain extends AppCompatActivity {
         LOWER_VOLUME,
         NONE
     }
+
     private int previousVolume;
+
     private void speechFavor(boolean favor) {
         SpeechFlavor speechFavor = SpeechFlavor.valueOf(preferences.getString("speechFavor", SpeechFlavor.PAUSE.name()));
         switch (speechFavor) {
@@ -1598,8 +1684,7 @@ public class ActivityMain extends AppCompatActivity {
                 }
             }
             speechFavor(false);
-        }
-        else if (requestCode == LISTS_REQUEST_CODE && resultCode == RESULT_OK) {
+        } else if (requestCode == LISTS_REQUEST_CODE && resultCode == RESULT_OK) {
             String action = data.getStringExtra("action"); //NON-NLS
             switch (action) {
                 case "playNextAndDisplayQueue": //NON-NLS
@@ -1614,8 +1699,7 @@ public class ActivityMain extends AppCompatActivity {
                     break;
             }
 
-        }
-        else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
+        } else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
             String action = data.getStringExtra("action"); //NON-NLS
             if (action != null && action.equals("checkPermissionsThenScanLibrary")) { //NON-NLS
                 checkPermissionsThenScanLibrary();
@@ -1672,11 +1756,12 @@ public class ActivityMain extends AppCompatActivity {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
+
         // Not closing as services may still need it
         /*HelperLibrary.close();*/
     }
 
-    private void connectDatabase() {
+    private void initializeMusicLibrary() {
         HelperLibrary.open(this, HelperFile.getAudioRootFolder(), musicLibraryDbFile);
 
         new Thread() {
@@ -1704,7 +1789,7 @@ public class ActivityMain extends AppCompatActivity {
         SpeechPostAction speechPostAction = SpeechPostAction.NONE;
         if (force
                 || displayedTrack.getRating() < 1 //no rating
-                || displayedTrack.getTags(false).size() < 1)  //no user tags
+                || displayedTrack.getTags(false).isEmpty())  //no user tags
         {
             if (ScreenReceiver.isScreenOn
                     && toggleButtonDimMode.isChecked()
@@ -1720,7 +1805,7 @@ public class ActivityMain extends AppCompatActivity {
     private String getDisplayedTrackStatus() {
         StringBuilder msg = new StringBuilder();
         ArrayList<String> trackTags = displayedTrack.getTags(false);
-        if (trackTags.size() > 0) {
+        if (!trackTags.isEmpty()) {
             msg.append(getString(R.string.speakTags)).append(": ");
             for (String tag : trackTags) {
                 msg.append(tag).append(", ");
@@ -1771,9 +1856,13 @@ public class ActivityMain extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             String msg = intent.getStringExtra("message"); //NON-NLS
             Log.i(TAG, "Broadcast.onReceive(" + msg + ")"); //NON-NLS
-            switch (msg) {
+            switch (Objects.requireNonNull(msg)) {
                 case "enableSync":
                     enableSync(true);
+                    break;
+                case "enableRemote":
+                    enableRemote(true);
+                    displayPlayingTrack();
                     break;
                 case "setupGenres":
                     setupGenres();
@@ -1822,6 +1911,7 @@ public class ActivityMain extends AppCompatActivity {
                 @Override
                 public void run() {
                     Log.v(TAG, "timerTask performed"); //NON-NLS
+                    //TODO: Why not dimming out ?
                     setBrightness(0);
                     //dim(false);
                     isDimOn = false;
@@ -1871,16 +1961,6 @@ public class ActivityMain extends AppCompatActivity {
         });
     }
 
-    @SuppressLint("SetTextI18n")
-    private void enableClientRemote(final Button button) {
-        runOnUiThread(() -> {
-            button.setEnabled(false);
-            button.setText("1");
-            button.setBackgroundResource(R.drawable.remote_off);
-            button.setEnabled(true);
-        });
-    }
-
     private void enablePlaylistEdit(final boolean enable) {
         runOnUiThread(() -> {
             toggle(layoutPlaylistEditBar, !enable);
@@ -1919,7 +1999,7 @@ public class ActivityMain extends AppCompatActivity {
                     });
             alertDialog.show();
         } else {
-            connectDatabase();
+            initializeMusicLibrary();
         }
     }
 
@@ -1984,7 +2064,7 @@ public class ActivityMain extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            connectDatabase();
+            initializeMusicLibrary();
         }
     }
 
@@ -1996,7 +2076,7 @@ public class ActivityMain extends AppCompatActivity {
     protected void doAction(String msg) {
         dimOn();
         if (isRemoteConnected()) {
-            clientRemote.send(msg);
+            serviceRemote.send(msg);
         } else {
             switch (msg) {
                 case "previousTrack":
@@ -2070,7 +2150,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void setupLocalPlaylistSpinner(String playlistName) {
-        if (localPlaylists.size() > 0) {
+        if (!localPlaylists.isEmpty()) {
             localPlaylists = sortHashMapByValues(localPlaylists);
         } else {
             Playlist playlistAll = new Playlist(getString(R.string.playlistDefaultAllPlaylistName), true);
@@ -2195,7 +2275,8 @@ public class ActivityMain extends AppCompatActivity {
             Playlist playlist = new Playlist(
                     filename.replaceFirst("[.][^.]+$", ""), true);
             Gson gson = new Gson();
-            Type mapType = new TypeToken<Playlist>(){}.getType();
+            Type mapType = new TypeToken<Playlist>() {
+            }.getType();
             try {
                 playlist = gson.fromJson(readJson, mapType);
             } catch (JsonSyntaxException ex) {
@@ -2280,18 +2361,18 @@ public class ActivityMain extends AppCompatActivity {
 
     private void displayTrackDetails() {
         runOnUiThread(() -> {
-            if(displayedTrack != null) {
+            if (displayedTrack != null) {
                 setTextView(textViewFileInfo4, trimTrailingWhitespace(Html.fromHtml(
                         String.format(Locale.getDefault(), "<html><BR/>%s<BR/>%s %d/5 %s %s<BR/>%s%s<BR/></html>", //NON-NLS
-                        displayedTrack.getSource().equals("") //NON-NLS
-                                ? "" //NON-NLS
-                                : "<u>".concat(displayedTrack.getSource()).concat("</u>"), //NON-NLS
-                        displayedTrack.getTags(),
-                        (int) displayedTrack.getRating(),
-                        displayedTrack.getGenre(),
-                        displayedTrack.getYear(),
-                        getLastPlayedAgo(displayedTrack),
-                        getAddedDateAgo(displayedTrack)))));
+                                displayedTrack.getSource().equals("") //NON-NLS
+                                        ? "" //NON-NLS
+                                        : "<u>".concat(displayedTrack.getSource()).concat("</u>"), //NON-NLS
+                                displayedTrack.getTags(),
+                                (int) displayedTrack.getRating(),
+                                displayedTrack.getGenre(),
+                                displayedTrack.getYear(),
+                                getLastPlayedAgo(displayedTrack),
+                                getAddedDateAgo(displayedTrack)))));
             }
         });
     }
@@ -2313,15 +2394,47 @@ public class ActivityMain extends AppCompatActivity {
                 prettyTime.format(track.getAddedDate()));
     }
 
-    private void displayPlayingTrack() {
+    /** Switch to local mode: track + seek bar from PlayQueue/MediaController. */
+    private void switchToLocalDisplay() {
+        stopSeekBarAnimator();
         displayedTrack = PlayQueue.queue.get(PlayQueue.queue.positionPlaying);
-        if(displayedTrack==null) {
+        if (displayedTrack == null) {
             displayedTrack = localTrack;
+        } else {
+            displayedTrack.setHistory(true);
         }
         displayTrack();
         MediaMetadataCompat metadata = MediaMetadataCompat.fromMediaMetadata(getMediaController().getMetadata());
-        if(metadata!=null) {
+        if (metadata != null) {
             setSeekBarPosition(PlaybackStateCompat.fromPlaybackState(getMediaController().getPlaybackState()), (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+        }
+    }
+
+    /** Switch to remote mode: request playing from server, seek bar updated by positionChanged. */
+    private void switchToRemoteDisplay() {
+        stopSeekBarAnimator();
+        if (serviceRemote != null) {
+            serviceRemote.refreshPlaying();
+        }
+    }
+
+    private void displayPlayingTrack() {
+        if (isRemoteConnected()) {
+            switchToRemoteDisplay();
+        } else {
+            switchToLocalDisplay();
+        }
+    }
+
+    private void displayTrack(int idFile) {
+        if(idFile>=0 && displayedTrack.getIdFileServer() != idFile) {
+            List<Track> tracks = HelperLibrary.musicLibrary.getTracks(
+                    "WHERE " + COL_TRACKS_ID_SERVER + "=" + idFile,
+                    "",
+                    "",
+                    1);
+            displayedTrack = tracks.get(0);
+            displayTrack();
         }
     }
 
@@ -2377,16 +2490,6 @@ public class ActivityMain extends AppCompatActivity {
         Bitmap coverIcon = RepoCovers.getCoverIcon(displayedTrack, RepoCovers.IconSize.COVER, false);
         if (coverIcon != null) {
             displayImage(coverIcon);
-        } else { //Ask cover
-            int maxWidth = this.getWindow().getDecorView().getWidth();
-            if (maxWidth <= 0) {
-                maxWidth = RepoCovers.IconSize.COVER.getSize();
-            }
-            //FIXME: Do not ask more than X times (to be defined) OR send a NO_COVER message somehow
-            //Otherwise it will ask forever in case of a bad cover from server (no cover), until a new cover is requested
-            if (clientRemote != null) {
-                clientRemote.send("sendCover" + maxWidth);
-            }
         }
     }
 
@@ -2403,80 +2506,11 @@ public class ActivityMain extends AppCompatActivity {
         });
     }
 
-    class ListenerRemote implements IListenerRemote {
-
-        private final String TAG = ListenerRemote.class.getName();
-
-        @Override
-        public void onReceivedJson(final String json) {
-            try {
-                JSONObject jObject = new JSONObject(json);
-                String type = jObject.getString("type"); //NON-NLS //NON-NLS
-                switch (type) {
-                    case "playlists": //NON-NLS
-                        String selectedPlaylist = jObject.getString("selectedPlaylist"); //NON-NLS
-                        Playlist temp = new Playlist(selectedPlaylist, false);
-                        final JSONArray jsonPlaylists = (JSONArray) jObject.get("playlists"); //NON-NLS
-                        final List<Playlist> playlists = new ArrayList<>();
-                        for (int i = 0; i < jsonPlaylists.length(); i++) {
-                            String playlist = (String) jsonPlaylists.get(i);
-                            Playlist playList = new Playlist(playlist, false);
-                            if (playlist.equals(selectedPlaylist)) {
-                                playList = temp;
-                            }
-                            playlists.add(playList);
-                        }
-                        ArrayAdapter<Playlist> arrayAdapter =
-                                new ArrayAdapter<>(ActivityMain.this,
-                                        R.layout.spinner_item, playlists);
-                        setupPlaylistSpinner(arrayAdapter, temp);
-                        enablePlaylistEdit(false);
-                        break;
-                    case "currentPosition":
-                        final int currentPosition = jObject.getInt("currentPosition"); //NON-NLS
-                        final int total = jObject.getInt("total"); //NON-NLS
-                        setSeekBar(currentPosition * 1000, total * 1000);
-                        break;
-                    case "fileInfoInt":
-                        String playlistInfo = jObject.getString("playlistInfo"); //NON-NLS //NON-NLS
-                        JSONObject fileInfoIntObject = (JSONObject) jObject.get("fileInfoInt");
-                        displayedTrack = new Track(fileInfoIntObject, new File(""), false);
-                        displayedTrack.setSource(getString(R.string.labelServer) + " " + playlistInfo);
-                        int startPosition = jObject.getInt("currentPosition");
-                        setSeekBar(startPosition * 1000, displayedTrack.getLength() * 1000);
-                        displayTrack();
-                        break;
-                }
-            } catch (JSONException e) {
-                Log.e(TAG, e.toString());
-            }
-        }
-
-        @Override
-        public void onReceivedBitmap(final Bitmap bitmap) { //NON-NLS
-            Log.d(TAG, "onReceivedBitmap: callback"); //NON-NLS //NON-NLS
-            Log.d(TAG, bitmap == null ? "null" : bitmap.getWidth() + "x" + bitmap.getHeight()); //NON-NLS //NON-NLS
-            if (bitmap != null && !RepoCovers.contains(displayedTrack.getCoverHash(), RepoCovers.IconSize.COVER)) {
-                RepoCovers.writeIconToCache(displayedTrack.getCoverHash(), bitmap);
-            }
-            displayCover();
-        }
-
-        @Override
-        public void onDisconnected(final String msg) {
-            if (!msg.equals("")) {
-                runOnUiThread(() -> helperToast.toastShort(msg));
-            }
-            enableClientRemote(buttonRemote);
-            setupLocalPlaylistSpinner();
-            runOnUiThread(() -> displayPlayingTrack());
-        }
-    }
-
     private void stopRemote() { //NON-NLS
-        if (clientRemote != null) {
-            clientRemote.close();
-            clientRemote = null;
+        if (serviceRemote != null) {
+            serviceRemote.unregisterCallback(serviceRemoteCallback);
+            unbindService(serviceRemoteConnection);
+            serviceRemote = null;
         }
     }
 
@@ -2515,7 +2549,8 @@ public class ActivityMain extends AppCompatActivity {
     public static Playlist clonePlaylist(Playlist playlist) {
         Gson gson = new Gson();
         String json = gson.toJson(playlist);
-        Type mapType = new TypeToken<Playlist>() {}.getType();
+        Type mapType = new TypeToken<Playlist>() {
+        }.getType();
         Playlist newPlaylist = null;
         try {
             newPlaylist = gson.fromJson(json, mapType);
