@@ -48,8 +48,9 @@ Please submit to the `master` branch.
    If the workflow failed at "Create release" (e.g. "Cannot upload assets to an immutable release"), you must restart the release process: release assets are immutable, so you cannot reuse the same tag even after deleting the tag and the release.
 
 1. **Optionally** F-Droid
-    - Optionally as with `UpdateCheckMode: Tags` and `AutoUpdateMode: Version`, new tags are picked up automatically, no need for manual edit.
-    - If you do need to change metadata, use the [fdroiddata](https://github.com/f-droid/fdroiddata) repo (fork → edit `metadata/org.phramusca.jamuz.yml` → PR, template "App update"). See the [F-Droid docs](https://f-droid.org/docs/) (e.g. [Build Metadata Reference](https://f-droid.org/docs/Build_Metadata_Reference/#UpdateCheckMode)) for field meanings.
+    - With `UpdateCheckMode: Tags` and `AutoUpdateMode: Version`, new tags are picked up automatically.
+    - To change metadata: [fdroiddata](https://gitlab.com/fdroid/fdroiddata) (GitLab) → fork → edit `metadata/org.phramusca.jamuz.yml` → MR with template **"App update"**. See [F-Droid docs](https://f-droid.org/docs/) and [MR !11561](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/11561).
+    - **Full process, local build, troubleshooting**: [fdroid.md](fdroid.md).
 
 
 1. **Optionally** [Edit gh-pages](https://github.com/phramusca/JaMuz/edit/gh-pages/index.md) — links there already point to the latest release.
