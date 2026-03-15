@@ -1,3 +1,11 @@
+# Release workflow: build signed APK and create/update GitHub Release.
+# Uses secrets.GITHUB_TOKEN (automatic). To use a Personal Access Token instead
+# (e.g. for cross-repo or higher limits): GitHub → Settings → Developer settings
+# → Personal access tokens → Generate new token (classic), scope "repo", then
+# add it as repository secret "TOKEN" in Settings → Secrets and variables → Actions,
+# and set repo_token: ${{ secrets.TOKEN }} in the upload step.
+# https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+
 name: Build & Publish Debug APK
 
 on:

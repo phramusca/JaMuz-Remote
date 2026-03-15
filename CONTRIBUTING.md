@@ -44,7 +44,13 @@ Please submit to the `master` branch.
 
 1. Tag last commit "vx.y.z" and push. This will trigger the [release github action](https://github.com/phramusca/JaMuz-Remote/actions/workflows/release.yml).
 
-1. Check [created release](https://github.com/phramusca/JaMuz-Remote/releases).
+1. Check [created release](https://github.com/phramusca/JaMuz-Remote/releases).  
+   If the workflow failed at "Create release" (e.g. "Cannot upload assets to an immutable release"), the APK was built in the job but not attached to a Release. Delete the existing release for that tag on GitHub (Releases → tag → Delete), then re-run the workflow so it can create the release and upload the APK.
+
+1. F-Droid
+    - **Optionally** as with `UpdateCheckMode: Tags` and `AutoUpdateMode: Version`, new tags are picked up automatically, no need for manual edit)
+    - If you do need to change metadata, use the [fdroiddata](https://github.com/f-droid/fdroiddata) repo (fork → edit `metadata/org.phramusca.jamuz.yml` → PR, template "App update"). See the [F-Droid docs](https://f-droid.org/docs/) (e.g. [Build Metadata Reference](https://f-droid.org/docs/Build_Metadata_Reference/#UpdateCheckMode)) for field meanings. 
+
 
 1. [Edit gh-pages](https://github.com/phramusca/JaMuz/edit/gh-pages/index.md) with link to new release.
 
