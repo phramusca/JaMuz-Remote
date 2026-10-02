@@ -1,7 +1,7 @@
 # JaMuz Remote Voice Commands
 
-- [English](#English)
-- [Français](#Français)
+- [English](#-english)
+- [Français](#-français)
 
 ## <a id="English"></a> English
 
